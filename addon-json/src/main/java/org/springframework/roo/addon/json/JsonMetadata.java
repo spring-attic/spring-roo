@@ -38,6 +38,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             "flexjson.JSONDeserializer");
     private static final JavaType JSON_SERIALIZER = new JavaType(
             "flexjson.JSONSerializer");
+
     private static final String PROVIDES_TYPE_STRING = JsonMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
@@ -125,8 +126,13 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 .getNameIncludingTypeParameters(false,
                         builder.getImportRegistrationResolver());
         bodyBuilder.appendFormalLine("return new " + deserializer + "<" + list
-                + "<" + bean + ">>().use(null, " + arrayList
-                + ".class).use(\"values\", " + bean
+                + "<" + bean + ">>()");
+        if (annotationValues.isIso8601Dates()) {
+            bodyBuilder
+                    .appendFormalLine(".use(java.util.Date.class, "
+                            + "new flexjson.transformer.DateTransformer(\"yyyy-MM-dd\"))");
+        }
+        bodyBuilder.appendFormalLine(".use(\"values\", " + bean
                 + ".class).deserialize(json);");
 
         final List<JavaSymbolName> parameterNames = Arrays
@@ -172,7 +178,14 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                 .getNameIncludingTypeParameters(false,
                         builder.getImportRegistrationResolver());
         bodyBuilder.appendFormalLine("return new " + deserializer + "<"
-                + destination.getSimpleTypeName() + ">().use(null, "
+                        + destination.getSimpleTypeName()
+                        + ">()");
+        if (annotationValues.isIso8601Dates()) {
+            bodyBuilder
+                    .appendFormalLine(".use(java.util.Date.class, "
+                            + "new flexjson.transformer.DateTransformer(\"yyyy-MM-dd\"))");
+        }
+        bodyBuilder.appendFormalLine(".use(null, "
                 + destination.getSimpleTypeName()
                 + ".class).deserialize(json);");
 
@@ -232,12 +245,16 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         final String root = annotationValues.getRootName() != null
                 && annotationValues.getRootName().length() > 0 ? ".rootName(\""
                 + annotationValues.getRootName() + "\")" : "";
+        bodyBuilder.appendFormalLine("return new " + serializer + "()" + root);
+        if (annotationValues.isIso8601Dates()) { 
+            bodyBuilder
+                    .appendFormalLine(".transform("
+                    + "new flexjson.transformer.DateTransformer"
+                    + "(\"yyyy-MM-dd\"), java.util.Date.class)");
+        }
         bodyBuilder
-                .appendFormalLine("return new "
-                        + serializer
-                        + "()"
-                        + root
-                        + (!includeParams ? "" : ".include(fields)")
+                    .appendFormalLine(
+                        (!includeParams ? "" : ".include(fields)")
                         + ".exclude(\"*.class\")"
                         + (annotationValues.isDeepSerialize() ? ".deepSerialize(collection)"
                                 : ".serialize(collection)") + ";");
@@ -280,8 +297,15 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         bodyBuilder.appendFormalLine("return new "
                 + serializer
                 + "()"
-                + root
-                + (!includeParams ? "" : ".include(fields)")
+                + root);
+        if (annotationValues.isIso8601Dates()) { 
+            bodyBuilder
+                    .appendFormalLine(".transform("
+                    + "new flexjson.transformer.DateTransformer"
+                    + "(\"yyyy-MM-dd\"), java.util.Date.class)");
+        }
+        bodyBuilder.appendFormalLine(
+                (!includeParams ? "" : ".include(fields)")
                 + ".exclude(\"*.class\")"
                 + (annotationValues.isDeepSerialize() ? ".deepSerialize(this)"
                         : ".serialize(this)") + ";");
