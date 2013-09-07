@@ -446,8 +446,7 @@ public class JspMetadataListener implements MetadataProvider,
                 menuOperations.addMenuItem(categoryName, finderLabel,
                         "global_menu_find", "/" + controllerPath + "?find="
                                 + finderName.replace("find" + plural, "")
-                                + "&form"
-                                + "&page=1&size=${empty param.size ? 10 : param.size}",
+                                + "&form",
                         MenuOperations.FINDER_MENU_ITEM_PREFIX, webappPath);
                 properties.put("menu_item_"
                         + categoryName.getSymbolName().toLowerCase() + "_"

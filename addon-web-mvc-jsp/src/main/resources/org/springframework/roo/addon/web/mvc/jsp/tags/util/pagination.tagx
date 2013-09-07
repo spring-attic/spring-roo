@@ -16,22 +16,8 @@
       <c:set var="size" value="10" />
     </c:if>
 
-<c:if test="${maxPages gt 1}">
-
     <spring:message code="list_size" var="list_size" htmlEscape="false" />
     <c:out value="${list_size} " />
-
-
-	<spring:url value="" var="queryUrl">
-		<c:forEach items="${paramValues}" var="p">
-			<c:if test="${p.key ne 'page' and p.key ne 'size'}">
-				<c:forEach var='value' items='${p.value}'>
-					<spring:param name="${p.key}" value="${value}" />
-				</c:forEach>
-			</c:if>
-		</c:forEach>
-	</spring:url>
-
 
     <c:forEach var="i" begin="5" end="25" step="5">
       <c:choose>
@@ -39,7 +25,7 @@
           <c:out value="${i}" />
         </c:when>
         <c:otherwise>
-          <spring:url value="${queryUrl}" var="sizeUrl" htmlEscape="false">
+          <spring:url value="" var="sizeUrl">
             <spring:param name="page" value="1" />
             <spring:param name="size" value="${i}" />
           </spring:url>
@@ -51,7 +37,7 @@
     <c:out value="| " />
 
     <c:if test="${page ne 1}">
-      <spring:url value="${queryUrl}" var="first" htmlEscape="false">
+      <spring:url value="" var="first">
         <spring:param name="page" value="1" />
         <spring:param name="size" value="${size}" />
       </spring:url>
@@ -62,7 +48,7 @@
       </a>
     </c:if>
     <c:if test="${page gt 1}">
-      <spring:url value="${queryUrl}" var="previous" htmlEscape="false">
+      <spring:url value="" var="previous">
         <spring:param name="page" value="${page - 1}" />
         <spring:param name="size" value="${size}" />
       </spring:url>
@@ -76,7 +62,7 @@
     <spring:message code="list_page" arguments="${page},${maxPages}" argumentSeparator="," />
     <c:out value=" " />
     <c:if test="${page lt maxPages}">
-      <spring:url value="${queryUrl}" var="next" htmlEscape="false">
+      <spring:url value="" var="next">
         <spring:param name="page" value="${page + 1}" />
         <spring:param name="size" value="${size}" />
       </spring:url>
@@ -87,7 +73,7 @@
       </a>
     </c:if>
     <c:if test="${page ne maxPages}">
-      <spring:url value="${queryUrl}" var="last" htmlEscape="false">
+      <spring:url value="" var="last">
         <spring:param name="page" value="${maxPages}" />
         <spring:param name="size" value="${size}" />
       </spring:url>
@@ -98,7 +84,4 @@
       </a>
     </c:if>
   </c:if>
-  
-  </c:if>
-
 </jsp:root>

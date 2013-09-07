@@ -113,8 +113,6 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         if (dynamicFinderMethods == null) {
             return null;
         }
-
-        
         final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService
                 .getRelatedApplicationTypeMetadata(formBackingType,
                         formBackingObjectMemberDetails,

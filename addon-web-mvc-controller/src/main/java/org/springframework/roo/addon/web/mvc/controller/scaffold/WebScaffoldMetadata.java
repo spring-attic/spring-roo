@@ -628,36 +628,14 @@ public class WebScaffoldMetadata extends
                 "required"), false));
         final AnnotationMetadataBuilder maxResultAnnotation = new AnnotationMetadataBuilder(
                 REQUEST_PARAM, maxResultsAttributes);
-        
-        final List<AnnotationAttributeValue<?>> sortFieldNameAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        sortFieldNameAttributes.add(new StringAttributeValue(new JavaSymbolName(
-                "value"), "sortFieldName"));
-        sortFieldNameAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
-                "required"), false));
-        final AnnotationMetadataBuilder sortFieldNameAnnotation = new AnnotationMetadataBuilder(
-                REQUEST_PARAM, sortFieldNameAttributes);
-        
-        final List<AnnotationAttributeValue<?>> sortOrderAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        sortOrderAttributes.add(new StringAttributeValue(new JavaSymbolName(
-                "value"), "sortOrder"));
-        sortOrderAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
-                "required"), false));
-        final AnnotationMetadataBuilder sortOrderAnnotation = new AnnotationMetadataBuilder(
-                REQUEST_PARAM, sortOrderAttributes);
-        
+
         final List<AnnotatedJavaType> parameterTypes = Arrays
                 .asList(new AnnotatedJavaType(INT_OBJECT, firstResultAnnotation
                         .build()), new AnnotatedJavaType(INT_OBJECT,
-                        maxResultAnnotation.build()), 
-                        new AnnotatedJavaType(STRING,
-                                sortFieldNameAnnotation.build()),
-                        new AnnotatedJavaType(STRING,
-                        		sortOrderAnnotation.build()),
-                        new AnnotatedJavaType(
+                        maxResultAnnotation.build()), new AnnotatedJavaType(
                         MODEL));
         final List<JavaSymbolName> parameterNames = Arrays.asList(
                 new JavaSymbolName("page"), new JavaSymbolName("size"),
-                new JavaSymbolName("sortFieldName"), new JavaSymbolName("sortOrder"),
                 new JavaSymbolName("uiModel"));
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -676,12 +654,7 @@ public class WebScaffoldMetadata extends
         bodyBuilder
                 .appendFormalLine("final int firstResult = page == null ? 0 : (page.intValue() - 1) * sizeNo;");
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural
-                + "\", " 
-                + getShortName(formBackingType)
-                + "."
-                + findEntriesAdditions.getMethodName() 
-                + "(firstResult, sizeNo, sortFieldName, sortOrder)" 
-                + ");");
+                + "\", " + findEntriesAdditions.getMethodCall() + ");");
         bodyBuilder.appendFormalLine("float nrOfPages = (float) "
                 + countAllAdditions.getMethodCall() + " / sizeNo;");
         bodyBuilder
@@ -690,12 +663,7 @@ public class WebScaffoldMetadata extends
         bodyBuilder.appendFormalLine("} else {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural
-                + "\", " 
-                + getShortName(formBackingType)
-                + "."
-                + findAllAdditions.getMethodName() 
-                + "(sortFieldName, sortOrder)" 
-                + ");");
+                + "\", " + findAllAdditions.getMethodCall() + ");");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         if (!dateTypes.isEmpty()) {
