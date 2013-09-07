@@ -19,8 +19,8 @@ import org.springframework.roo.model.JavaType;
 public class QueryHolder {
 
     private final String jpaQuery;
-    private final List<JavaSymbolName> parameterNames;
-    private final List<JavaType> parameterTypes;
+    private List<JavaSymbolName> parameterNames;
+    private List<JavaType> parameterTypes;
     private final List<Token> tokens;
 
     public QueryHolder(final String jpaQuery,
@@ -31,8 +31,8 @@ public class QueryHolder {
         Validate.notNull(parameterNames, "Parameter names required");
         Validate.notNull(tokens, "Tokens required");
         this.jpaQuery = jpaQuery;
-        this.parameterTypes = Collections.unmodifiableList(parameterTypes);
-        this.parameterNames = Collections.unmodifiableList(parameterNames);
+        this.parameterTypes = parameterTypes;
+        this.parameterNames = parameterNames;
         this.tokens = Collections.unmodifiableList(tokens);
     }
 

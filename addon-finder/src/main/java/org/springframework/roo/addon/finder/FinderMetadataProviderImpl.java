@@ -129,6 +129,17 @@ public class FinderMetadataProviderImpl extends
             if (queryHolder != null) {
                 queryHolders.put(finderName, queryHolder);
             }
+            
+            char[] methodNameArray = methodName.toCharArray();
+            methodNameArray[0] = Character.toUpperCase(methodNameArray[0]);
+            
+            final JavaSymbolName countFinderName = new JavaSymbolName("count" + new String(methodNameArray));
+            final QueryHolder countQueryHolder = dynamicFinderServices
+                    .getCountQueryHolder(memberDetails, finderName, plural,
+                            entityName);
+            if (countQueryHolder != null) {
+                queryHolders.put(countFinderName, countQueryHolder);
+            }
         }
 
         // Now determine all the ITDs we're relying on to ensure we are notified
