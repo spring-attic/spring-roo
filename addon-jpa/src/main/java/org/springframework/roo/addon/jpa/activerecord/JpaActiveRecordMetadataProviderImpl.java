@@ -12,6 +12,8 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.CLEAR_
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_SORTED_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FLUSH_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
@@ -228,7 +230,16 @@ public class JpaActiveRecordMetadataProviderImpl extends
                         new MethodMatcher(FIND_ENTRIES_METHOD,
                                 ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
                                         "findEntriesMethod"), "find", false,
-                                true, "Entries"), new MethodMatcher(
+                                true, "Entries"), 
+                        new MethodMatcher(FIND_ALL_SORTED_METHOD,
+                                 ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
+                                 "findAllSortedMethod"),
+                                 FIND_ALL_METHOD_DEFAULT, true, false, "Sorted"),
+                        new MethodMatcher(FIND_ENTRIES_SORTED_METHOD,
+                                  ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
+                                  "findEntriesSortedMethod"), "find", false,
+                                  true, "EntriesSorted"),                                 
+                        new MethodMatcher(
                                 FIND_METHOD, ROO_JPA_ACTIVE_RECORD,
                                 new JavaSymbolName("findMethod"),
                                 FIND_METHOD_DEFAULT, false, true),

@@ -558,13 +558,13 @@ public class JpaActiveRecordMetadata extends
      * @return the find all method (may return null)
      */
     private MethodMetadata getFindAllSortedMethod() {
-        if ("".equals(crudAnnotationValues.getFindAllMethod())) {
+        if ("".equals(crudAnnotationValues.getFindAllSortedMethod())) {
             return null;
         }
 
         // Method definition to find or build
         final JavaSymbolName methodName = new JavaSymbolName(
-                crudAnnotationValues.getFindAllMethod() + plural);
+                crudAnnotationValues.getFindAllSortedMethod() + plural);
         final JavaType[] parameterTypes = {STRING, STRING};
         final List<JavaSymbolName> parameterNames = Arrays.asList(
         		new JavaSymbolName("sortFieldName"),
@@ -674,13 +674,13 @@ public class JpaActiveRecordMetadata extends
      * @return the find entries method (may return null)
      */
     private MethodMetadata getFindEntriesSortedMethod() {
-        if ("".equals(crudAnnotationValues.getFindEntriesMethod())) {
+        if ("".equals(crudAnnotationValues.getFindEntriesSortedMethod())) {
             return null;
         }
 
         // Method definition to find or build
         final JavaSymbolName methodName = new JavaSymbolName(
-                crudAnnotationValues.getFindEntriesMethod()
+                crudAnnotationValues.getFindEntriesSortedMethod()
                         + destination.getSimpleTypeName() + "Entries");
         final JavaType[] parameterTypes = { INT_PRIMITIVE, INT_PRIMITIVE, JavaType.STRING, JavaType.STRING};
         final List<JavaSymbolName> parameterNames = Arrays.asList(

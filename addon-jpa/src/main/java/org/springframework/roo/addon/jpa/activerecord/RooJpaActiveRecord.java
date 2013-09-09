@@ -28,6 +28,8 @@ public @interface RooJpaActiveRecord {
     String FIND_ALL_METHOD_DEFAULT = "findAll";
     String FIND_ENTRIES_METHOD_DEFAULT = "find";
     String FIND_METHOD_DEFAULT = "find";
+    String FIND_ENTRIES_SORTED_METHOD_DEFAULT = "find";
+    String FIND_ALL_SORTED_METHOD_DEFAULT = "findAll";
     String FLUSH_METHOD_DEFAULT = "flush";
     String MERGE_METHOD_DEFAULT = "merge";
     String PERSIST_METHOD_DEFAULT = "persist";
