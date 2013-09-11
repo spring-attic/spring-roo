@@ -15,6 +15,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -89,10 +90,20 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         this.queryHolders = queryHolders;
 
         for (final JavaSymbolName finderName : queryHolders.keySet()) {
-            final MethodMetadataBuilder methodBuilder = getDynamicFinderMethod(
-                    finderName, entityManagerMethod);
+           
+        	// finder and count
+        	final MethodMetadataBuilder methodBuilder = getDynamicFinderMethod(
+                    finderName, entityManagerMethod, false);
             builder.addMethod(methodBuilder);
             dynamicFinderMethods.add(methodBuilder.build());
+            
+            // sorted finder
+            if(!finderName.getSymbolName().startsWith("count")) {
+	            final MethodMetadataBuilder methodBuilderSorted = getDynamicFinderMethod(
+	                    finderName, entityManagerMethod, true);
+	            builder.addMethod(methodBuilderSorted);
+	            dynamicFinderMethods.add(methodBuilderSorted.build());
+            }
         }
 
         // Create a representation of the desired output ITD
@@ -130,24 +141,12 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
      */
     private MethodMetadataBuilder getDynamicFinderMethod(
             final JavaSymbolName finderName,
-            final MethodMetadata entityManagerMethod) {
+            final MethodMetadata entityManagerMethod, final Boolean sorted) {
         Validate.notNull(finderName, "Dynamic finder method name is required");
         Validate.isTrue(queryHolders.containsKey(finderName),
                 "Undefined method name '%s'", finderName.getSymbolName());
 
-        // We have no access to method parameter information, so we scan by name
-        // alone and treat any match as authoritative
-        // We do not scan the superclass, as the caller is expected to know
-        // we'll only scan the current class
-        for (final MethodMetadata method : governorTypeDetails
-                .getDeclaredMethods()) {
-            if (method.getMethodName().equals(finderName)) {
-                // Found a method of the expected name; we won't check method
-                // parameters though
-                return new MethodMetadataBuilder(method);
-            }
-        }
-
+   
         // To get this far we need to create the method...
         final List<JavaType> parameters = new ArrayList<JavaType>();
         parameters.add(destination);
@@ -160,9 +159,26 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
         final QueryHolder queryHolder = queryHolders.get(finderName);
         final String jpaQuery = queryHolder.getJpaQuery();
-        List<JavaType> parameterTypes = queryHolder.getParameterTypes();
-        List<JavaSymbolName> parameterNames = queryHolder
+        final List<JavaType> parameterTypes = queryHolder.getParameterTypes();
+        final List<JavaSymbolName> parameterNames = queryHolder
                 .getParameterNames();
+        
+        
+        // Now we have parameters types, we can scan by name
+        // AND with parameters types
+        // We do not scan the superclass, as the caller is expected to know
+        // we'll only scan the current class
+    	List<JavaType> parameterTypes4Test = new ArrayList<JavaType>(parameterTypes);
+    	if(!finderName.getSymbolName().startsWith("count") && sorted) {
+    		parameterTypes4Test.add(STRING);
+    		parameterTypes4Test.add(STRING);
+    	}
+    	final MethodMetadata userMethod = MemberFindingUtils.getDeclaredMethod(governorTypeDetails,
+    			finderName, parameterTypes4Test);
+         if (userMethod != null) {
+        	 return new MethodMetadataBuilder(userMethod);
+         }
+         
 
         // We declared the field in this ITD, so produce a public accessor for
         // it
@@ -286,7 +302,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             }
                     
             // sorting part
-            if(!methodName.startsWith("count")) {
+            if(!methodName.startsWith("count") && sorted) {
                 bodyBuilder.appendFormalLine("if (fieldNames4OrderClauseFilter.contains(sortFieldName)) {");
                 bodyBuilder.indent();
                 bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" ORDER BY \" + sortFieldName;");
@@ -334,7 +350,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         }
         else {        
             // sorting part
-            if(!methodName.startsWith("count")) {
+            if(!methodName.startsWith("count") && sorted) {
                 bodyBuilder.appendFormalLine("String jpaQuery = \"" + jpaQuery + "\";");
                 bodyBuilder.appendFormalLine("if (fieldNames4OrderClauseFilter.contains(sortFieldName)) {");
                 bodyBuilder.indent();
@@ -369,18 +385,21 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
             bodyBuilder.appendFormalLine("return q;");
         }
         
+    	List<JavaType> methodParameterTypes = new ArrayList<JavaType>(parameterTypes);
+    	List<JavaSymbolName> methodParameterNames = new ArrayList<JavaSymbolName>(parameterNames);
+    	
         // sort parameters : sortFieldName & sortOrder
-        if(!methodName.startsWith("count")) {
-            parameterTypes.add(STRING);
-            parameterTypes.add(STRING);
-            parameterNames.add(new JavaSymbolName("sortFieldName"));
-            parameterNames.add(new JavaSymbolName("sortOrder"));
+        if(!methodName.startsWith("count")  && sorted) {
+        	methodParameterTypes.add(STRING);
+        	methodParameterTypes.add(STRING);
+        	methodParameterNames.add(new JavaSymbolName("sortFieldName"));
+        	methodParameterNames.add(new JavaSymbolName("sortOrder"));
         }
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC
                 | Modifier.STATIC, finderName, typedQueryType,
-                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-                parameterNames, bodyBuilder);
+                AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes),
+                methodParameterNames, bodyBuilder);
     }
 
     @Override
