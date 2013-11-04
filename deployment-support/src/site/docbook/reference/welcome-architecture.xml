@@ -172,17 +172,14 @@ public class Hello {
 
       <programlisting>package com.aspectj.rocks;
 
-import java.lang.String;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 privileged aspect Hello_Roo_ToString {
-    
-    public String Hello.toString() {    
-        StringBuilder sb = new StringBuilder();        
-        sb.append("Id: ").append(getId()).append(", ");        
-        sb.append("Version: ").append(getVersion()).append(", ");        
-        sb.append("Comment: ").append(getComment());        
-        return sb.toString();        
-    }    
+
+    public String Hello.toString() {
+          return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
     
 }</programlisting>
 
