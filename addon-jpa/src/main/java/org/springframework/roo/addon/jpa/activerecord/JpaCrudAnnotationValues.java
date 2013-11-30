@@ -5,6 +5,8 @@ import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.
 import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.FIND_ALL_METHOD_DEFAULT;
 import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.FIND_ENTRIES_METHOD_DEFAULT;
 import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.FIND_METHOD_DEFAULT;
+import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.FIND_ENTRIES_SORTED_METHOD_DEFAULT;
+import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.FIND_ALL_SORTED_METHOD_DEFAULT;
 import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.FLUSH_METHOD_DEFAULT;
 import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.MERGE_METHOD_DEFAULT;
 import static org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord.PERSIST_METHOD_DEFAULT;
@@ -29,6 +31,8 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String countMethod = COUNT_METHOD_DEFAULT;
     @AutoPopulate private String findAllMethod = FIND_ALL_METHOD_DEFAULT;
     @AutoPopulate private String findEntriesMethod = FIND_ENTRIES_METHOD_DEFAULT;
+    @AutoPopulate private String findAllSortedMethod = FIND_ALL_SORTED_METHOD_DEFAULT;
+    @AutoPopulate private String findEntriesSortedMethod = FIND_ENTRIES_SORTED_METHOD_DEFAULT;
     @AutoPopulate private String[] finders;
     @AutoPopulate private String findMethod = FIND_METHOD_DEFAULT;
     @AutoPopulate private String flushMethod = FLUSH_METHOD_DEFAULT;
@@ -56,9 +60,13 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
     public String getCountMethod() {
         return countMethod;
     }
-
+    
     public String getFindAllMethod() {
         return findAllMethod;
+    } 
+    
+    public String getFindAllSortedMethod() {
+        return findAllSortedMethod;
     }
 
     /**
@@ -69,6 +77,10 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
      */
     public String getFindEntriesMethod() {
         return findEntriesMethod;
+    }
+    
+    public String getFindEntriesSortedMethod() {
+        return findEntriesSortedMethod;
     }
 
     /**

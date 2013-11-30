@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_SORTED_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
@@ -160,7 +162,6 @@ public class WebScaffoldMetadata extends
             persistMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
 
-        // "list" method
         final MemberTypeAdditions countAllMethod = crudAdditions
                 .get(COUNT_ALL_METHOD);
         final MemberTypeAdditions findMethod = crudAdditions.get(FIND_METHOD);
@@ -168,6 +169,10 @@ public class WebScaffoldMetadata extends
                 .get(FIND_ALL_METHOD);
         final MemberTypeAdditions findEntriesMethod = crudAdditions
                 .get(FIND_ENTRIES_METHOD);
+        final MemberTypeAdditions findAllSortedMethod = crudAdditions
+                .get(FIND_ALL_SORTED_METHOD);
+        final MemberTypeAdditions findEntriesSortedMethod = crudAdditions
+                .get(FIND_ENTRIES_SORTED_METHOD);
 
         // "show" method
         if (findMethod != null) {
@@ -175,14 +180,24 @@ public class WebScaffoldMetadata extends
             findMethod.copyAdditionsTo(builder, governorTypeDetails);
         }
 
-        if (countAllMethod != null && findAllMethod != null
+        // sorted "list" method
+        if (countAllMethod != null && findAllSortedMethod != null
+                && findEntriesSortedMethod != null) {
+            builder.addMethod(getListMethod(findAllSortedMethod, countAllMethod,
+            		findEntriesSortedMethod));
+            countAllMethod.copyAdditionsTo(builder, governorTypeDetails);
+            findAllSortedMethod.copyAdditionsTo(builder, governorTypeDetails);
+            findEntriesSortedMethod.copyAdditionsTo(builder, governorTypeDetails);
+        } 
+        // or "list" method 
+        else if (countAllMethod != null && findAllMethod != null
                 && findEntriesMethod != null) {
             builder.addMethod(getListMethod(findAllMethod, countAllMethod,
                     findEntriesMethod));
             countAllMethod.copyAdditionsTo(builder, governorTypeDetails);
             findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
             findEntriesMethod.copyAdditionsTo(builder, governorTypeDetails);
-        }
+        }      
 
         // "update" methods
         final MemberTypeAdditions updateMethod = crudAdditions
@@ -628,14 +643,36 @@ public class WebScaffoldMetadata extends
                 "required"), false));
         final AnnotationMetadataBuilder maxResultAnnotation = new AnnotationMetadataBuilder(
                 REQUEST_PARAM, maxResultsAttributes);
-
+        
+        final List<AnnotationAttributeValue<?>> sortFieldNameAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        sortFieldNameAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "sortFieldName"));
+        sortFieldNameAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder sortFieldNameAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, sortFieldNameAttributes);
+        
+        final List<AnnotationAttributeValue<?>> sortOrderAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        sortOrderAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "sortOrder"));
+        sortOrderAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder sortOrderAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, sortOrderAttributes);
+        
         final List<AnnotatedJavaType> parameterTypes = Arrays
                 .asList(new AnnotatedJavaType(INT_OBJECT, firstResultAnnotation
                         .build()), new AnnotatedJavaType(INT_OBJECT,
-                        maxResultAnnotation.build()), new AnnotatedJavaType(
+                        maxResultAnnotation.build()), 
+                        new AnnotatedJavaType(STRING,
+                                sortFieldNameAnnotation.build()),
+                        new AnnotatedJavaType(STRING,
+                        		sortOrderAnnotation.build()),
+                        new AnnotatedJavaType(
                         MODEL));
         final List<JavaSymbolName> parameterNames = Arrays.asList(
                 new JavaSymbolName("page"), new JavaSymbolName("size"),
+                new JavaSymbolName("sortFieldName"), new JavaSymbolName("sortOrder"),
                 new JavaSymbolName("uiModel"));
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -654,7 +691,9 @@ public class WebScaffoldMetadata extends
         bodyBuilder
                 .appendFormalLine("final int firstResult = page == null ? 0 : (page.intValue() - 1) * sizeNo;");
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural
-                + "\", " + findEntriesAdditions.getMethodCall() + ");");
+                + "\", " 
+                + findEntriesAdditions.getMethodCall()
+                + ");");
         bodyBuilder.appendFormalLine("float nrOfPages = (float) "
                 + countAllAdditions.getMethodCall() + " / sizeNo;");
         bodyBuilder
@@ -663,7 +702,9 @@ public class WebScaffoldMetadata extends
         bodyBuilder.appendFormalLine("} else {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural
-                + "\", " + findAllAdditions.getMethodCall() + ");");
+                + "\", " 
+                + findAllAdditions.getMethodCall()
+                + ");");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         if (!dateTypes.isEmpty()) {
