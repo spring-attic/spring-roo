@@ -270,9 +270,12 @@ public class WebJsonMetadata extends
                 REQUEST_BODY);
         final List<AnnotatedJavaType> parameterTypes = Arrays
                 .asList(new AnnotatedJavaType(JavaType.STRING,
-                        requestBodyAnnotation.build()));
+                		requestBodyAnnotation.build()),
+				AnnotatedJavaType.convertFromJavaType(new JavaType(
+						"org.springframework.web.util.UriComponentsBuilder")));
         final List<JavaSymbolName> parameterNames = Arrays
-                .asList(new JavaSymbolName("json"));
+        		.asList(
+				new JavaSymbolName("json"), new JavaSymbolName("uriBuilder"));
 
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName(
@@ -295,7 +298,13 @@ public class WebJsonMetadata extends
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "\");");
-        bodyBuilder
+		bodyBuilder
+				.appendFormalLine("RequestMapping a = (RequestMapping) getClass().getAnnotation(RequestMapping.class);");
+		bodyBuilder
+				.appendFormalLine("headers.add(\"Location\",uriBuilder.path(a.value()[0]+\"/\"+"
+						+ jsonBeanName
+						+ ".getId().toString()).build().toUriString());");
+		bodyBuilder
                 .appendFormalLine("return new ResponseEntity<String>(headers, "
                         + getShortName(HTTP_STATUS) + ".CREATED);");
 
