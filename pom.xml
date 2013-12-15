@@ -75,10 +75,6 @@
         <module>addon-tailor</module>
         <module>annotations</module>
     </modules>
-    <organization>
-        <name>VMware, Inc</name>
-        <url>http://www.vmware.com/</url>
-    </organization>
     <distributionManagement>
         <repository>
             <id>spring-roo-repository-release</id>
@@ -128,16 +124,8 @@
     <developers>
         <developer>
             <name>Alan Stewart</name>
-            <id>stewarta</id>
-            <email>stewarta at vmware.com</email>
-            <organization>VMware</organization>
-            <timezone>+10</timezone>
-        </developer>
-        <developer>
-            <name>Andrew Swan</name>
-            <id>aswan</id>
-            <email>aswan at vmware.com</email>
-            <organization>VMware</organization>
+            <id>alankstewart</id>
+            <email>alankstewart at gmail dot com</email>
             <timezone>+10</timezone>
         </developer>
     </developers>
@@ -358,12 +346,12 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.1</version>
+                <version>2.4</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.6</version>
+                <version>1.8</version>
             </dependency>
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>
