@@ -457,6 +457,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
 
             final Table importedKeyForeignTable = foreignKey.getForeignTable();
+            Validate.notNull(
+                    importedKeyForeignTable,
+                    "Foreign key table for foreign key '%s' in table '%s' does not exist. One-to-one relationship not created",
+                    foreignKey.getName(), table.getFullyQualifiedTableName());
+
             final String foreignTableName = importedKeyForeignTable.getName();
             final String foreignSchemaName = importedKeyForeignTable
                     .getSchema().getName();
