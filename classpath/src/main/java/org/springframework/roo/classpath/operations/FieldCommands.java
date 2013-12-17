@@ -631,8 +631,10 @@ public class FieldCommands implements CommandMarker {
             fieldDetails.setValue(value);
         }
 
-		fieldDetails.getInitedAnnotations().add(
-				new AnnotationMetadataBuilder("javax.persistence.Lob"));
+		if (lob) {
+			fieldDetails.getInitedAnnotations().add(
+					new AnnotationMetadataBuilder("javax.persistence.Lob"));
+		}
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
 
