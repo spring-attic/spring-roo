@@ -337,13 +337,21 @@ public class DataOnDemandMetadata extends
         final String fieldName = field.getFieldName().getSymbolName();
         final JavaType fieldType = field.getFieldType();
 
-        final Integer precision = (Integer) values.get("precision");
+        Integer precision = (Integer) values.get("precision");
         Integer scale = (Integer) values.get("scale");
-        scale = scale == null ? 0 : scale;
-        final BigDecimal maxValue = new BigDecimal(StringUtils.rightPad("9",
-                precision - scale, '9')
-                + "."
-                + StringUtils.rightPad("9", scale, '9'));
+        if (precision != null && scale != null && precision < scale) {
+            scale = 0;
+        }
+
+        final BigDecimal maxValue;
+        if (scale == null || scale == 0) {
+            maxValue = new BigDecimal(StringUtils.rightPad("9", precision, '9'));
+        } else {
+            maxValue = new BigDecimal(StringUtils.rightPad("9",
+                    precision - scale, '9')
+                    + "."
+                    + StringUtils.rightPad("9", scale, '9'));
+        }
 
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         if (fieldType.equals(BIG_DECIMAL)) {
