@@ -300,7 +300,7 @@ RELEASE PROCEDURE:
 
 5. Build the reference guide and deploy to the static staging server.
    You must be connected to the VPN for deployment to work. Note that
-   http://www.springsource.org/roo is updated bi-hourly from staging:
+   http://projects.spring.io/spring-roo/ is updated bi-hourly from staging:
 
    cd $ROO_HOME/deployment-support
    mvn clean site site:deploy
@@ -355,7 +355,7 @@ to defer step 8 (and beyond) until you're sure everything is fine.
 
 PRE-NOTIFICATION TESTING:
 
-   * Visit http://www.springsource.org/roo/start, click "DOWNLOAD!"
+   * Visit http://projects.spring.io/spring-roo/, click "DOWNLOAD!"
    * Ensure it unzips OK and the sha1sum matches the downloaded .sha
    * rm -rf ~/.m2/repository/org/springframework/roo
    * Use "roo script clinic.roo" to build a new Roo project
@@ -368,11 +368,9 @@ Once the release is completed (ie all steps above) you'll typically:
    * Mark the version as "released" in JIRA (Admin > JIRA Admin...)
    * Publish a blog.springsource.com entry explaining what's new
    * Update http://en.wikipedia.org/wiki/Spring_Roo with the version
-   * Update http://www.springsource.org/node/2/ with the version
-   * Add a "News" announcement http://www.springsource.org
-   * Add a "News" announcement http://forum.springframework.org
-   * Add a "Roo" forum announcement http://forum.springframework.org
-   * Edit http://forum.springsource.org/showthread.php?t=71985
+   * Add a "News" announcement http://forum.spring.io/forum/spring-projects/roo
+   * Add a "Roo" forum announcement http://forum.spring.io/forum/spring-projects/roo
+   * Edit http://forum.spring.io/forum/spring-projects/roo/64079-latest-project-links-and-version-details
    * Tweet from @SpringRoo (NB: ensure #SpringRoo is in the message)
    * Tweet from your personal account
    * Email dev list
