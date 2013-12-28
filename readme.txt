@@ -11,7 +11,7 @@ simply like to try a release that has already been built, tested and
 distributed by the core development team, we recommend that you visit
 the Spring Roo home page and download an official release:
 
-   http://www.springsource.org/roo
+   http://projects.spring.io/spring-roo/
 
 ======================================================================
 ONE-TIME SETUP INSTRUCTIONS
@@ -21,7 +21,8 @@ We'll assume you typed the following to checkout Roo (if not, adjust
 the paths in the following instructions accordingly):
 
   cd ~
-  git clone git@github.com:SpringSource/spring-roo.git
+  git clone git@github.com:spring-projects/spring-roo.git
+
 
 In the instructions below, $ROO_HOME refers to the location where you
 checked out Roo (in this case it would be ROO_HOME="~/roo"). You do NOT
@@ -196,7 +197,7 @@ Setup Git correctly before you do anything else:
 
 Perform the initial checkout with this:
 
-  git clone git@github.com:SpringSource/spring-roo.git
+  git clone git@github.com:spring-projects/spring-roo.git
 
 Let's take the simple case where you just want to make a minor change
 against master. You don't want a new branch etc, and you only want a
@@ -383,6 +384,6 @@ HELP
 
 There are no developer-specific forums or mailing lists for Roo. If
 you have any questions, please use the community support forum at
-http://forum.springsource.org/forumdisplay.php?f=67. Thanks for your
+http://forum.spring.io/forum/spring-projects/roo. Thanks for your
 interest in Spring Roo!
 

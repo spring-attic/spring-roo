@@ -48,17 +48,17 @@
       <listitem>
         <para>Writing a services layer (perhaps annotated with Spring's
         @Service <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/beans.html#beans-stereotype-annotations">stereotype
+        xlink:href="http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/beans.html#beans-stereotype-annotations">stereotype
         annotation</link>) and exposing it using a remoting protocol to a rich
         client (Spring's <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/remoting.html">remoting
+        xlink:href="http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/remoting.html">remoting
         services</link> will help here)</para>
       </listitem>
 
       <listitem>
         <para>Executing a series of predefined actions against the database,
         perhaps in conjunction with Spring's new @Scheduled or @Async <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/scheduling.html#scheduling-annotation-support">timer
+        xlink:href="http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/scheduling.html#scheduling-annotation-support">timer
         annotations</link></para>
       </listitem>
 

@@ -171,7 +171,7 @@ public interface PizzaRepository {
       <para><programlisting>public interface PizzaRepository <emphasis
             role="bold">extends JpaRepository&lt;Pizza, Long&gt;</emphasis> {}</programlisting>Note,
       the <link
-      xlink:href="http://static.springsource.org/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html">JpaRepository</link>
+      xlink:href="http://docs.spring.io/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html">JpaRepository</link>
       interface is part of the <link
       xlink:href="http://www.springsource.org/spring-data/jpa">Spring Data
       JPA</link> API and provides all CRUD functionality out of the
@@ -260,15 +260,15 @@ public interface PizzaRepository {
     List&lt;Pizza&gt; findAll();
 }</programlisting>Similar the Spring Data JPA driven repository seen above,
         this interface is augmented through an ITD which introduces the <link
-        xlink:href="http://static.springsource.org/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html">PagingAndSortingRepository</link>
+        xlink:href="http://docs.spring.io/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html">PagingAndSortingRepository</link>
         provided by the Spring Data API and is responsible for providing all
         necessary CRUD functionality. In addition this interface defines a
         'custom' finder which is not offered by the <link
-        xlink:href="http://static.springsource.org/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html">PagingAndSortingRepository</link>
+        xlink:href="http://docs.spring.io/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html">PagingAndSortingRepository</link>
         implementation: <emphasis>List&lt;Pizza&gt; findAll();</emphasis>.
         This method iis required by Spring Roo's UI scaffolding and is
         automatically implemented by the <link
-        xlink:href="http://static.springsource.org/spring-data/data-document/docs/1.0.0.M4/reference/html/#repositories.definition-tuning">query
+        xlink:href="http://docs.spring.io/spring-data/data-document/docs/1.0.0.M4/reference/html/#repositories.definition-tuning">query
         builder mechanism</link> offered by Spring Data MongoDB.</para>
       </section>
 
