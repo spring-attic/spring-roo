@@ -178,7 +178,7 @@
     <title>Source Repository</title>
 
     <para>Read repository: <link
-    xlink:href="https://github.com/spring-projects/spring-roo.git">https://github.com/spring-projects/spring-roo.git</link></link></para>
+    xlink:href="https://github.com/spring-projects/spring-roo.git">https://github.com/spring-projects/spring-roo.git</link></para>
 
     <para>The Git source control system is currently used by Roo for mainline
     development.</para>
