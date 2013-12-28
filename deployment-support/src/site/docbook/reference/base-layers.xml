@@ -113,7 +113,7 @@ public class Pizza {
 
       <para>Developers who require a repository / DAO layer instead of the
       default Roo entity-based persistence approach can do so by creating a
-      <link xlink:href="http://www.springsource.org/spring-data/jpa">Spring
+      <link xlink:href="http://projects.spring.io/spring-data-jpa/">Spring
       Data JPA</link> backed repository for a given JPA domain type. The
       domain type backing the repository needs have a JPA @Entity annotation
       and also a ID field defined along with accessors and mutators. After
@@ -173,7 +173,7 @@ public interface PizzaRepository {
       the <link
       xlink:href="http://docs.spring.io/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html">JpaRepository</link>
       interface is part of the <link
-      xlink:href="http://www.springsource.org/spring-data/jpa">Spring Data
+      xlink:href="http://projects.spring.io/spring-data-jpa/">Spring Data
       JPA</link> API and provides all CRUD functionality out of the
       box.</para>
     </section>
@@ -184,7 +184,7 @@ public interface PizzaRepository {
       <para>As an alternative to JPA persistence, Spring Roo offers <link
       xlink:href="http://www.mongodb.org/">MongoDB</link> support by
       leveraging the <link
-      xlink:href="http://www.springsource.org/spring-data/mongodb">Spring Data
+      xlink:href="http://projects.spring.io/spring-data-mongodb/">Spring Data
       MongoDB</link> project.</para>
 
       <section>
@@ -251,7 +251,7 @@ public class Pizza {
 
         <para><programlisting>roo&gt; <emphasis role="bold">repository mongo </emphasis>--interface ~.repository.PizzaRepository --entity ~.domain.Pizza</programlisting>This
         will create a simple interface definition which leverages <link
-        xlink:href="http://www.springsource.org/spring-data/mongodb">Spring
+        xlink:href="http://projects.spring.io/spring-data-mongodb/">Spring
         Data MongoDB</link>:</para>
 
         <para><programlisting><emphasis role="bold">@RooMongoRepository</emphasis>(domainType = Pizza.class)

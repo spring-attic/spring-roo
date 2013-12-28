@@ -330,7 +330,7 @@ public class com.aspectj.rocks.Hello extends java.lang.Object implements org.spr
       duplicating Spring's documentation in this section. Instead please refer
       to the excellent Spring documentation for guidance, which can be found
       in the downloadable distribution files and also on the <link
-      xlink:href="http://www.springsource.org/documentation">Spring web
+      xlink:href="http://spring.io/docs">Spring web
       site</link>.</para>
     </section>
   </section>
