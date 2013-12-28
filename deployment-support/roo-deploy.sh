@@ -122,18 +122,18 @@ tomcat_stop_start_get_stop() {
     log "Performing MVC testing; expecting GET success for URL: $@"
     pushd /tmp/rootest &>/dev/null
     if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     else
-        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
         # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
-        log "kill -9 of old mvn tomcat:run with PID $MVN_TOMCAT_PID"
+        log "kill -9 of old mvn tomcat7:run with PID $MVN_TOMCAT_PID"
         kill -9 $MVN_TOMCAT_PID
         sleep 5
     fi
-    log "Invoking mvn tomcat:run in background"
-    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat:run &>/dev/null 2>&1 &
+    log "Invoking mvn tomcat7:run in background"
+    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat7:run &>/dev/null 2>&1 &
     WGET_OPTS="-q"
     if [ "$VERBOSE" = "1" ]; then
         WGET_OPTS="-v"
@@ -144,12 +144,12 @@ tomcat_stop_start_get_stop() {
         l_error "wget failed: $@ (returned code $EXITED)" >&2; exit 1;
     fi
     if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     else
-        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
-        log "Terminating background mvn tomcat:run process with PID $MVN_TOMCAT_PID"
+        log "Terminating background mvn tomcat7:run process with PID $MVN_TOMCAT_PID"
         kill $MVN_TOMCAT_PID
         # no need to sleep, as we'll be at least running Roo between now and the next Tomcat start
     fi
@@ -200,18 +200,18 @@ pizzashop_tests() {
 	log "Performing MVC REST testing;"
 	pushd /tmp/rootest &>/dev/null
 	if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     else  
-        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
         # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
-        log "kill -9 of old mvn tomcat:run with PID $MVN_TOMCAT_PID"
+        log "kill -9 of old mvn tomcat7:run with PID $MVN_TOMCAT_PID"
         kill -9 $MVN_TOMCAT_PID
         sleep 5
     fi
-    log "Invoking mvn tomcat:run in background"
-    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat:run &>/dev/null 2>&1 &
+    log "Invoking mvn tomcat7:run in background"
+    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat7:run &>/dev/null 2>&1 &
 
     wget --retry-connrefused --tries=30 --header 'Accept: application/json' --quiet http://localhost:8888/pizzashop/bases 2>&1
 	
@@ -312,12 +312,12 @@ pizzashop_tests() {
     #fi
 
     if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     else
-        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
-        log "Terminating background mvn tomcat:run process with PID $MVN_TOMCAT_PID"
+        log "Terminating background mvn tomcat7:run process with PID $MVN_TOMCAT_PID"
         kill $MVN_TOMCAT_PID
         # no need to sleep, as we'll be at least running Roo between now and the next Tomcat start
     fi
