@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.4.RELEASE [rev a41c4d1].</para>
+    <para>This appendix was automatically built from Roo 1.2.5.RELEASE [rev 8341dc2].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -2208,6 +2208,12 @@
                         <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>--lob</term>
+                    <listitem>
+                        <para>Indicates that this field is a Large Object; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
     </section>
@@ -3126,6 +3132,12 @@
                         <para>Indication if deep serialization should be enabled.; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>--iso8601Dates</term>
+                    <listitem>
+                        <para>Indication if dates should be formatted according to ISO 8601; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
         <section xml:id="command-index-json-all">
@@ -3137,6 +3149,12 @@
                     <term>--deepSerialize</term>
                     <listitem>
                         <para>Indication if deep serialization should be enabled; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--iso8601Dates</term>
+                    <listitem>
+                        <para>Indication if dates should be formatted according to ISO 8601; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
