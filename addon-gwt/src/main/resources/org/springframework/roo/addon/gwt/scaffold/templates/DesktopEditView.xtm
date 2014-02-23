@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.datepicker.client.DateBox;
+import {{=scaffoldUiPackage}}.*;
 
 {{#imports}}import {{=import}};
 {{/imports}}
