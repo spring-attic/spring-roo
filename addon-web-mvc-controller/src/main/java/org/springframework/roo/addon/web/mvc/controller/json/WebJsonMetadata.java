@@ -183,7 +183,26 @@ public class WebJsonMetadata extends
         itdTypeDetails = builder.build();
     }
 
-    private MethodMetadataBuilder getCreateFromJsonArrayMethod(
+	private void openTry(InvocableMemberBodyBuilder bodyBuilder) {
+		bodyBuilder.appendFormalLine("try {");
+		bodyBuilder.indent();
+	}
+
+	private void closeTry(InvocableMemberBodyBuilder bodyBuilder,
+			String responseEntityShortName, String httpStatusShortName) {
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("} catch (Exception e) {");
+		bodyBuilder.indent();
+		bodyBuilder
+				.appendFormalLine("return new "
+						+ responseEntityShortName
+						+ "<String>(\"{\\\"ERROR\\\":\"+e.getMessage()+\"\\\"}\", headers, "
+						+ httpStatusShortName + ".INTERNAL_SERVER_ERROR);");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+	}
+
+	private MethodMetadataBuilder getCreateFromJsonArrayMethod(
             final MemberTypeAdditions persistMethod) {
         if (StringUtils
                 .isBlank(annotationValues.getCreateFromJsonArrayMethod())
@@ -236,9 +255,12 @@ public class WebJsonMetadata extends
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "\");");
+		openTry(bodyBuilder);
         bodyBuilder
                 .appendFormalLine("return new ResponseEntity<String>(headers, "
                         + getShortName(HTTP_STATUS) + ".CREATED);");
+		closeTry(bodyBuilder, getShortName(RESPONSE_ENTITY),
+				getShortName(HTTP_STATUS));
 
         if (introduceLayerComponents) {
             persistMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -298,6 +320,7 @@ public class WebJsonMetadata extends
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "\");");
+		openTry(bodyBuilder);
 		bodyBuilder
 				.appendFormalLine("RequestMapping a = (RequestMapping) getClass().getAnnotation(RequestMapping.class);");
 		bodyBuilder
@@ -307,6 +330,8 @@ public class WebJsonMetadata extends
 		bodyBuilder
                 .appendFormalLine("return new ResponseEntity<String>(headers, "
                         + getShortName(HTTP_STATUS) + ".CREATED);");
+		closeTry(bodyBuilder, getShortName(RESPONSE_ENTITY),
+				getShortName(HTTP_STATUS));
 
         if (introduceLayerComponents) {
             persistMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -370,6 +395,7 @@ public class WebJsonMetadata extends
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "\");");
+		openTry(bodyBuilder);
         bodyBuilder.appendFormalLine("if (" + jsonBeanName + " == null) {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine("return new "
@@ -381,6 +407,8 @@ public class WebJsonMetadata extends
         bodyBuilder
                 .appendFormalLine("return new ResponseEntity<String>(headers, "
                         + getShortName(HTTP_STATUS) + ".OK);");
+		closeTry(bodyBuilder, getShortName(RESPONSE_ENTITY),
+				getShortName(HTTP_STATUS));
 
         if (introduceLayerComponents) {
             removeMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -479,6 +507,7 @@ public class WebJsonMetadata extends
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new "
                 + httpHeadersShortName + "();");
+		openTry(bodyBuilder);
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "; charset=utf-8\");");
         bodyBuilder.appendFormalLine("return new "
@@ -495,6 +524,7 @@ public class WebJsonMetadata extends
                         .getSymbolName() + "(" + methodParams.toString()
                 + ").getResultList()), headers, " + httpStatusShortName
                 + ".OK);");
+		closeTry(bodyBuilder, responseEntityShortName, httpStatusShortName);
 
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), PUBLIC, finderMethodName, RESPONSE_ENTITY_STRING,
@@ -537,6 +567,7 @@ public class WebJsonMetadata extends
                 + httpHeadersShortName + "();");
         bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \""
                 + CONTENT_TYPE + "; charset=utf-8\");");
+		openTry(bodyBuilder);
         final JavaType list = new JavaType(List.class.getName(), 0,
                 DataType.TYPE, null, Arrays.asList(jsonEnabledType));
         bodyBuilder.appendFormalLine(getShortName(list) + " result = "
@@ -545,6 +576,7 @@ public class WebJsonMetadata extends
                 + "<String>(" + jsonEnabledTypeShortName + "."
                 + toJsonArrayMethodName.getSymbolName() + "(result), headers, "
                 + httpStatusShortName + ".OK);");
+		closeTry(bodyBuilder, responseEntityShortName, httpStatusShortName);
 
         if (introduceLayerComponents) {
             findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -557,7 +589,7 @@ public class WebJsonMetadata extends
         return methodBuilder;
     }
 
-    private String getShortName(final JavaType type) {
+	private String getShortName(final JavaType type) {
         return type.getNameIncludingTypeParameters(false,
                 builder.getImportRegistrationResolver());
     }
