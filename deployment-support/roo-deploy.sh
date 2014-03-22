@@ -611,7 +611,7 @@ if [[ "$COMMAND" = "deploy" ]]; then
 
     ZIP_FILENAME=`basename $ASSEMBLY_ZIP`
     PROJECT_NAME="Spring Roo"
-    AWS_PATH="s3://dist.springframework.org/$TYPE/ROO/"
+    AWS_PATH="s3://spring-roo-repository.springsource.org/$TYPE/ROO/"
     log "AWS bundle.ver.: $VERSION"
     log "AWS rel.type...: $TYPE"
     log "AWS pkg.f.name.: $ZIP_FILENAME"
@@ -642,7 +642,7 @@ if [[ "$COMMAND" = "deploy" ]]; then
 
     # Clean up old snapshot releases (if we just performed a snapshot release)
     if [[ "$TYPE" = "snapshot" ]]; then
-        s3_execute ls s3://dist.springframework.org/snapshot/ROO/ | grep '.zip$' | cut -c "30-"> /tmp/dist_all.txt
+        s3_execute ls s3://spring-roo-repository.springsource.org/snapshot/ROO/ | grep '.zip$' | cut -c "30-"> /tmp/dist_all.txt
         tail -n 5 /tmp/dist_all.txt > /tmp/dist_to_keep.txt
         cat /tmp/dist_all.txt /tmp/dist_to_keep.txt | sort | uniq -u > /tmp/dist_to_delete.txt
         for url in `cat /tmp/dist_to_delete.txt`; do
