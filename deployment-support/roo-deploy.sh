@@ -409,7 +409,7 @@ log "Version........: $VERSION"
 SHORT_VERSION=`echo $VERSION | sed 's/\([0-9].[0-9].[0-9]\).*\.BUILD-SNAPSHOT/\1/'`
 log "Short Version..: $SHORT_VERSION"
 
-# Determine the version as required by the AWS dist.springframework.org "x-amz-meta-release.type" header
+# Determine the version as required by the AWS spring-roo-repository.springsource.org "x-amz-meta-release.type" header
 case $VERSION in
     *BUILD-SNAPSHOT) TYPE=snapshot;;
     *RC*) TYPE=milestone;;
