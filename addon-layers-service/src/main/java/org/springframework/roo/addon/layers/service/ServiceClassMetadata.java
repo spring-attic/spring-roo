@@ -142,6 +142,7 @@ public class ServiceClassMetadata extends
                     boolean usesDomainTypeMethod = false;
                     boolean requireAuthentication = annotationValues
                             .requireAuthentication();
+                    boolean usesRoles = false;
 
                     // checks to see if the method is a "save" method
                     if (method.getKey().equals(
@@ -185,6 +186,7 @@ public class ServiceClassMetadata extends
                     if (annotationValues.getAuthorizedCreateOrUpdateRoles().length > 0
                             && isCreateOrUpdateMethod) {
                         requireAuthentication = true;
+                        usesRoles = true;
                         addRoles(preAuthorizeValue,
                                 annotationValues
                                         .getAuthorizedCreateOrUpdateRoles());
@@ -195,6 +197,7 @@ public class ServiceClassMetadata extends
                     if (annotationValues.getAuthorizedReadRoles().length > 0
                             && isReadMethod) {
                         requireAuthentication = true;
+                        usesRoles = true;
                         addRoles(preAuthorizeValue,
                                 annotationValues.getAuthorizedReadRoles());
                     }
@@ -204,6 +207,7 @@ public class ServiceClassMetadata extends
                     if (annotationValues.getAuthorizedDeleteRoles().length > 0
                             && isDeleteMethod) {
                         requireAuthentication = true;
+                        usesRoles = true;
                         addRoles(preAuthorizeValue,
                                 annotationValues.getAuthorizedDeleteRoles());
                     }
@@ -213,8 +217,13 @@ public class ServiceClassMetadata extends
                     if (annotationValues.usePermissionEvaluator()
                             && usesDomainTypeMethod) {
                         requireAuthentication = true;
+                        //Adds "OR" logical operator only if one or more roles 
+                        //are used.
+                        if(usesRoles){
+                            preAuthorizeValue.append(" OR");
+                        }
                         preAuthorizeValue
-                                .append(" OR hasPermission("
+                                .append(" hasPermission("
                                         + (parameterNames.size() == 0 ? "#"
                                                 : "#"
                                                         + parameterNames
@@ -226,7 +235,7 @@ public class ServiceClassMetadata extends
 
                     // Adds "isAuthenticated" to @PreAuthorize annotation
                     if (requireAuthentication) {
-                        preAuthorizeValue.insert(0, "isAuthenticated() AND ");
+                        preAuthorizeValue.insert(0, "isAuthenticated() AND");
                     }
 
                     if (!preAuthorizeValue.toString().equals("")) {
@@ -273,7 +282,7 @@ public class ServiceClassMetadata extends
     }
 
     private void addRoles(StringBuilder preAuthorizeValue, String[] roles) {
-        preAuthorizeValue.append("(");
+        preAuthorizeValue.append(" (");
         int i = 0;
         for (String role : roles) {
             if (i > 0)
