@@ -2,6 +2,7 @@ package org.springframework.roo.addon.security;
 
 import static org.springframework.roo.model.SpringJavaType.PERMISSION_EVALUATOR;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,23 +10,29 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 
-@Component
+@Component(immediate = true)
 @Service
 public class PermissionEvaluatorMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
-    @Reference protected TypeManagementService typeManagementService;
+    @Reference private TypeManagementService typeManagementService;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
@@ -95,15 +102,17 @@ public class PermissionEvaluatorMetadataProvider extends
 
     @Override
     protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-            String metadataIdentificationString, JavaType aspectName,
-            PhysicalTypeMetadata governorPhysicalTypeMetadata,
-            String itdFilename) {
+            final String metadataIdentificationString, 
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+    	
         final ClassOrInterfaceTypeDetails permissionEvaluatorClass = governorPhysicalTypeMetadata
                 .getMemberHoldingTypeDetails();
         if (permissionEvaluatorClass == null) {
             return null;
         }
-
+        
         JavaType permissionEvaluatorInterface = null;
 
         for (final JavaType implementedType : permissionEvaluatorClass
@@ -114,16 +123,63 @@ public class PermissionEvaluatorMetadataProvider extends
             }
         }
 
+        //Checks to ensure the supposed permission evaluator class actually implements PermissionEvaluator
         if (permissionEvaluatorInterface == null) {
             return null;
         }
-
+        
+        final PermissionEvaluatorAnnotationValues annotationValues = new PermissionEvaluatorAnnotationValues(
+                governorPhysicalTypeMetadata);
+        
+        //AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(permissionEvaluatorClass.getAnnotations(), RooJavaType.ROO_PERMISSION_EVALUATOR);
+        //Checks to ensure permission evaluator class includes the @RooPermissionEvaluator annotation
+        /*if (annotationValues == null) {
+            return null;
+        }*/
+        
         final MemberDetails permissionEvaluatorClassDetails = memberDetailsScanner
                 .getMemberDetails(getClass().getName(),
                         permissionEvaluatorClass);
+        
+        Map<JavaType, String> domainTypesToPlurals = getDomainTypesToPlurals();
+        
+        //AnnotationAttributeValue<Boolean> defaultReturnValue = annotationMetadata.getAttribute("defaultReturnValue");
 
         return new PermissionEvaluatorMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata,
-                permissionEvaluatorClassDetails);
+                permissionEvaluatorClassDetails, 
+                annotationValues, // == null ? false : defaultReturnValue.getValue(), 
+                domainTypesToPlurals);
+    }
+    
+    private Map<JavaType, String> getDomainTypesToPlurals() {
+    	
+    	Map<JavaType, String>  domainTypesToPlurals = new HashMap<JavaType, String> ();
+    	for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE)) {
+    		AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_SERVICE);
+    		AnnotationAttributeValue<Boolean> usePermissionEvaluator = annotationMetadata.getAttribute("usePermissionEvaluator");
+    		if (usePermissionEvaluator == null || usePermissionEvaluator.getValue() == false){
+    			continue;
+    		}
+    		AnnotationAttributeValue<Collection<ClassAttributeValue>> domainTypes = annotationMetadata.getAttribute("domainTypes");
+            for (ClassAttributeValue domainType : domainTypes.getValue()) {
+	    		final ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService
+	                    .getTypeDetails(domainType.getValue());
+	            if (domainTypeDetails == null) {
+	                return null;
+	            }
+	            final LogicalPath path = PhysicalTypeIdentifier
+	                    .getPath(domainTypeDetails.getDeclaredByMetadataId());
+	            final String pluralId = PluralMetadata.createIdentifier(domainType.getValue(),
+	                    path);
+	            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+	                    .get(pluralId);
+	            if (pluralMetadata == null) {
+	                continue;
+	            }
+	    		domainTypesToPlurals.put(domainType.getValue(), pluralMetadata.getPlural());
+            }
+    	}
+    	return domainTypesToPlurals;
     }
 }
