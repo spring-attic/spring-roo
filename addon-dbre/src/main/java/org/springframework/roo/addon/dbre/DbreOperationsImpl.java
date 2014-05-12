@@ -109,7 +109,7 @@ public class DbreOperationsImpl implements DbreOperations {
             final boolean disableVersionFields,
             final boolean disableGeneratedIdentifiers,
             final boolean activeRecord, final boolean repository,
-            final boolean service,final Set<String> tablePrefixes) {
+            final boolean service, final Set<String> tablePrefixes) {
         // Force it to refresh the database from the actual JDBC connection
         final Database database = dbreModelService.refreshDatabase(schemas,
                 view, includeTables, excludeTables);
@@ -122,6 +122,7 @@ public class DbreOperationsImpl implements DbreOperations {
         database.setDisableVersionFields(disableVersionFields);
         database.setDisableGeneratedIdentifiers(disableGeneratedIdentifiers);
         database.setTestAutomatically(testAutomatically);
+        database.setTablePrefixes(tablePrefixes);
         outputSchemaXml(database, schemas, null, false);
 
         // Update the pom.xml to add an exclusion for the DBRE XML file in the

@@ -289,7 +289,7 @@ public abstract class DbreTypeUtils {
 	 */
 	public static JavaType suggestTypeNameForNewTable(final String tableName,
 			final JavaPackage javaPackage, Set<String> tablePrefixes) {
-		
+
 		Validate.notBlank(tableName, "Table name required");
 
 		final StringBuilder result = new StringBuilder();
@@ -300,12 +300,13 @@ public abstract class DbreTypeUtils {
 			result.append(".");
 		}
 		String tableNameToBeUsed = tableName;
-		for (String prefix : tablePrefixes) {
-			if (tableName.startsWith(prefix)) {
-				tableNameToBeUsed = tableName.replaceFirst(prefix, "");
-				break;
+		if (tablePrefixes != null)
+			for (String prefix : tablePrefixes) {
+				if (tableName.startsWith(prefix)) {
+					tableNameToBeUsed = tableName.replaceFirst(prefix, "");
+					break;
+				}
 			}
-		}
 
 		result.append(getName(tableNameToBeUsed, false));
 		return new JavaType(result.toString());

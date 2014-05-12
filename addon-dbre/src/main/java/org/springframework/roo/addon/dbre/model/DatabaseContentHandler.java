@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -35,6 +36,7 @@ public class DatabaseContentHandler extends DefaultHandler {
     private boolean service;
     private final Stack<Object> stack = new Stack<Object>();
     private final Set<Table> tables = new LinkedHashSet<Table>();
+    private Set<String> tablePrefixes = new HashSet<String>();
     private boolean testAutomatically;
 
     /**
@@ -87,6 +89,13 @@ public class DatabaseContentHandler extends DefaultHandler {
             if (option.getKey().equals("testAutomatically")) {
                 testAutomatically = Boolean.parseBoolean(option.getValue());
             }
+            if (option.getKey().equals("tablePrefixes")) {
+            	tablePrefixes = new HashSet<String>();
+            	String[] split = option.getValue().split(" ");
+            	for (String s : split){
+            		tablePrefixes.add(s);
+            	}
+            }
         }
         else if (qName.equals("table")) {
             tables.add((Table) tmp);
@@ -124,6 +133,7 @@ public class DatabaseContentHandler extends DefaultHandler {
             database.setRepository(repository);
             database.setService(service);
             database.setTestAutomatically(testAutomatically);
+            database.setTablePrefixes(tablePrefixes);
         }
         else {
             stack.push(tmp);
