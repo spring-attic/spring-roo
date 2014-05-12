@@ -615,7 +615,7 @@ public class DbreDatabaseListenerImpl extends
                 }
                 final JavaType javaType = DbreTypeUtils
                         .suggestTypeNameForNewTable(table.getName(),
-                                schemaPackage);
+                                schemaPackage,database.getTablePrefixes());
                 final boolean activeRecord = database.isActiveRecord()
                         && !database.isRepository();
                 if (typeLocationService.getTypeDetails(javaType) == null) {

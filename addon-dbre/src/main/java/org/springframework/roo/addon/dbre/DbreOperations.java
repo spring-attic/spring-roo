@@ -55,11 +55,12 @@ public interface DbreOperations {
      *            each entity
      * @param repository whether to generate a service layer for each entity
      * @param service whether to generate a repository layer for each entity
+     * @param tablePrefixes table prefixes to be removed for each entity
      */
     void reverseEngineerDatabase(Set<Schema> schemas,
             JavaPackage destinationPackage, boolean testAutomatically,
             boolean view, Set<String> includeTables, Set<String> excludeTables,
             boolean includeNonPortableAttributes, boolean disableVersionFields,
             boolean disableGeneratedIdentifiers, boolean activeRecord,
-            boolean repository, boolean service);
+            boolean repository, boolean service, Set<String> tablePrefixes);
 }

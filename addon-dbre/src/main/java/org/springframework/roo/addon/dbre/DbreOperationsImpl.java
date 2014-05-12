@@ -109,7 +109,7 @@ public class DbreOperationsImpl implements DbreOperations {
             final boolean disableVersionFields,
             final boolean disableGeneratedIdentifiers,
             final boolean activeRecord, final boolean repository,
-            final boolean service) {
+            final boolean service,final Set<String> tablePrefixes) {
         // Force it to refresh the database from the actual JDBC connection
         final Database database = dbreModelService.refreshDatabase(schemas,
                 view, includeTables, excludeTables);
