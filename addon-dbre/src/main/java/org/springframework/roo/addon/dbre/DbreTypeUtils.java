@@ -240,6 +240,10 @@ public abstract class DbreTypeUtils {
 		return getName(name, true);
 	}
 
+	public static String suggestFieldName(final String name, Set<String> tablePrefixes) {
+		Validate.notBlank(name, "Table or column name required");
+		return getName(trimPrefix(name, tablePrefixes), true);
+	}
 	/**
 	 * Returns a field name for a given database table;
 	 * 
@@ -247,9 +251,9 @@ public abstract class DbreTypeUtils {
 	 *            the the table (required)
 	 * @return a String representing the table or column.
 	 */
-	public static String suggestFieldName(final Table table) {
+	public static String suggestFieldName(final Table table, Set<String> tablePrefixes) {
 		Validate.notNull(table, "Table required");
-		return getName(table.getName(), true);
+		return getName(trimPrefix(table.getName(), tablePrefixes), true);
 	}
 
 	public static String suggestPackageName(final String str) {
@@ -299,16 +303,19 @@ public abstract class DbreTypeUtils {
 			result.append(javaPackage.getFullyQualifiedPackageName());
 			result.append(".");
 		}
-		String tableNameToBeUsed = tableName;
-		if (tablePrefixes != null)
-			for (String prefix : tablePrefixes) {
-				if (tableName.startsWith(prefix)) {
-					tableNameToBeUsed = tableName.replaceFirst(prefix, "");
-					break;
-				}
-			}
+		String tableNameToBeUsed = trimPrefix(tableName, tablePrefixes);
 
 		result.append(getName(tableNameToBeUsed, false));
 		return new JavaType(result.toString());
+	}
+
+	public static String trimPrefix(String name, Set<String> prefixes) {
+		if (prefixes != null && !prefixes.isEmpty())
+			for (String prefix : prefixes) {
+				if (name.startsWith(prefix)) {
+					return name.replaceFirst(prefix, "");
+				}
+			}
+		return name;
 	}
 }
