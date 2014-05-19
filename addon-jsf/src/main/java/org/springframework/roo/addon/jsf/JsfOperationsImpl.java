@@ -35,6 +35,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -251,6 +252,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
                 declaredByMetadataId, Modifier.PUBLIC, converterType,
                 PhysicalTypeCategory.CLASS);
         cidBuilder.addAnnotation(annotationBuilder);
+        cidBuilder.addImplementsType(JsfJavaType.CONVERTER);
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 
