@@ -401,6 +401,10 @@ public class WebFinderMetadata extends
                 .appendFormalLine("int sizeNo = size == null ? 10 : size.intValue();");
         bodyBuilder
                 .appendFormalLine("final int firstResult = page == null ? 0 : (page.intValue() - 1) * sizeNo;");
+        String methodParamsString = methodParams.toString();
+        if(StringUtils.isNotBlank(methodParamsString)){
+        	methodParamsString.concat(", ");
+        }
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                 + javaTypeMetadataHolder.getPlural().toLowerCase()
                 + "\", "
@@ -408,7 +412,7 @@ public class WebFinderMetadata extends
                 + "."
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
-                + methodParams.toString() + ", sortFieldName, sortOrder).setFirstResult(firstResult).setMaxResults(sizeNo).getResultList());");
+                + methodParamsString  + "sortFieldName, sortOrder).setFirstResult(firstResult).setMaxResults(sizeNo).getResultList());");
         
         char[] methodNameArray = finderMetadataDetails.getFinderMethodMetadata()
                 .getMethodName().getSymbolName().toCharArray();
@@ -419,7 +423,7 @@ public class WebFinderMetadata extends
         		+ getShortName(formBackingType)
                 + "."
                 + countMethodName + "("
-                + methodParams.toString() + ") / sizeNo;");
+                + methodParamsString + ") / sizeNo;");
         bodyBuilder
                 .appendFormalLine("uiModel.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
         bodyBuilder.indentRemove();
@@ -432,7 +436,7 @@ public class WebFinderMetadata extends
                 + "."
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
-                + methodParams.toString() + ", sortFieldName, sortOrder).getResultList());");
+                + methodParamsString + "sortFieldName, sortOrder).getResultList());");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         
