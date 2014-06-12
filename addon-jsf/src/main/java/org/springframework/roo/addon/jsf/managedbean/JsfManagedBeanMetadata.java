@@ -322,7 +322,11 @@ public class JsfManagedBeanMetadata extends
                 builderMethods.add(getAccessorMethod(selectedFieldName,
                         listType));
 
-                builder.getImportRegistrationResolver().addImport(HASH_SET);
+                JavaType realListType = HASH_SET;
+                if (listType.equals(LIST)) {
+                    realListType = ARRAY_LIST;
+                }
+                builder.getImportRegistrationResolver().addImport(realListType);
 
                 final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
                 bodyBuilder.appendFormalLine("if ("
@@ -330,7 +334,7 @@ public class JsfManagedBeanMetadata extends
                 bodyBuilder.indent();
                 bodyBuilder.appendFormalLine(entityName.getSymbolName()
                         + ".set" + StringUtils.capitalize(fieldName)
-                        + "(new HashSet<" + parameterType.getSimpleTypeName()
+                        + "(new " + realListType.getSimpleTypeName() + "<" + parameterType.getSimpleTypeName()
                         + ">(" + selectedFieldName + "));");
                 bodyBuilder.indentRemove();
                 bodyBuilder.appendFormalLine("}");
