@@ -81,6 +81,15 @@ public class PluginTest extends XmlTestCase {
             + DEPENDENCY_VERSION + "</version>" + "</dependency>"
             + "</dependencies>" + "</plugin>";
 
+    private static final String PLUGIN_WITHOUT_VERSION_WITH_DEPENDENCY = "<plugin>"
+            + "<groupId>com.example</groupId>"
+            + "<artifactId>ball-of-mud</artifactId>"  
+            + "<dependencies>" + "<dependency>" + "<groupId>"
+            + DEPENDENCY_GROUP_ID + "</groupId>" + "<artifactId>"
+            + DEPENDENCY_ARTIFACT_ID + "</artifactId>" + "<version>"
+            + DEPENDENCY_VERSION + "</version>" + "</dependency>"
+            + "</dependencies>" + "</plugin>";
+
     private static final String PLUGIN_XML_WITH_EXECUTION = "<plugin>"
             + "<groupId>tv.reality</groupId>"
             + "<artifactId>view-plugin</artifactId>" + "<version>2.5</version>"
@@ -279,6 +288,15 @@ public class PluginTest extends XmlTestCase {
                 DEPENDENCY_GROUP_ID, DEPENDENCY_ARTIFACT_ID, DEPENDENCY_VERSION);
         assertPluginFromXml(PLUGIN_XML_WITH_DEPENDENCY, "com.example",
                 "ball-of-mud", "1.4", null, Arrays.asList(expectedDependency),
+                NO_EXECUTIONS);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testXmlElementConstructorWithoutVersionWithOneDependency() throws Exception {
+        final Dependency expectedDependency = new Dependency(
+                DEPENDENCY_GROUP_ID, DEPENDENCY_ARTIFACT_ID, DEPENDENCY_VERSION);
+        assertPluginFromXml(PLUGIN_WITHOUT_VERSION_WITH_DEPENDENCY, "com.example",
+                "ball-of-mud", "", null, Arrays.asList(expectedDependency),
                 NO_EXECUTIONS);
     }
 
