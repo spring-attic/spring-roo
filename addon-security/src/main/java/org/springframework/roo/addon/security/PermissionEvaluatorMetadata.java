@@ -5,6 +5,8 @@ import static org.springframework.roo.model.SpringJavaType.AUTHENTICATION;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -52,47 +54,52 @@ public class PermissionEvaluatorMetadata extends
     }
 
     protected PermissionEvaluatorMetadata(String identifier,
-            JavaType aspectName,
-            PhysicalTypeMetadata governorPhysicalTypeMetadata,
-            final MemberDetails governorDetails) {
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final MemberDetails governorDetails,
+            final PermissionEvaluatorAnnotationValues annotationValues,
+            final Map<JavaType, String> domainTypeToPlurals) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
-
+        
+        //Creates method hasPermission(Authentication authentication, Object targetDomainObject, Object permission)
         List<JavaType> hasPermissionParameterTypes = new ArrayList<JavaType>();
         hasPermissionParameterTypes.add(AUTHENTICATION);
         hasPermissionParameterTypes.add(JavaType.OBJECT);
         hasPermissionParameterTypes.add(JavaType.OBJECT);
 
-        JavaSymbolName methodName = new JavaSymbolName("hasPermission");
-        if (!governorDetails.isMethodDeclaredByAnother(methodName,
+        JavaSymbolName hasPermissionMethodName = new JavaSymbolName("hasPermission");
+        if (!governorDetails.isMethodDeclaredByAnother(hasPermissionMethodName,
                 hasPermissionParameterTypes, getId())) {
-            final InvocableMemberBodyBuilder hasPermissionBodyBuilder = new InvocableMemberBodyBuilder();
-            hasPermissionBodyBuilder.append("\n\treturn true;\n");
-
-            List<JavaSymbolName> hasPermissionParameterNames = new ArrayList<JavaSymbolName>();
-            hasPermissionParameterNames
-                    .add(new JavaSymbolName("authentication"));
+        	
+        	List<JavaSymbolName> hasPermissionParameterNames = new ArrayList<JavaSymbolName>();
+            hasPermissionParameterNames.add(new JavaSymbolName("authentication"));
             hasPermissionParameterNames.add(new JavaSymbolName("targetObject"));
             hasPermissionParameterNames.add(new JavaSymbolName("permission"));
+            
+            final InvocableMemberBodyBuilder hasPermissionBodyBuilder = new InvocableMemberBodyBuilder();
+            
+            hasPermissionBodyBuilder.append("\n\t\treturn checkManagedPermissions(authentication, targetObject, permission);");
 
             MethodMetadataBuilder hasPermissionMethodMetadataBuilder = new MethodMetadataBuilder(
-                    getId(), PUBLIC, methodName, JavaType.BOOLEAN_PRIMITIVE,
+                    getId(), PUBLIC, hasPermissionMethodName, JavaType.BOOLEAN_PRIMITIVE,
                     AnnotatedJavaType
                             .convertFromJavaTypes(hasPermissionParameterTypes),
                     hasPermissionParameterNames, hasPermissionBodyBuilder);
 
             builder.addMethod(hasPermissionMethodMetadataBuilder.build());
         }
+        
+        //Creates method hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission)
+        hasPermissionParameterTypes = new ArrayList<JavaType>();
+        hasPermissionParameterTypes.add(AUTHENTICATION);
+        hasPermissionParameterTypes.add(JavaType.SERIALIZABLE);
+        hasPermissionParameterTypes.add(JavaType.STRING);
+        hasPermissionParameterTypes.add(JavaType.OBJECT);
 
-        List<JavaType> hasPermissionParameterTypes2 = new ArrayList<JavaType>();
-        hasPermissionParameterTypes2.add(AUTHENTICATION);
-        hasPermissionParameterTypes2.add(JavaType.SERIALIZABLE);
-        hasPermissionParameterTypes2.add(JavaType.STRING);
-        hasPermissionParameterTypes2.add(JavaType.OBJECT);
-
-        if (!governorDetails.isMethodDeclaredByAnother(methodName,
-                hasPermissionParameterTypes2, getId())) {
+        if (!governorDetails.isMethodDeclaredByAnother(hasPermissionMethodName,
+                hasPermissionParameterTypes, getId())) {
             final InvocableMemberBodyBuilder hasPermissionBodyBuilder2 = new InvocableMemberBodyBuilder();
-            hasPermissionBodyBuilder2.append("\n\treturn true;\n");
+            hasPermissionBodyBuilder2.append(String.format("\n\t\treturn %s;\n",annotationValues.getDefaultReturnValue()));
 
             List<JavaSymbolName> hasPermissionParameterNames2 = new ArrayList<JavaSymbolName>();
             hasPermissionParameterNames2.add(new JavaSymbolName(
@@ -107,13 +114,84 @@ public class PermissionEvaluatorMetadata extends
                     new JavaSymbolName("hasPermission"),
                     JavaType.BOOLEAN_PRIMITIVE,
                     AnnotatedJavaType
-                            .convertFromJavaTypes(hasPermissionParameterTypes2),
+                            .convertFromJavaTypes(hasPermissionParameterTypes),
                     hasPermissionParameterNames2, hasPermissionBodyBuilder2);
 
             builder.addMethod(hasPermissionMethodMetadataBuilder2.build());
-
-            itdTypeDetails = builder.build();
         }
+        
+        List<JavaType> checkManagedPermissionsParameterTypes = new ArrayList<JavaType>();
+        checkManagedPermissionsParameterTypes.add(AUTHENTICATION);
+        checkManagedPermissionsParameterTypes.add(JavaType.OBJECT);
+        checkManagedPermissionsParameterTypes.add(JavaType.OBJECT);
+
+        JavaSymbolName checkManagedPermissionsMethodName = new JavaSymbolName("checkManagedPermissions");
+        
+        if (!governorDetails.isMethodDeclaredByAnother(checkManagedPermissionsMethodName,
+        		checkManagedPermissionsParameterTypes, getId())) {
+        	
+        	List<JavaSymbolName> checkManagedPermissionsParameterNames = new ArrayList<JavaSymbolName>();
+        	checkManagedPermissionsParameterNames
+                    .add(new JavaSymbolName("authentication"));
+        	checkManagedPermissionsParameterNames.add(new JavaSymbolName("targetObject"));
+        	checkManagedPermissionsParameterNames.add(new JavaSymbolName("permission"));
+            
+            final InvocableMemberBodyBuilder checkManagedPermissionsBodyBuilder = new InvocableMemberBodyBuilder();
+            boolean firstPass = true;
+            for (Entry<JavaType, String> entrySet : domainTypeToPlurals.entrySet()) {
+            	for (Permission permission : Permission.values()){
+    		    	String permissionName = permission.getName(entrySet.getKey(), entrySet.getValue());
+    				if (permissionName == null) {
+    					continue;
+    				}
+	            	checkManagedPermissionsBodyBuilder.append(String.format("\n\t\t%sif(permission.equals(\"%s\")){",firstPass ? "" : "else ", permissionName));
+	            	checkManagedPermissionsBodyBuilder.append(String.format("\n\t\t\treturn %s(authentication, (%s)targetObject);", permissionName, entrySet.getKey().getFullyQualifiedTypeName()));
+	            	checkManagedPermissionsBodyBuilder.append("\n\t\t}");
+            	}
+            	firstPass = false;
+            }
+            checkManagedPermissionsBodyBuilder.append(String.format("\n\t\treturn %s;\n",annotationValues.getDefaultReturnValue()));
+
+            MethodMetadataBuilder hasPermissionMethodMetadataBuilder = new MethodMetadataBuilder(
+                    getId(), PUBLIC, checkManagedPermissionsMethodName, JavaType.BOOLEAN_PRIMITIVE,
+                    AnnotatedJavaType
+                            .convertFromJavaTypes(checkManagedPermissionsParameterTypes),
+                            checkManagedPermissionsParameterNames, checkManagedPermissionsBodyBuilder);
+
+            builder.addMethod(hasPermissionMethodMetadataBuilder.build());
+            
+        }
+        
+        for (Entry<JavaType, String> entrySet : domainTypeToPlurals.entrySet()) {
+        	for (Permission permission : Permission.values()){
+		    	String permissionName = permission.getName(entrySet.getKey(), entrySet.getValue());
+				if (permissionName == null) {
+					continue;
+				}
+	        	JavaSymbolName isAllowedMethodName = new JavaSymbolName(permissionName);
+	        	List<JavaType> isAllowedParameterTypes = new ArrayList<JavaType>();
+	        	isAllowedParameterTypes.add(AUTHENTICATION);
+	        	isAllowedParameterTypes.add(entrySet.getKey());
+	        	if (!governorDetails.isMethodDeclaredByAnother(isAllowedMethodName, isAllowedParameterTypes, getId())) {
+	        		List<JavaSymbolName> isAllowedParameterNames = new ArrayList<JavaSymbolName>();
+	        		isAllowedParameterNames.add(new JavaSymbolName("authentication"));
+	        		isAllowedParameterNames.add(JavaSymbolName.getReservedWordSafeName(entrySet.getKey()));
+	                
+	                final InvocableMemberBodyBuilder isAllowedBodyBuilder = new InvocableMemberBodyBuilder();
+	                isAllowedBodyBuilder.append(String.format("\n\t\treturn %s;\n",annotationValues.getDefaultReturnValue()));
+	
+	                MethodMetadataBuilder isAllowedMethodMetadataBuilder = new MethodMetadataBuilder(
+	                        getId(), PUBLIC, isAllowedMethodName, JavaType.BOOLEAN_PRIMITIVE,
+	                        AnnotatedJavaType
+	                                .convertFromJavaTypes(isAllowedParameterTypes),
+	                                isAllowedParameterNames, isAllowedBodyBuilder);
+	
+	                builder.addMethod(isAllowedMethodMetadataBuilder.build());
+	        	}
+        	}
+        }
+        
+        itdTypeDetails = builder.build();
     }
 
     @Override

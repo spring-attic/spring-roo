@@ -26,6 +26,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -73,7 +74,7 @@ public class ServiceClassMetadata extends
      * @param governorPhysicalTypeMetadata the governor, which is expected to
      *            contain a {@link ClassOrInterfaceTypeDetails} (required)
      * @param governorDetails (required)
-     * @param annotationValues (required)
+     * @param serviceAnnotationValues (required)
      * @param domainTypeToIdTypeMap (required)
      * @param allCrudAdditions any additions to be made to the service class in
      *            order to invoke lower-layer methods (required)
@@ -85,13 +86,14 @@ public class ServiceClassMetadata extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final MemberDetails governorDetails,
-            final ServiceAnnotationValues annotationValues,
+            final ServiceAnnotationValues serviceAnnotationValues,
             final Map<JavaType, JavaType> domainTypeToIdTypeMap,
             final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions,
             final Map<JavaType, String> domainTypePlurals, String serviceName) {
+    	
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.notNull(allCrudAdditions, "CRUD additions required");
-        Validate.notNull(annotationValues, "Annotation values required");
+        Validate.notNull(serviceAnnotationValues, "Annotation values required");
         Validate.notNull(governorDetails, "Governor details required");
         Validate.notNull(domainTypePlurals, "Domain type plurals required");
 
@@ -103,16 +105,15 @@ public class ServiceClassMetadata extends
                     .get(domainType);
             for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
                 final JavaSymbolName methodName = method.getSymbolName(
-                        annotationValues, domainType,
+                        serviceAnnotationValues, domainType,
                         domainTypePlurals.get(domainType));
-                final String permissionName = method.getPermissionName(
-                        annotationValues, domainType,
-                        domainTypePlurals.get(domainType));
+                
                 if (methodName != null
                         && !governorDetails.isMethodDeclaredByAnother(
                                 methodName,
                                 method.getParameterTypes(domainType, idType),
                                 getId())) {
+                	
                     // The method is desired and the service class' Java file
                     // doesn't contain it, so generate it
                     final MemberTypeAdditions lowerLayerCallAdditions = crudAdditions
@@ -134,14 +135,9 @@ public class ServiceClassMetadata extends
                                     .getParameterTypes(domainType, idType)),
                             parameterNames, bodyBuilder);
 
-                    StringBuilder preAuthorizeValue = new StringBuilder();
-
                     boolean isCreateOrUpdateMethod = false;
                     boolean isReadMethod = false;
                     boolean isDeleteMethod = false;
-                    boolean usesDomainTypeMethod = false;
-                    boolean requireAuthentication = annotationValues
-                            .requireAuthentication();
 
                     // checks to see if the method is a "save" method
                     if (method.getKey().equals(
@@ -168,72 +164,62 @@ public class ServiceClassMetadata extends
                                     CustomDataKeys.COUNT_ALL_METHOD)) {
                         isReadMethod = true;
                     }
+                    
+                    String authorizeValue = "";
+                    String authorizedRolesComponent = "";
+                    String permissionEvalutorComponent = "";
 
-                    if (method.getKey().equals(
-                            CustomDataKeys.PERSIST_METHOD.name())
-                            || method.getKey().equals(
-                                    CustomDataKeys.MERGE_METHOD.name())
-                            || method.getKey().equals(
-                                    CustomDataKeys.REMOVE_METHOD.name())
-                            || method.getKey().equals(
-                                    CustomDataKeys.FIND_METHOD.name())) {
-                        usesDomainTypeMethod = true;
-                    }
-
-                    // Adds required roles to @PreAuthorize annotation if the
+                    // Adds required roles to @PreAuthorize or @PostAuthorize annotation if the
                     // required roles for persist methods
-                    if (annotationValues.getAuthorizedCreateOrUpdateRoles().length > 0
+                    if (serviceAnnotationValues.getAuthorizedCreateOrUpdateRoles() != null &&
+                    		serviceAnnotationValues.getAuthorizedCreateOrUpdateRoles().length > 0
                             && isCreateOrUpdateMethod) {
-                        requireAuthentication = true;
-                        addRoles(preAuthorizeValue,
-                                annotationValues
-                                        .getAuthorizedCreateOrUpdateRoles());
+                        authorizedRolesComponent = getRoles(serviceAnnotationValues.getAuthorizedCreateOrUpdateRoles());
                     }
 
-                    // Adds required roles to @PreAuthorize annotation if the
+                    // Adds required roles to @PreAuthorize or @PostAuthorize annotation if the
                     // required roles exist for read methods
-                    if (annotationValues.getAuthorizedReadRoles().length > 0
+                    if (serviceAnnotationValues.getAuthorizedReadRoles() != null &&
+                    		serviceAnnotationValues.getAuthorizedReadRoles().length > 0
                             && isReadMethod) {
-                        requireAuthentication = true;
-                        addRoles(preAuthorizeValue,
-                                annotationValues.getAuthorizedReadRoles());
+                        authorizedRolesComponent = getRoles(serviceAnnotationValues.getAuthorizedReadRoles());
                     }
 
-                    // Adds required roles to @PreAuthorize annotation if the
+                    // Adds required roles to @PreAuthorize or @PostAuthorize annotation if the
                     // required roles exist for delete methods
-                    if (annotationValues.getAuthorizedDeleteRoles().length > 0
-                            && isDeleteMethod) {
-                        requireAuthentication = true;
-                        addRoles(preAuthorizeValue,
-                                annotationValues.getAuthorizedDeleteRoles());
+                    if (serviceAnnotationValues.getAuthorizedDeleteRoles() != null &&
+                    		serviceAnnotationValues.getAuthorizedDeleteRoles().length > 0 
+                    		&& isDeleteMethod) {
+                        authorizedRolesComponent = getRoles(serviceAnnotationValues.getAuthorizedDeleteRoles());
+                    }
+                    
+                    final String permissionName = method.getPermissionName(domainType,
+                            domainTypePlurals.get(domainType));
+                    
+                    if (permissionName != null && serviceAnnotationValues.usePermissionEvaluator()) {
+	                    // Add hasPermission to @PreAuthorize or @PostAuthorize annotation if
+	                    // required
+                    	permissionEvalutorComponent = String.format("hasPermission(%s, '%s')", method.usesPostAuthorize() ? "returnObject" : "#" + parameterNames.get(0).getSymbolName(), permissionName);
                     }
 
-                    // Add permission evaluator to @PreAuthorize annotation if
-                    // required
-                    if (annotationValues.usePermissionEvaluator()
-                            && usesDomainTypeMethod) {
-                        requireAuthentication = true;
-                        preAuthorizeValue
-                                .append(" OR hasPermission("
-                                        + (parameterNames.size() == 0 ? "#"
-                                                : "#"
-                                                        + parameterNames
-                                                                .get(0)
-                                                                .getSymbolName())
-                                        + ", '" + serviceName + ":"
-                                        + permissionName + "'" + ")");
+                    // Builds value for @PreAuthorize
+                    if (!authorizedRolesComponent.equals("") && !permissionEvalutorComponent.equals("")) {
+                    	authorizeValue= String.format("isAuthenticated() AND ((%s) OR %s)", authorizedRolesComponent, permissionEvalutorComponent);
+                    }
+                    else if (!authorizedRolesComponent.equals("")) {
+                    	authorizeValue= String.format("isAuthenticated() AND (%s)", authorizedRolesComponent);
+                    }
+                    else if (!permissionEvalutorComponent.equals("")) {
+                    	authorizeValue= String.format("isAuthenticated() AND %s", permissionEvalutorComponent);
+                    }
+                    else if (serviceAnnotationValues.requireAuthentication()) {
+                    	authorizeValue ="isAuthenticated()";
                     }
 
-                    // Adds "isAuthenticated" to @PreAuthorize annotation
-                    if (requireAuthentication) {
-                        preAuthorizeValue.insert(0, "isAuthenticated() AND ");
-                    }
-
-                    if (!preAuthorizeValue.toString().equals("")) {
-                        final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(
-                                PRE_AUTHORIZE);
+                    if (!authorizeValue.equals("")) {
+                        final AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(method.usesPostAuthorize() ? SpringJavaType.POST_AUTHORIZE : PRE_AUTHORIZE);
                         annotationMetadataBuilder.addStringAttribute("value",
-                                preAuthorizeValue.toString());
+                        		authorizeValue.toString());
                         methodMetadataBuilder
                                 .addAnnotation(annotationMetadataBuilder
                                         .build());
@@ -245,7 +231,7 @@ public class ServiceClassMetadata extends
         }
 
         // If useXmlConfiguration is true, do not add @Service
-        if (!annotationValues.useXmlConfiguration()) {
+        if (!serviceAnnotationValues.useXmlConfiguration()) {
             // Introduce the @Service annotation via the ITD if it's not already
             // on
             // the service's Java class
@@ -259,7 +245,7 @@ public class ServiceClassMetadata extends
 
         // Introduce the @Transactional annotation via the ITD if it's not
         // already on the service's Java class
-        if (annotationValues.isTransactional()) {
+        if (serviceAnnotationValues.isTransactional()) {
             final AnnotationMetadata transactionalAnnotation = new AnnotationMetadataBuilder(
                     TRANSACTIONAL).build();
             if (!governorDetails.isRequestingAnnotatedWith(
@@ -272,18 +258,17 @@ public class ServiceClassMetadata extends
         itdTypeDetails = builder.build();
     }
 
-    private void addRoles(StringBuilder preAuthorizeValue, String[] roles) {
-        preAuthorizeValue.append("(");
-        int i = 0;
-        for (String role : roles) {
-            if (i > 0)
-                preAuthorizeValue.append(" OR ");
+    private String getRoles(String[] roles) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < roles.length; i++) {
+            if (i > 0) {
+            	sb.append(" OR ");
+            }
 
-            preAuthorizeValue.append("hasRole('" + role + "')");
-            i++;
+            sb.append(String.format("hasRole('%s')", roles[i]));
         }
 
-        preAuthorizeValue.append(")");
+        return sb.toString();
     }
 
     @Override
