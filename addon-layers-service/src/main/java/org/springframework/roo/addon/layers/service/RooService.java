@@ -138,21 +138,21 @@ public @interface RooService {
      * 
      * @return a blank string if the annotated type doesn't support this method
      */
-    String[] authorizedCreateOrUpdateRoles() default "";
+    String[] authorizedCreateOrUpdateRoles() default { };
 
     /**
      * Annotates delete service methods with @PreAuthorize(hasRole())
      * 
      * @return a blank string if the annotated type doesn't support this method
      */
-    String[] authorizedDeleteRoles() default "";
+    String[] authorizedDeleteRoles() default { };
 
     /**
      * Annotates find service methods with @PreAuthorize(hasRole())
      * 
      * @return a blank string if the annotated type doesn't support this method
      */
-    String[] authorizedReadRoles() default "";
+    String[] authorizedReadRoles() default { };
 
     /**
      * Indicates whether the annotated service should be instantiated using XML
