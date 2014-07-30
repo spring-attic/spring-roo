@@ -427,9 +427,9 @@
       </listitem>
 
       <listitem>
-        <para>A Sun, JRocket or IBM Java 5 or Java 6 installation, with the
+        <para>A Java 6 or 7 installation, with the
         <code>$JAVA_HOME</code> environment variable pointing to the
-        installation</para>
+        installation. Note that Java 8 is currently not supported.</para>
       </listitem>
 
       <listitem>
