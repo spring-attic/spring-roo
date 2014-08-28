@@ -412,7 +412,7 @@ public class WebFinderMetadata extends
                 + "."
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
-                + methodParamsString  + "sortFieldName, sortOrder).setFirstResult(firstResult).setMaxResults(sizeNo).getResultList());");
+                + methodParamsString  + ", sortFieldName, sortOrder).setFirstResult(firstResult).setMaxResults(sizeNo).getResultList());");
         
         char[] methodNameArray = finderMetadataDetails.getFinderMethodMetadata()
                 .getMethodName().getSymbolName().toCharArray();
@@ -436,7 +436,7 @@ public class WebFinderMetadata extends
                 + "."
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
-                + methodParamsString + "sortFieldName, sortOrder).getResultList());");
+                + methodParamsString + ", sortFieldName, sortOrder).getResultList());");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
         
