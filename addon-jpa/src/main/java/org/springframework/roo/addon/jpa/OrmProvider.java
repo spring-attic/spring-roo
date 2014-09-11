@@ -14,7 +14,7 @@ public enum OrmProvider {
 
     DATANUCLEUS("org.datanucleus.api.jpa.PersistenceProviderImpl"), ECLIPSELINK(
             "org.eclipse.persistence.jpa.PersistenceProvider"), HIBERNATE(
-            "org.hibernate.ejb.HibernatePersistence"), OPENJPA(
+            "org.hibernate.jpa.HibernatePersistenceProvider"), OPENJPA(
             "org.apache.openjpa.persistence.PersistenceProviderImpl");
 
     private final String adapter;
