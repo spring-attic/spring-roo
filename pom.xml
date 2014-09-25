@@ -128,6 +128,12 @@
             <email>alankstewart at gmail dot com</email>
             <timezone>+10</timezone>
         </developer>
+        <developer>
+            <name>Juan Carlos García del Canto</name>
+            <id>jcagarcia</id>
+            <email>jugade92 at gmail dot com</email>
+            <timezone>+1</timezone>
+        </developer>
     </developers>
     <dependencies>
         <dependency>
