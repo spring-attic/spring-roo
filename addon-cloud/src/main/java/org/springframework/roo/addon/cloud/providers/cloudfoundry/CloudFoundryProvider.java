@@ -69,9 +69,10 @@ public class CloudFoundryProvider implements CloudProvider {
 	 */
 	@Override
 	public void setup(String pluginConfiguration) {
-		// Adding Cloud Foundry Maven Plugin 
+		// Adding Cloud Foundry Maven Plugin
 		updatePlugins(pluginConfiguration, projectOperations);
-		// TODO: Showing INFO about how to use CF Maven Plugin
+		// Showing INFO about how to use CF Maven Plugin
+		showInfo(pluginConfiguration);
 	}
 
 	/**
@@ -86,7 +87,7 @@ public class CloudFoundryProvider implements CloudProvider {
 			ProjectOperations projectOperations) {
 
 		Configuration conf = null;
-		
+
 		// Generating configuration if necessary
 		if (StringUtils.isNotBlank(pluginConfiguration)) {
 			try {
@@ -94,24 +95,24 @@ public class CloudFoundryProvider implements CloudProvider {
 				DocumentBuilderFactory docFactory = DocumentBuilderFactory
 						.newInstance();
 				DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-				
+
 				Document doc = docBuilder.newDocument();
 				Element configElement = doc.createElement("configuration");
-				
+
 				// Getting all configurations
 				String[] configurationTags = pluginConfiguration.split(",");
 
-				for(String configurationTag : configurationTags){
+				for (String configurationTag : configurationTags) {
 					String[] keyValue = configurationTag.split("=");
-					if(keyValue.length == 2){
+					if (keyValue.length == 2) {
 						Element element = doc.createElement(keyValue[0]);
 						element.setTextContent(keyValue[1]);
 						configElement.appendChild(element);
 					}
 				}
-				
+
 				conf = new Configuration(configElement);
-				
+
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "[ERROR] " + e);
 			}
@@ -126,8 +127,93 @@ public class CloudFoundryProvider implements CloudProvider {
 				.addBuildPlugin(projectOperations.getFocusedModuleName(),
 						cloudFoundryMvnPlugin);
 	}
-	
-	
+
+	/**
+	 * This method shows info about how to use Cloud Foundry
+	 * 
+	 * @param configuration
+	 */
+	public static void showInfo(String configuration) {
+		// Showing congrats message
+		LOGGER.log(
+				Level.INFO,
+				"Congratulations! Now you can use Cloud Foundry Maven Plugin to deploy your applications!");
+		LOGGER.log(Level.INFO, "");
+		// Showing current config if necessary
+		if (StringUtils.isNotBlank(configuration)) {
+			LOGGER.log(Level.INFO, "This is your current configuration:");
+			LOGGER.log(Level.INFO, "");
+			LOGGER.log(Level.INFO, "<configuration>");
+			// Getting all configurations
+			String[] configurationTags = configuration.split(",");
+
+			for (String configurationTag : configurationTags) {
+				String[] keyValue = configurationTag.split("=");
+				if (keyValue.length == 2) {
+					LOGGER.log(Level.INFO, String.format("   <%s>%s</%s>",
+							keyValue[0], keyValue[1], keyValue[0]));
+				}
+			}
+			LOGGER.log(Level.INFO, "</configuration>");
+		} else {
+			LOGGER.log(Level.INFO,
+					"WARNING: You don't specify any configuration.");
+		}
+		// Showing commands you can use with maven CF Plugin
+		LOGGER.log(Level.INFO, "");
+		LOGGER.log(
+				Level.INFO,
+				"You can use the following Cloud Foundry Maven Plugin commands with \"perform command --mavenCommand\" on ROO Shell or using \"mvn\" on OS command line.");
+		LOGGER.log(Level.INFO, "");
+		LOGGER.log(Level.INFO, "Command           			Description");
+		LOGGER.log(Level.INFO, "----------------------------------------");
+		LOGGER.log(Level.INFO, "cf:apps  	      			List deployed applications.");
+		LOGGER.log(Level.INFO,
+				"cf:app 	          			Show details of an application.");
+		LOGGER.log(Level.INFO, "cf:delete 	      			Delete an application.");
+		LOGGER.log(Level.INFO,
+				"cf:env 	          			Show an application's environment variables.");
+		LOGGER.log(Level.INFO,
+				"cf:help 	      			Show documentation for all available commands.");
+		LOGGER.log(Level.INFO,
+				"cf:push 	      			Push and optionally start an application.");
+		LOGGER.log(
+				Level.INFO,
+				"cf:push-only      			Push and optionally start an application, without packaging.");
+		LOGGER.log(Level.INFO, "cf:restart 	      			Restart an application.");
+		LOGGER.log(Level.INFO, "cf:start 	      			Start an application.");
+		LOGGER.log(Level.INFO, "cf:stop 	             	Stop an application.");
+		LOGGER.log(
+				Level.INFO,
+				"cf:target 	                Show information about the target Cloud Foundry service.");
+		LOGGER.log(Level.INFO,
+				"cf:logs 	                Tail application logs.");
+		LOGGER.log(Level.INFO,
+				"cf:recentLogs               Show recent application logs.");
+		LOGGER.log(Level.INFO,
+				"cf:scale 	                Scale the application instances up or down.");
+		LOGGER.log(Level.INFO,
+				"cf:services                 Show a list of provisioned services.");
+		LOGGER.log(Level.INFO,
+				"cf:service-plans 	        Show a list of available service plans.");
+		LOGGER.log(Level.INFO,
+				"cf:create-services 	        Create services defined in the pom.");
+		LOGGER.log(Level.INFO,
+				"cf:delete-services 	        Delete services defined in the pom.");
+		LOGGER.log(Level.INFO,
+				"cf:bind-services 	        Bind services to an application.");
+		LOGGER.log(Level.INFO,
+				"cf:unbind-services 	        Unbind services from an application.");
+		LOGGER.log(
+				Level.INFO,
+				"cf:delete-orphaned-routes 	Delete all routes that are not bound to any application.");
+		LOGGER.log(
+				Level.INFO,
+				"cf:login 	                Log in to the target Cloud Foundry service and save access tokens.");
+		LOGGER.log(
+				Level.INFO,
+				"cf:logout 	                Log out of the target Cloud Foundry service and remove access tokens.");
+	}
 
 	/**
 	 * PROVIDER CONFIGURATION METHODS
