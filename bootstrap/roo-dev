@@ -17,6 +17,9 @@ ROO_HOME=`dirname "$PRG"`
 ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
 # echo "Resolved ROO_HOME: $ROO_HOME"
 
+# Remove osgi cache
+rm -rf "$ROO_HOME"/bootstrap/target/osgi
+
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/bin
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/bundle
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/conf
