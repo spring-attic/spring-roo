@@ -24,7 +24,8 @@ public interface CloudProvider {
     /**
      * This method installs the provider that implements the interface
      * 
+     * @param configuration 
      */
-    void setup();
+    void setup(String configuration);
 
 }

@@ -39,7 +39,7 @@ public class CloudOperationsImpl implements CloudOperations {
 	}
 
 	@Override
-	public void installProvider(CloudProviderId prov) {
+	public void installProvider(CloudProviderId prov, String configuration) {
 		CloudProvider provider = null;
 		for (CloudProvider tmpProvider : providers) {
 			if (prov.is(tmpProvider)) {
@@ -51,7 +51,7 @@ public class CloudOperationsImpl implements CloudOperations {
 			throw new RuntimeException("Provider '".concat(prov.getId())
 					.concat("' not found'"));
 		}
-		provider.setup();
+		provider.setup(configuration);
 
 	}
 

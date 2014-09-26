@@ -24,8 +24,9 @@ public interface CloudOperations {
 	 * This method execute install provider method
 	 * 
 	 * @param provider
+	 * @param configuration 
 	 */
-	void installProvider(CloudProviderId provider);
+	void installProvider(CloudProviderId provider, String configuration);
 
 	/**
 	 * 
