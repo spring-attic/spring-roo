@@ -5,12 +5,9 @@ Getting started with Spring Roo development
 
 Thanks for checking out Spring Roo from Git.
 
-These instructions are aimed at experienced developers looking to develop Spring Roo itself. If you are new to Spring Roo or would simply like to try a release that has already been built, tested and distributed by the core development team, we recommend that you visit the Spring Roo home page and download an official release:
+These instructions are aimed at experienced developers looking to develop Spring Roo itself. If you are new to Spring Roo or would simply like to try a release that has already been built, tested and distributed by the core development team, we recommend that you visit the http://projects.spring.io/spring-roo/[Spring Roo Home Page] and download an official release.
 
-   http://projects.spring.io/spring-roo/
-
-
-image:https://lh4.googleusercontent.com/-_DpgkWvc3bQ/UUwmwkLNdlI/AAAAAAAAAhU/kG3QSpLOhtw/s301/Logo_SpringRoo.png["Spring Roo Logo", align="center"]
+image:https://lh4.googleusercontent.com/-_DpgkWvc3bQ/UUwmwkLNdlI/AAAAAAAAAhU/kG3QSpLOhtw/s301/Logo_SpringRoo.png[align="right"]
 
 == Index
 
