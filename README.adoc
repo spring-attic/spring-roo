@@ -9,9 +9,9 @@ Thanks for checking out Spring Roo from Git.
 
 These instructions are aimed at experienced developers looking to *develop Spring Roo itself*. If you are new to Spring Roo or would simply like to try a release that has already been built, tested and distributed by the core development team, we recommend that you visit the http://projects.spring.io/spring-roo/[Spring Roo Home Page] and download an official release.
 
-If you are looking for "Spring Roo - Reference Documentation" you can get it http://docs.spring.io/spring-roo/reference/pdf/spring-roo-docs.pdf[here].
+If you are looking for *Reference Documentation* you can get it http://docs.spring.io/spring-roo/reference/pdf/spring-roo-docs.pdf[here].
 
-image:https://lh4.googleusercontent.com/-_DpgkWvc3bQ/UUwmwkLNdlI/AAAAAAAAAhU/kG3QSpLOhtw/s301/Logo_SpringRoo.png
+image:https://lh4.googleusercontent.com/-_DpgkWvc3bQ/UUwmwkLNdlI/AAAAAAAAAhU/kG3QSpLOhtw/s301/Logo_SpringRoo.png["Spring Roo Logo"]
 
 == Index
 
@@ -242,7 +242,7 @@ Our release procedure may seem long, but that's because it includes many steps r
 
 === Release Procedure:
 
-1. Complete a thorough testing build and assembly ZIP:
+*1* Complete a thorough testing build and assembly ZIP:
 
 [source, shell]
 cd $ROO_HOME
@@ -255,46 +255,46 @@ cd $ROO_HOME/deployment-support
 mvn clean site
 ./roo-deploy.sh -c assembly -tv (use -t for extra tests)
 
-2. Verify the assembly ZIP ($ROO_HOME/target/roo-deploy/dist/*.zip) looks good:
+*2* Verify the assembly ZIP ($ROO_HOME/target/roo-deploy/dist/*.zip) looks good:
 
 - Assembly ZIP unzips and is of a sensible size
 - Assembly ZIP runs correctly when installed on major platforms
 - Create Jira Task ticket "Release Spring Roo x.y.z.aaaaaa"
 - Run the "reference guide" command in the Roo shell, copy the resulting XML file into $ROO_HOME/deployment-support/src/site/docbook/reference, git commit and then git push (so the appendix is updated)
 
-3. Tag the release (update the key ID, Jira ID and tag ID):
+*3* Tag the release (update the key ID, Jira ID and tag ID):
 
 [source, shell]
 cd $ROO_HOME
 git tag -a -m "ROO-XXXX: Release Spring Roo 4.5.6.RELEASE" 4.5.6.RELEASE
 
-4. Build JARs:
+*4* Build JARs:
 
 [source, shell]
  cd $ROO_HOME
  mvn clean package
 
-5. Build the reference guide and deploy to the static staging server. You must be connected to the VPN for deployment to work. Note that http://projects.spring.io/spring-roo/ is updated bi-hourly from staging:
+*5* Build the reference guide and deploy to the static staging server. You must be connected to the VPN for deployment to work. Note that http://projects.spring.io/spring-roo/ is updated bi-hourly from staging:
 
 [source, shell]
 cd $ROO_HOME/deployment-support
 mvn clean site site:deploy
 
-6. Create the final assembly ZIP (must happen *after* site built). We run full tests here, even ensuring all the Maven artifacts used by user projects are available. This takes a lot of time, but it is very helpful for our users:
+*6* Create the final assembly ZIP (must happen *after* site built). We run full tests here, even ensuring all the Maven artifacts used by user projects are available. This takes a lot of time, but it is very helpful for our users:
 
 [source, shell]
 cd $ROO_HOME/deployment-support
 ./roo-deploy.sh -c assembly -Tv (-T means Maven tests with empty repo)
 
-7. Repeat the verification tests on the assembly ZIP (see above). See note below if coordinating a release with the STS team.
+*7* Repeat the verification tests on the assembly ZIP (see above). See note below if coordinating a release with the STS team.
 
-8. If the verifications pass, push the Git tag up to the server:
+*8* If the verifications pass, push the Git tag up to the server:
 
 [source, shell]
 cd $ROO_HOME
 git push --tags
 
-9. Deploy the JARs and assembly ZIP to the production download servers (it takes up to an hour for these to be made fully downloadable):
+*9* Deploy the JARs and assembly ZIP to the production download servers (it takes up to an hour for these to be made fully downloadable):
 
 [source, shell]
 cd $ROO_HOME
@@ -302,7 +302,7 @@ mvn deploy
 cd $ROO_HOME/deployment-support
 ./roo-deploy.sh -c deploy (use -dv for a dry-run and verbose logging)
 
-10. Increment the version number to the next BUILD-SNAPSHOT number:
+*10* Increment the version number to the next BUILD-SNAPSHOT number:
 
 [source, shell]
 cd $ROO_HOME/deployment-support
