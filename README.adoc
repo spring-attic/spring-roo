@@ -21,6 +21,7 @@ These instructions detail how to get started with your freshly checked-out sourc
 . <<gpg-pgp-setup, GPG (PGP) Setup>>
 . <<developing-within-eclipse, Developing within eclipse>>
 . <<running-the-command-line-tool, Running the command line tool>>
+. <<sts-integration, STS integration>>
 . <<git-polices, Git Polices>>
 . <<git-tips, Git Tips>>
 . <<releasing, Releasing>>
@@ -150,6 +151,22 @@ Roo ships with a command line tool called *"roo-dev"*. This is also a Windows eq
 
 *"roo-dev"* also launches the OSGi container, which is currently http://felix.apache.org/[Apache Felix]. It also activate *"development mode"*, which gives fuller exceptions, more file activity reporting, extra flash messages related to OSGi events etc.
 
+[[sts-integration]]
+== STS integration
+
+Spring Roo is not longer included on http://spring.io/tools[STS] distributions.
+
+If you wan to include *Roo Support* on your STS, follow the next instructions:
+
+. Open your STS IDE
+. Open STS dashboard and search Spring Roo
+. Installs *Spring Roo (current production release)* and *Spring IDE - Roo Extension*
+. Restarts STS IDE
+
+image:http://i.stack.imgur.com/gzsc0.jpg[current production release]
+image:http://i.stack.imgur.com/MOtHu.png[Roo Extension]
+
+With that simple steps you will include Roo Support on your STS IDE.
 
 [[git-polices]]
 == Git Polices
