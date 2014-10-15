@@ -10,7 +10,7 @@ These instructions are aimed at experienced developers looking to develop Spring
    http://projects.spring.io/spring-roo/
 
 
-image:https://lh4.googleusercontent.com/-_DpgkWvc3bQ/UUwmwkLNdlI/AAAAAAAAAhU/kG3QSpLOhtw/s301/Logo_SpringRoo.png[Spring Roo Logo]
+image:https://lh4.googleusercontent.com/-_DpgkWvc3bQ/UUwmwkLNdlI/AAAAAAAAAhU/kG3QSpLOhtw/s301/Logo_SpringRoo.png["Spring Roo Logo", align="center"]
 
 == Index
 
