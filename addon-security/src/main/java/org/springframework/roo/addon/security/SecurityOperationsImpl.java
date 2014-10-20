@@ -135,14 +135,13 @@ public class SecurityOperationsImpl implements SecurityOperations {
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
         final Document webXmlDocument = XmlUtils.readXml(fileManager
                 .getInputStream(webXmlPath));
-        WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN,
-                WebMvcOperations.HTTP_METHOD_FILTER_NAME,
-                WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME,
-                SecurityOperations.SECURITY_FILTER_NAME,
-                "org.springframework.web.filter.DelegatingFilterProxy", "/*",
-                webXmlDocument, null);
-        fileManager.createOrUpdateTextFileIfRequired(webXmlPath,
-                XmlUtils.nodeToString(webXmlDocument), false);
+
+		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.LAST, null,
+				null, SecurityOperations.SECURITY_FILTER_NAME,
+				"org.springframework.web.filter.DelegatingFilterProxy", "/*",
+				webXmlDocument, null);
+		fileManager.createOrUpdateTextFileIfRequired(webXmlPath,
+				XmlUtils.nodeToString(webXmlDocument), false);
 
         // Include static view controller handler to webmvc-config.xml
         final String webConfigPath = pathResolver.getFocusedIdentifier(
