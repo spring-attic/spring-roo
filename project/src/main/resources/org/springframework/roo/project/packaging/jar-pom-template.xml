@@ -30,11 +30,16 @@
             <name>Spring Maven Milestone Repository</name>
             <url>http://maven.springframework.org/milestone</url>
         </repository>
-        <repository>
-            <id>spring-roo-repository</id>
-            <name>Spring Roo Repository</name>
-            <url>http://spring-roo-repository.springsource.org/release</url>
-        </repository>
+		<repository>
+			<id>spring-roo-repository-release</id>
+			<name>Spring Roo Repository</name>
+			<url>http://spring-roo-repository.springsource.org/release</url>
+		</repository>
+		<repository>
+			<id>spring-roo-repository-snapshot</id>
+			<name>Spring Roo Repository</name>
+			<url>http://spring-roo-repository.springsource.org/snapshot</url>
+		</repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
