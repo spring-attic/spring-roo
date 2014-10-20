@@ -341,7 +341,9 @@ public class WebScaffoldMetadata extends
 		boolean listAdded = false;
 		int fieldPosition = 0;
 		for (final JavaTypeMetadataDetails dependentType : dependentTypes) {
-			if (dependentType.getPersistenceDetails().getCountMethod() == null) {
+			MemberTypeAdditions countMethod = dependentType.getPersistenceDetails().
+					getCountMethod();
+			if (countMethod == null) {
 				fieldPosition++;
 				continue;
 			}
@@ -365,9 +367,11 @@ public class WebScaffoldMetadata extends
 			builder.getImportRegistrationResolver().addImport(
 					dependentType.getJavaType());
 			bodyBuilder.appendFormalLine("if ("
-					+ dependentType.getPersistenceDetails().getCountMethod()
-							.getMethodCall() + " == 0) {");
+					+ countMethod.getMethodCall() + " == 0) {");
 			bodyBuilder.indent();
+
+			countMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 			// Adding string array which has the fieldName at position 0 and the
 			// path at position 1
 			String dependentTypeName = fieldNamesList.get(fieldPosition)
