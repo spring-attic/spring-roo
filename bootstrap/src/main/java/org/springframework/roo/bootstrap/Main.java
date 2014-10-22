@@ -9,10 +9,13 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
@@ -224,13 +227,13 @@ public class Main
         Main.loadSystemProperties();
 
         // Read configuration properties.
-        Properties configProps = Main.loadConfigProperties();
+        Map<String, String> configProps = Main.loadConfigProperties();
         // If no configuration properties were found, then create
         // an empty properties object.
         if (configProps == null)
         {
             System.err.println("No " + CONFIG_PROPERTIES_FILE_VALUE + " found.");
-            configProps = new Properties();
+            configProps = new HashMap<String, String>();
         }
 
         // Copy framework properties from the system properties.
@@ -240,19 +243,19 @@ public class Main
         // that overwrites anything in the config file.
         if (bundleDir != null)
         {
-            configProps.setProperty(AutoProcessor.AUTO_DEPLOY_DIR_PROPERY, bundleDir);
+            configProps.put(AutoProcessor.AUTO_DEPLOY_DIR_PROPERY, bundleDir);
         }
 
         // If there is a passed in bundle cache directory, then
         // that overwrites anything in the config file.
         if (cacheDir != null)
         {
-            configProps.setProperty(Constants.FRAMEWORK_STORAGE, cacheDir);
+            configProps.put(Constants.FRAMEWORK_STORAGE, cacheDir);
         }
 
         // If enabled, register a shutdown hook to make sure the framework is
         // cleanly shutdown when the VM exits.
-        String enableHook = configProps.getProperty(SHUTDOWN_HOOK_PROP);
+        String enableHook = configProps.get(SHUTDOWN_HOOK_PROP);
         if ((enableHook == null) || !enableHook.equalsIgnoreCase("false"))
         {
             Runtime.getRuntime().addShutdownHook(new Thread("Spring Roo Felix Shutdown Hook") { // **** CHANGE FROM ORIGINAL FELIX VERSION ****
@@ -285,14 +288,21 @@ public class Main
             // Use the system bundle context to process the auto-deploy
             // and auto-install/auto-start properties.
             AutoProcessor.process(configProps, m_fwk.getBundleContext());
-            // Start the framework.
-            m_fwk.start();
-            // Wait for framework to stop to exit the VM.
-            m_fwk.waitForStop(0);
+            FrameworkEvent event;
+            do
+            {
+                // Start the framework.
+                m_fwk.start();
+                // Wait for framework to stop to exit the VM.
+                event = m_fwk.waitForStop(0);
+            }
+            // If the framework was updated, then restart it.
+            while (event.getType() == FrameworkEvent.STOPPED_UPDATE);
             // **** CHANGE FROM ORIGINAL FELIX VERSION ****
             if (System.getProperty("developmentMode") != null && System.getProperty("developmentMode").equals(Boolean.TRUE.toString())) {
                 System.out.println("Total execution time " + Math.round(((System.nanoTime() - startedNanoseconds) / 1000000000D) * Math.pow(10, 3)) / Math.pow(10, 3) + " seconds");
             }
+            // Otherwise, exit.
             System.exit(System.getProperty("roo.exit") == null ? 99 : new Integer(System.getProperty("roo.exit")));
             // **** END OF CHANGE FROM ORIGINAL FELIX VERSION ****
         }
@@ -463,7 +473,7 @@ public class Main
      * </p>
      * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
     **/
-    public static Properties loadConfigProperties()
+    public static Map<String, String> loadConfigProperties()
     {
         // The config properties file is either specified by a system
         // property or it is in the conf/ directory of the Felix
@@ -545,18 +555,20 @@ public class Main
             return null;
         }
 
-        // Perform variable substitution for system properties.
+        // Perform variable substitution for system properties and
+        // convert to dictionary.
+        Map<String, String> map = new HashMap<String, String>();
         for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
         {
             String name = (String) e.nextElement();
-            props.setProperty(name,
+            map.put(name,
                 Util.substVars(props.getProperty(name), name, null, props));
         }
 
-        return props;
+        return map;
     }
 
-    public static void copySystemProperties(Properties configProps)
+    public static void copySystemProperties(Map configProps)
     {
         for (Enumeration e = System.getProperties().propertyNames();
              e.hasMoreElements(); )
@@ -564,7 +576,7 @@ public class Main
             String key = (String) e.nextElement();
             if (key.startsWith("felix.") || key.startsWith("org.osgi.framework."))
             {
-                configProps.setProperty(key, System.getProperty(key));
+                configProps.put(key, System.getProperty(key));
             }
         }
     }
