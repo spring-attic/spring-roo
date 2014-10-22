@@ -27,15 +27,15 @@ public class UaaRelatedComponentRegistrationHelper {
     protected void activate(final ComponentContext context) {
         registrations.add(context.getBundleContext().registerService(
                 UaaService.class.getName(), UaaServiceFactory.getUaaService(),
-                new Hashtable<Object, Object>()));
+                new Hashtable<String, Object>()));
         registrations.add(context.getBundleContext().registerService(
                 UaaDetectedProducts.class.getName(),
                 UaaServiceFactory.getUaaDetectedProducts(),
-                new Hashtable<Object, Object>()));
+                new Hashtable<String, Object>()));
         registrations.add(context.getBundleContext().registerService(
                 ProxyService.class.getName(),
                 UaaServiceFactory.getProxyService(),
-                new Hashtable<Object, Object>()));
+                new Hashtable<String, Object>()));
     }
 
     protected void deactivate(final ComponentContext context) {
