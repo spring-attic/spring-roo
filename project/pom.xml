@@ -23,6 +23,10 @@
         <!-- Apache Felix -->
         <dependency>
             <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
         <!-- Roo -->
