@@ -51,6 +51,8 @@ import org.springframework.roo.project.LogicalPath;
 public class ConversionServiceMetadataProviderImpl extends
         AbstractItdMetadataProvider implements
         ConversionServiceMetadataProvider {
+	
+	private final static JavaType EMBEDDABLE_ANNOTATION = new JavaType("javax.persistence.Embeddable");
 
     // Stores the MID (as accepted by this
     // ConversionServiceMetadataProviderImpl) for the one (and only one)
@@ -116,6 +118,7 @@ public class ConversionServiceMetadataProviderImpl extends
         final Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
         final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
         final Map<JavaType, List<MethodMetadata>> toStringMethods = new HashMap<JavaType, List<MethodMetadata>>();
+        final List<JavaType> embeddableToStringMethods = new ArrayList<JavaType>();
 
         for (final ClassOrInterfaceTypeDetails controllerTypeDetails : typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
@@ -188,13 +191,21 @@ public class ConversionServiceMetadataProviderImpl extends
                     getToStringMethods(memberDetails,
                             metadataIdentificationString));
         }
+        
+        // Getting embeddable classes and adding toString methods
+        for (final ClassOrInterfaceTypeDetails embeddableTypeDetails : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(EMBEDDABLE_ANNOTATION)) {
+        	JavaType embeddableType = embeddableTypeDetails.getType();
+        	// Adding embeddable type to generate conversor method
+        	embeddableToStringMethods.add(embeddableType);
+        }
 
-        return new ConversionServiceMetadata(metadataIdentificationString,
+        return new ConversionServiceMetadata(typeLocationService, metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata, findMethods, idTypes,
-                relevantDomainTypes, compositePrimaryKeyTypes, toStringMethods);
+                relevantDomainTypes, compositePrimaryKeyTypes, toStringMethods, embeddableToStringMethods);
     }
 
-    public String getProvidesType() {
+	public String getProvidesType() {
         return MetadataIdentificationUtils
                 .create(ConversionServiceMetadata.class.getName());
     }
