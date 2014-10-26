@@ -36,7 +36,9 @@ import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDe
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -60,6 +62,11 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public class JspViewManager {
+	
+	private static final JavaType EMBEDDED_ANNOTATION = new JavaType("javax.persistence.Embedded");
+	private static final JavaType EMBEDDABLE_ANNOTATION = new JavaType("javax.persistence.Embeddable");
+	
+	private final TypeLocationService typeLocationService;
 
     private static final String CREATED = "created";
     private static final JavaSymbolName VALUE = new JavaSymbolName("value");
@@ -78,10 +85,11 @@ public class JspViewManager {
      * @param fields can't be <code>null</code>
      * @param webScaffoldAnnotationValues can't be <code>null</code>
      * @param relatedDomainTypes can't be <code>null</code>
+     * @param typeLocationService can't be <code>null</code>
      */
     public JspViewManager(final List<FieldMetadata> fields,
             final WebScaffoldAnnotationValues webScaffoldAnnotationValues,
-            final Map<JavaType, JavaTypeMetadataDetails> relatedDomainTypes) {
+            final Map<JavaType, JavaTypeMetadataDetails> relatedDomainTypes, TypeLocationService typeLocationService) {
         Validate.notNull(fields, "List of fields required");
         Validate.notNull(webScaffoldAnnotationValues,
                 "Web scaffold annotation values required");
@@ -103,6 +111,8 @@ public class JspViewManager {
                 webScaffoldAnnotationValues.getPath(),
                 "Path is not specified in the @RooWebScaffold annotation for '%s'",
                 webScaffoldAnnotationValues.getGovernorTypeDetails().getName());
+        
+        this.typeLocationService = typeLocationService;
 
         if (webScaffoldAnnotationValues.getPath().startsWith("/")) {
             controllerPath = webScaffoldAnnotationValues.getPath();
@@ -241,9 +251,21 @@ public class JspViewManager {
             final List<FieldMetadata> formFields, final Document document,
             final Element root, final boolean isCreate) {
         for (final FieldMetadata field : formFields) {
+        	
             final String fieldName = field.getFieldName().getSymbolName();
             JavaType fieldType = field.getFieldType();
             AnnotationMetadata annotationMetadata;
+            
+            // Getting @Embedded annotation if exists
+            boolean isEmbeddableType = false;
+            ClassOrInterfaceTypeDetails fieldTypeDetails = typeLocationService.getTypeDetails(fieldType);
+            
+            if(fieldTypeDetails != null){
+            	AnnotationMetadata embeddableAnnotation = fieldTypeDetails.getAnnotation(EMBEDDABLE_ANNOTATION);
+            	if(embeddableAnnotation != null){
+            		isEmbeddableType = true;
+            	}
+            }
 
             // Ignoring java.util.Map field types (see ROO-194)
             if (fieldType.equals(new JavaType(Map.class.getName()))) {
@@ -370,7 +392,8 @@ public class JspViewManager {
                     .contains(CustomDataKeys.LOB_FIELD)) {
                 fieldElement = new XmlElementBuilder("field:textarea", document)
                         .build();
-            }
+            } 
+            
             if ((annotationMetadata = MemberFindingUtils.getAnnotationOfType(
                     field.getAnnotations(), SIZE)) != null) {
                 final AnnotationAttributeValue<?> max = annotationMetadata
@@ -383,29 +406,59 @@ public class JspViewManager {
                     }
                 }
             }
-            // Use a default input field if no other criteria apply
-            if (fieldElement == null) {
-                fieldElement = document.createElement("field:input");
+          
+            
+            if (isEmbeddableType){
+            	// Getting all fields on embeddable class
+            	List<? extends FieldMetadata> embeddableFields = fieldTypeDetails.getDeclaredFields();
+            	for(FieldMetadata embeddableField : embeddableFields){
+            		// Getting field name
+            		JavaSymbolName embeddableFieldName = embeddableField.getFieldName();
+            		Element embeddableFieldElement = document.createElement("field:input");
+            		addCommonAttributes(embeddableField, embeddableFieldElement);
+            		embeddableFieldElement.setAttribute("field", fieldName + "." + embeddableFieldName.toString());
+            		embeddableFieldElement.setAttribute(
+                            "id",
+                            XmlUtils.convertId("c:"
+                                    + formBackingType.getFullyQualifiedTypeName() + "."
+                                    + field.getFieldName().getSymbolName() + "." + embeddableFieldName.getSymbolName()));
+            		// If identifier manually assigned, then add 'required=true'
+                    if (formBackingTypePersistenceMetadata.getIdentifierField()
+                            .getFieldName().equals(field.getFieldName())
+                            && field.getAnnotation(JpaJavaType.GENERATED_VALUE) == null) {
+                    	embeddableFieldElement.setAttribute("required", "true");
+                    }
+
+                    embeddableFieldElement.setAttribute("z",
+                            XmlRoundTripUtils.calculateUniqueKeyFor(embeddableFieldElement));
+
+                    root.appendChild(embeddableFieldElement);
+            	}
+            }else{
+            	// Use a default input field if no other criteria apply
+                if (fieldElement == null) {
+                    fieldElement = document.createElement("field:input");
+                }
+                addCommonAttributes(field, fieldElement);
+                fieldElement.setAttribute("field", fieldName);
+                fieldElement.setAttribute(
+                        "id",
+                        XmlUtils.convertId("c:"
+                                + formBackingType.getFullyQualifiedTypeName() + "."
+                                + field.getFieldName().getSymbolName()));
+
+                // If identifier manually assigned, then add 'required=true'
+                if (formBackingTypePersistenceMetadata.getIdentifierField()
+                        .getFieldName().equals(field.getFieldName())
+                        && field.getAnnotation(JpaJavaType.GENERATED_VALUE) == null) {
+                    fieldElement.setAttribute("required", "true");
+                }
+
+                fieldElement.setAttribute("z",
+                        XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
+
+                root.appendChild(fieldElement);
             }
-            addCommonAttributes(field, fieldElement);
-            fieldElement.setAttribute("field", fieldName);
-            fieldElement.setAttribute(
-                    "id",
-                    XmlUtils.convertId("c:"
-                            + formBackingType.getFullyQualifiedTypeName() + "."
-                            + field.getFieldName().getSymbolName()));
-
-            // If identifier manually assigned, then add 'required=true'
-            if (formBackingTypePersistenceMetadata.getIdentifierField()
-                    .getFieldName().equals(field.getFieldName())
-                    && field.getAnnotation(JpaJavaType.GENERATED_VALUE) == null) {
-                fieldElement.setAttribute("required", "true");
-            }
-
-            fieldElement.setAttribute("z",
-                    XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
-
-            root.appendChild(fieldElement);
         }
     }
 

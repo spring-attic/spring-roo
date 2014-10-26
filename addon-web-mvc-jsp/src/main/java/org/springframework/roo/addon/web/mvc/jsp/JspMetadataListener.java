@@ -38,6 +38,7 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -71,7 +72,10 @@ import org.springframework.roo.support.util.XmlUtils;
 public class JspMetadataListener implements MetadataProvider,
         MetadataNotificationListener {
 
-    private static final String WEB_INF_VIEWS = "/WEB-INF/views/";
+    private static final JavaType EMBEDDED_ANNOTATION = new JavaType("javax.persistence.Embedded");
+    private static final JavaType EMBEDDABLE_ANNOTATION = new JavaType("javax.persistence.Embeddable");
+
+	private static final String WEB_INF_VIEWS = "/WEB-INF/views/";
 
     @Reference private FileManager fileManager;
     @Reference private JspOperations jspOperations;
@@ -187,8 +191,9 @@ public class JspMetadataListener implements MetadataProvider,
                         .isEmpty()) {
             return null;
         }
+        
         final JspViewManager viewManager = new JspViewManager(eligibleFields,
-                webScaffoldMetadata.getAnnotationValues(), relatedTypeMd);
+                webScaffoldMetadata.getAnnotationValues(), relatedTypeMd, typeLocationService);
 
         String controllerPath = webScaffoldMetadata.getAnnotationValues()
                 .getPath();
@@ -334,6 +339,8 @@ public class JspMetadataListener implements MetadataProvider,
             if (field == null) {
                 continue;
             }
+            
+          
             final JavaSymbolName fieldName = field.getFieldName();
             final String fieldResourceId = XmlUtils.convertId(resourceId + "."
                     + fieldName.getSymbolName().toLowerCase());
@@ -377,6 +384,30 @@ public class JspMetadataListener implements MetadataProvider,
                 final String sb = fieldName.getReadableSymbolName();
                 properties.put(fieldResourceId, StringUtils.isNotBlank(sb) ? sb
                         : fieldName.getSymbolName());
+            }
+            
+            // Checking if current field is embeddable
+            // If is embeddable, add properties for every embeddable class field
+            AnnotationMetadata embeddedAnnotation = field.getAnnotation(EMBEDDED_ANNOTATION);
+            if(embeddedAnnotation != null){
+            	// Getting embeddable class
+            	JavaType embeddableClass = field.getFieldType();
+            	ClassOrInterfaceTypeDetails embeddableClassDetails = typeLocationService.getTypeDetails(embeddableClass);
+            	if(embeddableClassDetails != null){
+            		AnnotationMetadata embeddableAnnotation = embeddableClassDetails.getAnnotation(EMBEDDABLE_ANNOTATION);
+            		if(embeddableAnnotation != null){
+            			// Getting embeddable fields
+            			List<? extends FieldMetadata> embeddableClassFields = embeddableClassDetails.getDeclaredFields();
+            			for(FieldMetadata embeddableField : embeddableClassFields){
+            				final JavaSymbolName embeddableFieldName = embeddableField.getFieldName();
+            				final String embeddableFieldResourceId = XmlUtils.convertId(resourceId + "."
+            	                    + fieldName.getSymbolName().toLowerCase() + "." + embeddableFieldName.getSymbolName().toLowerCase());
+            				final String sb = embeddableFieldName.getReadableSymbolName();
+                            properties.put(embeddableFieldResourceId, StringUtils.isNotBlank(sb) ? sb
+                                    : embeddableFieldName.getSymbolName());
+            			}
+            		}
+            	}
             }
         }
 
