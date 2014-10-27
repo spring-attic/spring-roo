@@ -130,22 +130,22 @@ public class ConversionServiceMetadata extends
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+		if (this.embeddableTypes.isEmpty()) {
+			return null;
+		}
+		
 		// Generating all embeddableToString methods
 		List<MethodMetadataBuilder> embeddableMethods = generateEmbeddableTypeToStringMethods();
-		if (!embeddableMethods.isEmpty()) {
-			for (MethodMetadataBuilder method : embeddableMethods) {
-				builder.addMethod(method);
-				bodyBuilder
-						.appendFormalLine(String.format(
-								"registry.addConverter(%s());",
-								method.getMethodName()));
-			}
+		
+		for (MethodMetadataBuilder method : embeddableMethods) {
+			builder.addMethod(method);
+			bodyBuilder
+					.appendFormalLine(String.format(
+							"registry.addConverter(%s());",
+							method.getMethodName()));
 		}
 
 		final JavaType parameterType = FORMATTER_REGISTRY;
-		if (governorHasMethod(INSTALL_EMBEDDABLE_CONVERTERS, parameterType)) {
-			return null;
-		}
 
 		final List<JavaSymbolName> parameterNames = Arrays
 				.asList(new JavaSymbolName("registry"));
@@ -169,9 +169,10 @@ public class ConversionServiceMetadata extends
 		bodyBuilder.appendFormalLine("super.afterPropertiesSet();");
 		bodyBuilder.appendFormalLine(INSTALL_LABEL_CONVERTERS.getSymbolName()
 				+ "(getObject());");
-		bodyBuilder.appendFormalLine(INSTALL_EMBEDDABLE_CONVERTERS
-				.getSymbolName() + "(getObject());");
-
+		if (!this.embeddableTypes.isEmpty()) {
+			bodyBuilder.appendFormalLine(INSTALL_EMBEDDABLE_CONVERTERS
+					.getSymbolName() + "(getObject());");
+		}
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
 				JavaType.VOID_PRIMITIVE, bodyBuilder);
 	}
