@@ -23,7 +23,9 @@ import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Provides {@link ServiceClassMetadata} for building the ITD for the
@@ -40,7 +42,12 @@ public class ServiceClassMetadataProvider extends
 
     private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 
+    @Reference ProjectOperations projectOperations;
+    @Reference FileManager fileManager;
+    @Reference ServiceLayerTemplateService templateService;
+
     @Reference private LayerService layerService;
+
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
     protected void activate(final ComponentContext context) {
@@ -113,7 +120,9 @@ public class ServiceClassMetadataProvider extends
         if (serviceClass == null) {
             return null;
         }
+
         ServiceInterfaceMetadata serviceInterfaceMetadata = null;
+        ClassOrInterfaceTypeDetails serviceInterface = null;
         for (final JavaType implementedType : serviceClass.getImplementsTypes()) {
             final ClassOrInterfaceTypeDetails potentialServiceInterfaceTypeDetails = typeLocationService
                     .getTypeDetails(implementedType);
@@ -126,11 +135,12 @@ public class ServiceClassMetadataProvider extends
                 if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) metadataService
                         .get(implementedTypeId)) != null) {
                     // Found the metadata for the service interface
+                    serviceInterface = potentialServiceInterfaceTypeDetails;
                     break;
                 }
             }
         }
-        if (serviceInterfaceMetadata == null
+        if (serviceInterface == null || serviceInterfaceMetadata == null
                 || !serviceInterfaceMetadata.isValid()) {
             return null;
         }
@@ -211,12 +221,25 @@ public class ServiceClassMetadataProvider extends
             metadataDependencyRegistry.registerDependency(pluralId,
                     metadataIdentificationString);
         }
+
         final MemberDetails serviceClassDetails = memberDetailsScanner
                 .getMemberDetails(getClass().getName(), serviceClass);
+
+        // Adds or removes service from XML configuration
+        if (serviceAnnotationValues.useXmlConfiguration()) {
+            templateService.addServiceToXmlConfiguration(serviceInterface,
+                    serviceClass);
+        }
+        else {
+            templateService.removeServiceFromXmlConfiguration(serviceInterface);
+        }
+
         return new ServiceClassMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata, serviceClassDetails,
                 serviceAnnotationValues, domainTypeToIdTypeMap,
-                allCrudAdditions, domainTypePlurals);
+                allCrudAdditions, domainTypePlurals, serviceInterface.getName()
+                        .getSimpleTypeName());
+
     }
 
     public String getProvidesType() {

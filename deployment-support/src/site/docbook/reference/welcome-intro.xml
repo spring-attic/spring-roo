@@ -10,7 +10,7 @@
   <section xml:id="intro-what-is-roo">
     <title>What is Roo?</title>
 
-    <para><link xlink:href="http://www.springsource.org/roo">Spring Roo</link>
+    <para><link xlink:href="http://projects.spring.io/spring-roo/">Spring Roo</link>
     is an <link linkend="intro-why-use-it-usable-learnable">easy-to-use</link>
     productivity tool for rapidly building enterprise applications in the Java
     programming language. It allows you to build <link
@@ -56,7 +56,7 @@
         project in just a couple of minutes!). It probably also means you
         won't need to get approval to use Roo (what's to approve when it's
         more like a command line tool than a critical runtime library like
-        <link xlink:href="http://www.springsource.org/">Spring
+        <link xlink:href="http://projects.spring.io/spring-framework/">Spring
         Framework</link>?). It also means there is no technical way possible
         for Roo to slow your project down at runtime, waste memory or bloat
         your deployment artefacts with JARs. We're really proud of the fact
@@ -202,7 +202,7 @@
       technologies are available to you in their normal form, and you can use
       them in the same way as you always have. What Roo brings to the table is
       automatic setup of those technologies into a <link
-      xlink:href="http://www.springsource.com">SpringSource</link>-certified
+      xlink:href="http://spring.io/">Spring</link>-certified
       best-practice application architecture and, if you wish, automatic
       maintenance of all files required by those technologies (such as XML,
       JSP, Java etc). You'll see this in action when you complete the <link
@@ -427,9 +427,9 @@
       </listitem>
 
       <listitem>
-        <para>A Sun, JRocket or IBM Java 5 or Java 6 installation, with the
+        <para>A Java 6 or 7 installation, with the
         <code>$JAVA_HOME</code> environment variable pointing to the
-        installation</para>
+        installation. Note that Java 8 is currently not supported.</para>
       </listitem>
 
       <listitem>
@@ -442,7 +442,7 @@
     linkend="upgrade-known-issues">known issues</link> section of this
     documentation. We always recommend you use the latest version of Java and
     Maven that are available for your platform. We also recommend that you use
-    <link xlink:href="http://www.springsource.com/products/sts">SpringSource
+    <link xlink:href="http://spring.io/tools/sts">Spring
     Tool Suite</link> (STS), which is our free Eclipse-based IDE that includes
     a number of features that make working with Roo even easier (you can of
     course use Roo with normal Eclipse or without an IDE at all if you
@@ -499,7 +499,7 @@ $ <emphasis role="bold">rmdir roo-test</emphasis></programlisting>
     configuration via the ROO_OPTS environment variable. An environment
     variable is used so that these configuration settings can be applied
     before the shell is instantiated and the first messages displayed. The
-    ROO_OPTS settings does not apply within SpringSource Tool Suite's embedded
+    ROO_OPTS settings does not apply within Spring Tool Suite's embedded
     Roo shell.</para>
 
     <para>At present the only configuration settings available is roo.bright.
@@ -605,7 +605,7 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
     "mvn" instead. We just did them from within Roo to benefit from TAB
     completion. You could have also skipped the "<link
     linkend="command-index-perform-eclipse">perform eclipse</link>" command if
-    you are using the m2eclipse plugin. If you are using SpringSource Tool
+    you are using the m2eclipse plugin. If you are using Spring Tool
     Suite (STS), it automatically includes m2eclipse and as such you do not
     need to use the "perform eclipse" command. Indeed if you're an STS user,
     you could have started your Roo project right from within the IDE by
@@ -643,8 +643,9 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
     linkend="intro-first-steps">ten minute test</link>, you have a rough idea
     of how Roo works. To help you learn Roo we ship several sample scripts
     that can be used to build new applications. These sample scripts can be
-    found in your $ROO_HOME/samples directory. You can run any sample script
-    by using the following command format:</para>
+    found in your $ROO_HOME/classpath/src/main/resources/ directory.
+    These sample scripts available from roo classpath. You can
+    run any sample script by using the following command format:</para>
 
     <programlisting>$ <emphasis role="bold">mkdir sample</emphasis>
 $ <emphasis role="bold">cd sample</emphasis>

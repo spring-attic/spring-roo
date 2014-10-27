@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller.finder;
 
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_FINDER;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -9,6 +10,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.web.mvc.controller.details.DateTimeFormatDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
@@ -20,6 +22,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
@@ -110,14 +113,21 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         if (dynamicFinderMethods == null) {
             return null;
         }
+
+        
         final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService
                 .getRelatedApplicationTypeMetadata(formBackingType,
+                        formBackingObjectMemberDetails,
+                        metadataIdentificationString);
+        
+        final Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService
+                .getDatePatterns(formBackingType,
                         formBackingObjectMemberDetails,
                         metadataIdentificationString);
 
         return new WebFinderMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalTypeMetadata, annotationValues,
-                relatedApplicationTypeMetadata, dynamicFinderMethods);
+                relatedApplicationTypeMetadata, dynamicFinderMethods, datePatterns);
     }
 
     public String getProvidesType() {

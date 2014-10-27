@@ -64,10 +64,14 @@ public class JavaType implements Comparable<JavaType> {
     public static final JavaType LONG_PRIMITIVE = new JavaType(
             "java.lang.Long", 0, DataType.PRIMITIVE, null, null);
     public static final JavaType OBJECT = new JavaType("java.lang.Object");
+    public static final JavaType SERIALIZABLE = new JavaType(
+            "java.io.Serializable");
     public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
     public static final JavaType SHORT_PRIMITIVE = new JavaType(
             "java.lang.Short", 0, DataType.PRIMITIVE, null, null);
     public static final JavaType STRING = new JavaType("java.lang.String");
+    public static final JavaType STRING_ARRAY = new JavaType(
+            "java.lang.String", 1, DataType.TYPE, null, null);
 
     /**
      * @deprecated use {@link #STRING} instead
@@ -293,6 +297,7 @@ public class JavaType implements Comparable<JavaType> {
         }
     }
 
+    @Override
     public int compareTo(final JavaType o) {
         // NB: If adding more fields to this class ensure the equals(Object)
         // method is updated accordingly

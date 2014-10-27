@@ -808,7 +808,7 @@ Updated SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
       </mediaobject></para>
 
     <para>Spring Roo also configures <link
-    xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-themeresolver">theming
+    xlink:href="http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-themeresolver">theming
     support offered by Spring framework</link> so you can leverage this
     feature with ease.</para>
 

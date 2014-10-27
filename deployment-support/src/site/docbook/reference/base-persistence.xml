@@ -458,7 +458,7 @@ public class Person {
         <emphasis>findPersonEntries</emphasis>(..).</para>
 
         <para>All persistence methods are configured with <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/transaction.html">Spring's
+        xlink:href="http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/transaction.html">Spring's
         Transaction</link> support (Propagation.REQUIRED,
         Isolation.DEFAULT).</para>
 

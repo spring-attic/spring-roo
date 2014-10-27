@@ -3,6 +3,8 @@ package org.springframework.roo.addon.web.mvc.controller.details;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_SORTED_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_TYPE;
@@ -18,6 +20,7 @@ import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +88,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             .getLogger(WebMetadataServiceImpl.class);
     private static final MethodParameter MAX_RESULTS_PARAMETER = new MethodParameter(
             JavaType.INT_PRIMITIVE, "sizeNo");
-
+    private static final MethodParameter SORT_FIELDNAME_PARAMETER = new MethodParameter(
+            JavaType.STRING, "sortFieldName");
+    private static final MethodParameter SORT_ORDER_PARAMETER = new MethodParameter(
+            JavaType.STRING, "sortOrder");
+    
     @Reference private LayerService layerService;
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
@@ -166,6 +173,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
         additions.put(FIND_ALL_METHOD, persistenceDetails.getFindAllMethod());
         additions.put(FIND_ENTRIES_METHOD,
                 persistenceDetails.getFindEntriesMethod());
+        additions.put(FIND_ALL_SORTED_METHOD, persistenceDetails.getFindAllSortedMethod());
+        additions.put(FIND_ENTRIES_SORTED_METHOD,
+                persistenceDetails.getFindEntriesSortedMethod());
         additions.put(MERGE_METHOD, persistenceDetails.getMergeMethod());
         additions.put(PERSIST_METHOD, persistenceDetails.getPersistMethod());
         return additions;
@@ -348,7 +358,15 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                     method.getMethodName().getSymbolName(), method, fields);
             finderMetadataDetails.add(details);
         }
-        return Collections.unmodifiableSortedSet(finderMetadataDetails);
+        
+        SortedSet<FinderMetadataDetails> finderMetadataDetailsWoCountMethods = new TreeSet<FinderMetadataDetails>();
+        for(FinderMetadataDetails dynamicFinderMethod : finderMetadataDetails) {
+        	if(!dynamicFinderMethod.getFinderName().startsWith("count")) {
+        		finderMetadataDetailsWoCountMethods.add(dynamicFinderMethod);
+        	}
+        }
+        
+        return Collections.unmodifiableSortedSet(finderMetadataDetailsWoCountMethods);
     }
 
     public FieldMetadata getIdentifierField(final JavaType javaType) {
@@ -428,6 +446,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                 .getMemberTypeAdditions(metadataIdentificationString,
                         FIND_ALL_METHOD.name(), javaType, idType,
                         LAYER_POSITION);
+        final MemberTypeAdditions findAllSortedMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        FIND_ALL_SORTED_METHOD.name(), javaType, idType,
+                        LAYER_POSITION, SORT_FIELDNAME_PARAMETER,
+                        SORT_ORDER_PARAMETER);
         final MemberTypeAdditions findMethod = layerService
                 .getMemberTypeAdditions(metadataIdentificationString,
                         FIND_METHOD.name(), javaType, idType, LAYER_POSITION,
@@ -441,13 +464,20 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                         FIND_ENTRIES_METHOD.name(), javaType, idType,
                         LAYER_POSITION, FIRST_RESULT_PARAMETER,
                         MAX_RESULTS_PARAMETER);
+        final MemberTypeAdditions findEntriesSortedMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        FIND_ENTRIES_SORTED_METHOD.name(), javaType, idType,
+                        LAYER_POSITION, FIRST_RESULT_PARAMETER,
+                        MAX_RESULTS_PARAMETER, SORT_FIELDNAME_PARAMETER,
+                        SORT_ORDER_PARAMETER);
+        
         final List<String> dynamicFinderNames = memberDetails
                 .getDynamicFinderNames();
 
         return new JavaTypePersistenceMetadataDetails(idType, idField,
                 idAccessor, versionAccessor, persistMethod, mergeMethod,
-                removeMethod, findAllMethod, findMethod, countMethod,
-                findEntriesMethod, dynamicFinderNames, isRooIdentifier(
+                removeMethod, findAllMethod, findAllSortedMethod, findMethod, countMethod,
+                findEntriesMethod, findEntriesSortedMethod, dynamicFinderNames, isRooIdentifier(
                         javaType, memberDetails),
                 persistenceMemberLocator.getEmbeddedIdentifierFields(javaType));
     }

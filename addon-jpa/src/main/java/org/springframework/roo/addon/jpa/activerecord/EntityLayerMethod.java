@@ -90,7 +90,7 @@ enum EntityLayerMethod {
         @Override
         protected List<JavaType> getParameterTypes(final JavaType targetEntity,
                 final JavaType idType) {
-            return Collections.emptyList();
+        	return Collections.emptyList();
         }
     },
 
@@ -110,6 +110,43 @@ enum EntityLayerMethod {
                 final JavaType idType) {
             return Arrays
                     .asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
+        }
+    },
+    
+    FIND_SORTED_ALL(CustomDataKeys.FIND_ALL_SORTED_METHOD, true) {
+        @Override
+        public String getName(final JpaCrudAnnotationValues annotationValues,
+                final JavaType targetEntity, final String plural) {
+            if (StringUtils.isNotBlank(annotationValues.getFindAllMethod())) {
+                return annotationValues.getFindAllMethod() + plural;
+            }
+            return null;
+        }
+
+        @Override
+        protected List<JavaType> getParameterTypes(final JavaType targetEntity,
+                final JavaType idType) {
+        	return Arrays
+                    .asList(JavaType.STRING, JavaType.STRING);
+        }
+    },
+
+    FIND_SORTED_ENTRIES(CustomDataKeys.FIND_ENTRIES_SORTED_METHOD, true) {
+        @Override
+        public String getName(final JpaCrudAnnotationValues annotationValues,
+                final JavaType targetEntity, final String plural) {
+            if (StringUtils.isNotBlank(annotationValues.getFindEntriesMethod())) {
+                return annotationValues.getFindEntriesMethod()
+                        + targetEntity.getSimpleTypeName() + "Entries";
+            }
+            return null;
+        }
+
+        @Override
+        protected List<JavaType> getParameterTypes(final JavaType targetEntity,
+                final JavaType idType) {
+            return Arrays
+                    .asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE, JavaType.STRING, JavaType.STRING);
         }
     },
 

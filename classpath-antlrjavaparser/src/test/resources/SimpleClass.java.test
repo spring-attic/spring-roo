@@ -28,6 +28,20 @@ public class SimpleClass extends OtheClass<String, Boolean> implements SimpleInt
 	 * Javadoc for field
 	 */
 	private final String[] params;
+	
+	
+	/**
+	 * Javadoc for column field
+	 */
+	@Column(name = "VALOR", length = 500)
+	@Size(max = 500)
+	@NotNull
+	private final String valor;
+	
+	/**
+	 * Javadoc for transient field
+	 */
+	@Transient
 	protected Double param1 = new Double(12);
 	private List<String>[] listArray = new List<String>[3];
 	Set<String>[] setArray = new Set<String>[] {null, null, null};

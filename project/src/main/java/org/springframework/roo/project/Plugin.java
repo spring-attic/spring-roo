@@ -161,9 +161,9 @@ public class Plugin implements Comparable<Plugin> {
      * @return a non-<code>null</code> version number (might be empty)
      */
     private static String getVersion(final Element plugin) {
-        final NodeList versionElements = plugin.getElementsByTagName("version");
-        if (versionElements.getLength() > 0) {
-            return versionElements.item(0).getTextContent();
+        final List<Element> versionElements = XmlUtils.findElements("./version", plugin);
+        if (!versionElements.isEmpty()) {
+            return versionElements.get(0).getTextContent();
         }
         return "";
     }

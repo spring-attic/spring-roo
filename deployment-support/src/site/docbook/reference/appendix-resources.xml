@@ -17,7 +17,7 @@
     <title>Project Home Page</title>
 
     <para>Web: <link
-    xlink:href="http://www.springsource.org/roo">http://www.springsource.org/roo</link></para>
+    xlink:href="http://projects.spring.io/spring-roo/">http://projects.spring.io/spring-roo/</link></para>
 
     <para>The project home page provides a brief summary of Roo's main
     features and links to most of the other project resources. Please use this
@@ -112,8 +112,7 @@
 
     <para>Follow the core Roo development team for interesting Roo news and
     progress (higher volume than just following @SpringRoo, but only a few
-    Tweets per week): <link xlink:href="http://twitter.com/alankstewart">@alankstewart</link> and
-    <link xlink:href="http://twitter.com/AndrewSwan_au">@AndrewSwan_au</link>.</para>
+    Tweets per week): <link xlink:href="http://twitter.com/alankstewart">@alankstewart</link>.</para>
 
     <para>Many people who use Roo also use Twitter, including the core Roo
     development team. If you're a Twitter user, you're welcome to follow the
@@ -136,7 +135,7 @@
     <title>Issue Tracking</title>
 
     <para>Web: <link
-    xlink:href="http://jira.springframework.org/browse/ROO">http://jira.springframework.org/browse/ROO</link></para>
+    xlink:href="https://jira.springsource.org/browse/ROO">https://jira.springsource.org/browse/ROO</link></para>
 
     <para>Spring projects use Atlassian Jira for tracking bugs, improvements,
     feature requests and tasks. Roo uses a public Jira instance you're welcome
@@ -179,8 +178,7 @@
     <title>Source Repository</title>
 
     <para>Read repository: <link
-    xlink:href="https://src.springframework.org/svn/spring-roo/"><link
-    xlink:href="https://github.com/springsource/spring-roo">https://github.com/springsource/spring-roo</link></link></para>
+    xlink:href="https://github.com/spring-projects/spring-roo.git">https://github.com/spring-projects/spring-roo.git</link></para>
 
     <para>The Git source control system is currently used by Roo for mainline
     development.</para>
@@ -198,7 +196,7 @@
     <title>Source Web Browsing</title>
 
     <para>Web: <link
-    xlink:href="https://github.com/springsource/spring-roo">https://github.com/springsource/spring-roo</link></para>
+    xlink:href="https://github.com/spring-projects/spring-roo.git">https://github.com/spring-projects/spring-roo.git</link></para>
 
     <para>To assist those who wish to simply review the current Roo code but
     not check it out fully onto their own computer, Spring Roo offers a public
@@ -215,10 +213,10 @@
     <title>Commercial Products and Services</title>
 
     <para>Web: <link
-    xlink:href="http://www.springsource.com">http://www.springsource.com</link></para>
+    xlink:href="http://spring.io/">http://spring.io/</link></para>
 
-    <para>SpringSource (a division of <link
-    xlink:href="http://www.vmware.com">VMware</link>) employs the Roo
+    <para><link
+    xlink:href="http://gopivotal.com/">Pivitol Software</link> employs the Roo
     development team and offers a wide range of products and professional
     services around Roo and the technologies which Roo enables. Available
     professional services include training, consulting, design reviews and

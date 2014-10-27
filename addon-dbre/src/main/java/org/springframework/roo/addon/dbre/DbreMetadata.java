@@ -457,6 +457,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
 
             final Table importedKeyForeignTable = foreignKey.getForeignTable();
+            Validate.notNull(
+                    importedKeyForeignTable,
+                    "Foreign key table for foreign key '%s' in table '%s' does not exist. One-to-one relationship not created",
+                    foreignKey.getName(), table.getFullyQualifiedTableName());
+
             final String foreignTableName = importedKeyForeignTable.getName();
             final String foreignSchemaName = importedKeyForeignTable
                     .getSchema().getName();
@@ -713,15 +718,18 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         }
 
         // Add length attribute for Strings
-        if (column.getColumnSize() < 4000 && fieldType.equals(JavaType.STRING)) {
-            columnBuilder.addIntegerAttribute("length", column.getColumnSize());
+        int columnSize = column.getColumnSize();
+        if (columnSize < 4000 && fieldType.equals(JavaType.STRING)) {
+            columnBuilder.addIntegerAttribute("length", columnSize);
         }
 
         // Add precision and scale attributes for numeric fields
-        if (column.getScale() > 0 && JdkJavaType.isDecimalType(fieldType)) {
-            columnBuilder.addIntegerAttribute("precision",
-                    column.getColumnSize());
-            columnBuilder.addIntegerAttribute("scale", column.getScale());
+        if (columnSize > 0 && JdkJavaType.isDecimalType(fieldType)) {
+            columnBuilder.addIntegerAttribute("precision", columnSize);
+            int scale = column.getScale();
+            if (scale > 0) {
+                columnBuilder.addIntegerAttribute("scale", scale);
+            }
         }
 
         // Add unique = true to @Column if applicable

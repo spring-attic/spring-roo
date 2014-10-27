@@ -4,7 +4,7 @@
     <groupId>org.springframework.roo</groupId>
     <artifactId>org.springframework.roo.root</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.4.BUILD-SNAPSHOT</version>
+    <version>1.2.6.BUILD-SNAPSHOT</version>
     <name>Spring Roo</name>
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
@@ -34,7 +34,6 @@
         <module>project</module>
         <module>process-manager</module>
         <module>classpath</module>
-        <!-- module>classpath-javaparser</module -->
         <module>classpath-antlrjavaparser</module>
         <module>addon-tostring</module>
         <module>addon-equals</module>
@@ -68,7 +67,7 @@
         <module>addon-jsf</module>
         <module>addon-op4j</module>
         <module>addon-git</module>
-        <module>addon-cloud-foundry</module>
+        <module>addon-cloud</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository-jpa</module>
         <module>addon-layers-repository-mongo</module>
@@ -76,21 +75,15 @@
         <module>addon-tailor</module>
         <module>annotations</module>
     </modules>
-    <organization>
-        <name>VMware, Inc</name>
-        <url>http://www.vmware.com/</url>
-    </organization>
     <distributionManagement>
-        <repository>
-            <id>spring-roo-repository-release</id>
-            <name>Spring Roo Repository</name>
-            <url>s3://spring-roo-repository.springsource.org/release</url>
-        </repository>
         <snapshotRepository>
-            <id>spring-roo-repository-snapshot</id>
-            <name>Spring Roo Repository</name>
-            <url>s3://spring-roo-repository.springsource.org/snapshot</url>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
     </distributionManagement>
     <repositories>
         <repository>
@@ -129,17 +122,15 @@
     <developers>
         <developer>
             <name>Alan Stewart</name>
-            <id>stewarta</id>
-            <email>stewarta at vmware.com</email>
-            <organization>VMware</organization>
+            <id>alankstewart</id>
+            <email>alankstewart at gmail dot com</email>
             <timezone>+10</timezone>
         </developer>
         <developer>
-            <name>Andrew Swan</name>
-            <id>aswan</id>
-            <email>aswan at vmware.com</email>
-            <organization>VMware</organization>
-            <timezone>+10</timezone>
+            <name>Juan Carlos García del Canto</name>
+            <id>jcagarcia</id>
+            <email>jugade92 at gmail dot com</email>
+            <timezone>+1</timezone>
         </developer>
     </developers>
     <dependencies>
@@ -178,7 +169,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.10</version>
+                <version>4.11</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -339,17 +330,17 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.6.6</version>
+                <version>1.7.5</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-nop</artifactId>
-                <version>1.6.6</version>
+                <version>1.7.5</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.6.6</version>
+                <version>1.7.5</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -359,12 +350,12 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.1</version>
+                <version>2.4</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.6</version>
+                <version>1.8</version>
             </dependency>
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>
@@ -374,7 +365,7 @@
             <dependency>
                 <groupId>com.github.antlrjavaparser</groupId>
                 <artifactId>antlr-java-parser</artifactId>
-                <version>1.0.11</version>
+                <version>1.0.15</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -499,20 +490,8 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.cloud-foundry-api</artifactId>
-                <version>0.0.1.0010</version>
-            </dependency>
-            <!--
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
-                <version>1.0.7.0010</version>
-            </dependency>
-            -->
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.antlr4-runtime</artifactId>
-                <version>4.0-rc-1.0001</version>
+                <version>4.3.0002</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
@@ -710,13 +689,6 @@
                 <artifactId>org.springframework.roo.classpath</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!--
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.classpath.javaparser</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-           -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.classpath.antlrjavaparser</artifactId>
@@ -869,6 +841,17 @@
         </extensions>
         <plugins>
             <plugin>
+              <groupId>org.sonatype.plugins</groupId>
+              <artifactId>nexus-staging-maven-plugin</artifactId>
+              <version>1.6.3</version>
+              <extensions>true</extensions>
+              <configuration>
+                <serverId>ossrh</serverId>
+                <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                <autoReleaseAfterClose>true</autoReleaseAfterClose>
+              </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.3</version>
@@ -930,26 +913,37 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.1</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
-                <configuration>
-                    <attach>true</attach>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-source-plugin</artifactId>
+              <version>2.2.1</version>
+              <executions>
+                <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                    <goal>jar-no-fork</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.9.1</version>
+              <executions>
+                <execution>
+                  <id>attach-javadocs</id>
+                  <goals>
+                    <goal>jar</goal>
+                  </goals>
+                </execution>
+              </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

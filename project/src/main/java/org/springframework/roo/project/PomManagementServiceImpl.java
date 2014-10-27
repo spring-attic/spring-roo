@@ -130,6 +130,10 @@ public class PomManagementServiceImpl implements PomManagementService {
                 break;
             }
             startingPoint = StringUtils.removeEnd(startingPoint, SEPARATOR);
+            
+            if (startingPoint.lastIndexOf(SEPARATOR) < 0) {
+            	break;
+            }
             startingPoint = startingPoint.substring(0,
                     startingPoint.lastIndexOf(SEPARATOR));
             startingPoint = StringUtils.removeEnd(startingPoint, SEPARATOR);

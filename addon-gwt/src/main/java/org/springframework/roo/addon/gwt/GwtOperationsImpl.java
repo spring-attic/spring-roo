@@ -60,6 +60,7 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.osgi.OSGiUtils;
@@ -166,6 +167,7 @@ public class GwtOperationsImpl implements GwtOperations {
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 PhysicalTypeIdentifier.createIdentifier(proxyType,
                         proxyLogicalPath));
+
         cidBuilder.setName(proxyType);
         cidBuilder.setExtendsTypes(Collections.singletonList(ENTITY_PROXY));
         cidBuilder.setPhysicalTypeCategory(INTERFACE);
@@ -372,6 +374,7 @@ public class GwtOperationsImpl implements GwtOperations {
         return builder.toString();
     }
 
+    @Override
     public String getName() {
         return FeatureNames.GWT;
     }
@@ -403,12 +406,14 @@ public class GwtOperationsImpl implements GwtOperations {
                 gwtRequestAttributeValues).build();
     }
 
+    @Override
     public boolean isGwtInstallationPossible() {
         return projectOperations.isFocusedProjectAvailable()
                 && !projectOperations
                         .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
     }
 
+    @Override
     public boolean isInstalledInModule(final String moduleName) {
         final Pom pom = projectOperations.getPomFromModuleName(moduleName);
         if (pom == null) {
@@ -422,6 +427,7 @@ public class GwtOperationsImpl implements GwtOperations {
         return false;
     }
 
+    @Override
     public boolean isScaffoldAvailable() {
         return isGwtInstallationPossible()
                 && isInstalledInModule(projectOperations.getFocusedModuleName());
@@ -455,6 +461,7 @@ public class GwtOperationsImpl implements GwtOperations {
         return input;
     }
 
+    @Override
     public void proxyAll(final JavaPackage proxyPackage) {
         for (final ClassOrInterfaceTypeDetails entity : typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY,
@@ -464,17 +471,20 @@ public class GwtOperationsImpl implements GwtOperations {
         copyDirectoryContents(GwtPath.LOCATOR);
     }
 
+    @Override
     public void proxyAndRequestAll(final JavaPackage proxyAndRequestPackage) {
         proxyAll(proxyAndRequestPackage);
         requestAll(proxyAndRequestPackage);
     }
 
+    @Override
     public void proxyAndRequestType(final JavaPackage proxyAndRequestPackage,
             final JavaType type) {
         proxyType(proxyAndRequestPackage, type);
         requestType(proxyAndRequestPackage, type);
     }
 
+    @Override
     public void proxyType(final JavaPackage proxyPackage, final JavaType type) {
         final ClassOrInterfaceTypeDetails entity = typeLocationService
                 .getTypeDetails(type);
@@ -493,6 +503,7 @@ public class GwtOperationsImpl implements GwtOperations {
         }
     }
 
+    @Override
     public void requestAll(final JavaPackage proxyPackage) {
         for (final ClassOrInterfaceTypeDetails entity : typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY,
@@ -501,12 +512,14 @@ public class GwtOperationsImpl implements GwtOperations {
         }
     }
 
+    @Override
     public void requestType(final JavaPackage requestPackage,
             final JavaType type) {
         createRequestInterfaceIfNecessary(
                 typeLocationService.getTypeDetails(type), requestPackage);
     }
 
+    @Override
     public void scaffoldAll(final JavaPackage proxyPackage,
             final JavaPackage requestPackage) {
         updateScaffoldBoilerPlate();
@@ -524,6 +537,7 @@ public class GwtOperationsImpl implements GwtOperations {
         }
     }
 
+    @Override
     public void scaffoldType(final JavaPackage proxyPackage,
             final JavaPackage requestPackage, final JavaType type) {
         proxyType(proxyPackage, type);
@@ -544,6 +558,7 @@ public class GwtOperationsImpl implements GwtOperations {
         }
     }
 
+    @Override
     public void setup() {
         // Install web pieces if not already installed
         if (!fileManager.exists(projectOperations.getPathResolver()
@@ -618,6 +633,11 @@ public class GwtOperationsImpl implements GwtOperations {
 
         final Element configuration = XmlUtils.getConfiguration(getClass());
 
+        // Add properties
+        updateProperties(configuration,
+                projectOperations
+                        .isFeatureInstalledInFocusedModule(FeatureNames.GAE));
+
         // Add POM repositories
         updateRepositories(configuration);
 
@@ -681,6 +701,19 @@ public class GwtOperationsImpl implements GwtOperations {
         }
         projectOperations.addDependencies(
                 projectOperations.getFocusedModuleName(), dependencies);
+    }
+
+    private void updateProperties(final Element configuration,
+            final boolean isGaeEnabled) {
+        // Update the POM
+        final String xPathExpression = "/configuration/"
+                + (isGaeEnabled ? "gae" : "gwt") + "/properties/*";
+        final List<Element> propertyElements = XmlUtils.findElements(
+                xPathExpression, configuration);
+        for (final Element property : propertyElements) {
+            projectOperations.addProperty(projectOperations
+                    .getFocusedModuleName(), new Property(property));
+        }
     }
 
     /**
@@ -791,6 +824,7 @@ public class GwtOperationsImpl implements GwtOperations {
         }
     }
 
+    @Override
     public void updateGaeConfiguration() {
         final boolean isGaeEnabled = projectOperations
                 .isFeatureInstalledInFocusedModule(FeatureNames.GAE);

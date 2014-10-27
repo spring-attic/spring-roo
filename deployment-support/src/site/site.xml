@@ -3,7 +3,7 @@
 
 	<bannerLeft>
 		<name>${project.name}</name>
-		<href>http://www.springsource.org/roo
+		<href>http://projects.spring.io/spring-roo/
 		</href>
 	</bannerLeft>
 
@@ -26,7 +26,7 @@
 
 		<links>
 			<item name="Home"
-				href="http://www.springsource.org/roo" />
+				href="http://projects.spring.io/spring-roo/" />
 		</links>
 	</body>
 

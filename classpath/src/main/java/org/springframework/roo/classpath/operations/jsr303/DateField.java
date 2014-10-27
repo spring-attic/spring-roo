@@ -85,7 +85,7 @@ public class DateField extends FieldDetails {
         }
         else {
             final String dateStyle = null != dateFormat ? String
-                    .valueOf(dateFormat.getShortKey()) : "S";
+                    .valueOf(dateFormat.getShortKey()) : "M";
             final String timeStyle = null != timeFormat ? String
                     .valueOf(timeFormat.getShortKey()) : "-";
             attributes.add(new StringAttributeValue(

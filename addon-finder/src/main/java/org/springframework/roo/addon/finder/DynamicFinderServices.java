@@ -61,4 +61,7 @@ public interface DynamicFinderServices {
      */
     QueryHolder getQueryHolder(MemberDetails memberDetails,
             JavaSymbolName finderName, String plural, String entityName);
+    
+    QueryHolder getCountQueryHolder(MemberDetails memberDetails,
+            JavaSymbolName finderName, String plural, String entityName);
 }

@@ -31,15 +31,15 @@
       <itemizedlist>
         <listitem>
           <para>simply use Spring's <link
-          xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestbody">@RequestBody</link>
+          xlink:href="http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestbody">@RequestBody</link>
           and <link
-          xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-responsebody">@ResponseBody</link>
+          xlink:href="http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-responsebody">@ResponseBody</link>
           annotations in the controllers, or</para>
         </listitem>
 
         <listitem>
           <para>take advantage of Spring's <link
-          xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-multiple-representations">ContentNegotiatingViewResolver</link></para>
+          xlink:href="http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-multiple-representations">ContentNegotiatingViewResolver</link></para>
         </listitem>
       </itemizedlist>
     </sidebar>The JSON add-on offers JSON support in the domain layer as well
@@ -181,7 +181,7 @@ public ResponseEntity&lt;String&gt; ToppingController.<emphasis role="bold">show
     }
     return new ResponseEntity&lt;String&gt;(topping.toJson(), headers, HttpStatus.OK);
 }</programlisting>This method accepts an HTTP GET request with a <link
-              xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestparam">@PathVariable</link>
+              xlink:href="http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestparam">@PathVariable</link>
               for the requested Topping ID. The entity is serialized and returned
               as a JSON document if found, otherwise an HTTP 404 (NOT FOUND)
               status code is returned. The accompanying curl command is as

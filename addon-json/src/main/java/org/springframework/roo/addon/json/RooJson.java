@@ -24,6 +24,14 @@ public @interface RooJson {
     boolean deepSerialize() default false;
 
     /**
+     * Enable formatting of dates as specified by ISO 8601.
+     * 
+     * @return an indication if dates should be formatted according to ISO 8601
+     *         (defaults to false; optional)
+     */
+    boolean iso8601Dates() default false;
+
+    /**
      * Specify name of the "fromJsonArrayTo<TypeNamePlural>" method to generate.
      * Use a value of "" to avoid the generation of this method.
      * 

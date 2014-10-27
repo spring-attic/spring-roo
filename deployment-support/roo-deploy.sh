@@ -122,18 +122,18 @@ tomcat_stop_start_get_stop() {
     log "Performing MVC testing; expecting GET success for URL: $@"
     pushd /tmp/rootest &>/dev/null
     if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     else
-        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
         # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
-        log "kill -9 of old mvn tomcat:run with PID $MVN_TOMCAT_PID"
+        log "kill -9 of old mvn tomcat7:run with PID $MVN_TOMCAT_PID"
         kill -9 $MVN_TOMCAT_PID
         sleep 5
     fi
-    log "Invoking mvn tomcat:run in background"
-    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat:run &>/dev/null 2>&1 &
+    log "Invoking mvn tomcat7:run in background"
+    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat7:run &>/dev/null 2>&1 &
     WGET_OPTS="-q"
     if [ "$VERBOSE" = "1" ]; then
         WGET_OPTS="-v"
@@ -144,12 +144,12 @@ tomcat_stop_start_get_stop() {
         l_error "wget failed: $@ (returned code $EXITED)" >&2; exit 1;
     fi
     if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     else
-        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
-        log "Terminating background mvn tomcat:run process with PID $MVN_TOMCAT_PID"
+        log "Terminating background mvn tomcat7:run process with PID $MVN_TOMCAT_PID"
         kill $MVN_TOMCAT_PID
         # no need to sleep, as we'll be at least running Roo between now and the next Tomcat start
     fi
@@ -200,18 +200,18 @@ pizzashop_tests() {
 	log "Performing MVC REST testing;"
 	pushd /tmp/rootest &>/dev/null
 	if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     else  
-        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
         # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
-        log "kill -9 of old mvn tomcat:run with PID $MVN_TOMCAT_PID"
+        log "kill -9 of old mvn tomcat7:run with PID $MVN_TOMCAT_PID"
         kill -9 $MVN_TOMCAT_PID
         sleep 5
     fi
-    log "Invoking mvn tomcat:run in background"
-    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat:run &>/dev/null 2>&1 &
+    log "Invoking mvn tomcat7:run in background"
+    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat7:run &>/dev/null 2>&1 &
 
     wget --retry-connrefused --tries=30 --header 'Accept: application/json' --quiet http://localhost:8888/pizzashop/bases 2>&1
 	
@@ -226,6 +226,7 @@ pizzashop_tests() {
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "RESTful POST to PizzaShop application failed" >&2; exit 1;
     fi
+
 	log "Testing RESTful array data POST to PizzaShop application"
 	curl -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -i -s -X POST -d "[{name: \"Cheesy Crust\"},{name: \"Thick Crust\"}]" http://localhost:8888/pizzashop/bases/jsonArray	
 	EXITED=$?
@@ -237,6 +238,7 @@ pizzashop_tests() {
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "RESTful array data POST to PizzaShop application failed" >&2; exit 1;
     fi
+
 	log "Testing RESTful array data POST to PizzaShop application"
 	curl -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -i -s -X POST -d "[{name: \"Fresh Tomato\"},{name: \"Prawns\"},{name: \"Mozarella\"},{name: \"Bogus\"}]" http://localhost:8888/pizzashop/toppings/jsonArray
 	EXITED=$?
@@ -248,8 +250,9 @@ pizzashop_tests() {
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "RESTful array data POST to PizzaShop application failed" >&2; exit 1;
     fi
+
 	log "Testing RESTful PUT to PizzaShop application"
-	curl -i -s -X PUT -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -d "{id:6,name:\"Mozzarella\",version:1}" http://localhost:8888/pizzashop/toppings
+    curl -i -s -X PUT -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -d "{id:6,name:\"Mozzarella\",version:1}" http://localhost:8888/pizzashop/toppings/6
 	EXITED=$?
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
@@ -259,6 +262,7 @@ pizzashop_tests() {
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "RESTful PUT to PizzaShop application failed" >&2; exit 1;
     fi
+
 	log "Testing RESTful GET to PizzaShop application"
 	curl -i -s -H "Accept: application/json" -o /tmp/rootest/curl.txt http://localhost:8888/pizzashop/toppings
 	EXITED=$?
@@ -270,6 +274,7 @@ pizzashop_tests() {
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "RESTful GET to PizzaShop application failed" >&2; exit 1;
     fi
+
 	log "Testing RESTful GET to PizzaShop application"
 	curl -i -s -H "Accept: application/json" -o /tmp/rootest/curl.txt http://localhost:8888/pizzashop/toppings/6
 	EXITED=$?
@@ -281,17 +286,19 @@ pizzashop_tests() {
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "RESTful GET to PizzaShop application failed" >&2; exit 1;
     fi
-	#log "Testing RESTful complex POST to PizzaShop application"
-	#curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json"  -o /tmp/rootest/curl.txt -d "{name:\"Napolitana\",price:7.5,base:{id:1},toppings:[{name: \"Anchovy fillets\"},{name: \"Mozzarella\"}]}" http://localhost:8888/pizzashop/pizzas
-	#EXITED=$?
-    #if [[ ! "$EXITED" = "0" ]]; then
-    #    l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
-    #fi
-	#head /tmp/rootest/curl.txt | grep "201 Created"
-	#EXITED=$?
-    #if [[ ! "$EXITED" = "0" ]]; then
-    #    l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
-    #fi
+
+	log "Testing RESTful complex POST to PizzaShop application"
+	curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json"  -o /tmp/rootest/curl.txt -d "{name:\"Napolitana\",price:7.5,base:{id:1},toppings:[{name: \"Anchovy fillets\"},{name: \"Mozzarella\"}]}" http://localhost:8888/pizzashop/pizzas
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head /tmp/rootest/curl.txt | grep "201 Created"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
+    fi
+
 	#log "Testing RESTful complex POST to PizzaShop application"
 	#curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -d "{name:\"Stefan\",total:7.5,address:\"Sydney, AU\",deliveryDate:1314595427866,id:{shopCountry:\"AU\",shopCity:\"Sydney\",shopName:\"Pizza Pan 1\"},pizzas:[{id:8,version:1}]}" http://localhost:8888/pizzashop/pizzaorders	
 	#EXITED=$?
@@ -303,13 +310,14 @@ pizzashop_tests() {
     #if [[ ! "$EXITED" = "0" ]]; then
     #    l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
     #fi
+
     if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     else
-        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
     fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
-        log "Terminating background mvn tomcat:run process with PID $MVN_TOMCAT_PID"
+        log "Terminating background mvn tomcat7:run process with PID $MVN_TOMCAT_PID"
         kill $MVN_TOMCAT_PID
         # no need to sleep, as we'll be at least running Roo between now and the next Tomcat start
     fi
@@ -401,7 +409,7 @@ log "Version........: $VERSION"
 SHORT_VERSION=`echo $VERSION | sed 's/\([0-9].[0-9].[0-9]\).*\.BUILD-SNAPSHOT/\1/'`
 log "Short Version..: $SHORT_VERSION"
 
-# Determine the version as required by the AWS dist.springframework.org "x-amz-meta-release.type" header
+# Determine the version as required by the AWS spring-roo-repository.springsource.org "x-amz-meta-release.type" header
 case $VERSION in
     *BUILD-SNAPSHOT) TYPE=snapshot;;
     *RC*) TYPE=milestone;;
@@ -603,7 +611,7 @@ if [[ "$COMMAND" = "deploy" ]]; then
 
     ZIP_FILENAME=`basename $ASSEMBLY_ZIP`
     PROJECT_NAME="Spring Roo"
-    AWS_PATH="s3://dist.springframework.org/$TYPE/ROO/"
+    AWS_PATH="s3://spring-roo-repository.springsource.org/$TYPE/ROO/"
     log "AWS bundle.ver.: $VERSION"
     log "AWS rel.type...: $TYPE"
     log "AWS pkg.f.name.: $ZIP_FILENAME"
@@ -634,7 +642,7 @@ if [[ "$COMMAND" = "deploy" ]]; then
 
     # Clean up old snapshot releases (if we just performed a snapshot release)
     if [[ "$TYPE" = "snapshot" ]]; then
-        s3_execute ls s3://dist.springframework.org/snapshot/ROO/ | grep '.zip$' | cut -c "30-"> /tmp/dist_all.txt
+        s3_execute ls s3://spring-roo-repository.springsource.org/snapshot/ROO/ | grep '.zip$' | cut -c "30-"> /tmp/dist_all.txt
         tail -n 5 /tmp/dist_all.txt > /tmp/dist_to_keep.txt
         cat /tmp/dist_all.txt /tmp/dist_to_keep.txt | sort | uniq -u > /tmp/dist_to_delete.txt
         for url in `cat /tmp/dist_to_delete.txt`; do

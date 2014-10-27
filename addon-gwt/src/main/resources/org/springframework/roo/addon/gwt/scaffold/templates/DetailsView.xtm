@@ -1,85 +1,17 @@
 package {{=packageName}};
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Widget;
-
 import {{=placePackage}}.ProxyDetailsView;
-import {{=placePackage}}.ProxyListView;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
  * Details view for {{=proxy}}.
  */
-public class {{=className}} extends Composite implements ProxyDetailsView<{{=proxy}}> {
-	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {}
+public interface {{=className}} extends ProxyDetailsView<{{=proxy}}> 
+{
+	void setDelegate(Delegate delegate);
 
-	private static final Binder BINDER = GWT.create(Binder.class);
-
-	private static {{=className}} instance;
-
-	{{=proxy}} proxy;
-	{{#fields}}
-	@UiField SpanElement {{=field}};{{/fields}}	
-	
-	@UiField SpanElement displayRenderer;
-	@UiField HasClickHandlers edit;
-	@UiField HasClickHandlers delete;
-
-	private Delegate delegate;
-
-	public static {{=className}} instance() {
-		if (instance == null) {
-			instance = new {{=className}}();
-		}
-
-		return instance;
-	}
-
-	public {{=className}}() {
-		initWidget(BINDER.createAndBindUi(this));
-	}
-
-	public Widget asWidget() {
-		return this;
-	}
-
-	public boolean confirm(String msg) {
-		return Window.confirm(msg);
-	}
-
-	public {{=proxy}} getValue() {
-		return proxy;
-	}
-
-	@UiHandler("delete")
-	public void onDeleteClicked(ClickEvent e) {
-		delegate.deleteClicked();
-	}
-
-	@UiHandler("edit")
-	public void onEditClicked(ClickEvent e) {
-		delegate.editClicked();
-	}
-
-	public void setDelegate(Delegate delegate) {
-		this.delegate = delegate;
-	}
-
-	public void setValue({{=proxy}} proxy) {
-		this.proxy = proxy;{{#properties}}
-		{{=prop}}.setInnerText(proxy.{{=propGetter}}() == null ? "" : {{=propFormatter}}(proxy.{{=propGetter}}()));{{/properties}}
-
-		displayRenderer.setInnerText({{=proxyRendererType}}.instance().render(proxy));
+	interface Delegate extends ProxyDetailsView.Delegate
+	{
+		
 	}
 }

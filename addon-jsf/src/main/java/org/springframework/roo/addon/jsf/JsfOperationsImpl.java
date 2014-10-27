@@ -35,6 +35,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -69,7 +70,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private static final String JSF_LIBRARY_XPATH = "/configuration/jsf-libraries/jsf-library";
     private static final String MYFACES_LISTENER = "org.apache.myfaces.webapp.StartupServletContextListener";
     private static final String MOJARRA_LISTENER = "com.sun.faces.config.ConfigureListener";
-    private static final String PRIMEFACES_THEMES_VERSION = "1.0.8";
+    private static final String PRIMEFACES_THEMES_VERSION = "1.0.10";
     private static final String REPOSITORY_XPATH = "/repositories/repository";
 
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
@@ -251,6 +252,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
                 declaredByMetadataId, Modifier.PUBLIC, converterType,
                 PhysicalTypeCategory.CLASS);
         cidBuilder.addAnnotation(annotationBuilder);
+        cidBuilder.addImplementsType(JsfJavaType.CONVERTER);
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
 

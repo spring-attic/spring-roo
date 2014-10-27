@@ -41,6 +41,10 @@ public final class CustomDataKeys {
             "FIND_ALL_METHOD");
     public static final MethodMetadataCustomDataKey FIND_ENTRIES_METHOD = new MethodMetadataCustomDataKey(
             "FIND_ENTRIES_METHOD");
+    public static final MethodMetadataCustomDataKey FIND_ALL_SORTED_METHOD = new MethodMetadataCustomDataKey(
+            "FIND_ALL_SORTED_METHOD");
+    public static final MethodMetadataCustomDataKey FIND_ENTRIES_SORTED_METHOD = new MethodMetadataCustomDataKey(
+            "FIND_ENTRIES_SORTED_METHOD");
     public static final MethodMetadataCustomDataKey FIND_METHOD = new MethodMetadataCustomDataKey(
             "FIND_METHOD");
     public static final MethodMetadataCustomDataKey FLUSH_METHOD = new MethodMetadataCustomDataKey(

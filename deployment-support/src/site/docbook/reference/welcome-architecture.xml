@@ -48,17 +48,17 @@
       <listitem>
         <para>Writing a services layer (perhaps annotated with Spring's
         @Service <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/beans.html#beans-stereotype-annotations">stereotype
+        xlink:href="http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/beans.html#beans-stereotype-annotations">stereotype
         annotation</link>) and exposing it using a remoting protocol to a rich
         client (Spring's <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/remoting.html">remoting
+        xlink:href="http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/remoting.html">remoting
         services</link> will help here)</para>
       </listitem>
 
       <listitem>
         <para>Executing a series of predefined actions against the database,
         perhaps in conjunction with Spring's new @Scheduled or @Async <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/scheduling.html#scheduling-annotation-support">timer
+        xlink:href="http://docs.spring.io/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/scheduling.html#scheduling-annotation-support">timer
         annotations</link></para>
       </listitem>
 
@@ -172,17 +172,14 @@ public class Hello {
 
       <programlisting>package com.aspectj.rocks;
 
-import java.lang.String;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 privileged aspect Hello_Roo_ToString {
-    
-    public String Hello.toString() {    
-        StringBuilder sb = new StringBuilder();        
-        sb.append("Id: ").append(getId()).append(", ");        
-        sb.append("Version: ").append(getVersion()).append(", ");        
-        sb.append("Comment: ").append(getComment());        
-        return sb.toString();        
-    }    
+
+    public String Hello.toString() {
+          return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
     
 }</programlisting>
 
@@ -333,7 +330,7 @@ public class com.aspectj.rocks.Hello extends java.lang.Object implements org.spr
       duplicating Spring's documentation in this section. Instead please refer
       to the excellent Spring documentation for guidance, which can be found
       in the downloadable distribution files and also on the <link
-      xlink:href="http://www.springsource.org/documentation">Spring web
+      xlink:href="http://spring.io/docs">Spring web
       site</link>.</para>
     </section>
   </section>

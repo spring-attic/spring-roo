@@ -9,6 +9,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface CliOption {
 
+    // Special value that denotes a null value
+    static final String NULL = "__NULL__";
+    // Special value that denotes an empty string
+    static final String EMPTY = "__EMPTY__";
+
     /**
      * @return a help message for this option (the default is a blank String,
      *         which means there is no help)
@@ -56,7 +61,7 @@ public @interface CliOption {
      *         flags; defaults to __NULL__, which causes null to be presented to
      *         any non-primitive parameter)
      */
-    String specifiedDefaultValue() default "__NULL__";
+    String specifiedDefaultValue() default NULL;
 
     /**
      * @return if true, the user cannot specify this option and it is provided
@@ -69,5 +74,5 @@ public @interface CliOption {
      *         user (defaults to __NULL__, which causes null to be presented to
      *         any non-primitive parameter)
      */
-    String unspecifiedDefaultValue() default "__NULL__";
+    String unspecifiedDefaultValue() default NULL;
 }

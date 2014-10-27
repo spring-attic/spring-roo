@@ -17,6 +17,9 @@ ROO_HOME=`dirname "$PRG"`
 ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
 # echo "Resolved ROO_HOME: $ROO_HOME"
 
+# Remove osgi cache
+rm -rf "$ROO_HOME"/bootstrap/target/osgi
+
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/bin
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/bundle
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/conf
@@ -75,8 +78,8 @@ if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
 fi
 
 # Hop, hop, hop...
-DEBUG=
-#DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"
+#DEBUG=
+DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 PAUSE=
 #PAUSE="-Droo.pause=true"
 METADATA_TRACE=

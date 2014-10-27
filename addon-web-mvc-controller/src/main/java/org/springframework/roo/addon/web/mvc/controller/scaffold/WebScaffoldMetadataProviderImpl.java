@@ -174,7 +174,7 @@ public class WebScaffoldMetadataProviderImpl extends
                 aspectName, governorPhysicalType, annotationValues, idField,
                 relatedApplicationTypeMetadata,
                 dependentApplicationTypeMetadata, datePatterns, crudAdditions,
-                editableFieldTypes);
+                editableFieldTypes, typeLocationService);
     }
 
     public String getProvidesType() {

@@ -9,7 +9,6 @@ import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -591,7 +590,8 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
             @CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") final boolean unique,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords, 
+    	    @CliOption(key = "lob", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates that this field is a Large Object") final boolean lob) {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
@@ -631,6 +631,10 @@ public class FieldCommands implements CommandMarker {
             fieldDetails.setValue(value);
         }
 
+		if (lob) {
+			fieldDetails.getInitedAnnotations().add(
+					new AnnotationMetadataBuilder("javax.persistence.Lob"));
+		}
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
 
@@ -679,7 +683,8 @@ public class FieldCommands implements CommandMarker {
             }
         }
 
-        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		final List<AnnotationMetadataBuilder> annotations = fieldDetails
+				.getInitedAnnotations();
         fieldDetails.decorateAnnotationsList(annotations);
         fieldDetails.setAnnotations(annotations);
 

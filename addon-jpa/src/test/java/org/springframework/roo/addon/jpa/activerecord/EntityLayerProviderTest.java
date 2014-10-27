@@ -7,6 +7,8 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.CLEAR_
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_SORTED_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FLUSH_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
@@ -49,6 +51,8 @@ public class EntityLayerProviderTest {
         METHODS.put(COUNT_ALL_METHOD, Collections.<String> emptyList());
         METHODS.put(FIND_ALL_METHOD, Collections.<String> emptyList());
         METHODS.put(FIND_ENTRIES_METHOD, Arrays.asList("x", "y"));
+        METHODS.put(FIND_ALL_SORTED_METHOD, Arrays.asList("x", "y"));
+        METHODS.put(FIND_ENTRIES_SORTED_METHOD, Arrays.asList("w", "x", "y", "z"));
         METHODS.put(FIND_METHOD, Arrays.asList("id"));
         METHODS.put(FLUSH_METHOD, Collections.<String> emptyList());
         METHODS.put(MERGE_METHOD, Collections.<String> emptyList());

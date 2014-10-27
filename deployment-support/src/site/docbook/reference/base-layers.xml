@@ -113,7 +113,7 @@ public class Pizza {
 
       <para>Developers who require a repository / DAO layer instead of the
       default Roo entity-based persistence approach can do so by creating a
-      <link xlink:href="http://www.springsource.org/spring-data/jpa">Spring
+      <link xlink:href="http://projects.spring.io/spring-data-jpa/">Spring
       Data JPA</link> backed repository for a given JPA domain type. The
       domain type backing the repository needs have a JPA @Entity annotation
       and also a ID field defined along with accessors and mutators. After
@@ -171,9 +171,9 @@ public interface PizzaRepository {
       <para><programlisting>public interface PizzaRepository <emphasis
             role="bold">extends JpaRepository&lt;Pizza, Long&gt;</emphasis> {}</programlisting>Note,
       the <link
-      xlink:href="http://static.springsource.org/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html">JpaRepository</link>
+      xlink:href="http://docs.spring.io/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html">JpaRepository</link>
       interface is part of the <link
-      xlink:href="http://www.springsource.org/spring-data/jpa">Spring Data
+      xlink:href="http://projects.spring.io/spring-data-jpa/">Spring Data
       JPA</link> API and provides all CRUD functionality out of the
       box.</para>
     </section>
@@ -184,7 +184,7 @@ public interface PizzaRepository {
       <para>As an alternative to JPA persistence, Spring Roo offers <link
       xlink:href="http://www.mongodb.org/">MongoDB</link> support by
       leveraging the <link
-      xlink:href="http://www.springsource.org/spring-data/mongodb">Spring Data
+      xlink:href="http://projects.spring.io/spring-data-mongodb/">Spring Data
       MongoDB</link> project.</para>
 
       <section>
@@ -251,7 +251,7 @@ public class Pizza {
 
         <para><programlisting>roo&gt; <emphasis role="bold">repository mongo </emphasis>--interface ~.repository.PizzaRepository --entity ~.domain.Pizza</programlisting>This
         will create a simple interface definition which leverages <link
-        xlink:href="http://www.springsource.org/spring-data/mongodb">Spring
+        xlink:href="http://projects.spring.io/spring-data-mongodb/">Spring
         Data MongoDB</link>:</para>
 
         <para><programlisting><emphasis role="bold">@RooMongoRepository</emphasis>(domainType = Pizza.class)
@@ -260,15 +260,15 @@ public interface PizzaRepository {
     List&lt;Pizza&gt; findAll();
 }</programlisting>Similar the Spring Data JPA driven repository seen above,
         this interface is augmented through an ITD which introduces the <link
-        xlink:href="http://static.springsource.org/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html">PagingAndSortingRepository</link>
+        xlink:href="http://docs.spring.io/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html">PagingAndSortingRepository</link>
         provided by the Spring Data API and is responsible for providing all
         necessary CRUD functionality. In addition this interface defines a
         'custom' finder which is not offered by the <link
-        xlink:href="http://static.springsource.org/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html">PagingAndSortingRepository</link>
+        xlink:href="http://docs.spring.io/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html">PagingAndSortingRepository</link>
         implementation: <emphasis>List&lt;Pizza&gt; findAll();</emphasis>.
         This method iis required by Spring Roo's UI scaffolding and is
         automatically implemented by the <link
-        xlink:href="http://static.springsource.org/spring-data/data-document/docs/1.0.0.M4/reference/html/#repositories.definition-tuning">query
+        xlink:href="http://docs.spring.io/spring-data/data-document/docs/1.0.0.M4/reference/html/#repositories.definition-tuning">query
         builder mechanism</link> offered by Spring Data MongoDB.</para>
       </section>
 
@@ -311,10 +311,10 @@ repository mongo --interface ~.repository.ToppingRepository --entity ~.domain.To
 repository mongo --interface ~.repository.BaseRepository --entity ~.domain.Base
 repository mongo --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
 repository mongo --interface ~.repository.PizzaOrderRepository --entity ~.domain.PizzaOrder
-service --interface ~.service.ToppingService --entity ~.domain.Topping
-service --interface ~.service.BaseService --entity ~.domain.Base
-service --interface ~.service.PizzaService --entity ~.domain.Pizza
-service --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
+service type --interface ~.service.ToppingService --entity ~.domain.Topping
+service type --interface ~.service.BaseService --entity ~.domain.Base
+service type --interface ~.service.PizzaService --entity ~.domain.Pizza
+service type --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
 
 // Create a Web UI.
 web mvc setup

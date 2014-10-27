@@ -10,7 +10,8 @@
   <jsp:directive.attribute name="dateTimePattern" type="java.lang.String" required="false" rtexprvalue="true" description="The date / time pattern to use if the field is a date or calendar type" />
   <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
-
+  <jsp:directive.attribute name="sort" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the column can be used to sort/order list (default 'false')" />
+  
   <c:if test="${empty render or render}">
     <c:if test="${empty label}">
       <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label" htmlEscape="false" />
@@ -57,6 +58,16 @@
         <c:set var="columnProperties" value="${columnProperties}&#9999;${property}" scope="request" />
         <c:set var="columnLabels" value="${columnLabels}&#9999;${label}" scope="request" />
         <c:set var="columnMaxLengths" value="${columnMaxLengths}&#9999;${empty maxLength ? 128 : maxLength}" scope="request" />
+      </c:otherwise>
+    </c:choose>
+  </c:if>
+  <c:if test="${not empty sort and sort}">
+    <c:choose>
+      <c:when test="${empty columnSortProperties}">
+        <c:set var="columnSortProperties" value="${property}" scope="request" />
+      </c:when>
+      <c:otherwise>
+        <c:set var="columnSortProperties" value="${columnSortProperties}&#9999;${property}" scope="request" />
       </c:otherwise>
     </c:choose>
   </c:if>

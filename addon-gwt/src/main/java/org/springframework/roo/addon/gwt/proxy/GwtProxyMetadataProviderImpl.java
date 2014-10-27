@@ -139,6 +139,8 @@ public class GwtProxyMetadataProviderImpl extends
                     true);
             final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                     method);
+            // Remove all annotations from proxy method
+            methodBuilder.setAnnotations(new ArrayList<AnnotationMetadata>());
             methodBuilder.setReturnType(gwtType);
             final MethodMetadata convertedMethod = methodBuilder.build();
             if (gwtTypeService.isMethodReturnTypeInSourcePath(convertedMethod,

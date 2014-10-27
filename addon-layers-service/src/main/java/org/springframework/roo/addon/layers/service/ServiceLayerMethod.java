@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.springframework.roo.addon.security.Permission;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -51,6 +52,16 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.LONG_PRIMITIVE;
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getCountAllMethod();
+        }
+        
+        @Override
+        public String getPermissionName(final JavaType entityType, final String plural) {
+        	return Permission.COUNT.getName(entityType, plural);
+        }
     },
 
     DELETE(CustomDataKeys.REMOVE_METHOD) {
@@ -81,6 +92,16 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.VOID_PRIMITIVE;
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getDeleteMethod();
+        }
+        
+        @Override
+        public String getPermissionName(final JavaType entityType, final String plural) {
+        	return Permission.DELETE.getName(entityType, plural);
+        }
     },
 
     FIND(CustomDataKeys.FIND_METHOD) {
@@ -110,6 +131,21 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return entityType;
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getFindMethod();
+        }
+        
+        @Override
+        public String getPermissionName(final JavaType entityType, final String plural) {
+        	return Permission.FIND.getName(entityType, plural);
+        }
+        
+        @Override
+		public boolean usesPostAuthorize() {
+     	   return true;
+        }
     },
 
     FIND_ALL(CustomDataKeys.FIND_ALL_METHOD) {
@@ -137,6 +173,16 @@ enum ServiceLayerMethod {
         @Override
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.listOf(entityType);
+        }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getFindAllMethod();
+        }
+        
+        @Override
+        public String getPermissionName(final JavaType entityType, final String plural) {
+        	return Permission.FIND_ALL.getName(entityType, plural);
         }
     },
 
@@ -169,6 +215,16 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.listOf(entityType);
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getFindEntriesMethod();
+        }
+        
+        @Override
+        public String getPermissionName(final JavaType entityType, final String plural) {
+        	return Permission.FIND_ENTRIES.getName(entityType, plural);
+        }
     },
 
     SAVE(CustomDataKeys.PERSIST_METHOD) {
@@ -199,6 +255,16 @@ enum ServiceLayerMethod {
         public JavaType getReturnType(final JavaType entityType) {
             return JavaType.VOID_PRIMITIVE;
         }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getSaveMethod();
+        }
+        
+        @Override
+        public String getPermissionName(final JavaType entityType, final String plural) {
+        	return Permission.SAVE.getName(entityType, plural);
+        }
     },
 
     UPDATE(CustomDataKeys.MERGE_METHOD) {
@@ -228,6 +294,16 @@ enum ServiceLayerMethod {
         @Override
         public JavaType getReturnType(final JavaType entityType) {
             return entityType;
+        }
+
+        @Override
+        public String getBaseName(final ServiceAnnotationValues annotationValues) {
+            return annotationValues.getUpdateMethod();
+        }
+        
+        @Override
+        public String getPermissionName(final JavaType entityType, final String plural) {
+        	return Permission.UPDATE.getName(entityType, plural);
         }
     };
 
@@ -296,6 +372,10 @@ enum ServiceLayerMethod {
         return key.name();
     }
 
+    public abstract String getBaseName(final ServiceAnnotationValues annotationValues);
+
+    public abstract String getPermissionName(final JavaType entityType, final String plural);
+    
     /**
      * Returns the name of this method, based on the given inputs
      * 
@@ -379,4 +459,13 @@ enum ServiceLayerMethod {
     boolean isVoid() {
         return JavaType.VOID_PRIMITIVE.equals(getReturnType(null));
     }
+    
+    /**
+     * Indicates whether Spring method security should be applied after the method has executed
+     * 
+     * @return see above
+     */
+   public boolean usesPostAuthorize() {
+	   return false;
+   }
 }

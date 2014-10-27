@@ -19,6 +19,7 @@ import java.util.SortedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.web.mvc.controller.details.DateTimeFormatDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
@@ -89,6 +90,8 @@ public class WebFinderMetadata extends
     private JavaType formBackingType;
     private JavaTypeMetadataDetails javaTypeMetadataHolder;
     private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
+    
+    private Map<JavaSymbolName, DateTimeFormatDetails> dateTypes;
 
     /**
      * Constructor
@@ -106,7 +109,8 @@ public class WebFinderMetadata extends
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final WebScaffoldAnnotationValues annotationValues,
             final SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes,
-            final Set<FinderMetadataDetails> dynamicFinderMethods) {
+            final Set<FinderMetadataDetails> dynamicFinderMethods,
+            final Map<JavaSymbolName, DateTimeFormatDetails> dateTypes) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.isTrue(
                 isValid(identifier),
@@ -116,7 +120,9 @@ public class WebFinderMetadata extends
         Validate.notNull(specialDomainTypes, "Special domain type map required");
         Validate.notNull(dynamicFinderMethods,
                 "Dynamoic finder methods required");
-
+        
+        this.dateTypes = dateTypes;
+        
         if (!isValid()) {
             return;
         }
@@ -264,7 +270,7 @@ public class WebFinderMetadata extends
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         final StringBuilder methodParams = new StringBuilder();
 
-        boolean dateFieldPresent = false;
+        boolean dateFieldPresent = !dateTypes.isEmpty();
         for (final FieldMetadata field : finderMetadataDetails
                 .getFinderMethodParamFields()) {
             final JavaSymbolName fieldName = field.getFieldName();
@@ -309,7 +315,53 @@ public class WebFinderMetadata extends
             methodParams.delete(methodParams.length() - 2,
                     methodParams.length());
         }
+        
+        final List<AnnotationAttributeValue<?>> firstResultAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        firstResultAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "page"));
+        firstResultAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder firstResultAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, firstResultAttributes);
 
+        final List<AnnotationAttributeValue<?>> maxResultsAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        maxResultsAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "size"));
+        maxResultsAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder maxResultAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, maxResultsAttributes);
+        
+        final List<AnnotationAttributeValue<?>> sortFieldNameAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        sortFieldNameAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "sortFieldName"));
+        sortFieldNameAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder sortFieldNameAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, sortFieldNameAttributes);
+        
+        final List<AnnotationAttributeValue<?>> sortOrderAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+        sortOrderAttributes.add(new StringAttributeValue(new JavaSymbolName(
+                "value"), "sortOrder"));
+        sortOrderAttributes.add(new BooleanAttributeValue(new JavaSymbolName(
+                "required"), false));
+        final AnnotationMetadataBuilder sortOrderAnnotation = new AnnotationMetadataBuilder(
+                REQUEST_PARAM, sortOrderAttributes);
+        
+        
+        parameterTypes.add(new AnnotatedJavaType(
+                new JavaType(Integer.class.getName()),
+                firstResultAnnotation.build()));
+        parameterTypes.add(new AnnotatedJavaType(
+                new JavaType(Integer.class.getName()),
+                maxResultAnnotation.build()));
+        parameterTypes.add(new AnnotatedJavaType(
+                new JavaType(String.class.getName()),
+                sortFieldNameAnnotation.build()));
+        parameterTypes.add(new AnnotatedJavaType(
+                new JavaType(String.class.getName()),
+                sortOrderAnnotation.build()));
+        
         parameterTypes.add(new AnnotatedJavaType(MODEL));
         if (getGovernorMethod(finderMethodName,
                 AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes)) != null) {
@@ -318,8 +370,12 @@ public class WebFinderMetadata extends
 
         final List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
         newParamNames.addAll(parameterNames);
-        newParamNames.add(new JavaSymbolName("uiModel"));
-
+        newParamNames.add(new JavaSymbolName("page"));
+        newParamNames.add(new JavaSymbolName("size"));
+        newParamNames.add(new JavaSymbolName("sortFieldName"));
+        newParamNames.add(new JavaSymbolName("sortOrder"));
+        newParamNames.add(new JavaSymbolName("uiModel"));     
+        
         final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
         requestMappingAttributes.add(new StringAttributeValue(
                 new JavaSymbolName("params"), "find="
@@ -339,6 +395,16 @@ public class WebFinderMetadata extends
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(requestMapping);
 
+        bodyBuilder.appendFormalLine("if (page != null || size != null) {");
+        bodyBuilder.indent();
+        bodyBuilder
+                .appendFormalLine("int sizeNo = size == null ? 10 : size.intValue();");
+        bodyBuilder
+                .appendFormalLine("final int firstResult = page == null ? 0 : (page.intValue() - 1) * sizeNo;");
+        String methodParamsString = methodParams.toString();
+        if(StringUtils.isNotBlank(methodParamsString)){
+        	methodParamsString.concat(", ");
+        }
         bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
                 + javaTypeMetadataHolder.getPlural().toLowerCase()
                 + "\", "
@@ -346,7 +412,34 @@ public class WebFinderMetadata extends
                 + "."
                 + finderMetadataDetails.getFinderMethodMetadata()
                         .getMethodName().getSymbolName() + "("
-                + methodParams.toString() + ").getResultList());");
+                + methodParamsString  + ", sortFieldName, sortOrder).setFirstResult(firstResult).setMaxResults(sizeNo).getResultList());");
+        
+        char[] methodNameArray = finderMetadataDetails.getFinderMethodMetadata()
+                .getMethodName().getSymbolName().toCharArray();
+        methodNameArray[0] = Character.toUpperCase(methodNameArray[0]);
+        String countMethodName = "count" + new String(methodNameArray);
+        
+        bodyBuilder.appendFormalLine("float nrOfPages = (float) "
+        		+ getShortName(formBackingType)
+                + "."
+                + countMethodName + "("
+                + methodParamsString + ") / sizeNo;");
+        bodyBuilder
+                .appendFormalLine("uiModel.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("} else {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("uiModel.addAttribute(\""
+                + javaTypeMetadataHolder.getPlural().toLowerCase()
+                + "\", "
+                + getShortName(formBackingType)
+                + "."
+                + finderMetadataDetails.getFinderMethodMetadata()
+                        .getMethodName().getSymbolName() + "("
+                + methodParamsString + ", sortFieldName, sortOrder).getResultList());");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        
         if (dateFieldPresent) {
             bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
         }

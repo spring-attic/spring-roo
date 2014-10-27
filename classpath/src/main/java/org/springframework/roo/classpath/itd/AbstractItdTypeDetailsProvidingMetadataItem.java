@@ -369,4 +369,12 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends
         builder.append("itdTypeDetails", itdTypeDetails);
         return builder.toString();
     }
+    
+    /**
+     * Return current aspect name 
+     * @return
+     */
+    public JavaType getAspectName() {
+		return aspectName;
+	}
 }

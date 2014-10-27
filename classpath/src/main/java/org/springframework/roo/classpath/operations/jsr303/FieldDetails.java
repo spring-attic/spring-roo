@@ -170,6 +170,13 @@ public class FieldDetails {
         return annotations;
     }
 
+	public List<AnnotationMetadataBuilder> getInitedAnnotations() {
+		if (annotations == null) {
+			annotations = new ArrayList<AnnotationMetadataBuilder>();
+		}
+		return annotations;
+	}
+
     public void setColumn(final String column) {
         this.column = column;
     }

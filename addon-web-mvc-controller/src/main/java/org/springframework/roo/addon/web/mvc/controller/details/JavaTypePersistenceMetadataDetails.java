@@ -19,8 +19,9 @@ public class JavaTypePersistenceMetadataDetails {
 
     private final MemberTypeAdditions countMethod;
     private final MemberTypeAdditions findAllMethod;
-
+    private final MemberTypeAdditions findAllSortedMethod;
     private final MemberTypeAdditions findEntriesMethod;
+    private final MemberTypeAdditions findEntriesSortedMethod; 
     private final List<String> finderNames;
     private final MemberTypeAdditions findMethod;
     private final MethodMetadata identifierAccessorMethod;
@@ -46,7 +47,7 @@ public class JavaTypePersistenceMetadataDetails {
      * @param persistMethod (may be null if no persist method is present)
      * @param mergeMethod (may be null if no merge method is present)
      * @param removeMethod (may be null if no remove method is present)
-     * @param findAllMethod (may be null if no findAll method is present)
+     * @param findAllSortedMethod (may be null if no findAll method is present)
      * @param findMethod (may be null if no find method is present)
      * @param countMethod (may be null if no count method is present)
      * @param finderNames (must not be null, but may be empty of no finders are
@@ -63,9 +64,11 @@ public class JavaTypePersistenceMetadataDetails {
             final MemberTypeAdditions mergeMethod,
             final MemberTypeAdditions removeMethod,
             final MemberTypeAdditions findAllMethod,
+            final MemberTypeAdditions findAllSortedMethod,
             final MemberTypeAdditions findMethod,
             final MemberTypeAdditions countMethod,
             final MemberTypeAdditions findEntriesMethod,
+            final MemberTypeAdditions findEntriesSortedMethod,
             final List<String> finderNames, final boolean isRooIdentifier,
             final List<FieldMetadata> rooIdentifierFields) {
         Validate.notNull(identifierType, "Indentifier type required");
@@ -79,6 +82,7 @@ public class JavaTypePersistenceMetadataDetails {
         this.identifierType = identifierType;
         this.countMethod = countMethod;
         this.findAllMethod = findAllMethod;
+        this.findAllSortedMethod = findAllSortedMethod;
         this.finderNames = finderNames;
         this.findMethod = findMethod;
         this.identifierAccessorMethod = identifierAccessorMethod;
@@ -90,6 +94,7 @@ public class JavaTypePersistenceMetadataDetails {
         this.rooIdentifierFields = rooIdentifierFields;
         this.versionAccessorMethod = versionAccessorMethod;
         this.findEntriesMethod = findEntriesMethod;
+        this.findEntriesSortedMethod = findEntriesSortedMethod;
     }
 
     /**
@@ -122,6 +127,26 @@ public class JavaTypePersistenceMetadataDetails {
         return findEntriesMethod;
     }
 
+    /**
+     * Accessor for persistence findAll method
+     * 
+     * @return the {@link MemberTypeAdditions} for the findAll method presented
+     *         by the persistence MD (null if not defined)
+     */
+    public MemberTypeAdditions getFindAllSortedMethod() {
+        return findAllSortedMethod;
+    }
+
+    /**
+     * Accessor for persistence findEntries method
+     * 
+     * @return the {@link MemberTypeAdditions} for the findEntries method
+     *         presented by the persistence MD (null if not defined)
+     */
+    public MemberTypeAdditions getFindEntriesSortedMethod() {
+        return findEntriesSortedMethod;
+    }
+    
     /**
      * Accessor for finder names
      * 

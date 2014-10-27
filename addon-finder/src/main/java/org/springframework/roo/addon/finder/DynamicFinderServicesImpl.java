@@ -300,6 +300,13 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
         }
         return builder.toString().trim();
     }
+    
+    private String getJpaCountQuery(final List<Token> tokens,
+            final String simpleTypeName, final JavaSymbolName finderName,
+            final String plural, final String entityName) {
+        String jpaQuery = this.getJpaQuery(tokens, simpleTypeName, finderName, plural, entityName);
+        return jpaQuery.replaceFirst("SELECT o FROM ", "SELECT COUNT(o) FROM ");
+    }
 
     private List<MethodMetadata> getLocatedMutators(
             final MemberDetails memberDetails) {
@@ -409,6 +416,35 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
         final String simpleTypeName = getConcreteJavaType(memberDetails)
                 .getSimpleTypeName();
         final String jpaQuery = getJpaQuery(tokens, simpleTypeName, finderName,
+                plural, entityName);
+        final List<JavaType> parameterTypes = getParameterTypes(tokens,
+                finderName, plural);
+        final List<JavaSymbolName> parameterNames = getParameterNames(tokens,
+                finderName, plural);
+        return new QueryHolder(jpaQuery, parameterTypes, parameterNames, tokens);
+    }
+    
+    public QueryHolder getCountQueryHolder(final MemberDetails memberDetails,
+            final JavaSymbolName finderName, final String plural,
+            final String entityName) {
+        Validate.notNull(memberDetails, "Member details required");
+        Validate.notNull(finderName, "Finder name required");
+        Validate.notBlank(plural, "Plural required");
+
+        List<Token> tokens;
+        try {
+            tokens = tokenize(memberDetails, finderName, plural);
+        }
+        catch (final FinderFieldTokenMissingException e) {
+            return null;
+        }
+        catch (final InvalidFinderException e) {
+            return null;
+        }
+
+        final String simpleTypeName = getConcreteJavaType(memberDetails)
+                .getSimpleTypeName();
+        final String jpaQuery = getJpaCountQuery(tokens, simpleTypeName, finderName,
                 plural, entityName);
         final List<JavaType> parameterTypes = getParameterTypes(tokens,
                 finderName, plural);

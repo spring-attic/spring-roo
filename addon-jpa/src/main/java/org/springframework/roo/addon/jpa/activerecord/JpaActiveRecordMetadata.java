@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.jpa.activerecord;
 
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JpaJavaType.ENTITY_MANAGER;
 import static org.springframework.roo.model.JpaJavaType.PERSISTENCE_CONTEXT;
@@ -111,13 +112,17 @@ public class JpaActiveRecordMetadata extends
         // Determine the entity's "entityManager" field, which is guaranteed to
         // be accessible to the ITD.
         builder.addField(getEntityManagerField());
+        
+        builder.addField(getFieldNames4OrderClauseFilter());
 
         // Add static methods
         setEntityManagerMethod();
         builder.addMethod(getCountMethod());
         builder.addMethod(getFindAllMethod());
+        builder.addMethod(getFindAllSortedMethod());
         setFindMethod();
         builder.addMethod(getFindEntriesMethod());
+        builder.addMethod(getFindEntriesSortedMethod());
 
         // Add helper methods
         builder.addMethod(getPersistMethod());
@@ -133,7 +138,8 @@ public class JpaActiveRecordMetadata extends
         itdTypeDetails = builder.build();
     }
 
-    public static String createIdentifier(final JavaType javaType,
+
+	public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return PhysicalTypeIdentifierNamingUtils.createIdentifier(
                 PROVIDES_TYPE_STRING, javaType, path);
@@ -246,7 +252,35 @@ public class JpaActiveRecordMetadata extends
                     annotations, fieldSymbolName, ENTITY_MANAGER).build();
         }
     }
-
+    
+    
+    /**
+     * @return list of filedNames allowed for the "order by" clause (used to avoid JPQL injection)
+     */
+    public FieldMetadata getFieldNames4OrderClauseFilter() {   	
+    	
+    	JavaSymbolName fieldName = new JavaSymbolName("fieldNames4OrderClauseFilter");
+    	JavaType fieldType = JavaType.listOf(JavaType.STRING);
+    	
+        // Locate user-defined method
+        final FieldMetadata userField = governorTypeDetails.getField(fieldName); 
+        if (userField != null) {
+            return userField;
+        }
+        
+    	List<String> listOfFieldNames = new ArrayList<String>();   	
+    	for (final FieldMetadata field : governorPhysicalTypeMetadata
+                .getMemberHoldingTypeDetails().getDeclaredFields()) {
+    		listOfFieldNames.add(field.getFieldName().getSymbolName());
+    	}   	
+    	
+    	String listOfFieldNamesAsStringExpr = "java.util.Arrays.asList(\""+ StringUtils.join(listOfFieldNames, "\", \"") + "\")";  		
+    	
+    	return new FieldMetadataBuilder(getId(), Modifier.FINAL + Modifier.STATIC + Modifier.PUBLIC,
+    			fieldName, fieldType, listOfFieldNamesAsStringExpr).build();
+	}
+    
+    
     /**
      * @return the static utility entityManager() method used by other methods
      *         to obtain entity manager and available as a utility for user code
@@ -503,11 +537,72 @@ public class JpaActiveRecordMetadata extends
         if (isGaeEnabled) {
             addTransactionalAnnotation(annotations);
         }
-
+        
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME
                 + "().createQuery(\"SELECT o FROM " + entityName + " o\", "
                 + destination.getSimpleTypeName() + ".class).getResultList();");
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC | Modifier.STATIC, methodName,
+                returnType,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder.build();
+    }
+    
+    /**
+     * getFindAllMethod method with sortFieldName and sortOrder parameters
+     * 
+     * @return the find all method (may return null)
+     */
+    private MethodMetadata getFindAllSortedMethod() {
+        if ("".equals(crudAnnotationValues.getFindAllSortedMethod())) {
+            return null;
+        }
+
+        // Method definition to find or build
+        final JavaSymbolName methodName = new JavaSymbolName(
+                crudAnnotationValues.getFindAllSortedMethod() + plural);
+        final JavaType[] parameterTypes = {STRING, STRING};
+        final List<JavaSymbolName> parameterNames = Arrays.asList(
+        		new JavaSymbolName("sortFieldName"),
+                new JavaSymbolName("sortOrder"));
+        final JavaType returnType = new JavaType(
+                LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+                Arrays.asList(destination));
+
+        // Locate user-defined method
+        final MethodMetadata userMethod = getGovernorMethod(methodName,
+                parameterTypes);
+        if (userMethod != null) {
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
+            return userMethod;
+        }
+
+        // Create method
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        if (isGaeEnabled) {
+            addTransactionalAnnotation(annotations);
+        }
+        
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("String jpaQuery = \"SELECT o FROM " + entityName + " o\";");
+        bodyBuilder.appendFormalLine("if (fieldNames4OrderClauseFilter.contains(sortFieldName)) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" ORDER BY \" + sortFieldName;");
+        bodyBuilder.appendFormalLine("if (\"ASC\".equalsIgnoreCase(sortOrder) || \"DESC\".equalsIgnoreCase(sortOrder)) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" \" + sortOrder;");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME
+        		+ "().createQuery(jpaQuery, " + destination.getSimpleTypeName() + ".class" + ").getResultList();");
 
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), Modifier.PUBLIC | Modifier.STATIC, methodName,
@@ -563,6 +658,69 @@ public class JpaActiveRecordMetadata extends
                         + " o\", "
                         + destination.getSimpleTypeName()
                         + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+
+        final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
+                getId(), Modifier.PUBLIC | Modifier.STATIC, methodName,
+                returnType,
+                AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+                parameterNames, bodyBuilder);
+        methodBuilder.setAnnotations(annotations);
+        return methodBuilder.build();
+    }
+    
+    /**
+     * getFindEntriesMethod method with sortFieldName and sortOrder parameters
+     * 
+     * @return the find entries method (may return null)
+     */
+    private MethodMetadata getFindEntriesSortedMethod() {
+        if ("".equals(crudAnnotationValues.getFindEntriesSortedMethod())) {
+            return null;
+        }
+
+        // Method definition to find or build
+        final JavaSymbolName methodName = new JavaSymbolName(
+                crudAnnotationValues.getFindEntriesSortedMethod()
+                        + destination.getSimpleTypeName() + "Entries");
+        final JavaType[] parameterTypes = { INT_PRIMITIVE, INT_PRIMITIVE, JavaType.STRING, JavaType.STRING};
+        final List<JavaSymbolName> parameterNames = Arrays.asList(
+                new JavaSymbolName("firstResult"), new JavaSymbolName(
+                        "maxResults"), new JavaSymbolName("sortFieldName"),
+                        new JavaSymbolName("sortOrder"));
+        final JavaType returnType = new JavaType(
+                LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+                Arrays.asList(destination));
+
+        // Locate user-defined method
+        final MethodMetadata userMethod = getGovernorMethod(methodName,
+                parameterTypes);
+        if (userMethod != null) {
+            Validate.isTrue(userMethod.getReturnType().equals(returnType),
+                    "Method '%s' on '%s' must return '%s'", methodName,
+                    destination, returnType.getNameIncludingTypeParameters());
+            return userMethod;
+        }
+
+        // Create method
+        final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+        if (isGaeEnabled) {
+            addTransactionalAnnotation(annotations);
+        }
+
+        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine("String jpaQuery = \"SELECT o FROM " + entityName + " o\";");
+        bodyBuilder.appendFormalLine("if (fieldNames4OrderClauseFilter.contains(sortFieldName)) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" ORDER BY \" + sortFieldName;");
+        bodyBuilder.appendFormalLine("if (\"ASC\".equalsIgnoreCase(sortOrder) || \"DESC\".equalsIgnoreCase(sortOrder)) {");
+        bodyBuilder.indent();
+        bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" \" + sortOrder;");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.indentRemove();
+        bodyBuilder.appendFormalLine("}");
+        bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME
+        		+ "().createQuery(jpaQuery, " + destination.getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 
         final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(
                 getId(), Modifier.PUBLIC | Modifier.STATIC, methodName,
@@ -798,4 +956,7 @@ public class JpaActiveRecordMetadata extends
         builder.addMethod(methodBuilder);
         findMethod = methodBuilder.build();
     }
+    
+
+
 }
