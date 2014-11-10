@@ -107,11 +107,19 @@ public class Pom {
         Validate.notBlank(packaging, "Invalid packaging '%s'", packaging);
         Validate.notBlank(path, "Invalid path '%s'", path);
 
-        gav = new GAV(groupId, artifactId, version);
+        //gav = new GAV(groupId, artifactId, version);
         this.moduleName = StringUtils.stripToEmpty(moduleName);
         this.name = StringUtils.stripToEmpty(name);
         this.packaging = packaging;
         this.parent = parent;
+
+        if(version == null && parent.getVersion() != null) {
+          gav = new GAV(groupId, artifactId, parent.getVersion());
+        }
+        else {
+          gav = new GAV(groupId, artifactId, version);
+        }
+       
         this.path = path;
         this.sourceDirectory = StringUtils.defaultIfEmpty(sourceDirectory,
                 Path.SRC_MAIN_JAVA.getDefaultLocation());
