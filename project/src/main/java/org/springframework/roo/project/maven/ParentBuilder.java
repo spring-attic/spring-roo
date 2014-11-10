@@ -13,10 +13,10 @@ public class ParentBuilder implements Builder<Parent> {
     private final String version;
 
     public ParentBuilder(final Element parentElement, final String pomPath) {
-        groupId = XmlUtils.getTextContent("/groupId", parentElement);
-        artifactId = XmlUtils.getTextContent("/artifactId", parentElement);
-        version = XmlUtils.getTextContent("/version", parentElement);
-        relativePath = XmlUtils.getTextContent("/relativePath", parentElement);
+        groupId = XmlUtils.getTextContent("/project/groupId", parentElement);
+        artifactId = XmlUtils.getTextContent("/project/artifactId", parentElement);
+        version = XmlUtils.getTextContent("/project/version", parentElement);
+        relativePath = XmlUtils.getTextContent("/project/relativePath", parentElement);
         this.pomPath = pomPath;
     }
 
