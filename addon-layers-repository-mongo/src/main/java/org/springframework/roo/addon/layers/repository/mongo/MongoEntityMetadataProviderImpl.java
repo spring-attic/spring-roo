@@ -46,9 +46,6 @@ public class MongoEntityMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(MongoEntityMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private static final FieldMatcher ID_FIELD_MATCHER = new FieldMatcher(
             IDENTIFIER_FIELD,
             AnnotationMetadataBuilder.getInstance(SpringJavaType.DATA_ID
@@ -63,8 +60,8 @@ public class MongoEntityMetadataProviderImpl extends
     private CustomDataKeyDecorator customDataKeyDecorator;
 
     @SuppressWarnings("unchecked")
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         super.setDependsOnGovernorBeingAClass(false);
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -82,7 +79,6 @@ public class MongoEntityMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
         /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());*/

@@ -48,16 +48,13 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(JavaBeanMetadataProvider.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
 	private final Set<String> producedMids = new LinkedHashSet<String>();
 
 	private ProjectOperations projectOperations;
 	private Boolean wasGaeEnabled;
 
-	protected void activate(final ComponentContext context) {
-		this.context = context.getBundleContext();
+	protected void activate(final ComponentContext cContext) {
+		context = cContext.getBundleContext();
 		/*metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(
 				PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -230,10 +227,10 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
     public ProjectOperations getProjectOperations(){
     	// Get all Services implement ProjectOperations interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
+				return (ProjectOperations) context.getService(ref);
 			}
 			
 			return null;

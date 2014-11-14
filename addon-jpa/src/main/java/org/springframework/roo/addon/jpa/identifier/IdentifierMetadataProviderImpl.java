@@ -42,15 +42,12 @@ public class IdentifierMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(IdentifierMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private ConfigurableMetadataProvider configurableMetadataProvider;
     private ProjectOperations projectOperations;
     private SerializableMetadataProvider serializableMetadataProvider;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());*/
@@ -133,10 +130,10 @@ public class IdentifierMetadataProviderImpl extends
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
     	// Get all Services implement ConfigurableMetadataProvider interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) this.context.getService(ref);
+				return (ConfigurableMetadataProvider) context.getService(ref);
 			}
 			
 			return null;
@@ -150,10 +147,10 @@ public class IdentifierMetadataProviderImpl extends
     public ProjectOperations getProjectOperations(){
     	// Get all Services implement ProjectOperations interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
+				return (ProjectOperations) context.getService(ref);
 			}
 			
 			return null;
@@ -167,10 +164,10 @@ public class IdentifierMetadataProviderImpl extends
     public SerializableMetadataProvider getSerializableMetadataProvider(){
     	// Get all Services implement SerializableMetadataProvider interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(SerializableMetadataProvider.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(SerializableMetadataProvider.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (SerializableMetadataProvider) this.context.getService(ref);
+				return (SerializableMetadataProvider) context.getService(ref);
 			}
 			
 			return null;

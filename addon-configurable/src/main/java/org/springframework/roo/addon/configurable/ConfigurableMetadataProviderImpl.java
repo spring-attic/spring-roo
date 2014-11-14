@@ -2,16 +2,21 @@ package org.springframework.roo.addon.configurable;
 
 import static org.springframework.roo.model.RooJavaType.ROO_CONFIGURABLE;
 
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link ConfigurableMetadataProvider}.
@@ -23,8 +28,11 @@ import org.springframework.roo.project.LogicalPath;
 @Service
 public class ConfigurableMetadataProviderImpl extends
         AbstractItdMetadataProvider implements ConfigurableMetadataProvider {
-
-    protected void activate(final ComponentContext context) {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ConfigurableMetadataProviderImpl.class);
+	
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
     	/*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());*/

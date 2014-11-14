@@ -25,7 +25,8 @@ import org.springframework.roo.project.LogicalPath;
 public class ToStringMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),

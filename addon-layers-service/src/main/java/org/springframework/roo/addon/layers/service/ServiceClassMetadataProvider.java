@@ -47,9 +47,6 @@ public class ServiceClassMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(ServiceClassMetadataProvider.class);
-	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
 
     private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 
@@ -61,8 +58,8 @@ public class ServiceClassMetadataProvider extends
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
     	/*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -262,10 +259,10 @@ public class ServiceClassMetadataProvider extends
     	if(templateService == null){
     		// Get all Services implement ServiceLayerTemplateService interface
     		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ServiceLayerTemplateService.class.getName(), null);
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ServiceLayerTemplateService.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				return (ServiceLayerTemplateService) this.context.getService(ref);
+    				return (ServiceLayerTemplateService) context.getService(ref);
     			}
     			
     			return null;
@@ -283,10 +280,10 @@ public class ServiceClassMetadataProvider extends
     	if(layerService == null){
     		// Get all Services implement LayerService interface
     		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+    			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				return (LayerService) this.context.getService(ref);
+    				return (LayerService) context.getService(ref);
     			}
     			
     			return null;

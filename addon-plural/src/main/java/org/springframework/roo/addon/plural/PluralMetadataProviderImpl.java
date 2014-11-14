@@ -25,7 +25,8 @@ import org.springframework.roo.project.LogicalPath;
 public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider
         implements PluralMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());*/

@@ -40,14 +40,11 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(DbreMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private DbreModelService dbreModelService;
     private TypeManagementService typeManagementService;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
        /* metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());*/
@@ -172,10 +169,10 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
     	if(dbreModelService == null){
     		// Get all Services implement DbreModelService interface
     		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(DbreModelService.class.getName(), null);
+    			ServiceReference<?>[] references = context.getAllServiceReferences(DbreModelService.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				return (DbreModelService) this.context.getService(ref);
+    				return (DbreModelService) context.getService(ref);
     			}
     			
     			return null;
@@ -193,10 +190,10 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
     	if(typeManagementService == null){
     		// Get all Services implement TypeManagementService interface
     		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+    			ServiceReference<?>[] references = context.getAllServiceReferences(TypeManagementService.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				return (TypeManagementService) this.context.getService(ref);
+    				return (TypeManagementService) context.getService(ref);
     			}
     			
     			return null;

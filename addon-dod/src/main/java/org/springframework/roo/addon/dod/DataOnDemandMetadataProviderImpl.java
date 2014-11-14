@@ -74,9 +74,6 @@ public class DataOnDemandMetadataProviderImpl extends
         DataOnDemandMetadataProvider {
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(DataOnDemandMetadataProviderImpl.class);
-	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
 
     private static final String FLUSH_METHOD = CustomDataKeys.FLUSH_METHOD
             .name();
@@ -88,8 +85,8 @@ public class DataOnDemandMetadataProviderImpl extends
     private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
     private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -470,10 +467,10 @@ public class DataOnDemandMetadataProviderImpl extends
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
     	// Get all Services implement ConfigurableMetadataProvider interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) this.context.getService(ref);
+				return (ConfigurableMetadataProvider) context.getService(ref);
 			}
 			
 			return null;
@@ -487,10 +484,10 @@ public class DataOnDemandMetadataProviderImpl extends
     public LayerService getLayerService(){
     	// Get all Services implement LayerService interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (LayerService) this.context.getService(ref);
+				return (LayerService) context.getService(ref);
 			}
 			
 			return null;

@@ -48,13 +48,10 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(WebFinderMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private WebMetadataService webMetadataService;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());*/
@@ -158,10 +155,10 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
     public WebMetadataService getWebMetadataService(){
     	// Get all Services implement WebMetadataService interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(WebMetadataService.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(WebMetadataService.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (WebMetadataService) this.context.getService(ref);
+				return (WebMetadataService) context.getService(ref);
 			}
 			
 			return null;

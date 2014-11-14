@@ -35,7 +35,8 @@ public class EqualsMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         EqualsMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),

@@ -1270,6 +1270,21 @@ public class SimpleParser implements Parser {
 
     public ParseResult parse(final String rawInput) {
         synchronized (mutex) {
+        	
+        	if(converters.isEmpty()){
+        		// Get all Services implement Converter interface
+        		try {
+        			ServiceReference<?>[] references = this.context.getAllServiceReferences(Converter.class.getName(), null);
+        			
+        			for(ServiceReference<?> ref : references){
+        				add((Converter<?>) this.context.getService(ref));
+        			}
+        			
+        		} catch (InvalidSyntaxException e) {
+        			LOGGER.warning("Cannot load Converter on SimpleParser.");
+        		}
+        	}
+        	
             Validate.notNull(rawInput, "Raw input required");
             final String input = normalise(rawInput);
 

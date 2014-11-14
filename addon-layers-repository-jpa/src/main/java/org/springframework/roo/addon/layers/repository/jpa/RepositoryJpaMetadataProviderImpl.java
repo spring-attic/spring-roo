@@ -41,16 +41,13 @@ public class RepositoryJpaMetadataProviderImpl extends
         RepositoryJpaMetadataProvider {
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(RepositoryJpaMetadataProviderImpl.class);
-	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
 
     private CustomDataKeyDecorator customDataKeyDecorator;
     private final Map<JavaType, String> domainTypeToRepositoryMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> repositoryMidToDomainTypeMap = new LinkedHashMap<String, JavaType>();
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         super.setDependsOnGovernorBeingAClass(false);
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
@@ -162,10 +159,10 @@ public class RepositoryJpaMetadataProviderImpl extends
     	if(customDataKeyDecorator == null){
     		// Get all Services implement CustomDataKeyDecorator interface
     		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				return (CustomDataKeyDecorator) this.context.getService(ref);
+    				return (CustomDataKeyDecorator) context.getService(ref);
     			}
     			
     			return null;

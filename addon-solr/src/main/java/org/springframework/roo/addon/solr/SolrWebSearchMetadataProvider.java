@@ -34,13 +34,10 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(SolrWebSearchMetadataProvider.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private WebScaffoldMetadataProvider webScaffoldMetadataProvider;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());

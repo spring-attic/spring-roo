@@ -96,7 +96,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
                 getProjectOperations().getFocusedModuleName());
 
         // Copy the template across
-        final String destination = pathResolver.getFocusedIdentifier(
+        final String destination = getPathResolver().getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
         if (!getFileManager().exists(destination)) {
             InputStream inputStream = null;

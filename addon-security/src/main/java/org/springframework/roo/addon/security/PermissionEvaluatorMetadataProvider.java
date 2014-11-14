@@ -41,15 +41,12 @@ public class PermissionEvaluatorMetadataProvider extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(PermissionEvaluatorMetadataProvider.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-	
     private TypeManagementService typeManagementService;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),

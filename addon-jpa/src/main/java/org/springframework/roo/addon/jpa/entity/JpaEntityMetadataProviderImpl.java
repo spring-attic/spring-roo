@@ -84,9 +84,6 @@ public class JpaEntityMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(JpaEntityMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     // JPA-related field matchers
     private static final FieldMatcher JPA_COLUMN_FIELD_MATCHER = new FieldMatcher(
             COLUMN_FIELD, AnnotationMetadataBuilder.getInstance(COLUMN));
@@ -137,8 +134,8 @@ public class JpaEntityMetadataProviderImpl extends
     private CustomDataKeyDecorator customDataKeyDecorator;
     private ProjectOperations projectOperations;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 PROVIDES_TYPE);*/
@@ -253,7 +250,7 @@ public class JpaEntityMetadataProviderImpl extends
         if (projectOperations.isProjectAvailable(moduleName)) {
             // If the project itself changes, we want a chance to refresh this
             // item
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     ProjectMetadata.getProjectIdentifier(moduleName),
                     metadataIdentificationString);
             isGaeEnabled = projectOperations.isFeatureInstalledInModule(
@@ -319,10 +316,10 @@ public class JpaEntityMetadataProviderImpl extends
     public CustomDataKeyDecorator getCustomDataKeyDecorator(){
     	// Get all Services implement CustomDataKeyDecorator interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (CustomDataKeyDecorator) this.context.getService(ref);
+				return (CustomDataKeyDecorator) context.getService(ref);
 			}
 			
 			return null;
@@ -336,10 +333,10 @@ public class JpaEntityMetadataProviderImpl extends
     public ProjectOperations getProjectOperations(){
     	// Get all Services implement ProjectOperations interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
+				return (ProjectOperations) context.getService(ref);
 			}
 			
 			return null;

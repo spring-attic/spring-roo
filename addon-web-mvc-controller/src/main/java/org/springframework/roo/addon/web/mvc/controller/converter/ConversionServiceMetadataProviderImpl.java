@@ -62,9 +62,6 @@ public class ConversionServiceMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(ConversionServiceMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-	
 	private final static JavaType EMBEDDABLE_ANNOTATION = new JavaType("javax.persistence.Embeddable");
 
     // Stores the MID (as accepted by this
@@ -74,8 +71,8 @@ public class ConversionServiceMetadataProviderImpl extends
 
     private LayerService layerService;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
@@ -320,10 +317,10 @@ public class ConversionServiceMetadataProviderImpl extends
     public LayerService getLayerService(){
     	// Get all Services implement LayerService interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (LayerService) this.context.getService(ref);
+				return (LayerService) context.getService(ref);
 			}
 			
 			return null;

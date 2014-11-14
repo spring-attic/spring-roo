@@ -43,9 +43,6 @@ public class JsfApplicationBeanMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(JsfApplicationBeanMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private ConfigurableMetadataProvider configurableMetadataProvider;
     private ProjectOperations projectOperations;
 
@@ -53,8 +50,8 @@ public class JsfApplicationBeanMetadataProviderImpl extends
     // for the one (and only one) application-wide menu bean
     private String applicationBeanMid;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
@@ -159,10 +156,10 @@ public class JsfApplicationBeanMetadataProviderImpl extends
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
     	// Get all Services implement ConfigurableMetadataProvider interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) this.context.getService(ref);
+				return (ConfigurableMetadataProvider) context.getService(ref);
 			}
 			
 			return null;
@@ -176,10 +173,10 @@ public class JsfApplicationBeanMetadataProviderImpl extends
     public ProjectOperations getProjectOperations(){
     	// Get all Services implement ProjectOperations interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
+				return (ProjectOperations) context.getService(ref);
 			}
 			
 			return null;

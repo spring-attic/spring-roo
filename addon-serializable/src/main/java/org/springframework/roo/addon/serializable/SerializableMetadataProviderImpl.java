@@ -23,7 +23,8 @@ import org.springframework.roo.project.LogicalPath;
 public class SerializableMetadataProviderImpl extends
         AbstractItdMetadataProvider implements SerializableMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());*/

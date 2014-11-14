@@ -45,13 +45,10 @@ public class SolrMetadataProvider extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(SolrMetadataProvider.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private JpaActiveRecordMetadataProvider jpaActiveRecordMetadataProvider;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());

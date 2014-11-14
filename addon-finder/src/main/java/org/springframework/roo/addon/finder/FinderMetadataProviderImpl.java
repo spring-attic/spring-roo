@@ -43,14 +43,11 @@ public class FinderMetadataProviderImpl extends
         FinderMetadataProvider {
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(FinderMetadataProviderImpl.class);
-	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
 
     private DynamicFinderServices dynamicFinderServices;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
     	/*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -115,7 +112,7 @@ public class FinderMetadataProviderImpl extends
                 .createIdentifier(javaType, path);
 
         // We need to lookup the metadata we depend on
-        final JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
+        final JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) getMetadataService()
                 .get(jpaActiveRecordMetadataKey);
         if (jpaActiveRecordMetadata == null
                 || !jpaActiveRecordMetadata.isValid()) {
@@ -194,10 +191,10 @@ public class FinderMetadataProviderImpl extends
     public DynamicFinderServices getDynamicFinderServices(){
     	// Get all Services implement DynamicFinderServices interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(DynamicFinderServices.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(DynamicFinderServices.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (DynamicFinderServices) this.context.getService(ref);
+				return (DynamicFinderServices) context.getService(ref);
 			}
 			
 			return null;

@@ -69,16 +69,13 @@ public class JpaActiveRecordMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(JpaActiveRecordMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private ConfigurableMetadataProvider configurableMetadataProvider;
     private CustomDataKeyDecorator customDataKeyDecorator;
     private PluralMetadataProvider pluralMetadataProvider;
     private ProjectOperations projectOperations;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());*/
@@ -112,7 +109,7 @@ public class JpaActiveRecordMetadataProviderImpl extends
         if (StringUtils.isBlank(physicalTypeId)) {
             return null;
         }
-        final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService
+        final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) getMetadataService()
                 .get(physicalTypeId);
         if (MemberFindingUtils.getAnnotationOfType(governor,
                 ROO_JPA_ACTIVE_RECORD) == null) {
@@ -188,16 +185,16 @@ public class JpaActiveRecordMetadataProviderImpl extends
         final LogicalPath path = JpaActiveRecordMetadata
                 .getPath(metadataIdentificationString);
         final String pluralId = PluralMetadata.createIdentifier(entity, path);
-        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+        final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                 .get(pluralId);
         if (pluralMetadata == null) {
             // Can't acquire the plural
             return null;
         }
-        metadataDependencyRegistry.registerDependency(pluralId,
+        getMetadataDependencyRegistry().registerDependency(pluralId,
                 metadataIdentificationString);
 
-        final List<FieldMetadata> idFields = persistenceMemberLocator
+        final List<FieldMetadata> idFields = getPersistenceMemberLocator()
                 .getIdentifierFields(entity);
         if (idFields.size() != 1) {
             // The ID field metadata is either unavailable or not stable yet
@@ -215,7 +212,7 @@ public class JpaActiveRecordMetadataProviderImpl extends
         if (projectOperations.isProjectAvailable(moduleName)) {
             // If the project itself changes, we want a chance to refresh this
             // item
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     ProjectMetadata.getProjectIdentifier(moduleName),
                     metadataIdentificationString);
             isGaeEnabled = projectOperations.isFeatureInstalledInModule(
@@ -284,10 +281,10 @@ public class JpaActiveRecordMetadataProviderImpl extends
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
     	// Get all Services implement ConfigurableMetadataProvider interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) this.context.getService(ref);
+				return (ConfigurableMetadataProvider) context.getService(ref);
 			}
 			
 			return null;
@@ -301,10 +298,10 @@ public class JpaActiveRecordMetadataProviderImpl extends
     public CustomDataKeyDecorator getCustomDataKeyDecorator(){
     	// Get all Services implement CustomDataKeyDecorator interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (CustomDataKeyDecorator) this.context.getService(ref);
+				return (CustomDataKeyDecorator) context.getService(ref);
 			}
 			
 			return null;
@@ -318,10 +315,10 @@ public class JpaActiveRecordMetadataProviderImpl extends
     public PluralMetadataProvider getPluralMetadataProvider(){
     	// Get all Services implement PluralMetadataProvider interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(PluralMetadataProvider.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(PluralMetadataProvider.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (PluralMetadataProvider) this.context.getService(ref);
+				return (PluralMetadataProvider) context.getService(ref);
 			}
 			
 			return null;
@@ -335,10 +332,10 @@ public class JpaActiveRecordMetadataProviderImpl extends
     public ProjectOperations getProjectOperations(){
     	// Get all Services implement ProjectOperations interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
+				return (ProjectOperations) context.getService(ref);
 			}
 			
 			return null;

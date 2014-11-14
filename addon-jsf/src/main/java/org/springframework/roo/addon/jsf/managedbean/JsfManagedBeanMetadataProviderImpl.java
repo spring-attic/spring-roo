@@ -84,9 +84,6 @@ public class JsfManagedBeanMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(JsfManagedBeanMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
     // -- The maximum number of fields to form a String to show in a drop down
     // field.
@@ -99,8 +96,8 @@ public class JsfManagedBeanMetadataProviderImpl extends
     private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -492,10 +489,10 @@ public class JsfManagedBeanMetadataProviderImpl extends
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
     	// Get all Services implement ConfigurableMetadataProvider interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) this.context.getService(ref);
+				return (ConfigurableMetadataProvider) context.getService(ref);
 			}
 			
 			return null;
@@ -509,10 +506,10 @@ public class JsfManagedBeanMetadataProviderImpl extends
     public LayerService getLayerService(){
     	// Get all Services implement LayerService interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (LayerService) this.context.getService(ref);
+				return (LayerService) context.getService(ref);
 			}
 			
 			return null;

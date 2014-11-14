@@ -46,16 +46,13 @@ public class ServiceInterfaceMetadataProvider extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(ServiceInterfaceMetadataProvider.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private CustomDataKeyDecorator customDataKeyDecorator;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
     @SuppressWarnings("unchecked")
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         super.setDependsOnGovernorBeingAClass(false);
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(

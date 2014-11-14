@@ -70,9 +70,6 @@ public class IntegrationTestMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(IntegrationTestMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
     private static final JavaSymbolName TRANSACTION_MANAGER_ATTRIBUTE = new JavaSymbolName(
             "transactionManager");
@@ -85,8 +82,8 @@ public class IntegrationTestMetadataProviderImpl extends
     private final Set<String> producedMids = new LinkedHashSet<String>();
     private Boolean wasGaeEnabled;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -414,10 +411,10 @@ public class IntegrationTestMetadataProviderImpl extends
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
     	// Get all Services implement ConfigurableMetadataProvider interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) this.context.getService(ref);
+				return (ConfigurableMetadataProvider) context.getService(ref);
 			}
 			
 			return null;
@@ -431,10 +428,10 @@ public class IntegrationTestMetadataProviderImpl extends
     public LayerService getLayerService(){
     	// Get all Services implement LayerService interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (LayerService) this.context.getService(ref);
+				return (LayerService) context.getService(ref);
 			}
 			
 			return null;
@@ -448,10 +445,10 @@ public class IntegrationTestMetadataProviderImpl extends
     public ProjectOperations getProjectOperations(){
     	// Get all Services implement ProjectOperations interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
+				return (ProjectOperations) context.getService(ref);
 			}
 			
 			return null;

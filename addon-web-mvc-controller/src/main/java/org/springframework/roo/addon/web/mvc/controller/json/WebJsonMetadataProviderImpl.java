@@ -54,16 +54,13 @@ public class WebJsonMetadataProviderImpl extends
 
 	protected final static Logger LOGGER = HandlerUtils.getLogger(WebJsonMetadataProviderImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-	
     private WebMetadataService webMetadataService;
 
     // Maps entities to the IDs of their WebJsonMetadata
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
@@ -282,10 +279,10 @@ public class WebJsonMetadataProviderImpl extends
     public WebMetadataService getWebMetadataService(){
     	// Get all Services implement WebMetadataService interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(WebMetadataService.class.getName(), null);
+			ServiceReference<?>[] references = context.getAllServiceReferences(WebMetadataService.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (WebMetadataService) this.context.getService(ref);
+				return (WebMetadataService) context.getService(ref);
 			}
 			
 			return null;
