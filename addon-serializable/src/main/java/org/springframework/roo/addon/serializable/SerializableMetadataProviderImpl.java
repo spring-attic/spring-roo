@@ -18,15 +18,15 @@ import org.springframework.roo.project.LogicalPath;
  * @author Alan Stewart
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class SerializableMetadataProviderImpl extends
         AbstractItdMetadataProvider implements SerializableMetadataProvider {
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_SERIALIZABLE);
     }
 
@@ -37,9 +37,9 @@ public class SerializableMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_SERIALIZABLE);
     }
 

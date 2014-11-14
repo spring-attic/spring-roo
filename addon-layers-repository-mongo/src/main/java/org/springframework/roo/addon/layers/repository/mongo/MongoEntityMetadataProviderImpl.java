@@ -7,6 +7,7 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIS
 import static org.springframework.roo.model.RooJavaType.ROO_MONGO_ENTITY;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -27,16 +28,26 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link MongoEntityMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class MongoEntityMetadataProviderImpl extends
         AbstractItdMetadataProvider implements MongoEntityMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(MongoEntityMetadataProviderImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private static final FieldMatcher ID_FIELD_MATCHER = new FieldMatcher(
             IDENTIFIER_FIELD,
@@ -49,18 +60,19 @@ public class MongoEntityMetadataProviderImpl extends
     private static final AnnotatedTypeMatcher PERSISTENT_TYPE_MATCHER = new AnnotatedTypeMatcher(
             PERSISTENT_TYPE, ROO_MONGO_ENTITY);
 
-    @Reference private CustomDataKeyDecorator customDataKeyDecorator;
+    private CustomDataKeyDecorator customDataKeyDecorator;
 
     @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
         super.setDependsOnGovernorBeingAClass(false);
-        metadataDependencyRegistry.registerDependency(
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_MONGO_ENTITY);
-        customDataKeyDecorator.registerMatchers(getClass(),
+        /*customDataKeyDecorator.registerMatchers(getClass(),
                 PERSISTENT_TYPE_MATCHER, ID_FIELD_MATCHER, ID_ACCESSOR_MATCHER,
-                ID_MUTATOR_MATCHER);
+                ID_MUTATOR_MATCHER);*/
     }
 
     @Override
@@ -70,11 +82,12 @@ public class MongoEntityMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_MONGO_ENTITY);
-        customDataKeyDecorator.unregisterMatchers(getClass());
+        /*customDataKeyDecorator.unregisterMatchers(getClass());*/
     }
 
     @Override

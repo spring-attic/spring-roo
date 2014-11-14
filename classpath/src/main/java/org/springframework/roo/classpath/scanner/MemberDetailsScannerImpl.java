@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -23,6 +24,10 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Default implementation of {@link MemberDetailsScanner}.
@@ -41,13 +46,21 @@ import org.springframework.roo.metadata.MetadataService;
  * @author Ben Alex
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
-@References(value = {
-        @Reference(name = "memberHoldingDecorator", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MemberDetailsDecorator.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
-        @Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) })
 public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 
+	protected final static Logger LOGGER = HandlerUtils.getLogger(MemberDetailsScannerImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected MetadataService metadataService;
+   	
+   	protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
+	
     private final SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(
             new Comparator<MemberDetailsDecorator>() {
                 public int compare(final MemberDetailsDecorator o1,
@@ -60,8 +73,6 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
     // Mutex
     private final Object lock = new Object();
 
-    @Reference protected MetadataService metadataService;
-
     private final SortedSet<MetadataProvider> providers = new TreeSet<MetadataProvider>(
             new Comparator<MetadataProvider>() {
                 public int compare(final MetadataProvider o1,
@@ -71,22 +82,39 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
                 }
             });
 
-    protected void bindMemberHoldingDecorator(
-            final MemberDetailsDecorator decorator) {
-        synchronized (lock) {
-            decorators.add(decorator);
+    protected void bindDecorators() {
+    	synchronized (lock) {
+        	// Get all Services implement MemberDetailsDecorator interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MemberDetailsDecorator.class.getName(), null);
+    			for(ServiceReference<?> ref : references){
+    				MemberDetailsDecorator decorator = (MemberDetailsDecorator) this.context.getService(ref);
+		            decorators.add(decorator);
+    			}
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MemberDetailsDecorator on MemberDetailsScannerImpl.");
+    		}
         }
     }
 
-    protected void bindMetadataProvider(final MetadataProvider mp) {
-        synchronized (lock) {
-            Validate.notNull(mp, "Metadata provider required");
-            final String mid = mp.getProvidesType();
-            Validate.isTrue(
-                    MetadataIdentificationUtils.isIdentifyingClass(mid),
-                    "Metadata provider '%s' violated interface contract by returning '%s'",
-                    mp, mid);
-            providers.add(mp);
+    protected void bindProviders() {
+    	synchronized (lock) {
+        	// Get all Services implement MetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataProvider.class.getName(), null);
+    			for(ServiceReference<?> ref : references){
+				MetadataProvider provider = (MetadataProvider) this.context.getService(ref);
+				 Validate.notNull(provider, "Metadata provider required");
+		            final String mid = provider.getProvidesType();
+		            Validate.isTrue(
+		                    MetadataIdentificationUtils.isIdentifyingClass(mid),
+		                    "Metadata provider '%s' violated interface contract by returning '%s'",
+		                    provider, mid);
+		            providers.add(provider);
+    			}
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataProvider on MemberDetailsScannerImpl.");
+    		}
         }
     }
 
@@ -96,6 +124,19 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 
     public final MemberDetails getMemberDetails(final String requestingClass,
             ClassOrInterfaceTypeDetails cid) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	
+    	if(providers.isEmpty()){
+    		bindProviders();
+    	}
+    	
+    	if(decorators.isEmpty()){
+    		bindDecorators();
+    	}
+    	
         if (cid == null) {
             return null;
         }
@@ -187,17 +228,20 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
         }
     }
 
-    protected void unbindMemberHoldingDecorator(
-            final MemberDetailsDecorator decorator) {
-        synchronized (lock) {
-            decorators.remove(decorator);
-        }
-    }
-
-    protected void unbindMetadataProvider(final MetadataProvider mp) {
-        synchronized (lock) {
-            Validate.notNull(mp, "Metadata provider required");
-            providers.remove(mp);
-        }
+    public MetadataService getMetadataService(){
+    	// Get all Services implement MetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataService on MemberDetailsScannerImpl.");
+			return null;
+		}
     }
 }

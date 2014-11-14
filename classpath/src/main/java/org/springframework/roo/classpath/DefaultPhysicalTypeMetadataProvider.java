@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -29,6 +30,11 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Monitors for *.java files and produces a {@link PhysicalTypeMetadata} for
@@ -40,11 +46,20 @@ import org.springframework.roo.project.ProjectOperations;
  * @author James Tyrrell
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 @References(value = { @Reference(name = "memberHoldingDecorator", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MemberDetailsDecorator.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) })
 public class DefaultPhysicalTypeMetadataProvider implements
         PhysicalTypeMetadataProvider, FileEventListener {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(DefaultPhysicalTypeMetadataProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     private final SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(
             new Comparator<MemberDetailsDecorator>() {
@@ -55,12 +70,12 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 }
             });
 
-    @Reference private FileManager fileManager;
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference private MetadataService metadataService;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private TypeParsingService typeParsingService;
+    private FileManager fileManager;
+    private MetadataDependencyRegistry metadataDependencyRegistry;
+    private MetadataService metadataService;
+    private ProjectOperations projectOperations;
+    private TypeLocationService typeLocationService;
+    private TypeParsingService typeParsingService;
 
     // Mutex
     private final Object lock = new Object();
@@ -73,6 +88,38 @@ public class DefaultPhysicalTypeMetadataProvider implements
     }
 
     public MetadataItem get(final String metadataIdentificationString) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if (metadataDependencyRegistry == null){
+    		metadataDependencyRegistry = getMetadataDependencyRegistry();
+    	}
+    	
+    	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+    	if(typeParsingService == null){
+    		typeParsingService = getTypeParsingService();
+    	}
+    	
+    	Validate.notNull(typeParsingService, "TypeParsingService is required");
+    	
+    	
         Validate.isTrue(
                 PhysicalTypeIdentifier.isValid(metadataIdentificationString),
                 "Metadata id '%s' is not valid for this metadata provider",
@@ -165,6 +212,25 @@ public class DefaultPhysicalTypeMetadataProvider implements
     }
 
     public void onFileEvent(final FileEvent fileEvent) {
+    	
+    	if (metadataDependencyRegistry == null){
+    		metadataDependencyRegistry = getMetadataDependencyRegistry();
+    	}
+    	
+    	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         final String fileIdentifier = fileEvent.getFileDetails()
                 .getCanonicalPath();
 
@@ -191,4 +257,114 @@ public class DefaultPhysicalTypeMetadataProvider implements
             decorators.remove(decorator);
         }
     }
+    
+    public FileManager getFileManager(){
+    	// Get all Services implement FileManager interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (FileManager) this.context.getService(ref);
+			}
+			
+			LOGGER.warning("Cannot load FileManager on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load FileManager on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public MetadataDependencyRegistry getMetadataDependencyRegistry(){
+    	// Get all Services implement MetadataDependencyRegistry interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataDependencyRegistry) this.context.getService(ref);
+			}
+			
+			LOGGER.warning("Cannot load MetadataDependencyRegistry on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataDependencyRegistry on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public MetadataService getMetadataService(){
+    	// Get all Services implement MetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataService) this.context.getService(ref);
+			}
+			
+			LOGGER.warning("Cannot load MetadataService on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataService on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) this.context.getService(ref);
+			}
+			
+			LOGGER.warning("Cannot load ProjectOperations on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeLocationService) this.context.getService(ref);
+			}
+			
+			LOGGER.warning("Cannot load TypeLocationService on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeLocationService on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public TypeParsingService getTypeParsingService(){
+    	// Get all Services implement TypeParsingService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeParsingService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeParsingService) this.context.getService(ref);
+			}
+			
+			LOGGER.warning("Cannot load TypeParsingService on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeParsingService on DefaultPhysicalTypeMetadataProvider.");
+			return null;
+		}
+    }
+    
+    
 }

@@ -20,14 +20,14 @@ import org.springframework.roo.project.LogicalPath;
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_EDITOR);
     }
 
@@ -38,9 +38,9 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_EDITOR);
     }
 

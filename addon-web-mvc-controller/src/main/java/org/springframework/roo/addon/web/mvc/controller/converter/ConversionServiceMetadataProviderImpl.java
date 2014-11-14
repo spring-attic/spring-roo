@@ -10,6 +10,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.Validate;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -39,6 +42,11 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link ConversionServiceMetadataProvider}.
  * 
@@ -46,11 +54,16 @@ import org.springframework.roo.project.LogicalPath;
  * @author Stefan Schmidt
  * @since 1.1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class ConversionServiceMetadataProviderImpl extends
         AbstractItdMetadataProvider implements
         ConversionServiceMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ConversionServiceMetadataProviderImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 	
 	private final static JavaType EMBEDDABLE_ANNOTATION = new JavaType("javax.persistence.Embeddable");
 
@@ -59,15 +72,16 @@ public class ConversionServiceMetadataProviderImpl extends
     // application-wide conversion service
     private String applicationConversionServiceFactoryBeanMid;
 
-    @Reference private LayerService layerService;
+    private LayerService layerService;
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         metadataDependencyRegistry.registerDependency(
                 WebScaffoldMetadata.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_CONVERSION_SERVICE);
     }
 
@@ -79,12 +93,12 @@ public class ConversionServiceMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         metadataDependencyRegistry.deregisterDependency(
                 WebScaffoldMetadata.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_CONVERSION_SERVICE);
     }
 
@@ -108,6 +122,12 @@ public class ConversionServiceMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
         applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
 
         // To get here we know the governor is the
@@ -295,5 +315,22 @@ public class ConversionServiceMetadataProviderImpl extends
         // (it's expected it would be a PhysicalTypeIdentifier notification, as
         // that's the only other thing we registered to receive)
         return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
+    }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on ConversionServiceMetadataProviderImpl.");
+			return null;
+		}
     }
 }

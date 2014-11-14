@@ -8,6 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.Validate;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -33,28 +36,39 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.CollectionUtils;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link WebScaffoldMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class WebScaffoldMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         WebScaffoldMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(WebScaffoldMetadataProviderImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private WebMetadataService webMetadataService;
+    private WebMetadataService webMetadataService;
 
     private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_WEB_SCAFFOLD);
     }
 
@@ -65,10 +79,10 @@ public class WebScaffoldMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        /*metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_WEB_SCAFFOLD);
     }
 
@@ -107,6 +121,12 @@ public class WebScaffoldMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalType,
             final String itdFilename) {
+    	
+    	if(webMetadataService == null){
+    		webMetadataService = getWebMetadataService();
+    	}
+    	Validate.notNull(webMetadataService, "WebMetadataService is required");
+    	
         // We need to parse the annotation, which we expect to be present
         final WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(
                 governorPhysicalType);
@@ -213,5 +233,23 @@ public class WebScaffoldMetadataProviderImpl extends
             }
         }
         return null;
+    }
+    
+    
+    public WebMetadataService getWebMetadataService(){
+    	// Get all Services implement WebMetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(WebMetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (WebMetadataService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load WebMetadataService on WebScaffoldMetadataProviderImpl.");
+			return null;
+		}
     }
 }

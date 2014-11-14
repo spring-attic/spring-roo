@@ -20,15 +20,15 @@ import org.springframework.roo.project.LogicalPath;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider
         implements PluralMetadataProvider {
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         setIgnoreTriggerAnnotations(true);
         setDependsOnGovernorBeingAClass(false);
     }
@@ -40,9 +40,9 @@ public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
     }
 
     @Override

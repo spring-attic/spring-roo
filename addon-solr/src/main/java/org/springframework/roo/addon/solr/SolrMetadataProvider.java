@@ -4,6 +4,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -26,24 +27,35 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Provides {@link SolrMetadata}.
  * 
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class SolrMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(SolrMetadataProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private JpaActiveRecordMetadataProvider jpaActiveRecordMetadataProvider;
+    private JpaActiveRecordMetadataProvider jpaActiveRecordMetadataProvider;
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        jpaActiveRecordMetadataProvider.addMetadataTrigger(ROO_SOLR_SEARCHABLE);
+        jpaActiveRecordMetadataProvider.addMetadataTrigger(ROO_SOLR_SEARCHABLE);*/
         addMetadataTrigger(ROO_SOLR_SEARCHABLE);
     }
 
@@ -54,11 +66,11 @@ public class SolrMetadataProvider extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         jpaActiveRecordMetadataProvider
-                .removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
+                .removeMetadataTrigger(ROO_SOLR_SEARCHABLE);*/
         removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
     }
 

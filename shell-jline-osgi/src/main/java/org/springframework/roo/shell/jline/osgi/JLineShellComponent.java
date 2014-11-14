@@ -14,10 +14,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -30,6 +32,10 @@ import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * OSGi component launcher for {@link JLineShell}.
@@ -37,18 +43,21 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  * @author Ben Alex
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JLineShellComponent extends JLineShell {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JLineShellComponent.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private ExecutionStrategy executionStrategy;
-    @Reference private Parser parser;
-    @Reference private UrlInputStreamService urlInputStreamService;
-
-    private ComponentContext context;
+    @Reference ExecutionStrategy executionStrategy;
+    @Reference Parser parser;
+    private UrlInputStreamService urlInputStreamService;
 
     protected void activate(final ComponentContext context) {
-        this.context = context;
+    	this.context = context.getBundleContext();
         final Thread thread = new Thread(this, "Spring Roo JLine Shell");
         thread.start();
     }
@@ -61,7 +70,7 @@ public class JLineShellComponent extends JLineShell {
     @Override
     protected Collection<URL> findResources(final String path) {
         // For an OSGi bundle search, we add the root prefix to the given path
-        return OSGiUtils.findEntriesByPath(context.getBundleContext(),
+        return OSGiUtils.findEntriesByPath(context,
                 OSGiUtils.ROOT_PATH + path);
     }
 
@@ -156,6 +165,13 @@ public class JLineShellComponent extends JLineShell {
     // 29/08/11
     private String sendGetRequest(final String endpoint,
             final String requestParameters) {
+    	
+    	if(urlInputStreamService == null){
+    		urlInputStreamService = getUrlInputStreamService();
+    	}
+    	
+    	Validate.notNull(urlInputStreamService, "UrlInputStreamService is required");
+    	
         if (!(endpoint.startsWith("http://") || endpoint.startsWith("https://"))) {
             return null;
         }
@@ -179,5 +195,23 @@ public class JLineShellComponent extends JLineShell {
         finally {
             IOUtils.closeQuietly(inputStream);
         }
+    }
+    
+    
+    public UrlInputStreamService getUrlInputStreamService(){
+    	// Get all Services implement UrlInputStreamService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(UrlInputStreamService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (UrlInputStreamService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load UrlInputStreamService on JLineShellComponent.");
+			return null;
+		}
     }
 }

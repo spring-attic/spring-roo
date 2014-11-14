@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +55,12 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link JsfOperations}.
  * 
@@ -64,6 +71,12 @@ import org.w3c.dom.Element;
 @Service
 public class JsfOperationsImpl extends AbstractOperations implements
         JsfOperations {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JsfOperationsImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+	
 
     private static final String DEPENDENCY_XPATH = "/dependencies/dependency";
     private static final String JSF_IMPLEMENTATION_XPATH = "/configuration/jsf-implementations/jsf-implementation";
@@ -73,15 +86,25 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private static final String PRIMEFACES_THEMES_VERSION = "1.0.10";
     private static final String REPOSITORY_XPATH = "/repositories/repository";
 
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference private MetadataService metadataService;
-    @Reference private PathResolver pathResolver;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private Shell shell;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private TypeManagementService typeManagementService;
+    private MetadataDependencyRegistry metadataDependencyRegistry;
+    private MetadataService metadataService;
+    private PathResolver pathResolver;
+    private ProjectOperations projectOperations;
+    private Shell shell;
+    private TypeLocationService typeLocationService;
+    private TypeManagementService typeManagementService;
+    
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     public void addMediaSuurce(final String url, MediaPlayer mediaPlayer) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         Validate.notBlank(url, "Media source url required");
 
         final String mainPage = projectOperations.getPathResolver()
@@ -177,6 +200,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private void changePrimeFacesTheme(final Theme theme,
             final Document document) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         Validate.notNull(theme, "Theme required");
         Validate.notNull(document, "web.xml document required");
 
@@ -205,6 +234,13 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private void copyEntityTypePage(final JavaType entity,
             final String beanName, final String plural) {
+    	
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final String domainTypeFile = projectOperations.getPathResolver()
                 .getFocusedIdentifier(
                         Path.SRC_MAIN_WEBAPP,
@@ -238,7 +274,23 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private void createConverter(final JavaPackage javaPackage,
             final JavaType entity) {
-        // Create type annotation for new converter class
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(shell == null){
+    		shell = getShell();
+    	}
+    	Validate.notNull(shell, "Shell is required");
+    	
+    	if(typeManagementService == null){
+    		typeManagementService = getTypeManagementService();
+    	}
+    	Validate.notNull(typeManagementService, "TypeManagementService is required");
+    	
+    	// Create type annotation for new converter class
         final JavaType converterType = new JavaType(
                 javaPackage.getFullyQualifiedPackageName() + "."
                         + entity.getSimpleTypeName() + "Converter");
@@ -264,6 +316,32 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     public void createManagedBean(final JavaType managedBean,
             final JavaType entity, String beanName, final boolean includeOnMenu) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(shell == null){
+    		shell = getShell();
+    	}
+    	Validate.notNull(shell, "Shell is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+    	if(typeManagementService == null){
+    		typeManagementService = getTypeManagementService();
+    	}
+    	Validate.notNull(typeManagementService, "TypeManagementService is required");
+    	
         final JavaPackage managedBeanPackage = managedBean.getPackage();
         installFacesConfig(managedBeanPackage);
         installI18n(managedBeanPackage);
@@ -347,6 +425,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private void createOrUpdateWebXml(
             final JsfImplementation jsfImplementation, final Theme theme) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final String webXmlPath = getWebXmlFile();
 
         final Document document;
@@ -381,7 +465,18 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private void generateManagedBeans(final JavaPackage destinationPackage) {
-        for (final ClassOrInterfaceTypeDetails cid : typeLocationService
+        
+    	if(metadataDependencyRegistry == null){
+    		metadataDependencyRegistry = getMetadataDependencyRegistry();
+    	}
+    	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+    	for (final ClassOrInterfaceTypeDetails cid : typeLocationService
                 .findClassesOrInterfaceDetailsWithTag(CustomDataKeys.PERSISTENT_TYPE)) {
             if (Modifier.isAbstract(cid.getModifier())) {
                 continue;
@@ -424,6 +519,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private JsfImplementation getExistingOrDefaultJsfImplementation(
             final Element configuration) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final Pom pom = projectOperations
                 .getPomFromModuleName(projectOperations.getFocusedModuleName());
         JsfImplementation existingJsfImplementation = null;
@@ -444,6 +545,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private JsfLibrary getExistingOrDefaultJsfLibrary(
             final Element configuration) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final Pom pom = projectOperations
                 .getPomFromModuleName(projectOperations.getFocusedModuleName());
         JsfLibrary existingJsfImplementation = null;
@@ -463,6 +570,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private String getFacesConfigFile() {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         return projectOperations.getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml");
     }
@@ -518,6 +631,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private String getWebXmlFile() {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         return projectOperations.getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
     }
@@ -528,6 +647,22 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private void installBean(final String templateName,
             final JavaPackage destinationPackage) {
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(shell == null){
+    		shell = getShell();
+    	}
+    	Validate.notNull(shell, "Shell is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         final String beanName = templateName.substring(0,
                 templateName.indexOf("-template"));
         final JavaType javaType = new JavaType(
@@ -566,6 +701,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private void installFacesConfig(final JavaPackage destinationPackage) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         Validate.isTrue(projectOperations.isFocusedProjectAvailable(),
                 "Project metadata required");
         if (hasFacesConfig()) {
@@ -592,6 +733,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private void installI18n(final JavaPackage destinationPackage) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final String packagePath = destinationPackage
                 .getFullyQualifiedPackageName()
                 .replace('.', File.separatorChar);
@@ -602,6 +749,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     public boolean isInstalledInModule(final String moduleName) {
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         final LogicalPath webAppPath = LogicalPath.getInstance(
                 Path.SRC_MAIN_WEBAPP, moduleName);
         return fileManager.exists(pathResolver.getIdentifier(webAppPath,
@@ -611,18 +764,41 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     public boolean isJsfInstallationPossible() {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         return projectOperations.isFocusedProjectAvailable()
                 && !projectOperations
                         .isFeatureInstalledInFocusedModule(FeatureNames.MVC);
     }
 
     public boolean isScaffoldOrMediaAdditionAvailable() {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         return isInstalledInModule(projectOperations.getFocusedModuleName())
                 && fileManager.exists(getWebXmlFile());
     }
 
     public void setup(JsfImplementation jsfImplementation,
             final JsfLibrary jsfLibrary, final Theme theme) {
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         jsfImplementation = updateConfiguration(jsfImplementation, jsfLibrary);
         createOrUpdateWebXml(jsfImplementation, theme);
 
@@ -677,6 +853,13 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private void updateDependencies(final Element configuration,
             final JsfImplementation jsfImplementation,
             final JsfLibrary jsfLibrary) {
+    	
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final List<Dependency> requiredDependencyElements = new ArrayList<Dependency>();
 
         final List<Element> jsfImplementationDependencyElements = XmlUtils
@@ -730,6 +913,12 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private void updateRepositories(final Element configuration,
             final JsfImplementation jsfImplementation,
             final JsfLibrary jsfLibrary) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final List<Repository> repositories = new ArrayList<Repository>();
 
         final List<Element> jsfRepositoryElements = XmlUtils.findElements(
@@ -749,4 +938,124 @@ public class JsfOperationsImpl extends AbstractOperations implements
         projectOperations.addRepositories(
                 projectOperations.getFocusedModuleName(), repositories);
     }
+    
+    public MetadataDependencyRegistry getMetadataDependencyRegistry(){
+    	// Get all Services implement MetadataDependencyRegistry interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataDependencyRegistry) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataDependencyRegistry on JsfOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public MetadataService getMetadataService(){
+    	// Get all Services implement MetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataService on JsfOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public PathResolver getPathResolver(){
+    	// Get all Services implement PathResolver interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (PathResolver) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load PathResolver on JsfOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on JsfOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public Shell getShell(){
+    	// Get all Services implement Shell interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(Shell.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (Shell) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load Shell on JsfOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeLocationService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeLocationService on JsfOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public TypeManagementService getTypeManagementService(){
+    	// Get all Services implement TypeManagementService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeManagementService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeManagementService on JsfOperationsImpl.");
+			return null;
+		}
+    }
+    
 }

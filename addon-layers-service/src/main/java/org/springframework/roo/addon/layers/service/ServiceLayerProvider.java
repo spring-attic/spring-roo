@@ -7,6 +7,7 @@ import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -31,6 +32,12 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.PairList;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * The {@link org.springframework.roo.classpath.layers.LayerProvider} that
  * provides an application's service layer.
@@ -42,11 +49,20 @@ import org.springframework.roo.support.util.PairList;
 @Component
 @Service
 public class ServiceLayerProvider extends CoreLayerProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ServiceLayerProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private MetadataService metadataService;
-    @Reference private ServiceAnnotationValuesFactory serviceAnnotationValuesFactory;
-    @Reference private ServiceInterfaceLocator serviceInterfaceLocator;
-    @Reference TypeLocationService typeLocationService;
+    private MetadataService metadataService;
+    private ServiceAnnotationValuesFactory serviceAnnotationValuesFactory;
+    private ServiceInterfaceLocator serviceInterfaceLocator;
+    TypeLocationService typeLocationService;
+    
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     public int getLayerPosition() {
         return LayerType.SERVICE.getPosition();
@@ -63,6 +79,31 @@ public class ServiceLayerProvider extends CoreLayerProvider {
             final String methodIdentifier, final JavaType targetEntity,
             final JavaType idType, boolean autowire,
             final MethodParameter... methodParameters) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(serviceAnnotationValuesFactory == null){
+    		serviceAnnotationValuesFactory = getServiceAnnotationValuesFactory();
+    	}
+    	
+    	Validate.notNull(serviceAnnotationValuesFactory, "ServiceAnnotationValuesFactory is required");
+    	
+    	if(serviceInterfaceLocator == null){
+    		serviceInterfaceLocator = getServiceInterfaceLocator();
+    	}
+
+    	Validate.notNull(serviceInterfaceLocator, "ServiceInterfaceLocator is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         Validate.notBlank(callerMID, "Caller's metadata identifier required");
         Validate.notNull(methodIdentifier, "Method identifier required");
         Validate.notNull(targetEntity, "Target entity type required");
@@ -173,16 +214,105 @@ public class ServiceLayerProvider extends CoreLayerProvider {
     // -------------------- Setters for use by unit tests ----------------------
 
     void setMetadataService(final MetadataService metadataService) {
-        this.metadataService = metadataService;
+    	if(metadataService == null){
+    		this.metadataService = getMetadataService();
+    		
+    		Validate.notNull(metadataService, "MetadataService is required");
+    		
+    	}else{
+    		this.metadataService = metadataService;
+    	}
     }
 
     void setServiceAnnotationValuesFactory(
             final ServiceAnnotationValuesFactory serviceAnnotationValuesFactory) {
-        this.serviceAnnotationValuesFactory = serviceAnnotationValuesFactory;
+    	if(serviceAnnotationValuesFactory == null){
+    		this.serviceAnnotationValuesFactory = getServiceAnnotationValuesFactory();
+    		Validate.notNull(serviceAnnotationValuesFactory, "ServiceAnnotationValuesFactory is required");
+    	}else{
+    		this.serviceAnnotationValuesFactory = serviceAnnotationValuesFactory;
+    	}
+    	
     }
 
     void setServiceInterfaceLocator(
             final ServiceInterfaceLocator serviceInterfaceLocator) {
-        this.serviceInterfaceLocator = serviceInterfaceLocator;
+    	if(serviceInterfaceLocator == null){
+    		this.serviceInterfaceLocator = getServiceInterfaceLocator();
+    		Validate.notNull(serviceInterfaceLocator, "ServiceInterfaceLocator is required");
+    	}else{
+    		this.serviceInterfaceLocator = serviceInterfaceLocator;
+    	}
+
     }
+    
+    public MetadataService getMetadataService(){
+    	// Get all Services implement MetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataService on ServiceLayerProvider.");
+			return null;
+		}
+    }
+    
+    public ServiceAnnotationValuesFactory getServiceAnnotationValuesFactory(){
+    	// Get all Services implement ServiceAnnotationValuesFactory interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ServiceAnnotationValuesFactory.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ServiceAnnotationValuesFactory) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ServiceAnnotationValuesFactory on ServiceLayerProvider.");
+			return null;
+		}
+    }
+    
+    public ServiceInterfaceLocator getServiceInterfaceLocator(){
+    	// Get all Services implement ServiceInterfaceLocator interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ServiceInterfaceLocator.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ServiceInterfaceLocator) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ServiceInterfaceLocator on ServiceLayerProvider.");
+			return null;
+		}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeLocationService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeLocationService on ServiceLayerProvider.");
+			return null;
+		}
+    }
+    
+    
 }

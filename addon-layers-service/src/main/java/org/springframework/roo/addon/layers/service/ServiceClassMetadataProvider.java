@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -27,6 +28,11 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Provides {@link ServiceClassMetadata} for building the ITD for the
  * implementation class of a user project's service.
@@ -35,26 +41,32 @@ import org.springframework.roo.project.ProjectOperations;
  * @author Andrew Swan
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class ServiceClassMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ServiceClassMetadataProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 
-    @Reference ProjectOperations projectOperations;
-    @Reference FileManager fileManager;
-    @Reference ServiceLayerTemplateService templateService;
+    ProjectOperations projectOperations;
+    FileManager fileManager;
+    ServiceLayerTemplateService templateService;
 
-    @Reference private LayerService layerService;
+    private LayerService layerService;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
+    	this.context = context.getBundleContext();
+    	/*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         setIgnoreTriggerAnnotations(true);
     }
 
@@ -65,10 +77,10 @@ public class ServiceClassMetadataProvider extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        /*metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
     }
 
     @Override
@@ -202,7 +214,7 @@ public class ServiceClassMetadataProvider extends
             for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
                 final Collection<MethodParameter> methodParameters = MethodParameter
                         .asList(method.getParameters(domainType, idType));
-                final MemberTypeAdditions memberTypeAdditions = layerService
+                final MemberTypeAdditions memberTypeAdditions = getLayerService()
                         .getMemberTypeAdditions(metadataIdentificationString,
                                 method.getKey(), domainType, idType,
                                 LAYER_POSITION, methodParameters);
@@ -227,11 +239,11 @@ public class ServiceClassMetadataProvider extends
 
         // Adds or removes service from XML configuration
         if (serviceAnnotationValues.useXmlConfiguration()) {
-            templateService.addServiceToXmlConfiguration(serviceInterface,
+            getTemplateService().addServiceToXmlConfiguration(serviceInterface,
                     serviceClass);
         }
         else {
-            templateService.removeServiceFromXmlConfiguration(serviceInterface);
+            getTemplateService().removeServiceFromXmlConfiguration(serviceInterface);
         }
 
         return new ServiceClassMetadata(metadataIdentificationString,
@@ -244,5 +256,47 @@ public class ServiceClassMetadataProvider extends
 
     public String getProvidesType() {
         return ServiceClassMetadata.getMetadataIdentiferType();
+    }
+    
+    public ServiceLayerTemplateService getTemplateService(){
+    	if(templateService == null){
+    		// Get all Services implement ServiceLayerTemplateService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ServiceLayerTemplateService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ServiceLayerTemplateService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ServiceLayerTemplateService on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return templateService;
+    	}
+    }
+    
+    public LayerService getLayerService(){
+    	if(layerService == null){
+    		// Get all Services implement LayerService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (LayerService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load LayerService on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return layerService;
+    	}
     }
 }

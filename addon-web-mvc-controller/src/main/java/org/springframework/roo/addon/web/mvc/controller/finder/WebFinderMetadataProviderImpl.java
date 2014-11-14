@@ -5,6 +5,9 @@ import static org.springframework.roo.model.RooJavaType.ROO_WEB_FINDER;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.Validate;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -26,23 +29,35 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
+
 /**
  * Implementation of {@link WebFinderMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @since 1.1.3
  */
-@Component(immediate = true)
+@Component
 @Service
 public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         implements WebFinderMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(WebFinderMetadataProviderImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private WebMetadataService webMetadataService;
+    private WebMetadataService webMetadataService;
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_WEB_FINDER);
     }
 
@@ -53,9 +68,9 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_WEB_FINDER);
     }
 
@@ -79,6 +94,12 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
+    	
+    	if(webMetadataService == null){
+    		webMetadataService = getWebMetadataService();
+    	}
+    	Validate.notNull(webMetadataService, "WebMetadataService is required");
+    	
         // We need to parse the annotation, which we expect to be present
         final WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(
                 governorPhysicalTypeMetadata);
@@ -132,5 +153,22 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
 
     public String getProvidesType() {
         return WebFinderMetadata.getMetadataIdentiferType();
+    }
+    
+    public WebMetadataService getWebMetadataService(){
+    	// Get all Services implement WebMetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(WebMetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (WebMetadataService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load WebMetadataService on WebFinderMetadataProviderImpl.");
+			return null;
+		}
     }
 }

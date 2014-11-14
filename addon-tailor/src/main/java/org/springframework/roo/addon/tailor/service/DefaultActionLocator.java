@@ -16,7 +16,7 @@ import org.springframework.roo.addon.tailor.actions.Action;
  * 
  * @author Vladimir Tihomirov
  */
-@Component(immediate = true)
+@Component
 @Service
 @Reference(name = "action", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Action.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultActionLocator implements ActionLocator {

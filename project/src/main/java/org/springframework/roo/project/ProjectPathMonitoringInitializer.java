@@ -22,7 +22,7 @@ import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 
-@Component(immediate = true)
+@Component
 @Service
 public class ProjectPathMonitoringInitializer implements
         MetadataNotificationListener {

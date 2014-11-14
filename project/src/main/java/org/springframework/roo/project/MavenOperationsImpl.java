@@ -22,6 +22,11 @@ import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link MavenOperations}.
@@ -30,10 +35,22 @@ import org.w3c.dom.Element;
  * @author Alan Stewart
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class MavenOperationsImpl extends AbstractProjectOperations implements
         MavenOperations {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(MavenOperationsImpl.class);
+	
+	private PackagingProviderRegistry packagingProviderRegistry;
+    private ProcessManager processManager;
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     private static class LoggingInputStream extends Thread {
         private InputStream inputStream;
@@ -80,12 +97,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
             }
         }
     }
-
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(MavenOperationsImpl.class);
-
-    @Reference private PackagingProviderRegistry packagingProviderRegistry;
-    @Reference private ProcessManager processManager;
 
     private void addModuleDeclaration(final String moduleName,
             final Document pomDocument, final Element root) {
@@ -136,6 +147,13 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
     }
 
     public void executeMvnCommand(final String extra) throws IOException {
+    	
+    	if(processManager == null){
+    		processManager = getProcessManager();
+    	}
+    	
+    	Validate.notNull(processManager, "ProcessManager is required");
+    	
         final File root = new File(getProjectRoot());
         Validate.isTrue(root.isDirectory() && root.exists(),
                 "Project root does not currently exist as a directory ('%s')",
@@ -186,6 +204,10 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
 
     private PackagingProvider getPackagingProvider(
             final PackagingProvider selectedPackagingProvider) {
+    	if(packagingProviderRegistry == null){
+    		packagingProviderRegistry = getPackagingProviderRegistry();
+    	}
+    	Validate.notNull(packagingProviderRegistry, "PackagingProviderRegistry is required");
         return ObjectUtils.defaultIfNull(selectedPackagingProvider,
                 packagingProviderRegistry.getDefaultPackagingProvider());
     }
@@ -229,4 +251,39 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
                 .getPath(), XmlUtils.nodeToString(parentPomDocument),
                 addModuleMessage, false);
     }
+    
+    public PackagingProviderRegistry getPackagingProviderRegistry(){
+    	// Get all Services implement UndoManager interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(PackagingProviderRegistry.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (PackagingProviderRegistry) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load PackagingProviderRegistry on MavenOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public ProcessManager getProcessManager(){
+    	// Get all Services implement ProcessManager interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProcessManager.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProcessManager) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProcessManager on MavenOperationsImpl.");
+			return null;
+		}
+    }
+    
 }

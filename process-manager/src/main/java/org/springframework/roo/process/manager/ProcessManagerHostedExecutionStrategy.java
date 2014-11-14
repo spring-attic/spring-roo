@@ -21,7 +21,7 @@ import org.springframework.roo.shell.ParseResult;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 @Reference(name = "processManager", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = ProcessManager.class, cardinality = ReferenceCardinality.MANDATORY_UNARY)
 public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy {

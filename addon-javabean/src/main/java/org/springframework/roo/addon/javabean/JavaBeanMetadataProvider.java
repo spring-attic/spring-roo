@@ -8,8 +8,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -29,6 +31,10 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Provides {@link JavaBeanMetadata}.
@@ -36,21 +42,26 @@ import org.springframework.roo.project.ProjectOperations;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JavaBeanMetadataProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
 	private final Set<String> producedMids = new LinkedHashSet<String>();
 
-	@Reference
 	private ProjectOperations projectOperations;
 	private Boolean wasGaeEnabled;
 
 	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.addNotificationListener(this);
+		this.context = context.getBundleContext();
+		/*metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(
 				PhysicalTypeIdentifier.getMetadataIdentiferType(),
-				getProvidesType());
+				getProvidesType());*/
 		addMetadataTrigger(ROO_JAVA_BEAN);
 	}
 
@@ -61,10 +72,10 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	}
 
 	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
+		/*metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(
 				PhysicalTypeIdentifier.getMetadataIdentiferType(),
-				getProvidesType());
+				getProvidesType());*/
 		removeMetadataTrigger(ROO_JAVA_BEAN);
 	}
 
@@ -80,6 +91,13 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 
 	private JavaSymbolName getIdentifierAccessorMethodName(
 			final FieldMetadata field, final String metadataIdentificationString) {
+		
+		if(projectOperations == null){
+			projectOperations = getProjectOperations();
+		}
+		
+		Validate.notNull(projectOperations, "ProjectOperations is required");
+		
 		final LogicalPath path = PhysicalTypeIdentifier.getPath(field
 				.getDeclaredByMetadataId());
 		final String moduleNme = path.getModule();
@@ -175,6 +193,13 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	// <-> GAE persistence changes
 	@Override
 	protected void notifyForGenericListener(final String upstreamDependency) {
+		
+		if(projectOperations == null){
+			projectOperations = getProjectOperations();
+		}
+		
+		Validate.notNull(projectOperations, "ProjectOperations is required");
+		
 		// If the upstream dependency is null or invalid do not continue
 		if (StringUtils.isBlank(upstreamDependency)
 				|| !MetadataIdentificationUtils.isValid(upstreamDependency)) {
@@ -201,4 +226,21 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 			}
 		}
 	}
+	
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on JavaBeanMetadataProvider.");
+			return null;
+		}
+    }
 }

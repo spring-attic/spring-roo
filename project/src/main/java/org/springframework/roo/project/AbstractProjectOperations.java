@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
  * @author Alan Stewart
  * @since 1.0
  */
-@SuppressWarnings("deprecation")
+//@SuppressWarnings("deprecation")
 @Component(componentAbstract = true)
 @Reference(name = "feature", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Feature.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public abstract class AbstractProjectOperations implements ProjectOperations {

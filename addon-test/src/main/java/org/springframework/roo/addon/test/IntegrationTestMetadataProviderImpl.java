@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -51,37 +52,48 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
  * 
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class IntegrationTestMetadataProviderImpl extends
         AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(IntegrationTestMetadataProviderImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
     private static final JavaSymbolName TRANSACTION_MANAGER_ATTRIBUTE = new JavaSymbolName(
             "transactionManager");
 
-    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private LayerService layerService;
-    @Reference private ProjectOperations projectOperations;
+    private ConfigurableMetadataProvider configurableMetadataProvider;
+    private LayerService layerService;
+    private ProjectOperations projectOperations;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
     private final Set<String> producedMids = new LinkedHashSet<String>();
     private Boolean wasGaeEnabled;
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         // Integration test classes are @Configurable because they may need DI
         // of other DOD classes that provide M:1 relationships
-        configurableMetadataProvider.addMetadataTrigger(ROO_INTEGRATION_TEST);
+        /*configurableMetadataProvider.addMetadataTrigger(ROO_INTEGRATION_TEST);*/
         addMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
@@ -92,12 +104,12 @@ public class IntegrationTestMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        /*metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         configurableMetadataProvider
-                .removeMetadataTrigger(ROO_INTEGRATION_TEST);
+                .removeMetadataTrigger(ROO_INTEGRATION_TEST);*/
         removeMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
@@ -175,6 +187,17 @@ public class IntegrationTestMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
         // We need to parse the annotation, which we expect to be present
         final IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(
                 governorPhysicalTypeMetadata);
@@ -352,6 +375,12 @@ public class IntegrationTestMetadataProviderImpl extends
      * the project metadata
      */
     private void handleGenericChangeToProject(final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final ProjectMetadata projectMetadata = projectOperations
                 .getProjectMetadata(moduleName);
         if (projectMetadata != null && projectMetadata.isValid()) {
@@ -380,5 +409,56 @@ public class IntegrationTestMetadataProviderImpl extends
             handleGenericChangeToProject(ProjectMetadata
                     .getModuleName(upstreamDependency));
         }
+    }
+    
+    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
+    	// Get all Services implement ConfigurableMetadataProvider interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ConfigurableMetadataProvider) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ConfigurableMetadataProvider on IntegrationTestMetadataProviderImpl");
+			return null;
+		}
+    }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on IntegrationTestMetadataProviderImpl.");
+			return null;
+		}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on IntegrationTestMetadataProviderImpl.");
+			return null;
+		}
     }
 }

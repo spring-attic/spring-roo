@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.solr;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SOLR_WEB_SEARCHABLE;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -16,23 +17,34 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Provides {@link SolrWebSearchMetadata}.
  * 
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(SolrWebSearchMetadataProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private WebScaffoldMetadataProvider webScaffoldMetadataProvider;
+    private WebScaffoldMetadataProvider webScaffoldMetadataProvider;
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        webScaffoldMetadataProvider.addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
+        webScaffoldMetadataProvider.addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);*/
         addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
     }
 
@@ -49,11 +61,11 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
      * @since 1.2.0
      */
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         webScaffoldMetadataProvider
-                .removeMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
+                .removeMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);*/
         removeMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
     }
 

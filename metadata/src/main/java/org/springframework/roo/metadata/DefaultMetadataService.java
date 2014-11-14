@@ -28,7 +28,7 @@ import org.springframework.roo.metadata.internal.AbstractMetadataCache;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 @Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultMetadataService extends AbstractMetadataCache implements

@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,12 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Generates the jsp menu and allows for management of menu items.
  * 
@@ -37,11 +44,20 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class MenuOperationsImpl implements MenuOperations {
-
-    @Reference private FileManager fileManager;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private PropFileOperations propFileOperations;
-    @Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(MenuOperationsImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+    private FileManager fileManager;
+    private ProjectOperations projectOperations;
+    private PropFileOperations propFileOperations;
+    private XmlRoundTripFileManager xmlRoundTripFileManager;
+    
+   	protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     public void addMenuItem(final JavaSymbolName menuCategoryName,
             final JavaSymbolName menuItemId, final String globalMessageCode,
@@ -119,12 +135,12 @@ public class MenuOperationsImpl implements MenuOperations {
             properties.put("menu_item_" + lcMenuCategoryName + "_"
                     + menuItemId.getSymbolName().toLowerCase() + "_label",
                     menuItemLabel);
-            propFileOperations.addProperties(projectOperations
+            getPropFileOperations().addProperties(getProjectOperations()
                     .getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP),
                     "WEB-INF/i18n/application.properties", properties, true,
                     false);
         }
-        xmlRoundTripFileManager.writeToDiskIfNecessary(
+        getXmlRoundTripFileManager().writeToDiskIfNecessary(
                 getMenuFileName(logicalPath), document);
     }
 
@@ -162,7 +178,7 @@ public class MenuOperationsImpl implements MenuOperations {
                 element.getParentNode().removeChild(element);
             }
         }
-        xmlRoundTripFileManager.writeToDiskIfNecessary(
+        getXmlRoundTripFileManager().writeToDiskIfNecessary(
                 getMenuFileName(logicalPath), document);
     }
 
@@ -200,7 +216,7 @@ public class MenuOperationsImpl implements MenuOperations {
             element.getParentNode().removeChild(element);
         }
 
-        xmlRoundTripFileManager.writeToDiskIfNecessary(
+        getXmlRoundTripFileManager().writeToDiskIfNecessary(
                 getMenuFileName(logicalPath), document);
     }
 
@@ -217,12 +233,12 @@ public class MenuOperationsImpl implements MenuOperations {
 
     private InputStream getMenuFileInputStream(final LogicalPath logicalPath) {
         final String menuFileName = getMenuFileName(logicalPath);
-        if (!fileManager.exists(menuFileName)) {
+        if (!getFileManager().exists(menuFileName)) {
             InputStream inputStream = null;
             OutputStream outputStream = null;
             try {
                 inputStream = FileUtils.getInputStream(getClass(), "menu.jspx");
-                outputStream = fileManager.createFile(menuFileName)
+                outputStream = getFileManager().createFile(menuFileName)
                         .getOutputStream();
                 IOUtils.copy(inputStream, outputStream);
             }
@@ -237,15 +253,15 @@ public class MenuOperationsImpl implements MenuOperations {
             }
         }
 
-        final PathResolver pathResolver = projectOperations.getPathResolver();
+        final PathResolver pathResolver = getProjectOperations().getPathResolver();
 
         final String menuPath = pathResolver.getIdentifier(logicalPath,
                 "WEB-INF/tags/menu/menu.tagx");
-        if (!fileManager.exists(menuPath)) {
+        if (!getFileManager().exists(menuPath)) {
             InputStream inputStream = null;
             try {
                 inputStream = FileUtils.getInputStream(getClass(), "menu.tagx");
-                fileManager.createOrUpdateTextFileIfRequired(menuPath,
+                getFileManager().createOrUpdateTextFileIfRequired(menuPath,
                         IOUtils.toString(inputStream), false);
             }
             catch (final Exception e) {
@@ -260,11 +276,11 @@ public class MenuOperationsImpl implements MenuOperations {
 
         final String itemPath = pathResolver.getIdentifier(logicalPath,
                 "WEB-INF/tags/menu/item.tagx");
-        if (!fileManager.exists(itemPath)) {
+        if (!getFileManager().exists(itemPath)) {
             InputStream inputStream = null;
             try {
                 inputStream = FileUtils.getInputStream(getClass(), "item.tagx");
-                fileManager.createOrUpdateTextFileIfRequired(menuPath,
+                getFileManager().createOrUpdateTextFileIfRequired(menuPath,
                         IOUtils.toString(inputStream), false);
             }
             catch (final Exception e) {
@@ -279,12 +295,12 @@ public class MenuOperationsImpl implements MenuOperations {
 
         final String categoryPath = pathResolver.getIdentifier(logicalPath,
                 "WEB-INF/tags/menu/category.tagx");
-        if (!fileManager.exists(categoryPath)) {
+        if (!getFileManager().exists(categoryPath)) {
             InputStream inputStream = null;
             try {
                 inputStream = FileUtils.getInputStream(getClass(),
                         "category.tagx");
-                fileManager.createOrUpdateTextFileIfRequired(menuPath,
+                getFileManager().createOrUpdateTextFileIfRequired(menuPath,
                         IOUtils.toString(inputStream), false);
             }
             catch (final Exception e) {
@@ -297,11 +313,11 @@ public class MenuOperationsImpl implements MenuOperations {
             }
         }
 
-        return fileManager.getInputStream(menuFileName);
+        return getFileManager().getInputStream(menuFileName);
     }
 
     private String getMenuFileName(final LogicalPath logicalPath) {
-        return projectOperations.getPathResolver().getIdentifier(logicalPath,
+        return getProjectOperations().getPathResolver().getIdentifier(logicalPath,
                 "WEB-INF/views/menu.jspx");
     }
 
@@ -309,5 +325,89 @@ public class MenuOperationsImpl implements MenuOperations {
         return "?".equals(element.getAttribute("z"))
                 || XmlRoundTripUtils.calculateUniqueKeyFor(element).equals(
                         element.getAttribute("z"));
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+    		// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileManager) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on MenuOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+    		// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ProjectOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on MenuOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    }
+    
+    public PropFileOperations getPropFileOperations(){
+    	if(propFileOperations == null){
+    		// Get all Services implement PropFileOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PropFileOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PropFileOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PropFileOperations on MenuOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return propFileOperations;
+    	}
+    }
+    
+    public XmlRoundTripFileManager getXmlRoundTripFileManager(){
+    	if(xmlRoundTripFileManager == null){
+    		// Get all Services implement XmlRoundTripFileManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(XmlRoundTripFileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (XmlRoundTripFileManager) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load XmlRoundTripFileManager on MenuOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return xmlRoundTripFileManager;
+    	}
     }
 }

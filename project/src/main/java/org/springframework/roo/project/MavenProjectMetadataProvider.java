@@ -32,7 +32,7 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
  * @author Alan Stewart
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class MavenProjectMetadataProvider implements MetadataProvider,
         FileEventListener {

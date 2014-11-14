@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -33,6 +34,12 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * The {@link RepositoryJpaOperations} implementation.
  * 
@@ -42,11 +49,20 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(RepositoryJpaOperationsImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private FileManager fileManager;
-    @Reference private PathResolver pathResolver;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private TypeManagementService typeManagementService;
+    private FileManager fileManager;
+    private PathResolver pathResolver;
+    private ProjectOperations projectOperations;
+    private TypeManagementService typeManagementService;
+    
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     private void configureProject() {
         final Element configuration = XmlUtils.getConfiguration(getClass());
@@ -59,12 +75,12 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
             dependencies.add(new Dependency(dependencyElement));
         }
 
-        projectOperations.addDependencies(
-                projectOperations.getFocusedModuleName(), dependencies);
+        getProjectOperations().addDependencies(
+                getProjectOperations().getFocusedModuleName(), dependencies);
 
-        final String appCtxId = pathResolver.getFocusedIdentifier(
+        final String appCtxId = getPathResolver().getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
-        if (fileManager.exists(appCtxId)) {
+        if (getFileManager().exists(appCtxId)) {
             return;
         }
         else {
@@ -78,9 +94,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
                 String input = IOUtils.toString(templateInputStream);
                 input = input.replace("TO_BE_CHANGED_BY_ADDON",
-                        projectOperations.getFocusedTopLevelPackage()
+                        getProjectOperations().getFocusedTopLevelPackage()
                                 .getFullyQualifiedPackageName());
-                final MutableFile mutableFile = fileManager
+                final MutableFile mutableFile = getFileManager()
                         .createFile(appCtxId);
                 outputStream = mutableFile.getOutputStream();
                 IOUtils.write(input, outputStream);
@@ -103,15 +119,15 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     public boolean isInstalledInModule(final String moduleName) {
         final LogicalPath resourcesPath = LogicalPath.getInstance(
                 Path.SRC_MAIN_RESOURCES, moduleName);
-        return projectOperations.isFocusedProjectAvailable()
-                && fileManager.exists(projectOperations.getPathResolver()
+        return getProjectOperations().isFocusedProjectAvailable()
+                && getFileManager().exists(getProjectOperations().getPathResolver()
                         .getIdentifier(resourcesPath,
                                 "META-INF/persistence.xml"));
     }
 
     public boolean isRepositoryInstallationPossible() {
-        return isInstalledInModule(projectOperations.getFocusedModuleName())
-                && !projectOperations
+        return isInstalledInModule(getProjectOperations().getFocusedModuleName())
+                && !getProjectOperations()
                         .isFeatureInstalledInFocusedModule(FeatureNames.MONGO);
     }
 
@@ -120,10 +136,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         Validate.notNull(interfaceType, "Interface type required");
         Validate.notNull(domainType, "Domain type required");
 
-        final String interfaceIdentifier = pathResolver
+        final String interfaceIdentifier = getPathResolver()
                 .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
 
-        if (fileManager.exists(interfaceIdentifier)) {
+        if (getFileManager().exists(interfaceIdentifier)) {
             return; // Type exists already - nothing to do
         }
 
@@ -133,14 +149,98 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(
                 new JavaSymbolName("domainType"), domainType));
         final String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(
-                interfaceType, pathResolver.getPath(interfaceIdentifier));
+                interfaceType, getPathResolver().getPath(interfaceIdentifier));
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 interfaceMdId, Modifier.PUBLIC, interfaceType,
                 PhysicalTypeCategory.INTERFACE);
         cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
         // Take care of project configuration
         configureProject();
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+    		// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileManager) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on RepositoryJpaOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public PathResolver getPathResolver(){
+    	if(pathResolver == null){
+    		// Get all Services implement PathResolver interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PathResolver) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PathResolver on RepositoryJpaOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return pathResolver;
+    	}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+    		// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ProjectOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on RepositoryJpaOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    }
+    
+    public TypeManagementService getTypeManagementService(){
+    	if(typeManagementService == null){
+    		// Get all Services implement TypeManagementService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TypeManagementService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeManagementService on RepositoryJpaOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return typeManagementService;
+    	}
     }
 }

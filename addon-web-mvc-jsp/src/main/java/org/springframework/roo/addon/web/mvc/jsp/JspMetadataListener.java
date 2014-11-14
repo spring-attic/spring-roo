@@ -66,7 +66,7 @@ import org.springframework.roo.support.util.XmlUtils;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JspMetadataListener implements MetadataProvider,
         MetadataNotificationListener {

@@ -46,7 +46,7 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 
-@Component(immediate = true)
+@Component
 @Service
 public class GwtLocatorMetadataProviderImpl implements
         GwtLocatorMetadataProvider {

@@ -50,7 +50,7 @@ import org.springframework.roo.support.util.FileUtils;
  * @author James Tyrrell
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class TypeLocationServiceImpl implements TypeLocationService {
 

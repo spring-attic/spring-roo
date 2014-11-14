@@ -5,6 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -27,32 +28,43 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
  * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class ServiceInterfaceMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ServiceInterfaceMetadataProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private CustomDataKeyDecorator customDataKeyDecorator;
+    private CustomDataKeyDecorator customDataKeyDecorator;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
     @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
         super.setDependsOnGovernorBeingAClass(false);
-        metadataDependencyRegistry.addNotificationListener(this);
+        /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_SERVICE);
-        customDataKeyDecorator.registerMatchers(getClass(),
+        /*customDataKeyDecorator.registerMatchers(getClass(),
                 new LayerTypeMatcher(ROO_SERVICE, new JavaSymbolName(
-                        RooService.DOMAIN_TYPES_ATTRIBUTE)));
+                        RooService.DOMAIN_TYPES_ATTRIBUTE)));*/
     }
 
     @Override
@@ -62,10 +74,10 @@ public class ServiceInterfaceMetadataProvider extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        /*metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_SERVICE);
     }
 

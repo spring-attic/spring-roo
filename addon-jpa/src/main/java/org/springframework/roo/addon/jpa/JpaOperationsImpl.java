@@ -70,6 +70,13 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.osgi.service.component.ComponentContext;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link JpaOperations}.
  * 
@@ -80,6 +87,16 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JpaOperationsImpl implements JpaOperations {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JpaOperationsImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
+
 
     static class LinkedProperties extends Properties {
         private static final long serialVersionUID = -8828266911075836165L;
@@ -109,19 +126,17 @@ public class JpaOperationsImpl implements JpaOperations {
 
     private static final Dependency JSTL_IMPL_DEPENDENCY = new Dependency(
             "org.glassfish.web", "jstl-impl", "1.2");
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(JpaOperationsImpl.class);
     private static final String PERSISTENCE_UNIT = "persistence-unit";
     static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 
     static final String POM_XML = "pom.xml";
 
-    @Reference FileManager fileManager;
-    @Reference PathResolver pathResolver;
-    @Reference ProjectOperations projectOperations;
-    @Reference PropFileOperations propFileOperations;
-    @Reference TypeLocationService typeLocationService;
-    @Reference TypeManagementService typeManagementService;
+    FileManager fileManager;
+    PathResolver pathResolver;
+    ProjectOperations projectOperations;
+    PropFileOperations propFileOperations;
+    TypeLocationService typeLocationService;
+    TypeManagementService typeManagementService;
 
     public void configureJpa(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String jndi,
@@ -129,6 +144,12 @@ public class JpaOperationsImpl implements JpaOperations {
             final String databaseName, final String userName,
             final String password, final String transactionManager,
             final String persistenceUnit, final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         Validate.notNull(ormProvider, "ORM provider required");
         Validate.notNull(jdbcDatabase, "JDBC database required");
 
@@ -198,6 +219,12 @@ public class JpaOperationsImpl implements JpaOperations {
 
     private String getConnectionString(final JdbcDatabase jdbcDatabase,
             String hostName, final String databaseName, final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         String connectionString = jdbcDatabase.getConnectionString();
         if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
             connectionString = connectionString.replace(
@@ -220,6 +247,17 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     public SortedSet<String> getDatabaseProperties() {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
+    	if(propFileOperations == null){
+    		propFileOperations = getPropFileOperations();
+    	}
+    	Validate.notNull(propFileOperations, "PropFileOperations is required");
+    	
         if (hasDatabaseProperties()) {
             return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT
                     .getModulePathId(projectOperations.getFocusedModuleName()),
@@ -249,6 +287,12 @@ public class JpaOperationsImpl implements JpaOperations {
 
     private List<Dependency> getDependencies(final String xPathExpression,
             final Element configuration, final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final List<Dependency> dependencies = new ArrayList<Dependency>();
         for (final Element dependencyElement : XmlUtils.findElements(
                 xPathExpression + "/dependencies/dependency", configuration)) {
@@ -284,6 +328,12 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     private String getPersistencePathOfFocussedModule() {
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         return pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
                 PERSISTENCE_XML);
     }
@@ -299,10 +349,27 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     private String getProjectName(final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         return projectOperations.getProjectName(moduleName);
     }
 
     private SortedSet<String> getPropertiesFromDataNucleusConfiguration() {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         final String persistenceXmlPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);
         if (!fileManager.exists(persistenceXmlPath)) {
@@ -346,6 +413,12 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     private String getPropertiesPath(final String propertiesFile) {
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         String path = pathResolver.getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT, propertiesFile);
         if (StringUtils.isBlank(path)) {
@@ -405,10 +478,32 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     public boolean hasDatabaseProperties() {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
         return fileManager.exists(getDatabasePropertiesPath());
     }
 
     public boolean isInstalledInModule(final String moduleName) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final LogicalPath resourcesPath = LogicalPath.getInstance(
                 Path.SRC_MAIN_RESOURCES, moduleName);
         return isJpaInstallationPossible()
@@ -417,10 +512,22 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     public boolean isJpaInstallationPossible() {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         return projectOperations.isFocusedProjectAvailable();
     }
 
     public boolean isPersistentClassAvailable() {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         return isInstalledInModule(projectOperations.getFocusedModuleName());
     }
 
@@ -481,6 +588,17 @@ public class JpaOperationsImpl implements JpaOperations {
     private void manageGaeXml(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String applicationId,
             final String moduleName) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         final String appenginePath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
         final boolean appenginePathExists = fileManager.exists(appenginePath);
@@ -546,6 +664,17 @@ public class JpaOperationsImpl implements JpaOperations {
 
     public void newEmbeddableClass(final JavaType name,
             final boolean serializable) {
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(typeManagementService == null){
+    		typeManagementService = getTypeManagementService();
+    	}
+    	Validate.notNull(typeManagementService, "TypeManagementService is required");
+    	
         Validate.notNull(name, "Embeddable name required");
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
@@ -573,6 +702,22 @@ public class JpaOperationsImpl implements JpaOperations {
     public void newEntity(final JavaType name, final boolean createAbstract,
             final JavaType superclass, final JavaType implementsType,
             final List<AnnotationMetadataBuilder> annotations) {
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+    	if(typeManagementService == null){
+    		typeManagementService = getTypeManagementService();
+    	}
+    	Validate.notNull(typeManagementService, "TypeManagementService is required");
+    	
         Validate.notNull(name, "Entity name required");
         Validate.isTrue(
                 !JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
@@ -621,6 +766,17 @@ public class JpaOperationsImpl implements JpaOperations {
 
     public void newIdentifier(final JavaType identifierType,
             final String identifierField, final String identifierColumn) {
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(typeManagementService == null){
+    		typeManagementService = getTypeManagementService();
+    	}
+    	Validate.notNull(typeManagementService, "TypeManagementService is required");
+    	
         Validate.notNull(identifierType, "Identifier type required");
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
@@ -640,6 +796,13 @@ public class JpaOperationsImpl implements JpaOperations {
 
     private Properties readProperties(final String path, final boolean exists,
             final String templateFilename) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	
         final Properties props = new LinkedProperties();
         InputStream inputStream = null;
         try {
@@ -664,6 +827,22 @@ public class JpaOperationsImpl implements JpaOperations {
     private void updateApplicationContext(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String jndi,
             String transactionManager, final String persistenceUnit) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final String contextPath = projectOperations.getPathResolver()
                 .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
                         APPLICATION_CONTEXT_XML);
@@ -826,6 +1005,12 @@ public class JpaOperationsImpl implements JpaOperations {
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String databaseXPath, final String providersXPath,
             final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         // Identify the required plugins
         final List<Plugin> requiredPlugins = new ArrayList<Plugin>();
 
@@ -867,6 +1052,17 @@ public class JpaOperationsImpl implements JpaOperations {
             final String hostName, final String userName,
             final String password, final String persistenceUnit,
             final String moduleName) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         final String configPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, persistenceUnit + ".properties");
         final boolean configExists = fileManager.exists(configPath);
@@ -906,6 +1102,12 @@ public class JpaOperationsImpl implements JpaOperations {
             final JdbcDatabase jdbcDatabase, final String hostName,
             final String databaseName, String userName, final String password,
             final String moduleName) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
         final String databasePath = getDatabasePropertiesPath();
         final boolean databaseExists = fileManager.exists(databasePath);
 
@@ -979,6 +1181,17 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     private void updateDataNucleusPlugin(final boolean addToPlugin) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         final String pom = pathResolver
                 .getFocusedIdentifier(Path.ROOT, POM_XML);
         final Document document = XmlUtils.readXml(fileManager
@@ -1029,6 +1242,12 @@ public class JpaOperationsImpl implements JpaOperations {
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String databaseXPath, final String providersXPath,
             final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
         final List<Element> databaseDependencies = XmlUtils.findElements(
@@ -1075,6 +1294,17 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     private void updateEclipsePlugin(final boolean addGaeSettingsToPlugin) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         final String pom = pathResolver
                 .getFocusedIdentifier(Path.ROOT, POM_XML);
         final Document document = XmlUtils.readXml(fileManager
@@ -1095,6 +1325,12 @@ public class JpaOperationsImpl implements JpaOperations {
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String databaseXPath, final String providersXPath,
             final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         // Remove redundant filters
         final List<Filter> redundantFilters = new ArrayList<Filter>();
         redundantFilters.addAll(getFilters(databaseXPath, configuration));
@@ -1126,6 +1362,12 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     private void updateJndiProperties() {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
         final String databasePath = getDatabasePropertiesPath();
         if (fileManager.exists(databasePath)) {
             fileManager.delete(databasePath, "JNDI is used");
@@ -1143,6 +1385,17 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     private void updateLog4j(final OrmProvider ormProvider) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
         final String log4jPath = pathResolver.getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, "log4j.properties");
         if (!fileManager.exists(log4jPath)) {
@@ -1180,6 +1433,27 @@ public class JpaOperationsImpl implements JpaOperations {
             final JdbcDatabase jdbcDatabase, final String hostName,
             final String databaseName, String userName, final String password,
             final String persistenceUnit, final String moduleName) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(pathResolver == null){
+    		pathResolver = getPathResolver();
+    	}
+    	Validate.notNull(pathResolver, "PathResolver is required");
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
+    	if(propFileOperations == null){
+    		propFileOperations = getPropFileOperations();
+    	}
+    	Validate.notNull(propFileOperations, "PropFileOperations is required");
+    	
         final String persistencePath = getPersistencePathOfFocussedModule();
         final InputStream inputStream;
         if (fileManager.exists(persistencePath)) {
@@ -1417,6 +1691,12 @@ public class JpaOperationsImpl implements JpaOperations {
     private void updatePluginRepositories(final Element configuration,
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final List<Repository> pluginRepositories = new ArrayList<Repository>();
 
         final List<Element> databasePluginRepositories = XmlUtils
@@ -1440,6 +1720,12 @@ public class JpaOperationsImpl implements JpaOperations {
     private void updatePomProperties(final Element configuration,
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final List<Element> databaseProperties = XmlUtils
                 .findElements(jdbcDatabase.getConfigPrefix() + "/properties/*",
                         configuration);
@@ -1457,6 +1743,12 @@ public class JpaOperationsImpl implements JpaOperations {
     private void updateRepositories(final Element configuration,
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final List<Repository> repositories = new ArrayList<Repository>();
 
         final List<Element> databaseRepositories = XmlUtils.findElements(
@@ -1489,6 +1781,12 @@ public class JpaOperationsImpl implements JpaOperations {
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String databaseXPath, final String providersXPath,
             final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         // Remove redundant resources
         final List<Resource> redundantResources = new ArrayList<Resource>();
         redundantResources.addAll(getResources(databaseXPath, configuration));
@@ -1521,6 +1819,12 @@ public class JpaOperationsImpl implements JpaOperations {
 
     private void writeProperties(final String path, final boolean exists,
             final Properties props) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
         OutputStream outputStream = null;
         try {
             final MutableFile mutableFile = exists ? fileManager
@@ -1535,5 +1839,108 @@ public class JpaOperationsImpl implements JpaOperations {
         finally {
             IOUtils.closeQuietly(outputStream);
         }
+    }
+    
+    
+    public FileManager getFileManager(){
+    	// Get all Services implement FileManager interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (FileManager) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load FileManager on JpaOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public PathResolver getPathResolver(){
+    	// Get all Services implement PathResolver interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (PathResolver) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load PathResolver on JpaOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on JpaOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public PropFileOperations getPropFileOperations(){
+    	// Get all Services implement PropFileOperations interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(PropFileOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (PropFileOperations) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load PropFileOperations on JpaOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeLocationService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeLocationService on JpaOperationsImpl.");
+			return null;
+		}
+    }
+    
+    public TypeManagementService getTypeManagementService(){
+    	// Get all Services implement TypeManagementService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeManagementService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeManagementService on JpaOperationsImpl.");
+			return null;
+		}
     }
 }

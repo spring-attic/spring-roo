@@ -42,7 +42,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 
-@Component(immediate = true)
+@Component
 @Service
 public class GwtProxyMetadataProviderImpl extends
         AbstractHashCodeTrackingMetadataNotifier implements

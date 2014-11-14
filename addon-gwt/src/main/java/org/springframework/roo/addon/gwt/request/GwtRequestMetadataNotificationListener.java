@@ -33,7 +33,7 @@ import org.springframework.roo.project.LogicalPath;
  * @author Andrew Swan
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class GwtRequestMetadataNotificationListener implements
         MetadataNotificationListener {

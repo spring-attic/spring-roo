@@ -22,7 +22,7 @@ import org.springframework.roo.model.JavaType;
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 @Reference(name = "layerProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = LayerProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 public class LayerServiceImpl implements LayerService {

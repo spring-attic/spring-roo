@@ -32,7 +32,7 @@ import org.springframework.roo.support.logging.LoggingOutputStream;
  * 
  * @author Ben Alex
  */
-@Component(immediate = true)
+@Component
 @Service
 public class FelixDelegator implements CommandMarker, ShellStatusListener {
     private ComponentContext context;

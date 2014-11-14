@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.FileUtils;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class SpanishLanguage extends AbstractLanguage {
 

@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -64,17 +65,27 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link JsfManagedBeanMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JsfManagedBeanMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         JsfManagedBeanMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JsfManagedBeanMetadataProviderImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
     // -- The maximum number of fields to form a String to show in a drop down
@@ -83,18 +94,19 @@ public class JsfManagedBeanMetadataProviderImpl extends
     // -- The maximum number of entity fields to show in a list view.
     private static final int MAX_LIST_VIEW_FIELDS = 5;
 
-    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private LayerService layerService;
+    private ConfigurableMetadataProvider configurableMetadataProvider;
+    private LayerService layerService;
     private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
-        configurableMetadataProvider.addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
+        /*configurableMetadataProvider.addMetadataTrigger(ROO_JSF_MANAGED_BEAN);*/
     }
 
     @Override
@@ -104,13 +116,13 @@ public class JsfManagedBeanMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        /*metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
-        configurableMetadataProvider
-                .removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
+        /*configurableMetadataProvider
+                .removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);*/
     }
 
     /**
@@ -125,6 +137,12 @@ public class JsfManagedBeanMetadataProviderImpl extends
      */
     private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(
             final JavaType entity, final String metadataIdentificationString) {
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
         metadataDependencyRegistry.registerDependency(
                 typeLocationService.getPhysicalTypeIdentifier(entity),
                 metadataIdentificationString);
@@ -469,5 +487,39 @@ public class JsfManagedBeanMetadataProviderImpl extends
         }
 
         return locatedFields;
+    }
+    
+    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
+    	// Get all Services implement ConfigurableMetadataProvider interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ConfigurableMetadataProvider) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfManagedBeanMetadataProviderImpl.");
+			return null;
+		}
+    }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on JsfManagedBeanMetadataProviderImpl.");
+			return null;
+		}
     }
 }

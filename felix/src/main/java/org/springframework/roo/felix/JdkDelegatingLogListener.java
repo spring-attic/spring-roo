@@ -34,7 +34,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Reference(name = "shell", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Shell.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 public class JdkDelegatingLogListener extends AbstractFlashingObject implements
         LogListener {

@@ -5,6 +5,7 @@ import static org.springframework.roo.model.SpringJavaType.PERMISSION_EVALUATOR;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -28,27 +29,39 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 
-@Component(immediate = true)
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
+@Component
 @Service
 public class PermissionEvaluatorMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
-    @Reference private TypeManagementService typeManagementService;
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(PermissionEvaluatorMetadataProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+	
+    private TypeManagementService typeManagementService;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         setIgnoreTriggerAnnotations(true);
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        /*metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
     }
 
     @Override

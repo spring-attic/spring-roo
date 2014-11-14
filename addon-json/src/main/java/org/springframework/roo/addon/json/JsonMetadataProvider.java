@@ -20,14 +20,14 @@ import org.springframework.roo.project.LogicalPath;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JsonMetadataProvider extends AbstractItdMetadataProvider {
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+        /*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
     }
 
@@ -38,9 +38,9 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
     }
 

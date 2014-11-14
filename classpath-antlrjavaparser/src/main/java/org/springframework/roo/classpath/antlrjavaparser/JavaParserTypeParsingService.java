@@ -54,7 +54,7 @@ import com.github.antlrjavaparser.api.expr.NameExpr;
 import com.github.antlrjavaparser.api.expr.QualifiedNameExpr;
 import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
 
-@Component(immediate = true)
+@Component
 @Service
 public class JavaParserTypeParsingService implements TypeParsingService {
 

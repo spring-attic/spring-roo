@@ -2,6 +2,7 @@ package org.springframework.roo.addon.configurable;
 
 import static org.springframework.roo.model.RooJavaType.ROO_CONFIGURABLE;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
@@ -18,15 +19,15 @@ import org.springframework.roo.project.LogicalPath;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class ConfigurableMetadataProviderImpl extends
         AbstractItdMetadataProvider implements ConfigurableMetadataProvider {
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    	/*metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_CONFIGURABLE);
     }
 
@@ -37,9 +38,9 @@ public class ConfigurableMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        /*metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_CONFIGURABLE);
     }
 

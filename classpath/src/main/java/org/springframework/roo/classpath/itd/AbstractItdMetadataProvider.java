@@ -30,6 +30,14 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 
+import java.util.logging.Logger;
+
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Provides common functionality used by ITD-based generators.
  * <p>
@@ -64,6 +72,15 @@ import org.springframework.roo.project.Path;
 public abstract class AbstractItdMetadataProvider extends
         AbstractHashCodeTrackingMetadataNotifier implements
         ItdTriggerBasedMetadataProvider, MetadataNotificationListener {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(AbstractItdMetadataProvider.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     /**
      * Requires the governor to be a {@link PhysicalTypeCategory#CLASS} (as
@@ -77,12 +94,12 @@ public abstract class AbstractItdMetadataProvider extends
      * available
      */
     private boolean dependsOnGovernorTypeDetailAvailability = true;
-    @Reference protected FileManager fileManager;
+    protected FileManager fileManager;
     /** We don't care about trigger annotations; we always produce metadata */
     private boolean ignoreTriggerAnnotations = false;
-    @Reference protected ItdDiscoveryService itdDiscoveryService;
+    protected ItdDiscoveryService itdDiscoveryService;
 
-    @Reference protected MemberDetailsScanner memberDetailsScanner;
+    protected MemberDetailsScanner memberDetailsScanner;
 
     /**
      * The annotations which, if present on a class or interface, will cause
@@ -90,9 +107,9 @@ public abstract class AbstractItdMetadataProvider extends
      */
     private final List<JavaType> metadataTriggers = new ArrayList<JavaType>();
 
-    @Reference protected PersistenceMemberLocator persistenceMemberLocator;
+    protected PersistenceMemberLocator persistenceMemberLocator;
 
-    @Reference protected TypeLocationService typeLocationService;
+    protected TypeLocationService typeLocationService;
 
     /**
      * Registers an additional {@link JavaType} that will trigger metadata
@@ -150,6 +167,17 @@ public abstract class AbstractItdMetadataProvider extends
      */
     private void deleteItd(final String metadataIdentificationString,
             final String itdFilename, final String reason, final boolean now) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(itdDiscoveryService == null){
+    		itdDiscoveryService = getItdDiscoveryService();
+    	}
+    	Validate.notNull(itdDiscoveryService, "ItdDiscoveryService is required");
+    	
         if (now) {
             fileManager.delete(itdFilename, reason);
         }
@@ -163,6 +191,17 @@ public abstract class AbstractItdMetadataProvider extends
     }
 
     public final MetadataItem get(final String metadataIdentificationString) {
+    	
+    	if(fileManager == null){
+    		fileManager = getFileManager();
+    	}
+    	Validate.notNull(fileManager, "FileManager is required");
+    	
+    	if(itdDiscoveryService == null){
+    		itdDiscoveryService = getItdDiscoveryService();
+    	}
+    	Validate.notNull(itdDiscoveryService, "ItdDiscoveryService is required");
+    	
         Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         metadataIdentificationString).equals(
@@ -378,6 +417,12 @@ public abstract class AbstractItdMetadataProvider extends
      */
     protected MemberDetails getMemberDetails(
             final ClassOrInterfaceTypeDetails cid) {
+    	
+    	if(memberDetailsScanner == null){
+    		memberDetailsScanner = getMemberDetailsScanner();
+    	}
+    	Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
+    	
         if (cid == null) {
             return null;
         }
@@ -391,6 +436,12 @@ public abstract class AbstractItdMetadataProvider extends
      * @return <code>null</code> if the member details are unavailable
      */
     protected MemberDetails getMemberDetails(final JavaType type) {
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         final String physicalTypeIdentifier = typeLocationService
                 .getPhysicalTypeIdentifier(type);
         if (physicalTypeIdentifier == null) {
@@ -411,6 +462,12 @@ public abstract class AbstractItdMetadataProvider extends
      */
     protected MemberDetails getMemberDetails(
             final PhysicalTypeMetadata physicalTypeMetadata) {
+    	
+    	if(memberDetailsScanner == null){
+    		memberDetailsScanner = getMemberDetailsScanner();
+    	}
+    	Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
+    	
         // We need to abort if we couldn't find dependent metadata
         if (physicalTypeMetadata == null || !physicalTypeMetadata.isValid()) {
             return null;
@@ -685,5 +742,90 @@ public abstract class AbstractItdMetadataProvider extends
     protected void setIgnoreTriggerAnnotations(
             final boolean ignoreTriggerAnnotations) {
         this.ignoreTriggerAnnotations = ignoreTriggerAnnotations;
+    }
+    
+    public FileManager getFileManager(){
+    	// Get all Services implement FileManager interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (FileManager) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load FileManager on AbstractIdMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public ItdDiscoveryService getItdDiscoveryService(){
+    	// Get all Services implement ItdDiscoveryService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ItdDiscoveryService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ItdDiscoveryService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ItdDiscoveryService on AbstractIdMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public MemberDetailsScanner getMemberDetailsScanner(){
+    	// Get all Services implement MemberDetailsScanner interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MemberDetailsScanner) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MemberDetailsScanner on AbstractIdMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeLocationService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeLocationService on AbstractIdMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public PersistenceMemberLocator getPersistenceMemberLocator(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (PersistenceMemberLocator) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load PersistenceMemberLocator on AbstractIdMetadataProvider.");
+			return null;
+		}
     }
 }

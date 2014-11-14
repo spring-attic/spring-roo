@@ -6,6 +6,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -34,28 +35,39 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link WebJsonMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @since 1.1.3
  */
-@Component(immediate = true)
+@Component
 @Service
 public class WebJsonMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         WebJsonMetadataProvider {
 
-    @Reference private WebMetadataService webMetadataService;
+	protected final static Logger LOGGER = HandlerUtils.getLogger(WebJsonMetadataProviderImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+	
+    private WebMetadataService webMetadataService;
 
     // Maps entities to the IDs of their WebJsonMetadata
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
+    	this.context = context.getBundleContext();
+        /*metadataDependencyRegistry.addNotificationListener(this);
         metadataDependencyRegistry.registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         addMetadataTrigger(ROO_WEB_JSON);
     }
 
@@ -66,10 +78,10 @@ public class WebJsonMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        /*metadataDependencyRegistry.removeNotificationListener(this);
         metadataDependencyRegistry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+                getProvidesType());*/
         removeMetadataTrigger(ROO_WEB_JSON);
     }
 
@@ -113,6 +125,12 @@ public class WebJsonMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
+    	
+    	if(webMetadataService == null){
+    		webMetadataService = getWebMetadataService();
+    	}
+    	Validate.notNull(webMetadataService, "WebMetadataService is required");
+    	
         // We need to parse the annotation, which we expect to be present
         final WebJsonAnnotationValues annotationValues = new WebJsonAnnotationValues(
                 governorPhysicalTypeMetadata);
@@ -259,5 +277,22 @@ public class WebJsonMetadataProviderImpl extends
         return MemberFindingUtils.getAnnotationOfType(governor
                 .getMemberHoldingTypeDetails().getAnnotations(),
                 ROO_WEB_SCAFFOLD) == null;
+    }
+    
+    public WebMetadataService getWebMetadataService(){
+    	// Get all Services implement WebMetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(WebMetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (WebMetadataService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load WebMetadataService on WebJsonMetadataProviderImpl.");
+			return null;
+		}
     }
 }

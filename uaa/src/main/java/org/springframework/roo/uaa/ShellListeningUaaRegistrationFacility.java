@@ -19,7 +19,7 @@ import org.springframework.uaa.client.UaaService;
  * @author Ben Alex
  * @since 1.1.1
  */
-@Component(immediate = true)
+@Component
 public class ShellListeningUaaRegistrationFacility implements
         ShellStatusListener {
 

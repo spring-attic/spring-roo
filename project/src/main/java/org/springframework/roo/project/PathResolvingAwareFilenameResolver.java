@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.FileUtils;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class PathResolvingAwareFilenameResolver implements FilenameResolver {
 
