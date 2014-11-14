@@ -356,10 +356,10 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
                         + jpaQuery + "\");");
                 bodyBuilder.appendFormalLine("if (fieldNames4OrderClauseFilter.contains(sortFieldName)) {");
                 bodyBuilder.indent();
-                bodyBuilder.appendFormalLine("queryBuilder.append(\" ORDER BY \" + sortFieldName + \");\"");
+                bodyBuilder.appendFormalLine("queryBuilder.append(\" ORDER BY \").append(sortFieldName);");
                 bodyBuilder.appendFormalLine("if (\"ASC\".equalsIgnoreCase(sortOrder) || \"DESC\".equalsIgnoreCase(sortOrder)) {");
                 bodyBuilder.indent();
-                bodyBuilder.appendFormalLine("queryBuilder.append(\" \").append(sortOrder)");
+                bodyBuilder.appendFormalLine("queryBuilder.append(\" \").append(sortOrder);");
                 bodyBuilder.indentRemove();
                 bodyBuilder.appendFormalLine("}");
                 bodyBuilder.indentRemove();
