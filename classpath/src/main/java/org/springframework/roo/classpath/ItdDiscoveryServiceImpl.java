@@ -18,7 +18,7 @@ import org.springframework.roo.model.JavaType;
  * @author James Tyrrell
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 

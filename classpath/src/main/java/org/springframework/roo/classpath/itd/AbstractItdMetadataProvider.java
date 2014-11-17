@@ -30,6 +30,14 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 
+import java.util.logging.Logger;
+
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Provides common functionality used by ITD-based generators.
  * <p>
@@ -64,6 +72,12 @@ import org.springframework.roo.project.Path;
 public abstract class AbstractItdMetadataProvider extends
         AbstractHashCodeTrackingMetadataNotifier implements
         ItdTriggerBasedMetadataProvider, MetadataNotificationListener {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(AbstractItdMetadataProvider.class);
+	
+   	protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+    }
 
     /**
      * Requires the governor to be a {@link PhysicalTypeCategory#CLASS} (as
@@ -77,12 +91,12 @@ public abstract class AbstractItdMetadataProvider extends
      * available
      */
     private boolean dependsOnGovernorTypeDetailAvailability = true;
-    @Reference protected FileManager fileManager;
+    protected FileManager fileManager;
     /** We don't care about trigger annotations; we always produce metadata */
     private boolean ignoreTriggerAnnotations = false;
-    @Reference protected ItdDiscoveryService itdDiscoveryService;
+    protected ItdDiscoveryService itdDiscoveryService;
 
-    @Reference protected MemberDetailsScanner memberDetailsScanner;
+    protected MemberDetailsScanner memberDetailsScanner;
 
     /**
      * The annotations which, if present on a class or interface, will cause
@@ -90,9 +104,9 @@ public abstract class AbstractItdMetadataProvider extends
      */
     private final List<JavaType> metadataTriggers = new ArrayList<JavaType>();
 
-    @Reference protected PersistenceMemberLocator persistenceMemberLocator;
+    protected PersistenceMemberLocator persistenceMemberLocator;
 
-    @Reference protected TypeLocationService typeLocationService;
+    protected TypeLocationService typeLocationService;
 
     /**
      * Registers an additional {@link JavaType} that will trigger metadata
@@ -150,19 +164,21 @@ public abstract class AbstractItdMetadataProvider extends
      */
     private void deleteItd(final String metadataIdentificationString,
             final String itdFilename, final String reason, final boolean now) {
+    	
         if (now) {
-            fileManager.delete(itdFilename, reason);
+            getFileManager().delete(itdFilename, reason);
         }
         else {
-            fileManager
+            getFileManager()
                     .createOrUpdateTextFileIfRequired(itdFilename, "", false);
         }
-        itdDiscoveryService.removeItdTypeDetails(metadataIdentificationString);
+        getItdDiscoveryService().removeItdTypeDetails(metadataIdentificationString);
         // TODO do we need to notify downstream dependencies that this ITD has
         // gone away?
     }
 
     public final MetadataItem get(final String metadataIdentificationString) {
+    	
         Validate.isTrue(
                 MetadataIdentificationUtils.getMetadataClass(
                         metadataIdentificationString).equals(
@@ -173,7 +189,7 @@ public abstract class AbstractItdMetadataProvider extends
 
         // Remove the upstream dependencies for this instance (we'll be
         // recreating them later, if needed)
-        metadataDependencyRegistry
+        getMetadataDependencyRegistry()
                 .deregisterDependencies(metadataIdentificationString);
 
         // Compute the identifier for the Physical Type Metadata we're
@@ -181,7 +197,7 @@ public abstract class AbstractItdMetadataProvider extends
         final String governorPhysicalTypeIdentifier = getGovernorPhysicalTypeIdentifier(metadataIdentificationString);
 
         // Obtain the physical type
-        final PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService
+        final PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) getMetadataService()
                 .get(governorPhysicalTypeIdentifier);
         if (governorPhysicalTypeMetadata == null
                 || !governorPhysicalTypeMetadata.isValid()) {
@@ -229,7 +245,7 @@ public abstract class AbstractItdMetadataProvider extends
         final String itdFilename = governorPhysicalTypeMetadata
                 .getItdCanonicalPath(this);
         if (!produceMetadata && isGovernor(cid)
-                && fileManager.exists(itdFilename)) {
+                && getFileManager().exists(itdFilename)) {
             // We don't seem to want metadata anymore, yet the ITD physically
             // exists, so get rid of it
             // This might be because the trigger annotation has been removed,
@@ -284,9 +300,9 @@ public abstract class AbstractItdMetadataProvider extends
                 // is physical content to write
                 if (itdSourceFileComposer.isContent()) {
                     // We have content to write
-                    itdDiscoveryService.addItdTypeDetails(itdTypeDetails);
+                    getItdDiscoveryService().addItdTypeDetails(itdTypeDetails);
                     final String itd = itdSourceFileComposer.getOutput();
-                    fileManager.createOrUpdateTextFileIfRequired(itdFilename,
+                    getFileManager().createOrUpdateTextFileIfRequired(itdFilename,
                             itd, false);
                 }
                 else {
@@ -378,6 +394,12 @@ public abstract class AbstractItdMetadataProvider extends
      */
     protected MemberDetails getMemberDetails(
             final ClassOrInterfaceTypeDetails cid) {
+    	
+    	if(memberDetailsScanner == null){
+    		memberDetailsScanner = getMemberDetailsScanner();
+    	}
+    	Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
+    	
         if (cid == null) {
             return null;
         }
@@ -391,13 +413,19 @@ public abstract class AbstractItdMetadataProvider extends
      * @return <code>null</code> if the member details are unavailable
      */
     protected MemberDetails getMemberDetails(final JavaType type) {
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         final String physicalTypeIdentifier = typeLocationService
                 .getPhysicalTypeIdentifier(type);
         if (physicalTypeIdentifier == null) {
             return null;
         }
         // We need to lookup the metadata we depend on
-        final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService
+        final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) getMetadataService()
                 .get(physicalTypeIdentifier);
         return getMemberDetails(physicalTypeMetadata);
     }
@@ -411,6 +439,12 @@ public abstract class AbstractItdMetadataProvider extends
      */
     protected MemberDetails getMemberDetails(
             final PhysicalTypeMetadata physicalTypeMetadata) {
+    	
+    	if(memberDetailsScanner == null){
+    		memberDetailsScanner = getMemberDetailsScanner();
+    	}
+    	Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
+    	
         // We need to abort if we couldn't find dependent metadata
         if (physicalTypeMetadata == null || !physicalTypeMetadata.isValid()) {
             return null;
@@ -472,7 +506,7 @@ public abstract class AbstractItdMetadataProvider extends
                     .getPath(superCidPhysicalTypeIdentifier);
             final String superCidLocalIdentifier = createLocalIdentifier(
                     superCid.getName(), path);
-            parentMetadata = (T) metadataService.get(superCidLocalIdentifier);
+            parentMetadata = (T) getMetadataService().get(superCidLocalIdentifier);
             superCid = superCid.getSuperclass();
         }
         return parentMetadata; // Could be null
@@ -543,7 +577,7 @@ public abstract class AbstractItdMetadataProvider extends
             // It is unusual to register a direct downstream relationship given
             // it costs dependency registration memory and class-level
             // notifications will always occur anyway.
-            if (metadataDependencyRegistry.getDownstream(upstreamDependency)
+            if (getMetadataDependencyRegistry().getDownstream(upstreamDependency)
                     .contains(downstreamDependency)) {
                 return;
             }
@@ -564,7 +598,7 @@ public abstract class AbstractItdMetadataProvider extends
         // and it
         // directly notified downstreams as part of that method (BPA 10 Dec
         // 2010)
-        metadataService.evictAndGet(downstreamDependency);
+        getMetadataService().evictAndGet(downstreamDependency);
     }
 
     /**
@@ -685,5 +719,103 @@ public abstract class AbstractItdMetadataProvider extends
     protected void setIgnoreTriggerAnnotations(
             final boolean ignoreTriggerAnnotations) {
         this.ignoreTriggerAnnotations = ignoreTriggerAnnotations;
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+    		// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileManager) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on AbstractIdMetadataProvider.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public ItdDiscoveryService getItdDiscoveryService(){
+    	if(itdDiscoveryService == null){
+    		// Get all Services implement ItdDiscoveryService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ItdDiscoveryService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ItdDiscoveryService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ItdDiscoveryService on AbstractIdMetadataProvider.");
+    			return null;
+    		}
+    	}else{
+    		return itdDiscoveryService;
+    	}
+    	
+    }
+    
+    public MemberDetailsScanner getMemberDetailsScanner(){
+    	// Get all Services implement MemberDetailsScanner interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MemberDetailsScanner) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MemberDetailsScanner on AbstractIdMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeLocationService) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeLocationService on AbstractIdMetadataProvider.");
+			return null;
+		}
+    }
+    
+    public PersistenceMemberLocator getPersistenceMemberLocator(){
+    	if(persistenceMemberLocator == null){
+    		// Get all Services implement TypeLocationService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PersistenceMemberLocator) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PersistenceMemberLocator on AbstractIdMetadataProvider.");
+    			return null;
+    		}
+    	}else{
+    		return persistenceMemberLocator;
+    	}
     }
 }

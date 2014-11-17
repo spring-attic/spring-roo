@@ -81,7 +81,7 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
         }
 
         // We have an instance-specific identifier; try to get its metadata
-        final MetadataItem metadata = metadataService.get(upstreamDependency);
+        final MetadataItem metadata = getMetadataService().get(upstreamDependency);
 
         // We don't have to worry about physical type metadata, as we monitor
         // the relevant .java once the DOD governor is first detected
@@ -114,7 +114,7 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
                     MetadataIdentificationUtils.getMetadataClass(localMid),
                     MetadataIdentificationUtils
                             .getMetadataClass(getProvidesType()));
-            metadataService.evictAndGet(localMid);
+            getMetadataService().evictAndGet(localMid);
         }
     }
 }
