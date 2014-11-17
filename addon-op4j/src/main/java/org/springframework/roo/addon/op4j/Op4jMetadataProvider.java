@@ -18,12 +18,13 @@ import org.springframework.roo.project.LogicalPath;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class Op4jMetadataProvider extends AbstractItdMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_OP4J);
@@ -36,7 +37,7 @@ public class Op4jMetadataProvider extends AbstractItdMetadataProvider {
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_OP4J);
