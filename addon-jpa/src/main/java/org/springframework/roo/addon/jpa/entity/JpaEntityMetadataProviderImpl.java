@@ -35,6 +35,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -64,18 +65,25 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.CollectionUtils;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * The {@link JpaEntityMetadataProvider} implementation.
  * 
  * @author Andrew Swan
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JpaEntityMetadataProviderImpl extends
         AbstractIdentifierServiceAwareMetadataProvider implements
         JpaEntityMetadataProvider {
-
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JpaEntityMetadataProviderImpl.class);
+	
     // JPA-related field matchers
     private static final FieldMatcher JPA_COLUMN_FIELD_MATCHER = new FieldMatcher(
             COLUMN_FIELD, AnnotationMetadataBuilder.getInstance(COLUMN));
@@ -123,11 +131,12 @@ public class JpaEntityMetadataProviderImpl extends
             // need to add RooJpaEntity
             ROO_JPA_ACTIVE_RECORD, };
 
-    @Reference private CustomDataKeyDecorator customDataKeyDecorator;
-    @Reference private ProjectOperations projectOperations;
+    private CustomDataKeyDecorator customDataKeyDecorator;
+    private ProjectOperations projectOperations;
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 PROVIDES_TYPE);
         addMetadataTriggers(TRIGGER_ANNOTATIONS);
@@ -142,11 +151,11 @@ public class JpaEntityMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 PROVIDES_TYPE);
         removeMetadataTriggers(TRIGGER_ANNOTATIONS);
-        customDataKeyDecorator.unregisterMatchers(getClass());
+        getCustomDataKeyDecorator().unregisterMatchers(getClass());
     }
 
     @Override
@@ -211,6 +220,12 @@ public class JpaEntityMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalType,
             final String itdFilename) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         // Find out the entity-level JPA details from the trigger annotation
         final JpaEntityAnnotationValues jpaEntityAnnotationValues = getJpaEntityAnnotationValues(governorPhysicalType);
 
@@ -235,7 +250,7 @@ public class JpaEntityMetadataProviderImpl extends
         if (projectOperations.isProjectAvailable(moduleName)) {
             // If the project itself changes, we want a chance to refresh this
             // item
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     ProjectMetadata.getProjectIdentifier(moduleName),
                     metadataIdentificationString);
             isGaeEnabled = projectOperations.isFeatureInstalledInModule(
@@ -261,7 +276,8 @@ public class JpaEntityMetadataProviderImpl extends
 
     @SuppressWarnings("unchecked")
     private void registerMatchers() {
-        customDataKeyDecorator.registerMatchers(
+    	
+        getCustomDataKeyDecorator().registerMatchers(
                 getClass(),
                 // Type matchers
                 new MidTypeMatcher(IDENTIFIER_TYPE, IdentifierMetadata.class
@@ -290,5 +306,44 @@ public class JpaEntityMetadataProviderImpl extends
                         VERSION_ACCESSOR_METHOD, true), new MethodMatcher(
                         Arrays.asList(JPA_VERSION_FIELD_MATCHER),
                         VERSION_MUTATOR_METHOD, false));
+    }
+    
+    public CustomDataKeyDecorator getCustomDataKeyDecorator(){
+    	if(customDataKeyDecorator == null){
+    		// Get all Services implement CustomDataKeyDecorator interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (CustomDataKeyDecorator) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load CustomDataKeyDecorator on JpaEntityMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return customDataKeyDecorator;
+    	}
+    	
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on JpaEntityMetadataProviderImpl.");
+			return null;
+		}
     }
 }

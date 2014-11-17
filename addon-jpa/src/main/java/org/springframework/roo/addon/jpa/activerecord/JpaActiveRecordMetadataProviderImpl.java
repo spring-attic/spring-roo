@@ -23,6 +23,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -50,29 +51,37 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link JpaActiveRecordMetadataProvider}.
  * 
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JpaActiveRecordMetadataProviderImpl extends
         AbstractItdMetadataProvider implements JpaActiveRecordMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JpaActiveRecordMetadataProviderImpl.class);
+	
+    private ConfigurableMetadataProvider configurableMetadataProvider;
+    private CustomDataKeyDecorator customDataKeyDecorator;
+    private PluralMetadataProvider pluralMetadataProvider;
+    private ProjectOperations projectOperations;
 
-    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private CustomDataKeyDecorator customDataKeyDecorator;
-    @Reference private PluralMetadataProvider pluralMetadataProvider;
-    @Reference private ProjectOperations projectOperations;
-
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        configurableMetadataProvider.addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        pluralMetadataProvider.addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
+        getPluralMetadataProvider().addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
         registerMatchers();
     }
 
@@ -83,24 +92,24 @@ public class JpaActiveRecordMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        configurableMetadataProvider
+        getConfigurableMetadataProvider()
                 .removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        pluralMetadataProvider.removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        customDataKeyDecorator.unregisterMatchers(getClass());
+        getPluralMetadataProvider().removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
+        getCustomDataKeyDecorator().unregisterMatchers(getClass());
     }
 
     public JpaCrudAnnotationValues getAnnotationValues(final JavaType javaType) {
         Validate.notNull(javaType, "JavaType required");
-        final String physicalTypeId = typeLocationService
+        final String physicalTypeId = getTypeLocationService()
                 .getPhysicalTypeIdentifier(javaType);
         if (StringUtils.isBlank(physicalTypeId)) {
             return null;
         }
-        final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService
+        final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) getMetadataService()
                 .get(physicalTypeId);
         if (MemberFindingUtils.getAnnotationOfType(governor,
                 ROO_JPA_ACTIVE_RECORD) == null) {
@@ -130,6 +139,7 @@ public class JpaActiveRecordMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalType,
             final String itdFilename) {
+    	
         // Get the CRUD-related annotation values
         final JpaCrudAnnotationValues crudAnnotationValues = new JpaCrudAnnotationValues(
                 governorPhysicalType);
@@ -170,16 +180,16 @@ public class JpaActiveRecordMetadataProviderImpl extends
         final LogicalPath path = JpaActiveRecordMetadata
                 .getPath(metadataIdentificationString);
         final String pluralId = PluralMetadata.createIdentifier(entity, path);
-        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+        final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                 .get(pluralId);
         if (pluralMetadata == null) {
             // Can't acquire the plural
             return null;
         }
-        metadataDependencyRegistry.registerDependency(pluralId,
+        getMetadataDependencyRegistry().registerDependency(pluralId,
                 metadataIdentificationString);
 
-        final List<FieldMetadata> idFields = persistenceMemberLocator
+        final List<FieldMetadata> idFields = getPersistenceMemberLocator()
                 .getIdentifierFields(entity);
         if (idFields.size() != 1) {
             // The ID field metadata is either unavailable or not stable yet
@@ -194,13 +204,13 @@ public class JpaActiveRecordMetadataProviderImpl extends
         boolean isGaeEnabled = false;
 
         final String moduleName = path.getModule();
-        if (projectOperations.isProjectAvailable(moduleName)) {
+        if (getProjectOperations().isProjectAvailable(moduleName)) {
             // If the project itself changes, we want a chance to refresh this
             // item
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     ProjectMetadata.getProjectIdentifier(moduleName),
                     metadataIdentificationString);
-            isGaeEnabled = projectOperations.isFeatureInstalledInModule(
+            isGaeEnabled = getProjectOperations().isFeatureInstalledInModule(
                     FeatureNames.GAE, moduleName);
         }
 
@@ -215,7 +225,8 @@ public class JpaActiveRecordMetadataProviderImpl extends
 
     @SuppressWarnings("unchecked")
     private void registerMatchers() {
-        customDataKeyDecorator
+    	
+        getCustomDataKeyDecorator()
                 .registerMatchers(getClass(),
                         new MethodMatcher(CLEAR_METHOD, ROO_JPA_ACTIVE_RECORD,
                                 new JavaSymbolName("clearMethod"),
@@ -255,5 +266,93 @@ public class JpaActiveRecordMetadataProviderImpl extends
                                 REMOVE_METHOD, ROO_JPA_ACTIVE_RECORD,
                                 new JavaSymbolName("removeMethod"),
                                 REMOVE_METHOD_DEFAULT));
+    }
+    
+    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JpaActiveRecordMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
+    }
+    
+    public CustomDataKeyDecorator getCustomDataKeyDecorator(){
+    	if(customDataKeyDecorator == null){
+    		// Get all Services implement CustomDataKeyDecorator interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (CustomDataKeyDecorator) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load CustomDataKeyDecorator on JpaActiveRecordMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return customDataKeyDecorator;
+    	}
+    	
+    }
+    
+    public PluralMetadataProvider getPluralMetadataProvider(){
+    	if(pluralMetadataProvider == null){
+    		// Get all Services implement PluralMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(PluralMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PluralMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PluralMetadataProvider on JpaActiveRecordMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return pluralMetadataProvider;
+    	}
+    	
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+    		// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ProjectOperations) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on JpaActiveRecordMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    	
     }
 }

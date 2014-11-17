@@ -3,6 +3,9 @@ package org.springframework.roo.addon.jpa.identifier;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 
 import java.util.List;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.Validate;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -20,29 +23,37 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link IdentifierMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class IdentifierMetadataProviderImpl extends
         AbstractIdentifierServiceAwareMetadataProvider implements
         IdentifierMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(IdentifierMetadataProviderImpl.class);
+	
+    private ConfigurableMetadataProvider configurableMetadataProvider;
+    private ProjectOperations projectOperations;
+    private SerializableMetadataProvider serializableMetadataProvider;
 
-    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private SerializableMetadataProvider serializableMetadataProvider;
-
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_IDENTIFIER);
-        configurableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
-        serializableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_IDENTIFIER);
+        getSerializableMetadataProvider().addMetadataTrigger(ROO_IDENTIFIER);
     }
 
     @Override
@@ -52,12 +63,12 @@ public class IdentifierMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_IDENTIFIER);
-        configurableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
-        serializableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
+        getConfigurableMetadataProvider().removeMetadataTrigger(ROO_IDENTIFIER);
+        getSerializableMetadataProvider().removeMetadataTrigger(ROO_IDENTIFIER);
     }
 
     @Override
@@ -80,6 +91,12 @@ public class IdentifierMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final IdentifierAnnotationValues annotationValues = new IdentifierAnnotationValues(
                 governorPhysicalTypeMetadata);
         if (!annotationValues.isAnnotationFound()) {
@@ -96,7 +113,7 @@ public class IdentifierMetadataProviderImpl extends
         if (projectOperations.isProjectAvailable(path.getModule())) {
             // If the project itself changes, we want a chance to refresh this
             // item
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     ProjectMetadata.getProjectIdentifier(path.getModule()),
                     metadataIdentificationString);
         }
@@ -109,4 +126,66 @@ public class IdentifierMetadataProviderImpl extends
     public String getProvidesType() {
         return IdentifierMetadata.getMetadataIdentifierType();
     }
+    
+    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on IdentifierMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on IdentifierMetadataProviderImpl.");
+			return null;
+		}
+    }
+    
+    public SerializableMetadataProvider getSerializableMetadataProvider(){
+    	if(serializableMetadataProvider == null){
+    		// Get all Services implement SerializableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(SerializableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (SerializableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load SerializableMetadataProvider on IdentifierMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return serializableMetadataProvider;
+    	}
+    	
+    }
+    
 }
