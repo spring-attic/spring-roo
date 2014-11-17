@@ -10,6 +10,7 @@
     <inceptionYear>2009</inceptionYear>
     <modules>
         <!-- NB: Update the <dependencyManagement> section in this pom.xml if you add/remove/rename any module below! -->
+        <!-- Roo Core -->
         <module>deployment-support</module>
         <module>osgi-bundle</module>
         <module>osgi-roo-bundle</module>
@@ -35,44 +36,44 @@
         <module>process-manager</module>
         <module>classpath</module>
         <module>classpath-antlrjavaparser</module>
-        <module>addon-tostring</module>
-        <module>addon-equals</module>
-        <module>addon-javabean</module>
-        <module>addon-plural</module>
-        <module>addon-propfiles</module>
-        <module>addon-configurable</module>
-        <module>addon-email</module>
-        <module>addon-jpa</module>
-        <module>addon-jms</module>
-        <module>addon-finder</module>
-        <module>addon-logging</module>
-        <module>addon-property-editor</module>
-        <module>addon-dod</module>
-        <module>addon-test</module>
+        <!-- Addons -->
         <module>addon-backup</module>
-        <module>addon-serializable</module>
-        <module>addon-web-mvc-controller</module>
-        <module>addon-web-mvc-embedded</module>
-        <module>addon-web-mvc-jsp</module>
-        <module>addon-security</module>
-        <module>addon-solr</module>
-        <module>addon-web-flow</module>
-        <module>addon-web-selenium</module>
-        <module>addon-gwt</module>
+        <module>addon-configurable</module>
+        <module>addon-plural</module>
+        <module>addon-git</module>
+        <module>addon-oscommands</module>
+        <module>addon-op4j</module>
+        <module>addon-javabean</module>
+        <module>addon-tostring</module>
+        <module>addon-logging</module>
         <module>addon-jdbc</module>
-        <module>addon-dbre</module>
-        <module>addon-creator</module>
+        <module>addon-propfiles</module>
+        <module>addon-jms</module>
+        <module>addon-test</module>
+        <module>addon-dod</module>
+        <module>addon-serializable</module>
         <module>addon-roobot-client</module>
+        <module>addon-jpa</module>
+        <module>addon-cloud</module>
+        <module>addon-creator</module>
+        <module>addon-finder</module>
+        <module>addon-equals</module>
         <module>addon-json</module>
         <module>addon-jsf</module>
-        <module>addon-op4j</module>
-        <module>addon-git</module>
-        <module>addon-cloud</module>
+        <module>addon-web-mvc-controller</module>
+        <module>addon-web-mvc-jsp</module>
+        <module>addon-security</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository-jpa</module>
+        <module>addon-dbre</module>
+        <module>addon-email</module>
+        <module>addon-property-editor</module>
         <module>addon-layers-repository-mongo</module>
-        <module>addon-oscommands</module>
+        <module>addon-web-selenium</module>
+        <module>addon-web-mvc-embedded</module>
+        <module>addon-web-flow</module>
         <module>addon-tailor</module>
+        <module>addon-solr</module>
         <module>annotations</module>
     </modules>
     <distributionManagement>
@@ -200,18 +201,18 @@
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
-                <version>4.2.0</version>
+                <version>${osgi.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.compendium</artifactId>
-                <version>4.2.0</version>
+                <version>${osgi.version}</version>
             </dependency>
             <!-- Apache Felix -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.bundlerepository</artifactId>
-                <version>1.6.6</version>
+                <version>2.0.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.easymock</groupId>
@@ -222,7 +223,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
-                <version>3.2.2</version>
+                <version>4.4.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -237,7 +238,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.ipojo</artifactId>
-                <version>1.8.0</version>
+                <version>1.12.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -279,7 +280,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr</artifactId>
-                <version>1.6.0</version>
+                <version>1.8.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -294,12 +295,22 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.6.0</version>
+                <version>1.9.8</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.shell</artifactId>
-                <version>1.4.2</version>
+                <version>1.4.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.gogo.runtime</artifactId>
+                <version>0.12.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.gogo.command</artifactId>
+                <version>0.14.0</version>
             </dependency>
             <!-- External OSGi Bundles (ie not wrapped) -->
             <dependency>
@@ -518,85 +529,10 @@
                 <artifactId>org.springframework.roo.wrapping.json-simple</artifactId>
                 <version>1.1.0.0010</version>
             </dependency>
-            <!-- Roo Modules -->
+            <!-- Roo Addons -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.backup</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.configurable</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.creator</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.dbre</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.dod</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.email</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.finder</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.git</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.gwt</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.javabean</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.jdbc</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.jms</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.jpa</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.json</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.logging</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.op4j</artifactId>
+                <artifactId>org.springframework.roo.addon.propfiles</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -606,32 +542,12 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.property.editor</artifactId>
+                <artifactId>org.springframework.roo.addon.configurable</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.propfiles</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.roobot.client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.security</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.serializable</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.solr</artifactId>
+                <artifactId>org.springframework.roo.addon.dod</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -641,17 +557,22 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.tostring</artifactId>
+                <artifactId>org.springframework.roo.addon.serializable</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.equals</artifactId>
+                <artifactId>org.springframework.roo.addon.jpa</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.web.flow</artifactId>
+                <artifactId>org.springframework.roo.addon.finder</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.json</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -661,7 +582,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.web.mvc.embedded</artifactId>
+                <artifactId>org.springframework.roo.addon.backup</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -671,14 +592,25 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.web.mvc.selenium</artifactId>
+                <artifactId>org.springframework.roo.addon.security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.jsf</artifactId>
+                <artifactId>org.springframework.roo.addon.jdbc</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.layers.repository.jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+ 			<dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.layers.service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- End Roo Addons -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.bootstrap</artifactId>
@@ -804,31 +736,6 @@
                 <artifactId>org.springframework.roo.url.stream.jdk</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.layers.service</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.layers.repository.jpa</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.layers.repository.mongo</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.oscommands</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.tailor</artifactId>
-                <version>${project.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -917,6 +824,7 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                    <forceJavacCompilerUse>true</forceJavacCompilerUse>
                 </configuration>
             </plugin>
             <plugin>
@@ -1026,5 +934,8 @@
     <properties>
         <powermock.version>1.4.12</powermock.version>
         <spring.version>3.1.3.RELEASE</spring.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <osgi.version>5.0.0</osgi.version>
+        <scr.plugin.version>1.20.0</scr.plugin.version>
     </properties>
 </project>
