@@ -48,7 +48,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Utilities related to XML usage.
- *
+ * 
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
@@ -67,7 +67,7 @@ public final class XmlUtils {
     /**
      * Checks the presented element for illegal characters that could cause
      * malformed XML.
-     *
+     * 
      * @param element the content of the XML element
      * @throws IllegalArgumentException if the element is null, has no text or
      *             contains illegal characters
@@ -95,7 +95,7 @@ public final class XmlUtils {
     /**
      * Compares two DOM {@link Node nodes} by comparing the representations of
      * the nodes as XML strings
-     *
+     * 
      * @param node1 the first node
      * @param node2 the second node
      * @return true if the XML representation node1 is the same as the XML
@@ -123,7 +123,7 @@ public final class XmlUtils {
     /**
      * Converts a XHTML compliant id (used in jspx) to a CSS3 selector spec
      * compliant id. In that it will replace all '.,:,-' to '_'
-     *
+     * 
      * @param proposed Id
      * @return cleaned up Id
      */
@@ -151,7 +151,7 @@ public final class XmlUtils {
 
     /**
      * Creates an {@link Element} containing the given text
-     *
+     * 
      * @param document the document to contain the new element
      * @param tagName the element's tag name (required)
      * @param text the text to set; can be <code>null</code> for none
@@ -170,7 +170,7 @@ public final class XmlUtils {
      * {@link OutputStreamWriter} that transforms Windows line endings (\r\n)
      * into Unix line endings (\n) on Windows for consistency with Roo's
      * templates.
-     *
+     * 
      * @param outputStream
      * @return StreamResult
      * @throws UnsupportedEncodingException
@@ -228,7 +228,7 @@ public final class XmlUtils {
      * {@link Element} if they exist. Please note that the XPath parser used is
      * NOT namespace aware. So if you want to find a element <beans><sec:http>
      * you need to use the following XPath expression '/beans/http'.
-     *
+     * 
      * @param xPathExpression the xPathExpression
      * @param root the parent DOM element
      * @return a {@link List} of type {@link Element} if discovered, otherwise
@@ -262,7 +262,7 @@ public final class XmlUtils {
     /**
      * Checks for a given element whether it can find an attribute which matches
      * the XPath expression supplied. Returns {@link Node} if exists.
-     *
+     * 
      * @param xPathExpression the xPathExpression (required)
      * @param element (required)
      * @return the Node if discovered (null if not found)
@@ -292,7 +292,7 @@ public final class XmlUtils {
      * aware. So if you want to find an element
      * <code>&lt;beans&gt;&lt;sec:http&gt;</code>, you need to use the following
      * XPath expression '/beans/http'.
-     *
+     * 
      * @param xPathExpression the xPathExpression (required)
      * @param parent the parent DOM element (required)
      * @return the Element if discovered (null if no such {@link Element} found)
@@ -309,7 +309,7 @@ public final class XmlUtils {
     /**
      * Checks in under a given root element whether it can find a child element
      * which matches the name supplied. Returns {@link Element} if exists.
-     *
+     * 
      * @param name the Element name (required)
      * @param root the parent DOM element (required)
      * @return the Element if discovered
@@ -328,7 +328,7 @@ public final class XmlUtils {
      * exists. Please note that the XPath parser used is NOT namespace aware. So
      * if you want to find a element <code>&lt;beans&gt;&lt;sec:http&gt;</code>,
      * you need to use the XPath expression '<code>/beans/http</code>'.
-     *
+     * 
      * @param xPathExpression the XPath expression (required)
      * @param root the parent DOM element (required)
      * @return the Node if discovered (null if not found)
@@ -361,7 +361,7 @@ public final class XmlUtils {
      * parser used is NOT namespace aware. So if you want to find a element
      * <beans><sec:http> you need to use the following XPath expression
      * '/beans/http'.
-     *
+     * 
      * @param xPathExpression the XPath expression (required)
      * @param root the parent DOM element (required)
      * @return the Element if discovered (never null; an exception is thrown if
@@ -379,7 +379,7 @@ public final class XmlUtils {
 
     /**
      * Returns the root element of an addon's configuration file.
-     *
+     * 
      * @param clazz which owns the configuration
      * @return the configuration root element
      */
@@ -402,7 +402,7 @@ public final class XmlUtils {
 
     /**
      * Returns the root element of the given XML file.
-     *
+     * 
      * @param clazz the class from whose package to open the file (required)
      * @param xmlFilePath the path of the XML file relative to the given class'
      *            package (required)
@@ -434,7 +434,7 @@ public final class XmlUtils {
 
     /**
      * Converts a {@link Node node} to an XML string
-     *
+     * 
      * @param node the first element
      * @return the XML String representation of the node, never null
      */
@@ -453,7 +453,7 @@ public final class XmlUtils {
     /**
      * Read an XML document from the supplied input stream and return a
      * document.
-     *
+     * 
      * @param inputStream the input stream to read from (required). The stream
      *            is closed upon completion.
      * @return a document.
@@ -477,7 +477,7 @@ public final class XmlUtils {
 
     /**
      * Removes empty text nodes from the specified node
-     *
+     * 
      * @param node the element where empty text nodes will be removed
      * @deprecated use {@link DomUtils#removeTextNodes(Node)} instead
      */
@@ -489,7 +489,7 @@ public final class XmlUtils {
     /**
      * Returns the given XML as the root {@link Element} of a new
      * {@link Document}
-     *
+     * 
      * @param xml the XML to convert; can be blank
      * @return <code>null</code> if the given XML is blank
      * @since 1.2.0
@@ -519,7 +519,7 @@ public final class XmlUtils {
      * detect if the JDK supports the DOM Level 3 "format-pretty-print"
      * configuration and make use of it. If not found it will fall back to using
      * formatting offered by TrAX.
-     *
+     * 
      * @param outputStream the output stream to write to. The stream is closed
      *            upon completion.
      * @param document the document to write.
@@ -603,7 +603,7 @@ public final class XmlUtils {
     /**
      * Write an XML document to the OutputStream provided. This will use the
      * pre-configured Roo provided Transformer.
-     *
+     * 
      * @param outputStream the output stream to write to. The stream is closed
      *            upon completion.
      * @param document the document to write.
@@ -616,7 +616,7 @@ public final class XmlUtils {
     /**
      * Write an XML document to the OutputStream provided. This will use the
      * provided Transformer.
-     *
+     * 
      * @param transformer the transformer (can be obtained from
      *            XmlUtils.createIndentingTransformer())
      * @param outputStream the output stream to write to. The stream is closed
