@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -43,6 +44,12 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Provides security installation services.
  * 
@@ -54,17 +61,26 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class SecurityOperationsImpl implements SecurityOperations {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(SecurityOperationsImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private static final Dependency SPRING_SECURITY = new Dependency(
             "org.springframework.security", "spring-security-core",
             "3.1.0.RELEASE");
 
-    @Reference private FileManager fileManager;
-    @Reference private PathResolver pathResolver;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private TilesOperations tilesOperations;
-    @Reference private TypeManagementService typeManagementService;
-    @Reference private MetadataService metadataService;
+    private FileManager fileManager;
+    private PathResolver pathResolver;
+    private ProjectOperations projectOperations;
+    private TilesOperations tilesOperations;
+    private TypeManagementService typeManagementService;
+    private MetadataService metadataService;
+    
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     @Override
     public void installSecurity() {
@@ -73,22 +89,22 @@ public class SecurityOperationsImpl implements SecurityOperations {
 
         // Add POM properties
         updatePomProperties(configuration,
-                projectOperations.getFocusedModuleName());
+                getProjectOperations().getFocusedModuleName());
 
         // Add dependencies to POM
         updateDependencies(configuration,
-                projectOperations.getFocusedModuleName());
+                getProjectOperations().getFocusedModuleName());
 
         // Copy the template across
-        final String destination = pathResolver.getFocusedIdentifier(
+        final String destination = getPathResolver().getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
-        if (!fileManager.exists(destination)) {
+        if (!getFileManager().exists(destination)) {
             InputStream inputStream = null;
             OutputStream outputStream = null;
             try {
                 inputStream = FileUtils.getInputStream(getClass(),
                         "applicationContext-security-template.xml");
-                outputStream = fileManager.createFile(destination)
+                outputStream = getFileManager().createFile(destination)
                         .getOutputStream();
                 IOUtils.copy(inputStream, outputStream);
             }
@@ -102,15 +118,15 @@ public class SecurityOperationsImpl implements SecurityOperations {
         }
 
         // Copy the template across
-        final String loginPage = pathResolver.getFocusedIdentifier(
+        final String loginPage = getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/views/login.jspx");
-        if (!fileManager.exists(loginPage)) {
+        if (!getFileManager().exists(loginPage)) {
             InputStream inputStream = null;
             OutputStream outputStream = null;
             try {
                 inputStream = FileUtils
                         .getInputStream(getClass(), "login.jspx");
-                outputStream = fileManager.createFile(loginPage)
+                outputStream = getFileManager().createFile(loginPage)
                         .getOutputStream();
                 IOUtils.copy(inputStream, outputStream);
             }
@@ -123,30 +139,30 @@ public class SecurityOperationsImpl implements SecurityOperations {
             }
         }
 
-        if (fileManager.exists(pathResolver.getFocusedIdentifier(
+        if (getFileManager().exists(getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/views/views.xml"))) {
-            tilesOperations.addViewDefinition("",
-                    pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), "login",
-                    TilesOperations.PUBLIC_TEMPLATE,
+            getTilesOperations().addViewDefinition("",
+                    getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP), "login",
+                    getTilesOperations().PUBLIC_TEMPLATE,
                     "/WEB-INF/views/login.jspx");
         }
 
-        final String webXmlPath = pathResolver.getFocusedIdentifier(
+        final String webXmlPath = getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-        final Document webXmlDocument = XmlUtils.readXml(fileManager
+        final Document webXmlDocument = XmlUtils.readXml(getFileManager()
                 .getInputStream(webXmlPath));
 
 		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.LAST, null,
 				null, SecurityOperations.SECURITY_FILTER_NAME,
 				"org.springframework.web.filter.DelegatingFilterProxy", "/*",
 				webXmlDocument, null);
-		fileManager.createOrUpdateTextFileIfRequired(webXmlPath,
+		getFileManager().createOrUpdateTextFileIfRequired(webXmlPath,
 				XmlUtils.nodeToString(webXmlDocument), false);
 
         // Include static view controller handler to webmvc-config.xml
-        final String webConfigPath = pathResolver.getFocusedIdentifier(
+        final String webConfigPath = getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-        final Document webConfigDocument = XmlUtils.readXml(fileManager
+        final Document webConfigDocument = XmlUtils.readXml(getFileManager()
                 .getInputStream(webConfigPath));
         final Element webConfig = webConfigDocument.getDocumentElement();
         final Element viewController = DomUtils.findFirstElementByName(
@@ -158,7 +174,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
                         new XmlElementBuilder("mvc:view-controller",
                                 webConfigDocument).addAttribute("path",
                                 "/login").build(), viewController);
-        fileManager.createOrUpdateTextFileIfRequired(webConfigPath,
+        getFileManager().createOrUpdateTextFileIfRequired(webConfigPath,
                 XmlUtils.nodeToString(webConfigDocument), false);
     }
 
@@ -166,37 +182,37 @@ public class SecurityOperationsImpl implements SecurityOperations {
             final JavaPackage permissionEvaluatorPackage) {
         installPermissionEvaluatorTemplate(permissionEvaluatorPackage);
         final LogicalPath focusedSrcMainJava = LogicalPath.getInstance(
-                SRC_MAIN_JAVA, projectOperations.getFocusedModuleName());
+                SRC_MAIN_JAVA, getProjectOperations().getFocusedModuleName());
         JavaType permissionEvaluatorClass = new JavaType(
                 permissionEvaluatorPackage.getFullyQualifiedPackageName()
                         + ".ApplicationPermissionEvaluator");
-        final String identifier = pathResolver.getFocusedCanonicalPath(
+        final String identifier = getPathResolver().getFocusedCanonicalPath(
                 Path.SRC_MAIN_JAVA, permissionEvaluatorClass);
-        if (fileManager.exists(identifier)) {
+        if (getFileManager().exists(identifier)) {
             return; // Type already exists - nothing to do
         }
 
         final AnnotationMetadataBuilder classAnnotationMetadata = new AnnotationMetadataBuilder(
                 ROO_PERMISSION_EVALUATOR);
         final String classMid = PhysicalTypeIdentifier.createIdentifier(
-                permissionEvaluatorClass, pathResolver.getPath(identifier));
+                permissionEvaluatorClass, getPathResolver().getPath(identifier));
         final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 classMid, PUBLIC, permissionEvaluatorClass, CLASS);
         classBuilder.addAnnotation(classAnnotationMetadata.build());
         classBuilder.addImplementsType(PERMISSION_EVALUATOR);
-        typeManagementService.createOrUpdateTypeOnDisk(classBuilder.build());
+        getTypeManagementService().createOrUpdateTypeOnDisk(classBuilder.build());
 
-        metadataService.get(PermissionEvaluatorMetadata.createIdentifier(
+        getMetadataService().get(PermissionEvaluatorMetadata.createIdentifier(
                 permissionEvaluatorClass, focusedSrcMainJava));
     }
 
     private void installPermissionEvaluatorTemplate(
             JavaPackage permissionEvaluatorPackage) {
         // Copy the template across
-        final String destination = pathResolver.getFocusedIdentifier(
+        final String destination = getPathResolver().getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT,
                 "applicationContext-security-permissionEvaluator.xml");
-        if (!fileManager.exists(destination)) {
+        if (!getFileManager().exists(destination)) {
             try {
                 InputStream inputStream = FileUtils
                         .getInputStream(getClass(),
@@ -206,7 +222,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
                         permissionEvaluatorPackage
                                 .getFullyQualifiedPackageName());
 
-                fileManager.createOrUpdateTextFileIfRequired(destination,
+                getFileManager().createOrUpdateTextFileIfRequired(destination,
                         content, true);
             }
             catch (final IOException ioe) {
@@ -219,7 +235,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
     public void installPermissionEvaluator(
             final JavaPackage permissionEvaluatorPackage) {
         Validate.isTrue(
-                projectOperations.isFeatureInstalled(FeatureNames.SECURITY),
+                getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY),
                 "Security must first be setup before securing a method");
         Validate.notNull(permissionEvaluatorPackage, "Package required");
         createPermissionEvaluator(permissionEvaluatorPackage);
@@ -229,19 +245,19 @@ public class SecurityOperationsImpl implements SecurityOperations {
     public boolean isSecurityInstallationPossible() {
         // Permit installation if they have a web project (as per ROO-342) and
         // no version of Spring Security is already installed.
-        return projectOperations.isFocusedProjectAvailable()
-                && fileManager.exists(pathResolver.getFocusedIdentifier(
+        return getProjectOperations().isFocusedProjectAvailable()
+                && getFileManager().exists(getPathResolver().getFocusedIdentifier(
                         Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))
-                && !projectOperations.getFocusedModule()
+                && !getProjectOperations().getFocusedModule()
                         .hasDependencyExcludingVersion(SPRING_SECURITY)
-                && !projectOperations
+                && !getProjectOperations()
                         .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
     }
 
     @Override
     public boolean isServicePermissionEvaluatorInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && projectOperations.isFeatureInstalled(FeatureNames.SECURITY);
+        return getProjectOperations().isFocusedProjectAvailable()
+                && getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY);
     }
 
     private void updateDependencies(final Element configuration,
@@ -253,7 +269,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
         for (final Element dependencyElement : securityDependencies) {
             dependencies.add(new Dependency(dependencyElement));
         }
-        projectOperations.addDependencies(moduleName, dependencies);
+        getProjectOperations().addDependencies(moduleName, dependencies);
     }
 
     private void updatePomProperties(final Element configuration,
@@ -261,7 +277,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
         final List<Element> databaseProperties = XmlUtils.findElements(
                 "/configuration/spring-security/properties/*", configuration);
         for (final Element property : databaseProperties) {
-            projectOperations.addProperty(moduleName, new Property(property));
+            getProjectOperations().addProperty(moduleName, new Property(property));
         }
     }
 
@@ -272,7 +288,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 
     @Override
     public boolean isInstalledInModule(String moduleName) {
-        final Pom pom = projectOperations.getPomFromModuleName(moduleName);
+        final Pom pom = getProjectOperations().getPomFromModuleName(moduleName);
         if (pom == null) {
             return false;
         }
@@ -282,5 +298,131 @@ public class SecurityOperationsImpl implements SecurityOperations {
             }
         }
         return false;
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+    		// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileManager) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public PathResolver getPathResolver(){
+    	if(pathResolver == null){
+    		// Get all Services implement PathResolver interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PathResolver) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PathResolver on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return pathResolver;
+    	}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+    		// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ProjectOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    }
+    
+    public TilesOperations getTilesOperations(){
+    	if(tilesOperations == null){
+    		// Get all Services implement TilesOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(TilesOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TilesOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TilesOperations on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return tilesOperations;
+    	}
+    }
+    
+    public TypeManagementService getTypeManagementService(){
+    	if(typeManagementService == null){
+    		// Get all Services implement TypeManagementService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TypeManagementService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeManagementService on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return typeManagementService;
+    	}
+    }
+    
+    public MetadataService getMetadataService(){
+    	if(metadataService == null){
+    		// Get all Services implement MetadataService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MetadataService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataService on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return metadataService;
+    	}
     }
 }

@@ -5,6 +5,7 @@ import static org.springframework.roo.model.SpringJavaType.PERMISSION_EVALUATOR;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -28,25 +29,34 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 
-@Component(immediate = true)
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
+@Component
 @Service
 public class PermissionEvaluatorMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
-    @Reference private TypeManagementService typeManagementService;
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(PermissionEvaluatorMetadataProvider.class);
+	
+    private TypeManagementService typeManagementService;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         setIgnoreTriggerAnnotations(true);
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
     }
@@ -71,7 +81,7 @@ public class PermissionEvaluatorMetadataProvider extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -155,7 +165,7 @@ public class PermissionEvaluatorMetadataProvider extends
     private Map<JavaType, String> getDomainTypesToPlurals() {
     	
     	Map<JavaType, String>  domainTypesToPlurals = new HashMap<JavaType, String> ();
-    	for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE)) {
+    	for (ClassOrInterfaceTypeDetails cid : getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE)) {
     		AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_SERVICE);
     		AnnotationAttributeValue<Boolean> usePermissionEvaluator = annotationMetadata.getAttribute("usePermissionEvaluator");
     		if (usePermissionEvaluator == null || usePermissionEvaluator.getValue() == false){
@@ -163,7 +173,7 @@ public class PermissionEvaluatorMetadataProvider extends
     		}
     		AnnotationAttributeValue<Collection<ClassAttributeValue>> domainTypes = annotationMetadata.getAttribute("domainTypes");
             for (ClassAttributeValue domainType : domainTypes.getValue()) {
-	    		final ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService
+	    		final ClassOrInterfaceTypeDetails domainTypeDetails = getTypeLocationService()
 	                    .getTypeDetails(domainType.getValue());
 	            if (domainTypeDetails == null) {
 	                return null;
