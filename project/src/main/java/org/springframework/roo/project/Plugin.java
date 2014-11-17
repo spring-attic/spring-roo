@@ -214,8 +214,12 @@ public class Plugin implements Comparable<Plugin> {
             final Collection<? extends Execution> executions) {
         Validate.notNull(groupId, "Group ID required");
         Validate.notNull(artifactId, "Artifact ID required");
-        Validate.notNull(version, "Version required");
-        gav = new GAV(groupId, artifactId, version);
+        //Validate.notNull(version, "Version required");
+        if(version == null || version == "") {
+			gav = new GAV(groupId, artifactId, "-");
+		} else {
+			gav = new GAV(groupId, artifactId, version);
+		}
         this.configuration = configuration;
         // Defensively copy the given nullable collections
         CollectionUtils.populate(this.dependencies, dependencies);

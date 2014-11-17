@@ -81,7 +81,7 @@ public final class XmlUtils {
         // profiling than this approach
         final char[] value = element.toCharArray();
         for (final char c : value) {
-            if (' ' == c || '*' == c || '>' == c || '<' == c || '!' == c
+            if (' ' == c || '>' == c || '<' == c || '!' == c
                     || '@' == c || '%' == c || '^' == c || '?' == c || '(' == c
                     || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c
                     || '[' == c || ']' == c || '|' == c || '\\' == c
