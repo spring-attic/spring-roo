@@ -574,12 +574,10 @@ if [[ "$COMMAND" = "assembly" ]]; then
         load_roo_build_and_test script wedding.roo
         tomcat_stop_start_get_stop http://localhost:8888/wedding
 
-		load_roo_build_and_test script pizzashop.roo
+		    load_roo_build_and_test script pizzashop.roo
         tomcat_stop_start_get_stop http://localhost:8888/pizzashop
-		pizzashop_tests
+		    pizzashop_tests
 
-        load_roo_build_and_test script expenses.roo	
-        
         load_roo_build_and_test script bikeshop.roo
         jetty_stop_start_get_stop http://localhost:8888/bikeshop/pages/main.jsf
 
