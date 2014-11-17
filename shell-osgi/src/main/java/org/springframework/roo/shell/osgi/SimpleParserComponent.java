@@ -27,30 +27,18 @@ import org.springframework.roo.support.api.AddOnSearch;
  */
 @Component
 @Service(value = Parser.class)
-// Important, as auto-detection includes CommandMarker which is unacceptable as
-// we'd have a circular dependency to ourself
 @References(value = {
-        @Reference(name = "converter", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Converter.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
-        @Reference(name = "command", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = CommandMarker.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
         @Reference(name = "addOnSearch", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = AddOnSearch.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY) })
 public class SimpleParserComponent extends SimpleParser implements
         CommandMarker {
     private AddOnSearch addOnSearch;
 
     protected void activate(final ComponentContext context) {
-        bindCommand(this);
+    	this.context = context.getBundleContext();
     }
 
     protected void bindAddOnSearch(final AddOnSearch s) {
         addOnSearch = s;
-    }
-
-    protected void bindCommand(final CommandMarker c) {
-        add(c);
-    }
-
-    protected void bindConverter(final Converter<?> c) {
-        add(c);
     }
 
     @Override
@@ -94,10 +82,6 @@ public class SimpleParserComponent extends SimpleParser implements
         }
     }
 
-    protected void deactivate(final ComponentContext context) {
-        unbindCommand(this);
-    }
-
     @Override
     @CliCommand(value = "reference guide", help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory")
     public void helpReferenceGuide() {
@@ -114,13 +98,5 @@ public class SimpleParserComponent extends SimpleParser implements
 
     protected void unbindAddOnSearch(final AddOnSearch s) {
         addOnSearch = null;
-    }
-
-    protected void unbindCommand(final CommandMarker c) {
-        remove(c);
-    }
-
-    protected void unbindConverter(final Converter<?> c) {
-        remove(c);
     }
 }
