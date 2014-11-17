@@ -20,14 +20,15 @@ import org.springframework.roo.project.LogicalPath;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class ToStringMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_TO_STRING);
@@ -40,8 +41,8 @@ public class ToStringMetadataProvider extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_TO_STRING);
