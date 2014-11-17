@@ -20,12 +20,13 @@ import org.springframework.roo.project.LogicalPath;
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_EDITOR);
@@ -38,7 +39,7 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_EDITOR);
@@ -94,7 +95,7 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 jpaActiveRecordMetadataKey, metadataIdentificationString);
 
         // We do not need to monitor the parent, as any changes to the java type
