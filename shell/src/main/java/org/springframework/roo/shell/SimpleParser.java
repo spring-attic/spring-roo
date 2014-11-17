@@ -45,6 +45,11 @@ import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Default implementation of {@link Parser}.
  * 
@@ -52,6 +57,9 @@ import org.w3c.dom.Element;
  * @since 1.0
  */
 public class SimpleParser implements Parser {
+	
+	// ------------ OSGi component attributes ----------------
+   	public BundleContext context;
 
     private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
     private static final Logger LOGGER = HandlerUtils
@@ -206,6 +214,21 @@ public class SimpleParser implements Parser {
     public int completeAdvanced(String buffer, int cursor,
             final List<Completion> candidates) {
         synchronized (mutex) {
+        	
+        	if(converters.isEmpty()){
+        		// Get all Services implement Converter interface
+        		try {
+        			ServiceReference<?>[] references = this.context.getAllServiceReferences(Converter.class.getName(), null);
+        			
+        			for(ServiceReference<?> ref : references){
+        				add((Converter<?>) this.context.getService(ref));
+        			}
+        			
+        		} catch (InvalidSyntaxException e) {
+        			LOGGER.warning("Cannot load Converter on SimpleParser.");
+        		}
+        	}
+        	
             Validate.notNull(buffer, "Buffer required");
             Validate.notNull(candidates, "Candidates list required");
 
@@ -720,6 +743,22 @@ public class SimpleParser implements Parser {
 
     public Set<String> getEveryCommand() {
         synchronized (mutex) {
+        	
+        	if(commands.isEmpty()){
+        		// Get all Services implement CommandMarker interface
+        		try {
+        			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
+        			
+        			for(ServiceReference<?> ref : references){
+        				add((CommandMarker) this.context.getService(ref));
+        			}
+        			
+        		} catch (InvalidSyntaxException e) {
+        			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
+        		}
+        	}
+        	
+        	
             final SortedSet<String> result = new TreeSet<String>(COMPARATOR);
             for (final Object o : commands) {
                 final Method[] methods = o.getClass().getMethods();
@@ -753,6 +792,21 @@ public class SimpleParser implements Parser {
 
     public void helpReferenceGuide() {
         synchronized (mutex) {
+        	
+        	if(commands.isEmpty()){
+        		// Get all Services implement CommandMarker interface
+        		try {
+        			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
+        			
+        			for(ServiceReference<?> ref : references){
+        				add((CommandMarker) this.context.getService(ref));
+        			}
+        			
+        		} catch (InvalidSyntaxException e) {
+        			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
+        		}
+        	}
+        	
             final File f = new File(".");
             final File[] existing = f.listFiles(new FileFilter() {
                 public boolean accept(final File pathname) {
@@ -1033,6 +1087,21 @@ public class SimpleParser implements Parser {
     private Collection<MethodTarget> locateTargets(final String buffer,
             final boolean strictMatching,
             final boolean checkAvailabilityIndicators) {
+    	
+    	if(commands.isEmpty()){
+    		// Get all Services implement CommandMarker interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				add((CommandMarker) this.context.getService(ref));
+    			}
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
+    		}
+    	}
+    	
         Validate.notNull(buffer, "Buffer required");
         final Collection<MethodTarget> result = new HashSet<MethodTarget>();
 
@@ -1201,6 +1270,21 @@ public class SimpleParser implements Parser {
 
     public ParseResult parse(final String rawInput) {
         synchronized (mutex) {
+        	
+        	if(converters.isEmpty()){
+        		// Get all Services implement Converter interface
+        		try {
+        			ServiceReference<?>[] references = this.context.getAllServiceReferences(Converter.class.getName(), null);
+        			
+        			for(ServiceReference<?> ref : references){
+        				add((Converter<?>) this.context.getService(ref));
+        			}
+        			
+        		} catch (InvalidSyntaxException e) {
+        			LOGGER.warning("Cannot load Converter on SimpleParser.");
+        		}
+        	}
+        	
             Validate.notNull(rawInput, "Raw input required");
             final String input = normalise(rawInput);
 
