@@ -20,12 +20,13 @@ import org.springframework.roo.project.LogicalPath;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JsonMetadataProvider extends AbstractItdMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
@@ -38,7 +39,7 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
@@ -78,7 +79,7 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
                 governorPhysicalTypeMetadata);
 
         String plural = javaType.getSimpleTypeName() + "s";
-        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+        final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                 .get(PluralMetadata.createIdentifier(javaType, path));
         if (pluralMetadata != null) {
             plural = pluralMetadata.getPlural();
