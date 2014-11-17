@@ -7,6 +7,9 @@ import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.Validate;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -28,31 +31,39 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link JsfConverterMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JsfConverterMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         JsfConverterMetadataProvider {
-
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JsfConverterMetadataProviderImpl.class);
+	
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private LayerService layerService;
+    private ConfigurableMetadataProvider configurableMetadataProvider;
+    private LayerService layerService;
     private final Map<String, JavaType> converterMidToEntityMap = new LinkedHashMap<String, JavaType>();
     private final Map<JavaType, String> entityToConverterMidMap = new LinkedHashMap<JavaType, String>();
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_JSF_CONVERTER);
-        configurableMetadataProvider.addMetadataTrigger(ROO_JSF_CONVERTER);
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_JSF_CONVERTER);
     }
 
     @Override
@@ -62,31 +73,37 @@ public class JsfConverterMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_JSF_CONVERTER);
-        configurableMetadataProvider.removeMetadataTrigger(ROO_JSF_CONVERTER);
+        getConfigurableMetadataProvider().removeMetadataTrigger(ROO_JSF_CONVERTER);
     }
 
     private MemberTypeAdditions getFindMethod(final JavaType entity,
             final String metadataIdentificationString) {
-        metadataDependencyRegistry.registerDependency(
-                typeLocationService.getPhysicalTypeIdentifier(entity),
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
+        getMetadataDependencyRegistry().registerDependency(
+                getTypeLocationService().getPhysicalTypeIdentifier(entity),
                 metadataIdentificationString);
-        final List<FieldMetadata> idFields = persistenceMemberLocator
+        final List<FieldMetadata> idFields = getPersistenceMemberLocator()
                 .getIdentifierFields(entity);
         if (idFields.isEmpty()) {
             return null;
         }
         final FieldMetadata idField = idFields.get(0);
-        final JavaType idType = persistenceMemberLocator
+        final JavaType idType = getPersistenceMemberLocator()
                 .getIdentifierType(entity);
         if (idType == null) {
             return null;
         }
-        metadataDependencyRegistry
+        getMetadataDependencyRegistry()
                 .registerDependency(idField.getDeclaredByMetadataId(),
                         metadataIdentificationString);
 
@@ -121,7 +138,7 @@ public class JsfConverterMetadataProviderImpl extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(itdTypeDetails.getGovernor().getName());
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -162,7 +179,7 @@ public class JsfConverterMetadataProviderImpl extends
 
         final MemberTypeAdditions findMethod = getFindMethod(entity,
                 metadataIdentificationString);
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
                 .getIdentifierAccessor(entity);
 
         return new JsfConverterMetadata(metadataIdentificationString,
@@ -172,5 +189,43 @@ public class JsfConverterMetadataProviderImpl extends
 
     public String getProvidesType() {
         return JsfConverterMetadata.getMetadataIdentiferType();
+    }
+    
+    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfConverterMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on JsfConverterMetadataProviderImpl.");
+			return null;
+		}
     }
 }

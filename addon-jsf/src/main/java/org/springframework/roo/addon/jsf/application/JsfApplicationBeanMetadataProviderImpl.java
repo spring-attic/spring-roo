@@ -4,6 +4,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JSF_APPLICATION_BEAN
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -23,34 +24,42 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link JsfApplicationBeanMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class JsfApplicationBeanMetadataProviderImpl extends
         AbstractItdMetadataProvider implements
         JsfApplicationBeanMetadataProvider {
-
-    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private ProjectOperations projectOperations;
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JsfApplicationBeanMetadataProviderImpl.class);
+	
+    private ConfigurableMetadataProvider configurableMetadataProvider;
+    private ProjectOperations projectOperations;
 
     // Stores the MID (as accepted by this JsfApplicationBeanMetadataProvider)
     // for the one (and only one) application-wide menu bean
     private String applicationBeanMid;
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 JsfManagedBeanMetadata.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
-        configurableMetadataProvider
+        getConfigurableMetadataProvider()
                 .addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
     }
 
@@ -61,14 +70,14 @@ public class JsfApplicationBeanMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 JsfManagedBeanMetadata.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
-        configurableMetadataProvider
+        getConfigurableMetadataProvider()
                 .removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
     }
 
@@ -92,14 +101,20 @@ public class JsfApplicationBeanMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         applicationBeanMid = metadataIdentificationString;
 
         // To get here we know the governor is the MenuBean so let's go ahead
         // and create its ITD
-        final Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService
+        final Set<ClassOrInterfaceTypeDetails> managedBeans = getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
         for (final ClassOrInterfaceTypeDetails managedBean : managedBeans) {
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     managedBean.getDeclaredByMetadataId(),
                     metadataIdentificationString);
         }
@@ -136,5 +151,44 @@ public class JsfApplicationBeanMetadataProviderImpl extends
         // (it's expected it would be a PhysicalTypeIdentifier notification, as
         // that's the only other thing we registered to receive)
         return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
+    }
+    
+    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfApplicationBeanMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on JsfApplicationBeanMetadataProviderImpl.");
+			return null;
+		}
     }
 }
