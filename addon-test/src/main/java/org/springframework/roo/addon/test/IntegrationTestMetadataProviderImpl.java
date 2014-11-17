@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -51,37 +52,45 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
  * 
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class IntegrationTestMetadataProviderImpl extends
         AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
-
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(IntegrationTestMetadataProviderImpl.class);
+	
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
     private static final JavaSymbolName TRANSACTION_MANAGER_ATTRIBUTE = new JavaSymbolName(
             "transactionManager");
 
-    @Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-    @Reference private LayerService layerService;
-    @Reference private ProjectOperations projectOperations;
+    private ConfigurableMetadataProvider configurableMetadataProvider;
+    private LayerService layerService;
+    private ProjectOperations projectOperations;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
     private final Set<String> producedMids = new LinkedHashSet<String>();
     private Boolean wasGaeEnabled;
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         // Integration test classes are @Configurable because they may need DI
         // of other DOD classes that provide M:1 relationships
-        configurableMetadataProvider.addMetadataTrigger(ROO_INTEGRATION_TEST);
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_INTEGRATION_TEST);
         addMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
@@ -92,11 +101,11 @@ public class IntegrationTestMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        configurableMetadataProvider
+        getConfigurableMetadataProvider()
                 .removeMetadataTrigger(ROO_INTEGRATION_TEST);
         removeMetadataTrigger(ROO_INTEGRATION_TEST);
     }
@@ -113,13 +122,13 @@ public class IntegrationTestMetadataProviderImpl extends
         // convention
         final JavaType defaultDodType = new JavaType(
                 entity.getFullyQualifiedTypeName() + "DataOnDemand");
-        if (typeLocationService.getTypeDetails(defaultDodType) != null) {
+        if (getTypeLocationService().getTypeDetails(defaultDodType) != null) {
             return defaultDodType;
         }
 
         // Otherwise we look through all DoD-annotated classes for this entity's
         // one
-        for (final ClassOrInterfaceTypeDetails dodType : typeLocationService
+        for (final ClassOrInterfaceTypeDetails dodType : getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
             final AnnotationMetadata dodAnnotation = MemberFindingUtils
                     .getFirstAnnotation(dodType, ROO_DATA_ON_DEMAND);
@@ -139,8 +148,8 @@ public class IntegrationTestMetadataProviderImpl extends
             final JavaType entity) {
         final String physicalTypeIdentifier = PhysicalTypeIdentifier
                 .createIdentifier(entity,
-                        typeLocationService.getTypePath(entity));
-        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
+                        getTypeLocationService().getTypePath(entity));
+        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) getMetadataService()
                 .get(physicalTypeIdentifier);
         Validate.notNull(ptm, "Java source code unavailable for type %s",
                 PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
@@ -175,6 +184,17 @@ public class IntegrationTestMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
         // We need to parse the annotation, which we expect to be present
         final IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(
                 governorPhysicalTypeMetadata);
@@ -186,19 +206,19 @@ public class IntegrationTestMetadataProviderImpl extends
         final JavaType dataOnDemandType = getDataOnDemandType(entity);
         final String dataOnDemandMetadataKey = DataOnDemandMetadata
                 .createIdentifier(dataOnDemandType,
-                        typeLocationService.getTypePath(dataOnDemandType));
-        final DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService
+                        getTypeLocationService().getTypePath(dataOnDemandType));
+        final DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) getMetadataService()
                 .get(dataOnDemandMetadataKey);
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey,
+        getMetadataDependencyRegistry().registerDependency(dataOnDemandMetadataKey,
                 metadataIdentificationString);
 
         if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
             return null;
         }
 
-        final JavaType identifierType = persistenceMemberLocator
+        final JavaType identifierType = getPersistenceMemberLocator()
                 .getIdentifierType(entity);
         if (identifierType == null) {
             return null;
@@ -217,7 +237,7 @@ public class IntegrationTestMetadataProviderImpl extends
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(),
                 metadataIdentificationString);
 
@@ -228,7 +248,7 @@ public class IntegrationTestMetadataProviderImpl extends
 
         final MethodMetadata identifierAccessorMethod = memberDetails
                 .getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
-        final MethodMetadata versionAccessorMethod = persistenceMemberLocator
+        final MethodMetadata versionAccessorMethod = getPersistenceMemberLocator()
                 .getVersionAccessor(entity);
         final MemberTypeAdditions countMethodAdditions = layerService
                 .getMemberTypeAdditions(metadataIdentificationString,
@@ -317,7 +337,7 @@ public class IntegrationTestMetadataProviderImpl extends
 
     private void handleChangesToLayeringForTestedEntities(
             final JavaType physicalType) {
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(physicalType);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -332,7 +352,7 @@ public class IntegrationTestMetadataProviderImpl extends
         if (localMid != null) {
             // One of the entities for which we produce metadata has changed;
             // refresh that metadata
-            metadataService.get(localMid);
+            getMetadataService().get(localMid);
         }
     }
 
@@ -352,6 +372,12 @@ public class IntegrationTestMetadataProviderImpl extends
      * the project metadata
      */
     private void handleGenericChangeToProject(final String moduleName) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
         final ProjectMetadata projectMetadata = projectOperations
                 .getProjectMetadata(moduleName);
         if (projectMetadata != null && projectMetadata.isValid()) {
@@ -364,7 +390,7 @@ public class IntegrationTestMetadataProviderImpl extends
             if (hasGaeStateChanged) {
                 wasGaeEnabled = isGaeEnabled;
                 for (final String producedMid : producedMids) {
-                    metadataService.evictAndGet(producedMid);
+                    getMetadataService().evictAndGet(producedMid);
                 }
             }
         }
@@ -380,5 +406,61 @@ public class IntegrationTestMetadataProviderImpl extends
             handleGenericChangeToProject(ProjectMetadata
                     .getModuleName(upstreamDependency));
         }
+    }
+    
+    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on IntegrationTestMetadataProviderImpl");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
+    }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on IntegrationTestMetadataProviderImpl.");
+			return null;
+		}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on IntegrationTestMetadataProviderImpl.");
+			return null;
+		}
     }
 }
