@@ -12,7 +12,7 @@ import org.springframework.roo.addon.web.mvc.embedded.AbstractEmbeddedProvider;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class FinanceEmbeddedProvider extends AbstractEmbeddedProvider {
 

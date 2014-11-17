@@ -19,7 +19,7 @@ import org.w3c.dom.Element;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
 
