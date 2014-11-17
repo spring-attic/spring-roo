@@ -14,7 +14,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.util.FileUtils;
 
-@Component(immediate = true)
+@Component
 @Service
 public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 

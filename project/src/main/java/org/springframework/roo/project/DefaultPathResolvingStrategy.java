@@ -6,40 +6,40 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
 
-@Component(immediate = true)
+@Component
 @Service
-@Reference(name = "pathResolvingStrategy", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PathResolvingStrategy.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
-    private final Collection<PathResolvingStrategy> otherPathResolvingStrategies = new ArrayList<PathResolvingStrategy>();
+    protected final static Logger LOGGER = HandlerUtils
+            .getLogger(DefaultPathResolvingStrategy.class);
+
     private final Map<Path, PhysicalPath> rootModulePaths = new LinkedHashMap<Path, PhysicalPath>();
+
+    // ------------ OSGi component attributes ----------------
+
+    private BundleContext context;
 
     // ------------ OSGi component methods ----------------
 
     @Override
-    protected void activate(final ComponentContext context) {
-        super.activate(context);
+    protected void activate(final ComponentContext cContext) {
+        super.activate(cContext);
+        this.context = cContext.getBundleContext();
         populatePaths(getRoot());
-    }
-
-    protected void bindPathResolvingStrategy(
-            final PathResolvingStrategy pathResolvingStrategy) {
-        if (pathResolvingStrategy != this) {
-            otherPathResolvingStrategies.add(pathResolvingStrategy);
-        }
     }
 
     /**
@@ -119,13 +119,46 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
         return FileUtils.getCanonicalPath(root);
     }
 
+    /**
+     * {@inheritDoc}
+     * This {@code PathResolvingStrategy} is not active if there are any other 
+     * active strategy, otherwise it is active.
+     */
     public boolean isActive() {
-        for (final PathResolvingStrategy otherStrategy : otherPathResolvingStrategies) {
-            if (otherStrategy.isActive()) {
-                return false;
+        try {
+            // Get all Services implement PathResolvingStrategy interface
+            ServiceReference<?>[] references = context.getAllServiceReferences(
+                    PathResolvingStrategy.class.getName(), null);
+
+            // There aren't any other implementation, this instance is Active
+            if (references == null) {
+                return true;
             }
+            else if (references.length == 0) {
+                return true;
+            }
+
+            // Search for other service implementations
+            for (ServiceReference<?> ref : references) {
+                PathResolvingStrategy strategy = (PathResolvingStrategy) context.getService(ref);
+
+                if(!strategy.getClass().equals( this.getClass() )) {
+                    // If there is any other impl active, this strategy is not
+                    // active
+                    if (strategy.isActive()) {
+                        return false;
+                    }
+                }
+            }
+
+            // There aren't any other active strategy
+            return true;
         }
-        return true;
+        catch (InvalidSyntaxException ex) {
+            // Cannot occur because filter param is not used
+            LOGGER.warning("Invalid filter expression.");
+            return true;
+        }
     }
 
     private void populatePaths(final String projectDirectory) {
@@ -133,10 +166,5 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
             rootModulePaths.put(subPath,
                     subPath.getRootModulePath(projectDirectory));
         }
-    }
-
-    protected void unbindPathResolvingStrategy(
-            final PathResolvingStrategy pathResolvingStrategy) {
-        otherPathResolvingStrategies.remove(pathResolvingStrategy);
     }
 }

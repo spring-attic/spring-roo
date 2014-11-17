@@ -113,13 +113,12 @@ public class Pom {
         this.packaging = packaging;
         this.parent = parent;
 
-        if(version == null && parent.getVersion() != null) {
-          gav = new GAV(groupId, artifactId, parent.getVersion());
-        }
-        else {
-          gav = new GAV(groupId, artifactId, version);
-        }
-       
+		if(version == null && parent.getVersion() != null) {
+			gav = new GAV(groupId, artifactId, parent.getVersion());
+		}else {
+			gav = new GAV(groupId, artifactId, version);
+		}
+
         this.path = path;
         this.sourceDirectory = StringUtils.defaultIfEmpty(sourceDirectory,
                 Path.SRC_MAIN_JAVA.getDefaultLocation());

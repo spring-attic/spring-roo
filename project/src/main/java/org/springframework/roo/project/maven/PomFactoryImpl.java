@@ -97,11 +97,11 @@ public class PomFactoryImpl implements PomFactory {
                 REPOSITORY_XPATH, root);
         final List<Resource> resources = parseElements(Resource.class,
                 RESOURCE_XPATH, root);
-        final String projectParentVersion = XmlUtils.getTextContent("/project/parent/version", root);
+		final String projectParentVersion = XmlUtils.getTextContent("/project/parent/version", root);
         final Parent parent = getParent(pomPath, root);
-        if(version == null) {
-          version = projectParentVersion;
-        }
+		if(version == null) {
+			version = projectParentVersion;
+		}
         final Collection<Path> paths = getPaths(root, packaging);
         return new Pom(groupId, artifactId, version, packaging, dependencies,
                 parent, modules, pomProperties, name, repositories,
