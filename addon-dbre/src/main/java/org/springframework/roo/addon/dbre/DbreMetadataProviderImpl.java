@@ -3,6 +3,7 @@ package org.springframework.roo.addon.dbre;
 import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -21,22 +22,30 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link DbreMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
         implements DbreMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(DbreMetadataProviderImpl.class);
+	
+    private DbreModelService dbreModelService;
+    private TypeManagementService typeManagementService;
 
-    @Reference private DbreModelService dbreModelService;
-    @Reference private TypeManagementService typeManagementService;
-
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_DB_MANAGED);
@@ -49,7 +58,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_DB_MANAGED);
@@ -100,7 +109,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
 
         // Abort if the database couldn't be deserialized. This can occur if the
         // DBRE XML file has been deleted or is empty.
-        final Database database = dbreModelService.getDatabase(false);
+        final Database database = getDbreModelService().getDatabase(false);
         if (database == null) {
             return null;
         }
@@ -130,7 +139,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
         if (!found) {
             final String mid = typeLocationService
                     .getPhysicalTypeIdentifier(javaType);
-            metadataDependencyRegistry.registerDependency(mid,
+            getMetadataDependencyRegistry().registerDependency(mid,
                     metadataIdentificationString);
             return null;
         }
@@ -142,7 +151,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
         final ClassOrInterfaceTypeDetails updatedGovernor = dbreMetadata
                 .getUpdatedGovernor();
         if (updatedGovernor != null) {
-            typeManagementService.createOrUpdateTypeOnDisk(updatedGovernor);
+            getTypeManagementService().createOrUpdateTypeOnDisk(updatedGovernor);
         }
         return dbreMetadata;
     }
@@ -154,5 +163,47 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
     private FieldMetadata getVersionField(final JavaType domainType,
             final String metadataIdentificationString) {
         return persistenceMemberLocator.getVersionField(domainType);
+    }
+    
+    public DbreModelService getDbreModelService(){
+    	if(dbreModelService == null){
+    		// Get all Services implement DbreModelService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(DbreModelService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (DbreModelService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load DbreModelService on DbreMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return dbreModelService;
+    	}
+    }
+    
+    public TypeManagementService getTypeManagementService(){
+    	if(typeManagementService == null){
+    		// Get all Services implement TypeManagementService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TypeManagementService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeManagementService on DbreMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return typeManagementService;
+    	}
     }
 }

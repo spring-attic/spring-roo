@@ -65,7 +65,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * @author Alan Stewart
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class DbreDatabaseListenerImpl extends
         AbstractHashCodeTrackingMetadataNotifier implements IdentifierService,
