@@ -48,7 +48,7 @@ import org.w3c.dom.NodeList;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class WebMvcOperationsImpl implements WebMvcOperations {
 

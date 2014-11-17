@@ -70,6 +70,12 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.CollectionUtils;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link WebMetadataService} to retrieve various metadata
  * information for use by Web scaffolding add-ons.
@@ -80,12 +86,15 @@ import org.springframework.roo.support.util.CollectionUtils;
 @Component
 @Service
 public class WebMetadataServiceImpl implements WebMetadataService {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private static final MethodParameter FIRST_RESULT_PARAMETER = new MethodParameter(
             JavaType.INT_PRIMITIVE, "firstResult");
     private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(WebMetadataServiceImpl.class);
     private static final MethodParameter MAX_RESULTS_PARAMETER = new MethodParameter(
             JavaType.INT_PRIMITIVE, "sizeNo");
     private static final MethodParameter SORT_FIELDNAME_PARAMETER = new MethodParameter(
@@ -93,17 +102,32 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     private static final MethodParameter SORT_ORDER_PARAMETER = new MethodParameter(
             JavaType.STRING, "sortOrder");
     
-    @Reference private LayerService layerService;
-    @Reference private MemberDetailsScanner memberDetailsScanner;
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference private MetadataService metadataService;
-    @Reference private PersistenceMemberLocator persistenceMemberLocator;
-    @Reference private TypeLocationService typeLocationService;
+    private LayerService layerService;
+    private MemberDetailsScanner memberDetailsScanner;
+    private MetadataDependencyRegistry metadataDependencyRegistry;
+    private MetadataService metadataService;
+    private PersistenceMemberLocator persistenceMemberLocator;
+    private TypeLocationService typeLocationService;
 
     private final Map<String, String> pathMap = new HashMap<String, String>();
+    
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     private String getControllerPathForType(final JavaType type,
             final String metadataIdentificationString) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         if (pathMap.containsKey(type.getFullyQualifiedTypeName())
                 && !typeLocationService.hasTypeChanged(getClass().getName(),
                         type)) {
@@ -154,6 +178,17 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
     public Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(
             final JavaType domainType, final String metadataId) {
+    	
+    	if(metadataDependencyRegistry == null){
+    		metadataDependencyRegistry = getMetadataDependencyRegistry();
+    	}
+    	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         final String domainTypeMid = typeLocationService
                 .getPhysicalTypeIdentifier(domainType);
         if (domainTypeMid != null) {
@@ -184,12 +219,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
+    	
         Validate.notNull(javaType, "Java type required");
         Validate.notNull(memberDetails, "Member details required");
 
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
                 .getIdentifierAccessor(javaType);
-        final MethodMetadata versionAccessor = persistenceMemberLocator
+        final MethodMetadata versionAccessor = getPersistenceMemberLocator()
                 .getVersionAccessor(javaType);
 
         final Map<JavaSymbolName, DateTimeFormatDetails> dates = new LinkedHashMap<JavaSymbolName, DateTimeFormatDetails>();
@@ -304,6 +340,17 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             final JavaType formBackingType,
             final MemberDetails formBackingTypeDetails,
             final String metadataIdentificationString) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         Validate.notNull(formBackingType, "Java type required");
         Validate.notNull(formBackingTypeDetails, "Member details required");
 
@@ -370,7 +417,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     }
 
     public FieldMetadata getIdentifierField(final JavaType javaType) {
-        return CollectionUtils.firstElementOf(persistenceMemberLocator
+        return CollectionUtils.firstElementOf(getPersistenceMemberLocator()
                 .getIdentifierFields(javaType));
     }
 
@@ -396,6 +443,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
+    	
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
         Validate.notNull(javaType, "Java type required");
         Validate.notNull(memberDetails, "Member details required");
         Validate.notBlank(metadataIdentificationString, "Metadata id required");
@@ -407,13 +461,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
         }
 
         final FieldMetadata idField = CollectionUtils
-                .firstElementOf(persistenceMemberLocator
+                .firstElementOf(getPersistenceMemberLocator()
                         .getIdentifierFields(javaType));
         if (idField == null) {
             return null;
         }
 
-        final JavaType idType = persistenceMemberLocator
+        final JavaType idType = getPersistenceMemberLocator()
                 .getIdentifierType(javaType);
         if (idType == null) {
             return null;
@@ -479,10 +533,21 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                 removeMethod, findAllMethod, findAllSortedMethod, findMethod, countMethod,
                 findEntriesMethod, findEntriesSortedMethod, dynamicFinderNames, isRooIdentifier(
                         javaType, memberDetails),
-                persistenceMemberLocator.getEmbeddedIdentifierFields(javaType));
+                getPersistenceMemberLocator().getEmbeddedIdentifierFields(javaType));
     }
 
     public MemberDetails getMemberDetails(final JavaType javaType) {
+    	
+    	if(memberDetailsScanner == null){
+    		memberDetailsScanner = getMemberDetailsScanner();
+    	}
+    	Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(javaType);
         Validate.notNull(cid,
@@ -494,8 +559,18 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
     private String getPlural(final JavaType javaType,
             final String metadataIdentificationString) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         Validate.notNull(javaType, "Java type required");
-        Validate.notNull(metadataService, "Metadata service required");
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(javaType);
@@ -526,6 +601,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(
             final JavaType baseType, final MemberDetails baseTypeDetails,
             final String metadataIdentificationString) {
+    	
         Validate.notNull(baseType, "Java type required");
         Validate.notNull(baseTypeDetails, "Member details required");
         Validate.isTrue(isApplicationType(baseType),
@@ -538,7 +614,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                         metadataIdentificationString));
 
         for (final JavaType fieldType : baseTypeDetails
-                .getPersistentFieldTypes(baseType, persistenceMemberLocator)) {
+                .getPersistentFieldTypes(baseType, getPersistenceMemberLocator())) {
             if (isApplicationType(fieldType)) {
                 final MemberDetails fieldTypeDetails = getMemberDetails(fieldType);
                 specialTypes.put(
@@ -554,12 +630,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     public List<FieldMetadata> getScaffoldEligibleFieldMetadata(
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
+    	
         Validate.notNull(javaType, "Java type required");
         Validate.notNull(memberDetails, "Member details required");
 
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
                 .getIdentifierAccessor(javaType);
-        final MethodMetadata versionAccessor = persistenceMemberLocator
+        final MethodMetadata versionAccessor = getPersistenceMemberLocator()
                 .getVersionAccessor(javaType);
 
         final Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
@@ -591,12 +668,28 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     }
 
     public boolean isApplicationType(final JavaType javaType) {
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         return typeLocationService.isInProject(javaType);
     }
 
     private boolean isEnumType(final JavaType javaType) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
         Validate.notNull(javaType, "Java type required");
-        Validate.notNull(metadataService, "Metadata service required");
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(javaType);
         if (javaTypeDetails != null) {
@@ -618,6 +711,12 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
     private void registerDependency(final String upstreamDependency,
             final String downStreamDependency) {
+    	
+    	if(metadataDependencyRegistry == null){
+    		metadataDependencyRegistry = getMetadataDependencyRegistry();
+    	}
+    	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
+    	
         if (metadataDependencyRegistry != null
                 && StringUtils.isNotBlank(upstreamDependency)
                 && StringUtils.isNotBlank(downStreamDependency)
@@ -630,4 +729,113 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                     downStreamDependency);
         }
     }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    public MemberDetailsScanner getMemberDetailsScanner(){
+    	// Get all Services implement MemberDetailsScanner interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MemberDetailsScanner) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MemberDetailsScanner on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    public MetadataDependencyRegistry getMetadataDependencyRegistry(){
+    	// Get all Services implement MetadataDependencyRegistry interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataDependencyRegistry) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataDependencyRegistry on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    public MetadataService getMetadataService(){
+    	// Get all Services implement MetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataService on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    public PersistenceMemberLocator getPersistenceMemberLocator(){
+    	if(persistenceMemberLocator == null){
+    		// Get all Services implement PersistenceMemberLocator interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PersistenceMemberLocator) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PersistenceMemberLocator on WebMetadataServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return persistenceMemberLocator;
+    	}
+    	
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeLocationService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeLocationService on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    
 }

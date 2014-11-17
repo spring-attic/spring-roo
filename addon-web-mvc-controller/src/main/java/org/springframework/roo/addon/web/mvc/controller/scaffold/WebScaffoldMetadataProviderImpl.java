@@ -8,6 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.Validate;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -33,26 +36,34 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.CollectionUtils;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link WebScaffoldMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class WebScaffoldMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         WebScaffoldMetadataProvider {
-
-    @Reference private WebMetadataService webMetadataService;
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(WebScaffoldMetadataProviderImpl.class);
+	
+    private WebMetadataService webMetadataService;
 
     private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_WEB_SCAFFOLD);
@@ -65,8 +76,8 @@ public class WebScaffoldMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_WEB_SCAFFOLD);
@@ -107,6 +118,12 @@ public class WebScaffoldMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalType,
             final String itdFilename) {
+    	
+    	if(webMetadataService == null){
+    		webMetadataService = getWebMetadataService();
+    	}
+    	Validate.notNull(webMetadataService, "WebMetadataService is required");
+    	
         // We need to parse the annotation, which we expect to be present
         final WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(
                 governorPhysicalType);
@@ -135,7 +152,7 @@ public class WebScaffoldMetadataProviderImpl extends
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(),
                 metadataIdentificationString);
 
@@ -168,13 +185,13 @@ public class WebScaffoldMetadataProviderImpl extends
                         metadataIdentificationString);
         final Collection<JavaType> editableFieldTypes = formBackingObjectMemberDetails
                 .getPersistentFieldTypes(formBackingType,
-                        persistenceMemberLocator);
+                        getPersistenceMemberLocator());
 
         return new WebScaffoldMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalType, annotationValues, idField,
                 relatedApplicationTypeMetadata,
                 dependentApplicationTypeMetadata, datePatterns, crudAdditions,
-                editableFieldTypes, typeLocationService);
+                editableFieldTypes, getTypeLocationService());
     }
 
     public String getProvidesType() {
@@ -196,7 +213,7 @@ public class WebScaffoldMetadataProviderImpl extends
      * @return see above
      */
     private String getWebScaffoldMidIfLayerComponent(final JavaType governor) {
-        final ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails governorTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (governorTypeDetails != null) {
             for (final JavaType type : governorTypeDetails.getLayerEntities()) {
@@ -213,5 +230,23 @@ public class WebScaffoldMetadataProviderImpl extends
             }
         }
         return null;
+    }
+    
+    
+    public WebMetadataService getWebMetadataService(){
+    	// Get all Services implement WebMetadataService interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(WebMetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (WebMetadataService) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load WebMetadataService on WebScaffoldMetadataProviderImpl.");
+			return null;
+		}
     }
 }

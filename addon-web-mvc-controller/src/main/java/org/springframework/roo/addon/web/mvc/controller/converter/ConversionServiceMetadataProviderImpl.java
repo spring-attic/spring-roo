@@ -10,6 +10,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.Validate;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -39,6 +42,11 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link ConversionServiceMetadataProvider}.
  * 
@@ -46,11 +54,13 @@ import org.springframework.roo.project.LogicalPath;
  * @author Stefan Schmidt
  * @since 1.1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class ConversionServiceMetadataProviderImpl extends
         AbstractItdMetadataProvider implements
         ConversionServiceMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ConversionServiceMetadataProviderImpl.class);
 	
 	private final static JavaType EMBEDDABLE_ANNOTATION = new JavaType("javax.persistence.Embeddable");
 
@@ -59,13 +69,14 @@ public class ConversionServiceMetadataProviderImpl extends
     // application-wide conversion service
     private String applicationConversionServiceFactoryBeanMid;
 
-    @Reference private LayerService layerService;
+    private LayerService layerService;
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 WebScaffoldMetadata.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_CONVERSION_SERVICE);
@@ -79,10 +90,10 @@ public class ConversionServiceMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 WebScaffoldMetadata.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_CONVERSION_SERVICE);
@@ -108,6 +119,12 @@ public class ConversionServiceMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
         applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
 
         // To get here we know the governor is the
@@ -120,9 +137,9 @@ public class ConversionServiceMetadataProviderImpl extends
         final Map<JavaType, List<MethodMetadata>> toStringMethods = new HashMap<JavaType, List<MethodMetadata>>();
         final List<JavaType> embeddableToStringMethods = new ArrayList<JavaType>();
 
-        for (final ClassOrInterfaceTypeDetails controllerTypeDetails : typeLocationService
+        for (final ClassOrInterfaceTypeDetails controllerTypeDetails : getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     controllerTypeDetails.getDeclaredByMetadataId(),
                     metadataIdentificationString);
 
@@ -167,7 +184,7 @@ public class ConversionServiceMetadataProviderImpl extends
                 }
             }
 
-            final JavaType identifierType = persistenceMemberLocator
+            final JavaType identifierType = getPersistenceMemberLocator()
                     .getIdentifierType(formBackingObject);
             if (identifierType == null) {
                 // This type either has no ID field (e.g. an embedded type) or
@@ -193,14 +210,14 @@ public class ConversionServiceMetadataProviderImpl extends
         }
         
         // Getting embeddable classes and adding toString methods
-        for (final ClassOrInterfaceTypeDetails embeddableTypeDetails : typeLocationService
+        for (final ClassOrInterfaceTypeDetails embeddableTypeDetails : getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(EMBEDDABLE_ANNOTATION)) {
         	JavaType embeddableType = embeddableTypeDetails.getType();
         	// Adding embeddable type to generate conversor method
         	embeddableToStringMethods.add(embeddableType);
         }
 
-        return new ConversionServiceMetadata(typeLocationService, metadataIdentificationString,
+        return new ConversionServiceMetadata(getTypeLocationService(), metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata, findMethods, idTypes,
                 relevantDomainTypes, compositePrimaryKeyTypes, toStringMethods, embeddableToStringMethods);
     }
@@ -218,7 +235,7 @@ public class ConversionServiceMetadataProviderImpl extends
         int counter = 0;
         for (final MethodMetadata method : memberDetails.getMethods()) {
             // Track any changes to that method (eg it goes away)
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     method.getDeclaredByMetadataId(),
                     metadataIdentificationString);
 
@@ -252,7 +269,7 @@ public class ConversionServiceMetadataProviderImpl extends
         final JavaType fieldType = field.getFieldType();
         if (fieldType.isCommonCollectionType()
                 || fieldType.isArray() // Exclude collections and arrays
-                || typeLocationService.isInProject(fieldType) // Exclude
+                || getTypeLocationService().isInProject(fieldType) // Exclude
                                                               // references to
                                                               // other domain
                                                               // objects as they
@@ -295,5 +312,22 @@ public class ConversionServiceMetadataProviderImpl extends
         // (it's expected it would be a PhysicalTypeIdentifier notification, as
         // that's the only other thing we registered to receive)
         return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
+    }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on ConversionServiceMetadataProviderImpl.");
+			return null;
+		}
     }
 }
