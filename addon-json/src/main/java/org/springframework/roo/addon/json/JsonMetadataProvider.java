@@ -26,9 +26,9 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
     }
 
@@ -39,9 +39,9 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
     }
 

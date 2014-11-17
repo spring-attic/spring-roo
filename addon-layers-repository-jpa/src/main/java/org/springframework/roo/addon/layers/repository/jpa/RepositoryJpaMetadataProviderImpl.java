@@ -49,12 +49,12 @@ public class RepositoryJpaMetadataProviderImpl extends
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
         super.setDependsOnGovernorBeingAClass(false);
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_REPOSITORY_JPA);
-        /*registerMatchers();*/
+        registerMatchers();
     }
 
     @Override
@@ -64,12 +64,12 @@ public class RepositoryJpaMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_REPOSITORY_JPA);
-        /*customDataKeyDecorator.unregisterMatchers(getClass());*/
+        getCustomDataKeyDecorator().unregisterMatchers(getClass());
     }
 
     @Override
@@ -96,7 +96,7 @@ public class RepositoryJpaMetadataProviderImpl extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails

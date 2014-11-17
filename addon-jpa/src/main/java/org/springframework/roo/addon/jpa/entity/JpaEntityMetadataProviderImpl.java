@@ -136,11 +136,11 @@ public class JpaEntityMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                PROVIDES_TYPE);*/
+                PROVIDES_TYPE);
         addMetadataTriggers(TRIGGER_ANNOTATIONS);
-        /*registerMatchers();*/
+        registerMatchers();
     }
 
     @Override
@@ -151,11 +151,11 @@ public class JpaEntityMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                PROVIDES_TYPE);*/
+                PROVIDES_TYPE);
         removeMetadataTriggers(TRIGGER_ANNOTATIONS);
-        /*customDataKeyDecorator.unregisterMatchers(getClass());*/
+        getCustomDataKeyDecorator().unregisterMatchers(getClass());
     }
 
     @Override
@@ -277,12 +277,7 @@ public class JpaEntityMetadataProviderImpl extends
     @SuppressWarnings("unchecked")
     private void registerMatchers() {
     	
-    	if(customDataKeyDecorator == null){
-    		customDataKeyDecorator = getCustomDataKeyDecorator();
-    	}
-    	Validate.notNull(customDataKeyDecorator, "CustomDataKeyDecorator is required");
-    	
-        customDataKeyDecorator.registerMatchers(
+        getCustomDataKeyDecorator().registerMatchers(
                 getClass(),
                 // Type matchers
                 new MidTypeMatcher(IDENTIFIER_TYPE, IdentifierMetadata.class
@@ -314,20 +309,25 @@ public class JpaEntityMetadataProviderImpl extends
     }
     
     public CustomDataKeyDecorator getCustomDataKeyDecorator(){
-    	// Get all Services implement CustomDataKeyDecorator interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (CustomDataKeyDecorator) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load CustomDataKeyDecorator on JpaEntityMetadataProviderImpl.");
-			return null;
-		}
+    	if(customDataKeyDecorator == null){
+    		// Get all Services implement CustomDataKeyDecorator interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (CustomDataKeyDecorator) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load CustomDataKeyDecorator on JpaEntityMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return customDataKeyDecorator;
+    	}
+    	
     }
     
     public ProjectOperations getProjectOperations(){

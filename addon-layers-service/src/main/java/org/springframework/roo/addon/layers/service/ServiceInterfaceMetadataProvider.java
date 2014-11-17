@@ -54,14 +54,14 @@ public class ServiceInterfaceMetadataProvider extends
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
         super.setDependsOnGovernorBeingAClass(false);
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_SERVICE);
-        /*customDataKeyDecorator.registerMatchers(getClass(),
+        getCustomDataKeyDecorator().registerMatchers(getClass(),
                 new LayerTypeMatcher(ROO_SERVICE, new JavaSymbolName(
-                        RooService.DOMAIN_TYPES_ATTRIBUTE)));*/
+                        RooService.DOMAIN_TYPES_ATTRIBUTE)));
     }
 
     @Override
@@ -71,10 +71,10 @@ public class ServiceInterfaceMetadataProvider extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_SERVICE);
     }
 
@@ -102,7 +102,7 @@ public class ServiceInterfaceMetadataProvider extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -146,7 +146,7 @@ public class ServiceInterfaceMetadataProvider extends
             // We simply take the first disregarding any further fields which
             // may be identifiers
             domainTypeToIdTypeMap.put(type, idType);
-            final String domainTypeId = typeLocationService
+            final String domainTypeId = getTypeLocationService()
                     .getPhysicalTypeIdentifier(type);
             if (domainTypeId == null) {
                 return null;
@@ -161,13 +161,13 @@ public class ServiceInterfaceMetadataProvider extends
             }
             // Maintain a list of entities that are being handled by this layer
             managedEntityTypes.put(type, metadataIdentificationString);
-            metadataDependencyRegistry.registerDependency(pluralId,
+            getMetadataDependencyRegistry().registerDependency(pluralId,
                     metadataIdentificationString);
             domainTypePlurals.put(type, pluralMetadata.getPlural());
         }
 
         PermissionEvaluatorMetadata permissionEvaluatorMetadata = null;
-        for (final ClassOrInterfaceTypeDetails permissionEvaluator : typeLocationService
+        for (final ClassOrInterfaceTypeDetails permissionEvaluator : getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_PERMISSION_EVALUATOR)) {
             if (permissionEvaluator != null) {
                 final LogicalPath path = PhysicalTypeIdentifier
@@ -179,12 +179,12 @@ public class ServiceInterfaceMetadataProvider extends
                 if (permissionEvaluatorMetadata != null
                         && permissionEvaluatorMetadata.isValid()) {
                     if (annotationValues.usePermissionEvaluator()) {
-                        metadataDependencyRegistry.registerDependency(
+                        getMetadataDependencyRegistry().registerDependency(
                                 metadataIdentificationString,
                                 permissionEvaluatorMetadata.getId());
                     }
                     else {
-                        metadataDependencyRegistry.deregisterDependency(
+                        getMetadataDependencyRegistry().deregisterDependency(
                                 metadataIdentificationString,
                                 permissionEvaluatorMetadata.getId());
                     }
@@ -201,4 +201,27 @@ public class ServiceInterfaceMetadataProvider extends
     public String getProvidesType() {
         return ServiceInterfaceMetadata.getMetadataIdentiferType();
     }
+    
+    public CustomDataKeyDecorator getCustomDataKeyDecorator(){
+    	if(customDataKeyDecorator == null){
+    		// Get all Services implement CustomDataKeyDecorator interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (CustomDataKeyDecorator) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load CustomDataKeyDecorator on ServiceInterfaceMetadataProvider.");
+    			return null;
+    		}
+    	}else{
+    		return customDataKeyDecorator;
+    	}
+    	
+    }
+    
 }

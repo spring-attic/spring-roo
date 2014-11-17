@@ -55,10 +55,10 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 
 	protected void activate(final ComponentContext cContext) {
 		context = cContext.getBundleContext();
-		/*metadataDependencyRegistry.addNotificationListener(this);
-		metadataDependencyRegistry.registerDependency(
+		getMetadataDependencyRegistry().addNotificationListener(this);
+		getMetadataDependencyRegistry().registerDependency(
 				PhysicalTypeIdentifier.getMetadataIdentiferType(),
-				getProvidesType());*/
+				getProvidesType());
 		addMetadataTrigger(ROO_JAVA_BEAN);
 	}
 
@@ -69,10 +69,10 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	}
 
 	protected void deactivate(final ComponentContext context) {
-		/*metadataDependencyRegistry.removeNotificationListener(this);
-		metadataDependencyRegistry.deregisterDependency(
+		getMetadataDependencyRegistry().removeNotificationListener(this);
+		getMetadataDependencyRegistry().deregisterDependency(
 				PhysicalTypeIdentifier.getMetadataIdentiferType(),
-				getProvidesType());*/
+				getProvidesType());
 		removeMetadataTrigger(ROO_JAVA_BEAN);
 	}
 
@@ -123,7 +123,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 		final MethodMetadata identifierAccessor = persistenceMemberLocator
 				.getIdentifierAccessor(fieldType);
 		if (identifierAccessor != null) {
-			metadataDependencyRegistry.registerDependency(
+			getMetadataDependencyRegistry().registerDependency(
 					identifierAccessor.getDeclaredByMetadataId(),
 					metadataIdentificationString);
 			return identifierAccessor.getMethodName();

@@ -52,15 +52,15 @@ public class JsfApplicationBeanMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 JsfManagedBeanMetadata.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
-        /*configurableMetadataProvider
-                .addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);*/
+        getConfigurableMetadataProvider()
+                .addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
     }
 
     @Override
@@ -70,15 +70,15 @@ public class JsfApplicationBeanMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 JsfManagedBeanMetadata.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
-        /*configurableMetadataProvider
-                .removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);*/
+        getConfigurableMetadataProvider()
+                .removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class JsfApplicationBeanMetadataProviderImpl extends
         final Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
         for (final ClassOrInterfaceTypeDetails managedBean : managedBeans) {
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     managedBean.getDeclaredByMetadataId(),
                     metadataIdentificationString);
         }
@@ -154,20 +154,25 @@ public class JsfApplicationBeanMetadataProviderImpl extends
     }
     
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
-    	// Get all Services implement ConfigurableMetadataProvider interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfApplicationBeanMetadataProviderImpl.");
-			return null;
-		}
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfApplicationBeanMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
     }
     
     public ProjectOperations getProjectOperations(){

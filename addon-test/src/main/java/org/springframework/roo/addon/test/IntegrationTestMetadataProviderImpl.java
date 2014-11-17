@@ -84,13 +84,13 @@ public class IntegrationTestMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         // Integration test classes are @Configurable because they may need DI
         // of other DOD classes that provide M:1 relationships
-        /*configurableMetadataProvider.addMetadataTrigger(ROO_INTEGRATION_TEST);*/
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_INTEGRATION_TEST);
         addMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
@@ -101,12 +101,12 @@ public class IntegrationTestMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        configurableMetadataProvider
-                .removeMetadataTrigger(ROO_INTEGRATION_TEST);*/
+        getConfigurableMetadataProvider()
+                .removeMetadataTrigger(ROO_INTEGRATION_TEST);
         removeMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
@@ -122,13 +122,13 @@ public class IntegrationTestMetadataProviderImpl extends
         // convention
         final JavaType defaultDodType = new JavaType(
                 entity.getFullyQualifiedTypeName() + "DataOnDemand");
-        if (typeLocationService.getTypeDetails(defaultDodType) != null) {
+        if (getTypeLocationService().getTypeDetails(defaultDodType) != null) {
             return defaultDodType;
         }
 
         // Otherwise we look through all DoD-annotated classes for this entity's
         // one
-        for (final ClassOrInterfaceTypeDetails dodType : typeLocationService
+        for (final ClassOrInterfaceTypeDetails dodType : getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
             final AnnotationMetadata dodAnnotation = MemberFindingUtils
                     .getFirstAnnotation(dodType, ROO_DATA_ON_DEMAND);
@@ -148,8 +148,8 @@ public class IntegrationTestMetadataProviderImpl extends
             final JavaType entity) {
         final String physicalTypeIdentifier = PhysicalTypeIdentifier
                 .createIdentifier(entity,
-                        typeLocationService.getTypePath(entity));
-        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
+                        getTypeLocationService().getTypePath(entity));
+        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) getMetadataService()
                 .get(physicalTypeIdentifier);
         Validate.notNull(ptm, "Java source code unavailable for type %s",
                 PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
@@ -206,19 +206,19 @@ public class IntegrationTestMetadataProviderImpl extends
         final JavaType dataOnDemandType = getDataOnDemandType(entity);
         final String dataOnDemandMetadataKey = DataOnDemandMetadata
                 .createIdentifier(dataOnDemandType,
-                        typeLocationService.getTypePath(dataOnDemandType));
-        final DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService
+                        getTypeLocationService().getTypePath(dataOnDemandType));
+        final DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) getMetadataService()
                 .get(dataOnDemandMetadataKey);
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey,
+        getMetadataDependencyRegistry().registerDependency(dataOnDemandMetadataKey,
                 metadataIdentificationString);
 
         if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
             return null;
         }
 
-        final JavaType identifierType = persistenceMemberLocator
+        final JavaType identifierType = getPersistenceMemberLocator()
                 .getIdentifierType(entity);
         if (identifierType == null) {
             return null;
@@ -237,7 +237,7 @@ public class IntegrationTestMetadataProviderImpl extends
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(),
                 metadataIdentificationString);
 
@@ -248,7 +248,7 @@ public class IntegrationTestMetadataProviderImpl extends
 
         final MethodMetadata identifierAccessorMethod = memberDetails
                 .getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
-        final MethodMetadata versionAccessorMethod = persistenceMemberLocator
+        final MethodMetadata versionAccessorMethod = getPersistenceMemberLocator()
                 .getVersionAccessor(entity);
         final MemberTypeAdditions countMethodAdditions = layerService
                 .getMemberTypeAdditions(metadataIdentificationString,
@@ -337,7 +337,7 @@ public class IntegrationTestMetadataProviderImpl extends
 
     private void handleChangesToLayeringForTestedEntities(
             final JavaType physicalType) {
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(physicalType);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -352,7 +352,7 @@ public class IntegrationTestMetadataProviderImpl extends
         if (localMid != null) {
             // One of the entities for which we produce metadata has changed;
             // refresh that metadata
-            metadataService.get(localMid);
+            getMetadataService().get(localMid);
         }
     }
 
@@ -390,7 +390,7 @@ public class IntegrationTestMetadataProviderImpl extends
             if (hasGaeStateChanged) {
                 wasGaeEnabled = isGaeEnabled;
                 for (final String producedMid : producedMids) {
-                    metadataService.evictAndGet(producedMid);
+                    getMetadataService().evictAndGet(producedMid);
                 }
             }
         }
@@ -409,20 +409,25 @@ public class IntegrationTestMetadataProviderImpl extends
     }
     
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
-    	// Get all Services implement ConfigurableMetadataProvider interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ConfigurableMetadataProvider on IntegrationTestMetadataProviderImpl");
-			return null;
-		}
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on IntegrationTestMetadataProviderImpl");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
     }
     
     public LayerService getLayerService(){

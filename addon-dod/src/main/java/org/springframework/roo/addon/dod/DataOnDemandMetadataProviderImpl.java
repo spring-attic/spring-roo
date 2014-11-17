@@ -87,13 +87,13 @@ public class DataOnDemandMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         // DOD classes are @Configurable because they may need DI of other DOD
         // classes that provide M:1 relationships
-        /*configurableMetadataProvider.addMetadataTrigger(ROO_DATA_ON_DEMAND);*/
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_DATA_ON_DEMAND);
         addMetadataTrigger(ROO_DATA_ON_DEMAND);
     }
 
@@ -104,11 +104,11 @@ public class DataOnDemandMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        configurableMetadataProvider.removeMetadataTrigger(ROO_DATA_ON_DEMAND);*/
+        getConfigurableMetadataProvider().removeMetadataTrigger(ROO_DATA_ON_DEMAND);
         removeMetadataTrigger(ROO_DATA_ON_DEMAND);
     }
 
@@ -154,7 +154,7 @@ public class DataOnDemandMetadataProviderImpl extends
                 if (!(Modifier.isStatic(field.getModifier())
                         || Modifier.isFinal(field.getModifier()) || Modifier
                             .isTransient(field.getModifier()))) {
-                    metadataDependencyRegistry.registerDependency(
+                    getMetadataDependencyRegistry().registerDependency(
                             field.getDeclaredByMetadataId(),
                             metadataIdentificationString);
                     fields.add(field);
@@ -186,7 +186,7 @@ public class DataOnDemandMetadataProviderImpl extends
             if (!(Modifier.isStatic(field.getModifier())
                     || Modifier.isFinal(field.getModifier()) || Modifier
                         .isTransient(field.getModifier()))) {
-                metadataDependencyRegistry.registerDependency(
+                getMetadataDependencyRegistry().registerDependency(
                         field.getDeclaredByMetadataId(),
                         metadataIdentificationString);
                 idFields.add(field);
@@ -274,7 +274,7 @@ public class DataOnDemandMetadataProviderImpl extends
             }
 
             // Track any changes to the mutator method (eg it goes away)
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     method.getDeclaredByMetadataId(), dodMetadataId);
 
             final Set<Object> fieldCustomDataKeys = field.getCustomData()
@@ -341,7 +341,7 @@ public class DataOnDemandMetadataProviderImpl extends
         entityToDodMidMap.put(annotationValues.getEntity(), dodMetadataId);
         dodMidToEntityMap.put(dodMetadataId, annotationValues.getEntity());
 
-        final JavaType identifierType = persistenceMemberLocator
+        final JavaType identifierType = getPersistenceMemberLocator()
                 .getIdentifierType(entity);
         if (identifierType == null) {
             return null;
@@ -360,7 +360,7 @@ public class DataOnDemandMetadataProviderImpl extends
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(),
                 dodMetadataId);
 
@@ -453,32 +453,37 @@ public class DataOnDemandMetadataProviderImpl extends
         // we get a circular MD dependency)
         registerDependencyUponType(dodMetadataId, field.getFieldType());
 
-        return (DataOnDemandMetadata) metadataService.get(otherDodMetadataId);
+        return (DataOnDemandMetadata) getMetadataService().get(otherDodMetadataId);
     }
 
     private void registerDependencyUponType(final String dodMetadataId,
             final JavaType type) {
         final String fieldPhysicalTypeId = typeLocationService
                 .getPhysicalTypeIdentifier(type);
-        metadataDependencyRegistry.registerDependency(fieldPhysicalTypeId,
+        getMetadataDependencyRegistry().registerDependency(fieldPhysicalTypeId,
                 dodMetadataId);
     }
     
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
-    	// Get all Services implement ConfigurableMetadataProvider interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ConfigurableMetadataProvider on DataOnDemandMetadataProviderImpl.");
-			return null;
-		}
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on DataOnDemandMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
     }
     
     public LayerService getLayerService(){

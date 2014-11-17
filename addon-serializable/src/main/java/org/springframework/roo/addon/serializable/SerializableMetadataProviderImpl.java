@@ -25,9 +25,9 @@ public class SerializableMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_SERIALIZABLE);
     }
 
@@ -38,9 +38,9 @@ public class SerializableMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_SERIALIZABLE);
     }
 

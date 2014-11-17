@@ -52,9 +52,9 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_WEB_FINDER);
     }
 
@@ -65,9 +65,9 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_WEB_FINDER);
     }
 
@@ -110,7 +110,7 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         // Lookup the form backing object's metadata
         final JavaType formBackingType = annotationValues
                 .getFormBackingObject();
-        final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails formBackingTypeDetails = getTypeLocationService()
                 .getTypeDetails(formBackingType);
         if (formBackingTypeDetails == null
                 || !formBackingTypeDetails.getCustomData().keySet()
@@ -119,7 +119,7 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 formBackingTypeDetails.getDeclaredByMetadataId(),
                 metadataIdentificationString);
 

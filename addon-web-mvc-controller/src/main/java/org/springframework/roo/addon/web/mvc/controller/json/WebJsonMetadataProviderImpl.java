@@ -61,10 +61,10 @@ public class WebJsonMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_WEB_JSON);
     }
 
@@ -75,10 +75,10 @@ public class WebJsonMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_WEB_JSON);
     }
 
@@ -98,7 +98,7 @@ public class WebJsonMetadataProviderImpl extends
 
     @Override
     protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-        final ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails governorTypeDetails = getTypeLocationService()
                 .getTypeDetails(itdTypeDetails.getName());
         if (governorTypeDetails == null) {
             return null;
@@ -139,7 +139,7 @@ public class WebJsonMetadataProviderImpl extends
 
         // Lookup the form backing object's metadata
         final JavaType jsonObject = annotationValues.getJsonObject();
-        final ClassOrInterfaceTypeDetails jsonTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails jsonTypeDetails = getTypeLocationService()
                 .getTypeDetails(jsonObject);
         if (jsonTypeDetails == null) {
             return null;
@@ -154,7 +154,7 @@ public class WebJsonMetadataProviderImpl extends
 
         final PhysicalTypeMetadata backingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService
                 .get(PhysicalTypeIdentifier.createIdentifier(jsonObject,
-                        typeLocationService.getTypePath(jsonObject)));
+                        getTypeLocationService().getTypePath(jsonObject)));
         Validate.notNull(backingObjectPhysicalTypeMetadata,
                 "Unable to obtain physical type metadata for type %s",
                 jsonObject.getFullyQualifiedTypeName());
@@ -168,7 +168,7 @@ public class WebJsonMetadataProviderImpl extends
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 backingMemberHoldingTypeDetails.getDeclaredByMetadataId(),
                 metadataIdentificationString);
 
@@ -187,7 +187,7 @@ public class WebJsonMetadataProviderImpl extends
                         metadataIdentificationString);
         final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
                 .get(PluralMetadata.createIdentifier(jsonObject,
-                        typeLocationService.getTypePath(jsonObject)));
+                        getTypeLocationService().getTypePath(jsonObject)));
         if (persistenceAdditions.isEmpty()
                 || javaTypePersistenceMetadataDetails == null
                 || pluralMetadata == null) {

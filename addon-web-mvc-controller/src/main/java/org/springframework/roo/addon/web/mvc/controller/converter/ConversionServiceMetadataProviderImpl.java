@@ -73,12 +73,12 @@ public class ConversionServiceMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 WebScaffoldMetadata.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_CONVERSION_SERVICE);
     }
 
@@ -90,12 +90,12 @@ public class ConversionServiceMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 WebScaffoldMetadata.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_CONVERSION_SERVICE);
     }
 
@@ -137,9 +137,9 @@ public class ConversionServiceMetadataProviderImpl extends
         final Map<JavaType, List<MethodMetadata>> toStringMethods = new HashMap<JavaType, List<MethodMetadata>>();
         final List<JavaType> embeddableToStringMethods = new ArrayList<JavaType>();
 
-        for (final ClassOrInterfaceTypeDetails controllerTypeDetails : typeLocationService
+        for (final ClassOrInterfaceTypeDetails controllerTypeDetails : getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     controllerTypeDetails.getDeclaredByMetadataId(),
                     metadataIdentificationString);
 
@@ -184,7 +184,7 @@ public class ConversionServiceMetadataProviderImpl extends
                 }
             }
 
-            final JavaType identifierType = persistenceMemberLocator
+            final JavaType identifierType = getPersistenceMemberLocator()
                     .getIdentifierType(formBackingObject);
             if (identifierType == null) {
                 // This type either has no ID field (e.g. an embedded type) or
@@ -210,14 +210,14 @@ public class ConversionServiceMetadataProviderImpl extends
         }
         
         // Getting embeddable classes and adding toString methods
-        for (final ClassOrInterfaceTypeDetails embeddableTypeDetails : typeLocationService
+        for (final ClassOrInterfaceTypeDetails embeddableTypeDetails : getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(EMBEDDABLE_ANNOTATION)) {
         	JavaType embeddableType = embeddableTypeDetails.getType();
         	// Adding embeddable type to generate conversor method
         	embeddableToStringMethods.add(embeddableType);
         }
 
-        return new ConversionServiceMetadata(typeLocationService, metadataIdentificationString,
+        return new ConversionServiceMetadata(getTypeLocationService(), metadataIdentificationString,
                 aspectName, governorPhysicalTypeMetadata, findMethods, idTypes,
                 relevantDomainTypes, compositePrimaryKeyTypes, toStringMethods, embeddableToStringMethods);
     }
@@ -235,7 +235,7 @@ public class ConversionServiceMetadataProviderImpl extends
         int counter = 0;
         for (final MethodMetadata method : memberDetails.getMethods()) {
             // Track any changes to that method (eg it goes away)
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     method.getDeclaredByMetadataId(),
                     metadataIdentificationString);
 
@@ -269,7 +269,7 @@ public class ConversionServiceMetadataProviderImpl extends
         final JavaType fieldType = field.getFieldType();
         if (fieldType.isCommonCollectionType()
                 || fieldType.isArray() // Exclude collections and arrays
-                || typeLocationService.isInProject(fieldType) // Exclude
+                || getTypeLocationService().isInProject(fieldType) // Exclude
                                                               // references to
                                                               // other domain
                                                               // objects as they

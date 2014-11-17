@@ -33,9 +33,9 @@ public class ConfigurableMetadataProviderImpl extends
 	
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-    	/*metadataDependencyRegistry.registerDependency(
+    	getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_CONFIGURABLE);
     }
 
@@ -46,9 +46,9 @@ public class ConfigurableMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_CONFIGURABLE);
     }
 

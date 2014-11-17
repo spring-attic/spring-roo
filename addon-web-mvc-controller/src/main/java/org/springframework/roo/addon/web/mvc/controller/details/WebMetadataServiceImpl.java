@@ -220,17 +220,12 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
     	
-    	if(persistenceMemberLocator == null){
-    		persistenceMemberLocator = getPersistenceMemberLocator();
-    	}
-    	Validate.notNull(persistenceMemberLocator, "PersistenceMemberLocator is required");
-    	
         Validate.notNull(javaType, "Java type required");
         Validate.notNull(memberDetails, "Member details required");
 
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
                 .getIdentifierAccessor(javaType);
-        final MethodMetadata versionAccessor = persistenceMemberLocator
+        final MethodMetadata versionAccessor = getPersistenceMemberLocator()
                 .getVersionAccessor(javaType);
 
         final Map<JavaSymbolName, DateTimeFormatDetails> dates = new LinkedHashMap<JavaSymbolName, DateTimeFormatDetails>();
@@ -422,13 +417,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     }
 
     public FieldMetadata getIdentifierField(final JavaType javaType) {
-    	
-    	if(persistenceMemberLocator == null){
-    		persistenceMemberLocator = getPersistenceMemberLocator();
-    	}
-    	Validate.notNull(persistenceMemberLocator, "PersistenceMemberLocator is required");
-    	
-        return CollectionUtils.firstElementOf(persistenceMemberLocator
+        return CollectionUtils.firstElementOf(getPersistenceMemberLocator()
                 .getIdentifierFields(javaType));
     }
 
@@ -461,11 +450,6 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     	}
     	Validate.notNull(layerService, "LayerService is required");
     	
-    	if(persistenceMemberLocator == null){
-    		persistenceMemberLocator = getPersistenceMemberLocator();
-    	}
-    	Validate.notNull(persistenceMemberLocator, "PersistenceMemberLocator is required");
-    	
         Validate.notNull(javaType, "Java type required");
         Validate.notNull(memberDetails, "Member details required");
         Validate.notBlank(metadataIdentificationString, "Metadata id required");
@@ -477,13 +461,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
         }
 
         final FieldMetadata idField = CollectionUtils
-                .firstElementOf(persistenceMemberLocator
+                .firstElementOf(getPersistenceMemberLocator()
                         .getIdentifierFields(javaType));
         if (idField == null) {
             return null;
         }
 
-        final JavaType idType = persistenceMemberLocator
+        final JavaType idType = getPersistenceMemberLocator()
                 .getIdentifierType(javaType);
         if (idType == null) {
             return null;
@@ -549,7 +533,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                 removeMethod, findAllMethod, findAllSortedMethod, findMethod, countMethod,
                 findEntriesMethod, findEntriesSortedMethod, dynamicFinderNames, isRooIdentifier(
                         javaType, memberDetails),
-                persistenceMemberLocator.getEmbeddedIdentifierFields(javaType));
+                getPersistenceMemberLocator().getEmbeddedIdentifierFields(javaType));
     }
 
     public MemberDetails getMemberDetails(final JavaType javaType) {
@@ -618,11 +602,6 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             final JavaType baseType, final MemberDetails baseTypeDetails,
             final String metadataIdentificationString) {
     	
-    	if(persistenceMemberLocator == null){
-    		persistenceMemberLocator = getPersistenceMemberLocator();
-    	}
-    	Validate.notNull(persistenceMemberLocator, "PersistenceMemberLocator is required");
-    	
         Validate.notNull(baseType, "Java type required");
         Validate.notNull(baseTypeDetails, "Member details required");
         Validate.isTrue(isApplicationType(baseType),
@@ -635,7 +614,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
                         metadataIdentificationString));
 
         for (final JavaType fieldType : baseTypeDetails
-                .getPersistentFieldTypes(baseType, persistenceMemberLocator)) {
+                .getPersistentFieldTypes(baseType, getPersistenceMemberLocator())) {
             if (isApplicationType(fieldType)) {
                 final MemberDetails fieldTypeDetails = getMemberDetails(fieldType);
                 specialTypes.put(
@@ -652,17 +631,12 @@ public class WebMetadataServiceImpl implements WebMetadataService {
             final JavaType javaType, final MemberDetails memberDetails,
             final String metadataIdentificationString) {
     	
-    	if(persistenceMemberLocator == null){
-    		persistenceMemberLocator = getPersistenceMemberLocator();
-    	}
-    	Validate.notNull(persistenceMemberLocator, "PersistenceMemberLocator is required");
-    	
         Validate.notNull(javaType, "Java type required");
         Validate.notNull(memberDetails, "Member details required");
 
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
                 .getIdentifierAccessor(javaType);
-        final MethodMetadata versionAccessor = persistenceMemberLocator
+        final MethodMetadata versionAccessor = getPersistenceMemberLocator()
                 .getVersionAccessor(javaType);
 
         final Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
@@ -825,20 +799,25 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     }
     
     public PersistenceMemberLocator getPersistenceMemberLocator(){
-    	// Get all Services implement PersistenceMemberLocator interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (PersistenceMemberLocator) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load PersistenceMemberLocator on WebMetadataServiceImpl.");
-			return null;
-		}
+    	if(persistenceMemberLocator == null){
+    		// Get all Services implement PersistenceMemberLocator interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PersistenceMemberLocator) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PersistenceMemberLocator on WebMetadataServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return persistenceMemberLocator;
+    	}
+    	
     }
     
     public TypeLocationService getTypeLocationService(){

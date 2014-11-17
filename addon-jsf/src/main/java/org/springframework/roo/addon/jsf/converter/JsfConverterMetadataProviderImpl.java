@@ -58,12 +58,12 @@ public class JsfConverterMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_JSF_CONVERTER);
-        /*configurableMetadataProvider.addMetadataTrigger(ROO_JSF_CONVERTER);*/
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_JSF_CONVERTER);
     }
 
     @Override
@@ -73,12 +73,12 @@ public class JsfConverterMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_JSF_CONVERTER);
-        /*configurableMetadataProvider.removeMetadataTrigger(ROO_JSF_CONVERTER);*/
+        getConfigurableMetadataProvider().removeMetadataTrigger(ROO_JSF_CONVERTER);
     }
 
     private MemberTypeAdditions getFindMethod(final JavaType entity,
@@ -89,8 +89,8 @@ public class JsfConverterMetadataProviderImpl extends
     	}
     	Validate.notNull(layerService, "LayerService is required");
     	
-        metadataDependencyRegistry.registerDependency(
-                typeLocationService.getPhysicalTypeIdentifier(entity),
+        getMetadataDependencyRegistry().registerDependency(
+                getTypeLocationService().getPhysicalTypeIdentifier(entity),
                 metadataIdentificationString);
         final List<FieldMetadata> idFields = persistenceMemberLocator
                 .getIdentifierFields(entity);
@@ -103,7 +103,7 @@ public class JsfConverterMetadataProviderImpl extends
         if (idType == null) {
             return null;
         }
-        metadataDependencyRegistry
+        getMetadataDependencyRegistry()
                 .registerDependency(idField.getDeclaredByMetadataId(),
                         metadataIdentificationString);
 
@@ -138,7 +138,7 @@ public class JsfConverterMetadataProviderImpl extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(itdTypeDetails.getGovernor().getName());
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -192,20 +192,24 @@ public class JsfConverterMetadataProviderImpl extends
     }
     
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
-    	// Get all Services implement ConfigurableMetadataProvider interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfConverterMetadataProviderImpl.");
-			return null;
-		}
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfConverterMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
     }
     
     public LayerService getLayerService(){

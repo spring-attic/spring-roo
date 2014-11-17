@@ -98,12 +98,12 @@ public class JsfManagedBeanMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
-        /*configurableMetadataProvider.addMetadataTrigger(ROO_JSF_MANAGED_BEAN);*/
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
     }
 
     @Override
@@ -113,13 +113,13 @@ public class JsfManagedBeanMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
-        /*configurableMetadataProvider
-                .removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);*/
+        getConfigurableMetadataProvider()
+                .removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
     }
 
     /**
@@ -140,8 +140,8 @@ public class JsfManagedBeanMetadataProviderImpl extends
     	}
     	Validate.notNull(layerService, "LayerService is required");
     	
-        metadataDependencyRegistry.registerDependency(
-                typeLocationService.getPhysicalTypeIdentifier(entity),
+        getMetadataDependencyRegistry().registerDependency(
+                getTypeLocationService().getPhysicalTypeIdentifier(entity),
                 metadataIdentificationString);
         final List<FieldMetadata> idFields = persistenceMemberLocator
                 .getIdentifierFields(entity);
@@ -154,7 +154,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
         if (identifierType == null) {
             return Collections.emptyMap();
         }
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 identifierField.getDeclaredByMetadataId(),
                 metadataIdentificationString);
 
@@ -219,7 +219,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -271,7 +271,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
         entityToManagedBeanMidMap.put(entity, metadataIdentificationString);
         managedBeanMidToEntityMap.put(metadataIdentificationString, entity);
 
-        final String physicalTypeIdentifier = typeLocationService
+        final String physicalTypeIdentifier = getTypeLocationService()
                 .getPhysicalTypeIdentifier(entity);
         final LogicalPath path = PhysicalTypeIdentifier
                 .getPath(physicalTypeIdentifier);
@@ -331,7 +331,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
             final MethodMetadata identifierAccessor,
             final MethodMetadata versionAccessor) {
         final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
-        final Set<ClassOrInterfaceTypeDetails> managedBeanTypes = typeLocationService
+        final Set<ClassOrInterfaceTypeDetails> managedBeanTypes = getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
 
         int listViewFields = 0;
@@ -348,7 +348,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
             if (field == null) {
                 continue;
             }
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     field.getDeclaredByMetadataId(),
                     metadataIdentificationString);
 
@@ -360,7 +360,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
                 continue;
             }
 
-            final ClassOrInterfaceTypeDetails fieldTypeCid = typeLocationService
+            final ClassOrInterfaceTypeDetails fieldTypeCid = getTypeLocationService()
                     .getTypeDetails(fieldType);
 
             // Check field is to be displayed in the entity's list view
@@ -380,7 +380,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
                 if (fieldType.isCommonCollectionType()) {
                     parameterTypeLoop: for (final JavaType parameter : fieldType
                             .getParameters()) {
-                        final ClassOrInterfaceTypeDetails parameterTypeCid = typeLocationService
+                        final ClassOrInterfaceTypeDetails parameterTypeCid = getTypeLocationService()
                                 .getTypeDetails(parameter);
                         if (parameterTypeCid == null) {
                             continue;
@@ -454,7 +454,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
                             }
                             if (dropDownFields < MAX_DROP_DOWN_FIELDS
                                     && isFieldOfInterest(applicationTypeField)
-                                    && !typeLocationService
+                                    && !getTypeLocationService()
                                             .isInProject(applicationTypeField
                                                     .getFieldType())) {
                                 dropDownFields++;
@@ -487,20 +487,25 @@ public class JsfManagedBeanMetadataProviderImpl extends
     }
     
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
-    	// Get all Services implement ConfigurableMetadataProvider interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfManagedBeanMetadataProviderImpl.");
-			return null;
-		}
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JsfManagedBeanMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
     }
     
     public LayerService getLayerService(){

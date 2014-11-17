@@ -49,10 +49,10 @@ public class SolrMetadataProvider extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        jpaActiveRecordMetadataProvider.addMetadataTrigger(ROO_SOLR_SEARCHABLE);*/
+        getJpaActiveRecordMetadataProvider().addMetadataTrigger(ROO_SOLR_SEARCHABLE);
         addMetadataTrigger(ROO_SOLR_SEARCHABLE);
     }
 
@@ -63,11 +63,11 @@ public class SolrMetadataProvider extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        jpaActiveRecordMetadataProvider
-                .removeMetadataTrigger(ROO_SOLR_SEARCHABLE);*/
+        getJpaActiveRecordMetadataProvider()
+                .removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
         removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
     }
 
@@ -136,7 +136,7 @@ public class SolrMetadataProvider extends
                 .createIdentifier(javaType, path);
 
         // We want to be notified if the getter info changes in any way
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 jpaActiveRecordMetadataKey, metadataIdentificationString);
         final JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
                 .get(jpaActiveRecordMetadataKey);
@@ -166,7 +166,7 @@ public class SolrMetadataProvider extends
                     accessorDetails.put(method, field);
                 }
                 // Track any changes to that method (eg it goes away)
-                metadataDependencyRegistry.registerDependency(
+                getMetadataDependencyRegistry().registerDependency(
                         method.getDeclaredByMetadataId(),
                         metadataIdentificationString);
             }
@@ -187,5 +187,26 @@ public class SolrMetadataProvider extends
 
     public String getProvidesType() {
         return SolrMetadata.getMetadataIdentiferType();
+    }
+    
+    public JpaActiveRecordMetadataProvider getJpaActiveRecordMetadataProvider(){
+    	if(jpaActiveRecordMetadataProvider == null){
+    		// Get all Services implement JpaActiveRecordMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(JpaActiveRecordMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (JpaActiveRecordMetadataProvider) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load JpaActiveRecordMetadataProvider on SolrMetadataProvider.");
+    			return null;
+    		}
+    	}else{
+    		return jpaActiveRecordMetadataProvider;
+    	}
     }
 }

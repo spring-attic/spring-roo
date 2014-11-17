@@ -62,10 +62,10 @@ public class WebScaffoldMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_WEB_SCAFFOLD);
     }
 
@@ -76,10 +76,10 @@ public class WebScaffoldMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_WEB_SCAFFOLD);
     }
 
@@ -152,7 +152,7 @@ public class WebScaffoldMetadataProviderImpl extends
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(),
                 metadataIdentificationString);
 
@@ -185,13 +185,13 @@ public class WebScaffoldMetadataProviderImpl extends
                         metadataIdentificationString);
         final Collection<JavaType> editableFieldTypes = formBackingObjectMemberDetails
                 .getPersistentFieldTypes(formBackingType,
-                        persistenceMemberLocator);
+                        getPersistenceMemberLocator());
 
         return new WebScaffoldMetadata(metadataIdentificationString,
                 aspectName, governorPhysicalType, annotationValues, idField,
                 relatedApplicationTypeMetadata,
                 dependentApplicationTypeMetadata, datePatterns, crudAdditions,
-                editableFieldTypes, typeLocationService);
+                editableFieldTypes, getTypeLocationService());
     }
 
     public String getProvidesType() {
@@ -213,7 +213,7 @@ public class WebScaffoldMetadataProviderImpl extends
      * @return see above
      */
     private String getWebScaffoldMidIfLayerComponent(final JavaType governor) {
-        final ClassOrInterfaceTypeDetails governorTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails governorTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (governorTypeDetails != null) {
             for (final JavaType type : governorTypeDetails.getLayerEntities()) {

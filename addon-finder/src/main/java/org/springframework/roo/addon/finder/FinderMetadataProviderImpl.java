@@ -48,10 +48,10 @@ public class FinderMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-    	/*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    	getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         // Ignoring trigger annotations means that other MD providers that want
         // to discover whether a type has finders can do so.
         setIgnoreTriggerAnnotations(true);
@@ -64,10 +64,10 @@ public class FinderMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
     }
 
     @Override
@@ -167,14 +167,14 @@ public class FinderMetadataProviderImpl extends
                     final FieldToken fieldToken = (FieldToken) token;
                     final String declaredByMid = fieldToken.getField()
                             .getDeclaredByMetadataId();
-                    metadataDependencyRegistry.registerDependency(
+                    getMetadataDependencyRegistry().registerDependency(
                             declaredByMid, metadataIdentificationString);
                 }
             }
         }
 
         // We need to be informed if our dependent metadata changes
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 jpaActiveRecordMetadataKey, metadataIdentificationString);
 
         // We make the queryHolders immutable in case FinderMetadata in the

@@ -38,10 +38,10 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        webScaffoldMetadataProvider.addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);*/
+        getWebScaffoldMetadataProvider().addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
         addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
     }
 
@@ -58,11 +58,11 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
      * @since 1.2.0
      */
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        webScaffoldMetadataProvider
-                .removeMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);*/
+        getWebScaffoldMetadataProvider()
+                .removeMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
         removeMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
     }
 
@@ -103,7 +103,7 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
                 .createIdentifier(javaType, path);
 
         // We want to be notified if the getter info changes in any way
-        metadataDependencyRegistry.registerDependency(webScaffoldMetadataKey,
+        getMetadataDependencyRegistry().registerDependency(webScaffoldMetadataKey,
                 metadataIdentificationString);
         final WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService
                 .get(webScaffoldMetadataKey);
@@ -142,5 +142,26 @@ public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 
     public String getProvidesType() {
         return SolrWebSearchMetadata.getMetadataIdentiferType();
+    }
+    
+    public WebScaffoldMetadataProvider getWebScaffoldMetadataProvider(){
+    	if(webScaffoldMetadataProvider == null){
+    		// Get all Services implement WebScaffoldMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(WebScaffoldMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (WebScaffoldMetadataProvider) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load WebScaffoldMetadataProvider on SolrWebSearchMetadataProvider.");
+    			return null;
+    		}
+    	}else{
+    		return webScaffoldMetadataProvider;
+    	}
     }
 }

@@ -86,9 +86,9 @@ public class SolrJspMetadataListener implements MetadataProvider,
 
     protected void activate(final ComponentContext context) {
     	this.context = context.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 SolrWebSearchMetadata.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
     }
 
     private void copyArtifacts(final String relativeTemplateLocation,

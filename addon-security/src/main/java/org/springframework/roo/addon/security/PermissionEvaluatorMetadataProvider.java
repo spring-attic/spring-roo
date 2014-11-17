@@ -47,18 +47,18 @@ public class PermissionEvaluatorMetadataProvider extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         setIgnoreTriggerAnnotations(true);
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
     }
 
     @Override
@@ -81,7 +81,7 @@ public class PermissionEvaluatorMetadataProvider extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -165,7 +165,7 @@ public class PermissionEvaluatorMetadataProvider extends
     private Map<JavaType, String> getDomainTypesToPlurals() {
     	
     	Map<JavaType, String>  domainTypesToPlurals = new HashMap<JavaType, String> ();
-    	for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE)) {
+    	for (ClassOrInterfaceTypeDetails cid : getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE)) {
     		AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_SERVICE);
     		AnnotationAttributeValue<Boolean> usePermissionEvaluator = annotationMetadata.getAttribute("usePermissionEvaluator");
     		if (usePermissionEvaluator == null || usePermissionEvaluator.getValue() == false){
@@ -173,7 +173,7 @@ public class PermissionEvaluatorMetadataProvider extends
     		}
     		AnnotationAttributeValue<Collection<ClassAttributeValue>> domainTypes = annotationMetadata.getAttribute("domainTypes");
             for (ClassAttributeValue domainType : domainTypes.getValue()) {
-	    		final ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService
+	    		final ClassOrInterfaceTypeDetails domainTypeDetails = getTypeLocationService()
 	                    .getTypeDetails(domainType.getValue());
 	            if (domainTypeDetails == null) {
 	                return null;

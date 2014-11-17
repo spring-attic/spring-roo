@@ -48,12 +48,12 @@ public class IdentifierMetadataProviderImpl extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        /*metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         addMetadataTrigger(ROO_IDENTIFIER);
-        /*configurableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
-        serializableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);*/
+        getConfigurableMetadataProvider().addMetadataTrigger(ROO_IDENTIFIER);
+        getSerializableMetadataProvider().addMetadataTrigger(ROO_IDENTIFIER);
     }
 
     @Override
@@ -63,12 +63,12 @@ public class IdentifierMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         removeMetadataTrigger(ROO_IDENTIFIER);
-        /*configurableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
-        serializableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);*/
+        getConfigurableMetadataProvider().removeMetadataTrigger(ROO_IDENTIFIER);
+        getSerializableMetadataProvider().removeMetadataTrigger(ROO_IDENTIFIER);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class IdentifierMetadataProviderImpl extends
         if (projectOperations.isProjectAvailable(path.getModule())) {
             // If the project itself changes, we want a chance to refresh this
             // item
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     ProjectMetadata.getProjectIdentifier(path.getModule()),
                     metadataIdentificationString);
         }
@@ -128,20 +128,25 @@ public class IdentifierMetadataProviderImpl extends
     }
     
     public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
-    	// Get all Services implement ConfigurableMetadataProvider interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ConfigurableMetadataProvider) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ConfigurableMetadataProvider on IdentifierMetadataProviderImpl.");
-			return null;
-		}
+    	if(configurableMetadataProvider == null){
+    		// Get all Services implement ConfigurableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ConfigurableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on IdentifierMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return configurableMetadataProvider;
+    	}
+    	
     }
     
     public ProjectOperations getProjectOperations(){
@@ -162,20 +167,25 @@ public class IdentifierMetadataProviderImpl extends
     }
     
     public SerializableMetadataProvider getSerializableMetadataProvider(){
-    	// Get all Services implement SerializableMetadataProvider interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(SerializableMetadataProvider.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (SerializableMetadataProvider) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load SerializableMetadataProvider on IdentifierMetadataProviderImpl.");
-			return null;
-		}
+    	if(serializableMetadataProvider == null){
+    		// Get all Services implement SerializableMetadataProvider interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(SerializableMetadataProvider.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (SerializableMetadataProvider) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load SerializableMetadataProvider on IdentifierMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return serializableMetadataProvider;
+    	}
+    	
     }
     
 }
