@@ -56,7 +56,7 @@ import org.w3c.dom.Element;
  * @author Ben Alex
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
