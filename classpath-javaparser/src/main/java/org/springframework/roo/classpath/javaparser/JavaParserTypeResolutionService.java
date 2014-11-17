@@ -18,7 +18,7 @@ import org.springframework.roo.classpath.TypeResolutionService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
-@Component(immediate = true)
+@Component
 @Service
 public class JavaParserTypeResolutionService implements TypeResolutionService {
 

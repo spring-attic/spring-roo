@@ -52,7 +52,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
-@Component(immediate = true)
+@Component
 @Service
 public class JavaParserTypeParsingService implements TypeParsingService {
 
