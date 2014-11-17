@@ -4,6 +4,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -21,6 +22,11 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link RepositoryJpaMetadataProvider}.
  * 
@@ -28,20 +34,23 @@ import org.springframework.roo.project.LogicalPath;
  * @author Andrew Swan
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class RepositoryJpaMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         RepositoryJpaMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(RepositoryJpaMetadataProviderImpl.class);
 
-    @Reference private CustomDataKeyDecorator customDataKeyDecorator;
+    private CustomDataKeyDecorator customDataKeyDecorator;
     private final Map<JavaType, String> domainTypeToRepositoryMidMap = new LinkedHashMap<JavaType, String>();
     private final Map<String, JavaType> repositoryMidToDomainTypeMap = new LinkedHashMap<String, JavaType>();
 
-    protected void activate(final ComponentContext context) {
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
         super.setDependsOnGovernorBeingAClass(false);
-        metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_REPOSITORY_JPA);
@@ -55,12 +64,12 @@ public class RepositoryJpaMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_REPOSITORY_JPA);
-        customDataKeyDecorator.unregisterMatchers(getClass());
+        getCustomDataKeyDecorator().unregisterMatchers(getClass());
     }
 
     @Override
@@ -87,7 +96,7 @@ public class RepositoryJpaMetadataProviderImpl extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -111,7 +120,7 @@ public class RepositoryJpaMetadataProviderImpl extends
         final RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(
                 governorPhysicalTypeMetadata);
         final JavaType domainType = annotationValues.getDomainType();
-        final JavaType identifierType = persistenceMemberLocator
+        final JavaType identifierType = getPersistenceMemberLocator()
                 .getIdentifierType(domainType);
         if (identifierType == null) {
             return null;
@@ -141,8 +150,29 @@ public class RepositoryJpaMetadataProviderImpl extends
 
     @SuppressWarnings("unchecked")
     private void registerMatchers() {
-        customDataKeyDecorator.registerMatchers(getClass(),
+        getCustomDataKeyDecorator().registerMatchers(getClass(),
                 new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(
                         RooJpaRepository.DOMAIN_TYPE_ATTRIBUTE)));
+    }
+    
+    public CustomDataKeyDecorator getCustomDataKeyDecorator(){
+    	if(customDataKeyDecorator == null){
+    		// Get all Services implement CustomDataKeyDecorator interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (CustomDataKeyDecorator) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load CustomDataKeyDecorator on RepositoryJpaMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return customDataKeyDecorator;
+    	}
     }
 }
