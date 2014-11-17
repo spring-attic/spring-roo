@@ -22,7 +22,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * @author Birgitta Boeckeler
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 @Reference(name = "config", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = TailorConfigurationFactory.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultConfigurationLocator implements ConfigurationLocator {

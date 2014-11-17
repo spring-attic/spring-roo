@@ -29,7 +29,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Vladimir Tihomirov
  */
 @Service
-@Component(immediate = true)
+@Component
 public class DefaultTailorImpl implements Tailor {
     @Reference protected ActionLocator actionLocator;
     @Reference protected ConfigurationLocator configLocator;
