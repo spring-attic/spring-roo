@@ -143,13 +143,13 @@ public class JsfManagedBeanMetadataProviderImpl extends
         getMetadataDependencyRegistry().registerDependency(
                 getTypeLocationService().getPhysicalTypeIdentifier(entity),
                 metadataIdentificationString);
-        final List<FieldMetadata> idFields = persistenceMemberLocator
+        final List<FieldMetadata> idFields = getPersistenceMemberLocator()
                 .getIdentifierFields(entity);
         if (idFields.isEmpty()) {
             return Collections.emptyMap();
         }
         final FieldMetadata identifierField = idFields.get(0);
-        final JavaType identifierType = persistenceMemberLocator
+        final JavaType identifierType = getPersistenceMemberLocator()
                 .getIdentifierType(entity);
         if (identifierType == null) {
             return Collections.emptyMap();
@@ -252,9 +252,9 @@ public class JsfManagedBeanMetadataProviderImpl extends
             return null;
         }
 
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
                 .getIdentifierAccessor(entity);
-        final MethodMetadata versionAccessor = persistenceMemberLocator
+        final MethodMetadata versionAccessor = getPersistenceMemberLocator()
                 .getVersionAccessor(entity);
         final Set<FieldMetadata> locatedFields = locateFields(entity,
                 memberDetails, metadataIdentificationString,
@@ -275,7 +275,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
                 .getPhysicalTypeIdentifier(entity);
         final LogicalPath path = PhysicalTypeIdentifier
                 .getPath(physicalTypeIdentifier);
-        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+        final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                 .get(PluralMetadata.createIdentifier(entity, path));
         Validate.notNull(pluralMetadata, "Could not determine plural for '%s'",
                 entity.getSimpleTypeName());
@@ -401,7 +401,7 @@ public class JsfManagedBeanMetadataProviderImpl extends
                                 final LogicalPath logicalPath = PhysicalTypeIdentifier
                                         .getPath(parameterTypeCid
                                                 .getDeclaredByMetadataId());
-                                final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+                                final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                                         .get(PluralMetadata.createIdentifier(
                                                 parameter, logicalPath));
                                 if (pluralMetadata != null) {
@@ -426,9 +426,9 @@ public class JsfManagedBeanMetadataProviderImpl extends
                             && !customDataBuilder.keySet().contains(
                                     CustomDataKeys.EMBEDDED_FIELD)) {
                         customDataBuilder.put(APPLICATION_TYPE_KEY, null);
-                        final MethodMetadata applicationTypeIdentifierAccessor = persistenceMemberLocator
+                        final MethodMetadata applicationTypeIdentifierAccessor = getPersistenceMemberLocator()
                                 .getIdentifierAccessor(entity);
-                        final MethodMetadata applicationTypeVersionAccessor = persistenceMemberLocator
+                        final MethodMetadata applicationTypeVersionAccessor = getPersistenceMemberLocator()
                                 .getVersionAccessor(entity);
                         final List<FieldMetadata> applicationTypeFields = new ArrayList<FieldMetadata>();
 

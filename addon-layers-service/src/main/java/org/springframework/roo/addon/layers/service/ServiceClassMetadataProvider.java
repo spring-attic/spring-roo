@@ -60,10 +60,10 @@ public class ServiceClassMetadataProvider extends
 
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-    	/*metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    	getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
         setIgnoreTriggerAnnotations(true);
     }
 
@@ -74,10 +74,10 @@ public class ServiceClassMetadataProvider extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        /*metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());*/
+                getProvidesType());
     }
 
     @Override
@@ -104,7 +104,7 @@ public class ServiceClassMetadataProvider extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -133,7 +133,7 @@ public class ServiceClassMetadataProvider extends
         ServiceInterfaceMetadata serviceInterfaceMetadata = null;
         ClassOrInterfaceTypeDetails serviceInterface = null;
         for (final JavaType implementedType : serviceClass.getImplementsTypes()) {
-            final ClassOrInterfaceTypeDetails potentialServiceInterfaceTypeDetails = typeLocationService
+            final ClassOrInterfaceTypeDetails potentialServiceInterfaceTypeDetails = getTypeLocationService()
                     .getTypeDetails(implementedType);
             if (potentialServiceInterfaceTypeDetails != null) {
                 final LogicalPath path = PhysicalTypeIdentifier
@@ -141,7 +141,7 @@ public class ServiceClassMetadataProvider extends
                                 .getDeclaredByMetadataId());
                 final String implementedTypeId = ServiceInterfaceMetadata
                         .createIdentifier(implementedType, path);
-                if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) metadataService
+                if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) getMetadataService()
                         .get(implementedTypeId)) != null) {
                     // Found the metadata for the service interface
                     serviceInterface = potentialServiceInterfaceTypeDetails;
@@ -156,7 +156,7 @@ public class ServiceClassMetadataProvider extends
 
         // Register this provider for changes to the service interface // TODO
         // move this down in case we return null early below?
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 serviceInterfaceMetadata.getId(), metadataIdentificationString);
 
         final ServiceAnnotationValues serviceAnnotationValues = serviceInterfaceMetadata
@@ -178,7 +178,7 @@ public class ServiceClassMetadataProvider extends
         final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions = new LinkedHashMap<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>>();
         for (final JavaType domainType : domainTypes) {
 
-            final JavaType idType = persistenceMemberLocator
+            final JavaType idType = getPersistenceMemberLocator()
                     .getIdentifierType(domainType);
             if (idType == null) {
                 return null;
@@ -186,7 +186,7 @@ public class ServiceClassMetadataProvider extends
             domainTypeToIdTypeMap.put(domainType, idType);
             // Collect the plural for this domain type
 
-            final ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService
+            final ClassOrInterfaceTypeDetails domainTypeDetails = getTypeLocationService()
                     .getTypeDetails(domainType);
             if (domainTypeDetails == null) {
                 return null;
@@ -195,7 +195,7 @@ public class ServiceClassMetadataProvider extends
                     .getPath(domainTypeDetails.getDeclaredByMetadataId());
             final String pluralId = PluralMetadata.createIdentifier(domainType,
                     path);
-            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+            final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                     .get(pluralId);
             if (pluralMetadata == null) {
                 return null;
@@ -224,14 +224,14 @@ public class ServiceClassMetadataProvider extends
 
             // Register this provider for changes to the domain type or its
             // plural
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     domainTypeDetails.getDeclaredByMetadataId(),
                     metadataIdentificationString);
-            metadataDependencyRegistry.registerDependency(pluralId,
+            getMetadataDependencyRegistry().registerDependency(pluralId,
                     metadataIdentificationString);
         }
 
-        final MemberDetails serviceClassDetails = memberDetailsScanner
+        final MemberDetails serviceClassDetails = getMemberDetailsScanner()
                 .getMemberDetails(getClass().getName(), serviceClass);
 
         // Adds or removes service from XML configuration

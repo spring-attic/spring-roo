@@ -79,7 +79,7 @@ public class JsonMetadataProvider extends AbstractItdMetadataProvider {
                 governorPhysicalTypeMetadata);
 
         String plural = javaType.getSimpleTypeName() + "s";
-        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+        final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                 .get(PluralMetadata.createIdentifier(javaType, path));
         if (pluralMetadata != null) {
             plural = pluralMetadata.getPlural();

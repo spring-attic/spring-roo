@@ -111,7 +111,7 @@ public class JsfApplicationBeanMetadataProviderImpl extends
 
         // To get here we know the governor is the MenuBean so let's go ahead
         // and create its ITD
-        final Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService
+        final Set<ClassOrInterfaceTypeDetails> managedBeans = getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
         for (final ClassOrInterfaceTypeDetails managedBean : managedBeans) {
             getMetadataDependencyRegistry().registerDependency(

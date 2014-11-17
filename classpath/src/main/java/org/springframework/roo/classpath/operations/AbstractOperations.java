@@ -17,6 +17,8 @@ import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 
+import org.osgi.framework.BundleContext;
+
 /**
  * Abstract base class for operations classes. Contains common methods.
  * 
@@ -31,10 +33,10 @@ public abstract class AbstractOperations {
 
     @Reference protected FileManager fileManager;
 
-    protected ComponentContext context;
+    protected BundleContext context;
 
-    protected void activate(final ComponentContext context) {
-        this.context = context;
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
     }
 
     /**
@@ -59,7 +61,7 @@ public abstract class AbstractOperations {
 
         final String path = FileUtils.getPath(getClass(), sourceAntPath);
         final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
-                context.getBundleContext(), path);
+                context, path);
         Validate.notNull(urls,
                 "Could not search bundles for resources for Ant Path '%s'",
                 path);

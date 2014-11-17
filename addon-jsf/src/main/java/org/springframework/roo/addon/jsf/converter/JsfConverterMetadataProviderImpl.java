@@ -92,13 +92,13 @@ public class JsfConverterMetadataProviderImpl extends
         getMetadataDependencyRegistry().registerDependency(
                 getTypeLocationService().getPhysicalTypeIdentifier(entity),
                 metadataIdentificationString);
-        final List<FieldMetadata> idFields = persistenceMemberLocator
+        final List<FieldMetadata> idFields = getPersistenceMemberLocator()
                 .getIdentifierFields(entity);
         if (idFields.isEmpty()) {
             return null;
         }
         final FieldMetadata idField = idFields.get(0);
-        final JavaType idType = persistenceMemberLocator
+        final JavaType idType = getPersistenceMemberLocator()
                 .getIdentifierType(entity);
         if (idType == null) {
             return null;
@@ -179,7 +179,7 @@ public class JsfConverterMetadataProviderImpl extends
 
         final MemberTypeAdditions findMethod = getFindMethod(entity,
                 metadataIdentificationString);
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
                 .getIdentifierAccessor(entity);
 
         return new JsfConverterMetadata(metadataIdentificationString,

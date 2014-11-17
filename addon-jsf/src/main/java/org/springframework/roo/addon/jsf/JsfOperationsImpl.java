@@ -74,10 +74,6 @@ public class JsfOperationsImpl extends AbstractOperations implements
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(JsfOperationsImpl.class);
 	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-	
-
     private static final String DEPENDENCY_XPATH = "/dependencies/dependency";
     private static final String JSF_IMPLEMENTATION_XPATH = "/configuration/jsf-implementations/jsf-implementation";
     private static final String JSF_LIBRARY_XPATH = "/configuration/jsf-libraries/jsf-library";
@@ -94,20 +90,15 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private TypeLocationService typeLocationService;
     private TypeManagementService typeManagementService;
     
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
     }
 
     public void addMediaSuurce(final String url, MediaPlayer mediaPlayer) {
     	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
         Validate.notBlank(url, "Media source url required");
 
-        final String mainPage = projectOperations.getPathResolver()
+        final String mainPage = getProjectOperations().getPathResolver()
                 .getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "pages/main.xhtml");
         final Document document = XmlUtils.readXml(fileManager
                 .getInputStream(mainPage));
@@ -201,19 +192,14 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private void changePrimeFacesTheme(final Theme theme,
             final Document document) {
     	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
         Validate.notNull(theme, "Theme required");
         Validate.notNull(document, "web.xml document required");
 
         // Add theme to the pom if not already there
         final String themeName = StringUtils.lowerCase(theme.name().replace(
                 "_", "-"));
-        projectOperations.addDependency(
-                projectOperations.getFocusedModuleName(),
+        getProjectOperations().addDependency(
+                getProjectOperations().getFocusedModuleName(),
                 "org.primefaces.themes", themeName, PRIMEFACES_THEMES_VERSION);
 
         // Update the web.xml primefaces.THEME content-param
@@ -234,14 +220,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
     private void copyEntityTypePage(final JavaType entity,
             final String beanName, final String plural) {
-    	
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final String domainTypeFile = projectOperations.getPathResolver()
+
+    	final String domainTypeFile = getProjectOperations().getPathResolver()
                 .getFocusedIdentifier(
                         Path.SRC_MAIN_WEBAPP,
                         "pages/"
@@ -426,11 +406,6 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private void createOrUpdateWebXml(
             final JsfImplementation jsfImplementation, final Theme theme) {
     	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
         final String webXmlPath = getWebXmlFile();
 
         final Document document;
@@ -439,7 +414,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
         }
         else {
             document = getDocumentTemplate("WEB-INF/web-template.xml");
-            final String projectName = projectOperations.getFocusedModule()
+            final String projectName = getProjectOperations().getFocusedModule()
                     .getDisplayName();
             WebXmlUtils.setDisplayName(projectName, document, null);
             WebXmlUtils.setDescription("Roo generated " + projectName
@@ -520,13 +495,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private JsfImplementation getExistingOrDefaultJsfImplementation(
             final Element configuration) {
     	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final Pom pom = projectOperations
-                .getPomFromModuleName(projectOperations.getFocusedModuleName());
+        final Pom pom = getProjectOperations()
+                .getPomFromModuleName(getProjectOperations().getFocusedModuleName());
         JsfImplementation existingJsfImplementation = null;
         for (final JsfImplementation value : JsfImplementation.values()) {
             final Element jsfDependencyElement = XmlUtils.findFirstElement(
@@ -546,13 +516,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private JsfLibrary getExistingOrDefaultJsfLibrary(
             final Element configuration) {
     	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final Pom pom = projectOperations
-                .getPomFromModuleName(projectOperations.getFocusedModuleName());
+        final Pom pom = getProjectOperations()
+                .getPomFromModuleName(getProjectOperations().getFocusedModuleName());
         JsfLibrary existingJsfImplementation = null;
         for (final JsfLibrary value : JsfLibrary.values()) {
             final Element jsfDependencyElement = XmlUtils.findFirstElement(
@@ -570,13 +535,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private String getFacesConfigFile() {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        return projectOperations.getPathResolver().getFocusedIdentifier(
+        return getProjectOperations().getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml");
     }
 
@@ -631,13 +590,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private String getWebXmlFile() {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        return projectOperations.getPathResolver().getFocusedIdentifier(
+        return getProjectOperations().getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
     }
 
@@ -701,13 +654,7 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private void installFacesConfig(final JavaPackage destinationPackage) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        Validate.isTrue(projectOperations.isFocusedProjectAvailable(),
+        Validate.isTrue(getProjectOperations().isFocusedProjectAvailable(),
                 "Project metadata required");
         if (hasFacesConfig()) {
             return;
@@ -733,16 +680,10 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     private void installI18n(final JavaPackage destinationPackage) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
         final String packagePath = destinationPackage
                 .getFullyQualifiedPackageName()
                 .replace('.', File.separatorChar);
-        final String i18nDirectory = projectOperations.getPathResolver()
+        final String i18nDirectory = getProjectOperations().getPathResolver()
                 .getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
                         packagePath + "/i18n");
         copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
@@ -764,25 +705,13 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
 
     public boolean isJsfInstallationPossible() {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        return projectOperations.isFocusedProjectAvailable()
-                && !projectOperations
+        return getProjectOperations().isFocusedProjectAvailable()
+                && !getProjectOperations()
                         .isFeatureInstalledInFocusedModule(FeatureNames.MVC);
     }
 
     public boolean isScaffoldOrMediaAdditionAvailable() {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        return isInstalledInModule(projectOperations.getFocusedModuleName())
+        return isInstalledInModule(getProjectOperations().getFocusedModuleName())
                 && fileManager.exists(getWebXmlFile());
     }
 
@@ -794,16 +723,11 @@ public class JsfOperationsImpl extends AbstractOperations implements
     	}
     	Validate.notNull(pathResolver, "PathResolver is required");
     	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
         jsfImplementation = updateConfiguration(jsfImplementation, jsfLibrary);
         createOrUpdateWebXml(jsfImplementation, theme);
 
         final LogicalPath webappPath = Path.SRC_MAIN_WEBAPP
-                .getModulePathId(projectOperations.getFocusedModuleName());
+                .getModulePathId(getProjectOperations().getFocusedModuleName());
         copyDirectoryContents("index.html",
                 pathResolver.getIdentifier(webappPath, ""), false);
         copyDirectoryContents("viewExpired.xhtml",
@@ -820,8 +744,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
         copyDirectoryContents("pages/main.xhtml",
                 pathResolver.getIdentifier(webappPath, "pages"), false);
 
-        projectOperations.updateProjectType(
-                projectOperations.getFocusedModuleName(), ProjectType.WAR);
+        getProjectOperations().updateProjectType(
+                getProjectOperations().getFocusedModuleName(), ProjectType.WAR);
 
         fileManager.scan();
     }
@@ -853,12 +777,6 @@ public class JsfOperationsImpl extends AbstractOperations implements
     private void updateDependencies(final Element configuration,
             final JsfImplementation jsfImplementation,
             final JsfLibrary jsfLibrary) {
-    	
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
     	
         final List<Dependency> requiredDependencyElements = new ArrayList<Dependency>();
 
@@ -902,22 +820,17 @@ public class JsfOperationsImpl extends AbstractOperations implements
         redundantDependencyElements.removeAll(requiredDependencyElements);
 
         // Update the POM
-        projectOperations.addDependencies(
-                projectOperations.getFocusedModuleName(),
+        getProjectOperations().addDependencies(
+                getProjectOperations().getFocusedModuleName(),
                 requiredDependencyElements);
-        projectOperations.removeDependencies(
-                projectOperations.getFocusedModuleName(),
+        getProjectOperations().removeDependencies(
+                getProjectOperations().getFocusedModuleName(),
                 redundantDependencyElements);
     }
 
     private void updateRepositories(final Element configuration,
             final JsfImplementation jsfImplementation,
             final JsfLibrary jsfLibrary) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
     	
         final List<Repository> repositories = new ArrayList<Repository>();
 
@@ -935,8 +848,8 @@ public class JsfOperationsImpl extends AbstractOperations implements
             repositories.add(new Repository(repositoryElement));
         }
 
-        projectOperations.addRepositories(
-                projectOperations.getFocusedModuleName(), repositories);
+        getProjectOperations().addRepositories(
+                getProjectOperations().getFocusedModuleName(), repositories);
     }
     
     public MetadataDependencyRegistry getMetadataDependencyRegistry(){
@@ -991,20 +904,25 @@ public class JsfOperationsImpl extends AbstractOperations implements
     }
     
     public ProjectOperations getProjectOperations(){
-    	// Get all Services implement ProjectOperations interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ProjectOperations on JsfOperationsImpl.");
-			return null;
-		}
+    	if(projectOperations == null){
+    		// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ProjectOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on JsfOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    	
     }
     
     public Shell getShell(){

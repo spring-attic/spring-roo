@@ -123,11 +123,6 @@ public class WebJsonMetadataProviderImpl extends
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
             final String itdFilename) {
     	
-    	if(webMetadataService == null){
-    		webMetadataService = getWebMetadataService();
-    	}
-    	Validate.notNull(webMetadataService, "WebMetadataService is required");
-    	
         // We need to parse the annotation, which we expect to be present
         final WebJsonAnnotationValues annotationValues = new WebJsonAnnotationValues(
                 governorPhysicalTypeMetadata);
@@ -146,13 +141,13 @@ public class WebJsonMetadataProviderImpl extends
         }
         final LogicalPath jsonObjectPath = PhysicalTypeIdentifier
                 .getPath(jsonTypeDetails.getDeclaredByMetadataId());
-        final JsonMetadata jsonMetadata = (JsonMetadata) metadataService
+        final JsonMetadata jsonMetadata = (JsonMetadata) getMetadataService()
                 .get(JsonMetadata.createIdentifier(jsonObject, jsonObjectPath));
         if (jsonMetadata == null) {
             return null;
         }
 
-        final PhysicalTypeMetadata backingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService
+        final PhysicalTypeMetadata backingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) getMetadataService()
                 .get(PhysicalTypeIdentifier.createIdentifier(jsonObject,
                         getTypeLocationService().getTypePath(jsonObject)));
         Validate.notNull(backingObjectPhysicalTypeMetadata,
@@ -172,20 +167,20 @@ public class WebJsonMetadataProviderImpl extends
                 backingMemberHoldingTypeDetails.getDeclaredByMetadataId(),
                 metadataIdentificationString);
 
-        final Set<FinderMetadataDetails> finderDetails = webMetadataService
+        final Set<FinderMetadataDetails> finderDetails = getWebMetadataService()
                 .getDynamicFinderMethodsAndFields(jsonObject,
                         formBackingObjectMemberDetails,
                         metadataIdentificationString);
         if (finderDetails == null) {
             return null;
         }
-        final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> persistenceAdditions = webMetadataService
+        final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> persistenceAdditions = getWebMetadataService()
                 .getCrudAdditions(jsonObject, metadataIdentificationString);
-        final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService
+        final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getWebMetadataService()
                 .getJavaTypePersistenceMetadataDetails(jsonObject,
                         getMemberDetails(jsonObject),
                         metadataIdentificationString);
-        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+        final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                 .get(PluralMetadata.createIdentifier(jsonObject,
                         getTypeLocationService().getTypePath(jsonObject)));
         if (persistenceAdditions.isEmpty()
@@ -253,7 +248,7 @@ public class WebJsonMetadataProviderImpl extends
                  * MD to ensure our ITD does or does not introduce any required
                  * layer components, as appropriate.
                  */
-                metadataService.get(webJsonMetadataId);
+                getMetadataService().get(webJsonMetadataId);
             }
         }
         return null;
@@ -277,19 +272,24 @@ public class WebJsonMetadataProviderImpl extends
     }
     
     public WebMetadataService getWebMetadataService(){
-    	// Get all Services implement WebMetadataService interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(WebMetadataService.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (WebMetadataService) context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load WebMetadataService on WebJsonMetadataProviderImpl.");
-			return null;
-		}
+    	if(webMetadataService == null){
+    		// Get all Services implement WebMetadataService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(WebMetadataService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (WebMetadataService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load WebMetadataService on WebJsonMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return webMetadataService;
+    	}
+    	
     }
 }

@@ -426,7 +426,7 @@ public class JspOperationsImpl extends AbstractOperations implements
         // Record use of add-on (most languages are implemented via public
         // add-ons)
         final String bundleSymbolicName = BundleFindingUtils
-                .findFirstBundleForTypeName(context.getBundleContext(), i18n
+                .findFirstBundleForTypeName(context, i18n
                         .getClass().getName());
         if (bundleSymbolicName != null) {
             uaaRegistrationService.registerBundleSymbolicNameUse(

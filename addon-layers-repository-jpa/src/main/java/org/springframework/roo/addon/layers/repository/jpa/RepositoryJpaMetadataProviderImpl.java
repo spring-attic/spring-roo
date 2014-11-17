@@ -120,7 +120,7 @@ public class RepositoryJpaMetadataProviderImpl extends
         final RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(
                 governorPhysicalTypeMetadata);
         final JavaType domainType = annotationValues.getDomainType();
-        final JavaType identifierType = persistenceMemberLocator
+        final JavaType identifierType = getPersistenceMemberLocator()
                 .getIdentifierType(domainType);
         if (identifierType == null) {
             return null;

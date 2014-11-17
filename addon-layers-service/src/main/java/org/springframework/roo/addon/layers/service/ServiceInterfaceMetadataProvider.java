@@ -129,7 +129,7 @@ public class ServiceInterfaceMetadataProvider extends
         if (cid == null) {
             return null;
         }
-        final MemberDetails memberDetails = memberDetailsScanner
+        final MemberDetails memberDetails = getMemberDetailsScanner()
                 .getMemberDetails(getClass().getName(), cid);
         final JavaType[] domainTypes = annotationValues.getDomainTypes();
         if (domainTypes == null || domainTypes.length == 0) {
@@ -138,7 +138,7 @@ public class ServiceInterfaceMetadataProvider extends
         final Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
         final Map<JavaType, JavaType> domainTypeToIdTypeMap = new HashMap<JavaType, JavaType>();
         for (final JavaType type : domainTypes) {
-            final JavaType idType = persistenceMemberLocator
+            final JavaType idType = getPersistenceMemberLocator()
                     .getIdentifierType(type);
             if (idType == null) {
                 continue;
@@ -154,7 +154,7 @@ public class ServiceInterfaceMetadataProvider extends
             final LogicalPath path = PhysicalTypeIdentifier
                     .getPath(domainTypeId);
             final String pluralId = PluralMetadata.createIdentifier(type, path);
-            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+            final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                     .get(pluralId);
             if (pluralMetadata == null) {
                 return null;
@@ -174,7 +174,7 @@ public class ServiceInterfaceMetadataProvider extends
                         .getPath(permissionEvaluator.getDeclaredByMetadataId());
                 final String permissionEvaluatorId = PermissionEvaluatorMetadata
                         .createIdentifier(permissionEvaluator.getName(), path);
-                permissionEvaluatorMetadata = (PermissionEvaluatorMetadata) metadataService
+                permissionEvaluatorMetadata = (PermissionEvaluatorMetadata) getMetadataService()
                         .get(permissionEvaluatorId);
                 if (permissionEvaluatorMetadata != null
                         && permissionEvaluatorMetadata.isValid()) {

@@ -121,7 +121,7 @@ public class EqualsMetadataProviderImpl extends
 
         final List<?> excludeFieldsList = CollectionUtils
                 .arrayToList(excludeFields);
-        final FieldMetadata versionField = persistenceMemberLocator
+        final FieldMetadata versionField = getPersistenceMemberLocator()
                 .getVersionField(javaType);
 
         for (final FieldMetadata field : memberDetails.getFields()) {
