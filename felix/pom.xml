@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.shell</artifactId>
+            <artifactId>org.apache.felix.gogo.runtime</artifactId>
         </dependency>
         <!-- Apache Felix: OSGi Logging support -->
         <dependency>

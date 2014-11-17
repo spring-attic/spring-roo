@@ -1,12 +1,16 @@
 package org.springframework.roo.felix;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.shell.ShellService;
+import org.apache.felix.service.command.CommandProcessor;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -17,6 +21,7 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.logging.LoggingOutputStream;
 
 /**
@@ -27,13 +32,16 @@ import org.springframework.roo.support.logging.LoggingOutputStream;
  * 
  * @author Ben Alex
  */
-@Component(immediate = true)
+@Component
 @Service
 public class FelixDelegator implements CommandMarker, ShellStatusListener {
     private ComponentContext context;
     @Reference private Shell rooShell;
-    @Reference private ShellService shellService;
+    @Reference private CommandProcessor commandProcessor;
     @Reference private StaticFieldConverter staticFieldConverter;
+
+    protected static final Logger LOGGER = HandlerUtils
+            .getLogger(LoggingOutputStream.class);
 
     protected void activate(final ComponentContext context) {
         this.context = context;
@@ -198,15 +206,34 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
     }
 
     private void perform(final String commandLine) throws Exception {
-        final LoggingOutputStream sysOut = new LoggingOutputStream(Level.INFO);
-        final LoggingOutputStream sysErr = new LoggingOutputStream(Level.SEVERE);
-        sysOut.setSourceClassName(FelixDelegator.class.getName());
-        sysErr.setSourceClassName(FelixDelegator.class.getName());
+        if("shutdown".equals(commandLine)) {
+            context.getBundleContext().getBundle(0).stop();
+            return;
+        }
+
+        ByteArrayOutputStream sysOut = new ByteArrayOutputStream();
+        ByteArrayOutputStream sysErr = new ByteArrayOutputStream();
+
         final PrintStream printStreamOut = new PrintStream(sysOut);
         final PrintStream printErrOut = new PrintStream(sysErr);
         try {
-            shellService.executeCommand(commandLine, printStreamOut,
-                    printErrOut);
+            final CommandSession commandSession = commandProcessor.createSession(System.in, printStreamOut, printErrOut);
+            Object result = commandSession.execute(commandLine);
+
+            if(result != null) {
+                printStreamOut.println(commandSession.format(result, Converter.INSPECT));
+            }
+
+            if(sysOut.size() > 0) {
+                LOGGER.log(Level.INFO, new String(sysOut.toByteArray()));
+            }
+
+            if(sysErr.size() > 0) {
+                LOGGER.log(Level.SEVERE, new String(sysErr.toByteArray()));
+            }
+        }
+        catch(Throwable ex) {
+            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
         }
         finally {
             printStreamOut.close();

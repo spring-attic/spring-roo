@@ -45,7 +45,7 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  * @author Ben Alex
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class HttpPgpUrlStreamHandlerServiceImpl extends
         AbstractURLStreamHandlerService implements
