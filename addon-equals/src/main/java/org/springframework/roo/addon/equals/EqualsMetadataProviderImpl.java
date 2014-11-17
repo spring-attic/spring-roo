@@ -29,15 +29,16 @@ import org.springframework.roo.support.util.CollectionUtils;
  * @author Alan Stewart
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class EqualsMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         EqualsMetadataProvider {
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         addMetadataTrigger(ROO_EQUALS);
@@ -50,8 +51,8 @@ public class EqualsMetadataProviderImpl extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         removeMetadataTrigger(ROO_EQUALS);
@@ -120,7 +121,7 @@ public class EqualsMetadataProviderImpl extends
 
         final List<?> excludeFieldsList = CollectionUtils
                 .arrayToList(excludeFields);
-        final FieldMetadata versionField = persistenceMemberLocator
+        final FieldMetadata versionField = getPersistenceMemberLocator()
                 .getVersionField(javaType);
 
         for (final FieldMetadata field : memberDetails.getFields()) {
@@ -140,7 +141,7 @@ public class EqualsMetadataProviderImpl extends
             }
 
             locatedFields.add(field);
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     field.getDeclaredByMetadataId(),
                     metadataIdentificationString);
         }
