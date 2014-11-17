@@ -25,6 +25,10 @@ import org.springframework.roo.process.manager.event.AbstractProcessManagerStatu
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Default implementation of {@link ProcessManager} interface.
@@ -32,21 +36,24 @@ import org.springframework.roo.support.osgi.OSGiUtils;
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class DefaultProcessManager extends
         AbstractProcessManagerStatusPublisher implements ProcessManager {
 
     private static final Logger LOGGER = HandlerUtils
             .getLogger(DefaultProcessManager.class);
+    
+    // ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private boolean developmentMode = false;
-    @Reference private FileMonitorService fileMonitorService;
+    private FileMonitorService fileMonitorService;
     private long lastPollDuration = 0;
     private long lastPollTime = 0; // What time the last poll was completed
     private long minimumDelayBetweenPoll = -1; // How many ms must pass at
-    @Reference private StartLevel startLevel;
-    @Reference private UndoManager undoManager;
+    private StartLevel startLevel;
+    private UndoManager undoManager;
     private String workingDir;
 
     public <T> T execute(final CommandCallback<T> callback) {
@@ -94,6 +101,13 @@ public class DefaultProcessManager extends
     }
 
     public void setDevelopmentMode(final boolean developmentMode) {
+    	
+    	if(undoManager == null){
+    		undoManager = getUndoManager();
+    	}
+    	
+    	Validate.notNull(undoManager, "UndoManager is required");
+    	
         this.developmentMode = developmentMode;
 
         // To assist with debugging, development mode does not undertake undo
@@ -167,10 +181,18 @@ public class DefaultProcessManager extends
     }
 
     protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
         workingDir = OSGiUtils.getRooWorkingDirectory(context);
-        context.getBundleContext().addFrameworkListener(
+        this.context.addFrameworkListener(
                 new FrameworkListener() {
                     public void frameworkEvent(final FrameworkEvent event) {
+                    	
+                    	if(startLevel == null){
+                    		startLevel = getStartLevel();
+                    	}
+                    	
+                    	Validate.notNull(startLevel, "StartLevel is required");
+                    	
                         if (startLevel.getStartLevel() >= 99) {
                             // We check we haven't already started, as this
                             // event listener will be called several times at SL
@@ -247,6 +269,13 @@ public class DefaultProcessManager extends
     }
 
     private void completeStartup() {
+    	
+    	if(fileMonitorService == null){
+    		fileMonitorService = getFileMonitorService();
+    	}
+    	
+    	Validate.notNull(fileMonitorService, "FileMonitorService is required");
+    	
         synchronized (processManagerStatus) {
             if (getProcessManagerStatus() != ProcessManagerStatus.STARTING) {
                 throw new IllegalStateException("Process manager status "
@@ -271,6 +300,19 @@ public class DefaultProcessManager extends
     }
 
     private <T> T doTransactionally(final CommandCallback<T> callback) {
+    	
+    	if(fileMonitorService == null){
+    		fileMonitorService = getFileMonitorService();
+    	}
+    	
+    	Validate.notNull(fileMonitorService, "FileMonitorService is required");
+    	
+    	if(undoManager == null){
+    		undoManager = getUndoManager();
+    	}
+    	
+    	Validate.notNull(undoManager, "UndoManager is required");
+    	
         T result = null;
         try {
             ActiveProcessManager.setActiveProcessManager(this);
@@ -347,4 +389,56 @@ public class DefaultProcessManager extends
             LOGGER.log(Level.FINE, message);
         }
     }
+    
+    public FileMonitorService getFileMonitorService(){
+    	// Get all Services implement FileMonitorService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileMonitorService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (FileMonitorService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load FileMonitorService on DefaultProcessManager.");
+			return null;
+		}
+    }
+    
+    public StartLevel getStartLevel(){
+    	// Get all Services implement StartLevel interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(StartLevel.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (StartLevel) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load StartLevel on DefaultProcessManager.");
+			return null;
+		}
+    }
+    
+    public UndoManager getUndoManager(){
+    	// Get all Services implement UndoManager interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(UndoManager.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (UndoManager) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load UndoManager on DefaultProcessManager.");
+			return null;
+		}
+    }
+    
 }

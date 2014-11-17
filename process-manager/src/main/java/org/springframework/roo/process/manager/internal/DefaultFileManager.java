@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -34,6 +35,10 @@ import org.springframework.roo.file.undo.UpdateFile;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Default implementation of {@link FileManager}.
@@ -45,20 +50,29 @@ import org.springframework.roo.process.manager.ProcessManager;
 @Service
 public class DefaultFileManager implements FileManager, UndoListener {
 
+	protected final static Logger LOGGER = HandlerUtils.getLogger(DefaultFileManager.class);
+	
     /** key: file identifier, value: new description of change */
     private final Map<String, String> deferredDescriptionOfChanges = new LinkedHashMap<String, String>();
     /** key: file identifier, value: new textual content */
     private final Map<String, String> deferredFileWrites = new LinkedHashMap<String, String>();
 
-    @Reference private NotifiableFileMonitorService fileMonitorService;
-    @Reference private FilenameResolver filenameResolver;
-    @Reference private ProcessManager processManager;
-    @Reference private UndoManager undoManager;
+    // ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+
+    private NotifiableFileMonitorService fileMonitorService;
+    private FilenameResolver filenameResolver;
+    private ProcessManager processManager;
+    private UndoManager undoManager;
 
     protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    	if(undoManager == null){
+    		undoManager = getUndoManager();
+    	}
         undoManager.addUndoListener(this);
     }
-
+    
     public void clear() {
         deferredFileWrites.clear();
         deferredDescriptionOfChanges.clear();
@@ -92,7 +106,19 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public FileDetails createDirectory(final String fileIdentifier) {
+    	if(fileMonitorService == null){
+    		fileMonitorService = getFileMonitorService();
+    	}
+    	if(filenameResolver == null){
+    		filenameResolver = getFileNameResolver();
+    	}
+    	if(undoManager == null){
+    		undoManager = getUndoManager();
+    	}
         Validate.notNull(fileIdentifier, "File identifier required");
+        Validate.notNull(fileMonitorService, "FileMonitorService required");
+        Validate.notNull(filenameResolver, "FilenameResolver required");
+        Validate.notNull(undoManager, "UndoManager required");
         final File actual = new File(fileIdentifier);
         Validate.isTrue(!actual.exists(), "File '%s' already exists",
                 fileIdentifier);
@@ -106,7 +132,23 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public MutableFile createFile(final String fileIdentifier) {
+    	if(fileMonitorService == null){
+    		fileMonitorService = getFileMonitorService();
+    	}
+    	if(processManager == null){
+    		processManager = getProcessManager();
+    	}
+    	if(filenameResolver == null){
+    		filenameResolver = getFileNameResolver();
+    	}
+    	if(undoManager == null){
+    		undoManager = getUndoManager();
+    	}
         Validate.notNull(fileIdentifier, "File identifier required");
+        Validate.notNull(fileMonitorService, "FileMonitorService required");
+        Validate.notNull(processManager, "ProcessManager required");
+        Validate.notNull(filenameResolver, "FilenameResolver required");
+        Validate.notNull(undoManager, "UndoManager required");
         final File actual = new File(fileIdentifier);
         Validate.isTrue(!actual.exists(), "File '%s' already exists",
                 fileIdentifier);
@@ -198,6 +240,10 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     protected void deactivate(final ComponentContext context) {
+    	if(undoManager == null){
+    		undoManager = getUndoManager();
+    	}
+    	Validate.notNull(undoManager, "UndoManager is required");
         undoManager.removeUndoListener(this);
     }
 
@@ -207,6 +253,18 @@ public class DefaultFileManager implements FileManager, UndoListener {
 
     public void delete(final String fileIdentifier,
             final String reasonForDeletion) {
+    	if(fileMonitorService == null){
+    		fileMonitorService = getFileMonitorService();
+    	}
+    	if(filenameResolver == null){
+    		filenameResolver = getFileNameResolver();
+    	}
+    	if(undoManager == null){
+    		undoManager = getUndoManager();
+    	}
+        Validate.notNull(fileMonitorService, "FileMonitorService required");
+        Validate.notNull(filenameResolver, "FilenameResolver required");
+        Validate.notNull(undoManager, "UndoManager is required");
         if (StringUtils.isBlank(fileIdentifier)) {
             return;
         }
@@ -235,6 +293,10 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public SortedSet<FileDetails> findMatchingAntPath(final String antPath) {
+    	if(fileMonitorService == null){
+    		fileMonitorService = getFileMonitorService();
+    	}
+        Validate.notNull(fileMonitorService, "FileMonitorService required");
         return fileMonitorService.findMatchingAntPath(antPath);
     }
 
@@ -280,11 +342,31 @@ public class DefaultFileManager implements FileManager, UndoListener {
     }
 
     public int scan() {
+    	if(fileMonitorService == null){
+    		fileMonitorService = getFileMonitorService();
+    	}
+        Validate.notNull(fileMonitorService, "FileMonitorService required");
         return fileMonitorService.scanNotified();
     }
 
     public MutableFile updateFile(final String fileIdentifier) {
+    	if(fileMonitorService == null){
+    		fileMonitorService = getFileMonitorService();
+    	}
+    	if(processManager == null){
+    		processManager = getProcessManager();
+    	}
+    	if(filenameResolver == null){
+    		filenameResolver = getFileNameResolver();
+    	}
+    	if(undoManager == null){
+    		undoManager = getUndoManager();
+    	}
         Validate.notNull(fileIdentifier, "File identifier required");
+        Validate.notNull(fileMonitorService, "FileMonitorService required");
+        Validate.notNull(processManager, "ProcessManager required");
+        Validate.notNull(filenameResolver, "FilenameResolver required");
+        Validate.notNull(undoManager, "UndoManager required");
         final File actual = new File(fileIdentifier);
         Validate.isTrue(actual.exists(), "File '%s' does not exist",
                 fileIdentifier);
@@ -293,5 +375,73 @@ public class DefaultFileManager implements FileManager, UndoListener {
                 filenameResolver, actual, false);
         renderer.setIncludeHashCode(processManager.isDevelopmentMode());
         return new DefaultMutableFile(actual, fileMonitorService, renderer);
+    }
+    
+    public NotifiableFileMonitorService getFileMonitorService(){
+    	// Get all Services implement NotifiableFileMonitorService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(NotifiableFileMonitorService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (NotifiableFileMonitorService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load NotifiableFileMonitorService on DefaultFileManager.");
+			return null;
+		}
+    }
+    
+    public ProcessManager getProcessManager(){
+    	// Get all Services implement ProcessManager interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProcessManager.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProcessManager) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProcessManager on DefaultFileManager.");
+			return null;
+		}
+    }
+    
+    public FilenameResolver getFileNameResolver(){
+    	// Get all Services implement FilenameResolver interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(FilenameResolver.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (FilenameResolver) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load FilenameResolver on DefaultFileManager.");
+			return null;
+		}
+    }
+    
+    public UndoManager getUndoManager(){
+    	// Get all Services implement UndoManager interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(UndoManager.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (UndoManager) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load UndoManager on DefaultFileManager.");
+			return null;
+		}
     }
 }

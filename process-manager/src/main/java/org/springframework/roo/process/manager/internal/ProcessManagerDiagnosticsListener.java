@@ -23,7 +23,7 @@ import org.springframework.roo.shell.osgi.AbstractFlashingObject;
  * @since 1.1
  */
 @Service
-@Component(immediate = true)
+@Component
 public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject
         implements ProcessManagerStatusListener, CommandMarker {
 
