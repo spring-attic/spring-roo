@@ -2,9 +2,17 @@ package org.springframework.roo.metadata;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
+
+import org.apache.commons.lang3.Validate;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
+
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Allows a {@link MetadataProvider} or other class to track hash codes of
@@ -22,11 +30,20 @@ import org.apache.felix.scr.annotations.Reference;
  */
 @Component(componentAbstract = true)
 public abstract class AbstractHashCodeTrackingMetadataNotifier {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(AbstractHashCodeTrackingMetadataNotifier.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	public BundleContext context;
+   	
+	protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+    }
 
     private final Map<String, Integer> hashes = new HashMap<String, Integer>();
-    @Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
-
-    @Reference protected MetadataService metadataService;
+    
+    protected MetadataDependencyRegistry metadataDependencyRegistry;
+    protected MetadataService metadataService;
 
     /**
      * Notifies downstream dependencies of a change if and only if the passed
@@ -39,6 +56,7 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
      *            presented to this class)
      */
     protected void notifyIfRequired(final MetadataItem metadataItem) {
+    	
         final String instanceId = MetadataIdentificationUtils
                 .getMetadataInstance(metadataItem.getId());
         final Integer existing = hashes.get(instanceId);
@@ -53,8 +71,53 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
 
         // Eagerly insert into the cache to so any recursive gets for this
         // metadata item will be returned successfully
-        metadataService.put(metadataItem);
+        getMetadataService().put(metadataItem);
 
-        metadataDependencyRegistry.notifyDownstream(metadataItem.getId());
+        getMetadataDependencyRegistry().notifyDownstream(metadataItem.getId());
     }
+    
+    public MetadataDependencyRegistry getMetadataDependencyRegistry(){
+    	if(metadataDependencyRegistry == null){
+    		// Get all Services implement MetadataDependencyRegistry interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MetadataDependencyRegistry) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataDependencyRegistry on AbstractHashCodeTrackingNotifier.");
+    			return null;
+    		}
+    	}else{
+    		return metadataDependencyRegistry;
+    	}
+    	
+    }
+    
+    public MetadataService getMetadataService(){
+    	if(metadataService == null){
+    		// Get all Services implement MetadataService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(MetadataService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MetadataService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataService on AbstractHashCodeTrackingNotifier.");
+    			return null;
+    		}
+    	}else{
+    		return metadataService;
+    	}
+    	
+    }
+    
 }
