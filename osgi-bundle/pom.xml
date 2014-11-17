@@ -108,5 +108,63 @@
                 </executions>
             </plugin>
         </plugins>
+        <pluginManagement>
+          <!-- 
+          Some Maven plugins are recognized as problematic by Eclipse m2e and 
+          will produce error markers with a text similar to: 
+          
+            maven-dependency-plugin (goals "copy-dependencies","unpack") 
+            is not supported by m2e. 
+            
+          In version 1.0 there is no quick fix available for this but it is 
+          possible to define a lifecycle mapping for the plugin which removes 
+          the error marker http://wiki.eclipse.org/M2E_plugin_execution_not_covered#Common_problems
+            
+          To configure your Eclipse to use the lifecycle mapping in this file 
+          read http://wiki.eclipse.org/M2E_plugin_execution_not_covered#Eclipse_4.2_add_default_mapping
+          -->
+          <plugins>
+            <plugin>
+                <groupId>org.eclipse.m2e</groupId>
+                <artifactId>lifecycle-mapping</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+    
+                    <lifecycleMappingMetadata>
+                      <pluginExecutions>
+                        <pluginExecution>
+                          <pluginExecutionFilter>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-dependency-plugin</artifactId>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                                <goal>unpack</goal>
+                            </goals>
+                            <versionRange>[0.0,)</versionRange>
+                          </pluginExecutionFilter>
+                          <action>
+                            <ignore/>
+                          </action>
+                        </pluginExecution>
+                        <pluginExecution>
+                          <pluginExecutionFilter>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>exec-maven-plugin</artifactId>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <versionRange>[0.0,)</versionRange>
+                          </pluginExecutionFilter>
+                          <action>
+                            <ignore/>
+                          </action>
+                        </pluginExecution>
+                      </pluginExecutions>
+                    </lifecycleMappingMetadata>
+                    
+                </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
     </build>
 </project>
