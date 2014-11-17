@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -45,6 +46,11 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Metadata listener responsible for installing Web MVC JSP artifacts for the
  * Solr search addon.
@@ -52,29 +58,35 @@ import org.w3c.dom.Element;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class SolrJspMetadataListener implements MetadataProvider,
         MetadataNotificationListener {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(SolrJspMetadataListener.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-    @Reference private FileManager fileManager;
+    private FileManager fileManager;
     private JavaType formbackingObject;
     private JavaType javaType;
     private JpaActiveRecordMetadata jpaActiveRecordMetadata;
-    @Reference private MemberDetailsScanner memberDetailsScanner;
-    @Reference private MenuOperations menuOperations;
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference private MetadataService metadataService;
-    @Reference private PathResolver pathResolver;
-    @Reference private PersistenceMemberLocator persistenceMemberLocator;
+    private MemberDetailsScanner memberDetailsScanner;
+    private MenuOperations menuOperations;
+    private MetadataDependencyRegistry metadataDependencyRegistry;
+    private MetadataService metadataService;
+    private PathResolver pathResolver;
+    private PersistenceMemberLocator persistenceMemberLocator;
 
-    @Reference private TilesOperations tilesOperations;
-    @Reference private TypeLocationService typeLocationService;
+    private TilesOperations tilesOperations;
+    private TypeLocationService typeLocationService;
     private WebScaffoldMetadata webScaffoldMetadata;
-    @Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
+    private XmlRoundTripFileManager xmlRoundTripFileManager;
 
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    	this.context = context.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 SolrWebSearchMetadata.getMetadataIdentiferType(),
                 getProvidesType());
     }
@@ -82,15 +94,15 @@ public class SolrJspMetadataListener implements MetadataProvider,
     private void copyArtifacts(final String relativeTemplateLocation,
             final String relativeProjectFileLocation) {
         // First install search.tagx
-        final String projectFileLocation = pathResolver.getFocusedIdentifier(
+        final String projectFileLocation = getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
-        if (!fileManager.exists(projectFileLocation)) {
+        if (!getFileManager().exists(projectFileLocation)) {
             InputStream inputStream = null;
             OutputStream outputStream = null;
             try {
                 inputStream = FileUtils.getInputStream(getClass(),
                         relativeTemplateLocation);
-                outputStream = fileManager.createFile(projectFileLocation)
+                outputStream = getFileManager().createFile(projectFileLocation)
                         .getOutputStream();
                 IOUtils.copy(inputStream, outputStream);
             }
@@ -111,19 +123,19 @@ public class SolrJspMetadataListener implements MetadataProvider,
                 .getPath(metadataIdentificationString);
         final String solrWebSearchMetadataKeyString = SolrWebSearchMetadata
                 .createIdentifier(javaType, path);
-        final SolrWebSearchMetadata webSearchMetadata = (SolrWebSearchMetadata) metadataService
+        final SolrWebSearchMetadata webSearchMetadata = (SolrWebSearchMetadata) getMetadataService()
                 .get(solrWebSearchMetadataKeyString);
         if (webSearchMetadata == null || !webSearchMetadata.isValid()) {
             return null;
         }
 
-        webScaffoldMetadata = (WebScaffoldMetadata) metadataService
+        webScaffoldMetadata = (WebScaffoldMetadata) getMetadataService()
                 .get(WebScaffoldMetadata.createIdentifier(javaType, path));
         Validate.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
         formbackingObject = webScaffoldMetadata.getAnnotationValues()
                 .getFormBackingObject();
-        jpaActiveRecordMetadata = (JpaActiveRecordMetadata) metadataService
+        jpaActiveRecordMetadata = (JpaActiveRecordMetadata) getMetadataService()
                 .get(JpaActiveRecordMetadata.createIdentifier(
                         formbackingObject, path));
         Validate.notNull(jpaActiveRecordMetadata,
@@ -175,7 +187,7 @@ public class SolrJspMetadataListener implements MetadataProvider,
         pageSearch.setAttribute("z",
                 XmlRoundTripUtils.calculateUniqueKeyFor(pageSearch));
 
-        final List<FieldMetadata> idFields = persistenceMemberLocator
+        final List<FieldMetadata> idFields = getPersistenceMemberLocator()
                 .getIdentifierFields(formbackingObject);
         if (idFields.isEmpty()) {
             return null;
@@ -207,17 +219,17 @@ public class SolrJspMetadataListener implements MetadataProvider,
         final StringBuilder facetFields = new StringBuilder();
         int fieldCounter = 0;
 
-        final ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = getTypeLocationService()
                 .getTypeDetails(formbackingObject);
         Validate.notNull(formbackingClassOrInterfaceDetails,
                 "Unable to obtain physical type metadata for type %s",
                 formbackingObject.getFullyQualifiedTypeName());
-        final MemberDetails memberDetails = memberDetailsScanner
+        final MemberDetails memberDetails = getMemberDetailsScanner()
                 .getMemberDetails(getClass().getName(),
                         formbackingClassOrInterfaceDetails);
-        final MethodMetadata identifierAccessor = persistenceMemberLocator
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
                 .getIdentifierAccessor(formbackingObject);
-        final MethodMetadata versionAccessor = persistenceMemberLocator
+        final MethodMetadata versionAccessor = getPersistenceMemberLocator()
                 .getVersionAccessor(formbackingObject);
 
         for (final MethodMetadata method : memberDetails.getMethods()) {
@@ -318,7 +330,7 @@ public class SolrJspMetadataListener implements MetadataProvider,
 
         final LogicalPath path = WebScaffoldMetadata
                 .getPath(webScaffoldMetadata.getId());
-        xmlRoundTripFileManager.writeToDiskIfNecessary(pathResolver
+        getXmlRoundTripFileManager().writeToDiskIfNecessary(getPathResolver()
                 .getIdentifier(
                         Path.SRC_MAIN_WEBAPP.getModulePathId(path.getModule()),
                         "WEB-INF/views/"
@@ -328,11 +340,11 @@ public class SolrJspMetadataListener implements MetadataProvider,
 
         final String folderName = webScaffoldMetadata.getAnnotationValues()
                 .getPath();
-        tilesOperations.addViewDefinition(folderName, path, folderName
+        getTilesOperations().addViewDefinition(folderName, path, folderName
                 + "/search", TilesOperations.DEFAULT_TEMPLATE, "WEB-INF/views/"
                 + webScaffoldMetadata.getAnnotationValues().getPath()
                 + "/search.jspx");
-        menuOperations.addMenuItem(
+        getMenuOperations().addMenuItem(
                 new JavaSymbolName(formbackingObject.getSimpleTypeName()),
                 new JavaSymbolName("solr"), new JavaSymbolName(
                         jpaActiveRecordMetadata.getPlural())
@@ -368,7 +380,7 @@ public class SolrJspMetadataListener implements MetadataProvider,
             // is not already registered
             // (if it's already registered, the event will be delivered directly
             // later on)
-            if (metadataDependencyRegistry.getDownstream(upstreamDependency)
+            if (getMetadataDependencyRegistry().getDownstream(upstreamDependency)
                     .contains(downstreamDependency)) {
                 return;
             }
@@ -384,9 +396,219 @@ public class SolrJspMetadataListener implements MetadataProvider,
                 "Unexpected downstream notification for '%s' to this provider (which uses '%s')",
                 downstreamDependency, getProvidesType());
 
-        metadataService.evict(downstreamDependency);
+        getMetadataService().evict(downstreamDependency);
         if (get(downstreamDependency) != null) {
-            metadataDependencyRegistry.notifyDownstream(downstreamDependency);
+            getMetadataDependencyRegistry().notifyDownstream(downstreamDependency);
         }
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+    		// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileManager) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public MemberDetailsScanner getMemberDetailsScanner(){
+    	if(memberDetailsScanner == null){
+    		// Get all Services implement MemberDetailsScanner interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MemberDetailsScanner) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MemberDetailsScanner on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return memberDetailsScanner;
+    	}
+    }
+    
+    public MenuOperations getMenuOperations(){
+    	if(menuOperations == null){
+    		// Get all Services implement MenuOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MenuOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MenuOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MenuOperations on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return menuOperations;
+    	}
+    }
+    
+    public MetadataDependencyRegistry getMetadataDependencyRegistry(){
+    	if(metadataDependencyRegistry == null){
+    		// Get all Services implement MetadataDependencyRegistry interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MetadataDependencyRegistry) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataDependencyRegistry on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return metadataDependencyRegistry;
+    	}
+    }
+    
+    public MetadataService getMetadataService(){
+    	if(metadataService == null){
+    		// Get all Services implement MetadataService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MetadataService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataService on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return metadataService;
+    	}
+    }
+    
+    public PathResolver getPathResolver(){
+    	if(pathResolver == null){
+    		// Get all Services implement PathResolver interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PathResolver) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PathResolver on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return pathResolver;
+    	}
+    }
+    
+    public PersistenceMemberLocator getPersistenceMemberLocator(){
+    	if(persistenceMemberLocator == null){
+    		// Get all Services implement PersistenceMemberLocator interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PersistenceMemberLocator) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PersistenceMemberLocator on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return persistenceMemberLocator;
+    	}
+    }
+    
+    public TilesOperations getTilesOperations(){
+    	if(tilesOperations == null){
+    		// Get all Services implement TilesOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(TilesOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TilesOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TilesOperations on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return tilesOperations;
+    	}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	if(typeLocationService == null){
+    		// Get all Services implement TypeLocationService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TypeLocationService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeLocationService on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return typeLocationService;
+    	}
+    }
+    
+    public XmlRoundTripFileManager getXmlRoundTripFileManager(){
+    	if(xmlRoundTripFileManager == null){
+    		// Get all Services implement XmlRoundTripFileManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(XmlRoundTripFileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (XmlRoundTripFileManager) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load XmlRoundTripFileManager on SolrJspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return xmlRoundTripFileManager;
+    	}
     }
 }
