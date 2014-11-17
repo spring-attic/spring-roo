@@ -18,7 +18,7 @@ import com.github.antlrjavaparser.ParseException;
 import com.github.antlrjavaparser.api.CompilationUnit;
 import com.github.antlrjavaparser.api.body.TypeDeclaration;
 
-@Component(immediate = true)
+@Component
 @Service
 public class JavaParserTypeResolutionService implements TypeResolutionService {
 

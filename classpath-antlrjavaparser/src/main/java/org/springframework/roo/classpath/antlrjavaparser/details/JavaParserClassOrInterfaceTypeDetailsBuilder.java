@@ -46,8 +46,7 @@ import com.github.antlrjavaparser.api.type.ClassOrInterfaceType;
 public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
         Builder<ClassOrInterfaceTypeDetails> {
 
-  private static final Logger LOGGER = Logger
-      .getLogger(JavaParserClassOrInterfaceTypeDetailsBuilder.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(JavaParserClassOrInterfaceTypeDetailsBuilder.class.getName());
 
     static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
 
@@ -183,9 +182,9 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
 
         // Verify the package declaration appears to be correct
         if(compilationUnitPackage.equals(name.getPackage()) != true) {
-          String warningStr = "[Warning] Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "', it may be a nested class.";
-          LOGGER.log(Level.WARNING, warningStr);
-        }
+			String warningStr = "[Warning] Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "', it may be a nested class.";
+			LOGGER.log(Level.WARNING, warningStr);		
+		}
 
         for (final ImportDeclaration importDeclaration : imports) {
             if (importDeclaration.getName() instanceof QualifiedNameExpr) {
