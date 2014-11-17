@@ -81,7 +81,7 @@ import org.xml.sax.InputSource;
  * @author Amit Manjhi
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class GwtScaffoldMetadataProviderImpl implements
         GwtScaffoldMetadataProvider {
