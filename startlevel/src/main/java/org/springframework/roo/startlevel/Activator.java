@@ -3,6 +3,8 @@ package org.springframework.roo.startlevel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -173,10 +175,13 @@ public class Activator implements BundleActivator {
         startLevel = (StartLevel) context
                 .getService(startLevelServiceReference);
         for (final Bundle bundle : context.getBundles()) {
-            final Object value = bundle.getHeaders().get("Service-Component");
+            final String value = bundle.getHeaders().get("Service-Component");
             if (value != null) {
-                final URL url = bundle.getResource(value.toString());
-                process(url);
+                List<String> componentDescriptions = Arrays.asList(value.split("\\s*,\\s*"));
+                for (String desc : componentDescriptions) {
+                    final URL url = bundle.getResource(desc);
+                    process(url);
+                }
             }
         }
 
