@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -27,6 +28,11 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Provides {@link ServiceClassMetadata} for building the ITD for the
  * implementation class of a user project's service.
@@ -35,24 +41,27 @@ import org.springframework.roo.project.ProjectOperations;
  * @author Andrew Swan
  * @since 1.2.0
  */
-@Component(immediate = true)
+@Component
 @Service
 public class ServiceClassMetadataProvider extends
         AbstractMemberDiscoveringItdMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ServiceClassMetadataProvider.class);
 
     private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 
-    @Reference ProjectOperations projectOperations;
-    @Reference FileManager fileManager;
-    @Reference ServiceLayerTemplateService templateService;
+    ProjectOperations projectOperations;
+    FileManager fileManager;
+    ServiceLayerTemplateService templateService;
 
-    @Reference private LayerService layerService;
+    private LayerService layerService;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+    	getMetadataDependencyRegistry().addNotificationListener(this);
+        getMetadataDependencyRegistry().registerDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
         setIgnoreTriggerAnnotations(true);
@@ -65,8 +74,8 @@ public class ServiceClassMetadataProvider extends
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().removeNotificationListener(this);
+        getMetadataDependencyRegistry().deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
     }
@@ -95,7 +104,7 @@ public class ServiceClassMetadataProvider extends
             return localMid;
         }
 
-        final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
                 .getTypeDetails(governor);
         if (memberHoldingTypeDetails != null) {
             for (final JavaType type : memberHoldingTypeDetails
@@ -124,7 +133,7 @@ public class ServiceClassMetadataProvider extends
         ServiceInterfaceMetadata serviceInterfaceMetadata = null;
         ClassOrInterfaceTypeDetails serviceInterface = null;
         for (final JavaType implementedType : serviceClass.getImplementsTypes()) {
-            final ClassOrInterfaceTypeDetails potentialServiceInterfaceTypeDetails = typeLocationService
+            final ClassOrInterfaceTypeDetails potentialServiceInterfaceTypeDetails = getTypeLocationService()
                     .getTypeDetails(implementedType);
             if (potentialServiceInterfaceTypeDetails != null) {
                 final LogicalPath path = PhysicalTypeIdentifier
@@ -132,7 +141,7 @@ public class ServiceClassMetadataProvider extends
                                 .getDeclaredByMetadataId());
                 final String implementedTypeId = ServiceInterfaceMetadata
                         .createIdentifier(implementedType, path);
-                if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) metadataService
+                if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) getMetadataService()
                         .get(implementedTypeId)) != null) {
                     // Found the metadata for the service interface
                     serviceInterface = potentialServiceInterfaceTypeDetails;
@@ -147,7 +156,7 @@ public class ServiceClassMetadataProvider extends
 
         // Register this provider for changes to the service interface // TODO
         // move this down in case we return null early below?
-        metadataDependencyRegistry.registerDependency(
+        getMetadataDependencyRegistry().registerDependency(
                 serviceInterfaceMetadata.getId(), metadataIdentificationString);
 
         final ServiceAnnotationValues serviceAnnotationValues = serviceInterfaceMetadata
@@ -169,7 +178,7 @@ public class ServiceClassMetadataProvider extends
         final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions = new LinkedHashMap<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>>();
         for (final JavaType domainType : domainTypes) {
 
-            final JavaType idType = persistenceMemberLocator
+            final JavaType idType = getPersistenceMemberLocator()
                     .getIdentifierType(domainType);
             if (idType == null) {
                 return null;
@@ -177,7 +186,7 @@ public class ServiceClassMetadataProvider extends
             domainTypeToIdTypeMap.put(domainType, idType);
             // Collect the plural for this domain type
 
-            final ClassOrInterfaceTypeDetails domainTypeDetails = typeLocationService
+            final ClassOrInterfaceTypeDetails domainTypeDetails = getTypeLocationService()
                     .getTypeDetails(domainType);
             if (domainTypeDetails == null) {
                 return null;
@@ -186,7 +195,7 @@ public class ServiceClassMetadataProvider extends
                     .getPath(domainTypeDetails.getDeclaredByMetadataId());
             final String pluralId = PluralMetadata.createIdentifier(domainType,
                     path);
-            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+            final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
                     .get(pluralId);
             if (pluralMetadata == null) {
                 return null;
@@ -202,7 +211,7 @@ public class ServiceClassMetadataProvider extends
             for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
                 final Collection<MethodParameter> methodParameters = MethodParameter
                         .asList(method.getParameters(domainType, idType));
-                final MemberTypeAdditions memberTypeAdditions = layerService
+                final MemberTypeAdditions memberTypeAdditions = getLayerService()
                         .getMemberTypeAdditions(metadataIdentificationString,
                                 method.getKey(), domainType, idType,
                                 LAYER_POSITION, methodParameters);
@@ -215,23 +224,23 @@ public class ServiceClassMetadataProvider extends
 
             // Register this provider for changes to the domain type or its
             // plural
-            metadataDependencyRegistry.registerDependency(
+            getMetadataDependencyRegistry().registerDependency(
                     domainTypeDetails.getDeclaredByMetadataId(),
                     metadataIdentificationString);
-            metadataDependencyRegistry.registerDependency(pluralId,
+            getMetadataDependencyRegistry().registerDependency(pluralId,
                     metadataIdentificationString);
         }
 
-        final MemberDetails serviceClassDetails = memberDetailsScanner
+        final MemberDetails serviceClassDetails = getMemberDetailsScanner()
                 .getMemberDetails(getClass().getName(), serviceClass);
 
         // Adds or removes service from XML configuration
         if (serviceAnnotationValues.useXmlConfiguration()) {
-            templateService.addServiceToXmlConfiguration(serviceInterface,
+            getTemplateService().addServiceToXmlConfiguration(serviceInterface,
                     serviceClass);
         }
         else {
-            templateService.removeServiceFromXmlConfiguration(serviceInterface);
+            getTemplateService().removeServiceFromXmlConfiguration(serviceInterface);
         }
 
         return new ServiceClassMetadata(metadataIdentificationString,
@@ -244,5 +253,47 @@ public class ServiceClassMetadataProvider extends
 
     public String getProvidesType() {
         return ServiceClassMetadata.getMetadataIdentiferType();
+    }
+    
+    public ServiceLayerTemplateService getTemplateService(){
+    	if(templateService == null){
+    		// Get all Services implement ServiceLayerTemplateService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ServiceLayerTemplateService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ServiceLayerTemplateService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ServiceLayerTemplateService on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return templateService;
+    	}
+    }
+    
+    public LayerService getLayerService(){
+    	if(layerService == null){
+    		// Get all Services implement LayerService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (LayerService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load LayerService on SecurityOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return layerService;
+    	}
     }
 }
