@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +50,13 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
+
 /**
  * The {@link MongoOperations} implementation.
  * 
@@ -58,32 +66,41 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class MongoOperationsImpl implements MongoOperations {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(MongoOperationsImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private static final String MONGO_XML = "applicationContext-mongo.xml";
 
-    @Reference private DataOnDemandOperations dataOnDemandOperations;
-    @Reference private FileManager fileManager;
-    @Reference private IntegrationTestOperations integrationTestOperations;
-    @Reference private PathResolver pathResolver;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private PropFileOperations propFileOperations;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private TypeManagementService typeManagementService;
+    private DataOnDemandOperations dataOnDemandOperations;
+    private FileManager fileManager;
+    private IntegrationTestOperations integrationTestOperations;
+    private PathResolver pathResolver;
+    private ProjectOperations projectOperations;
+    private PropFileOperations propFileOperations;
+    private TypeLocationService typeLocationService;
+    private TypeManagementService typeManagementService;
+    
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+    }
 
     public void createType(final JavaType classType, final JavaType idType,
             final boolean testAutomatically) {
         Validate.notNull(classType, "Class type required");
         Validate.notNull(idType, "Identifier type required");
 
-        final String classIdentifier = typeLocationService
+        final String classIdentifier = getTypeLocationService()
                 .getPhysicalTypeCanonicalPath(classType,
-                        pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-        if (fileManager.exists(classIdentifier)) {
+                        getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+        if (getFileManager().exists(classIdentifier)) {
             return; // Type exists already - nothing to do
         }
 
         final String classMdId = PhysicalTypeIdentifier.createIdentifier(
-                classType, pathResolver.getPath(classIdentifier));
+                classType, getPathResolver().getPath(classIdentifier));
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 classMdId, Modifier.PUBLIC, classType,
                 PhysicalTypeCategory.CLASS);
@@ -99,11 +116,11 @@ public class MongoOperationsImpl implements MongoOperations {
         }
         cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
                 RooJavaType.ROO_MONGO_ENTITY, attributes));
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
         if (testAutomatically) {
-            integrationTestOperations.newIntegrationTest(classType, false);
-            dataOnDemandOperations.newDod(classType,
+            getIntegrationTestOperations().newIntegrationTest(classType, false);
+            getDataOnDemandOperations().newDod(classType,
                     new JavaType(classType.getFullyQualifiedTypeName()
                             + "DataOnDemand"));
         }
@@ -114,38 +131,38 @@ public class MongoOperationsImpl implements MongoOperations {
     }
 
     public boolean isInstalledInModule(final String moduleName) {
-        return projectOperations.isFocusedProjectAvailable()
-                && fileManager.exists(pathResolver.getFocusedIdentifier(
+        return getProjectOperations().isFocusedProjectAvailable()
+                && getFileManager().exists(getPathResolver().getFocusedIdentifier(
                         Path.SPRING_CONFIG_ROOT, MONGO_XML));
     }
 
     public boolean isMongoInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable()
-                && !projectOperations
+        return getProjectOperations().isFocusedProjectAvailable()
+                && !getProjectOperations()
                         .isFeatureInstalledInFocusedModule(FeatureNames.JPA);
     }
 
     public boolean isRepositoryInstallationPossible() {
-        return isInstalledInModule(projectOperations.getFocusedModuleName())
-                && !projectOperations
+        return isInstalledInModule(getProjectOperations().getFocusedModuleName())
+                && !getProjectOperations()
                         .isFeatureInstalledInFocusedModule(FeatureNames.JPA);
     }
 
     private void manageAppCtx(final String username, final String password,
             final String name, final boolean cloudFoundry,
             final String moduleName) {
-        final String appCtxId = pathResolver.getFocusedIdentifier(
+        final String appCtxId = getPathResolver().getFocusedIdentifier(
                 Path.SPRING_CONFIG_ROOT, MONGO_XML);
-        if (!fileManager.exists(appCtxId)) {
+        if (!getFileManager().exists(appCtxId)) {
             InputStream inputStream = null;
             OutputStream outputStream = null;
             try {
                 inputStream = FileUtils.getInputStream(getClass(), MONGO_XML);
-                final MutableFile mutableFile = fileManager
+                final MutableFile mutableFile = getFileManager()
                         .createFile(appCtxId);
                 String input = IOUtils.toString(inputStream);
                 input = input.replace("TO_BE_CHANGED_BY_ADDON",
-                        projectOperations.getTopLevelPackage(moduleName)
+                        getProjectOperations().getTopLevelPackage(moduleName)
                                 .getFullyQualifiedPackageName());
                 outputStream = mutableFile.getOutputStream();
                 IOUtils.write(input, outputStream);
@@ -160,7 +177,7 @@ public class MongoOperationsImpl implements MongoOperations {
             }
         }
 
-        final Document document = XmlUtils.readXml(fileManager
+        final Document document = XmlUtils.readXml(getFileManager()
                 .getInputStream(appCtxId));
         final Element root = document.getDocumentElement();
         Element mongoSetup = XmlUtils.findFirstElement("/beans/db-factory",
@@ -203,7 +220,7 @@ public class MongoOperationsImpl implements MongoOperations {
                 root.appendChild(mongoCloudSetup);
             }
         }
-        fileManager.createOrUpdateTextFileIfRequired(appCtxId,
+        getFileManager().createOrUpdateTextFileIfRequired(appCtxId,
                 XmlUtils.nodeToString(document), false);
     }
 
@@ -226,14 +243,14 @@ public class MongoOperationsImpl implements MongoOperations {
             repositories.add(new Repository(repositoryElement));
         }
 
-        projectOperations.addRepositories(moduleName, repositories);
-        projectOperations.addDependencies(moduleName, dependencies);
+        getProjectOperations().addRepositories(moduleName, repositories);
+        getProjectOperations().addDependencies(moduleName, dependencies);
     }
 
     public void setup(final String username, final String password,
             final String name, final String port, final String host,
             final boolean cloudFoundry) {
-        final String moduleName = projectOperations.getFocusedModuleName();
+        final String moduleName = getProjectOperations().getFocusedModuleName();
         writeProperties(username, password, name, port, host, moduleName);
         manageDependencies(moduleName);
         manageAppCtx(username, password, name, cloudFoundry, moduleName);
@@ -244,10 +261,10 @@ public class MongoOperationsImpl implements MongoOperations {
         Validate.notNull(interfaceType, "Interface type required");
         Validate.notNull(domainType, "Domain type required");
 
-        final String interfaceIdentifier = pathResolver
+        final String interfaceIdentifier = getPathResolver()
                 .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
 
-        if (fileManager.exists(interfaceIdentifier)) {
+        if (getFileManager().exists(interfaceIdentifier)) {
             return; // Type exists already - nothing to do
         }
 
@@ -257,7 +274,7 @@ public class MongoOperationsImpl implements MongoOperations {
         interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(
                 new JavaSymbolName("domainType"), domainType));
         final String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(
-                interfaceType, pathResolver.getPath(interfaceIdentifier));
+                interfaceType, getPathResolver().getPath(interfaceIdentifier));
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 interfaceMdId, Modifier.PUBLIC, interfaceType,
                 PhysicalTypeCategory.INTERFACE);
@@ -267,7 +284,7 @@ public class MongoOperationsImpl implements MongoOperations {
         cidBuilder.addMethod(new MethodMetadataBuilder(interfaceMdId, 0,
                 new JavaSymbolName("findAll"), listType,
                 new InvocableMemberBodyBuilder()));
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
     private void writeProperties(String username, String password, String name,
@@ -279,7 +296,7 @@ public class MongoOperationsImpl implements MongoOperations {
             password = "";
         }
         if (StringUtils.isBlank(name)) {
-            name = projectOperations.getProjectName(moduleName);
+            name = getProjectOperations().getProjectName(moduleName);
         }
         if (StringUtils.isBlank(port)) {
             port = "27017";
@@ -294,8 +311,176 @@ public class MongoOperationsImpl implements MongoOperations {
         properties.put("mongo.database", name);
         properties.put("mongo.port", port);
         properties.put("mongo.host", host);
-        propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT
-                .getModulePathId(projectOperations.getFocusedModuleName()),
+        getPropFileOperations().addProperties(Path.SPRING_CONFIG_ROOT
+                .getModulePathId(getProjectOperations().getFocusedModuleName()),
                 "database.properties", properties, true, false);
+    }
+    
+    public DataOnDemandOperations getDataOnDemandOperations(){
+    	if(dataOnDemandOperations == null){
+    		// Get all Services implement DataOnDemandOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(DataOnDemandOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (DataOnDemandOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load DataOnDemandOperations on MongoOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return dataOnDemandOperations;
+    	}
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+    		// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileManager) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on MongoOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public IntegrationTestOperations getIntegrationTestOperations(){
+    	if(integrationTestOperations == null){
+    		// Get all Services implement IntegrationTestOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(IntegrationTestOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (IntegrationTestOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load IntegrationTestOperations on MongoOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return integrationTestOperations;
+    	}
+    }
+    
+    public PathResolver getPathResolver(){
+    	if(pathResolver == null){
+    		// Get all Services implement PathResolver interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PathResolver) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PathResolver on MongoOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return pathResolver;
+    	}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+    		// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ProjectOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on MongoOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    }
+    
+    public PropFileOperations getPropFileOperations(){
+    	if(propFileOperations == null){
+    		// Get all Services implement PropFileOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PropFileOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PropFileOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PropFileOperations on MongoOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return propFileOperations;
+    	}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	if(typeLocationService == null){
+    		// Get all Services implement TypeLocationService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TypeLocationService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeLocationService on MongoOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return typeLocationService;
+    	}
+    }
+    
+    public TypeManagementService getTypeManagementService(){
+    	if(typeManagementService == null){
+    		// Get all Services implement TypeManagementService interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TypeManagementService) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeManagementService on MongoOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return typeManagementService;
+    	}
     }
 }
