@@ -23,6 +23,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <google.code.project.name>${project.name}</google.code.project.name>
         <repo.folder>TO_BE_CHANGED_BY_ADDON</repo.folder>
+        <osgi.version>5.0.0</osgi.version>
+        <scr.plugin.version>1.20.0</scr.plugin.version>
     </properties>
     <repositories>
         <repository>
@@ -43,12 +45,12 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>4.2.0</version>
+            <version>${osgi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>4.2.0</version>
+            <version>${osgi.version}</version>
         </dependency>
         <!-- Apache Felix -->
         <dependency>
@@ -223,7 +225,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.7.2</version>
+                <version>${scr.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
