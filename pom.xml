@@ -850,6 +850,10 @@
                   <goals>
                     <goal>jar</goal>
                   </goals>
+                  <!-- To compile ROO using Java 8 uncomment this -->
+                  <!--<configuration>
+	                  <additionalparam>-Xdoclint:none</additionalparam>
+            	    </configuration>-->
                 </execution>
               </executions>
             </plugin>
