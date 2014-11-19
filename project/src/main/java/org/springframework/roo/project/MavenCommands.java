@@ -53,8 +53,8 @@ public class MavenCommands implements CommandMarker {
 
     private MavenOperations mavenOperations;
     
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
     }
 
     @CliCommand(value = DEPENDENCY_ADD_COMMAND, help = "Adds a new dependency to the Maven project object model (POM)")
@@ -65,11 +65,7 @@ public class MavenCommands implements CommandMarker {
             @CliOption(key = "classifier", help = "The classifier of the dependency") final String classifier,
             @CliOption(key = "scope", help = "The scope of the dependency") final DependencyScope scope) {
 
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        mavenOperations.addDependency(mavenOperations.getFocusedModuleName(),
+        getMavenOperations().addDependency(getMavenOperations().getFocusedModuleName(),
                 groupId, artifactId, version, scope, classifier);
     }
 
@@ -79,11 +75,7 @@ public class MavenCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = false, help = "The name of the repository") final String name,
             @CliOption(key = "url", mandatory = true, help = "The URL of the repository") final String url) {
 
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        mavenOperations.addRepository(mavenOperations.getFocusedModuleName(),
+        getMavenOperations().addRepository(getMavenOperations().getFocusedModuleName(),
                 new Repository(id, name, url));
     }
 
@@ -96,11 +88,7 @@ public class MavenCommands implements CommandMarker {
             @CliOption(key = "packaging", help = "The Maven packaging of this module", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging,
             @CliOption(key = "artifactId", help = "The artifact ID of this module (defaults to moduleName if not specified)") final String artifactId) {
 
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        mavenOperations.createModule(topLevelPackage, parentPom, moduleName,
+        getMavenOperations().createModule(topLevelPackage, parentPom, moduleName,
                 packaging, majorJavaVersion, artifactId);
     }
 
@@ -112,11 +100,7 @@ public class MavenCommands implements CommandMarker {
             @CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
             @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        mavenOperations.createProject(topLevelPackage, projectName,
+        getMavenOperations().createProject(topLevelPackage, projectName,
                 majorJavaVersion, parentPom, packaging);
     }
 
@@ -124,52 +108,33 @@ public class MavenCommands implements CommandMarker {
     public void focusModule(
             @CliOption(key = "moduleName", mandatory = true, help = "The module to focus on") final Pom module) {
 
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        mavenOperations.setModule(module);
+        getMavenOperations().setModule(module);
     }
 
     @CliAvailabilityIndicator(PROJECT_COMMAND)
     public boolean isCreateProjectAvailable() {
     	
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        return mavenOperations.isCreateProjectAvailable();
+        return getMavenOperations().isCreateProjectAvailable();
     }
 
     @CliAvailabilityIndicator({ DEPENDENCY_ADD_COMMAND,
             DEPENDENCY_REMOVE_COMMAND })
     public boolean isDependencyModificationAllowed() {
     	
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        return mavenOperations.isFocusedProjectAvailable();
+        return getMavenOperations().isFocusedProjectAvailable();
     }
 
     @CliAvailabilityIndicator(MODULE_CREATE_COMMAND)
     public boolean isModuleCreationAllowed() {
-    	
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        return mavenOperations.isModuleCreationAllowed();
+
+        return getMavenOperations().isModuleCreationAllowed();
     }
 
     @CliAvailabilityIndicator(MODULE_FOCUS_COMMAND)
     public boolean isModuleFocusAllowed() {
     	
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
     	
-        return mavenOperations.isModuleFocusAllowed();
+        return getMavenOperations().isModuleFocusAllowed();
     }
 
     @CliAvailabilityIndicator({ PERFORM_PACKAGE_COMMAND,
@@ -177,12 +142,7 @@ public class MavenCommands implements CommandMarker {
             PERFORM_CLEAN_COMMAND, PERFORM_ASSEMBLY_COMMAND,
             PERFORM_COMMAND_COMMAND })
     public boolean isPerformCommandAllowed() {
-    	
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        return mavenOperations.isFocusedProjectAvailable();
+        return getMavenOperations().isFocusedProjectAvailable();
     }
 
     @CliCommand(value = { PERFORM_COMMAND_COMMAND }, help = "Executes a user-specified Maven command")
@@ -190,11 +150,7 @@ public class MavenCommands implements CommandMarker {
             @CliOption(key = "mavenCommand", mandatory = true, help = "User-specified Maven command (eg test:test)") final String command)
             throws IOException {
 
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        mavenOperations.executeMvnCommand(command);
+        getMavenOperations().executeMvnCommand(command);
     }
 
     @CliCommand(value = DEPENDENCY_REMOVE_COMMAND, help = "Removes an existing dependency from the Maven project object model (POM)")
@@ -204,12 +160,9 @@ public class MavenCommands implements CommandMarker {
             @CliOption(key = "version", mandatory = true, help = "The version of the dependency") final String version,
             @CliOption(key = "classifier", help = "The classifier of the dependency") final String classifier) {
 
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
     	
-        mavenOperations.removeDependency(
-                mavenOperations.getFocusedModuleName(), groupId, artifactId,
+        getMavenOperations().removeDependency(
+                getMavenOperations().getFocusedModuleName(), groupId, artifactId,
                 version, classifier);
     }
 
@@ -218,12 +171,8 @@ public class MavenCommands implements CommandMarker {
             @CliOption(key = "id", mandatory = true, help = "The ID of the repository") final String id,
             @CliOption(key = "url", mandatory = true, help = "The URL of the repository") final String url) {
 
-    	if(mavenOperations == null){
-    		mavenOperations = getMavenOperations();
-    	}
-    	
-        mavenOperations.removeRepository(
-                mavenOperations.getFocusedModuleName(), new Repository(id,
+        getMavenOperations().removeRepository(
+                getMavenOperations().getFocusedModuleName(), new Repository(id,
                         null, url));
     }
 
@@ -253,19 +202,24 @@ public class MavenCommands implements CommandMarker {
     }
     
     public MavenOperations getMavenOperations(){
-    	// Get all Services implement MavenOperations interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(MavenOperations.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (MavenOperations) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load MavenOperations on MavenCommands.");
-			return null;
-		}
+    	if(mavenOperations == null){
+    		// Get all Services implement MavenOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MavenOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MavenOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MavenOperations on MavenCommands.");
+    			return null;
+    		}
+    	}else{
+    		return mavenOperations;
+    	}
+    	
     }
 }
