@@ -110,7 +110,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
             throws Exception {
 
         final StringBuilder sb = new StringBuilder();
-        sb.append("ps");
+        sb.append("lb");
         if (format != null) {
             sb.append(format.getFelixCode());
         }
