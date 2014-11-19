@@ -14,6 +14,10 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * Commands for Web-related add-on to be used by the Roo shell.
@@ -24,11 +28,18 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class JspCommands implements CommandMarker {
+	
+    // ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
     private static Logger LOGGER = HandlerUtils.getLogger(JspCommands.class);
 
-    @Reference private JspOperations jspOperations;
-    @Reference private PathResolver pathResolver;
+    private JspOperations jspOperations;
+    private PathResolver pathResolver;
+    
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+    }
 
     @Deprecated
     @CliCommand(value = "web mvc install view", help = "Create a new static view.")
@@ -44,17 +55,17 @@ public class JspCommands implements CommandMarker {
     @CliAvailabilityIndicator({ "web mvc controller", "controller class",
             "web mvc install view", "web mvc view", "web mvc update tags" })
     public boolean isControllerClassAvailable() {
-        return jspOperations.isControllerAvailable();
+        return getJspOperations().isControllerAvailable();
     }
 
     @CliAvailabilityIndicator({ "web mvc install language", "web mvc language" })
     public boolean isInstallLanguageAvailable() {
-        return jspOperations.isInstallLanguageCommandAvailable();
+        return getJspOperations().isInstallLanguageCommandAvailable();
     }
 
     @CliAvailabilityIndicator({ "web mvc setup" })
     public boolean isProjectAvailable() {
-        return jspOperations.isMvcInstallationPossible();
+        return getJspOperations().isMvcInstallationPossible();
     }
 
     @Deprecated
@@ -66,8 +77,8 @@ public class JspCommands implements CommandMarker {
             LOGGER.warning("Could not parse language code");
             return;
         }
-        jspOperations.installI18n(i18n,
-                pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+        getJspOperations().installI18n(i18n,
+                getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP));
     }
 
     @CliCommand(value = "web mvc language", help = "Install new internationalization bundle for MVC scaffolded UI.")
@@ -78,8 +89,8 @@ public class JspCommands implements CommandMarker {
             LOGGER.warning("Could not parse language code");
             return;
         }
-        jspOperations.installI18n(i18n,
-                pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+        getJspOperations().installI18n(i18n,
+                getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP));
     }
 
     @Deprecated
@@ -96,16 +107,16 @@ public class JspCommands implements CommandMarker {
             @CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the controller object to be created") final JavaType controller,
             @CliOption(key = "preferredMapping", mandatory = false, help = "Indicates a specific request mapping path for this controller (eg /foo/)") final String preferredMapping) {
 
-        jspOperations.createManualController(controller, preferredMapping,
-                pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+        getJspOperations().createManualController(controller, preferredMapping,
+                getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP));
     }
 
     @CliCommand(value = "web mvc update tags", help = "Replace an existing application tagx library with the latest version (use --backup option to backup your application first)")
     public void update(
             @CliOption(key = "backup", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Backup your application before replacing your existing tag library") final boolean backup) {
 
-        jspOperations.updateTags(backup,
-                pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+        getJspOperations().updateTags(backup,
+                getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP));
     }
 
     @CliCommand(value = "web mvc view", help = "Create a new static view.")
@@ -114,12 +125,56 @@ public class JspCommands implements CommandMarker {
             @CliOption(key = "viewName", mandatory = true, help = "The view name the mapping this view should adopt (required, ie 'index')") final String viewName,
             @CliOption(key = "title", mandatory = true, help = "The title of the view") final String title) {
 
-        jspOperations.installView(path, viewName, title, "View",
-                pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP));
+        getJspOperations().installView(path, viewName, title, "View",
+                getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP));
     }
 
     @CliCommand(value = "web mvc setup", help = "Setup a basic project structure for a Spring MVC / JSP application")
     public void webMvcSetup() {
-        jspOperations.installCommonViewArtefacts();
+        getJspOperations().installCommonViewArtefacts();
+    }
+    
+    public JspOperations getJspOperations(){
+    	if(jspOperations == null){
+    		// Get all Services implement JspOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(JspOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (JspOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load JspOperations on JspCommands.");
+    			return null;
+    		}
+    	}else{
+    		return jspOperations;
+    	}
+    	
+    }
+    
+    public PathResolver getPathResolver(){
+    	if(pathResolver == null){
+    		// Get all Services implement PathResolver interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PathResolver) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PathResolver on JspCommands.");
+    			return null;
+    		}
+    	}else{
+    		return pathResolver;
+    	}
+    	
     }
 }
