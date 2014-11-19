@@ -169,7 +169,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 		List<? extends MethodMetadata> interfaceMethods = null;
 		if (!interfaces.isEmpty()) {
 			for (JavaType currentInterface : interfaces) {
-				ClassOrInterfaceTypeDetails currentInterfaceDetails = typeLocationService
+				ClassOrInterfaceTypeDetails currentInterfaceDetails = getTypeLocationService()
 						.getTypeDetails(currentInterface);
 				if(currentInterfaceDetails != null){
 					interfaceMethods = currentInterfaceDetails.getDeclaredMethods();
