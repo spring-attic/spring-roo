@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.roo</groupId>
         <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
-        <version>1.2.6.BUILD-SNAPSHOT</version>
+        <version>1.3.0.RELEASE</version>
         <relativePath>../osgi-roo-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.shell.jline.osgi</artifactId>
