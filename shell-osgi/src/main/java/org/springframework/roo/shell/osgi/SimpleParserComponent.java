@@ -33,8 +33,8 @@ public class SimpleParserComponent extends SimpleParser implements
         CommandMarker {
     private AddOnSearch addOnSearch;
 
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
     }
 
     protected void bindAddOnSearch(final AddOnSearch s) {
@@ -80,20 +80,6 @@ public class SimpleParserComponent extends SimpleParser implements
             addOnSearch.searchAddOns(true, null, false, 1, 99, false, false,
                     false, command);
         }
-    }
-
-    @Override
-    @CliCommand(value = "reference guide", help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory")
-    public void helpReferenceGuide() {
-        super.helpReferenceGuide();
-    }
-
-    @Override
-    @CliCommand(value = "help", help = "Shows system help")
-    public void obtainHelp(
-            @CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") final String buffer) {
-
-        super.obtainHelp(buffer);
     }
 
     protected void unbindAddOnSearch(final AddOnSearch s) {
