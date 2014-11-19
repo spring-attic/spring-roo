@@ -351,19 +351,21 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
         else {        
             // sorting part
             if(!methodName.startsWith("count") && sorted) {
-                bodyBuilder.appendFormalLine("String jpaQuery = \"" + jpaQuery + "\";");
+                bodyBuilder
+                .appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\""
+                        + jpaQuery + "\");");
                 bodyBuilder.appendFormalLine("if (fieldNames4OrderClauseFilter.contains(sortFieldName)) {");
                 bodyBuilder.indent();
-                bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" ORDER BY \" + sortFieldName;");
+                bodyBuilder.appendFormalLine("queryBuilder.append(\" ORDER BY \").append(sortFieldName);");
                 bodyBuilder.appendFormalLine("if (\"ASC\".equalsIgnoreCase(sortOrder) || \"DESC\".equalsIgnoreCase(sortOrder)) {");
                 bodyBuilder.indent();
-                bodyBuilder.appendFormalLine("jpaQuery = jpaQuery + \" \" + sortOrder;");
+                bodyBuilder.appendFormalLine("queryBuilder.append(\" \").append(sortOrder);");
                 bodyBuilder.indentRemove();
                 bodyBuilder.appendFormalLine("}");
                 bodyBuilder.indentRemove();
                 bodyBuilder.appendFormalLine("}");
                 bodyBuilder.appendFormalLine(typeNameIncludingTypeParameters
-                        + " q = em.createQuery(jpaQuery, "
+                        + " q = em.createQuery(queryBuilder.toString(), "
                         + typeName + ".class);");
             } else {
                 bodyBuilder.appendFormalLine(typeNameIncludingTypeParameters
