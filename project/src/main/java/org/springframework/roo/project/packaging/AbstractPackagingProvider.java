@@ -26,6 +26,11 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * Convenient superclass for core or third-party addons to implement a
@@ -36,6 +41,13 @@ import org.w3c.dom.Node;
  */
 @Component(componentAbstract = true)
 public abstract class AbstractPackagingProvider implements PackagingProvider {
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+    }
 
     private static final String DEFAULT_VERSION = "0.1.0.BUILD-SNAPSHOT";
     private static final String JAVA_VERSION_PLACEHOLDER = "JAVA_VERSION";
@@ -48,9 +60,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 
     private static final String VERSION_ELEMENT = "version";
 
-    @Reference protected ApplicationContextOperations applicationContextOperations;
-    @Reference protected FileManager fileManager;
-    @Reference protected PathResolver pathResolver;
+    protected ApplicationContextOperations applicationContextOperations;
+    protected FileManager fileManager;
+    protected PathResolver pathResolver;
     private final String id;
     private final String name;
     private final String pomTemplate;
@@ -194,9 +206,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
         }
 
         // Write the new POM to disk
-        final String pomPath = pathResolver.getIdentifier(
+        final String pomPath = getPathResolver().getIdentifier(
                 Path.ROOT.getModulePathId(module), "pom.xml");
-        fileManager.createOrUpdateTextFileIfRequired(pomPath,
+        getFileManager().createOrUpdateTextFileIfRequired(pomPath,
                 XmlUtils.nodeToString(pom), true);
         return pomPath;
     }
@@ -349,13 +361,13 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     }
 
     private void setUpLog4jConfiguration() {
-        final String log4jConfigFile = pathResolver.getFocusedIdentifier(
+        final String log4jConfigFile = getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, "log4j.properties");
         final InputStream templateInputStream = FileUtils.getInputStream(
                 getClass(), "log4j.properties-template");
         OutputStream outputStream = null;
         try {
-            outputStream = fileManager.createFile(log4jConfigFile)
+            outputStream = getFileManager().createFile(log4jConfigFile)
                     .getOutputStream();
             IOUtils.copy(templateInputStream, outputStream);
         }
@@ -366,5 +378,68 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
             IOUtils.closeQuietly(templateInputStream);
             IOUtils.closeQuietly(outputStream);
         }
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+    		// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileManager) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on AbstractPackagingProvider.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public PathResolver getPathResolver(){
+    	if(pathResolver == null){
+    		// Get all Services implement PathResolver interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(PathResolver.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PathResolver) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PathResolver on AbstractPackagingProvider.");
+    			return null;
+    		}
+    	}else{
+    		return pathResolver;
+    	}
+    }
+    
+    public ApplicationContextOperations getApplicationContextOperations(){
+    	if(applicationContextOperations == null){
+    		// Get all Services implement ApplicationContextOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ApplicationContextOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ApplicationContextOperations) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ApplicationContextOperations on AbstractPackagingProvider.");
+    			return null;
+    		}
+    	}else{
+    		return applicationContextOperations;
+    	}
     }
 }

@@ -42,7 +42,7 @@ public class JarPackaging extends AbstractCorePackagingProvider {
         super.createOtherArtifacts(topLevelPackage, module, projectOperations);
         final String fullyQualifiedModuleName = getFullyQualifiedModuleName(
                 module, projectOperations);
-        applicationContextOperations.createMiddleTierApplicationContext(
+        getApplicationContextOperations().createMiddleTierApplicationContext(
                 topLevelPackage, fullyQualifiedModuleName);
     }
 
