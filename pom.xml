@@ -6,6 +6,18 @@
     <packaging>pom</packaging>
     <version>1.3.0.RELEASE</version>
     <name>Spring Roo</name>
+    <url>http://projects.spring.io/spring-roo/</url>
+    <licenses>
+    	<license>
+		    <name>Apache License, Version 2.0</name>
+		    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		    <distribution>repo</distribution>
+		    <comments>A business-friendly OSS license</comments>
+	  	</license>
+    </licenses>
+    <scm>
+	    <url>https://github.com/spring-projects/spring-roo</url>
+  	</scm>
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
     <modules>
