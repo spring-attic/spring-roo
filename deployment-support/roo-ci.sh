@@ -21,9 +21,9 @@ DESCRIPTION:
       * Aborts if version != *.BUILD-SNAPSHOT (unless -f was indicated)
       * Performs a "mvn clean package" from the project root
       * Performs a "mvn clean site" from deployment-support
-      * Performs "roo-deploy.sh assembly" (with -T/t if requested)
+      * Performs "roo-deploy-dist.sh assembly" (with -T/t if requested)
       * Performs "mvn deploy" from the project root
-      * Performs "roo-deploy.sh deploy" to release the assembly
+      * Performs "roo-deploy-dist.sh deploy" to release the assembly
       * Removes older snapshot releases from S3
 
 RETURNS:
@@ -186,7 +186,7 @@ if [[ ! "$EXITED" = "0" ]]; then
 fi
 
 # Build (and test if user used -T or -t) the assembly
-./roo-deploy.sh -c assembly -s $SUFFIX $ROO_DEPLOY_OPTS $TEST
+./roo-deploy-dist.sh -c assembly -s $SUFFIX $ROO_DEPLOY_OPTS $TEST
 EXITED=$?
 if [[ ! "$EXITED" = "0" ]]; then
     l_error "roo-deploy -c assembly failed (exit code $EXITED)." >&2; exit 1;
@@ -203,9 +203,9 @@ if [[ "$DRY_RUN" = "0" ]]; then
     popd &>/dev/null
 fi
 
-# Deploy the assembly so people can download it (note roo-deploy.sh will prune old snapshots from the download site automatically)
+# Deploy the assembly so people can download it (note roo-deploy-dist.sh will prune old snapshots from the download site automatically)
 if [[ "$DRY_RUN" = "0" ]]; then
-    ./roo-deploy.sh -c deploy -s $SUFFIX $ROO_DEPLOY_OPTS
+    ./roo-deploy-dist.sh -c deploy -s $SUFFIX $ROO_DEPLOY_OPTS
     EXITED=$?
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "roo-deploy -c deploy failed (exit code $EXITED)." >&2; exit 1;
