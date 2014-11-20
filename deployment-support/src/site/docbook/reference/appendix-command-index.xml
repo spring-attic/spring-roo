@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.5.RELEASE [rev 8341dc2].</para>
+    <para>This appendix was automatically built from Roo 1.3.0.RELEASE [rev 770570e].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -14,19 +14,19 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The bundle symbolic name for the add-on of interest; no default value (mandatory) </para>
+                        <para>The bundle symbolic name for the add-on of interest; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--rating</term>
                     <listitem>
-                        <para>How much did you like this add-on?; no default value (mandatory) </para>
+                        <para>How much did you like this add-on?; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>Your comments on this add-on eg "this is my comment!"; limit of 140 characters; no default value</para>
+                        <para>Your comments on this add-on eg "this is my comment!"; limit of 140 characters; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -39,7 +39,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The bundle symbolic name for the add-on of interest; no default value (mandatory) </para>
+                        <para>The bundle symbolic name for the add-on of interest; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -52,7 +52,7 @@
                 <varlistentry>
                     <term>--searchResultId</term>
                     <listitem>
-                        <para>The bundle ID as presented via the addon list or addon search command; no default value (mandatory) </para>
+                        <para>The bundle ID as presented via the addon list or addon search command; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -65,7 +65,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The bundle symbolic name for the add-on of interest; no default value (mandatory) </para>
+                        <para>The bundle symbolic name for the add-on of interest; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -78,7 +78,7 @@
                 <varlistentry>
                     <term>--searchResultId</term>
                     <listitem>
-                        <para>The bundle ID as presented via the addon list or addon search command; no default value (mandatory) </para>
+                        <para>The bundle ID as presented via the addon list or addon search command; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -134,7 +134,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The bundle symbolic name for the add-on of interest; no default value (mandatory) </para>
+                        <para>The bundle symbolic name for the add-on of interest; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -189,7 +189,7 @@
                 <varlistentry>
                     <term>--requiresCommand</term>
                     <listitem>
-                        <para>Only display add-ons in search results that offer this command; no default value</para>
+                        <para>Only display add-ons in search results that offer this command; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -208,7 +208,7 @@
                 <varlistentry>
                     <term>--addonStabilityLevel</term>
                     <listitem>
-                        <para>The stability level of add-ons or components which are presented for upgrading (default: ANY); no default value</para>
+                        <para>The stability level of add-ons or components which are presented for upgrading (default: ANY); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -221,7 +221,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The bundle symbolic name for the add-on to upgrade; no default value (mandatory) </para>
+                        <para>The bundle symbolic name for the add-on to upgrade; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -234,7 +234,7 @@
                 <varlistentry>
                     <term>--searchResultId</term>
                     <listitem>
-                        <para>The bundle ID as presented via the addon list or addon search command; no default value (mandatory) </para>
+                        <para>The bundle ID as presented via the addon list or addon search command; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -247,7 +247,7 @@
                 <varlistentry>
                     <term>--addonStabilityLevel</term>
                     <listitem>
-                        <para>The stability level of add-ons or components which are presented for upgrading; no default value</para>
+                        <para>The stability level of add-ons or components which are presented for upgrading; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -274,7 +274,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to create; no default value (mandatory) </para>
+                        <para>The name of the class to create; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -298,7 +298,7 @@
                 <varlistentry>
                     <term>--implements</term>
                     <listitem>
-                        <para>The interface to implement; no default value</para>
+                        <para>The interface to implement; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -348,7 +348,7 @@
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>The name of the constant; no default value (mandatory) </para>
+                        <para>The name of the constant; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -367,7 +367,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the enum to create; no default value (mandatory) </para>
+                        <para>The name of the enum to create; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -392,7 +392,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The type to focus on; no default value (mandatory) </para>
+                        <para>The type to focus on; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -405,7 +405,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the interface to create; no default value (mandatory) </para>
+                        <para>The name of the interface to create; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -423,6 +423,29 @@
             </variablelist>
         </section>
     </section>
+    <section xml:id="command-index-cloud-commands">
+        <title>Cloud Commands</title>
+        <para>Cloud Commands are contained in org.springframework.roo.addon.cloud.CloudCommands.</para>
+        <section xml:id="command-index-cloud-setup">
+            <title>cloud setup</title>
+            <para>Setup Cloud Provider on Spring Roo Project</para>
+            <programlisting><![CDATA[cloud setup --provider]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--provider</term>
+                    <listitem>
+                        <para>Cloud Provider's Name; default: '__NULL__' (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--configuration</term>
+                    <listitem>
+                        <para>Plugin Configuration. Add configuration by command like 'key=value,key2=value2,key3=value3'; default: '__NULL__'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
     <section xml:id="command-index-controller-commands">
         <title>Controller Commands</title>
         <para>Controller Commands are contained in org.springframework.roo.addon.web.mvc.controller.ControllerCommands.</para>
@@ -434,7 +457,7 @@
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package in which new controllers will be placed; no default value (mandatory) </para>
+                        <para>The package in which new controllers will be placed; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -447,7 +470,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
+                        <para>The path and name of the controller object to be created; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -459,13 +482,13 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object); no default value</para>
+                        <para>The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--disallowedOperations</term>
                     <listitem>
-                        <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller; no default value</para>
+                        <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -478,7 +501,7 @@
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package in which new controllers will be placed; no default value (mandatory) </para>
+                        <para>The package in which new controllers will be placed; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -491,7 +514,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
+                        <para>The path and name of the controller object to be created; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -503,13 +526,13 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object); no default value</para>
+                        <para>The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--disallowedOperations</term>
                     <listitem>
-                        <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller; no default value</para>
+                        <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -526,19 +549,19 @@
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
-                        <para>The top level package of the new addon; no default value (mandatory) </para>
+                        <para>The top level package of the new addon; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--description</term>
                     <listitem>
-                        <para>Description of your addon (surround text with double quotes); no default value</para>
+                        <para>Description of your addon (surround text with double quotes); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--projectName</term>
                     <listitem>
-                        <para>Provide a custom project name (if not provided the top level package name will be used instead); no default value</para>
+                        <para>Provide a custom project name (if not provided the top level package name will be used instead); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -551,43 +574,43 @@
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
-                        <para>The top level package of the new addon; no default value (mandatory) </para>
+                        <para>The top level package of the new addon; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--locale</term>
                     <listitem>
-                        <para>The locale abbreviation (ie: en, or more specific like en_AU, or de_DE); no default value (mandatory) </para>
+                        <para>The locale abbreviation (ie: en, or more specific like en_AU, or de_DE); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--messageBundle</term>
                     <listitem>
-                        <para>Fully qualified path to the messages_xx.properties file; no default value (mandatory) </para>
+                        <para>Fully qualified path to the messages_xx.properties file; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--language</term>
                     <listitem>
-                        <para>The full name of the language (used as a label for the UI); no default value</para>
+                        <para>The full name of the language (used as a label for the UI); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--flagGraphic</term>
                     <listitem>
-                        <para>Fully qualified path to flag xx.png file; no default value</para>
+                        <para>Fully qualified path to flag xx.png file; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--description</term>
                     <listitem>
-                        <para>Description of your addon (surround text with double quotes); no default value</para>
+                        <para>Description of your addon (surround text with double quotes); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--projectName</term>
                     <listitem>
-                        <para>Provide a custom project name (if not provided the top level package name will be used instead); no default value</para>
+                        <para>Provide a custom project name (if not provided the top level package name will be used instead); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -600,19 +623,19 @@
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
-                        <para>The top level package of the new addon; no default value (mandatory) </para>
+                        <para>The top level package of the new addon; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--description</term>
                     <listitem>
-                        <para>Description of your addon (surround text with double quotes); no default value</para>
+                        <para>Description of your addon (surround text with double quotes); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--projectName</term>
                     <listitem>
-                        <para>Provide a custom project name (if not provided the top level package name will be used instead); no default value</para>
+                        <para>Provide a custom project name (if not provided the top level package name will be used instead); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -625,61 +648,61 @@
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
-                        <para>The top level package of the new wrapper bundle; no default value (mandatory) </para>
+                        <para>The top level package of the new wrapper bundle; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--groupId</term>
                     <listitem>
-                        <para>Dependency group id; no default value (mandatory) </para>
+                        <para>Dependency group id; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--artifactId</term>
                     <listitem>
-                        <para>Dependency artifact id); no default value (mandatory) </para>
+                        <para>Dependency artifact id); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--version</term>
                     <listitem>
-                        <para>Dependency version; no default value (mandatory) </para>
+                        <para>Dependency version; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--vendorName</term>
                     <listitem>
-                        <para>Dependency vendor name); no default value (mandatory) </para>
+                        <para>Dependency vendor name); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--licenseUrl</term>
                     <listitem>
-                        <para>Dependency license URL; no default value (mandatory) </para>
+                        <para>Dependency license URL; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--docUrl</term>
                     <listitem>
-                        <para>Dependency documentation URL; no default value</para>
+                        <para>Dependency documentation URL; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--description</term>
                     <listitem>
-                        <para>Description of the bundle (use keywords with #-tags for better search integration); no default value</para>
+                        <para>Description of the bundle (use keywords with #-tags for better search integration); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--projectName</term>
                     <listitem>
-                        <para>Provide a custom project name (if not provided the top level package name will be used instead); no default value</para>
+                        <para>Provide a custom project name (if not provided the top level package name will be used instead); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--osgiImports</term>
                     <listitem>
-                        <para>Contents of Import-Package in OSGi manifest; no default value</para>
+                        <para>Contents of Import-Package in OSGi manifest; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -702,7 +725,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand'); no default value</para>
+                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand'); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -725,13 +748,13 @@
                 <varlistentry>
                     <term>--schema</term>
                     <listitem>
-                        <para>The database schema names. Multiple schema names must be a double-quoted list separated by spaces; no default value (mandatory) </para>
+                        <para>The database schema names. Multiple schema names must be a double-quoted list separated by spaces; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--file</term>
                     <listitem>
-                        <para>The file to save the metadata to; no default value</para>
+                        <para>The file to save the metadata to; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -750,13 +773,13 @@
                 <varlistentry>
                     <term>--schema</term>
                     <listitem>
-                        <para>The database schema names. Multiple schema names must be a double-quoted list separated by spaces; no default value (mandatory) </para>
+                        <para>The database schema names. Multiple schema names must be a double-quoted list separated by spaces; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package in which new entities will be placed; no default value</para>
+                        <para>The package in which new entities will be placed; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -833,19 +856,19 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The id of the document; no default value (mandatory) </para>
+                        <para>The id of the document; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--documentId</term>
                     <listitem>
-                        <para>The id of the document; no default value (mandatory) </para>
+                        <para>The id of the document; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The name of the jspx view; no default value</para>
+                        <para>The name of the jspx view; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -858,13 +881,13 @@
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The url of the source to be embedded; no default value (mandatory) </para>
+                        <para>The url of the source to be embedded; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The name of the jspx view; no default value</para>
+                        <para>The name of the jspx view; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -877,13 +900,13 @@
                 <varlistentry>
                     <term>--location</term>
                     <listitem>
-                        <para>The location of the map (ie "Sydney, Australia"); no default value (mandatory) </para>
+                        <para>The location of the map (ie "Sydney, Australia"); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The name of the jspx view; no default value</para>
+                        <para>The name of the jspx view; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -896,25 +919,25 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The provider of the photo gallery; no default value (mandatory) </para>
+                        <para>The provider of the photo gallery; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--userId</term>
                     <listitem>
-                        <para>The user id; no default value (mandatory) </para>
+                        <para>The user id; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--albumId</term>
                     <listitem>
-                        <para>The album id; no default value (mandatory) </para>
+                        <para>The album id; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The name of the jspx view; no default value</para>
+                        <para>The name of the jspx view; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -927,19 +950,19 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The provider of the video stream; no default value (mandatory) </para>
+                        <para>The provider of the video stream; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--streamId</term>
                     <listitem>
-                        <para>The stream id; no default value (mandatory) </para>
+                        <para>The stream id; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The name of the jspx view; no default value</para>
+                        <para>The name of the jspx view; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -952,13 +975,13 @@
                 <varlistentry>
                     <term>--searchTerm</term>
                     <listitem>
-                        <para>The search term to display results for; no default value (mandatory) </para>
+                        <para>The search term to display results for; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The name of the jspx view; no default value</para>
+                        <para>The name of the jspx view; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -971,19 +994,19 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The id of the video; no default value (mandatory) </para>
+                        <para>The id of the video; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--videoId</term>
                     <listitem>
-                        <para>The id of the video; no default value (mandatory) </para>
+                        <para>The id of the video; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The name of the jspx view; no default value</para>
+                        <para>The name of the jspx view; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -996,13 +1019,13 @@
                 <varlistentry>
                     <term>--waveId</term>
                     <listitem>
-                        <para>The key of the wave; no default value (mandatory) </para>
+                        <para>The key of the wave; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The name of the jspx view; no default value</para>
+                        <para>The name of the jspx view; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1046,19 +1069,6 @@
             <programlisting><![CDATA[exit]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section xml:id="command-index-osgi-find">
-            <title>osgi find</title>
-            <para>Finds bundles by name</para>
-            <programlisting><![CDATA[osgi find --bundleSymbolicName]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--bundleSymbolicName</term>
-                    <listitem>
-                        <para>A bundle symbolic name to find; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
         <section xml:id="command-index-osgi-framework-command">
             <title>osgi framework command</title>
             <para>Passes a command directly through to the Felix shell infrastructure</para>
@@ -1080,7 +1090,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>Limit results to a specific bundle symbolic name; no default value</para>
+                        <para>Limit results to a specific bundle symbolic name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1093,7 +1103,7 @@
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The URL to obtain the bundle from; no default value (mandatory) </para>
+                        <para>The URL to obtain the bundle from; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1106,13 +1116,13 @@
                 <varlistentry>
                     <term>--maximumEntries</term>
                     <listitem>
-                        <para>The maximum number of log messages to display; no default value</para>
+                        <para>The maximum number of log messages to display; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--level</term>
                     <listitem>
-                        <para>The minimum level of messages to display; no default value</para>
+                        <para>The minimum level of messages to display; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1125,7 +1135,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The specific bundle to deploy; no default value (mandatory) </para>
+                        <para>The specific bundle to deploy; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1138,7 +1148,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The specific bundle to display information for; no default value (mandatory) </para>
+                        <para>The specific bundle to display information for; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1151,7 +1161,7 @@
                 <varlistentry>
                     <term>--keywords</term>
                     <listitem>
-                        <para>Keywords to locate; no default value</para>
+                        <para>Keywords to locate; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1164,52 +1174,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The specific bundle to start; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-osgi-obr-url-add">
-            <title>osgi obr url add</title>
-            <para>Adds a new OSGi Bundle Repository (OBR) repository file URL</para>
-            <programlisting><![CDATA[osgi obr url add --url]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--url</term>
-                    <listitem>
-                        <para>The URL to add (eg http://felix.apache.org/obr/releases.xml); no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-osgi-obr-url-list">
-            <title>osgi obr url list</title>
-            <para>Lists the currently-configured OSGi Bundle Repository (OBR) repository file URLs</para>
-            <programlisting><![CDATA[osgi obr url list]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-        <section xml:id="command-index-osgi-obr-url-refresh">
-            <title>osgi obr url refresh</title>
-            <para>Refreshes an existing OSGi Bundle Repository (OBR) repository file URL</para>
-            <programlisting><![CDATA[osgi obr url refresh --url]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--url</term>
-                    <listitem>
-                        <para>The URL to refresh (list existing URLs via 'osgi obr url list'); no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-osgi-obr-url-remove">
-            <title>osgi obr url remove</title>
-            <para>Removes an existing OSGi Bundle Repository (OBR) repository file URL</para>
-            <programlisting><![CDATA[osgi obr url remove --url]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--url</term>
-                    <listitem>
-                        <para>The URL to remove (list existing URLs via 'osgi obr url list'); no default value (mandatory) </para>
+                        <para>The specific bundle to start; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1235,7 +1200,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The specific bundle to resolve; no default value (mandatory) </para>
+                        <para>The specific bundle to resolve; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1254,7 +1219,7 @@
                 <varlistentry>
                     <term>--componentId</term>
                     <listitem>
-                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); no default value (mandatory) </para>
+                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1267,7 +1232,7 @@
                 <varlistentry>
                     <term>--componentId</term>
                     <listitem>
-                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); no default value (mandatory) </para>
+                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1280,7 +1245,7 @@
                 <varlistentry>
                     <term>--componentId</term>
                     <listitem>
-                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); no default value (mandatory) </para>
+                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1293,7 +1258,7 @@
                 <varlistentry>
                     <term>--bundleId</term>
                     <listitem>
-                        <para>Limit results to a specific bundle; no default value</para>
+                        <para>Limit results to a specific bundle; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1306,7 +1271,7 @@
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The URL to obtain the bundle from; no default value (mandatory) </para>
+                        <para>The URL to obtain the bundle from; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1319,7 +1284,7 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The specific bundle to uninstall; no default value (mandatory) </para>
+                        <para>The specific bundle to uninstall; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1332,22 +1297,16 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The specific bundle to update ; no default value (mandatory) </para>
+                        <para>The specific bundle to update ; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The URL to obtain the updated bundle from; no default value</para>
+                        <para>The URL to obtain the updated bundle from; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
-        </section>
-        <section xml:id="command-index-osgi-version">
-            <title>osgi version</title>
-            <para>Displays OSGi framework version</para>
-            <programlisting><![CDATA[osgi version]]></programlisting>
-            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-field-commands">
@@ -1361,7 +1320,7 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1397,19 +1356,19 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA @Column name; no default value</para>
+                        <para>The JPA @Column name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                        <para>Inserts an optional Spring @Value annotation with the given content; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1440,19 +1399,19 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of the entity; no default value (mandatory) </para>
+                        <para>The Java type of the entity; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--persistenceType</term>
                     <listitem>
-                        <para>The type of persistent storage to be used; no default value</para>
+                        <para>The type of persistent storage to be used; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1488,19 +1447,19 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA @Column name; no default value</para>
+                        <para>The JPA @Column name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                        <para>Inserts an optional Spring @Value annotation with the given content; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1530,7 +1489,7 @@
                 <varlistentry>
                     <term>--dateTimeFormatPattern</term>
                     <listitem>
-                        <para>Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a; no default value</para>
+                        <para>Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1543,13 +1502,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of the @Embeddable class; no default value (mandatory) </para>
+                        <para>The Java type of the @Embeddable class; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1574,13 +1533,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The enum type of this field; no default value (mandatory) </para>
+                        <para>The enum type of this field; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1592,7 +1551,7 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA @Column name; no default value</para>
+                        <para>The JPA @Column name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1610,13 +1569,13 @@
                 <varlistentry>
                     <term>--enumType</term>
                     <listitem>
-                        <para>The fetch semantics at a JPA level; no default value</para>
+                        <para>The fetch semantics at a JPA level; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1641,7 +1600,7 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the file upload field to add; no default value (mandatory) </para>
+                        <para>The name of the file upload field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1653,7 +1612,7 @@
                 <varlistentry>
                     <term>--contentType</term>
                     <listitem>
-                        <para>The content type of the file; no default value (mandatory) </para>
+                        <para>The content type of the file; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1665,7 +1624,7 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA @Column name; no default value</para>
+                        <para>The JPA @Column name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1690,13 +1649,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The entity which will be contained within the Set; no default value (mandatory) </para>
+                        <para>The entity which will be contained within the Set; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1708,7 +1667,7 @@
                 <varlistentry>
                     <term>--mappedBy</term>
                     <listitem>
-                        <para>The field name on the referenced type which owns the relationship; no default value</para>
+                        <para>The field name on the referenced type which owns the relationship; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1726,13 +1685,13 @@
                 <varlistentry>
                     <term>--sizeMin</term>
                     <listitem>
-                        <para>The minimum number of elements in the collection; no default value</para>
+                        <para>The minimum number of elements in the collection; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sizeMax</term>
                     <listitem>
-                        <para>The maximum number of elements in the collection; no default value</para>
+                        <para>The maximum number of elements in the collection; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1744,13 +1703,13 @@
                 <varlistentry>
                     <term>--fetch</term>
                     <listitem>
-                        <para>The fetch semantics at a JPA level; no default value</para>
+                        <para>The fetch semantics at a JPA level; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1775,13 +1734,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of the entity; no default value (mandatory) </para>
+                        <para>The Java type of the entity; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1805,55 +1764,55 @@
                 <varlistentry>
                     <term>--decimalMin</term>
                     <listitem>
-                        <para>The BigDecimal string-based representation of the minimum value; no default value</para>
+                        <para>The BigDecimal string-based representation of the minimum value; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--decimalMax</term>
                     <listitem>
-                        <para>The BigDecimal string based representation of the maximum value; no default value</para>
+                        <para>The BigDecimal string based representation of the maximum value; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--digitsInteger</term>
                     <listitem>
-                        <para>Maximum number of integral digits accepted for this number; no default value</para>
+                        <para>Maximum number of integral digits accepted for this number; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--digitsFraction</term>
                     <listitem>
-                        <para>Maximum number of fractional digits accepted for this number; no default value</para>
+                        <para>Maximum number of fractional digits accepted for this number; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--min</term>
                     <listitem>
-                        <para>The minimum value; no default value</para>
+                        <para>The minimum value; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--max</term>
                     <listitem>
-                        <para>The maximum value; no default value</para>
+                        <para>The maximum value; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA @Column name; no default value</para>
+                        <para>The JPA @Column name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                        <para>Inserts an optional Spring @Value annotation with the given content; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1890,13 +1849,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field; no default value (mandatory) </para>
+                        <para>The name of the field; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of this field; no default value (mandatory) </para>
+                        <para>The Java type of this field; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1920,19 +1879,19 @@
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA @Column name; no default value</para>
+                        <para>The JPA @Column name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                        <para>Inserts an optional Spring @Value annotation with the given content; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1957,13 +1916,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of the entity to reference; no default value (mandatory) </para>
+                        <para>The Java type of the entity to reference; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1987,13 +1946,13 @@
                 <varlistentry>
                     <term>--joinColumnName</term>
                     <listitem>
-                        <para>The JPA @JoinColumn name; no default value</para>
+                        <para>The JPA @JoinColumn name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--referencedColumnName</term>
                     <listitem>
-                        <para>The JPA @JoinColumn referencedColumnName; no default value</para>
+                        <para>The JPA @JoinColumn referencedColumnName; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2005,13 +1964,13 @@
                 <varlistentry>
                     <term>--fetch</term>
                     <listitem>
-                        <para>The fetch semantics at a JPA level; no default value</para>
+                        <para>The fetch semantics at a JPA level; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2036,13 +1995,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The entity which will be contained within the Set; no default value (mandatory) </para>
+                        <para>The entity which will be contained within the Set; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2054,7 +2013,7 @@
                 <varlistentry>
                     <term>--mappedBy</term>
                     <listitem>
-                        <para>The field name on the referenced type which owns the relationship; no default value</para>
+                        <para>The field name on the referenced type which owns the relationship; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2072,13 +2031,13 @@
                 <varlistentry>
                     <term>--sizeMin</term>
                     <listitem>
-                        <para>The minimum number of elements in the collection; no default value</para>
+                        <para>The minimum number of elements in the collection; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sizeMax</term>
                     <listitem>
-                        <para>The maximum number of elements in the collection; no default value</para>
+                        <para>The maximum number of elements in the collection; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2090,13 +2049,13 @@
                 <varlistentry>
                     <term>--fetch</term>
                     <listitem>
-                        <para>The fetch semantics at a JPA level; no default value</para>
+                        <para>The fetch semantics at a JPA level; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2121,7 +2080,7 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add; no default value (mandatory) </para>
+                        <para>The name of the field to add; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2145,49 +2104,49 @@
                 <varlistentry>
                     <term>--decimalMin</term>
                     <listitem>
-                        <para>The BigDecimal string-based representation of the minimum value; no default value</para>
+                        <para>The BigDecimal string-based representation of the minimum value; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--decimalMax</term>
                     <listitem>
-                        <para>The BigDecimal string based representation of the maximum value; no default value</para>
+                        <para>The BigDecimal string based representation of the maximum value; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sizeMin</term>
                     <listitem>
-                        <para>The minimum string length; no default value</para>
+                        <para>The minimum string length; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sizeMax</term>
                     <listitem>
-                        <para>The maximum string length; no default value</para>
+                        <para>The maximum string length; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--regexp</term>
                     <listitem>
-                        <para>The required regular expression pattern; no default value</para>
+                        <para>The required regular expression pattern; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA @Column name; no default value</para>
+                        <para>The JPA @Column name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                        <para>Inserts an optional Spring @Value annotation with the given content; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs; no default value</para>
+                        <para>An optional comment for JavaDocs; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2234,7 +2193,7 @@
                 <varlistentry>
                     <term>--finderName</term>
                     <listitem>
-                        <para>The finder string as generated with the 'finder list' command; no default value (mandatory) </para>
+                        <para>The finder string as generated with the 'finder list' command; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2259,171 +2218,32 @@
                 <varlistentry>
                     <term>--filter</term>
                     <listitem>
-                        <para>A comma separated list of strings that must be present in a filter to be included; no default value</para>
+                        <para>A comma separated list of strings that must be present in a filter to be included; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
         </section>
     </section>
-    <section xml:id="command-index-gwt-commands">
-        <title>Gwt Commands</title>
-        <para>Gwt Commands are contained in org.springframework.roo.addon.gwt.GwtCommands.</para>
-        <section xml:id="command-index-gwt-setup">
-            <title>gwt setup</title>
-            <para>Install Google Web Toolkit (GWT) into your project - deprecated, use 'web gwt setup' instead</para>
-            <programlisting><![CDATA[gwt setup]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-        <section xml:id="command-index-web-gwt-all">
-            <title>web gwt all</title>
-            <para>Locates all entities in the project and creates GWT requests, proxies and creates the scaffold</para>
-            <programlisting><![CDATA[web gwt all --proxyPackage --requestPackage]]></programlisting>
+    <section xml:id="command-index-help-commands">
+        <title>Help Commands</title>
+        <para>Help Commands are contained in org.springframework.roo.felix.help.HelpCommands.</para>
+        <section xml:id="command-index-help">
+            <title>help</title>
+            <para>Shows system help</para>
+            <programlisting><![CDATA[help]]></programlisting>
             <variablelist>
                 <varlistentry>
-                    <term>--proxyPackage</term>
+                    <term>--command</term>
                     <listitem>
-                        <para>The package in which created proxies will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--requestPackage</term>
-                    <listitem>
-                        <para>The package in which created requests will be placed; no default value (mandatory) </para>
+                        <para>Command name to provide help for; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
         </section>
-        <section xml:id="command-index-web-gwt-gae-update">
-            <title>web gwt gae update</title>
-            <para>Updates the GWT project to support GAE</para>
-            <programlisting><![CDATA[web gwt gae update]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-        <section xml:id="command-index-web-gwt-proxy-all">
-            <title>web gwt proxy all</title>
-            <para>Locates all entities in the project and creates GWT proxies</para>
-            <programlisting><![CDATA[web gwt proxy all --package]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>The package in which created proxies will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-web-gwt-proxy-request-all">
-            <title>web gwt proxy request all</title>
-            <para>Locates all entities in the project and creates GWT requests and proxies</para>
-            <programlisting><![CDATA[web gwt proxy request all --package]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>The package in which created proxies and requests will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-web-gwt-proxy-request-type">
-            <title>web gwt proxy request type</title>
-            <para>Creates a proxy and request based on the specified type</para>
-            <programlisting><![CDATA[web gwt proxy request type --package --type]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>The package in which created proxies and requests will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--type</term>
-                    <listitem>
-                        <para>The type to base the created proxy and request on; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-web-gwt-proxy-type">
-            <title>web gwt proxy type</title>
-            <para>Creates a GWT proxy based on the specified type</para>
-            <programlisting><![CDATA[web gwt proxy type --package --type]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>The package in which created proxies will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--type</term>
-                    <listitem>
-                        <para>The type to base the created request on; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-web-gwt-request-all">
-            <title>web gwt request all</title>
-            <para>Locates all entities in the project and creates GWT requests</para>
-            <programlisting><![CDATA[web gwt request all --package]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>The package in which created requests will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-web-gwt-request-type">
-            <title>web gwt request type</title>
-            <para>Creates a GWT proxy based on the specified type</para>
-            <programlisting><![CDATA[web gwt request type --package --type]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>The package in which created requests will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--type</term>
-                    <listitem>
-                        <para>The type to base the created request on; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-web-gwt-scaffold">
-            <title>web gwt scaffold</title>
-            <para>Creates a GWT request, proxy and scaffold for the specified</para>
-            <programlisting><![CDATA[web gwt scaffold --proxyPackage --requestPackage --type]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--proxyPackage</term>
-                    <listitem>
-                        <para>The package in which created proxies will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--requestPackage</term>
-                    <listitem>
-                        <para>The package in which created requests will be placed; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--type</term>
-                    <listitem>
-                        <para>The type to base the created scaffold on; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-web-gwt-setup">
-            <title>web gwt setup</title>
-            <para>Install Google Web Toolkit (GWT) into your project</para>
-            <programlisting><![CDATA[web gwt setup]]></programlisting>
+        <section xml:id="command-index-reference-guide">
+            <title>reference guide</title>
+            <para>Writes the reference guide XML fragments (in DocBook format) into the current working directory</para>
+            <programlisting><![CDATA[reference guide]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
     </section>
@@ -2552,7 +2372,7 @@
                 <varlistentry>
                     <term>--file</term>
                     <listitem>
-                        <para>The file to locate and execute; no default value (mandatory) </para>
+                        <para>The file to locate and execute; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2577,7 +2397,7 @@
                 <varlistentry>
                     <term>--[default]</term>
                     <listitem>
-                        <para>Special version flags; no default value</para>
+                        <para>Special version flags; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2619,7 +2439,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to create; no default value (mandatory) </para>
+                        <para>The name of the class to create; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2644,7 +2464,7 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The persistence provider to support; no default value (mandatory) </para>
+                        <para>The persistence provider to support; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2679,7 +2499,7 @@
                 <varlistentry>
                     <term>--key</term>
                     <listitem>
-                        <para>The property key that should be removed; no default value (mandatory) </para>
+                        <para>The property key that should be removed; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2692,13 +2512,13 @@
                 <varlistentry>
                     <term>--key</term>
                     <listitem>
-                        <para>The property key that should be changed; no default value (mandatory) </para>
+                        <para>The property key that should be changed; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>The new vale for this property key; no default value (mandatory) </para>
+                        <para>The new vale for this property key; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2711,7 +2531,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to create; no default value (mandatory) </para>
+                        <para>The name of the class to create; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2736,7 +2556,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>Name of the entity to create; no default value (mandatory) </para>
+                        <para>Name of the entity to create; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2748,7 +2568,7 @@
                 <varlistentry>
                     <term>--implements</term>
                     <listitem>
-                        <para>The interface to implement; no default value</para>
+                        <para>The interface to implement; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2766,31 +2586,31 @@
                 <varlistentry>
                     <term>--table</term>
                     <listitem>
-                        <para>The JPA table name to use for this entity; no default value</para>
+                        <para>The JPA table name to use for this entity; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--schema</term>
                     <listitem>
-                        <para>The JPA table schema name to use for this entity; no default value</para>
+                        <para>The JPA table schema name to use for this entity; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--catalog</term>
                     <listitem>
-                        <para>The JPA table catalog name to use for this entity; no default value</para>
+                        <para>The JPA table catalog name to use for this entity; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--identifierField</term>
                     <listitem>
-                        <para>The JPA identifier field name to use for this entity; no default value</para>
+                        <para>The JPA identifier field name to use for this entity; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--identifierColumn</term>
                     <listitem>
-                        <para>The JPA identifier field column to use for this entity; no default value</para>
+                        <para>The JPA identifier field column to use for this entity; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2802,13 +2622,13 @@
                 <varlistentry>
                     <term>--versionField</term>
                     <listitem>
-                        <para>The JPA version field name to use for this entity; no default value</para>
+                        <para>The JPA version field name to use for this entity; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--versionColumn</term>
                     <listitem>
-                        <para>The JPA version field column to use for this entity; no default value</para>
+                        <para>The JPA version field column to use for this entity; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2820,7 +2640,7 @@
                 <varlistentry>
                     <term>--inheritanceType</term>
                     <listitem>
-                        <para>The JPA @Inheritance value (apply to base class); no default value</para>
+                        <para>The JPA @Inheritance value (apply to base class); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2844,13 +2664,13 @@
                 <varlistentry>
                     <term>--persistenceUnit</term>
                     <listitem>
-                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
+                        <para>The persistence unit name to be used in the persistence.xml file; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transactionManager</term>
                     <listitem>
-                        <para>The transaction manager name; no default value</para>
+                        <para>The transaction manager name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2862,13 +2682,13 @@
                 <varlistentry>
                     <term>--entityName</term>
                     <listitem>
-                        <para>The name used to refer to the entity in queries; no default value</para>
+                        <para>The name used to refer to the entity in queries; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sequenceName</term>
                     <listitem>
-                        <para>The name of the sequence for incrementing sequence-driven primary keys; no default value</para>
+                        <para>The name of the sequence for incrementing sequence-driven primary keys; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2887,13 +2707,13 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The persistence provider to support; no default value (mandatory) </para>
+                        <para>The persistence provider to support; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--database</term>
                     <listitem>
-                        <para>The database to support; no default value (mandatory) </para>
+                        <para>The database to support; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2905,43 +2725,43 @@
                 <varlistentry>
                     <term>--jndiDataSource</term>
                     <listitem>
-                        <para>The JNDI datasource to use; no default value</para>
+                        <para>The JNDI datasource to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--hostName</term>
                     <listitem>
-                        <para>The host name to use; no default value</para>
+                        <para>The host name to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--databaseName</term>
                     <listitem>
-                        <para>The database name to use; no default value</para>
+                        <para>The database name to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--userName</term>
                     <listitem>
-                        <para>The username to use; no default value</para>
+                        <para>The username to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--password</term>
                     <listitem>
-                        <para>The password to use; no default value</para>
+                        <para>The password to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transactionManager</term>
                     <listitem>
-                        <para>The transaction manager name; no default value</para>
+                        <para>The transaction manager name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--persistenceUnit</term>
                     <listitem>
-                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
+                        <para>The persistence unit name to be used in the persistence.xml file; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2954,13 +2774,13 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The persistence provider to support; no default value (mandatory) </para>
+                        <para>The persistence provider to support; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--database</term>
                     <listitem>
-                        <para>The database to support; no default value (mandatory) </para>
+                        <para>The database to support; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2972,43 +2792,43 @@
                 <varlistentry>
                     <term>--jndiDataSource</term>
                     <listitem>
-                        <para>The JNDI datasource to use; no default value</para>
+                        <para>The JNDI datasource to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--hostName</term>
                     <listitem>
-                        <para>The host name to use; no default value</para>
+                        <para>The host name to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--databaseName</term>
                     <listitem>
-                        <para>The database name to use; no default value</para>
+                        <para>The database name to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--userName</term>
                     <listitem>
-                        <para>The username to use; no default value</para>
+                        <para>The username to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--password</term>
                     <listitem>
-                        <para>The password to use; no default value</para>
+                        <para>The password to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transactionManager</term>
                     <listitem>
-                        <para>The transaction manager name; no default value</para>
+                        <para>The transaction manager name; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--persistenceUnit</term>
                     <listitem>
-                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
+                        <para>The persistence unit name to be used in the persistence.xml file; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3025,7 +2845,7 @@
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package in which new JSF managed beans will be placed; no default value (mandatory) </para>
+                        <para>The package in which new JSF managed beans will be placed; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3038,13 +2858,13 @@
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The url of the media source; no default value (mandatory) </para>
+                        <para>The url of the media source; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--player</term>
                     <listitem>
-                        <para>The name of the media player; no default value</para>
+                        <para>The name of the media player; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3057,7 +2877,7 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The path and name of the JSF managed bean to be created; no default value (mandatory) </para>
+                        <para>The path and name of the JSF managed bean to be created; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3069,7 +2889,7 @@
                 <varlistentry>
                     <term>--beanName</term>
                     <listitem>
-                        <para>The name of the managed bean to use in the 'name' attribute of the @ManagedBean annotation; no default value</para>
+                        <para>The name of the managed bean to use in the 'name' attribute of the @ManagedBean annotation; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3088,19 +2908,19 @@
                 <varlistentry>
                     <term>--implementation</term>
                     <listitem>
-                        <para>The JSF implementation to use; no default value</para>
+                        <para>The JSF implementation to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--library</term>
                     <listitem>
-                        <para>The JSF component library to use; no default value</para>
+                        <para>The JSF component library to use; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--theme</term>
                     <listitem>
-                        <para>The name of the theme; no default value</para>
+                        <para>The name of the theme; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3123,7 +2943,7 @@
                 <varlistentry>
                     <term>--rootName</term>
                     <listitem>
-                        <para>The root name which should be used to wrap the JSON document; no default value</para>
+                        <para>The root name which should be used to wrap the JSON document; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3171,13 +2991,13 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
+                        <para>The path and name of the controller object to be created; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--preferredMapping</term>
                     <listitem>
-                        <para>Indicates a specific request mapping path for this controller (eg /foo/); no default value</para>
+                        <para>Indicates a specific request mapping path for this controller (eg /foo/); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3190,13 +3010,13 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
+                        <para>The path and name of the controller object to be created; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--preferredMapping</term>
                     <listitem>
-                        <para>Indicates a specific request mapping path for this controller (eg /foo/); no default value</para>
+                        <para>Indicates a specific request mapping path for this controller (eg /foo/); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3209,7 +3029,7 @@
                 <varlistentry>
                     <term>--code</term>
                     <listitem>
-                        <para>The language code for the desired bundle; no default value (mandatory) </para>
+                        <para>The language code for the desired bundle; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3222,19 +3042,19 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>The path the static view to create in (required, ie '/foo/blah'); no default value (mandatory) </para>
+                        <para>The path the static view to create in (required, ie '/foo/blah'); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The view name the mapping this view should adopt (required, ie 'index'); no default value (mandatory) </para>
+                        <para>The view name the mapping this view should adopt (required, ie 'index'); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--title</term>
                     <listitem>
-                        <para>The title of the view; no default value (mandatory) </para>
+                        <para>The title of the view; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3247,7 +3067,7 @@
                 <varlistentry>
                     <term>--code</term>
                     <listitem>
-                        <para>The language code for the desired bundle; no default value (mandatory) </para>
+                        <para>The language code for the desired bundle; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3279,19 +3099,19 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>The path the static view to create in (required, ie '/foo/blah'); no default value (mandatory) </para>
+                        <para>The path the static view to create in (required, ie '/foo/blah'); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The view name the mapping this view should adopt (required, ie 'index'); no default value (mandatory) </para>
+                        <para>The view name the mapping this view should adopt (required, ie 'index'); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--title</term>
                     <listitem>
-                        <para>The title of the view; no default value (mandatory) </para>
+                        <para>The title of the view; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3308,13 +3128,13 @@
                 <varlistentry>
                     <term>--level</term>
                     <listitem>
-                        <para>The log level to configure; no default value (mandatory) </para>
+                        <para>The log level to configure; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package to append the logging level to (all by default); no default value</para>
+                        <para>The package to append the logging level to (all by default); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3331,37 +3151,37 @@
                 <varlistentry>
                     <term>--hostServer</term>
                     <listitem>
-                        <para>The host server; no default value (mandatory) </para>
+                        <para>The host server; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--protocol</term>
                     <listitem>
-                        <para>The protocol used by mail server; no default value</para>
+                        <para>The protocol used by mail server; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--port</term>
                     <listitem>
-                        <para>The port used by mail server; no default value</para>
+                        <para>The port used by mail server; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--encoding</term>
                     <listitem>
-                        <para>The encoding used for mail; no default value</para>
+                        <para>The encoding used for mail; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--username</term>
                     <listitem>
-                        <para>The mail account username; no default value</para>
+                        <para>The mail account username; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--password</term>
                     <listitem>
-                        <para>The mail account password; no default value</para>
+                        <para>The mail account password; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3374,13 +3194,13 @@
                 <varlistentry>
                     <term>--from</term>
                     <listitem>
-                        <para>The 'from' email (optional); no default value</para>
+                        <para>The 'from' email (optional); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--subject</term>
                     <listitem>
-                        <para>The message subject (obtional); no default value</para>
+                        <para>The message subject (obtional); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3422,31 +3242,31 @@
                 <varlistentry>
                     <term>--groupId</term>
                     <listitem>
-                        <para>The group ID of the dependency; no default value (mandatory) </para>
+                        <para>The group ID of the dependency; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--artifactId</term>
                     <listitem>
-                        <para>The artifact ID of the dependency; no default value (mandatory) </para>
+                        <para>The artifact ID of the dependency; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--version</term>
                     <listitem>
-                        <para>The version of the dependency; no default value (mandatory) </para>
+                        <para>The version of the dependency; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--classifier</term>
                     <listitem>
-                        <para>The classifier of the dependency; no default value</para>
+                        <para>The classifier of the dependency; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--scope</term>
                     <listitem>
-                        <para>The scope of the dependency; no default value</para>
+                        <para>The scope of the dependency; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3459,25 +3279,25 @@
                 <varlistentry>
                     <term>--groupId</term>
                     <listitem>
-                        <para>The group ID of the dependency; no default value (mandatory) </para>
+                        <para>The group ID of the dependency; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--artifactId</term>
                     <listitem>
-                        <para>The artifact ID of the dependency; no default value (mandatory) </para>
+                        <para>The artifact ID of the dependency; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--version</term>
                     <listitem>
-                        <para>The version of the dependency; no default value (mandatory) </para>
+                        <para>The version of the dependency; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--classifier</term>
                     <listitem>
-                        <para>The classifier of the dependency; no default value</para>
+                        <para>The classifier of the dependency; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3490,19 +3310,19 @@
                 <varlistentry>
                     <term>--id</term>
                     <listitem>
-                        <para>The ID of the repository; no default value (mandatory) </para>
+                        <para>The ID of the repository; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>The name of the repository; no default value</para>
+                        <para>The name of the repository; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The URL of the repository; no default value (mandatory) </para>
+                        <para>The URL of the repository; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3515,13 +3335,13 @@
                 <varlistentry>
                     <term>--id</term>
                     <listitem>
-                        <para>The ID of the repository; no default value (mandatory) </para>
+                        <para>The ID of the repository; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The URL of the repository; no default value (mandatory) </para>
+                        <para>The URL of the repository; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3534,25 +3354,25 @@
                 <varlistentry>
                     <term>--moduleName</term>
                     <listitem>
-                        <para>The name of the module; no default value (mandatory) </para>
+                        <para>The name of the module; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
-                        <para>The uppermost package name (this becomes the &lt;groupId&gt; in Maven and also the '~' value when using Roo's shell); no default value (mandatory) </para>
+                        <para>The uppermost package name (this becomes the &lt;groupId&gt; in Maven and also the '~' value when using Roo's shell); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--java</term>
                     <listitem>
-                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 6 or 7 only); no default value</para>
+                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 6 or 7 only); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--parent</term>
                     <listitem>
-                        <para>The Maven coordinates of the parent POM, in the form "groupId:artifactId:version"; no default value</para>
+                        <para>The Maven coordinates of the parent POM, in the form "groupId:artifactId:version"; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3564,7 +3384,7 @@
                 <varlistentry>
                     <term>--artifactId</term>
                     <listitem>
-                        <para>The artifact ID of this module (defaults to moduleName if not specified); no default value</para>
+                        <para>The artifact ID of this module (defaults to moduleName if not specified); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3577,7 +3397,7 @@
                 <varlistentry>
                     <term>--moduleName</term>
                     <listitem>
-                        <para>The module to focus on; no default value (mandatory) </para>
+                        <para>The module to focus on; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3602,7 +3422,7 @@
                 <varlistentry>
                     <term>--mavenCommand</term>
                     <listitem>
-                        <para>User-specified Maven command (eg test:test); no default value (mandatory) </para>
+                        <para>User-specified Maven command (eg test:test); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3633,25 +3453,25 @@
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
-                        <para>The uppermost package name (this becomes the &lt;groupId&gt; in Maven and also the '~' value when using Roo's shell); no default value (mandatory) </para>
+                        <para>The uppermost package name (this becomes the &lt;groupId&gt; in Maven and also the '~' value when using Roo's shell); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--projectName</term>
                     <listitem>
-                        <para>The name of the project (last segment of package name used as default); no default value</para>
+                        <para>The name of the project (last segment of package name used as default); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--java</term>
                     <listitem>
-                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only); no default value</para>
+                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--parent</term>
                     <listitem>
-                        <para>The Maven coordinates of the parent POM, in the form "groupId:artifactId:version"; no default value</para>
+                        <para>The Maven coordinates of the parent POM, in the form "groupId:artifactId:version"; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3674,7 +3494,7 @@
                 <varlistentry>
                     <term>--maximumCapacity</term>
                     <listitem>
-                        <para>The maximum number of metadata items to cache; no default value (mandatory) </para>
+                        <para>The maximum number of metadata items to cache; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3687,7 +3507,7 @@
                 <varlistentry>
                     <term>--metadataId</term>
                     <listitem>
-                        <para>The metadata ID (should start with MID:); no default value (mandatory) </para>
+                        <para>The metadata ID (should start with MID:); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3700,7 +3520,7 @@
                 <varlistentry>
                     <term>--module</term>
                     <listitem>
-                        <para>The module for which to retrieve the metadata (defaults to the focused module); no default value</para>
+                        <para>The module for which to retrieve the metadata (defaults to the focused module); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3713,7 +3533,7 @@
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type for which to display metadata; no default value (mandatory) </para>
+                        <para>The Java type for which to display metadata; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3732,7 +3552,7 @@
                 <varlistentry>
                     <term>--level</term>
                     <listitem>
-                        <para>The verbosity of notifications (0=none, 1=some, 2=all); no default value (mandatory) </para>
+                        <para>The verbosity of notifications (0=none, 1=some, 2=all); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3749,13 +3569,13 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>Implementation class for the specified interface; no default value (mandatory) </para>
+                        <para>Implementation class for the specified interface; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--identifierType</term>
                     <listitem>
-                        <para>The ID type to be used for this domain type (defaults to BigInteger); no default value</para>
+                        <para>The ID type to be used for this domain type (defaults to BigInteger); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3774,31 +3594,31 @@
                 <varlistentry>
                     <term>--username</term>
                     <listitem>
-                        <para>Username for accessing the database (defaults to ''); no default value</para>
+                        <para>Username for accessing the database (defaults to ''); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--password</term>
                     <listitem>
-                        <para>Password for accessing the database (defaults to ''); no default value</para>
+                        <para>Password for accessing the database (defaults to ''); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--databaseName</term>
                     <listitem>
-                        <para>Name of the database (defaults to project name); no default value</para>
+                        <para>Name of the database (defaults to project name); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--port</term>
                     <listitem>
-                        <para>Port for the database (defaults to '27017'); no default value</para>
+                        <para>Port for the database (defaults to '27017'); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--host</term>
                     <listitem>
-                        <para>Host for the database (defaults to '127.0.0.1'); no default value</para>
+                        <para>Host for the database (defaults to '127.0.0.1'); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3817,7 +3637,7 @@
                 <varlistentry>
                     <term>--interface</term>
                     <listitem>
-                        <para>The java interface to apply this annotation to; no default value (mandatory) </para>
+                        <para>The java interface to apply this annotation to; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -3863,7 +3683,7 @@
                 <varlistentry>
                     <term>--keyId</term>
                     <listitem>
-                        <para>The key ID to view (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
+                        <para>The key ID to view (eg 00B5050F or 0x00B5050F); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3894,7 +3714,7 @@
                 <varlistentry>
                     <term>--keyId</term>
                     <listitem>
-                        <para>The key ID to trust (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
+                        <para>The key ID to trust (eg 00B5050F or 0x00B5050F); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3907,7 +3727,7 @@
                 <varlistentry>
                     <term>--keyId</term>
                     <listitem>
-                        <para>The key ID to remove trust from (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
+                        <para>The key ID to remove trust from (eg 00B5050F or 0x00B5050F); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3943,7 +3763,7 @@
                 <varlistentry>
                     <term>--ms</term>
                     <listitem>
-                        <para>The number of milliseconds between each poll; no default value (mandatory) </para>
+                        <para>The number of milliseconds between each poll; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3983,13 +3803,13 @@
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>Property file name (including .properties suffix); no default value (mandatory) </para>
+                        <para>Property file name (including .properties suffix); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>Source path to property file; no default value (mandatory) </para>
+                        <para>Source path to property file; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4002,19 +3822,19 @@
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>Property file name (including .properties suffix); no default value (mandatory) </para>
+                        <para>Property file name (including .properties suffix); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>Source path to property file; no default value (mandatory) </para>
+                        <para>Source path to property file; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--key</term>
                     <listitem>
-                        <para>The property key that should be removed; no default value (mandatory) </para>
+                        <para>The property key that should be removed; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4027,25 +3847,25 @@
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>Property file name (including .properties suffix); no default value (mandatory) </para>
+                        <para>Property file name (including .properties suffix); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>Source path to property file; no default value (mandatory) </para>
+                        <para>Source path to property file; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--key</term>
                     <listitem>
-                        <para>The property key that should be changed; no default value (mandatory) </para>
+                        <para>The property key that should be changed; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>The new vale for this property key; no default value (mandatory) </para>
+                        <para>The new vale for this property key; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4072,7 +3892,7 @@
                 <varlistentry>
                     <term>--interface</term>
                     <listitem>
-                        <para>The java interface to apply this annotation to; no default value (mandatory) </para>
+                        <para>The java interface to apply this annotation to; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4095,7 +3915,7 @@
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package to add the permission evaluator to; no default value (mandatory) </para>
+                        <para>The package to add the permission evaluator to; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4118,13 +3938,13 @@
                 <varlistentry>
                     <term>--controller</term>
                     <listitem>
-                        <para>Controller to create a Selenium test for; no default value (mandatory) </para>
+                        <para>Controller to create a Selenium test for; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>Name of the test; no default value</para>
+                        <para>Name of the test; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4147,19 +3967,19 @@
                 <varlistentry>
                     <term>--interfacePackage</term>
                     <listitem>
-                        <para>The java interface package; no default value (mandatory) </para>
+                        <para>The java interface package; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--classPackage</term>
                     <listitem>
-                        <para>The java package of the implementation classes for the interfaces; no default value</para>
+                        <para>The java package of the implementation classes for the interfaces; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--useXmlConfiguration</term>
                     <listitem>
-                        <para>When true, Spring Roo will configure services using XML.  This is the default behavior for services using GAE; no default value</para>
+                        <para>When true, Spring Roo will configure services using XML.  This is the default behavior for services using GAE; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4172,13 +3992,13 @@
                 <varlistentry>
                     <term>--interfacePackage</term>
                     <listitem>
-                        <para>The java interface package; no default value (mandatory) </para>
+                        <para>The java interface package; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--classPackage</term>
                     <listitem>
-                        <para>The java package of the implementation classes for the interfaces; no default value</para>
+                        <para>The java package of the implementation classes for the interfaces; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4190,7 +4010,7 @@
                 <varlistentry>
                     <term>--authorizedRole</term>
                     <listitem>
-                        <para>The role authorized the use the methods in the service (additional roles can be added after creation); no default value</para>
+                        <para>The role authorized the use the methods in the service (additional roles can be added after creation); default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4202,7 +4022,7 @@
                 <varlistentry>
                     <term>--useXmlConfiguration</term>
                     <listitem>
-                        <para>When true, Spring Roo will configure services using XML.; no default value</para>
+                        <para>When true, Spring Roo will configure services using XML.; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4215,13 +4035,13 @@
                 <varlistentry>
                     <term>--interface</term>
                     <listitem>
-                        <para>The java interface to apply this annotation to; no default value (mandatory) </para>
+                        <para>The java interface to apply this annotation to; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>Implementation class for the specified interface; no default value</para>
+                        <para>Implementation class for the specified interface; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4239,7 +4059,7 @@
                 <varlistentry>
                     <term>--authorizedRoles</term>
                     <listitem>
-                        <para>The role authorized the use the methods in the service; no default value</para>
+                        <para>The role authorized the use the methods in the service; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4251,7 +4071,7 @@
                 <varlistentry>
                     <term>--useXmlConfiguration</term>
                     <listitem>
-                        <para>When true, Spring Roo will configure services using XML.; no default value</para>
+                        <para>When true, Spring Roo will configure services using XML.; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4264,13 +4084,13 @@
                 <varlistentry>
                     <term>--interface</term>
                     <listitem>
-                        <para>The java interface to apply this annotation to; no default value (mandatory) </para>
+                        <para>The java interface to apply this annotation to; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>Implementation class for the specified interface; no default value</para>
+                        <para>Implementation class for the specified interface; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4282,33 +4102,10 @@
                 <varlistentry>
                     <term>--useXmlConfiguration</term>
                     <listitem>
-                        <para>When true, Spring Roo will configure services using XML.; no default value</para>
+                        <para>When true, Spring Roo will configure services using XML.; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
-        </section>
-    </section>
-    <section xml:id="command-index-simple-parser-component">
-        <title>Simple Parser Component</title>
-        <para>Simple Parser Component are contained in org.springframework.roo.shell.osgi.SimpleParserComponent.</para>
-        <section xml:id="command-index-help">
-            <title>help</title>
-            <para>Shows system help</para>
-            <programlisting><![CDATA[help]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--command</term>
-                    <listitem>
-                        <para>Command name to provide help for; no default value</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-reference-guide">
-            <title>reference guide</title>
-            <para>Writes the reference guide XML fragments (in DocBook format) into the current working directory</para>
-            <programlisting><![CDATA[reference guide]]></programlisting>
-            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-solr-commands">
@@ -4358,7 +4155,7 @@
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>The name of the tailor configuration; no default value (mandatory) </para>
+                        <para>The name of the tailor configuration; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4393,7 +4190,7 @@
                 <varlistentry>
                     <term>--privacyLevel</term>
                     <listitem>
-                        <para>The new UAA privacy level to use; no default value (mandatory) </para>
+                        <para>The new UAA privacy level to use; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4418,7 +4215,7 @@
                 <varlistentry>
                     <term>--file</term>
                     <listitem>
-                        <para>The file to save the UAA JSON content to; no default value</para>
+                        <para>The file to save the UAA JSON content to; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4435,7 +4232,7 @@
                 <varlistentry>
                     <term>--formBackingType</term>
                     <listitem>
-                        <para>The finder-enabled type; no default value (mandatory) </para>
+                        <para>The finder-enabled type; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4464,7 +4261,7 @@
                 <varlistentry>
                     <term>--flowName</term>
                     <listitem>
-                        <para>The name for your web flow; no default value</para>
+                        <para>The name for your web flow; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -4481,7 +4278,7 @@
                 <varlistentry>
                     <term>--jsonObject</term>
                     <listitem>
-                        <para>The JSON-enabled object which backs this Spring MVC controller.; no default value (mandatory) </para>
+                        <para>The JSON-enabled object which backs this Spring MVC controller.; default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -4500,7 +4297,7 @@
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package in which new controllers will be placed; no default value</para>
+                        <para>The package in which new controllers will be placed; default: '__NULL__'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
