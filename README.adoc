@@ -2,8 +2,8 @@
 Getting started with Spring Roo development
 :page-layout: base
 :toc-placement: manual
-:Author:    Juan Carlos García del Canto
-:Email:     <jcgarcia@disid.com>
+:Author:    DISID Corporation S.L.
+:Email:     <info@disid.com>
 
 Thanks for checking out Spring Roo from Git.
 
@@ -41,10 +41,10 @@ In the instructions below, _$ROO_HOME_ refers to the location where you checked 
 
 Next double-check you meet the *installation requirements*:
 
-- A proper installation of *Java 6 or above*
-- *Maven 3.0.1+* properly installed and working with your Java 6+
-- *Internet access* so that Maven can download required dependencies
-- A *Git command line* client installed (required by Roo's Maven build for inserting the current revision number into OSGi bundle manifests)
+* A proper installation of *Java 6 or above*
+* *Maven 3.0.1+* properly installed and working with your Java 6+
+* *Internet access* so that Maven can download required dependencies
+* A *Git command line* client installed (required by Roo's Maven build for inserting the current revision number into OSGi bundle manifests)
 
 Next you need to setup an environment variable called _MAVEN_OPTS_. If you already have a _MAVEN_OPTS_, just check it has the memory sizes shown below (or greater).  
 
@@ -70,22 +70,23 @@ sudo chmod +x /usr/bin/roo-dev
 
 Roo now uses GPG to automatically sign build outputs. If you haven't installed GPG, download and install it:
 
-- Main site: http://www.gnupg.org/download/
-- Apple Mac option: http://macgpg.sourceforge.net/
+* Main site: http://www.gnupg.org/download/
+* Apple Mac option: http://macgpg.sourceforge.net/
 
 Ensure you have a valid signature. Use _"gpg --list-secret-keys"_. 
 
 You should see some output like this:
 
 [source, shell]
+----
 $ gpg --list-secret-keys
 /home/balex/.gnupg/secring.gpg
-------------------------------
 sec   1024D/00B5050F 2009-03-28
 uid                  Ben Alex <ben.alex@acegi.com.au>
 uid                  Ben Alex <ben.alex@springsource.com>
 uid                  Ben Alex <balex@vmware.com>
 ssb   4096g/2DB6833B 2009-03-28
+----
 
 If you don't see the output, it means you first need to create a key. 
 
@@ -97,14 +98,15 @@ Next you need to publish your key to a *public keyserver*. Take a note of the "s
 
 Push your public key to a keyserver via the command _"gpg --keyserver hkp://pgp.mit.edu --send-keys 00B5050F"_ (_of course changing the key ID at the end_). Most public key servers share keys, so you don't need to send your public key to multiple key servers.
 
-Finally, every time you build you will be prompted for the password of your key. 
+Finally, every time you build you will be prompted for the password of your
+key.
 
 You have *several options*:
 
-- Type the password in every time
-- Include a _-Dgpg.passphrase=thephrase_ argument when calling "mvn"
-- Edit _~/.bashrc_ and add _-Dgpg.passphrase=thephrase_ to _MAVEN_OPTS_
-- Edit your active Maven profile to include a _"gpg.passphrase"_ property:
+* Type the password in every time
+* Include a _-Dgpg.passphrase=thephrase_ argument when calling "mvn"
+* Edit _~/.bashrc_ and add _-Dgpg.passphrase=thephrase_ to _MAVEN_OPTS_
+* Edit your active Maven profile to include a _"gpg.passphrase"_ property:
 [source, shell]
      <profiles>
          <profile>
@@ -159,12 +161,18 @@ Spring Roo is not longer included on http://spring.io/tools[STS] distributions.
 If you wan to include *Roo Support* on your STS, follow the next instructions:
 
 . Open your STS IDE
-. Open STS dashboard and search Spring Roo
-. Installs *Spring Roo (current production release)* and *Spring IDE - Roo Extension*
-. Restarts STS IDE
 
-image:http://i.stack.imgur.com/gzsc0.jpg[current production release]
+. Open STS dashboard and search Spring Roo
+
+. Install *Spring IDE - Roo Extension*
++
+image:http://i.stack.imgur.com/gzsc0.jpg[Current production release]
+
+. Install *Spring IDE - Roo Extension*
++
 image:http://i.stack.imgur.com/MOtHu.png[Roo Extension]
+
+. Restarts STS IDE
 
 With that simple steps you will include Roo Support on your STS IDE.
 
@@ -236,7 +244,6 @@ The --rebase option will essentially do a 'git pull', but then it will reapply y
 
 If you're doing something non-trivial, it's best to create a branch. Learn more about this at http://sysmonblog.co.uk/misc/git_by_example/.
 
-
 [[releasing]]
 == Releasing
 
@@ -246,84 +253,94 @@ Our release procedure may seem long, but that's because it includes many steps r
 
 === Prerequisites:
 
-- *GPG setup* (probably already setup if you followed notes above)
-- *Git push privileges* (if you can commit, you have this)
-- *VPN access* for SSH into static.springsource.org
-- *SSH keypair* for auto login into static.springsource.org
-- *s3cmd setup* (so "s3cmd ls" lists spring-roo-repository.springsource.org)
-- *~/.m2/settings.xml* for spring-roo-repository-release and spring-roo-repository-snapshot IDs with S3 username/password
-- @SpringRoo *twitter account credentials*
-- www.springsource.org *editor privileges*
-- JIRA project *administrator privileges*
-- Close down your IDE before proceeding
+* *GPG setup* (probably already setup if you followed notes above)
+* *Git push privileges* (if you can commit, you have this)
+* *VPN access* for SSH into static.springsource.org
+* *SSH keypair* for auto login into static.springsource.org
+* *s3cmd setup* (so "s3cmd ls" lists spring-roo-repository.springsource.org)
+* *~/.m2/settings.xml* for spring-roo-repository-release and spring-roo-repository-snapshot IDs with S3 username/password
+* @SpringRoo *twitter account credentials*
+* spring.io/projects/spring-roo *editor privileges*. Note you need editor
+  privileges for source pages at 
+  https://github.com/spring-projects/spring-roo/tree/gh-pages
+* JIRA project *administrator privileges*
+* Close down your IDE before proceeding
 
 === Release Procedure:
 
-*1* Complete a thorough testing build and assembly ZIP:
-
+. Complete a thorough testing build and assembly ZIP:
++
 [source, shell]
+----
 cd $ROO_HOME
 git pull
 cd $ROO_HOME/deployment-support
-./roo-deploy.sh -c next -n 4.5.6.RELEASE (use -v for logging)
+./roo-deploy-dist.sh -c next -n 4.5.6.RELEASE (use -v for logging)
 cd $ROO_HOME
 mvn clean install
 cd $ROO_HOME/deployment-support
 mvn clean site
-./roo-deploy.sh -c assembly -tv (use -t for extra tests)
+./roo-deploy-dist.sh -c assembly -tv (use -t for extra tests)
+----
 
-*2* Verify the assembly ZIP ($ROO_HOME/target/roo-deploy/dist/*.zip) looks good:
+. Verify the assembly ZIP ($ROO_HOME/target/roo-deploy/dist/*.zip) looks good:
 
 - Assembly ZIP unzips and is of a sensible size
 - Assembly ZIP runs correctly when installed on major platforms
 - Create Jira Task ticket "Release Spring Roo x.y.z.aaaaaa"
 - Run the "reference guide" command in the Roo shell, copy the resulting XML file into $ROO_HOME/deployment-support/src/site/docbook/reference, git commit and then git push (so the appendix is updated)
 
-*3* Tag the release (update the key ID, Jira ID and tag ID):
-
+. Tag the release (update the key ID, Jira ID and tag ID):
++
 [source, shell]
 cd $ROO_HOME
 git tag -a -m "ROO-XXXX: Release Spring Roo 4.5.6.RELEASE" 4.5.6.RELEASE
 
-*4* Build JARs:
-
+. Build JARs:
++
 [source, shell]
  cd $ROO_HOME
  mvn clean package
 
-*5* Build the reference guide and deploy to the static staging server. You must be connected to the VPN for deployment to work. Note that http://projects.spring.io/spring-roo/ is updated bi-hourly from staging:
-
+. Build the reference guide and deploy to the static staging server. You must be connected to the VPN for deployment to work. Note that http://projects.spring.io/spring-roo/ is updated bi-hourly from staging:
++
 [source, shell]
 cd $ROO_HOME/deployment-support
 mvn clean site site:deploy
 
-*6* Create the final assembly ZIP (must happen *after* site built). We run full tests here, even ensuring all the Maven artifacts used by user projects are available. This takes a lot of time, but it is very helpful for our users:
-
+. Create the final assembly ZIP (must happen *after* site built). We run full tests here, even ensuring all the Maven artifacts used by user projects are available. This takes a lot of time, but it is very helpful for our users:
++
 [source, shell]
 cd $ROO_HOME/deployment-support
-./roo-deploy.sh -c assembly -Tv (-T means Maven tests with empty repo)
+./roo-deploy-dist.sh -c assembly -Tv (-T means Maven tests with empty repo)
 
-*7* Repeat the verification tests on the assembly ZIP (see above). See note below if coordinating a release with the STS team.
+. Repeat the verification tests on the assembly ZIP (see above). See note below if coordinating a release with the STS team.
++
+Typically after this step you'll *send the tested assembly ZIP to the STS team for a concurrent release*. Allow time for them to test the ZIP before starting step 8. This allows verification of STS embeddeding. Keep your ROO_HOME intact during this time, as you need the **/target and /.git directories for steps 8 and 9 to be completed.
 
-*8* If the verifications pass, push the Git tag up to the server:
-
+. If the verifications pass, push the Git tag up to the server:
++
 [source, shell]
 cd $ROO_HOME
 git push --tags
 
-*9* Deploy the JARs and assembly ZIP to the production download servers (it takes up to an hour for these to be made fully downloadable):
-
+. Deploy the JARs to Maven Central
++
 [source, shell]
 cd $ROO_HOME
-mvn deploy
-cd $ROO_HOME/deployment-support
-./roo-deploy.sh -c deploy (use -dv for a dry-run and verbose logging)
+mvn clean deploy
 
-*10* Increment the version number to the next BUILD-SNAPSHOT number:
-
+. Deploy assembly ZIP (binaries) to the production download servers (it takes up to an hour for these to be made fully downloadable):
++
 [source, shell]
 cd $ROO_HOME/deployment-support
-./roo-deploy.sh -c next -n 4.5.6.BUILD-SNAPSHOT (use -v for logging)
+./roo-deploy-dist.sh -c deploy (use -dv for a dry-run and verbose logging)
+
+. Increment the version number to the next BUILD-SNAPSHOT number:
++
+[source, shell]
+cd $ROO_HOME/deployment-support
+./roo-deploy-dist.sh -c next -n 4.5.6.BUILD-SNAPSHOT (use -v for logging)
 cd $ROO_HOME
 mvn clean install eclipse:clean eclipse:eclipse
 cd ~/some-directory; roo-dev script clinic.roo; mvn test
@@ -332,32 +349,28 @@ git diff
 git commit -a -m "ROO-XXXX: Update to next version"
 git push
 
-Typically after step 7 you'll *send the tested assembly ZIP to the STS team for a concurrent release*. Allow time for them to test the ZIP before starting step 8. This allows verification of STS embeddeding. Keep your ROO_HOME intact during this time, as you need the **/target and /.git directories for steps 8 and 9 to be completed.
-
 If any problems are detected before step 8, *simply fix*, push and start from step 1 again. You have not deployed anything substantial (ie only the reference guide) until step 8, so some corrections and re-tagging can be performed without any difficulty. The critical requirement is to defer step 8 (and beyond) until you're sure everything is fine.
 
 === Pre-notification testing:
 
-- Visit http://projects.spring.io/spring-roo/, click "Download!"
-- Ensure it unzips OK and the sha1sum matches the downloaded .sha
-- rm -rf ~/.m2/repository/org/springframework/roo
-- Use "roo script clinic.roo" to build a new Roo project
-- Use "mvn clean test" to verify Roo's annotation JAR downloads
+* Visit http://projects.spring.io/spring-roo/, click "Download!"
+* Ensure it unzips OK and the sha1sum matches the downloaded .sha
+* `rm -rf ~/.m2/repository/org/springframework/roo`
+* Use "roo script clinic.roo" to build a new Roo project
+* Use "mvn clean test" to verify Roo's annotation JAR downloads
 
 === Notifications and administration
 
 Once the release is completed (ie all steps above) you'll typically:
 
-- Mark the version as "released" in JIRA (_Admin > JIRA Admin_...)
-- Publish a blog.springsource.com entry explaining what's new
-- Update http://en.wikipedia.org/wiki/Spring_Roo with the version
-- Add a "News" announcement http://forum.spring.io/forum/spring-projects/roo
-- Add a "Roo" forum announcement http://forum.spring.io/forum/spring-projects/roo
-- Edit http://forum.spring.io/forum/spring-projects/roo/64079-latest-project-links-and-version-details
-- Tweet from @SpringRoo (NB: ensure #SpringRoo is in the message)
-- Tweet from your personal account
-- Email dev list
-- Resolve the "release ticket" in JIRA
+* Mark the version as "released" in JIRA (_Admin > JIRA Admin_...)
+* Publish a https://spring.io/blog/ entry explaining what's new
+* Update http://en.wikipedia.org/wiki/Spring_Roo with the version
+* Edit project page http://projects.spring.io/spring-roo/
+* Tweet from @SpringRoo (NB: ensure #SpringRoo is in the message)
+* Tweet from your personal account
+* Email dev list
+* Resolve the "release ticket" in JIRA
 
 [[help]]
 == Help
@@ -367,3 +380,4 @@ http://forum.springsource.org is now a read-only archive. All commenting, postin
 If you have any question about Spring-roo project and its functionalities, you can check http://stackoverflow.com/questions/tagged/spring-roo
 
 Thanks for your interest in Spring Roo!
+
