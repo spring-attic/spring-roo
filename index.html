@@ -46,10 +46,10 @@ Spring Roo differs from other productivity tools by focusing on:
 * Comprehensive technology integrations
 * Extension points via Roo add-ons
 * Spring-certified architecture
- 
+
 ## Instant Results - Making Java Fun
 
-Spring Roo is a lightweight developer tool that makes it fast and easy to deliver instant results. Best of all, you code 100% in Java and get to reuse all your existing Java knowledge, skills and experience. You'll like it - and have plenty of fun too! Read how [TomTom cut development time in half](http://drupal.spring.io/node/3001) using Spring Roo.
+Spring Roo is a lightweight developer tool that makes it fast and easy to deliver instant results. Best of all, you code 100% in Java and get to reuse all your existing Java knowledge, skills and experience.
 
 Read the book [Getting Started with Roo](http://shop.oreilly.com/product/0636920020981.do) written by Josh Long and Steve Mayzak.
 
@@ -68,7 +68,7 @@ With Roo you still program everything in Java. Its innovative approach operates 
 <span id="quick-start"></span>
 ## Quick Start
 
-Download [Spring Roo 1.2.5](http://spring-roo-repository.springsource.org/spring-roo-1.2.5.RELEASE.zip).
+Download [Spring Roo 1.3.0](http://spring-roo-repository.springsource.org.s3.amazonaws.com/release/ROO/spring-roo-1.3.0.RELEASE.zip).
 
 After downloading, unpacking, and installing Roo, try out the following steps to create an application:
 
@@ -78,15 +78,14 @@ cd hello
 roo
 roo> hint
 roo> project --topLevelPackage com.foo
-roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY         
-roo> entity jpa --class ~.Timer --testAutomatically
+roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+roo> entity jpa --class ~.domain.Timer --testAutomatically
 roo> field string --fieldName message --notNull
 roo> hint web mvc
 roo> web mvc setup
 roo> web mvc all --package ~.web
 roo> selenium test --controller ~.web.TimerController
-roo> web gwt setup
-roo> web gwt all --proxyPackage ~.client.proxy --requestPackage ~.client.request          
+roo> security setup
 roo> perform tests
 roo> quit
 ```
@@ -97,7 +96,7 @@ roo> quit
 
 ### Additional Documentation
 
-* [Reference (PDF)](http://docs.spring.io/spring-roo/reference/pdf/spring-roo-docs.pdf)
+* [Reference (PDF)](http://docs.spring.io/spring-roo/docs/current/reference/pdf/spring-roo-docs.pdf)
 
 ### Videos
 
