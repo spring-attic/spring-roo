@@ -4,7 +4,7 @@
     <groupId>org.springframework.roo</groupId>
     <artifactId>org.springframework.roo.root</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.0.BUILD-SNAPSHOT</version>
+    <version>1.3.1.RELEASE</version>
     <name>Spring Roo</name>
     <url>http://projects.spring.io/spring-roo/</url>
     <licenses>
