@@ -16,28 +16,15 @@
 
     <authorgroup>
       <author>
-        <personname>Ben Alex</personname>
+        <personname>DISID Corporation, S.L</personname>
       </author>
-
       <author>
-        <personname>Stefan Schmidt</personname>
-      </author>
-
-      <author>
-        <personname>Alan Stewart</personname>
-      </author>
-
-      <author>
-        <personname>James Tyrrell</personname>
-      </author>
-
-      <author>
-        <personname>Andrew Swan</personname>
+        <personname>Pivotal Software, Inc</personname>
       </author>
     </authorgroup>
 
     <legalnotice>
-      <para>Copyright 2009-2013 VMware, Inc. All Rights
+      <para>Copyright 2009-2014 VMware, Inc. All Rights
       Reserved.</para>
 
       <para>Copies of this document may be made for your own use and for
@@ -104,8 +91,6 @@
     <xi:include href="base-jsf.xml" />
 
     <xi:include href="base-cloud-foundry.xml" />
-
-    <xi:include href="base-gwt.xml" />
 
     <xi:include href="base-json.xml" />
 

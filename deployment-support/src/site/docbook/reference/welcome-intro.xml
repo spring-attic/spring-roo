@@ -686,14 +686,6 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
       </listitem>
 
       <listitem>
-        <para><emphasis>expenses.roo</emphasis>: The Expenses sample script
-        produces a <link
-        xlink:href="http://code.google.com/webtoolkit/">Google Web
-        Toolkit</link> (GWT) application using Spring Roo. This shows you the
-        new GWT scaffolding support we added to Roo 1.1.</para>
-      </listitem>
-
-      <listitem>
         <para><emphasis>pizzashop.roo</emphasis>: The PizzaShop sample script
         demonstrates Roo's integration of JPA composite primary keys. It
         produces a headless application which is accessible via JSON

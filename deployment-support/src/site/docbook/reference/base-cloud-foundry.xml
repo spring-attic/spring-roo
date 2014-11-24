@@ -108,9 +108,6 @@ cloud foundry login</programlisting>
 
 	<section>
     <title>Deploying Your Application</title>
-    <para>As the creation of sample application that will be used in this
-    chapter has already been covered in the <link linkend="base-gwt">GWT
-    chapter</link> we will skip to the deploying it.</para>
 
     <para>The first command that is likely to be of use is "cloud foundry
     deploy". With this command you are are able to deploy an application to
@@ -206,9 +203,6 @@ cloud foundry login</programlisting>
       </imageobject>
     </mediaobject>
 
-    <para>To change the alotted memory we could run "cloud foundry update app
-    memory --appName new-expenses" but as GWT allows state to be stored client
-    side the default should be enough.</para>
     </section>
     
     <section>
