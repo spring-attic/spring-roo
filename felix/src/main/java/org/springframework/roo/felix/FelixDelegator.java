@@ -23,6 +23,7 @@ import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.logging.LoggingOutputStream;
+import org.osgi.framework.BundleContext;
 
 /**
  * Delegates to commands provided via Felix's Shell API.
@@ -35,7 +36,7 @@ import org.springframework.roo.support.logging.LoggingOutputStream;
 @Component
 @Service
 public class FelixDelegator implements CommandMarker, ShellStatusListener {
-    private ComponentContext context;
+    private BundleContext context;
     @Reference private Shell rooShell;
     @Reference private CommandProcessor commandProcessor;
     @Reference private StaticFieldConverter staticFieldConverter;
@@ -43,8 +44,8 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
     protected static final Logger LOGGER = HandlerUtils
             .getLogger(LoggingOutputStream.class);
 
-    protected void activate(final ComponentContext context) {
-        this.context = context;
+    protected void activate(final ComponentContext cContext) {
+        context = cContext.getBundleContext();
         rooShell.addShellStatusListener(this);
         staticFieldConverter.add(LogLevel.class);
         staticFieldConverter.add(PsOptions.class);
@@ -67,7 +68,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
         }
         else {
             perform("headers "
-                    + bsn.findBundleIdWithoutFail(context.getBundleContext()));
+                    + bsn.findBundleIdWithoutFail(context));
         }
     }
 
@@ -199,7 +200,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
 
     private void perform(final String commandLine) throws Exception {
         if("shutdown".equals(commandLine)) {
-            context.getBundleContext().getBundle(0).stop();
+            context.getBundle(0).stop();
             return;
         }
 
@@ -244,7 +245,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
             throws Exception {
 
         perform("resolve "
-                + bsn.findBundleIdWithoutFail(context.getBundleContext()));
+                + bsn.findBundleIdWithoutFail(context));
     }
 
     @CliCommand(value = "osgi scr config", help = "Lists the current SCR configuration")
@@ -286,7 +287,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
         }
         else {
             perform("scr:list "
-                    + bsn.findBundleIdWithoutFail(context.getBundleContext()));
+                    + bsn.findBundleIdWithoutFail(context));
         }
     }
 
@@ -312,7 +313,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
             throws Exception {
 
         perform("uninstall "
-                + bsn.findBundleIdWithoutFail(context.getBundleContext()));
+                + bsn.findBundleIdWithoutFail(context));
     }
 
     @CliCommand(value = "osgi update", help = "Updates a specific bundle")
@@ -321,7 +322,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
             @CliOption(key = "url", mandatory = false, help = "The URL to obtain the updated bundle from") final String url)
             throws Exception {
 
-        final Long id = bsn.findBundleIdWithoutFail(context.getBundleContext());
+        final Long id = bsn.findBundleIdWithoutFail(context);
         if (url == null) {
             perform("update " + id);
         }

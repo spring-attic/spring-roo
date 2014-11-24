@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.3.0.RELEASE [rev 770570e].</para>
+    <para>This appendix was automatically built from Roo 1.3.1.RC1 [rev b506194].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -1175,6 +1175,51 @@
                     <term>--bundleSymbolicName</term>
                     <listitem>
                         <para>The specific bundle to start; default: '__NULL__' (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-url-add">
+            <title>osgi obr url add</title>
+            <para>Adds a new OSGi Bundle Repository (OBR) repository file URL</para>
+            <programlisting><![CDATA[osgi obr url add --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to add (eg http://felix.apache.org/obr/releases.xml); default: '__NULL__' (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-url-list">
+            <title>osgi obr url list</title>
+            <para>Lists the currently-configured OSGi Bundle Repository (OBR) repository file URLs</para>
+            <programlisting><![CDATA[osgi obr url list]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-osgi-obr-url-refresh">
+            <title>osgi obr url refresh</title>
+            <para>Refreshes an existing OSGi Bundle Repository (OBR) repository file URL</para>
+            <programlisting><![CDATA[osgi obr url refresh --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to refresh (list existing URLs via 'osgi obr url list'); default: '__NULL__' (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-url-remove">
+            <title>osgi obr url remove</title>
+            <para>Removes an existing OSGi Bundle Repository (OBR) repository file URL</para>
+            <programlisting><![CDATA[osgi obr url remove --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to remove (list existing URLs via 'osgi obr url list'); default: '__NULL__' (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
