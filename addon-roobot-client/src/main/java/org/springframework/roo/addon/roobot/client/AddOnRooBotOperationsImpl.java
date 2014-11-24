@@ -475,7 +475,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
                 .executeCommand("osgi obr url add --url http://spring-roo-repository.springsource.org/repository.xml"));
         success &= shell.executeCommand("osgi obr url add --url "
                 + bundleVersion.getObrUrl());
-        success &= shell.executeCommand("osgi obr start --bundleSymbolicName "
+        success &= shell.executeCommand("osgi obr deploy --bundleSymbolicName "
                 + bsn);
         success &= shell.executeCommand("osgi obr url remove --url "
                 + bundleVersion.getObrUrl());

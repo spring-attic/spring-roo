@@ -377,7 +377,7 @@ public class DbreDatabaseListenerImpl extends
         if (StringUtils.isBlank(declaredByMetadataId)) {
             return null;
         }
-        return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+        return (PhysicalTypeMetadata) getMetadataService().get(declaredByMetadataId);
     }
 
     private AnnotationMetadataBuilder getRooDbManagedAnnotation() {
@@ -460,7 +460,7 @@ public class DbreDatabaseListenerImpl extends
         final String declaredByMetadataId = DbreMetadata.createIdentifier(
                 managedEntity.getName(), PhysicalTypeIdentifier
                         .getPath(managedEntity.getDeclaredByMetadataId()));
-        final DbreMetadata dbreMetadata = (DbreMetadata) metadataService
+        final DbreMetadata dbreMetadata = (DbreMetadata) getMetadataService()
                 .get(declaredByMetadataId);
         if (dbreMetadata == null || !dbreMetadata.isAutomaticallyDelete()) {
             return false;
@@ -545,7 +545,7 @@ public class DbreDatabaseListenerImpl extends
 
     private void notify(final List<ClassOrInterfaceTypeDetails> entities) {
         for (final ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
-            final MetadataItem metadataItem = metadataService
+            final MetadataItem metadataItem = getMetadataService()
                     .evictAndGet(managedIdentifierType
                             .getDeclaredByMetadataId());
             if (metadataItem != null) {
@@ -554,7 +554,7 @@ public class DbreDatabaseListenerImpl extends
         }
 
         for (final ClassOrInterfaceTypeDetails entity : entities) {
-            final MetadataItem metadataItem = metadataService
+            final MetadataItem metadataItem = getMetadataService()
                     .evictAndGet(entity.getDeclaredByMetadataId());
             if (metadataItem != null) {
                 notifyIfRequired(metadataItem);

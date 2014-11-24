@@ -75,7 +75,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
     }
 
     private IdentifierHolder getIdentifierHolder(final JavaType javaType) {
-        final List<FieldMetadata> identifierFields = persistenceMemberLocator
+        final List<FieldMetadata> identifierFields = getPersistenceMemberLocator()
                 .getIdentifierFields(javaType);
         if (identifierFields.isEmpty()) {
             return null;
@@ -84,7 +84,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
         final FieldMetadata identifierField = identifierFields.get(0);
         final boolean embeddedIdField = identifierField.getCustomData().get(
                 CustomDataKeys.EMBEDDED_ID_FIELD) != null;
-        final List<FieldMetadata> embeddedIdFields = persistenceMemberLocator
+        final List<FieldMetadata> embeddedIdFields = getPersistenceMemberLocator()
                 .getEmbeddedIdentifierFields(javaType);
         return new IdentifierHolder(identifierField, embeddedIdField,
                 embeddedIdFields);
@@ -126,7 +126,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
                 metadataIdentificationString);
 
         // Search for database-managed entities
-        final Iterable<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService
+        final Iterable<ClassOrInterfaceTypeDetails> managedEntities = getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
 
         boolean found = false;
@@ -137,7 +137,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
             }
         }
         if (!found) {
-            final String mid = typeLocationService
+            final String mid = getTypeLocationService()
                     .getPhysicalTypeIdentifier(javaType);
             getMetadataDependencyRegistry().registerDependency(mid,
                     metadataIdentificationString);
@@ -162,7 +162,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
 
     private FieldMetadata getVersionField(final JavaType domainType,
             final String metadataIdentificationString) {
-        return persistenceMemberLocator.getVersionField(domainType);
+        return getPersistenceMemberLocator().getVersionField(domainType);
     }
     
     public DbreModelService getDbreModelService(){

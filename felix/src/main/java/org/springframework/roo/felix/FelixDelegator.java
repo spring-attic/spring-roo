@@ -146,6 +146,34 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
         perform("start " + bsn.getKey());
     }
 
+    @CliCommand(value = "osgi obr url add", help = "Adds a new OSGi Bundle Repository (OBR) repository file URL")
+    public void obrUrlAdd(
+            @CliOption(key = "url", mandatory = true, help = "The URL to add (eg http://felix.apache.org/obr/releases.xml)") final String url)
+            throws Exception {
+
+        perform("obr:repos add " + url);
+    }
+
+    @CliCommand(value = "osgi obr url list", help = "Lists the currently-configured OSGi Bundle Repository (OBR) repository file URLs")
+    public void obrUrlList() throws Exception {
+        perform("obr:repos list");
+    }
+
+    @CliCommand(value = "osgi obr url refresh", help = "Refreshes an existing OSGi Bundle Repository (OBR) repository file URL")
+    public void obrUrlRefresh(
+            @CliOption(key = "url", mandatory = true, help = "The URL to refresh (list existing URLs via 'osgi obr url list')") final String url)
+            throws Exception {
+
+        perform("obr:repos refresh " + url);
+    }
+
+    @CliCommand(value = "osgi obr url remove", help = "Removes an existing OSGi Bundle Repository (OBR) repository file URL")
+    public void obrUrlRemove(
+            @CliOption(key = "url", mandatory = true, help = "The URL to remove (list existing URLs via 'osgi obr url list')") final String url)
+            throws Exception {
+
+        perform("obr:repos remove " + url);
+    }
 
     public void onShellStatusChange(final ShellStatus oldStatus,
             final ShellStatus newStatus) {
