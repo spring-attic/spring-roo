@@ -38,7 +38,7 @@ public class WarPackaging extends AbstractCorePackagingProvider {
             // This is a single-module web project
             final String fullyQualifiedModuleName = getFullyQualifiedModuleName(
                     module, projectOperations);
-            applicationContextOperations.createMiddleTierApplicationContext(
+            getApplicationContextOperations().createMiddleTierApplicationContext(
                     topLevelPackage, fullyQualifiedModuleName);
         }
     }
