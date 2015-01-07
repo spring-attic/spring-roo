@@ -14,6 +14,7 @@ import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.logging.Logger;
 
@@ -25,7 +26,9 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.entity.RooJpaEntity;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.test.IntegrationTestOperations;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
@@ -66,7 +69,8 @@ public class JpaCommands implements CommandMarker {
     @Reference private ProjectOperations projectOperations;
     @Reference private PropFileOperations propFileOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
-
+    @Reference private TypeLocationService typeLocationService;
+    
     @CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
     public void createEmbeddableClass(
             @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true, help = "The name of the class to create") final JavaType name,
@@ -205,7 +209,18 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "activeRecord", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Generate CRUD active record methods for this entity") final boolean activeRecord) {
         Validate.isTrue(!identifierType.isPrimitive(),
                 "Identifier type cannot be a primitive");
+        
+        // Check if exists other entity with the same name
+        Set<ClassOrInterfaceTypeDetails> currentEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JAVA_BEAN);
 
+        for(ClassOrInterfaceTypeDetails entity : currentEntities){
+        	// If exists, we can't create a duplicate entity
+        	if(name.equals(entity.getName())){
+        		throw new IllegalArgumentException(
+                        String.format("Entity '%s' already exists and cannot be created. Try to use other entity name on --class parameter.", name));
+        	}
+        }
+        
         if (!permitReservedWords) {
             ReservedWords.verifyReservedWordsNotPresent(name);
         }
