@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -38,6 +39,12 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.NaturalOrderComparator;
 import org.springframework.roo.support.util.FileUtils;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 /**
  * Implementation of {@link TypeLocationService}.
  * <p>
@@ -53,6 +60,16 @@ import org.springframework.roo.support.util.FileUtils;
 @Component
 @Service
 public class TypeLocationServiceImpl implements TypeLocationService {
+	
+	private static final Logger LOGGER = HandlerUtils
+            .getLogger(TypeLocationServiceImpl.class);
+    
+    // ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+    }
 
     private static final Comparator<String> LENGTH_COMPARATOR = new Comparator<String>() {
         public int compare(final String key1, final String key2) {
@@ -133,12 +150,12 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         return sortedMap;
     }
 
-    @Reference private FileManager fileManager;
-    @Reference private FileMonitorService fileMonitorService;
-    @Reference private MetadataService metadataService;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private TypeCache typeCache;
-    @Reference private TypeResolutionService typeResolutionService;
+    private FileManager fileManager;
+    private FileMonitorService fileMonitorService;
+    private MetadataService metadataService;
+    private ProjectOperations projectOperations;
+    private TypeCache typeCache;
+    private TypeResolutionService typeResolutionService;
 
     private final Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
     private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
@@ -156,15 +173,15 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                 // Change to Java, so drop the cache
                 final ClassOrInterfaceTypeDetails cid = lookupClassOrInterfaceTypeDetails(id);
                 if (cid == null) {
-                    if (!fileManager.exists(fileCanonicalPath)) {
-                        typeCache.removeType(id);
-                        final JavaType type = typeCache.getTypeDetails(id)
+                    if (!getFileManager().exists(fileCanonicalPath)) {
+                        getTypeCache().removeType(id);
+                        final JavaType type = getTypeCache().getTypeDetails(id)
                                 .getName();
                         updateChanges(type.getFullyQualifiedTypeName(), true);
                     }
                     return;
                 }
-                typeCache.cacheType(fileCanonicalPath, cid);
+                getTypeCache().cacheType(fileCanonicalPath, cid);
                 updateAttributeCache(cid);
                 updateChanges(cid.getName().getFullyQualifiedTypeName(), false);
             }
@@ -174,7 +191,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     private Set<String> discoverTypes() {
         // Retrieve a list of paths that have been discovered or modified since
         // the last invocation by this class
-        for (final String change : fileMonitorService
+        for (final String change : getFileMonitorService()
                 .getDirtyFiles(TypeLocationServiceImpl.class.getName())) {
             if (doesPathIndicateJavaType(change)) {
                 discoveredTypes.add(change);
@@ -269,14 +286,14 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         if (parentPath == null) {
             return null;
         }
-        for (final Pom pom : projectOperations.getPoms()) {
+        for (final Pom pom : getProjectOperations().getPoms()) {
             for (final PhysicalPath physicalPath : pom.getPhysicalPaths()) {
                 if (physicalPath.isSource()) {
                     final String pathLocation = FileUtils
                             .ensureTrailingSeparator(physicalPath
                                     .getLocationPath());
                     if (pathLocation.startsWith(parentPath)) {
-                        typeCache.cacheTypeAgainstModule(pom, javaType);
+                        getTypeCache().cacheTypeAgainstModule(pom, javaType);
                         return physicalPath;
                     }
                 }
@@ -296,13 +313,13 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                 .getPath(physicalTypeId);
         final JavaType javaType = PhysicalTypeIdentifier
                 .getJavaType(physicalTypeId);
-        final Pom pom = projectOperations.getPomFromModuleName(logicalPath
+        final Pom pom = getProjectOperations().getPomFromModuleName(logicalPath
                 .getModule());
         final String canonicalFilePath = pom.getPathLocation(logicalPath
                 .getPath()) + javaType.getRelativeFileName();
-        if (fileManager.exists(canonicalFilePath)) {
-            typeCache.cacheTypeAgainstModule(pom, javaType);
-            typeCache.cacheFilePathAgainstTypeIdentifier(canonicalFilePath,
+        if (getFileManager().exists(canonicalFilePath)) {
+            getTypeCache().cacheTypeAgainstModule(pom, javaType);
+            getTypeCache().cacheFilePathAgainstTypeIdentifier(canonicalFilePath,
                     physicalTypeId);
         }
         return canonicalFilePath;
@@ -322,7 +339,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         if (!doesPathIndicateJavaType(fileCanonicalPath)) {
             return null;
         }
-        String physicalTypeIdentifier = typeCache
+        String physicalTypeIdentifier = getTypeCache()
                 .getTypeIdFromTypeFilePath(fileCanonicalPath);
         if (physicalTypeIdentifier != null) {
             return physicalTypeIdentifier;
@@ -331,7 +348,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                 .getFirstDirectory(fileCanonicalPath);
         final String simpleTypeName = StringUtils.replace(fileCanonicalPath,
                 typeDirectory + File.separator, "", 1).replace(".java", "");
-        final JavaPackage javaPackage = typeResolutionService
+        final JavaPackage javaPackage = getTypeResolutionService()
                 .getPackage(fileCanonicalPath);
         if (javaPackage == null) {
             return null;
@@ -339,11 +356,11 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         final JavaType javaType = new JavaType(
                 javaPackage.getFullyQualifiedPackageName() + "."
                         + simpleTypeName);
-        final Pom module = projectOperations
+        final Pom module = getProjectOperations()
                 .getModuleForFileIdentifier(fileCanonicalPath);
         Validate.notNull(module, "The module for the file '"
                 + fileCanonicalPath + "' could not be located");
-        typeCache.cacheTypeAgainstModule(module, javaType);
+        getTypeCache().cacheTypeAgainstModule(module, javaType);
 
         String reducedPath = fileCanonicalPath.replace(
                 javaType.getRelativeFileName(), "");
@@ -358,7 +375,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                 break;
             }
         }
-        typeCache.cacheFilePathAgainstTypeIdentifier(fileCanonicalPath,
+        getTypeCache().cacheFilePathAgainstTypeIdentifier(fileCanonicalPath,
                 physicalTypeIdentifier);
 
         return physicalTypeIdentifier;
@@ -412,7 +429,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         Validate.notBlank(fileCanonicalPath, "File canonical path required");
         // Determine the JavaType for this file
         String relativePath = "";
-        final Pom moduleForFileIdentifier = projectOperations
+        final Pom moduleForFileIdentifier = getProjectOperations()
                 .getModuleForFileIdentifier(fileCanonicalPath);
         if (moduleForFileIdentifier == null) {
             return relativePath;
@@ -494,12 +511,12 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                 "Metadata id '%s' is not a valid physical type id",
                 physicalTypeId);
         updateTypeCache();
-        final ClassOrInterfaceTypeDetails cachedDetails = typeCache
+        final ClassOrInterfaceTypeDetails cachedDetails = getTypeCache()
                 .getTypeDetails(physicalTypeId);
         if (cachedDetails != null) {
             return cachedDetails;
         }
-        final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService
+        final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) getMetadataService()
                 .get(physicalTypeId);
         if (physicalTypeMetadata == null) {
             return null;
@@ -529,7 +546,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
     public Set<String> getTypesForModule(final String modulePath) {
         Validate.notNull(modulePath, "Module path required");
-        return typeCache.getTypeNamesForModuleFilePath(modulePath);
+        return getTypeCache().getTypeNamesForModuleFilePath(modulePath);
     }
 
     public boolean hasTypeChanged(final String requestingClass,
@@ -541,9 +558,9 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
         if (changesSinceLastRequest == null) {
             changesSinceLastRequest = new LinkedHashSet<String>();
-            for (final String typeIdentifier : typeCache
+            for (final String typeIdentifier : getTypeCache()
                     .getAllTypeIdentifiers()) {
-                changesSinceLastRequest.add(typeCache
+                changesSinceLastRequest.add(getTypeCache()
                         .getTypeDetails(typeIdentifier).getName()
                         .getFullyQualifiedTypeName());
             }
@@ -559,13 +576,13 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     private void initTypeMap() {
-        for (final Pom pom : projectOperations.getPoms()) {
+        for (final Pom pom : getProjectOperations().getPoms()) {
             for (final PhysicalPath path : pom.getPhysicalPaths()) {
                 if (path.isSource()) {
                     final String allJavaFiles = FileUtils
                             .ensureTrailingSeparator(path.getLocationPath())
                             + JAVA_FILES_ANT_PATH;
-                    for (final FileDetails file : fileManager
+                    for (final FileDetails file : getFileManager()
                             .findMatchingAntPath(allJavaFiles)) {
                         cacheType(file.getCanonicalPath());
                     }
@@ -588,7 +605,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
      */
     private ClassOrInterfaceTypeDetails lookupClassOrInterfaceTypeDetails(
             final String physicalTypeIdentifier) {
-        final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService
+        final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) getMetadataService()
                 .evictAndGet(physicalTypeIdentifier);
         if (physicalTypeMetadata == null) {
             return null;
@@ -616,7 +633,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         for (final JavaType annotationType : annotationsToDetect) {
             for (final String locatedMid : annotationToMidMap
                     .get(annotationType)) {
-                final ClassOrInterfaceTypeDetails located = typeCache
+                final ClassOrInterfaceTypeDetails located = getTypeCache()
                         .getTypeDetails(locatedMid);
                 callback.process(located);
             }
@@ -637,7 +654,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         updateTypeCache();
 
         for (final String locatedMid : tagToMidMap.get(tag)) {
-            final ClassOrInterfaceTypeDetails located = typeCache
+            final ClassOrInterfaceTypeDetails located = getTypeCache()
                     .getTypeDetails(locatedMid);
             callback.process(located);
         }
@@ -704,7 +721,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     private void updateTypeCache() {
-        if (typeCache.getAllTypeIdentifiers().isEmpty()) {
+        if (getTypeCache().getAllTypeIdentifiers().isEmpty()) {
             initTypeMap();
         }
         discoverTypes();
@@ -714,4 +731,131 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         }
         dirtyFiles.clear();
     }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+        	// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileManager) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on TypeLocationServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public FileMonitorService getFileMonitorService(){
+    	if(fileMonitorService == null){
+        	// Get all Services implement FileMonitorService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(FileMonitorService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (FileMonitorService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileMonitorService on TypeLocationServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return fileMonitorService;
+    	}
+    }
+    
+    public MetadataService getMetadataService(){
+    	if(metadataService == null){
+        	// Get all Services implement MetadataService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(MetadataService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MetadataService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataService on TypeLocationServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return metadataService;
+    	}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+        	// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (ProjectOperations) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on TypeLocationServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    }
+    
+    public TypeCache getTypeCache(){
+    	if(typeCache == null){
+        	// Get all Services implement TypeCache interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(TypeCache.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TypeCache) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeCache on TypeLocationServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return typeCache;
+    	}
+    }
+    
+    public TypeResolutionService getTypeResolutionService(){
+    	if(typeResolutionService == null){
+        	// Get all Services implement TypeResolutionService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(TypeResolutionService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (TypeResolutionService) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeResolutionService on TypeLocationServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return typeResolutionService;
+    	}
+    }
+    
 }
