@@ -38,6 +38,12 @@ public interface LastUsed {
      * to java.*.
      */
     void setType(JavaType javaType);
+    
+    /**
+     * Sets the type, and also sets the package field. Ignores attempts to set
+     * to java.*. But with not verified
+     */
+    void setTypeNotVerified(JavaType javaType);
 
     /**
      * Sets the last used type and the module to which it belongs
@@ -46,5 +52,13 @@ public interface LastUsed {
      * @param module
      */
     void setType(JavaType javaType, Pom module);
+
+    /**
+     * Sets the last used type and the module to which it belongs not verified
+     * 
+     * @param result
+     * @param module
+     */
+	void setTypeNotVerified(JavaType result, Pom module);
 
 }

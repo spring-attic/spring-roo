@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +27,10 @@ import java.util.zip.ZipEntry;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
@@ -37,9 +42,17 @@ import org.springframework.roo.support.util.CollectionUtils;
  * 
  * @author Ben Alex
  */
+@Component
 public abstract class AbstractShell extends AbstractShellStatusPublisher
         implements Shell {
-
+	
+	List<CommandListener> commandListeners = new ArrayList<CommandListener>();
+	
+   	private static final Logger LOGGER = HandlerUtils
+            .getLogger(AbstractShell.class);
+	
+	private CommandListener commandListener;
+	
     private static final String MY_SLOT = AbstractShell.class.getName();
     protected static final String ROO_PROMPT = "roo> ";
 
@@ -221,7 +234,10 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             if (parseResult == null) {
                 return false;
             }
-
+            try {
+            	notifyBeginExecute(parseResult);
+            }catch (final Exception ignored) {
+            }
             setShellStatus(Status.EXECUTING);
             final Object result = executionStrategy.execute(parseResult);
             setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
@@ -245,10 +261,21 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
 
             logCommandIfRequired(line, true);
             setShellStatus(Status.EXECUTION_SUCCESS, line, parseResult);
+            // ROO-3581: When command success, execute command listener SUCCESS
+            try {
+            	notifyExecutionSuccess();
+            }catch (final Exception ignored) {
+            }
+
             return true;
         }
         catch (final RuntimeException e) {
             setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
+            try {
+	            // ROO-3581: When command fails, execute command listener FAILS
+	            notifyExecutionFailed();
+            }catch (final Exception ignored) {
+            }
             // We rely on execution strategy to log it
             try {
                 logCommandIfRequired(line, false);
@@ -261,8 +288,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             setShellStatus(Status.USER_INPUT);
         }
     }
-
-    /**
+    
+	/**
      * Execute the single line from a script.
      * <p>
      * This method can be overridden by sub-classes to pre-process script lines.
@@ -545,6 +572,45 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     public void setTailor(final Tailor tailor) {
         this.tailor = tailor;
     }
+    
+	@Override
+	public void addListerner(CommandListener listener) {
+		commandListeners.add(listener);
+	}
+	
+	@Override
+	public void removeListener(CommandListener listener) {
+		commandListeners.remove(listener);
+	}
+    
+    private void notifyExecutionFailed() {
+		if (commandListeners.isEmpty()) {
+			return;
+		}
+		
+		for (CommandListener listener : commandListeners) {
+			listener.onCommandFails();
+		}
+	}
+
+	private void notifyExecutionSuccess() {
+		if (commandListeners.isEmpty()) {
+			return;
+		}
+		for (CommandListener listener : commandListeners) {
+			listener.onCommandSuccess();
+		}
+		
+	}
+
+	private void notifyBeginExecute(ParseResult parseResult) {
+		if (commandListeners.isEmpty()) {
+			return;
+		}
+		for (CommandListener listener : commandListeners) {
+			listener.onCommandBegin(parseResult);
+		}
+	}
 
     @CliCommand(value = { "version" }, help = "Displays shell version")
     public String version(
