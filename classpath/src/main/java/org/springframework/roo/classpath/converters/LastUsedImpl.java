@@ -36,14 +36,14 @@ public class LastUsedImpl implements LastUsed, CommandListener {
 	 private static final Logger LOGGER = HandlerUtils
 	            .getLogger(LastUsedImpl.class);
 	    
-	    // ------------ OSGi component attributes ----------------
-	   	private BundleContext context;
-	   	
-	   	protected void deactivate(final ComponentContext cContext) {
-	   		if (shell != null) {
-	   			shell.removeListener(this);
-	   		}
-	    }
+    // ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected void deactivate(final ComponentContext cContext) {
+   		if (shell != null) {
+   			shell.removeListener(this);
+   		}
+    }
 
 	// Verified fields
     private JavaPackage topLevelPackage;
