@@ -145,8 +145,12 @@ public class JavaTypeConverter implements Converter<JavaType> {
                     + typeName;
         }
         final JavaType result = new JavaType(newValue);
+        
+        // ROO-3581: On this time we don't know if current result 
+        // exists as type on generated project. We need to save as 
+        // not verified
         if (StringUtils.contains(optionContext, UPDATE)) {
-            lastUsed.setType(result, module);
+        	lastUsed.setTypeNotVerified(result, module);
         }
         return result;
     }
@@ -449,4 +453,5 @@ public class JavaTypeConverter implements Converter<JavaType> {
         }
         return existingData;
     }
+    
 }

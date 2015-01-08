@@ -112,4 +112,18 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
      * @param tailor the tailor implementation
      */
     void setTailor(Tailor tailor);
+    
+    /**
+     * To add new CommandListener on Shell object, use addListener method.
+     * 
+     * @param listener
+     */
+    void addListerner(CommandListener listener);
+    
+    /**
+     * To remove CommandListener on Shell object, use removeListener method
+     * 
+     * @param listener
+     */
+    void removeListener(CommandListener listener);
 }

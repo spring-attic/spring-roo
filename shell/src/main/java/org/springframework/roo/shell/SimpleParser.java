@@ -1,12 +1,9 @@
 package org.springframework.roo.shell;
 
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
-import static org.springframework.roo.shell.CliOption.*;
+import static org.springframework.roo.shell.CliOption.EMPTY;
+import static org.springframework.roo.shell.CliOption.NULL;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,36 +16,19 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.XmlElementBuilder;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.CDATASection;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Default implementation of {@link Parser}.
@@ -60,7 +40,7 @@ public class SimpleParser implements Parser {
 	
 	// ------------ OSGi component attributes ----------------
    	public BundleContext context;
-
+   	
     private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
     private static final Logger LOGGER = HandlerUtils
             .getLogger(SimpleParser.class);
@@ -215,19 +195,8 @@ public class SimpleParser implements Parser {
             final List<Completion> candidates) {
         synchronized (mutex) {
         	
-        	if(converters.isEmpty()){
-        		// Get all Services implement Converter interface
-        		try {
-        			ServiceReference<?>[] references = this.context.getAllServiceReferences(Converter.class.getName(), null);
-        			
-        			for(ServiceReference<?> ref : references){
-        				add((Converter<?>) this.context.getService(ref));
-        			}
-        			
-        		} catch (InvalidSyntaxException e) {
-        			LOGGER.warning("Cannot load Converter on SimpleParser.");
-        		}
-        	}
+        	// Loading converters if needed
+        	loadConverters();
         	
             Validate.notNull(buffer, "Buffer required");
             Validate.notNull(candidates, "Candidates list required");
@@ -876,19 +845,8 @@ public class SimpleParser implements Parser {
     public ParseResult parse(final String rawInput) {
         synchronized (mutex) {
         	
-        	if(converters.isEmpty()){
-        		// Get all Services implement Converter interface
-        		try {
-        			ServiceReference<?>[] references = this.context.getAllServiceReferences(Converter.class.getName(), null);
-        			
-        			for(ServiceReference<?> ref : references){
-        				add((Converter<?>) this.context.getService(ref));
-        			}
-        			
-        		} catch (InvalidSyntaxException e) {
-        			LOGGER.warning("Cannot load Converter on SimpleParser.");
-        		}
-        	}
+        	// Load converters if needed
+        	loadConverters();
         	
             Validate.notNull(rawInput, "Raw input required");
             final String input = normalise(rawInput);
@@ -1064,7 +1022,7 @@ public class SimpleParser implements Parser {
                     // Use the converter
                     result = c.convertFromText(value, requiredType,
                             cliOption.optionContext());
-
+                    
                     // If the option has been specified to be mandatory then the
                     // result should never be null
                     if (result == null && cliOption.mandatory()) {
@@ -1114,7 +1072,7 @@ public class SimpleParser implements Parser {
                     methodTarget.getTarget(), arguments.toArray());
         }
     }
-
+    
     private String collectionToDelimitedString(final Collection<?> coll,
             final String delim, final String prefix, final String suffix) {
         if (CollectionUtils.isEmpty(coll)) {
@@ -1150,5 +1108,21 @@ public class SimpleParser implements Parser {
         synchronized (mutex) {
             converters.remove(converter);
         }
+    }
+    
+    public final void loadConverters(){
+    	if(converters.isEmpty()){
+    		// Get all Services implement Converter interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(Converter.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				add((Converter<?>) this.context.getService(ref));
+    			}
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load Converter on SimpleParser.");
+    		}
+    	}
     }
 }
