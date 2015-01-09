@@ -1,7 +1,10 @@
 package org.springframework.roo.felix;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,6 +14,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -23,7 +28,6 @@ import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.logging.LoggingOutputStream;
-import org.osgi.framework.BundleContext;
 
 /**
  * Delegates to commands provided via Felix's Shell API.
@@ -62,13 +66,29 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
     public void headers(
             @CliOption(key = "bundleSymbolicName", mandatory = false, help = "Limit results to a specific bundle symbolic name") final BundleSymbolicName bsn)
             throws Exception {
-
+    	
         if (bsn == null) {
             perform("headers");
         }
         else {
-            perform("headers "
-                    + bsn.findBundleIdWithoutFail(context));
+        	// ROO-3573: Gets Bundle using context and show headers
+        	Bundle bundle = bsn.findBundleWithoutFail(context);
+        	Dictionary<String, String> bundleHeaders = bundle.getHeaders();
+        	
+        	LOGGER.log(Level.INFO, String.format("%s - (%s)",bundleHeaders.get("Bundle-Name"), bundle.getBundleId()));
+        	LOGGER.log(Level.INFO, "-------------------------------------------");
+        	
+        	Enumeration<String> bundleHeadersKeys = bundleHeaders.keys();
+        	Enumeration<String> bundleHeadersElements = bundleHeaders.elements();
+        	
+        	while(bundleHeadersKeys.hasMoreElements()){
+        		String key = bundleHeadersKeys.nextElement();
+        		String element = bundleHeadersElements.nextElement();
+        		LOGGER.log(Level.INFO, String.format("%s = %s", key, element));
+        	}
+        	
+        	LOGGER.log(Level.INFO, "");
+        	
         }
     }
 
@@ -83,7 +103,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
     @CliCommand(value = "osgi log", help = "Displays the OSGi log information")
     public void log(
             @CliOption(key = "maximumEntries", mandatory = false, help = "The maximum number of log messages to display") final Integer maximumEntries,
-            @CliOption(key = "level", mandatory = false, help = "The minimum level of messages to display") final LogLevel logLevel)
+            @CliOption(key = "level", mandatory = true, help = "The minimum level of messages to display") final LogLevel logLevel)
             throws Exception {
 
         final StringBuilder sb = new StringBuilder();
@@ -305,15 +325,21 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
             throws Exception {
 
         perform("start " + url);
+        
+        LOGGER.log(Level.INFO, "Started!");
+        LOGGER.log(Level.INFO, "");
     }
 
     @CliCommand(value = "osgi uninstall", help = "Uninstalls a specific bundle")
     public void uninstall(
             @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The specific bundle to uninstall") final BundleSymbolicName bsn)
             throws Exception {
-
-        perform("uninstall "
-                + bsn.findBundleIdWithoutFail(context));
+    	// ROO-3573: Gets Bundle using context and uninstall it
+    	bsn.findBundleWithoutFail(context).uninstall();
+    	
+    	LOGGER.log(Level.INFO, String.format("Bundle '%s' : Uninstalled!", bsn.getKey()));
+    	LOGGER.log(Level.INFO, "");
+    	
     }
 
     @CliCommand(value = "osgi update", help = "Updates a specific bundle")
@@ -322,12 +348,16 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
             @CliOption(key = "url", mandatory = false, help = "The URL to obtain the updated bundle from") final String url)
             throws Exception {
 
-        final Long id = bsn.findBundleIdWithoutFail(context);
+    	// ROO-3573: Gets Bundle using context and update it
+        Bundle bundle = bsn.findBundleWithoutFail(context);
         if (url == null) {
-            perform("update " + id);
+        	bundle.update();
         }
         else {
-            perform("update " + id + " " + url);
+        	bundle.update(new ByteArrayInputStream(url.getBytes()));
         }
+        
+        LOGGER.log(Level.INFO, String.format("Bundle '%s' : Updated!", bsn.getKey()));
+        LOGGER.log(Level.INFO, "");
     }
 }
