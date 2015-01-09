@@ -54,6 +54,28 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
         throw new IllegalStateException("Bundle symbolic name '" + getKey()
                 + "' has no local bundle ID at this time");
     }
+    
+    /**
+     * Locates the Bundle for this BundleSymbolicName, if available
+     * 
+     * @param context
+     * @return
+     */
+    public Bundle findBundleWithoutFail(final BundleContext context) {
+    	Validate.notNull(context, "Bundle context is unavailable");
+    	final Bundle[] bundles = context.getBundles();
+    	if (bundles == null) {
+            throw new IllegalStateException(
+                    "Bundle cannot be retrieved as BundleContext unavailable");
+        }
+    	for (final Bundle b : bundles) {
+            if (getKey().equals(b.getSymbolicName())) {
+                return b;
+            }
+        }
+    	 throw new IllegalStateException("Bundle symbolic name '" + getKey()
+                 + "' has no local bundle at this time");
+    }
 
     public String getKey() {
         return key;
