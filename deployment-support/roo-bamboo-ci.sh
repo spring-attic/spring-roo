@@ -184,10 +184,10 @@ if [[ ! "$EXITED" = "0" ]]; then
 fi
 
 # Build (and test if user used -T or -t) the assembly
-./roo-deploy-dist.sh -c assembly -s $SUFFIX $ROO_DEPLOY_OPTS $TEST
+./roo-bamboo-deploy-dist.sh -c assembly -s $SUFFIX $ROO_DEPLOY_OPTS $TEST
 EXITED=$?
 if [[ ! "$EXITED" = "0" ]]; then
-    l_error "roo-deploy -c assembly failed (exit code $EXITED)." >&2; exit 1;
+    l_error "roo-bamboo-deploy -c assembly failed (exit code $EXITED)." >&2; exit 1;
 fi
 
 # Deploy the Maven JARs (we do this first to avoid people getting the latest snapshot assembly ZIP before the latest annotation JAR is visible)
