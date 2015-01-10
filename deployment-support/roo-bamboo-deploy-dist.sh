@@ -517,8 +517,6 @@ if [[ "$COMMAND" = "assembly" ]]; then
     popd &>/dev/null
     popd &>/dev/null
 
-    quick_zip_gpg_tests
-
     if [ ! "$TEST" = "0" ]; then
         log "Unzipping Roo distribution to test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER
