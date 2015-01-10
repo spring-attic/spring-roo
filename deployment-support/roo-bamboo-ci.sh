@@ -169,7 +169,7 @@ fi
 
 pushd $ROO_HOME/ &>/dev/null
 # Do the initial mvn packaging (but don't dpeloy)
-mvn $MAVEN_MAIN_OPTS
+mvn $MAVEN_MAIN_OPTS -Pbamboo-build
 EXITED=$?
 if [[ ! "$EXITED" = "0" ]]; then
     l_error "Maven main build failed (exit code $EXITED)." >&2; exit 1;
@@ -177,7 +177,7 @@ fi
 
 # Build reference guide docs (and deploy them; it's not a big deal if the later tests fail but the docs were updated)
 pushd $ROO_HOME/deployment-support &>/dev/null
-mvn $MAVEN_SITE_OPTS
+mvn $MAVEN_SITE_OPTS -Pbamboo-build
 EXITED=$?
 if [[ ! "$EXITED" = "0" ]]; then
     l_error "Maven site build failed (exit code $EXITED)." >&2; exit 1;
