@@ -1,4 +1,4 @@
-= Spring Roo - Developer Instructions
+= Spring Roo - Developer Instructions image:https://build.spring.io/plugins/servlet/buildStatusImage/ROO-BUILD["Build Status", link="https://build.spring.io/browse/ROO-BUILD"]
 Getting started with Spring Roo development
 :page-layout: base
 :toc-placement: manual
