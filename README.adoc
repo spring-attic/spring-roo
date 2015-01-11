@@ -1,4 +1,4 @@
-= Spring Roo - Developer Instructions image:https://build.spring.io/plugins/servlet/buildStatusImage/ROO-BUILD["Build Status", link="https://build.spring.io/browse/ROO-BUILD"]
+= Spring Roo image:https://build.spring.io/plugins/servlet/buildStatusImage/ROO-BUILD["Build Status", link="https://build.spring.io/browse/ROO-BUILD"]
 Getting started with Spring Roo development
 :page-layout: base
 :toc-placement: manual
@@ -13,7 +13,7 @@ If you are looking for *Reference Documentation* you can get it http://docs.spri
 
 image:https://lh4.googleusercontent.com/-_DpgkWvc3bQ/UUwmwkLNdlI/AAAAAAAAAhU/kG3QSpLOhtw/s301/Logo_SpringRoo.png["Spring Roo Logo"]
 
-== Index
+== Developer Instructions
 
 These instructions detail how to get started with your freshly checked-out source tree. Follow next steps to develop Spring Roo yourself.
 
