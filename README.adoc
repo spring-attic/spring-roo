@@ -1,4 +1,4 @@
-= Spring Roo image:https://build.spring.io/plugins/servlet/buildStatusImage/ROO-BUILD["Build Status", link="https://build.spring.io/browse/ROO-BUILD"]
+= Spring Roo image:https://build.spring.io/plugins/servlet/buildStatusImage/ROO-BUILD["Build Status", link="https://build.spring.io/browse/ROO-BUILD"] image:https://badges.gitter.im/Join Chat.svg["Chat",link="https://gitter.im/spring-projects/spring-roo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 Getting started with Spring Roo development
 :page-layout: base
 :toc-placement: manual
