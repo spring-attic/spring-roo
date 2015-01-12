@@ -97,16 +97,16 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>-->
-        <repository>
-          <id>central</id>
-          <name>libs-release-remote</name>
-          <url>http://repo.spring.io/libs-release-remote</url>
-        </repository>
         <snapshotRepository>
           <id>snapshots</id>
           <name>libs-snapshot-remote</name>
           <url>http://repo.spring.io/libs-snapshot-remote</url>
         </snapshotRepository>
+        <repository>
+          <id>central</id>
+          <name>libs-release-remote</name>
+          <url>http://repo.spring.io/libs-release-remote</url>
+        </repository>
     </distributionManagement>
     <repositories>
         <repository>
