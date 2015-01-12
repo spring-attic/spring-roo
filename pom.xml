@@ -759,14 +759,6 @@
             </extension>
         </extensions>
         <plugins>
-        	<plugin>
-	            <groupId>org.jfrog.buildinfo</groupId>
-	            <artifactId>artifactory-maven-plugin</artifactId>
-	            <version>2.2.1</version>
-	            <goals>
-	            	<goal>deploy</goal>
-	            </goals>
-	        </plugin>
             <plugin>
               <groupId>org.sonatype.plugins</groupId>
               <artifactId>nexus-staging-maven-plugin</artifactId>
