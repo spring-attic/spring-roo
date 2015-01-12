@@ -763,15 +763,9 @@
 	            <groupId>org.jfrog.buildinfo</groupId>
 	            <artifactId>artifactory-maven-plugin</artifactId>
 	            <version>2.2.1</version>
-	            <inherited>false</inherited>
-	            <executions>
-	                <execution>
-	                    <id>build-info</id>
-	                    <goals>
-	                        <goal>publish</goal>
-	                    </goals>
-	                </execution>
-	            </executions>
+	            <goals>
+	            	<goal>deploy</goal>
+	            </goals>
 	        </plugin>
             <plugin>
               <groupId>org.sonatype.plugins</groupId>
