@@ -88,16 +88,26 @@
 		<module>addon-tailor</module>
 		<module>annotations</module>
     </modules>
-    <!-- <distributionManagement>
-        <snapshotRepository>
+    <distributionManagement>
+        <!-- <snapshotRepository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>-->
+        <repository>
+          <id>central</id>
+          <name>libs-release-remote</name>
+          <url>http://repo.spring.io/libs-release-remote</url>
         </repository>
-    </distributionManagement>-->
+        <snapshotRepository>
+          <id>snapshots</id>
+          <name>libs-snapshot-remote</name>
+          <url>http://repo.spring.io/libs-snapshot-remote</url>
+        </snapshotRepository>
+    </distributionManagement>
     <repositories>
         <repository>
             <id>spring-roo-repository-release</id>
