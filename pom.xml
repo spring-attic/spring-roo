@@ -99,13 +99,13 @@
         </repository>-->
         <snapshotRepository>
           <id>snapshots</id>
-          <name>libs-snapshot-remote</name>
-          <url>http://repo.spring.io/libs-snapshot-remote</url>
+          <name>libs-snapshot-local</name>
+          <url>http://repo.spring.io/libs-snapshot-local</url>
         </snapshotRepository>
         <repository>
           <id>central</id>
-          <name>libs-release-remote</name>
-          <url>http://repo.spring.io/libs-release-remote</url>
+          <name>libs-release-local</name>
+          <url>http://repo.spring.io/libs-release-local</url>
         </repository>
     </distributionManagement>
     <repositories>
