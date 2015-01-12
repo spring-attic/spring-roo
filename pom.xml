@@ -954,4 +954,21 @@
         <osgi.version>5.0.0</osgi.version>
         <scr.plugin.version>1.20.0</scr.plugin.version>
     </properties>
+    <!-- Adding Profiles to deactivating GPG on Build process --> 
+    <profiles>
+    	<profile>
+	   <id>bamboo-build</id>
+	   <build>
+	      <plugins>
+  		<plugin>
+    		  <groupId>org.apache.maven.plugins</groupId>
+    		  <artifactId>maven-gpg-plugin</artifactId>
+    		  <configuration>
+        	    <skip>true</skip>
+    		  </configuration>
+		</plugin>
+	     </plugins>
+	   </build>
+	</profile>
+    </profiles>	
 </project>
