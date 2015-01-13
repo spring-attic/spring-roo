@@ -89,24 +89,24 @@
 		<module>annotations</module>
     </modules>
     <distributionManagement>
-        <!-- <snapshotRepository>
+        <snapshotRepository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>-->
-        <snapshotRepository>
-          <id>snapshots</id>
+        </repository>
+        <!-- <snapshotRepository>
+          <id>repo</id>
           <name>libs-snapshot-local</name>
           <url>http://repo.spring.io/libs-snapshot-local</url>
         </snapshotRepository>
         <repository>
-          <id>central</id>
+          <id>repo</id>
           <name>libs-release-local</name>
           <url>http://repo.spring.io/libs-release-local</url>
-        </repository>
+        </repository>-->
     </distributionManagement>
     <repositories>
         <repository>
@@ -418,7 +418,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-asm</artifactId>
-                <version>${spring.version}</version>
+                <version>3.1.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>aopalliance</groupId>
@@ -769,7 +769,7 @@
             </extension>
         </extensions>
         <plugins>
-            <!-- <plugin>
+            <plugin>
               <groupId>org.sonatype.plugins</groupId>
               <artifactId>nexus-staging-maven-plugin</artifactId>
               <version>1.6.3</version>
@@ -779,7 +779,7 @@
                 <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                 <autoReleaseAfterClose>true</autoReleaseAfterClose>
               </configuration>
-            </plugin>-->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
