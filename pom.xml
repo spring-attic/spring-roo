@@ -97,6 +97,16 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
+        <!-- <snapshotRepository>
+          <id>repo</id>
+          <name>libs-snapshot-local</name>
+          <url>http://repo.spring.io/libs-snapshot-local</url>
+        </snapshotRepository>
+        <repository>
+          <id>repo</id>
+          <name>libs-release-local</name>
+          <url>http://repo.spring.io/libs-release-local</url>
+        </repository>-->
     </distributionManagement>
     <repositories>
         <repository>
@@ -408,7 +418,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-asm</artifactId>
-                <version>${spring.version}</version>
+                <version>3.1.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>aopalliance</groupId>

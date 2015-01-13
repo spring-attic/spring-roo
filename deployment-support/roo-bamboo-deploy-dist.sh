@@ -377,7 +377,6 @@ else
     exit 1
 fi
 
-type -P gpg &>/dev/null || { l_error "gpg not found. Aborting." >&2; exit 1; }
 type -P zip &>/dev/null || { l_error "zip not found. Aborting." >&2; exit 1; }
 type -P unzip &>/dev/null || { l_error "unzip not found. Aborting." >&2; exit 1; }
 type -P sha1sum &>/dev/null || { l_error "sha1sum not found. Aborting." >&2; exit 1; }
