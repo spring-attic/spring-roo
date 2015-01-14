@@ -166,7 +166,10 @@ public class JavaBeanMetadata extends
 		if (interfaceMethods != null) {
 			for (MethodMetadata interfaceMethod : interfaceMethods) {
 				MethodMetadataBuilder methodBuilder = getInterfaceMethod(interfaceMethod);
-				builder.addMethod(methodBuilder);
+				// ROO-3584: JavaBean implementing Interface defining getters and setters
+				if(!checkIfInterfaceMethodWasImplemented(methodBuilder)){
+					builder.addMethod(methodBuilder);
+				}
 			}
 		}
 
@@ -585,6 +588,27 @@ public class JavaBeanMetadata extends
 				break;
 			}
 		}
+	}
+	
+	/**
+	 * To check if current method was implemented on _JavaBean.aj.
+	 * If method was implemented, is not necessary to add again.
+	 * 
+	 * @param methodBuilder
+	 * @return
+	 */
+	private boolean checkIfInterfaceMethodWasImplemented(
+			MethodMetadataBuilder methodBuilder) {
+		// Obtain current declared methods
+		List<MethodMetadataBuilder> declaredMethods = builder.getDeclaredMethods();
+		
+		for(MethodMetadataBuilder method : declaredMethods){
+			// If current method equals to interface method, return false
+			if(method.getMethodName().equals(methodBuilder.getMethodName())){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
