@@ -167,7 +167,10 @@ public class JavaBeanMetadata extends
 			for (MethodMetadata interfaceMethod : interfaceMethods) {
 				MethodMetadataBuilder methodBuilder = getInterfaceMethod(interfaceMethod);
 				// ROO-3584: JavaBean implementing Interface defining getters and setters
-				if(!checkIfInterfaceMethodWasImplemented(methodBuilder)){
+				// ROO-3585: If interface method already exists on type is not necessary 
+				// to add on ITD. Method builder will be NULL. 
+				if(methodBuilder != null && 
+						!checkIfInterfaceMethodWasImplemented(methodBuilder)){
 					builder.addMethod(methodBuilder);
 				}
 			}
