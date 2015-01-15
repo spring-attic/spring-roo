@@ -12,6 +12,5 @@ Downloads
         </p>
         <div class="js-download-maven-widget"></div>
         </div>
-        <div class="project-download-zip-widget-template"></div>
     </div>
 </div>
