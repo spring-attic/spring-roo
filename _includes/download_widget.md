@@ -7,7 +7,7 @@ Downloads
         <div data-download-widget-controls style="display: inline-block"></div>
     </div>
     <div class="download-widget--body">
-        <p>The recommended way to get started using <code>{{ site.project }} {@= version @}</code> is download
+        <p>The recommended way to get started using <code>{{ site.project }}</code> is download
         and unpackage zip on your system.
         </p>
         <div class="js-download-maven-widget"></div>
