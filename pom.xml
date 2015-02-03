@@ -55,9 +55,7 @@
 		<module>addon-plural</module>
 		<module>addon-propfiles</module>
 		<module>addon-configurable</module>
-		<module>addon-email</module>
 		<module>addon-jpa</module>
-		<module>addon-jms</module>
 		<module>addon-finder</module>
 		<module>addon-logging</module>
 		<module>addon-property-editor</module>
@@ -69,21 +67,16 @@
 		<module>addon-web-mvc-embedded</module>
 		<module>addon-web-mvc-jsp</module>
 		<module>addon-security</module>
-		<module>addon-solr</module>
-		<module>addon-web-flow</module>
 		<module>addon-web-selenium</module>
 		<module>addon-jdbc</module>
 		<module>addon-dbre</module>
 		<module>addon-creator</module>
 		<module>addon-roobot-client</module>
 		<module>addon-json</module>
-		<module>addon-jsf</module>
 		<module>addon-op4j</module>
 		<module>addon-git</module>
-		<module>addon-cloud</module>
 		<module>addon-layers-service</module>
 		<module>addon-layers-repository-jpa</module>
-		<module>addon-layers-repository-mongo</module>
 		<module>addon-oscommands</module>
 		<module>addon-tailor</module>
 		<module>annotations</module>

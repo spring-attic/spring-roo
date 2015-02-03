@@ -1,0 +1,3 @@
+== 3rd Party Addons
+
+This addons were part of Spring Roo 1.x and will be not included on Spring Roo 2.x
