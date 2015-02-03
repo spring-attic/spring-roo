@@ -1,3 +1,12 @@
 == 3rd Party Addons
 
-This addons were part of Spring Roo 1.x and will be not included on Spring Roo 2.x
+This addons were part of *Spring Roo 1.x* and will not be included on *Spring Roo 2.x*
+
+. addon-cloud
+. addon-email
+. addon-gwt
+. addon-jms
+. addon-jsf
+. addon-layers-repository-mongo
+. addon-solr
+. addon-web-flow
