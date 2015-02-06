@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>org.springframework.roo.osgi.bundle</artifactId>
+		<version>2.0.0.BUILD-SNAPSHOT</version>
+		<relativePath>../runtime/osgi-bundle</relativePath>
+	</parent>
+	<artifactId>org.springframework.roo.osgi.subsystem</artifactId>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Runtime - OSGi Apache Aries Subsystem</name>
+	<description>Provides subsystem implementation on Spring Roo Shell</description>
+
+	<dependencies>
+		<!-- Subsystem API -->
+		<dependency>
+			<groupId>org.apache.aries.subsystem</groupId>
+			<artifactId>org.apache.aries.subsystem.api</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<!-- Subsystem Core -->
+		<!-- <dependency> <groupId>org.apache.aries.subsystem</groupId> <artifactId>org.apache.aries.subsystem.core</artifactId> 
+			<version>1.0.0</version> <exclusions> <exclusion> <groupId>org.apache.aries.subsystem</groupId> 
+			<artifactId>org.apache.aries.subsystem.api</artifactId> </exclusion> <exclusion> 
+			<groupId>org.apache.aries.application</groupId> <artifactId>org.apache.aries.application.api</artifactId> 
+			</exclusion> <exclusion> <groupId>org.apache.aries.application</groupId> 
+			<artifactId>org.apache.aries.application.utils</artifactId> </exclusion> 
+			</exclusions> </dependency> -->
+		<!-- Subsystem OBR -->
+		<dependency>
+			<groupId>org.apache.aries.subsystem</groupId>
+			<artifactId>org.apache.aries.subsystem.obr</artifactId>
+			<version>1.0.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.aries.subsystem</groupId>
+					<artifactId>org.apache.aries.subsystem.api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.aries.application</groupId>
+					<artifactId>org.apache.aries.application.api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.aries.application</groupId>
+					<artifactId>org.apache.aries.application.utils</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Apache Application API -->
+		<dependency>
+			<groupId>org.apache.aries.application</groupId>
+			<artifactId>org.apache.aries.application.api</artifactId>
+			<version>1.0.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.aries</groupId>
+					<artifactId>org.apache.aries.util</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Apache Application MODELLER -->
+		<dependency>
+			<groupId>org.apache.aries.application</groupId>
+			<artifactId>org.apache.aries.application.modeller</artifactId>
+			<version>1.0.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.aries</groupId>
+					<artifactId>org.apache.aries.util</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Appache Application Utils -->
+		<dependency>
+			<groupId>org.apache.aries.application</groupId>
+			<artifactId>org.apache.aries.application.utils</artifactId>
+			<version>1.0.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.aries</groupId>
+					<artifactId>org.apache.aries.util</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Apache Aries Blueprint -->
+		<dependency>
+			<groupId>org.apache.aries.blueprint</groupId>
+			<artifactId>org.apache.aries.blueprint</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		<!-- Apache Aries Proxy -->
+		<dependency>
+			<groupId>org.apache.aries.proxy</groupId>
+			<artifactId>org.apache.aries.proxy</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+		<!-- Apache Felix Resolver -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.resolver</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<!-- Equinox Coordinator -->
+		<!-- <dependency>
+			<groupId>org.eclipse.equinox</groupId>
+			<artifactId>org.eclipse.equinox.coordinator</artifactId>
+			<version>1.1.0.v20120522-1841</version>
+		</dependency>-->
+		<!-- Equinox Region -->
+		<dependency>
+			<groupId>org.eclipse.equinox</groupId>
+			<artifactId>org.eclipse.equinox.region</artifactId>
+			<version>1.1.0.v20120522-1841</version>
+		</dependency>
+		<!-- OSGi Eclipse Util -->
+		<dependency>
+			<groupId>org.eclipse.osgi</groupId>
+			<artifactId>util</artifactId>
+			<version>3.1.200-v20070605</version>
+		</dependency>
+		<!-- SLF4J Simple -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+	</dependencies>
+
+</project>
