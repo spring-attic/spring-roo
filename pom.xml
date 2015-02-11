@@ -226,7 +226,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
+            <!--<dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.ipojo</artifactId>
                 <version>1.12.0</version>
@@ -248,7 +248,7 @@
                         <artifactId>asm-all</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
+            </dependency>-->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.log</artifactId>
@@ -520,6 +520,11 @@
                 <artifactId>org.springframework.roo.wrapping.json-simple</artifactId>
                 <version>1.1.0.0010</version>
             </dependency>
+            <dependency>
+				<groupId>org.springframework.roo.wrapping</groupId>
+				<artifactId>org.springframework.roo.wrapping.protobuf-java</artifactId>
+				<version>2.4.1.0010</version>
+			</dependency>
             <!-- Roo Addons -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>

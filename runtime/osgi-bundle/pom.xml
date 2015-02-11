@@ -79,6 +79,7 @@
                     <includeScope>compile</includeScope>
                     <excludeArtifactIds>org.apache.felix.scr.annotations</excludeArtifactIds>
                     <excludeGroupIds>org.osgi</excludeGroupIds>
+                   	<excludeTransitive>true</excludeTransitive>
                 </configuration>
             </plugin>
             <plugin>
