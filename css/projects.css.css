@@ -310,6 +310,11 @@
     font-weight: bold;
 }
 
+.project-body--container .project-body--section h4 {
+    font-family: "Montserrat", sans-serif;
+}
+
+
 .project-body--container .project-body--section pre {
     border-radius: 0;
 }
