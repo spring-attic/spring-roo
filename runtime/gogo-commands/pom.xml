@@ -7,10 +7,10 @@
         <version>2.0.0.BUILD-SNAPSHOT</version>
         <relativePath>../runtime/osgi-roo-bundle</relativePath>
     </parent>
-    <artifactId>org.springframework.roo.osgi.roo.subsystem</artifactId>
+    <artifactId>org.springframework.roo.osgi.gogo.commands</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Runtime - OSGi Apache Aries Subsystem ROO Impl</name>
-    <description>Provides support to execute subsystem commands</description>
+    <name>Spring Roo - Runtime - ROO Gogo Commands</name>
+    <description>Extends Felix Gogo Shell with new Commands</description>
     <dependencies>
         <!-- OSGi -->
         <dependency>

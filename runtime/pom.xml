@@ -17,7 +17,7 @@
 		<module>osgi-bundle</module>
 		<module>osgi-roo-bundle</module>
 		<module>osgi-subsystem</module>
-		<module>osgi-roo-subsystem</module>
+		<module>gogo-commands</module>
 		<module>bootstrap</module>
 		<module>startlevel</module>
 		<module>support</module>

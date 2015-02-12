@@ -1,4 +1,4 @@
-package org.srpingframework.roo.osgi.roo.subsystem;
+package org.srpingframework.roo.osgi.gogo.commands;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,14 +18,16 @@ import org.osgi.service.subsystem.Subsystem;
 
 @Component(immediate = true)
 @Service
-public class Activator implements BundleActivator {
+public class SubsystemCommands implements BundleActivator {
 	private BundleContext bundleContext;
+	
+	// TODO: Improve Gogo commands ROO implementation using
+	// apache felix @Command annotation
 	
    	protected void activate(final ComponentContext context) {
     	try {
 			start(context.getBundleContext());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
