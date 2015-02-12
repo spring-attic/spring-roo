@@ -49,12 +49,12 @@
 		<module>addon-creator</module>
 		<module>addon-roobot-client</module>
 		<module>addon-json</module>
-		<module>addon-op4j</module>
-		<module>addon-git</module>
 		<module>addon-layers-service</module>
 		<module>addon-layers-repository-jpa</module>
 		<module>addon-oscommands</module>
 		<module>addon-tailor</module>
+		<module>addon-cloud</module>
+		<module>addon-jms</module>
 		<module>annotations</module>
     </modules>
     <distributionManagement>
