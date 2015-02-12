@@ -30,7 +30,8 @@
 </script>
 
 <script type="text/html" id="project-download-widget-controls-template">
-    <div class="js-download-widget-selector">
+   <!-- not in use
+   <div class="js-download-widget-selector">
         <select class='selector selectpicker'>
             {@ _.each(releases, function(release, index) { @}
             <option value="{@= index @}"
@@ -46,16 +47,27 @@
             {@ }); @}
         </select>
     </div>
+    -->
 
     <div class="item-slider-widget js-item-slider--wrapper">
         <div class="item-slider--container">
+            <!-- not in use
             <div class="item--slider js-item--slider"></div>
-            <div class="item js-active js-item" data-snippet-type='maven'>
+            -->
+            <div class="item" data-snippet-type='zip'>
+                Zip
+            </div>
+            <!-- not in use
+            <div class="item js-active js-item" data-snippet-type='zip'>
+                Zip
+            </div>
+            <div class="item js-item" data-snippet-type='maven'>
                 Maven
             </div>
             <div class="item js-item" data-snippet-type='gradle'>
                 Gradle
             </div>
+            -->
         </div>
     </div>
 
