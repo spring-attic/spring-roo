@@ -55,6 +55,7 @@
 		<module>addon-tailor</module>
 		<module>addon-cloud</module>
 		<module>addon-jms</module>
+		<module>addon-email</module>
 		<module>annotations</module>
     </modules>
     <distributionManagement>
