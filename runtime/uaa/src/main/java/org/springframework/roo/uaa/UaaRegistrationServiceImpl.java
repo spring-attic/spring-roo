@@ -42,7 +42,6 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService,
     private BundleContext bundleContext;
     /** key: projectId, value: list of products */
     private final Map<String, List<Product>> projectIdBuffer = new HashMap<String, List<Product>>();
-    @Reference private PublicFeatureResolver publicFeatureResolver;
     @Reference private UaaService uaaService;
 
     protected void activate(final ComponentContext context) {
@@ -163,12 +162,6 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService,
     private void registerBundleSymbolicNameUse(final String bundleSymbolicName,
             String customJson, final boolean flushWhenDone) {
         Validate.notBlank(bundleSymbolicName, "Bundle symbolic name required");
-
-        // Ensure it's a public feature (we do not want to log or buffer private
-        // features)
-        if (!publicFeatureResolver.isPublic(bundleSymbolicName)) {
-            return;
-        }
 
         // Turn a null custom JSON into "" for simplicity later, including
         // buffering
