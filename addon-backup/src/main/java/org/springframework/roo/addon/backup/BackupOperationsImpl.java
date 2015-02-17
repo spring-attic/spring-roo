@@ -25,6 +25,11 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
 
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+
 /**
  * Operations for the 'backup' add-on.
  * 
@@ -36,12 +41,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Component
 @Service
 public class BackupOperationsImpl implements BackupOperations {
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected void activate(final ComponentContext cContext) {
+    	this.context = cContext.getBundleContext();
+    }
 
     private static final Logger LOGGER = HandlerUtils
             .getLogger(BackupOperationsImpl.class);
 
-    @Reference private FileManager fileManager;
-    @Reference private ProjectOperations projectOperations;
+    private FileManager fileManager;
+    private ProjectOperations projectOperations;
 
     public String backup() {
         Validate.isTrue(isBackupPossible(), "Project metadata unavailable");
@@ -55,11 +67,11 @@ public class BackupOperationsImpl implements BackupOperations {
 
         ZipOutputStream zos = null;
         try {
-            final File projectDirectory = new File(projectOperations
+            final File projectDirectory = new File(getProjectOperations()
                     .getPathResolver().getFocusedIdentifier(Path.ROOT, "."));
-            final MutableFile file = fileManager.createFile(FileUtils
+            final MutableFile file = getFileManager().createFile(FileUtils
                     .getCanonicalPath(new File(projectDirectory,
-                            projectOperations.getFocusedProjectName() + "_"
+                            getProjectOperations().getFocusedProjectName() + "_"
                                     + df.format(new Date()) + ".zip")));
             zos = new ZipOutputStream(file.getOutputStream());
             zip(projectDirectory, projectDirectory, zos);
@@ -79,7 +91,7 @@ public class BackupOperationsImpl implements BackupOperations {
     }
 
     public boolean isBackupPossible() {
-        return projectOperations.isFocusedProjectAvailable();
+        return getProjectOperations().isFocusedProjectAvailable();
     }
 
     private void zip(final File directory, final File base,
@@ -126,5 +138,45 @@ public class BackupOperationsImpl implements BackupOperations {
                 }
             }
         }
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+        	// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				fileManager = (FileManager)  context.getService(ref);;
+    				return fileManager;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on BackupOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+        	// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				projectOperations = (ProjectOperations)  context.getService(ref);;
+    				return projectOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on BackupOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
     }
 }
