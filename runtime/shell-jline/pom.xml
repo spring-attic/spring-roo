@@ -20,10 +20,6 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.url.stream.jdk</artifactId>
-        </dependency>
         <!-- External modules -->
         <dependency>
             <groupId>net.sourceforge.jline</groupId>

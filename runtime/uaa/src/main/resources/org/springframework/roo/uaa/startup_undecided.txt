@@ -1,4 +1,0 @@
-                                                                        
-At this time you have not authorized Spring Roo to download an index of
-available add-ons. This will reduce Spring Roo features available to you.
-Please type 'download status' and press ENTER for further information.

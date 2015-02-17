@@ -474,7 +474,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
     rm $WORK_DIR/bundle/jackson-*.jar
     rm $WORK_DIR/bundle/jcl-over-slf4j-*.jar
     rm $WORK_DIR/bundle/servlet-api-*.jar
-    rm $WORK_DIR/bundle/slf4j-*.jar
+    #rm $WORK_DIR/bundle/slf4j-*.jar
     rm $WORK_DIR/bundle/spring-*.jar
     # These have to be removed as the Cloud Foundry add-on requires dependencies that are not bundled and thus must be installed via the shell.
     rm $WORK_DIR/bundle/*cloud.foundry*.jar

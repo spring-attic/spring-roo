@@ -31,7 +31,6 @@ import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -54,7 +53,6 @@ public class JLineShellComponent extends JLineShell {
 
     @Reference ExecutionStrategy executionStrategy;
     @Reference Parser parser;
-    private UrlInputStreamService urlInputStreamService;
 
     protected void activate(final ComponentContext context) {
     	this.context = context.getBundleContext();
@@ -79,72 +77,6 @@ public class JLineShellComponent extends JLineShell {
         return executionStrategy;
     }
 
-    private String getLatestFavouriteTweet() {
-        // Access Twitter's REST API
-        final String string = sendGetRequest(
-                "http://api.twitter.com/1/favorites.json",
-                "id=SpringRoo&count=5");
-        if (StringUtils.isBlank(string)) {
-            return null;
-        }
-        // Parse the returned JSON. This is a once off operation so we can used
-        // JSONValue.parse without penalty
-        final JSONArray object = (JSONArray) JSONValue.parse(string);
-        if (object == null) {
-            return null;
-        }
-        int index = 0;
-        if (object.size() > 4) {
-            index = new Random().nextInt(5);
-        }
-        final JSONObject jsonObject = (JSONObject) object.get(index);
-        if (jsonObject == null) {
-            return null;
-        }
-        final String screenName = (String) ((JSONObject) jsonObject.get("user"))
-                .get("screen_name");
-        String tweet = (String) jsonObject.get("text");
-        // We only want one line
-        tweet = tweet.replace(IOUtils.LINE_SEPARATOR, " ");
-        final List<String> words = Arrays.asList(tweet.split(" "));
-        final StringBuilder sb = new StringBuilder();
-        // Add in Roo's twitter account to give context to the notification
-        sb.append(decorate("@" + screenName + ":",
-                SystemUtils.IS_OS_WINDOWS ? FG_YELLOW : REVERSE));
-        sb.append(" ");
-
-        // We want to colourise certain words. The codes used here should be
-        // moved to a ShellUtils and include a few helper methods
-        // This is a basic attempt at pattern identification, it should be
-        // adequate in most cases although may be incorrect for URLs.
-        // For example url.com/ttym: is valid by may mean "url.com/ttym" + ":"
-        for (final String word : words) {
-            if (word.startsWith("http://") || word.startsWith("https://")) {
-                // It's a URL
-                if (SystemUtils.IS_OS_WINDOWS) {
-                    sb.append(decorate(word, FG_GREEN));
-                }
-                else {
-                    sb.append(decorate(word, FG_GREEN, UNDERSCORE));
-                }
-            }
-            else if (word.charAt(0) == '@') {
-                // It's a Twitter username
-                sb.append(decorate(word, FG_MAGENTA));
-            }
-            else if (word.charAt(0) == '#') {
-                // It's a Twitter hash tag
-                sb.append(decorate(word, FG_CYAN));
-            }
-            else {
-                // All else default
-                sb.append(word);
-            }
-            // Add back separator
-            sb.append(" ");
-        }
-        return sb.toString();
-    }
 
     @Override
     protected Parser getParser() {
@@ -153,65 +85,7 @@ public class JLineShellComponent extends JLineShell {
 
     @Override
     public String getStartupNotifications() {
-        try {
-            return getLatestFavouriteTweet();
-        }
-        catch (final Exception e) {
-            return null;
-        }
+        return null;
     }
 
-    // TODO: This should probably be moved to a HTTP service of some sort - JTT
-    // 29/08/11
-    private String sendGetRequest(final String endpoint,
-            final String requestParameters) {
-    	
-    	if(urlInputStreamService == null){
-    		urlInputStreamService = getUrlInputStreamService();
-    	}
-    	
-    	Validate.notNull(urlInputStreamService, "UrlInputStreamService is required");
-    	
-        if (!(endpoint.startsWith("http://") || endpoint.startsWith("https://"))) {
-            return null;
-        }
-
-        // Send a GET request to the servlet
-        InputStream inputStream = null;
-        try {
-            // Send data
-            String urlStr = endpoint;
-            if (StringUtils.isNotBlank(requestParameters)) {
-                urlStr += "?" + requestParameters;
-            }
-            // Get the response
-            final URL url = new URL(urlStr);
-            inputStream = urlInputStreamService.openConnection(url);
-            return IOUtils.toString(inputStream);
-        }
-        catch (final Exception e) {
-            return null;
-        }
-        finally {
-            IOUtils.closeQuietly(inputStream);
-        }
-    }
-    
-    
-    public UrlInputStreamService getUrlInputStreamService(){
-    	// Get all Services implement UrlInputStreamService interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(UrlInputStreamService.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (UrlInputStreamService) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load UrlInputStreamService on JLineShellComponent.");
-			return null;
-		}
-    }
 }

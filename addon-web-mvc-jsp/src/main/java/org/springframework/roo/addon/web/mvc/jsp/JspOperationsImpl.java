@@ -52,7 +52,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
-import org.springframework.roo.uaa.UaaRegistrationService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -111,7 +110,6 @@ public class JspOperationsImpl extends AbstractOperations implements
     @Reference private PropFileOperations propFileOperations;
     @Reference private TilesOperations tilesOperations;
     @Reference private TypeManagementService typeManagementService;
-    @Reference private UaaRegistrationService uaaRegistrationService;
     @Reference private WebMvcOperations webMvcOperations;
 
     private String cleanPath(String path) {
@@ -421,16 +419,6 @@ public class JspOperationsImpl extends AbstractOperations implements
                     .addAttribute("label", i18n.getLanguage()).build());
             fileManager.createOrUpdateTextFileIfRequired(footerFileLocation,
                     XmlUtils.nodeToString(footer), false);
-        }
-
-        // Record use of add-on (most languages are implemented via public
-        // add-ons)
-        final String bundleSymbolicName = BundleFindingUtils
-                .findFirstBundleForTypeName(context, i18n
-                        .getClass().getName());
-        if (bundleSymbolicName != null) {
-            uaaRegistrationService.registerBundleSymbolicNameUse(
-                    bundleSymbolicName, null);
         }
     }
 

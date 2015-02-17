@@ -305,11 +305,6 @@
             </dependency>
             <!-- External OSGi Bundles (ie not wrapped) -->
             <dependency>
-                <groupId>org.springframework.uaa</groupId>
-                <artifactId>org.springframework.uaa.client</artifactId>
-                <version>1.0.2.RELEASE</version>
-            </dependency>
-            <dependency>
                 <groupId>net.sourceforge.jline</groupId>
                 <artifactId>jline</artifactId>
                 <version>1.0.S2-B</version>
@@ -520,11 +515,6 @@
                 <artifactId>org.springframework.roo.wrapping.json-simple</artifactId>
                 <version>1.1.0.0010</version>
             </dependency>
-            <dependency>
-				<groupId>org.springframework.roo.wrapping</groupId>
-				<artifactId>org.springframework.roo.wrapping.protobuf-java</artifactId>
-				<version>2.4.1.0010</version>
-			</dependency>
             <!-- Roo Addons -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
@@ -719,17 +709,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.uaa</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.url.stream</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.url.stream.jdk</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

@@ -1,6 +1,0 @@
-Thank you. We have recorded that you have declined the UAA Terms of Use. This
-means no further reminders will be displayed in the future.
-
-Please be aware features requiring downloads from VMware-operated domains are
-now disabled. You can type 'download status' and press ENTER at any time in
-the future if you'd like to review the status or obtain help on UAA commands.
