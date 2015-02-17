@@ -77,10 +77,6 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
             if (matches == null) {
                 LOGGER.info("Spring Roo automatic add-on discovery service currently unavailable");
             }
-            else if (matches == 0) {
-                LOGGER.info("addon search --requiresDescription \""
-                        + searchTerms + "\" found no matches");
-            }
             else if (matches > 0) {
                 LOGGER.info("Located add-on" + (matches == 1 ? "" : "s")
                         + " that may offer this JDBC driver");

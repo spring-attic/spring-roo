@@ -70,10 +70,6 @@ public class SimpleParserComponent extends SimpleParser implements
         if (matches == null) {
             logger.info("Spring Roo automatic add-on discovery service currently unavailable");
         }
-        else if (matches == 0) {
-            logger.info("addon search --requiresCommand \"" + command
-                    + "\" found no matches");
-        }
         else if (matches > 0) {
             logger.info("Located add-on" + (matches == 1 ? "" : "s")
                     + " that may offer this command");
