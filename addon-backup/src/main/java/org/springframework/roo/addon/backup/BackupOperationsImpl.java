@@ -147,7 +147,7 @@ public class BackupOperationsImpl implements BackupOperations {
     			ServiceReference<?>[] references = context.getAllServiceReferences(FileManager.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				fileManager = (FileManager)  context.getService(ref);;
+    				fileManager = (FileManager)  context.getService(ref);
     				return fileManager;
     			}
     			return null;
@@ -167,7 +167,7 @@ public class BackupOperationsImpl implements BackupOperations {
     			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				projectOperations = (ProjectOperations)  context.getService(ref);;
+    				projectOperations = (ProjectOperations)  context.getService(ref);
     				return projectOperations;
     			}
     			return null;

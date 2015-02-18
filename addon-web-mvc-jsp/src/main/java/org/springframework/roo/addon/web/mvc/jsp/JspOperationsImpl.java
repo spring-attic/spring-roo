@@ -13,6 +13,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +57,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import org.springframework.roo.support.logging.HandlerUtils;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+
 /**
  * Implementation of {@link JspOperations}.
  * 
@@ -67,6 +74,23 @@ import org.w3c.dom.Node;
 @Service
 public class JspOperationsImpl extends AbstractOperations implements
         JspOperations {
+	
+	private static final Logger LOGGER = HandlerUtils
+            .getLogger(JspOperationsImpl.class);
+	
+    private BackupOperations backupOperations;
+    private I18nSupport i18nSupport;
+    private MenuOperations menuOperations;
+    private PathResolver pathResolver;
+    private ProjectOperations projectOperations;
+    private PropFileOperations propFileOperations;
+    private TilesOperations tilesOperations;
+    private TypeManagementService typeManagementService;
+    private WebMvcOperations webMvcOperations;
+   	
+   	protected void activate(final ComponentContext cContext) {
+    	this.context = cContext.getBundleContext();
+    }
 
     private static final JavaType HTTP_SERVLET_REQUEST = new JavaType(
             "javax.servlet.http.HttpServletRequest");
@@ -101,16 +125,6 @@ public class JspOperationsImpl extends AbstractOperations implements
         return new ImmutablePair<String, String>(typeNameLower, "/"
                 + typeNameLower + "/**");
     }
-
-    @Reference private BackupOperations backupOperations;
-    @Reference private I18nSupport i18nSupport;
-    @Reference private MenuOperations menuOperations;
-    @Reference private PathResolver pathResolver;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private PropFileOperations propFileOperations;
-    @Reference private TilesOperations tilesOperations;
-    @Reference private TypeManagementService typeManagementService;
-    @Reference private WebMvcOperations webMvcOperations;
 
     private String cleanPath(String path) {
         if ("/".equals(path)) {
@@ -154,10 +168,10 @@ public class JspOperationsImpl extends AbstractOperations implements
                 preferredMapping, controller);
         final String folderName = folderAndMapping.getKey();
 
-        final String resourceIdentifier = pathResolver.getFocusedCanonicalPath(
+        final String resourceIdentifier = getPathResolver().getFocusedCanonicalPath(
                 Path.SRC_MAIN_JAVA, controller);
         final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(controller, projectOperations
+                .createIdentifier(controller, getProjectOperations()
                         .getPathResolver().getPath(resourceIdentifier));
         final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 
@@ -188,7 +202,7 @@ public class JspOperationsImpl extends AbstractOperations implements
                 PhysicalTypeCategory.CLASS);
         cidBuilder.setAnnotations(typeAnnotations);
         cidBuilder.setDeclaredMethods(methods);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
         installView(
                 folderName,
@@ -254,7 +268,7 @@ public class JspOperationsImpl extends AbstractOperations implements
     }
 
     public void installCommonViewArtefacts() {
-        installCommonViewArtefacts(projectOperations.getFocusedModuleName());
+        installCommonViewArtefacts(getProjectOperations().getFocusedModuleName());
     }
 
     public void installCommonViewArtefacts(final String moduleName) {
@@ -262,7 +276,7 @@ public class JspOperationsImpl extends AbstractOperations implements
         final LogicalPath webappPath = Path.SRC_MAIN_WEBAPP
                 .getModulePathId(moduleName);
         if (!isControllerAvailable()) {
-            webMvcOperations.installAllWebMvcArtifacts();
+            getWebMvcOperations().installAllWebMvcArtifacts();
         }
 
         // Install tiles config
@@ -270,62 +284,62 @@ public class JspOperationsImpl extends AbstractOperations implements
 
         // Install styles
         copyDirectoryContents("images/*.*",
-                pathResolver.getIdentifier(webappPath, "images"), false);
+                getPathResolver().getIdentifier(webappPath, "images"), false);
 
         // Install styles
         copyDirectoryContents("styles/*.css",
-                pathResolver.getIdentifier(webappPath, "styles"), false);
+                getPathResolver().getIdentifier(webappPath, "styles"), false);
         copyDirectoryContents("styles/*.properties",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/classes"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/classes"),
                 false);
 
         // Install layout
         copyDirectoryContents("tiles/default.jspx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/layouts/"),
                 false);
         copyDirectoryContents("tiles/layouts.xml",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/layouts/"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/layouts/"),
                 false);
         copyDirectoryContents("tiles/header.jspx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/views/"), false);
         copyDirectoryContents("tiles/menu.jspx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/views/"), false);
         copyDirectoryContents("tiles/footer.jspx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/views/"), false);
         copyDirectoryContents("tiles/views.xml",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/views/"), false);
 
         // Install common view files
         copyDirectoryContents("*.jspx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/views/"), false);
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/views/"), false);
 
         // Install tags
         copyDirectoryContents("tags/form/*.tagx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/tags/form"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/tags/form"),
                 false);
         copyDirectoryContents("tags/form/fields/*.tagx",
-                pathResolver.getIdentifier(webappPath,
+                getPathResolver().getIdentifier(webappPath,
                         "WEB-INF/tags/form/fields"), false);
         copyDirectoryContents("tags/menu/*.tagx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/tags/menu"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/tags/menu"),
                 false);
         copyDirectoryContents("tags/util/*.tagx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/tags/util"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/tags/util"),
                 false);
 
         // Install default language 'en'
-        installI18n(i18nSupport.getLanguage(Locale.ENGLISH), webappPath);
+        installI18n(getI18nSupport().getLanguage(Locale.ENGLISH), webappPath);
 
-        final String i18nDirectory = pathResolver.getIdentifier(webappPath,
+        final String i18nDirectory = getPathResolver().getIdentifier(webappPath,
                 "WEB-INF/i18n/application.properties");
         if (!fileManager.exists(i18nDirectory)) {
             try {
-                final String projectName = projectOperations
-                        .getProjectName(projectOperations
+                final String projectName = getProjectOperations()
+                        .getProjectName(getProjectOperations()
                                 .getFocusedModuleName());
-                fileManager.createFile(pathResolver.getIdentifier(webappPath,
+                fileManager.createFile(getPathResolver().getIdentifier(webappPath,
                         "WEB-INF/i18n/application.properties"));
-                propFileOperations
+                getPropFileOperations()
                         .addPropertyIfNotExists(webappPath,
                                 "WEB-INF/i18n/application.properties",
                                 "application_name",
@@ -348,7 +362,7 @@ public class JspOperationsImpl extends AbstractOperations implements
             return;
         }
 
-        final String targetDirectory = pathResolver.getIdentifier(webappPath,
+        final String targetDirectory = getPathResolver().getIdentifier(webappPath,
                 "");
 
         // Install message bundle
@@ -439,8 +453,7 @@ public class JspOperationsImpl extends AbstractOperations implements
             final String folderName, final String title, final String category,
             final boolean registerStaticController, final LogicalPath webappPath) {
         // Probe if common web artifacts exist, and install them if needed
-        final PathResolver pathResolver = projectOperations.getPathResolver();
-        if (!fileManager.exists(pathResolver.getIdentifier(webappPath,
+        if (!fileManager.exists(getPathResolver().getIdentifier(webappPath,
                 "WEB-INF/layouts/default.jspx"))) {
             installCommonViewArtefacts(webappPath.getModule());
         }
@@ -451,22 +464,22 @@ public class JspOperationsImpl extends AbstractOperations implements
         // translation)
         final String messageCode = "label"
                 + folderName.replace("/", "_").toLowerCase() + "_" + lcViewName;
-        propFileOperations
+        getPropFileOperations()
                 .addPropertyIfNotExists(
-                        pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP),
+                        getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP),
                         "WEB-INF/i18n/application.properties", messageCode,
                         title, true);
 
         // Add the menu item
         final String relativeUrl = folderName + "/" + lcViewName;
-        menuOperations.addMenuItem(new JavaSymbolName(category),
+        getMenuOperations().addMenuItem(new JavaSymbolName(category),
                 new JavaSymbolName(folderName.replace("/", "_").toLowerCase()
                         + lcViewName + "_id"), title, "global_generic",
                 relativeUrl, null, webappPath);
 
         // Add the view definition
-        tilesOperations.addViewDefinition(folderName.toLowerCase(),
-                pathResolver.getFocusedPath(Path.SRC_MAIN_WEBAPP), relativeUrl,
+        getTilesOperations().addViewDefinition(folderName.toLowerCase(),
+                getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP), relativeUrl,
                 TilesOperations.DEFAULT_TEMPLATE,
                 "/WEB-INF/views" + folderName.toLowerCase() + "/" + lcViewName
                         + ".jspx");
@@ -504,7 +517,7 @@ public class JspOperationsImpl extends AbstractOperations implements
             }
         }
 
-        final String viewFile = pathResolver.getFocusedIdentifier(
+        final String viewFile = getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP,
                 "WEB-INF/views" + cleanedPath.toLowerCase() + "/" + lcViewName
                         + ".jspx");
@@ -528,34 +541,34 @@ public class JspOperationsImpl extends AbstractOperations implements
     }
 
     public boolean isControllerAvailable() {
-        return fileManager.exists(pathResolver.getFocusedIdentifier(
+        return fileManager.exists(getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_WEBAPP, "WEB-INF/views"))
-                && !projectOperations
+                && !getProjectOperations()
                         .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
     }
 
     public boolean isInstalledInModule(final String moduleName) {
         final LogicalPath webAppPath = LogicalPath.getInstance(
                 Path.SRC_MAIN_WEBAPP, moduleName);
-        return fileManager.exists(projectOperations.getPathResolver()
+        return fileManager.exists(getProjectOperations().getPathResolver()
                 .getIdentifier(webAppPath, "WEB-INF/spring/webmvc-config.xml"));
     }
 
     public boolean isInstallLanguageCommandAvailable() {
         return isProjectAvailable()
-                && fileManager.exists(pathResolver.getFocusedIdentifier(
+                && fileManager.exists(getPathResolver().getFocusedIdentifier(
                         Path.SRC_MAIN_WEBAPP, "WEB-INF/views/footer.jspx"));
     }
 
     public boolean isMvcInstallationPossible() {
         return isProjectAvailable()
                 && !isControllerAvailable()
-                && !projectOperations
+                && !getProjectOperations()
                         .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
     }
 
     private boolean isProjectAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
+        return getProjectOperations().isFocusedProjectAvailable();
     }
 
     /**
@@ -567,7 +580,7 @@ public class JspOperationsImpl extends AbstractOperations implements
      */
     private void registerStaticSpringMvcController(final String relativeUrl,
             final LogicalPath webappPath) {
-        final String mvcConfig = projectOperations.getPathResolver()
+        final String mvcConfig = getProjectOperations().getPathResolver()
                 .getIdentifier(webappPath, "WEB-INF/spring/webmvc-config.xml");
         if (fileManager.exists(mvcConfig)) {
             final Document document = XmlUtils.readXml(fileManager
@@ -608,11 +621,11 @@ public class JspOperationsImpl extends AbstractOperations implements
         for (final Element dependencyElement : springDependencies) {
             dependencies.add(new Dependency(dependencyElement));
         }
-        projectOperations.addDependencies(
-                projectOperations.getFocusedModuleName(), dependencies);
+        getProjectOperations().addDependencies(
+                getProjectOperations().getFocusedModuleName(), dependencies);
 
         // Add config to MVC app context
-        final String mvcConfig = pathResolver.getFocusedIdentifier(
+        final String mvcConfig = getPathResolver().getFocusedIdentifier(
                 SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
         final Document mvcConfigDocument = XmlUtils.readXml(fileManager
                 .getInputStream(mvcConfig));
@@ -639,21 +652,202 @@ public class JspOperationsImpl extends AbstractOperations implements
 
     public void updateTags(final boolean backup, final LogicalPath webappPath) {
         if (backup) {
-            backupOperations.backup();
+            getBackupOperations().backup();
         }
 
         // Update tags
         copyDirectoryContents("tags/form/*.tagx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/tags/form"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/tags/form"),
                 true);
         copyDirectoryContents("tags/form/fields/*.tagx",
-                pathResolver.getIdentifier(webappPath,
+                getPathResolver().getIdentifier(webappPath,
                         "WEB-INF/tags/form/fields"), true);
         copyDirectoryContents("tags/menu/*.tagx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/tags/menu"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/tags/menu"),
                 true);
         copyDirectoryContents("tags/util/*.tagx",
-                pathResolver.getIdentifier(webappPath, "WEB-INF/tags/util"),
+                getPathResolver().getIdentifier(webappPath, "WEB-INF/tags/util"),
                 true);
     }
+    
+    public BackupOperations getBackupOperations(){
+    	if(backupOperations == null){
+        	// Get all Services implement BackupOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(BackupOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				backupOperations = (BackupOperations)  context.getService(ref);
+    				return backupOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load BackupOperations on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return backupOperations;
+    	}
+    }
+    
+    public I18nSupport getI18nSupport(){
+    	if(i18nSupport == null){
+        	// Get all Services implement I18nSupport interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(I18nSupport.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				i18nSupport = (I18nSupport)  context.getService(ref);
+    				return i18nSupport;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load I18nSupport on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return i18nSupport;
+    	}
+    }
+    
+    public MenuOperations getMenuOperations(){
+    	if(menuOperations == null){
+        	// Get all Services implement MenuOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(MenuOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				menuOperations = (MenuOperations)  context.getService(ref);
+    				return menuOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MenuOperations on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return menuOperations;
+    	}
+    }
+    
+    public PathResolver getPathResolver(){
+    	if(pathResolver == null){
+        	// Get all Services implement PathResolver interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(PathResolver.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				pathResolver = (PathResolver)  context.getService(ref);
+    				return pathResolver;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PathResolver on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return pathResolver;
+    	}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+        	// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				projectOperations = (ProjectOperations)  context.getService(ref);
+    				return projectOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    }
+    
+    public PropFileOperations getPropFileOperations(){
+    	if(propFileOperations == null){
+        	// Get all Services implement PropFileOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(PropFileOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				propFileOperations = (PropFileOperations)  context.getService(ref);
+    				return propFileOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PropFileOperations on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return propFileOperations;
+    	}
+    }
+    
+    public TilesOperations getTilesOperations(){
+    	if(tilesOperations == null){
+        	// Get all Services implement TilesOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(TilesOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				tilesOperations = (TilesOperations)  context.getService(ref);
+    				return tilesOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TilesOperations on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return tilesOperations;
+    	}
+    }
+    
+    public TypeManagementService getTypeManagementService(){
+    	if(typeManagementService == null){
+        	// Get all Services implement TypeManagementService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				typeManagementService = (TypeManagementService)  context.getService(ref);
+    				return typeManagementService;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeManagementService on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return typeManagementService;
+    	}
+    }
+    
+    public WebMvcOperations getWebMvcOperations(){
+    	if(webMvcOperations == null){
+        	// Get all Services implement WebMvcOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(WebMvcOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				webMvcOperations = (WebMvcOperations)  context.getService(ref);
+    				return webMvcOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load WebMvcOperations on JspOperationsImpl.");
+    			return null;
+    		}
+    	}else{
+    		return webMvcOperations;
+    	}
+    }
+    
 }

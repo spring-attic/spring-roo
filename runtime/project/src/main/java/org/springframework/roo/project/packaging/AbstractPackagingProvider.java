@@ -406,11 +406,10 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     		// Get all Services implement PathResolver interface
     		try {
     			ServiceReference<?>[] references = context.getAllServiceReferences(PathResolver.class.getName(), null);
-    			
     			for(ServiceReference<?> ref : references){
-    				return (PathResolver) context.getService(ref);
+    				pathResolver = (PathResolver) context.getService(ref); 
+    				return pathResolver;
     			}
-    			
     			return null;
     			
     		} catch (InvalidSyntaxException e) {

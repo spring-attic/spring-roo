@@ -10,13 +10,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
@@ -55,6 +58,7 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
@@ -71,42 +75,50 @@ import org.springframework.roo.support.util.XmlUtils;
 public class JspMetadataListener implements MetadataProvider,
         MetadataNotificationListener {
 
+	
+	private static final Logger LOGGER = HandlerUtils
+            .getLogger(JspOperationsImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
     private static final String WEB_INF_VIEWS = "/WEB-INF/views/";
 
-    @Reference private FileManager fileManager;
-    @Reference private JspOperations jspOperations;
-    @Reference private MenuOperations menuOperations;
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference private MetadataService metadataService;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private PropFileOperations propFileOperations;
-    @Reference private TilesOperations tilesOperations;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private WebMetadataService webMetadataService;
-    @Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
+    private FileManager fileManager;
+    private JspOperations jspOperations;
+    private MenuOperations menuOperations;
+    private MetadataDependencyRegistry metadataDependencyRegistry;
+    private MetadataService metadataService;
+    private ProjectOperations projectOperations;
+    private PropFileOperations propFileOperations;
+    private TilesOperations tilesOperations;
+    private TypeLocationService typeLocationService;
+    private WebMetadataService webMetadataService;
+    private XmlRoundTripFileManager xmlRoundTripFileManager;
 
     private final Map<JavaType, String> formBackingObjectTypesToLocalMids = new HashMap<JavaType, String>();
 
-    protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(
+    protected void activate(final ComponentContext cContext) {
+    	this.context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
                 WebScaffoldMetadata.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry
+        getMetadataDependencyRegistry()
                 .registerDependency(
                         WebFinderMetadata.getMetadataIdentiferType(),
                         getProvidesType());
-        metadataDependencyRegistry.addNotificationListener(this);
+        getMetadataDependencyRegistry().addNotificationListener(this);
     }
 
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(
+        getMetadataDependencyRegistry().deregisterDependency(
                 WebScaffoldMetadata.getMetadataIdentiferType(),
                 getProvidesType());
-        metadataDependencyRegistry
+        getMetadataDependencyRegistry()
                 .deregisterDependency(
                         WebFinderMetadata.getMetadataIdentiferType(),
                         getProvidesType());
-        metadataDependencyRegistry.removeNotificationListener(this);
+        getMetadataDependencyRegistry().removeNotificationListener(this);
     }
 
     public MetadataItem get(final String jspMetadataId) {
@@ -117,7 +129,7 @@ public class JspMetadataListener implements MetadataProvider,
         final String webScaffoldMetadataKey = WebScaffoldMetadata
                 .createIdentifier(JspMetadata.getJavaType(jspMetadataId),
                         JspMetadata.getPath(jspMetadataId));
-        final WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService
+        final WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) getMetadataService()
                 .get(webScaffoldMetadataKey);
         if (webScaffoldMetadata == null || !webScaffoldMetadata.isValid()) {
             // Can't get the corresponding scaffold, so we certainly don't need
@@ -127,9 +139,9 @@ public class JspMetadataListener implements MetadataProvider,
 
         final JavaType formBackingType = webScaffoldMetadata
                 .getAnnotationValues().getFormBackingObject();
-        final MemberDetails memberDetails = webMetadataService
+        final MemberDetails memberDetails = getWebMetadataService()
                 .getMemberDetails(formBackingType);
-        final JavaTypeMetadataDetails formBackingTypeMetadataDetails = webMetadataService
+        final JavaTypeMetadataDetails formBackingTypeMetadataDetails = getWebMetadataService()
                 .getJavaTypeMetadataDetails(formBackingType, memberDetails,
                         jspMetadataId);
         Validate.notNull(formBackingTypeMetadataDetails,
@@ -138,7 +150,7 @@ public class JspMetadataListener implements MetadataProvider,
 
         formBackingObjectTypesToLocalMids.put(formBackingType, jspMetadataId);
 
-        final SortedMap<JavaType, JavaTypeMetadataDetails> relatedTypeMd = webMetadataService
+        final SortedMap<JavaType, JavaTypeMetadataDetails> relatedTypeMd = getWebMetadataService()
                 .getRelatedApplicationTypeMetadata(formBackingType,
                         memberDetails, jspMetadataId);
         final JavaTypeMetadataDetails formbackingTypeMetadata = relatedTypeMd
@@ -150,11 +162,11 @@ public class JspMetadataListener implements MetadataProvider,
         if (formBackingTypePersistenceMetadata == null) {
             return null;
         }
-        final ClassOrInterfaceTypeDetails formBackingTypeDetails = typeLocationService
+        final ClassOrInterfaceTypeDetails formBackingTypeDetails = getTypeLocationService()
                 .getTypeDetails(formBackingType);
         final LogicalPath formBackingTypePath = PhysicalTypeIdentifier
                 .getPath(formBackingTypeDetails.getDeclaredByMetadataId());
-        metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier
+        getMetadataDependencyRegistry().registerDependency(PhysicalTypeIdentifier
                 .createIdentifier(formBackingType, formBackingTypePath),
                 JspMetadata.createIdentifier(formBackingType,
                         formBackingTypePath));
@@ -162,13 +174,13 @@ public class JspMetadataListener implements MetadataProvider,
 
         // Install web artifacts only if Spring MVC config is missing
         // TODO: Remove this call when 'controller' commands are gone
-        final PathResolver pathResolver = projectOperations.getPathResolver();
+        final PathResolver pathResolver = getProjectOperations().getPathResolver();
         final LogicalPath webappPath = LogicalPath.getInstance(
                 Path.SRC_MAIN_WEBAPP, path.getModule());
 
-        if (!fileManager.exists(pathResolver.getIdentifier(webappPath,
+        if (!getFileManager().exists(pathResolver.getIdentifier(webappPath,
                 WEB_INF_VIEWS))) {
-            jspOperations.installCommonViewArtefacts(path.getModule());
+            getJspOperations().installCommonViewArtefacts(path.getModule());
         }
 
         installImage(webappPath, "images/show.png");
@@ -179,7 +191,7 @@ public class JspMetadataListener implements MetadataProvider,
             installImage(webappPath, "images/delete.png");
         }
 
-        final List<FieldMetadata> eligibleFields = webMetadataService
+        final List<FieldMetadata> eligibleFields = getWebMetadataService()
                 .getScaffoldEligibleFieldMetadata(formBackingType,
                         memberDetails, jspMetadataId);
         if (eligibleFields.isEmpty()
@@ -199,8 +211,8 @@ public class JspMetadataListener implements MetadataProvider,
         // Make the holding directory for this controller
         final String destinationDirectory = pathResolver.getIdentifier(
                 webappPath, WEB_INF_VIEWS + controllerPath);
-        if (!fileManager.exists(destinationDirectory)) {
-            fileManager.createDirectory(destinationDirectory);
+        if (!getFileManager().exists(destinationDirectory)) {
+            getFileManager().createDirectory(destinationDirectory);
         }
         else {
             final File file = new File(destinationDirectory);
@@ -211,17 +223,17 @@ public class JspMetadataListener implements MetadataProvider,
 
         // By now we have a directory to put the JSPs inside
         final String listPath1 = destinationDirectory + "/list.jspx";
-        xmlRoundTripFileManager.writeToDiskIfNecessary(listPath1,
+        getXmlRoundTripFileManager().writeToDiskIfNecessary(listPath1,
                 viewManager.getListDocument());
-        tilesOperations.addViewDefinition(controllerPath, webappPath,
+        getTilesOperations().addViewDefinition(controllerPath, webappPath,
                 controllerPath + "/" + "list",
                 TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS
                         + controllerPath + "/list.jspx");
 
         final String showPath = destinationDirectory + "/show.jspx";
-        xmlRoundTripFileManager.writeToDiskIfNecessary(showPath,
+        getXmlRoundTripFileManager().writeToDiskIfNecessary(showPath,
                 viewManager.getShowDocument());
-        tilesOperations.addViewDefinition(controllerPath, webappPath,
+        getTilesOperations().addViewDefinition(controllerPath, webappPath,
                 controllerPath + "/" + "show",
                 TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS
                         + controllerPath + "/show.jspx");
@@ -243,35 +255,35 @@ public class JspMetadataListener implements MetadataProvider,
 
         if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
             final String listPath = destinationDirectory + "/create.jspx";
-            xmlRoundTripFileManager.writeToDiskIfNecessary(listPath,
+            getXmlRoundTripFileManager().writeToDiskIfNecessary(listPath,
                     viewManager.getCreateDocument());
             // Add 'create new' menu item
-            menuOperations.addMenuItem(categoryName, newMenuItemId,
+            getMenuOperations().addMenuItem(categoryName, newMenuItemId,
                     "global_menu_new", "/" + controllerPath + "?form",
                     MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
-            tilesOperations.addViewDefinition(controllerPath, webappPath,
+            getTilesOperations().addViewDefinition(controllerPath, webappPath,
                     controllerPath + "/" + "create",
                     TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS
                             + controllerPath + "/create.jspx");
         }
         else {
-            menuOperations
+            getMenuOperations()
                     .cleanUpMenuItem(categoryName, new JavaSymbolName("new"),
                             MenuOperations.DEFAULT_MENU_ITEM_PREFIX, webappPath);
-            tilesOperations.removeViewDefinition(controllerPath + "/"
+            getTilesOperations().removeViewDefinition(controllerPath + "/"
                     + "create", controllerPath, webappPath);
         }
         if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
             final String listPath = destinationDirectory + "/update.jspx";
-            xmlRoundTripFileManager.writeToDiskIfNecessary(listPath,
+            getXmlRoundTripFileManager().writeToDiskIfNecessary(listPath,
                     viewManager.getUpdateDocument());
-            tilesOperations.addViewDefinition(controllerPath, webappPath,
+            getTilesOperations().addViewDefinition(controllerPath, webappPath,
                     controllerPath + "/" + "update",
                     TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS
                             + controllerPath + "/update.jspx");
         }
         else {
-            tilesOperations.removeViewDefinition(controllerPath + "/"
+            getTilesOperations().removeViewDefinition(controllerPath + "/"
                     + "update", controllerPath, webappPath);
         }
 
@@ -337,13 +349,13 @@ public class JspMetadataListener implements MetadataProvider,
             final JavaSymbolName fieldName = field.getFieldName();
             final String fieldResourceId = XmlUtils.convertId(resourceId + "."
                     + fieldName.getSymbolName().toLowerCase());
-            if (typeLocationService.isInProject(method.getReturnType())
-                    && webMetadataService.isRooIdentifier(method
-                            .getReturnType(), webMetadataService
+            if (getTypeLocationService().isInProject(method.getReturnType())
+                    && getWebMetadataService().isRooIdentifier(method
+                            .getReturnType(), getWebMetadataService()
                             .getMemberDetails(method.getReturnType()))) {
-                final JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = webMetadataService
+                final JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = getWebMetadataService()
                         .getJavaTypePersistenceMetadataDetails(method
-                                .getReturnType(), webMetadataService
+                                .getReturnType(), getWebMetadataService()
                                 .getMemberDetails(method.getReturnType()),
                                 jspMetadataId);
                 if (typePersistenceMetadataDetails != null) {
@@ -383,7 +395,7 @@ public class JspMetadataListener implements MetadataProvider,
         if (javaTypePersistenceMetadataDetails.getFindAllMethod() != null) {
             // Add 'list all' menu item
             final JavaSymbolName listMenuItemId = new JavaSymbolName("list");
-            menuOperations
+            getMenuOperations()
                     .addMenuItem(
                             categoryName,
                             listMenuItemId,
@@ -398,7 +410,7 @@ public class JspMetadataListener implements MetadataProvider,
                     new JavaSymbolName(plural).getReadableSymbolName());
         }
         else {
-            menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName(
+            getMenuOperations().cleanUpMenuItem(categoryName, new JavaSymbolName(
                     "list"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX,
                     webappPath);
         }
@@ -406,7 +418,7 @@ public class JspMetadataListener implements MetadataProvider,
         final String controllerPhysicalTypeId = PhysicalTypeIdentifier
                 .createIdentifier(JspMetadata.getJavaType(jspMetadataId),
                         JspMetadata.getPath(jspMetadataId));
-        final PhysicalTypeMetadata controllerPhysicalTypeMd = (PhysicalTypeMetadata) metadataService
+        final PhysicalTypeMetadata controllerPhysicalTypeMd = (PhysicalTypeMetadata) getMetadataService()
                 .get(controllerPhysicalTypeId);
         if (controllerPhysicalTypeMd == null) {
             return null;
@@ -420,7 +432,7 @@ public class JspMetadataListener implements MetadataProvider,
         if (MemberFindingUtils.getAnnotationOfType(mhtd.getAnnotations(),
                 RooJavaType.ROO_WEB_FINDER) != null) {
             // This controller is annotated with @RooWebFinder
-            final Set<FinderMetadataDetails> finderMethodsDetails = webMetadataService
+            final Set<FinderMetadataDetails> finderMethodsDetails = getWebMetadataService()
                     .getDynamicFinderMethodsAndFields(formBackingType,
                             memberDetails, jspMetadataId);
             if (finderMethodsDetails == null) {
@@ -437,13 +449,13 @@ public class JspMetadataListener implements MetadataProvider,
                 if (listPath.length() > 244) {
                     continue;
                 }
-                xmlRoundTripFileManager.writeToDiskIfNecessary(listPath,
+                getXmlRoundTripFileManager().writeToDiskIfNecessary(listPath,
                         viewManager.getFinderDocument(finderDetails));
                 final JavaSymbolName finderLabel = new JavaSymbolName(
                         finderName.replace("find" + plural + "By", ""));
 
                 // Add 'Find by' menu item
-                menuOperations.addMenuItem(categoryName, finderLabel,
+                getMenuOperations().addMenuItem(categoryName, finderLabel,
                         "global_menu_find", "/" + controllerPath + "?find="
                                 + finderName.replace("find" + plural, "")
                                 + "&form"
@@ -463,17 +475,17 @@ public class JspMetadataListener implements MetadataProvider,
                                     + paramName.getSymbolName().toLowerCase()),
                             paramName.getReadableSymbolName());
                 }
-                tilesOperations.addViewDefinition(controllerPath, webappPath,
+                getTilesOperations().addViewDefinition(controllerPath, webappPath,
                         controllerPath + "/" + finderName,
                         TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS
                                 + controllerPath + "/" + finderName + ".jspx");
             }
         }
 
-        menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems,
+        getMenuOperations().cleanUpFinderMenuItems(categoryName, allowedMenuItems,
                 webappPath);
 
-        propFileOperations.addProperties(webappPath,
+        getPropFileOperations().addProperties(webappPath,
                 "WEB-INF/i18n/application.properties", properties, true, false);
 
         return new JspMetadata(jspMetadataId, webScaffoldMetadata);
@@ -484,14 +496,14 @@ public class JspMetadataListener implements MetadataProvider,
     }
 
     private void installImage(final LogicalPath path, final String imagePath) {
-        final PathResolver pathResolver = projectOperations.getPathResolver();
+        final PathResolver pathResolver = getProjectOperations().getPathResolver();
         final String imageFile = pathResolver.getIdentifier(path, imagePath);
-        if (!fileManager.exists(imageFile)) {
+        if (!getFileManager().exists(imageFile)) {
             InputStream inputStream = null;
             OutputStream outputStream = null;
             try {
                 inputStream = FileUtils.getInputStream(getClass(), imagePath);
-                outputStream = fileManager.createFile(
+                outputStream = getFileManager().createFile(
                         pathResolver.getIdentifier(path, imagePath))
                         .getOutputStream();
                 IOUtils.copy(inputStream, outputStream);
@@ -536,7 +548,7 @@ public class JspMetadataListener implements MetadataProvider,
             // is not already registered
             // (if it's already registered, the event will be delivered directly
             // later on)
-            if (metadataDependencyRegistry.getDownstream(upstreamDependency)
+            if (getMetadataDependencyRegistry().getDownstream(upstreamDependency)
                     .contains(downstreamDependency)) {
                 return;
             }
@@ -548,7 +560,7 @@ public class JspMetadataListener implements MetadataProvider,
             // method
 
             // Get the metadata that just changed
-            final MetadataItem metadataItem = metadataService
+            final MetadataItem metadataItem = getMetadataService()
                     .get(upstreamDependency);
 
             // We don't have to worry about physical type metadata, as we
@@ -573,14 +585,236 @@ public class JspMetadataListener implements MetadataProvider,
             final String localMid = formBackingObjectTypesToLocalMids
                     .get(itdTypeDetails.getGovernor().getName());
             if (localMid != null) {
-                metadataService.evictAndGet(localMid);
+                getMetadataService().evictAndGet(localMid);
             }
             return;
         }
 
         if (MetadataIdentificationUtils
                 .isIdentifyingInstance(downstreamDependency)) {
-            metadataService.evictAndGet(downstreamDependency);
+            getMetadataService().evictAndGet(downstreamDependency);
         }
+    }
+    
+    public FileManager getFileManager(){
+    	if(fileManager == null){
+        	// Get all Services implement FileManager interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(FileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				fileManager = (FileManager)  context.getService(ref);
+    				return fileManager;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load FileManager on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return fileManager;
+    	}
+    }
+    
+    public JspOperations getJspOperations(){
+    	if(jspOperations == null){
+        	// Get all Services implement JspOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(JspOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				jspOperations = (JspOperations)  context.getService(ref);
+    				return jspOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load JspOperations on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return jspOperations;
+    	}
+    }
+    
+    public MenuOperations getMenuOperations(){
+    	if(menuOperations == null){
+        	// Get all Services implement MenuOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(MenuOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				menuOperations = (MenuOperations)  context.getService(ref);
+    				return menuOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MenuOperations on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return menuOperations;
+    	}
+    }
+    
+    
+    public MetadataDependencyRegistry getMetadataDependencyRegistry(){
+    	if(metadataDependencyRegistry == null){
+        	// Get all Services implement MetadataDependencyRegistry interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				metadataDependencyRegistry = (MetadataDependencyRegistry)  context.getService(ref);
+    				return metadataDependencyRegistry;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataDependencyRegistry on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return metadataDependencyRegistry;
+    	}
+    }
+    
+    public MetadataService getMetadataService(){
+    	if(metadataService == null){
+        	// Get all Services implement MetadataService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(MetadataService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				metadataService = (MetadataService)  context.getService(ref);
+    				return metadataService;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MetadataService on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return metadataService;
+    	}
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+        	// Get all Services implement ProjectOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				projectOperations = (ProjectOperations)  context.getService(ref);
+    				return projectOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProjectOperations on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return projectOperations;
+    	}
+    }
+    
+    public PropFileOperations getPropFileOperations(){
+    	if(propFileOperations == null){
+        	// Get all Services implement PropFileOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(PropFileOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				propFileOperations = (PropFileOperations)  context.getService(ref);
+    				return propFileOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PropFileOperations on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return propFileOperations;
+    	}
+    }
+    
+    public TilesOperations getTilesOperations(){
+    	if(tilesOperations == null){
+        	// Get all Services implement TilesOperations interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(TilesOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				tilesOperations = (TilesOperations)  context.getService(ref);
+    				return tilesOperations;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TilesOperations on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return tilesOperations;
+    	}
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	if(typeLocationService == null){
+        	// Get all Services implement TypeLocationService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				typeLocationService = (TypeLocationService)  context.getService(ref);
+    				return typeLocationService;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load TypeLocationService on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return typeLocationService;
+    	}
+    }
+    
+    
+    public WebMetadataService getWebMetadataService(){
+    	if(webMetadataService == null){
+        	// Get all Services implement WebMetadataService interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(WebMetadataService.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				webMetadataService = (WebMetadataService)  context.getService(ref);
+    				return webMetadataService;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load WebMetadataService on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return webMetadataService;
+    	}
+    }
+    
+    public XmlRoundTripFileManager getXmlRoundTripFileManager(){
+    	if(xmlRoundTripFileManager == null){
+        	// Get all Services implement XmlRoundTripFileManager interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(XmlRoundTripFileManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				xmlRoundTripFileManager = (XmlRoundTripFileManager)  context.getService(ref);
+    				return xmlRoundTripFileManager;
+    			}
+    			return null;
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load XmlRoundTripFileManager on JspMetadataListener.");
+    			return null;
+    		}
+    	}else{
+    		return xmlRoundTripFileManager;
+    	}
     }
 }
