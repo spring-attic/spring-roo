@@ -25,8 +25,6 @@
 		<!-- ROO Core -->
 		<module>runtime</module>
 		<!-- ROO Addons -->
-		<module>addon-tostring</module>
-		<module>addon-equals</module>
 		<module>addon-javabean</module>
 		<module>addon-plural</module>
 		<module>addon-propfiles</module>
@@ -34,11 +32,9 @@
 		<module>addon-jpa</module>
 		<module>addon-finder</module>
 		<module>addon-logging</module>
-		<module>addon-property-editor</module>
 		<module>addon-dod</module>
 		<module>addon-test</module>
 		<module>addon-backup</module>
-		<module>addon-serializable</module>
 		<module>addon-web-mvc-controller</module>
 		<module>addon-web-mvc-embedded</module>
 		<module>addon-web-mvc-jsp</module>
@@ -543,7 +539,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.serializable</artifactId>
+                <artifactId>org.springframework.roo.addon.javabean</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

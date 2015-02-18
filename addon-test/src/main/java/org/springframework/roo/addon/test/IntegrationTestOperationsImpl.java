@@ -255,7 +255,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
                     .contains(CustomDataKeys.PERSISTENT_TYPE) || typeDetails
                     .getDeclaredByMetadataId()
                     .startsWith(
-                            "MID:org.springframework.roo.addon.tostring.ToStringMetadata"))) {
+                            "MID:org.springframework.roo.addon.javabean.ToStringMetadata"))) {
                 for (final MethodMetadata method : typeDetails
                         .getDeclaredMethods()) {
                     // Check if public, non-abstract method

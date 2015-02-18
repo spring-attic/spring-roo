@@ -18,10 +18,8 @@ public final class RooJavaType {
             "org.springframework.roo.addon.dod.RooDataOnDemand");
     public static final JavaType ROO_DB_MANAGED = new JavaType(
             "org.springframework.roo.addon.dbre.RooDbManaged");
-    public static final JavaType ROO_EDITOR = new JavaType(
-            "org.springframework.roo.addon.property.editor.RooEditor");
     public static final JavaType ROO_EQUALS = new JavaType(
-            "org.springframework.roo.addon.equals.RooEquals");
+            "org.springframework.roo.addon.javabean.RooEquals");
     public static final JavaType ROO_GWT_LOCATOR = new JavaType(
             "org.springframework.roo.addon.gwt.RooGwtLocator");
     public static final JavaType ROO_GWT_MIRRORED_FROM = new JavaType(
@@ -67,7 +65,7 @@ public final class RooJavaType {
     public static final JavaType ROO_REPOSITORY_NEO4J = new JavaType(
             "org.springframework.roo.addon.layers.repository.neo4j.RooNeo4jRepository");
     public static final JavaType ROO_SERIALIZABLE = new JavaType(
-            "org.springframework.roo.addon.serializable.RooSerializable");
+            "org.springframework.roo.addon.javabean.RooSerializable");
     public static final JavaType ROO_SERVICE = new JavaType(
             "org.springframework.roo.addon.layers.service.RooService");
     public static final JavaType ROO_SOLR_SEARCHABLE = new JavaType(
@@ -75,7 +73,7 @@ public final class RooJavaType {
     public static final JavaType ROO_SOLR_WEB_SEARCHABLE = new JavaType(
             "org.springframework.roo.addon.solr.RooSolrWebSearchable");
     public static final JavaType ROO_TO_STRING = new JavaType(
-            "org.springframework.roo.addon.tostring.RooToString");
+            "org.springframework.roo.addon.javabean.RooToString");
     public static final JavaType ROO_UPLOADED_FILE = new JavaType(
             "org.springframework.roo.classpath.operations.jsr303.RooUploadedFile");
     public static final JavaType ROO_WEB_FINDER = new JavaType(

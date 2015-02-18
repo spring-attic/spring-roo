@@ -41,10 +41,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.serializable</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.propfiles</artifactId>
         </dependency>
         <dependency>
@@ -83,5 +79,9 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
+        <dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.javabean</artifactId>
+		</dependency>
     </dependencies>
 </project>
