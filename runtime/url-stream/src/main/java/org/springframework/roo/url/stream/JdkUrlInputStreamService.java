@@ -1,4 +1,4 @@
-package org.springframework.roo.url.stream.jdk;
+package org.springframework.roo.url.stream;
 
 import java.io.IOException;
 import java.io.InputStream;

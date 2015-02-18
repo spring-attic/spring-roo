@@ -38,7 +38,6 @@
 		<module>classpath</module>
 		<module>classpath-antlrjavaparser</module>
 		<module>url-stream</module>
-		<module>url-stream-jdk</module>
 	</modules>
 
 </project>
