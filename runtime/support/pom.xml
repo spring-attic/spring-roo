@@ -9,15 +9,27 @@
     </parent>
     <artifactId>org.springframework.roo.support</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Runtime - Support</name>
-    <description>Provides support services for Spring Roo's core. Has no external dependencies (including no dependency on OSGi).</description>
-
-	<dependencies>
-       	<!-- Apache Felix -->
+    <name>Spring Roo - Runtime - Support for OSGi Features</name>
+    <description>Provides support services for Spring Roo's core and base add-ons. Includes OSGi dependencies.</description>
+    <dependencies>
+        <!-- OSGi -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <!-- Roo support -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support</artifactId>
+        </dependency>
+        <!-- Apache Felix -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
-	</dependencies>
-	
+    </dependencies>
 </project>

@@ -1,4 +1,4 @@
-package org.springframework.roo.file.monitor.polling.roo;
+package org.springframework.roo.file.monitor.polling;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;

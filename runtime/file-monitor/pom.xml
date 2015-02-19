@@ -11,15 +11,24 @@
     <packaging>bundle</packaging>
     <name>Spring Roo - Runtime - File Monitor</name>
     <dependencies>
-        <!-- Roo -->
+		<!-- OSGi -->
         <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.support</artifactId>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
         </dependency>
         <!-- Apache Felix -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+        <!-- Roo -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
     </dependencies>
 </project>

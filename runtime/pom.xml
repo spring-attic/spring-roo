@@ -20,7 +20,6 @@
 		<module>bootstrap</module>
 		<module>startlevel</module>
 		<module>support</module>
-		<module>support-osgi</module>
 		<module>shell</module>
 		<module>shell-osgi</module>
 		<module>shell-jline</module>
@@ -30,8 +29,6 @@
 		<module>metadata</module>
 		<module>file-undo</module>
 		<module>file-monitor</module>
-		<module>file-monitor-polling</module>
-		<module>file-monitor-polling-roo</module>
 		<module>project</module>
 		<module>process-manager</module>
 		<module>classpath</module>
