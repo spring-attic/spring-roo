@@ -10,6 +10,15 @@
     <artifactId>org.springframework.roo.annotations</artifactId>
     <packaging>bundle</packaging>
     <name>Spring Roo - Annotations (ASLv2 Licensed)</name>
+    
+    <dependencies>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+    </dependencies>
+    
     <build>
         <plugins>
             <plugin> <!-- Should move antrun to a pluginManagement section in root POM; similarly do this for all other plugins -->

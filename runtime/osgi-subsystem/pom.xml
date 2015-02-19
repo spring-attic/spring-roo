@@ -98,5 +98,10 @@
 			<artifactId>org.apache.felix.metatype</artifactId>
 			<version>1.0.10</version>
 		</dependency>
+       	<!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
 	</dependencies>
 </project>

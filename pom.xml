@@ -655,7 +655,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
+                <artifactId>org.springframework.roo.osgi.bundle</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
