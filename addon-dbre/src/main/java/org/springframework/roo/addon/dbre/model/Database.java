@@ -56,6 +56,9 @@ public class Database {
     /** Whether to create integration tests */
     private boolean testAutomatically;
 
+    /** All tables. */
+    private Set<String> tablePrefixes;
+
     /**
      * Constructor
      * 
@@ -388,5 +391,13 @@ public class Database {
             table.setJoinTable(true);
         }
     }
+
+	public Set<String> getTablePrefixes() {
+		return tablePrefixes;
+	}
+
+	public void setTablePrefixes(Set<String> tablePrefixes) {
+		this.tablePrefixes = tablePrefixes;
+	}
 
 }

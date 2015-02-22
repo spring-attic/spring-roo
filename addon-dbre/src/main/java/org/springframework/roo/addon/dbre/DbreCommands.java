@@ -53,11 +53,14 @@ public class DbreCommands implements CommandMarker {
             @CliOption(key = "disableGeneratedIdentifiers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Disable identifier auto generation") final boolean disableGeneratedIdentifiers,
             @CliOption(key = "activeRecord", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Generate CRUD active record methods for each entity") final boolean activeRecord,
             @CliOption(key = "repository", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate a repository for each entity") final boolean repository,
-            @CliOption(key = "service", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate a service for each entity") final boolean service) {
+            @CliOption(key = "service", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate a service for each entity") final boolean service,
+            @CliOption(key = "tablePrefixes", mandatory = false, specifiedDefaultValue = "", optionContext = "tables-prefixes", help = "Table prefixes to be removed when generating entities") final Set<String> tablePrefixes
+            ) {
 
         dbreOperations.reverseEngineerDatabase(schemas, destinationPackage,
                 testAutomatically, view, includeTables, excludeTables,
                 includeNonPortableAttributes, disableVersionFields,
-                disableGeneratedIdentifiers, activeRecord, repository, service);
+                disableGeneratedIdentifiers, activeRecord, repository, service, 
+                tablePrefixes);
     }
 }

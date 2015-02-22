@@ -271,7 +271,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             if (owningSideTable.equals(table)) {
                 final JavaSymbolName fieldName = new JavaSymbolName(
                         getInflectorPlural(DbreTypeUtils
-                                .suggestFieldName(inverseSideTable))
+                                .suggestFieldName(inverseSideTable,database.getTablePrefixes()))
                                 + (sameTable ? "1" : fieldSuffix));
                 final FieldMetadataBuilder fieldBuilder = getManyToManyOwningSideField(
                         fieldName, joinTable, inverseSideTable,
@@ -282,11 +282,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             if (inverseSideTable.equals(table)) {
                 final JavaSymbolName fieldName = new JavaSymbolName(
                         getInflectorPlural(DbreTypeUtils
-                                .suggestFieldName(owningSideTable))
+                                .suggestFieldName(owningSideTable,database.getTablePrefixes()))
                                 + (sameTable ? "2" : fieldSuffix));
                 final JavaSymbolName mappedByFieldName = new JavaSymbolName(
                         getInflectorPlural(DbreTypeUtils
-                                .suggestFieldName(inverseSideTable))
+                                .suggestFieldName(inverseSideTable,database.getTablePrefixes()))
                                 + (sameTable ? "1" : fieldSuffix));
                 final FieldMetadataBuilder fieldBuilder = getManyToManyInverseSideField(
                         fieldName, mappedByFieldName, owningSideTable,
@@ -336,7 +336,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                         .iterator().next();
                 fieldName = new JavaSymbolName(
                         DbreTypeUtils.suggestFieldName(reference
-                                .getLocalColumnName()));
+                                .getLocalColumnName(),database.getTablePrefixes()));
             }
             else {
                 final Short keySequence = foreignKey.getKeySequence();
@@ -412,7 +412,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
                     .valueOf(keySequence) : "";
             JavaSymbolName fieldName = new JavaSymbolName(
                     getInflectorPlural(DbreTypeUtils
-                            .suggestFieldName(foreignTableName)) + fieldSuffix);
+                            .suggestFieldName(foreignTableName,database.getTablePrefixes())) + fieldSuffix);
             JavaSymbolName mappedByFieldName = null;
             if (exportedKey.getReferenceCount() == 1) {
                 final Reference reference = exportedKey.getReferences()
@@ -423,7 +423,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             }
             else {
                 mappedByFieldName = new JavaSymbolName(
-                        DbreTypeUtils.suggestFieldName(table) + fieldSuffix);
+                        DbreTypeUtils.suggestFieldName(table,database.getTablePrefixes()) + fieldSuffix);
             }
 
             // Check for existence of same field - ROO-1691
@@ -469,7 +469,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             final String fieldSuffix = keySequence != null && keySequence > 0 ? String
                     .valueOf(keySequence) : "";
             final JavaSymbolName fieldName = new JavaSymbolName(
-                    DbreTypeUtils.suggestFieldName(foreignTableName)
+                    DbreTypeUtils.suggestFieldName(foreignTableName,database.getTablePrefixes())
                             + fieldSuffix);
             final JavaType fieldType = DbreTypeUtils.findTypeForTableName(
                     managedEntities, foreignTableName, foreignSchemaName);
