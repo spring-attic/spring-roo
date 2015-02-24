@@ -18,9 +18,9 @@ import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
-import org.springframework.roo.shell.Shell;
-import org.springframework.roo.shell.osgi.AbstractFlashingObject;
+import org.springframework.roo.shell.AbstractFlashingObject;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.shell.core.Shell;
 
 /**
  * Delegates OSGi log messages to the JDK logging infrastructure. This in turn

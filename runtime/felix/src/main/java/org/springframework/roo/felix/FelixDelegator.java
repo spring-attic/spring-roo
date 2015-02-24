@@ -17,17 +17,17 @@ import org.apache.felix.service.command.Converter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CliOption;
-import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.ExitShellRequest;
-import org.springframework.roo.shell.Shell;
-import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.shell.event.ShellStatus;
-import org.springframework.roo.shell.event.ShellStatus.Status;
-import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.logging.LoggingOutputStream;
+import org.springframework.shell.converters.StaticFieldConverter;
+import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.ExitShellRequest;
+import org.springframework.shell.core.Shell;
+import org.springframework.shell.core.annotation.CliCommand;
+import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.event.ShellStatus;
+import org.springframework.shell.event.ShellStatus.Status;
+import org.springframework.shell.event.ShellStatusListener;
 
 /**
  * Delegates to commands provided via Felix's Shell API.

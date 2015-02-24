@@ -21,9 +21,6 @@
 		<module>startlevel</module>
 		<module>support</module>
 		<module>shell</module>
-		<module>shell-osgi</module>
-		<module>shell-jline</module>
-		<module>shell-jline-osgi</module>
 		<module>felix</module>
 		<module>model</module>
 		<module>metadata</module>

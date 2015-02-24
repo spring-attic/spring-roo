@@ -29,9 +29,9 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.maven.PomFactory;
-import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.shell.core.Shell;
 import org.w3c.dom.Element;
 
 /**

@@ -8,7 +8,8 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.roo.shell.Completion;
+import org.springframework.shell.converters.EnumConverter;
+import org.springframework.shell.core.Completion;
 
 /**
  * Unit test of {@link EnumConverter}

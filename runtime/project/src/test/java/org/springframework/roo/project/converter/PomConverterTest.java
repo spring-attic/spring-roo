@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.shell.Completion;
+import org.springframework.shell.core.Completion;
 
 /**
  * Unit test of {@link PomConverter}

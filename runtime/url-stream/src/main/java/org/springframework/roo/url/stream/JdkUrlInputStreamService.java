@@ -14,8 +14,7 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.shell.osgi.AbstractFlashingObject;
-import org.springframework.roo.url.stream.UrlInputStreamService;
+import org.springframework.roo.shell.AbstractFlashingObject;
 
 /**
  * Simple implementation of {@link UrlInputStreamService} that uses the JDK.

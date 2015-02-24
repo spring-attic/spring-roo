@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.MavenUtils;
-import org.springframework.roo.shell.Completion;
+import org.springframework.shell.core.Completion;
 
 /**
  * Unit test of {@link GAVConverter}

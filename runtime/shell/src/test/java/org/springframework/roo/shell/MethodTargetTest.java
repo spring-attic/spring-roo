@@ -6,6 +6,8 @@ import static org.junit.Assert.assertFalse;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
+import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.MethodTarget;
 
 /**
  * Unit test of {@link MethodTarget}

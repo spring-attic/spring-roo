@@ -7,9 +7,9 @@ import java.util.StringTokenizer;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.shell.Completion;
-import org.springframework.roo.shell.Converter;
-import org.springframework.roo.shell.MethodTarget;
+import org.springframework.shell.core.Completion;
+import org.springframework.shell.core.Converter;
+import org.springframework.shell.core.MethodTarget;
 
 /**
  * Provides conversion between a space-separated list of field names to a set of

@@ -3,19 +3,17 @@ package org.springframework.roo.process.manager;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
-
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CliOption;
-import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.Shell;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.Shell;
+import org.springframework.shell.core.annotation.CliCommand;
+import org.springframework.shell.core.annotation.CliOption;
 
 /**
  * Commands related to file system monitoring and process management.

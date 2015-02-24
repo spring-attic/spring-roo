@@ -39,7 +39,7 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.shell.converters.StaticFieldConverter;
+import org.springframework.shell.converters.StaticFieldConverter;
 
 /**
  * OSGi implementation of {@link ClasspathOperations}.

@@ -10,10 +10,10 @@ import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.process.manager.event.ProcessManagerStatusListener;
 import org.springframework.roo.process.manager.event.ProcessManagerStatusProvider;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CliOption;
-import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.osgi.AbstractFlashingObject;
+import org.springframework.roo.shell.AbstractFlashingObject;
+import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.annotation.CliCommand;
+import org.springframework.shell.core.annotation.CliOption;
 
 /**
  * Allows monitoring of {@link ProcessManager} for development mode users.

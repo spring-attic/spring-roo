@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
+import org.springframework.shell.core.CliOptionContext;
 
 /**
  * Unit test of {@link CliOptionContext}

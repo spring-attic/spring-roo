@@ -5,9 +5,9 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.project.GAV;
-import org.springframework.roo.shell.Completion;
-import org.springframework.roo.shell.Converter;
-import org.springframework.roo.shell.MethodTarget;
+import org.springframework.shell.core.Completion;
+import org.springframework.shell.core.Converter;
+import org.springframework.shell.core.MethodTarget;
 
 /**
  * A {@link Converter} for {@link GAV}s

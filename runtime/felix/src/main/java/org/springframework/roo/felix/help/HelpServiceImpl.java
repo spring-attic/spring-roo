@@ -39,17 +39,16 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.shell.AbstractShell;
-import org.springframework.roo.shell.CliAvailabilityIndicator;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CliOption;
-import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.Converter;
-import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.shell.NaturalOrderComparator;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
+import org.springframework.shell.core.CommandMarker;
+import org.springframework.shell.core.Converter;
+import org.springframework.shell.core.MethodTarget;
+import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
+import org.springframework.shell.core.annotation.CliCommand;
+import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.support.util.NaturalOrderComparator;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -332,11 +331,11 @@ public class HelpServiceImpl implements HelpService {
 			appendix.setAttribute("xml:id", "command-index");
 			appendix.appendChild(new XmlElementBuilder("title", document)
 					.setText("Command Index").build());
-			appendix.appendChild(new XmlElementBuilder("para", document)
+			/*appendix.appendChild(new XmlElementBuilder("para", document)
 					.setText(
 							"This appendix was automatically built from Roo "
 									+ AbstractShell.versionInfo() + ".")
-					.build());
+					.build());*/
 			appendix.appendChild(new XmlElementBuilder("para", document)
 					.setText(
 							"Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.")

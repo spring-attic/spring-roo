@@ -6,9 +6,9 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.shell.Completion;
-import org.springframework.roo.shell.Converter;
-import org.springframework.roo.shell.MethodTarget;
+import org.springframework.shell.core.Completion;
+import org.springframework.shell.core.Converter;
+import org.springframework.shell.core.MethodTarget;
 
 /**
  * A {@link Converter} for {@link PackagingProvider}s

@@ -18,7 +18,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.shell.AbstractShell;
+import org.springframework.shell.core.AbstractShell;
 
 /**
  * Base implementation of {@link HintOperations}.

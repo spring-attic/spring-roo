@@ -10,8 +10,8 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
-import org.springframework.roo.shell.ExecutionStrategy;
-import org.springframework.roo.shell.ParseResult;
+import org.springframework.shell.core.ExecutionStrategy;
+import org.springframework.shell.event.ParseResult;
 
 /**
  * Used to dispatch shell {@link ExecutionStrategy} requests through

@@ -18,10 +18,10 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CommandListener;
-import org.springframework.roo.shell.ParseResult;
-import org.springframework.roo.shell.Shell;
+import org.springframework.roo.shell.RooShell;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.AnsiEscapeCode;
+import org.springframework.shell.event.ParseResult;
 
 /**
  * Records the last Java package and type used.
@@ -60,7 +60,7 @@ public class LastUsedImpl implements LastUsed, CommandListener {
     private boolean isVerified;
     
     @Reference private ProjectOperations projectOperations;
-    @Reference private Shell shell;
+    @Reference private RooShell shell;
     @Reference private TypeLocationService typeLocationService;
 
 	private boolean listenerRegistered;

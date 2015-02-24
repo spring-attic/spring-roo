@@ -22,7 +22,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.shell.Completion;
+import org.springframework.shell.core.Completion;
 
 /**
  * Unit test of {@link JavaPackageConverter}
