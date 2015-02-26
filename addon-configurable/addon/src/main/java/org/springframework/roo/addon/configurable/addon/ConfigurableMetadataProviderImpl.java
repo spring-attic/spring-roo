@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.configurable;
+package org.springframework.roo.addon.configurable.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_CONFIGURABLE;
 

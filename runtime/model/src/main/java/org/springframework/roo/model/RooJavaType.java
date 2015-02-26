@@ -11,7 +11,7 @@ public final class RooJavaType {
 
     // org.springframework.roo.addon
     public static final JavaType ROO_CONFIGURABLE = new JavaType(
-            "org.springframework.roo.addon.configurable.RooConfigurable");
+            "org.springframework.roo.addon.configurable.addon.RooConfigurable");
     public static final JavaType ROO_CONVERSION_SERVICE = new JavaType(
             "org.springframework.roo.addon.web.mvc.controller.converter.RooConversionService");
     public static final JavaType ROO_DATA_ON_DEMAND = new JavaType(

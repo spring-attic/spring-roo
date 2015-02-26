@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.configurable;
+package org.springframework.roo.addon.configurable.addon;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

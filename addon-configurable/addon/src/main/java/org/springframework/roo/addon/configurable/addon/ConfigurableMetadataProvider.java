@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.configurable;
+package org.springframework.roo.addon.configurable.addon;
 
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 

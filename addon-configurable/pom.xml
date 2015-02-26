@@ -8,9 +8,15 @@
         <relativePath>../runtime/osgi-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.addon.configurable</artifactId>
-    <packaging>bundle</packaging>
-    <name>Spring Roo - Addon - @Configurable</name>
+    <packaging>pom</packaging>
+    <name>Spring Roo - Parent - Configurable</name>
     <description>Support for the introduction of Spring's @Configurable annotation through an AspectJ ITD.</description>
+    
+    <modules>
+		<module>addon</module>
+		<module>annotations</module>    
+    </modules>
+    
     <dependencies>
         <!-- OSGi -->
         <dependency>
@@ -64,4 +70,9 @@
             <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
     </dependencies>
+    
+    <properties>
+    	<target.jar.directory>${basedir}/../target/all</target.jar.directory>  
+	</properties>
+    
 </project>

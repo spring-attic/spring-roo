@@ -93,7 +93,7 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy todir="${project.build.directory}/../../target/all" preservelastmodified="true">
+                                <copy todir="${target.jar.directory}" preservelastmodified="true">
                                     <fileset dir="${project.build.directory}">
                                         <include name="*.jar" />
                                         <exclude name="*-tests.jar" />
@@ -185,4 +185,9 @@
           </plugins>
         </pluginManagement>
     </build>
+    
+    <properties>
+    	<target.jar.directory>${project.build.directory}/../../target/all</target.jar.directory>  
+	</properties>
+    
 </project>

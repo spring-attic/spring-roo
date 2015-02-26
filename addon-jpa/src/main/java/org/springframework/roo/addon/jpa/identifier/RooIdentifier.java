@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.roo.addon.configurable.RooConfigurable;
+import org.springframework.roo.addon.configurable.addon.RooConfigurable;
 import org.springframework.roo.addon.javabean.RooSerializable;
 
 /**
