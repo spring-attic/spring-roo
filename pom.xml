@@ -544,7 +544,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.jpa</artifactId>
+                <artifactId>org.springframework.roo.addon.jpa.addon</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

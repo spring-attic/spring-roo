@@ -8,9 +8,15 @@
         <relativePath>../runtime/osgi-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.addon.jpa</artifactId>
-    <packaging>bundle</packaging>
-    <name>Spring Roo - Addon - JPA</name>
+    <packaging>pom</packaging>
+    <name>Spring Roo - JPA</name>
     <description>Support for Java Persistence API (JPA) features and domain entities in the target project</description>
+    
+    <modules>
+    	<module>addon</module>
+    	<module>annotations</module>
+    </modules>
+    
     <dependencies>
         <!-- OSGi -->
         <dependency>
@@ -84,4 +90,9 @@
 			<artifactId>org.springframework.roo.addon.javabean.addon</artifactId>
 		</dependency>
     </dependencies>
+    
+    <properties>
+    	<target.jar.directory>${basedir}/../target/all</target.jar.directory>  
+	</properties>
+    
 </project>
