@@ -72,7 +72,7 @@ public @interface RooWebScaffold {
      * controller types with
      * {@link org.springframework.roo.addon.web.mvc.controller.json.RooWebJson}
      * instead. (Was: Will scan the formBackingObjects for
-     * org.springframework.roo.addon.json.RooJson annotation and expose json
+     * org.springframework.roo.addon.json.annotations.RooJson annotation and expose json
      * when configured.)
      * 
      * @return indicates if the json methods should be provided (defaults to

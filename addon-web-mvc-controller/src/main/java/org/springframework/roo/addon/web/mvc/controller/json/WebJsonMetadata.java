@@ -28,7 +28,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.roo.addon.json.JsonMetadata;
+import org.springframework.roo.addon.json.addon.JsonMetadata;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.RooWebScaffold;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;

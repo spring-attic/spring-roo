@@ -47,7 +47,7 @@ public final class RooJavaType {
     public static final JavaType ROO_JSF_MANAGED_BEAN = new JavaType(
             "org.springframework.roo.addon.jsf.managedbean.RooJsfManagedBean");
     public static final JavaType ROO_JSON = new JavaType(
-            "org.springframework.roo.addon.json.RooJson");
+            "org.springframework.roo.addon.json.annotations.RooJson");
     public static final JavaType ROO_MONGO_ENTITY = new JavaType(
             "org.springframework.roo.addon.layers.repository.mongo.RooMongoEntity");
     public static final JavaType ROO_NEO4J_ENTITY = new JavaType(
