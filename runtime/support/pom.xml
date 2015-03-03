@@ -21,11 +21,6 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>
-        <!-- Roo support -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.support</artifactId>
-        </dependency>
         <!-- Apache Felix -->
         <dependency>
             <groupId>org.apache.felix</groupId>
