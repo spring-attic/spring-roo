@@ -59,7 +59,7 @@ public final class RooJavaType {
     public static final JavaType ROO_PLURAL = new JavaType(
             "org.springframework.roo.addon.plural.RooPlural");
     public static final JavaType ROO_REPOSITORY_JPA = new JavaType(
-            "org.springframework.roo.addon.layers.repository.jpa.RooJpaRepository");
+            "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository");
     public static final JavaType ROO_REPOSITORY_MONGO = new JavaType(
             "org.springframework.roo.addon.layers.repository.mongo.RooMongoRepository");
     public static final JavaType ROO_REPOSITORY_NEO4J = new JavaType(

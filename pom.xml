@@ -584,7 +584,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.layers.repository.jpa</artifactId>
+                <artifactId>org.springframework.roo.addon.layers.repository.jpa.addon</artifactId>
                 <version>${project.version}</version>
             </dependency>
  			<dependency>
