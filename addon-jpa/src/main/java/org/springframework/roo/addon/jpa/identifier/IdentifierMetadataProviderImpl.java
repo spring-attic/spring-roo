@@ -13,7 +13,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.addon.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.jpa.AbstractIdentifierServiceAwareMetadataProvider;
-import org.springframework.roo.addon.javabean.SerializableMetadataProvider;
+import org.springframework.roo.addon.javabean.addon.SerializableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;

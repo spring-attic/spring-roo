@@ -19,7 +19,7 @@ public final class RooJavaType {
     public static final JavaType ROO_DB_MANAGED = new JavaType(
             "org.springframework.roo.addon.dbre.RooDbManaged");
     public static final JavaType ROO_EQUALS = new JavaType(
-            "org.springframework.roo.addon.javabean.RooEquals");
+            "org.springframework.roo.addon.javabean.addon.RooEquals");
     public static final JavaType ROO_GWT_LOCATOR = new JavaType(
             "org.springframework.roo.addon.gwt.RooGwtLocator");
     public static final JavaType ROO_GWT_MIRRORED_FROM = new JavaType(
@@ -35,7 +35,7 @@ public final class RooJavaType {
     public static final JavaType ROO_INTEGRATION_TEST = new JavaType(
             "org.springframework.roo.addon.test.RooIntegrationTest");
     public static final JavaType ROO_JAVA_BEAN = new JavaType(
-            "org.springframework.roo.addon.javabean.RooJavaBean");
+            "org.springframework.roo.addon.javabean.addon.RooJavaBean");
     public static final JavaType ROO_JPA_ACTIVE_RECORD = new JavaType(
             "org.springframework.roo.addon.jpa.activerecord.RooJpaActiveRecord");
     public static final JavaType ROO_JPA_ENTITY = new JavaType(
@@ -65,7 +65,7 @@ public final class RooJavaType {
     public static final JavaType ROO_REPOSITORY_NEO4J = new JavaType(
             "org.springframework.roo.addon.layers.repository.neo4j.RooNeo4jRepository");
     public static final JavaType ROO_SERIALIZABLE = new JavaType(
-            "org.springframework.roo.addon.javabean.RooSerializable");
+            "org.springframework.roo.addon.javabean.addon.RooSerializable");
     public static final JavaType ROO_SERVICE = new JavaType(
             "org.springframework.roo.addon.layers.service.RooService");
     public static final JavaType ROO_SOLR_SEARCHABLE = new JavaType(
@@ -73,7 +73,7 @@ public final class RooJavaType {
     public static final JavaType ROO_SOLR_WEB_SEARCHABLE = new JavaType(
             "org.springframework.roo.addon.solr.RooSolrWebSearchable");
     public static final JavaType ROO_TO_STRING = new JavaType(
-            "org.springframework.roo.addon.javabean.RooToString");
+            "org.springframework.roo.addon.javabean.addon.RooToString");
     public static final JavaType ROO_UPLOADED_FILE = new JavaType(
             "org.springframework.roo.classpath.operations.jsr303.RooUploadedFile");
     public static final JavaType ROO_WEB_FINDER = new JavaType(

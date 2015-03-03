@@ -293,7 +293,7 @@ public class UpdateCompilationUnitTest {
 
         final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(
                 new JavaType(
-                        "org.springframework.roo.addon.javabean.RooToString"));
+                        "org.springframework.roo.addon.javabean.addon.RooToString"));
         final ClassOrInterfaceTypeDetails newSimpleInterfaceDetails = addAnnotation(
                 simpleInterfaceDetails, annotationBuilder.build());
 
@@ -307,7 +307,7 @@ public class UpdateCompilationUnitTest {
         checkSimpleClass(result);
 
         assertTrue(result
-                .contains("import org.springframework.roo.addon.javabean.RooToString;"));
+                .contains("import org.springframework.roo.addon.javabean.addon.RooToString;"));
         assertTrue(result.contains("@RooToString"));
 
         // Invoke2
@@ -324,7 +324,7 @@ public class UpdateCompilationUnitTest {
         checkSimpleClass(result2);
 
         assertTrue(result2
-                .contains("import org.springframework.roo.addon.javabean.RooToString;"));
+                .contains("import org.springframework.roo.addon.javabean.addon.RooToString;"));
         assertTrue(result2.contains("@RooToString"));
 
     }
@@ -555,9 +555,9 @@ public class UpdateCompilationUnitTest {
         // Check imports
         assertTrue(result.contains("import javax.persistence.Entity;"));
         assertTrue(result
-                .contains("import org.springframework.roo.addon.javabean.RooJavaBean;"));
+                .contains("import org.springframework.roo.addon.javabean.addon.RooJavaBean;"));
         assertTrue(result
-                .contains("import org.springframework.roo.addon.javabean.RooToString;"));
+                .contains("import org.springframework.roo.addon.javabean.addon.RooToString;"));
         assertTrue(result
                 .contains("import org.springframework.roo.addon.entity.RooEntity;"));
         assertTrue(result

@@ -8,9 +8,15 @@
         <relativePath>../runtime/osgi-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.addon.javabean</artifactId>
-    <packaging>bundle</packaging>
-    <name>Spring Roo - Addon - JavaBean Method Manager</name>
+    <packaging>pom</packaging>
+    <name>Spring Roo - JavaBean Method Manager</name>
     <description>Support for creation and management of accessors and mutators following the JavaBean standard.</description>
+    
+    <modules>
+    	<module>addon</module>
+    	<module>annotations</module>
+    </modules>
+    
     <dependencies>
         <!-- OSGi -->
         <dependency>
@@ -68,4 +74,7 @@
             <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
     </dependencies>
+    <properties>
+    	<target.jar.directory>${basedir}/../target/all</target.jar.directory>  
+	</properties>
 </project>

@@ -529,7 +529,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.dod</artifactId>
+                <artifactId>org.springframework.roo.addon.dod.addon</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -539,7 +539,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.javabean</artifactId>
+                <artifactId>org.springframework.roo.addon.javabean.addon</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

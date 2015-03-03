@@ -4,6 +4,7 @@ import static org.springframework.roo.model.SpringJavaType.CONFIGURABLE;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.configurable.annotations.RooConfigurable;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;

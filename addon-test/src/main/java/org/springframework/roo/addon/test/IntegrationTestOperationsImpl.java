@@ -12,7 +12,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.dod.DataOnDemandOperations;
+import org.springframework.roo.addon.dod.addon.DataOnDemandOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -255,7 +255,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
                     .contains(CustomDataKeys.PERSISTENT_TYPE) || typeDetails
                     .getDeclaredByMetadataId()
                     .startsWith(
-                            "MID:org.springframework.roo.addon.javabean.ToStringMetadata"))) {
+                            "MID:org.springframework.roo.addon.javabean.addon.ToStringMetadata"))) {
                 for (final MethodMetadata method : typeDetails
                         .getDeclaredMethods()) {
                     // Check if public, non-abstract method

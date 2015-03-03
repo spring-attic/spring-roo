@@ -12,14 +12,14 @@ public interface JsonOperations {
 
     /**
      * Annotate all types in the project which are annotated with @
-     * {@link org.springframework.roo.addon.javabean.RooJavaBean}.
+     * {@link org.springframework.roo.addon.javabean.addon.RooJavaBean}.
      */
     @Deprecated
     void annotateAll();
 
     /**
      * Annotate all types in the project which are annotated with @
-     * {@link org.springframework.roo.addon.javabean.RooJavaBean}.
+     * {@link org.springframework.roo.addon.javabean.addon.RooJavaBean}.
      * 
      * @param deepSerialize Indication if deep serialization should be enabled
      *            (optional)
@@ -29,7 +29,7 @@ public interface JsonOperations {
 
     /**
      * Annotate all types in the project which are annotated with @
-     * {@link org.springframework.roo.addon.javabean.RooJavaBean}.
+     * {@link org.springframework.roo.addon.javabean.addon.RooJavaBean}.
      * 
      * @param deepSerialize
      *            Indication if deep serialization should be enabled (optional)

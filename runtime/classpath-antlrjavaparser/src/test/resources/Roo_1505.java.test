@@ -1,8 +1,8 @@
 package com.pet;
 
 import javax.persistence.Entity;
-import org.springframework.roo.addon.javabean.RooJavaBean;
-import org.springframework.roo.addon.javabean.RooToString;
+import org.springframework.roo.addon.javabean.addon.RooJavaBean;
+import org.springframework.roo.addon.javabean.addon.RooToString;
 import org.springframework.roo.addon.entity.RooEntity;
 import javax.validation.constraints.NotNull;
 import java.util.Set;

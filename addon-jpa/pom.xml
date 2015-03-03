@@ -81,7 +81,7 @@
         </dependency>
         <dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.javabean</artifactId>
+			<artifactId>org.springframework.roo.addon.javabean.addon</artifactId>
 		</dependency>
     </dependencies>
 </project>
