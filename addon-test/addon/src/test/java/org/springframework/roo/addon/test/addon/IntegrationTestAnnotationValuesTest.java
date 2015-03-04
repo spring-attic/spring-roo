@@ -1,5 +1,7 @@
-package org.springframework.roo.addon.test;
+package org.springframework.roo.addon.test.addon;
 
+import org.springframework.roo.addon.test.addon.IntegrationTestAnnotationValues;
+import org.springframework.roo.addon.test.annotations.RooIntegrationTest;
 import org.springframework.roo.classpath.details.annotations.populator.AnnotationValuesTestCase;
 
 /**

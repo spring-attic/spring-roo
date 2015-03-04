@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test;
+package org.springframework.roo.addon.test.addon;
 
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 

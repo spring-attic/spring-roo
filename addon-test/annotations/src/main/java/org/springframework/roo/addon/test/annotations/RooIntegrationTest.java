@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test;
+package org.springframework.roo.addon.test.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

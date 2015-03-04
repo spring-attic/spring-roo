@@ -8,9 +8,15 @@
         <relativePath>../runtime/osgi-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.addon.test</artifactId>
-    <packaging>bundle</packaging>
-    <name>Spring Roo - Addon - Automated Integration Testing</name>
+    <packaging>pom</packaging>
+    <name>Spring Roo - Automated Integration Testing</name>
     <description>Integration of JUnit integration tests in the target project.</description>
+    
+    <modules>
+    	<module>addon</module>
+    	<module>annotations</module>
+    </modules>
+    
     <dependencies>
         <!-- OSGi -->
         <dependency>
@@ -76,4 +82,9 @@
             <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
     </dependencies>
+    
+    <properties>
+    	<target.jar.directory>${basedir}/../target/all</target.jar.directory>  
+	</properties>
+    
 </project>

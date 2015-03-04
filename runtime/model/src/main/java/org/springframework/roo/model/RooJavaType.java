@@ -33,7 +33,7 @@ public final class RooJavaType {
     public static final JavaType ROO_IDENTIFIER = new JavaType(
             "org.springframework.roo.addon.jpa.annotations.identifier.RooIdentifier");
     public static final JavaType ROO_INTEGRATION_TEST = new JavaType(
-            "org.springframework.roo.addon.test.RooIntegrationTest");
+            "org.springframework.roo.addon.test.annotations.RooIntegrationTest");
     public static final JavaType ROO_JAVA_BEAN = new JavaType(
             "org.springframework.roo.addon.javabean.annotations.RooJavaBean");
     public static final JavaType ROO_JPA_ACTIVE_RECORD = new JavaType(

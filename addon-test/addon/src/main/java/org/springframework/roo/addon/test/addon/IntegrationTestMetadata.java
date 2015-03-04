@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test;
+package org.springframework.roo.addon.test.addon;
 
 import static org.springframework.roo.model.GoogleJavaType.GAE_LOCAL_SERVICE_TEST_HELPER;
 import static org.springframework.roo.model.JdkJavaType.ITERATOR;
@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.dod.addon.DataOnDemandMetadata;
+import org.springframework.roo.addon.test.annotations.RooIntegrationTest;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;

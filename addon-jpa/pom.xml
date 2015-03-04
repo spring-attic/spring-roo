@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.test</artifactId>
+            <artifactId>org.springframework.roo.addon.test.addon</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>

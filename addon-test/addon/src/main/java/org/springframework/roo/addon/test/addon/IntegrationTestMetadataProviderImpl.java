@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test;
+package org.springframework.roo.addon.test.addon;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.test;
+package org.springframework.roo.addon.test.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 import static org.springframework.roo.model.SpringJavaType.MOCK_STATIC_ENTITY_METHODS;

@@ -25,7 +25,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.addon.test.IntegrationTestOperations;
+import org.springframework.roo.addon.test.addon.IntegrationTestOperations;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
