@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.security;
+package org.springframework.roo.addon.security.addon;
 
 import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.classpath.PhysicalTypeCategory.CLASS;

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.security;
+package org.springframework.roo.addon.security.annotations;
 
 public @interface RooPermissionEvaluator {
 	/**

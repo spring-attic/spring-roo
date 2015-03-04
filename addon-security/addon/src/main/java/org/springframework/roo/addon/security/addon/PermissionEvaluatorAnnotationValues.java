@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.security;
+package org.springframework.roo.addon.security.addon;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;

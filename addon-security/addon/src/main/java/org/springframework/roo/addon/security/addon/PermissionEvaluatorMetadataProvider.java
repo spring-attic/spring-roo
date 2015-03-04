@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.security;
+package org.springframework.roo.addon.security.addon;
 
 import static org.springframework.roo.model.SpringJavaType.PERMISSION_EVALUATOR;
 

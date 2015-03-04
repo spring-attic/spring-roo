@@ -1,7 +1,8 @@
-package org.springframework.roo.addon.security;
+package org.springframework.roo.addon.security.addon;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.springframework.roo.addon.security.annotations.RooPermissionEvaluator;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.model.JavaType;
