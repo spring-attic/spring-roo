@@ -8,9 +8,15 @@
         <relativePath>../runtime/osgi-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
-    <packaging>bundle</packaging>
-    <name>Spring Roo - Addon - Web MVC Controller</name>
+    <packaging>pom</packaging>
+    <name>Spring Roo - Web MVC Controller</name>
     <description>Configuration and integration of Spring MVC controllers in the target project.</description>
+    
+    <modules>
+    	<module>addon</module>
+    	<module>annotations</module>
+    </modules>
+    
     <build>
         <plugins>
             <plugin>
@@ -94,4 +100,7 @@
             <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
 	</dependencies>
+	<properties>
+    	<target.jar.directory>${basedir}/../target/all</target.jar.directory>  
+	</properties>
 </project>

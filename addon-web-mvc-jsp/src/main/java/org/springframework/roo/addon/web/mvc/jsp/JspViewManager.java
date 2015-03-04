@@ -32,10 +32,10 @@ import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
-import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
-import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
-import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.addon.details.FinderMetadataDetails;
+import org.springframework.roo.addon.web.mvc.controller.addon.details.JavaTypeMetadataDetails;
+import org.springframework.roo.addon.web.mvc.controller.addon.details.JavaTypePersistenceMetadataDetails;
+import org.springframework.roo.addon.web.mvc.controller.addon.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;

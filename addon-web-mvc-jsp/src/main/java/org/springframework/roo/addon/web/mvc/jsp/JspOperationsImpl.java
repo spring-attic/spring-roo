@@ -24,7 +24,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.backup.BackupOperations;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
+import org.springframework.roo.addon.web.mvc.controller.addon.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18nSupport;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;

@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
+            <artifactId>org.springframework.roo.addon.web.mvc.controller.addon</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
