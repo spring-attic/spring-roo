@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.plural;
+package org.springframework.roo.addon.plural.addon;
 
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.plural;
+package org.springframework.roo.addon.plural.addon;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;

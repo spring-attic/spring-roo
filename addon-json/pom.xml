@@ -35,7 +35,7 @@
         <!-- Spring Roo modules -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.plural</artifactId>
+            <artifactId>org.springframework.roo.addon.plural.addon</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>

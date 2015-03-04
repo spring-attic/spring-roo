@@ -22,7 +22,7 @@ import org.springframework.roo.addon.layers.service.addon.ServiceAnnotationValue
 import org.springframework.roo.addon.layers.service.addon.ServiceInterfaceLocator;
 import org.springframework.roo.addon.layers.service.addon.ServiceLayerProvider;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
-import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.addon.plural.addon.PluralMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;

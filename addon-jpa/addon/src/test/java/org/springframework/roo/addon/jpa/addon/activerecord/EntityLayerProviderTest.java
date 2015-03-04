@@ -28,7 +28,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.addon.jpa.addon.activerecord.EntityLayerProvider;
 import org.springframework.roo.addon.jpa.addon.activerecord.JpaActiveRecordMetadataProvider;
 import org.springframework.roo.addon.jpa.addon.activerecord.JpaCrudAnnotationValues;
-import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.addon.plural.addon.PluralMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;

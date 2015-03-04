@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.plural;
+package org.springframework.roo.addon.plural.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

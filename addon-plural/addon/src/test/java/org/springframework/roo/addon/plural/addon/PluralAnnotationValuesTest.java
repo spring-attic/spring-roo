@@ -1,5 +1,7 @@
-package org.springframework.roo.addon.plural;
+package org.springframework.roo.addon.plural.addon;
 
+import org.springframework.roo.addon.plural.addon.PluralAnnotationValues;
+import org.springframework.roo.addon.plural.annotations.RooPlural;
 import org.springframework.roo.classpath.details.annotations.populator.AnnotationValuesTestCase;
 
 /**

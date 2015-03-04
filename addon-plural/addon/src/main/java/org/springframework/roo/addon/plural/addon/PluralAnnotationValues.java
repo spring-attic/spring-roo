@@ -1,5 +1,6 @@
-package org.springframework.roo.addon.plural;
+package org.springframework.roo.addon.plural.addon;
 
+import org.springframework.roo.addon.plural.annotations.RooPlural;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.plural;
+package org.springframework.roo.addon.plural.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_PLURAL;
 
@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jvnet.inflector.Noun;
+import org.springframework.roo.addon.plural.annotations.RooPlural;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
