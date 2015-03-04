@@ -8,58 +8,69 @@
         <relativePath>../runtime/osgi-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.annotations</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>pom</packaging>
     <name>Spring Roo - Annotations (ASLv2 Licensed)</name>
     
     <dependencies>
-        <!-- Apache Felix -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-        </dependency>
+    	<!-- Roo Configurable Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.configurable.annotations</artifactId>		
+		</dependency>
+		<!-- Roo Dbre Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>		
+		</dependency>
+		<!-- Roo Dod Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.dod.annotations</artifactId>		
+		</dependency>
+		<!--Roo JavaBean Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.javabean.annotations</artifactId>		
+		</dependency>
+		<!-- Roo JPA Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.jpa.annotations</artifactId>		
+		</dependency>
+		<!-- Roo JSON Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.json.annotations</artifactId>		
+		</dependency>
+		<!-- Roo Layers Repository JPA Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.layers.repository.jpa.annotations</artifactId>		
+		</dependency>
+		<!-- Roo Layers Service Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.layers.service.annotations</artifactId>		
+		</dependency>
+		<!-- Roo Plural Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.plural.annotations</artifactId>		
+		</dependency>
+		<!-- Roo Security Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.security.annotations</artifactId>		
+		</dependency>
+		<!-- Roo Test Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.test.annotations</artifactId>		
+		</dependency>
+		<!-- Roo Web MVC Controller Annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.web.mvc.controller.annotations</artifactId>		
+		</dependency>
     </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin> <!-- Should move antrun to a pluginManagement section in root POM; similarly do this for all other plugins -->
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <target>
-                                <delete dir="${basedir}/src/main/java/org/" />
-                                <copy todir="${basedir}/src/main/java/" preservelastmodified="true">
-                                    <fileset dir="${basedir}/..">
-                                        <include name="**/Roo*.java" />
-                                        <exclude name="core/**" />
-                                        <exclude name="**/RooJavaType.java" />
-                                    </fileset>
-                                    <!-- Discard the module names prefixes from each file path -->
-                                    <regexpmapper from="^(.*).src.main.java.(.*)$$" to="\2" />
-                                </copy>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>ant-contrib</groupId>
-                        <artifactId>ant-contrib</artifactId>
-                        <version>20020829</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant-apache-regexp</artifactId>
-                        <version>1.7.1</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
 </project>

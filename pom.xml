@@ -524,7 +524,17 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.plural.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.configurable.addon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.configurable.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -534,7 +544,17 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.dod.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.test.addon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.test.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -544,7 +564,17 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.javabean.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.jpa.addon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.jpa.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -559,7 +589,17 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.json.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.web.mvc.controller.addon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.web.mvc.controller.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -579,6 +619,11 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.security.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.jdbc</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -587,9 +632,24 @@
                 <artifactId>org.springframework.roo.addon.layers.repository.jpa.addon</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.layers.repository.jpa.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
  			<dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.layers.service.addon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.layers.service.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- End Roo Addons -->
