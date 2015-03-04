@@ -8,9 +8,15 @@
         <relativePath>../runtime/osgi-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.addon.layers.service</artifactId>
-    <packaging>bundle</packaging>
-    <name>Spring Roo - Addon - Service Layer</name>
+    <packaging>pom</packaging>
+    <name>Spring Roo - Service Layer</name>
     <description>Support for common layering options in Java Enterprise Applications</description>
+    
+    <modules>
+    	<module>addon</module>
+    	<module>annotations</module>
+    </modules>
+    
     <dependencies>
         <!-- OSGi -->
          <dependency>
@@ -86,4 +92,10 @@
             <artifactId>org.springframework.roo.wrapping.hapax</artifactId>
         </dependency>
 	</dependencies>
+	
+	
+	<properties>
+    	<target.jar.directory>${basedir}/../target/all</target.jar.directory>  
+	</properties>
+	
 </project>

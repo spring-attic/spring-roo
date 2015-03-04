@@ -589,7 +589,7 @@
             </dependency>
  			<dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.layers.service</artifactId>
+                <artifactId>org.springframework.roo.addon.layers.service.addon</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- End Roo Addons -->

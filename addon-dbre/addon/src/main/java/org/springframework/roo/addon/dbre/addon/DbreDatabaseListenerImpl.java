@@ -32,7 +32,7 @@ import org.springframework.roo.addon.dbre.addon.model.Table;
 import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
 import org.springframework.roo.addon.jpa.addon.identifier.IdentifierService;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaOperations;
-import org.springframework.roo.addon.layers.service.ServiceOperations;
+import org.springframework.roo.addon.layers.service.addon.ServiceOperations;
 import org.springframework.roo.addon.test.IntegrationTestOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
