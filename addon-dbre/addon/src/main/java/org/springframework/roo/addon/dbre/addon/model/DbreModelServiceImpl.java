@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -18,8 +19,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dbre.addon.jdbc.ConnectionProvider;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
@@ -27,6 +31,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -40,14 +45,24 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class DbreModelServiceImpl implements DbreModelService {
+	
+	// OSGi Bundle Context
+	private BundleContext context;
+	
+	private static final Logger LOGGER = HandlerUtils
+			.getLogger(DbreModelServiceImpl.class);
+	
+	protected void activate(final ComponentContext cContext) {
+		this.context = cContext.getBundleContext();
+	}
 
     private final Set<Database> cachedIntrospections = new HashSet<Database>();
-    @Reference private ConnectionProvider connectionProvider;
-    @Reference private FileManager fileManager;
+    private ConnectionProvider connectionProvider;
+    private FileManager fileManager;
     private Database lastDatabase;
 
-    @Reference private ProjectOperations projectOperations;
-    @Reference private PropFileOperations propFileOperations;
+    private ProjectOperations projectOperations;
+    private PropFileOperations propFileOperations;
 
     private void cacheDatabase(final Database database) {
         if (database != null) {
@@ -60,35 +75,35 @@ public class DbreModelServiceImpl implements DbreModelService {
         final String dbProps = "database.properties";
         final String jndiDataSource = getJndiDataSourceName();
         if (StringUtils.isNotBlank(jndiDataSource)) {
-            final Map<String, String> props = propFileOperations.getProperties(
-                    Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations
+            final Map<String, String> props = getPropFileOperations().getProperties(
+                    Path.SPRING_CONFIG_ROOT.getModulePathId(getProjectOperations()
                             .getFocusedModuleName()), "jndi.properties");
-            return connectionProvider.getConnectionViaJndiDataSource(
+            return getConnectionProvider().getConnectionViaJndiDataSource(
                     jndiDataSource, props, displayAddOns);
         }
-        else if (fileManager.exists(projectOperations.getPathResolver()
+        else if (getFileManager().exists(getProjectOperations().getPathResolver()
                 .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT, dbProps))) {
-            final Map<String, String> props = propFileOperations.getProperties(
-                    Path.SPRING_CONFIG_ROOT.getModulePathId(projectOperations
+            final Map<String, String> props = getPropFileOperations().getProperties(
+                    Path.SPRING_CONFIG_ROOT.getModulePathId(getProjectOperations()
                             .getFocusedModuleName()), dbProps);
-            return connectionProvider.getConnection(props, displayAddOns);
+            return getConnectionProvider().getConnection(props, displayAddOns);
         }
 
         final Properties connectionProperties = getConnectionPropertiesFromDataNucleusConfiguration();
-        return connectionProvider.getConnection(connectionProperties,
+        return getConnectionProvider().getConnection(connectionProperties,
                 displayAddOns);
     }
 
     private Properties getConnectionPropertiesFromDataNucleusConfiguration() {
-        final String persistenceXmlPath = projectOperations.getPathResolver()
+        final String persistenceXmlPath = getProjectOperations().getPathResolver()
                 .getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
                         "META-INF/persistence.xml");
-        if (!fileManager.exists(persistenceXmlPath)) {
+        if (!getFileManager().exists(persistenceXmlPath)) {
             throw new IllegalStateException("Failed to find "
                     + persistenceXmlPath);
         }
 
-        final FileDetails fileDetails = fileManager
+        final FileDetails fileDetails = getFileManager()
                 .readFile(persistenceXmlPath);
         Document document = null;
         try {
@@ -148,14 +163,14 @@ public class DbreModelServiceImpl implements DbreModelService {
 
         final String dbreXmlPath = getDbreXmlPath();
         if (StringUtils.isBlank(dbreXmlPath)
-                || !fileManager.exists(dbreXmlPath)) {
+                || !getFileManager().exists(dbreXmlPath)) {
             return null;
         }
 
         Database database = null;
         InputStream inputStream = null;
         try {
-            inputStream = fileManager.getInputStream(dbreXmlPath);
+            inputStream = getFileManager().getInputStream(dbreXmlPath);
             database = DatabaseXmlUtils.readDatabase(inputStream);
             cacheDatabase(database);
             return database;
@@ -169,24 +184,24 @@ public class DbreModelServiceImpl implements DbreModelService {
     }
 
     private String getDbreXmlPath() {
-        for (final String moduleName : projectOperations.getModuleNames()) {
+        for (final String moduleName : getProjectOperations().getModuleNames()) {
             final LogicalPath logicalPath = LogicalPath.getInstance(
                     Path.SRC_MAIN_RESOURCES, moduleName);
-            final String dbreXmlPath = projectOperations.getPathResolver()
+            final String dbreXmlPath = getProjectOperations().getPathResolver()
                     .getIdentifier(logicalPath, DBRE_XML);
-            if (fileManager.exists(dbreXmlPath)) {
+            if (getFileManager().exists(dbreXmlPath)) {
                 return dbreXmlPath;
             }
         }
-        return projectOperations.getPathResolver().getFocusedIdentifier(
+        return getProjectOperations().getPathResolver().getFocusedIdentifier(
                 Path.SRC_MAIN_RESOURCES, DBRE_XML);
     }
 
     private String getJndiDataSourceName() {
-        final String contextPath = projectOperations.getPathResolver()
+        final String contextPath = getProjectOperations().getPathResolver()
                 .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
                         "applicationContext.xml");
-        final Document appCtx = XmlUtils.readXml(fileManager
+        final Document appCtx = XmlUtils.readXml(getFileManager()
                 .getInputStream(contextPath));
         final Element root = appCtx.getDocumentElement();
         final Element dataSourceJndi = XmlUtils.findFirstElement(
@@ -207,7 +222,7 @@ public class DbreModelServiceImpl implements DbreModelService {
             return Collections.emptySet();
         }
         finally {
-            connectionProvider.closeConnection(connection);
+            getConnectionProvider().closeConnection(connection);
         }
     }
 
@@ -229,7 +244,7 @@ public class DbreModelServiceImpl implements DbreModelService {
             throw new IllegalStateException(e);
         }
         finally {
-            connectionProvider.closeConnection(connection);
+            getConnectionProvider().closeConnection(connection);
         }
     }
 
@@ -247,14 +262,130 @@ public class DbreModelServiceImpl implements DbreModelService {
             throw new IllegalStateException(e);
         }
         finally {
-            connectionProvider.closeConnection(connection);
+            getConnectionProvider().closeConnection(connection);
         }
     }
 
     public void writeDatabase(final Database database) {
         final Document document = DatabaseXmlUtils
                 .getDatabaseDocument(database);
-        fileManager.createOrUpdateTextFileIfRequired(getDbreXmlPath(),
+        getFileManager().createOrUpdateTextFileIfRequired(getDbreXmlPath(),
                 XmlUtils.nodeToString(document), true);
     }
+    
+	/**
+	 * Method to get ConnectionProvider Service implementation
+	 * 
+	 * @return
+	 */
+	public ConnectionProvider getConnectionProvider() {
+		if (connectionProvider == null) {
+			// Get all Services implement ConnectionProvider interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								ConnectionProvider.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					connectionProvider = (ConnectionProvider) context.getService(ref);
+					return connectionProvider;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load ConnectionProvider on DbreModelServiceImpl.");
+				return null;
+			}
+		} else {
+			return connectionProvider;
+		}
+	}
+	
+	/**
+	 * Method to get FileManager Service implementation
+	 * 
+	 * @return
+	 */
+	public FileManager getFileManager() {
+		if (fileManager == null) {
+			// Get all Services implement FileManager interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								FileManager.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					fileManager = (FileManager) context.getService(ref);
+					return fileManager;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load FileManager on DbreModelServiceImpl.");
+				return null;
+			}
+		} else {
+			return fileManager;
+		}
+	}
+	
+	/**
+	 * Method to get ProjectOperations Service implementation
+	 * 
+	 * @return
+	 */
+	public ProjectOperations getProjectOperations() {
+		if (projectOperations == null) {
+			// Get all Services implement ProjectOperations interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								ProjectOperations.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					projectOperations = (ProjectOperations) context.getService(ref);
+					return projectOperations;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load ProjectOperations on DbreModelServiceImpl.");
+				return null;
+			}
+		} else {
+			return projectOperations;
+		}
+	}
+	
+	/**
+	 * Method to get PropFileOperations Service implementation
+	 * 
+	 * @return
+	 */
+	public PropFileOperations getPropFileOperations() {
+		if (propFileOperations == null) {
+			// Get all Services implement PropFileOperations interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								PropFileOperations.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					propFileOperations = (PropFileOperations) context.getService(ref);
+					return propFileOperations;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load PropFileOperations on DbreModelServiceImpl.");
+				return null;
+			}
+		} else {
+			return propFileOperations;
+		}
+	}
 }

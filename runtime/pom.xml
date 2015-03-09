@@ -34,6 +34,7 @@
 		<module>classpath</module>
 		<module>classpath-antlrjavaparser</module>
 		<module>url-stream</module>
+		<module>obr-addon-search</module>
 	</modules>
 
 </project>

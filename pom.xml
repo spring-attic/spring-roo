@@ -715,11 +715,6 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.osgi.bundle</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.process.manager</artifactId>
                 <version>${project.version}</version>
             </dependency>
