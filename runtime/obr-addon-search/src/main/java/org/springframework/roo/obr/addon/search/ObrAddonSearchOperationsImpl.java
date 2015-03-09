@@ -363,8 +363,23 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 
 	@Override
 	public InstallOrUpgradeStatus removeAddOn(BundleSymbolicName bsn) {
-		// TODO Auto-generated method stub
-		return null;
+		synchronized (mutex) {
+            Validate.notNull(bsn, "Bundle symbolic name required");
+            boolean success = false;
+            success = getShell()
+                    .executeCommand("osgi uninstall --bundleSymbolicName "
+                            + bsn.getKey());
+            InstallOrUpgradeStatus status;
+            if (!success) {
+                LOGGER.warning("Unable to remove add-on: " + bsn.getKey());
+                status = InstallOrUpgradeStatus.FAILED;
+            }
+            else {
+                LOGGER.info("Successfully removed add-on: " + bsn.getKey());
+                status = InstallOrUpgradeStatus.SUCCESS;
+            }
+            return status;
+        }
 	}
 	
 	/**
