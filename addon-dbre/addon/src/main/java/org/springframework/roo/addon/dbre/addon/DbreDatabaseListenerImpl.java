@@ -23,8 +23,9 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.springframework.roo.addon.dbre.addon.model.Column;
 import org.springframework.roo.addon.dbre.addon.model.Database;
 import org.springframework.roo.addon.dbre.addon.model.DbreModelService;
@@ -70,7 +71,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 public class DbreDatabaseListenerImpl extends
         AbstractHashCodeTrackingMetadataNotifier implements IdentifierService,
         FileEventListener {
-
+	
     private static final JavaSymbolName DB_MANAGED = new JavaSymbolName(
             "dbManaged");
     private static final String IDENTIFIER_TYPE = "identifierType";
@@ -79,15 +80,15 @@ public class DbreDatabaseListenerImpl extends
     private static final String VERSION = "version";
     private static final String VERSION_FIELD = "versionField";
 
-    @Reference private DbreModelService dbreModelService;
-    @Reference private FileManager fileManager;
-    @Reference private IntegrationTestOperations integrationTestOperations;
-    @Reference private ProjectOperations projectOperations;
-    @Reference private RepositoryJpaOperations repositoryJpaOperations;
-    @Reference private ServiceOperations serviceOperations;
-    @Reference private Shell shell;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private TypeManagementService typeManagementService;
+    private DbreModelService dbreModelService;
+    private FileManager fileManager;
+    private IntegrationTestOperations integrationTestOperations;
+    private ProjectOperations projectOperations;
+    private RepositoryJpaOperations repositoryJpaOperations;
+    private ServiceOperations serviceOperations;
+    private Shell shell;
+    private TypeLocationService typeLocationService;
+    private TypeManagementService typeManagementService;
 
     private Map<JavaType, List<Identifier>> identifierResults;
 
@@ -101,18 +102,18 @@ public class DbreDatabaseListenerImpl extends
 
         // Produce identifier itself
         final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(identifierType, projectOperations
+                .createIdentifier(identifierType, getProjectOperations()
                         .getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL,
                 identifierType, PhysicalTypeCategory.CLASS);
         cidBuilder.setAnnotations(identifierAnnotations);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
-        shell.flash(Level.FINE,
+        getShell().flash(Level.FINE,
                 "Created " + identifierType.getFullyQualifiedTypeName(),
                 DbreDatabaseListenerImpl.class.getName());
-        shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
+        getShell().flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
     }
 
     /**
@@ -164,7 +165,7 @@ public class DbreDatabaseListenerImpl extends
 
         // Create entity class
         final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(javaType, projectOperations.getPathResolver()
+                .createIdentifier(javaType, getProjectOperations().getPathResolver()
                         .getFocusedPath(Path.SRC_MAIN_JAVA));
         final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
                 declaredByMetadataId, Modifier.PUBLIC, javaType,
@@ -173,12 +174,12 @@ public class DbreDatabaseListenerImpl extends
         cidBuilder.setAnnotations(annotations);
 
         final ClassOrInterfaceTypeDetails entity = cidBuilder.build();
-        typeManagementService.createOrUpdateTypeOnDisk(entity);
+        getTypeManagementService().createOrUpdateTypeOnDisk(entity);
 
-        shell.flash(Level.FINE,
+        getShell().flash(Level.FINE,
                 "Created " + javaType.getFullyQualifiedTypeName(),
                 DbreDatabaseListenerImpl.class.getName());
-        shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
+        getShell().flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 
         return entity;
     }
@@ -194,14 +195,14 @@ public class DbreDatabaseListenerImpl extends
         if (governorPhysicalTypeMetadata != null) {
             final String filePath = governorPhysicalTypeMetadata
                     .getPhysicalLocationCanonicalPath();
-            if (fileManager.exists(filePath)) {
-                fileManager.delete(filePath, reason);
-                shell.flash(Level.FINE,
+            if (getFileManager().exists(filePath)) {
+                getFileManager().delete(filePath, reason);
+                getShell().flash(Level.FINE,
                         "Deleted " + javaType.getFullyQualifiedTypeName(),
                         DbreDatabaseListenerImpl.class.getName());
             }
 
-            shell.flash(Level.FINE, "",
+            getShell().flash(Level.FINE, "",
                     DbreDatabaseListenerImpl.class.getName());
         }
     }
@@ -227,7 +228,7 @@ public class DbreDatabaseListenerImpl extends
     }
 
     private void deserializeDatabase() {
-        final Database database = dbreModelService.getDatabase(true);
+        final Database database = getDbreModelService().getDatabase(true);
         if (database != null) {
             identifierResults = new LinkedHashMap<JavaType, List<Identifier>>();
             reverseEngineer(database);
@@ -247,7 +248,7 @@ public class DbreDatabaseListenerImpl extends
 
         // Fall back to project's top level package
         if (destinationPackage == null) {
-            destinationPackage = projectOperations.getFocusedTopLevelPackage();
+            destinationPackage = getProjectOperations().getFocusedTopLevelPackage();
         }
         return destinationPackage;
     }
@@ -357,7 +358,7 @@ public class DbreDatabaseListenerImpl extends
     private Set<ClassOrInterfaceTypeDetails> getManagedIdentifiers() {
         final Set<ClassOrInterfaceTypeDetails> managedIdentifierTypes = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
 
-        final Set<ClassOrInterfaceTypeDetails> identifierTypes = typeLocationService
+        final Set<ClassOrInterfaceTypeDetails> identifierTypes = getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_IDENTIFIER);
         for (final ClassOrInterfaceTypeDetails managedIdentifierType : identifierTypes) {
             final AnnotationMetadata identifierAnnotation = managedIdentifierType
@@ -372,7 +373,7 @@ public class DbreDatabaseListenerImpl extends
     }
 
     private PhysicalTypeMetadata getPhysicalTypeMetadata(final JavaType javaType) {
-        final String declaredByMetadataId = typeLocationService
+        final String declaredByMetadataId = getTypeLocationService()
                 .getPhysicalTypeIdentifier(javaType);
         if (StringUtils.isBlank(declaredByMetadataId)) {
             return null;
@@ -573,7 +574,7 @@ public class DbreDatabaseListenerImpl extends
     }
 
     private void reverseEngineer(final Database database) {
-        final Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService
+        final Set<ClassOrInterfaceTypeDetails> managedEntities = getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
         // Determine whether to create "active record" CRUD methods
         database.setActiveRecord(isActiveRecord(database, managedEntities));
@@ -618,7 +619,7 @@ public class DbreDatabaseListenerImpl extends
                                 schemaPackage);
                 final boolean activeRecord = database.isActiveRecord()
                         && !database.isRepository();
-                if (typeLocationService.getTypeDetails(javaType) == null) {
+                if (getTypeLocationService().getTypeDetails(javaType) == null) {
                     table.setIncludeNonPortableAttributes(database
                             .isIncludeNonPortableAttributes());
                     table.setDisableVersionFields(database
@@ -635,7 +636,7 @@ public class DbreDatabaseListenerImpl extends
         if (database.isRepository()) {
             for (final ClassOrInterfaceTypeDetails entity : newEntities) {
                 final JavaType type = entity.getType();
-                repositoryJpaOperations.setupRepository(
+                getRepositoryJpaOperations().setupRepository(
                         new JavaType(type.getFullyQualifiedTypeName()
                                 + "Repository"), type);
             }
@@ -646,7 +647,7 @@ public class DbreDatabaseListenerImpl extends
             for (final ClassOrInterfaceTypeDetails entity : newEntities) {
                 final JavaType type = entity.getType();
                 final String typeName = type.getFullyQualifiedTypeName();
-                serviceOperations.setupService(new JavaType(typeName
+                getServiceOperations().setupService(new JavaType(typeName
                         + "Service"), new JavaType(typeName + "ServiceImpl"),
                         type, false, "", false, false);
             }
@@ -655,7 +656,7 @@ public class DbreDatabaseListenerImpl extends
         // Create integration tests if required
         if (database.isTestAutomatically()) {
             for (final ClassOrInterfaceTypeDetails entity : newEntities) {
-                integrationTestOperations.newIntegrationTest(entity.getType());
+                getIntegrationTestOperations().newIntegrationTest(entity.getType());
             }
         }
 
@@ -765,7 +766,269 @@ public class DbreDatabaseListenerImpl extends
                 managedEntity);
         cidBuilder.updateTypeAnnotation(jpaAnnotationBuilder.build(),
                 attributesToDeleteIfPresent);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
         return table;
     }
+    
+	/**
+	 * Method to get DbreModelService Service implementation
+	 * 
+	 * @return
+	 */
+	public DbreModelService getDbreModelService() {
+		if (dbreModelService == null) {
+			// Get all Services implement DbreModelService interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								DbreModelService.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					dbreModelService = (DbreModelService) context.getService(ref);
+					return dbreModelService;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load DbreModelService on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return dbreModelService;
+		}
+	}
+	
+	/**
+	 * Method to get FileManager Service implementation
+	 * 
+	 * @return
+	 */
+	public FileManager getFileManager() {
+		if (fileManager == null) {
+			// Get all Services implement FileManager interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								FileManager.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					fileManager = (FileManager) context.getService(ref);
+					return fileManager;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load FileManager on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return fileManager;
+		}
+	}
+	
+	/**
+	 * Method to get IntegrationTestOperations Service implementation
+	 * 
+	 * @return
+	 */
+	public IntegrationTestOperations getIntegrationTestOperations() {
+		if (integrationTestOperations == null) {
+			// Get all Services implement IntegrationTestOperations interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								IntegrationTestOperations.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					integrationTestOperations = (IntegrationTestOperations) context.getService(ref);
+					return integrationTestOperations;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load IntegrationTestOperations on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return integrationTestOperations;
+		}
+	}
+	
+	/**
+	 * Method to get ProjectOperations Service implementation
+	 * 
+	 * @return
+	 */
+	public ProjectOperations getProjectOperations() {
+		if (projectOperations == null) {
+			// Get all Services implement ProjectOperations interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								ProjectOperations.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					projectOperations = (ProjectOperations) context.getService(ref);
+					return projectOperations;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load ProjectOperations on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return projectOperations;
+		}
+	}
+	
+	/**
+	 * Method to get RepositoryJpaOperations Service implementation
+	 * 
+	 * @return
+	 */
+	public RepositoryJpaOperations getRepositoryJpaOperations() {
+		if (repositoryJpaOperations == null) {
+			// Get all Services implement RepositoryJpaOperations interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								RepositoryJpaOperations.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					repositoryJpaOperations = (RepositoryJpaOperations) context.getService(ref);
+					return repositoryJpaOperations;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load RepositoryJpaOperations on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return repositoryJpaOperations;
+		}
+	}
+	
+	/**
+	 * Method to get ServiceOperations Service implementation
+	 * 
+	 * @return
+	 */
+	public ServiceOperations getServiceOperations() {
+		if (serviceOperations == null) {
+			// Get all Services implement ServiceOperations interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								ServiceOperations.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					serviceOperations = (ServiceOperations) context.getService(ref);
+					return serviceOperations;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load ServiceOperations on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return serviceOperations;
+		}
+	}
+	
+	/**
+	 * Method to get Shell Service implementation
+	 * 
+	 * @return
+	 */
+	public Shell getShell() {
+		if (shell == null) {
+			// Get all Services implement Shell interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								Shell.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					shell = (Shell) context.getService(ref);
+					return shell;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load Shell on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return shell;
+		}
+	}
+	
+	/**
+	 * Method to get TypeLocationService Service implementation
+	 * 
+	 * @return
+	 */
+	public TypeLocationService getTypeLocationService() {
+		if (typeLocationService == null) {
+			// Get all Services implement TypeLocationService interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								TypeLocationService.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					typeLocationService = (TypeLocationService) context.getService(ref);
+					return typeLocationService;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load TypeLocationService on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return typeLocationService;
+		}
+	}
+	
+	
+	/**
+	 * Method to get TypeManagementService Service implementation
+	 * 
+	 * @return
+	 */
+	public TypeManagementService getTypeManagementService() {
+		if (typeManagementService == null) {
+			// Get all Services implement TypeManagementService interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								TypeManagementService.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					typeManagementService = (TypeManagementService) context.getService(ref);
+					return typeManagementService;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load TypeManagementService on DbreDatabaseListenerImpl.");
+				return null;
+			}
+		} else {
+			return typeManagementService;
+		}
+	}
 }
