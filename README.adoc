@@ -3,7 +3,7 @@ Getting started with Spring Roo development
 :page-layout: base
 :toc-placement: manual
 :Author:    DISID Corporation S.L.
-:Email:     <info@disid.com>
+:Email:     <springroo@disid.com>
 
 Thanks for checking out Spring Roo from Git.
 
