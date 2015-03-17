@@ -41,6 +41,10 @@ public class SimpleParser implements Parser {
 	// ------------ OSGi component attributes ----------------
    	public BundleContext context;
    	
+   	private RooBundleActivator rooBundleActivator;
+   	
+   	private Long lasTimeUpdateCommands;
+   	
     private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
     private static final Logger LOGGER = HandlerUtils
             .getLogger(SimpleParser.class);
@@ -713,7 +717,7 @@ public class SimpleParser implements Parser {
     public Set<String> getEveryCommand() {
         synchronized (mutex) {
         	
-        	if(commands.isEmpty() || RooBundleActivator.getUpdateCommands()){
+        	if(commands.isEmpty() || hasToReloadComands()){
         		// Get all Services implement CommandMarker interface
         		try {
         			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
@@ -729,7 +733,8 @@ public class SimpleParser implements Parser {
         			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
         		}
         		
-        		RooBundleActivator.setUpdateCommands(false);
+        		setLasTimeUpdateCommands(System.currentTimeMillis());
+        		
         	}
         	
         	
@@ -768,7 +773,7 @@ public class SimpleParser implements Parser {
             final boolean strictMatching,
             final boolean checkAvailabilityIndicators) {
     	
-    	if(commands.isEmpty() || RooBundleActivator.getUpdateCommands()){
+    	if(commands.isEmpty() || hasToReloadComands()){
     		// Get all Services implement CommandMarker interface
     		try {
     			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
@@ -784,7 +789,7 @@ public class SimpleParser implements Parser {
     			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
     		}
     		
-    		RooBundleActivator.setUpdateCommands(false);
+    		setLasTimeUpdateCommands(System.currentTimeMillis());
     	}
     	
         Validate.notNull(buffer, "Buffer required");
@@ -841,7 +846,7 @@ public class SimpleParser implements Parser {
         return result;
     }
 
-    /**
+	/**
      * Normalises the given raw user input string ready for parsing
      * 
      * @param rawInput the string to normalise; can't be <code>null</code>
@@ -1134,5 +1139,64 @@ public class SimpleParser implements Parser {
     			LOGGER.warning("Cannot load Converter on SimpleParser.");
     		}
     	}
+    }
+    
+    /**
+     * This method compares RooBundleActivator lastTimeBundleChange with
+     * SimpleParser lasTimeUpdateCommands
+     * 
+     * @return
+     */
+    private boolean hasToReloadComands() {
+    	if(getRooBundleActivator() != null){
+    		return getRooBundleActivator().getLastTimeBundleChange() > getLasTimeUpdateCommands();
+    	}
+    	return true;
+	}
+
+	/**
+	 * @return the lasTimeUpdateCommands
+	 */
+	public Long getLasTimeUpdateCommands() {
+		return lasTimeUpdateCommands == null ? Long.MIN_VALUE : lasTimeUpdateCommands;
+	}
+
+	/**
+	 * @param lasTimeUpdateCommands the lasTimeUpdateCommands to set
+	 */
+	public void setLasTimeUpdateCommands(Long lasTimeUpdateCommands) {
+		this.lasTimeUpdateCommands = lasTimeUpdateCommands;
+	}
+	
+	/**
+	 * Obtains all Services that implements RooBundleActivator
+	 * 
+	 * @return
+	 */
+    public RooBundleActivator getRooBundleActivator() {
+        if (rooBundleActivator == null) {
+            // Get all Services implement RooBundleActivator interface
+            try {
+                ServiceReference<?>[] references = context
+                        .getAllServiceReferences(
+                        		RooBundleActivator.class.getName(), null);
+
+                for (ServiceReference<?> ref : references) {
+                	rooBundleActivator = (RooBundleActivator) context.getService(ref);
+                    return rooBundleActivator;
+                }
+
+                return null;
+
+            }
+            catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load RooBundleActivator on SimpleParser.");
+                return null;
+            }
+        }
+        else {
+            return rooBundleActivator;
+        }
+
     }
 }
