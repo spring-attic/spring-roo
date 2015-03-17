@@ -4,10 +4,6 @@ import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
 import static org.springframework.roo.shell.CliOption.EMPTY;
 import static org.springframework.roo.shell.CliOption.NULL;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -20,32 +16,14 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.XmlElementBuilder;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.CDATASection;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -735,18 +713,23 @@ public class SimpleParser implements Parser {
     public Set<String> getEveryCommand() {
         synchronized (mutex) {
         	
-        	if(commands.isEmpty()){
+        	if(commands.isEmpty() || RooBundleActivator.getUpdateCommands()){
         		// Get all Services implement CommandMarker interface
         		try {
         			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
         			
         			for(ServiceReference<?> ref : references){
-        				add((CommandMarker) this.context.getService(ref));
+        				CommandMarker command = (CommandMarker) this.context.getService(ref);
+        				if(!commands.contains(command)){
+        					add(command);
+        				}
         			}
         			
         		} catch (InvalidSyntaxException e) {
         			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
         		}
+        		
+        		RooBundleActivator.setUpdateCommands(false);
         	}
         	
         	
@@ -785,18 +768,23 @@ public class SimpleParser implements Parser {
             final boolean strictMatching,
             final boolean checkAvailabilityIndicators) {
     	
-    	if(commands.isEmpty()){
+    	if(commands.isEmpty() || RooBundleActivator.getUpdateCommands()){
     		// Get all Services implement CommandMarker interface
     		try {
     			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				add((CommandMarker) this.context.getService(ref));
+    				CommandMarker command = (CommandMarker) this.context.getService(ref);
+    				if(!commands.contains(command)){
+    					add(command);
+    				}
     			}
     			
     		} catch (InvalidSyntaxException e) {
     			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
     		}
+    		
+    		RooBundleActivator.setUpdateCommands(false);
     	}
     	
         Validate.notNull(buffer, "Buffer required");

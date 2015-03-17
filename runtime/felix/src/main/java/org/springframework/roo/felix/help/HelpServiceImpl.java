@@ -78,7 +78,7 @@ public class HelpServiceImpl implements HelpService {
 	static final String NULL = "__NULL__";
 
 	private final Object mutex = new Object();
-
+	
 	protected void activate(final ComponentContext cContext) {
 		context = cContext.getBundleContext();
 	}
@@ -86,20 +86,21 @@ public class HelpServiceImpl implements HelpService {
 	public void helpReferenceGuide() {
 		synchronized (mutex) {
 
-			if (commands.isEmpty()) {
-				// Get all Services implement CommandMarker interface
-				try {
-					ServiceReference<?>[] references = this.context
-							.getAllServiceReferences(
-									CommandMarker.class.getName(), null);
+			// Get all Services implement CommandMarker interface
+			try {
+				ServiceReference<?>[] references = this.context
+						.getAllServiceReferences(
+								CommandMarker.class.getName(), null);
 
-					for (ServiceReference<?> ref : references) {
-						add((CommandMarker) this.context.getService(ref));
+				for (ServiceReference<?> ref : references) {
+					CommandMarker command = (CommandMarker) this.context.getService(ref);
+					if(!commands.contains(command)){
+						add(command);
 					}
-
-				} catch (InvalidSyntaxException e) {
-					LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
 				}
+
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
 			}
 
 			final File f = new File(".");
@@ -476,20 +477,21 @@ public class HelpServiceImpl implements HelpService {
 			final boolean strictMatching,
 			final boolean checkAvailabilityIndicators) {
 
-		if (commands.isEmpty()) {
-			// Get all Services implement CommandMarker interface
-			try {
-				ServiceReference<?>[] references = this.context
-						.getAllServiceReferences(CommandMarker.class.getName(),
-								null);
+		// Get all Services implement CommandMarker interface
+		try {
+			ServiceReference<?>[] references = this.context
+					.getAllServiceReferences(CommandMarker.class.getName(),
+							null);
 
-				for (ServiceReference<?> ref : references) {
-					add((CommandMarker) this.context.getService(ref));
+			for (ServiceReference<?> ref : references) {
+				CommandMarker command = (CommandMarker) this.context.getService(ref);
+				if(!commands.contains(command)){
+					add(command);
 				}
-
-			} catch (InvalidSyntaxException e) {
-				LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
 			}
+
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
 		}
 
 		Validate.notNull(buffer, "Buffer required");
