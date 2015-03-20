@@ -43,7 +43,7 @@ public class SimpleParser implements Parser {
    	
    	private RooBundleActivator rooBundleActivator;
    	
-   	private Long lasTimeUpdateCommands;
+   	private Long lastTimeUpdateComponents;
    	
     private static final Comparator<Object> COMPARATOR = new NaturalOrderComparator<Object>();
     private static final Logger LOGGER = HandlerUtils
@@ -733,7 +733,7 @@ public class SimpleParser implements Parser {
         			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
         		}
         		
-        		setLasTimeUpdateCommands(System.currentTimeMillis());
+        		setLasTimeUpdateComponents(System.currentTimeMillis());
         		
         	}
         	
@@ -789,7 +789,7 @@ public class SimpleParser implements Parser {
     			LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
     		}
     		
-    		setLasTimeUpdateCommands(System.currentTimeMillis());
+    		setLasTimeUpdateComponents(System.currentTimeMillis());
     	}
     	
         Validate.notNull(buffer, "Buffer required");
@@ -1138,6 +1138,8 @@ public class SimpleParser implements Parser {
     		} catch (InvalidSyntaxException e) {
     			LOGGER.warning("Cannot load Converter on SimpleParser.");
     		}
+    		
+    		setLasTimeUpdateComponents(System.currentTimeMillis());
     	}
     }
     
@@ -1149,7 +1151,7 @@ public class SimpleParser implements Parser {
      */
     private boolean hasToReloadComponents() {
     	if(getRooBundleActivator() != null){
-    		return getRooBundleActivator().getLastTimeBundleChange() > getLasTimeUpdateCommands();
+    		return getRooBundleActivator().getLastTimeBundleChange() > getLasTimeUpdateComponents();
     	}
     	return true;
 	}
@@ -1157,15 +1159,15 @@ public class SimpleParser implements Parser {
 	/**
 	 * @return the lasTimeUpdateCommands
 	 */
-	public Long getLasTimeUpdateCommands() {
-		return lasTimeUpdateCommands == null ? Long.MIN_VALUE : lasTimeUpdateCommands;
+	public Long getLasTimeUpdateComponents() {
+		return lastTimeUpdateComponents == null ? Long.MIN_VALUE : lastTimeUpdateComponents;
 	}
 
 	/**
 	 * @param lasTimeUpdateCommands the lasTimeUpdateCommands to set
 	 */
-	public void setLasTimeUpdateCommands(Long lasTimeUpdateCommands) {
-		this.lasTimeUpdateCommands = lasTimeUpdateCommands;
+	public void setLasTimeUpdateComponents(Long lasTimeUpdateComponents) {
+		this.lastTimeUpdateComponents = lastTimeUpdateComponents;
 	}
 	
 	/**
