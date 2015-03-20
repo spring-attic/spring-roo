@@ -717,7 +717,7 @@ public class SimpleParser implements Parser {
     public Set<String> getEveryCommand() {
         synchronized (mutex) {
         	
-        	if(commands.isEmpty() || hasToReloadComands()){
+        	if(commands.isEmpty() || hasToReloadComponents()){
         		// Get all Services implement CommandMarker interface
         		try {
         			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
@@ -773,7 +773,7 @@ public class SimpleParser implements Parser {
             final boolean strictMatching,
             final boolean checkAvailabilityIndicators) {
     	
-    	if(commands.isEmpty() || hasToReloadComands()){
+    	if(commands.isEmpty() || hasToReloadComponents()){
     		// Get all Services implement CommandMarker interface
     		try {
     			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
@@ -1126,7 +1126,7 @@ public class SimpleParser implements Parser {
     }
     
     public final void loadConverters(){
-    	if(converters.isEmpty()){
+    	if(converters.isEmpty() || hasToReloadComponents()){
     		// Get all Services implement Converter interface
     		try {
     			ServiceReference<?>[] references = this.context.getAllServiceReferences(Converter.class.getName(), null);
@@ -1147,7 +1147,7 @@ public class SimpleParser implements Parser {
      * 
      * @return
      */
-    private boolean hasToReloadComands() {
+    private boolean hasToReloadComponents() {
     	if(getRooBundleActivator() != null){
     		return getRooBundleActivator().getLastTimeBundleChange() > getLasTimeUpdateCommands();
     	}
