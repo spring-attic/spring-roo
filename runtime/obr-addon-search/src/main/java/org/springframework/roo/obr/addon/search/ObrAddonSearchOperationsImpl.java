@@ -250,12 +250,15 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 	private void printResultList(List<ObrBundle> bundles) {
 		final StringBuilder sb = new StringBuilder();
 		int bundleId = 1;
-		LOGGER.warning("ID   DESCRIPTION ");
+		int maxSymbolicNameLength = getSymbolicNameMaxLength(bundles);
+		LOGGER.warning(String.format("ID   BUNDLE SYMBOLIC NAME%s   DESCRIPTION", printSpaces(maxSymbolicNameLength - "BUNDLE SYMBOLIC NAME".length())));
 		LOGGER.warning("--------------------------------------------------------------------------------");
 		for (final ObrBundle bundle : bundles) {
 			final String bundleKey = String.format("%02d", bundleId++);
 			sb.append(bundleKey);
 			sb.append("   ");
+			sb.append(bundle.getSymbolicName());
+			sb.append(String.format("%s   ", printSpaces(maxSymbolicNameLength - bundle.getSymbolicName().length())));
 			sb.append(bundle.getPresentationName());
 			if (sb.toString().trim().length() > 0) {
 				LOGGER.info(sb.toString());
@@ -267,6 +270,32 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 		LOGGER.info("[HINT] use 'addon info bundle --bundleSymbolicName ..' to see details about a search result");
 		LOGGER.info("[HINT] use 'addon install id --searchResultId ..' to install a specific search result, or");
 		LOGGER.info("[HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version");
+	}
+	
+	
+	/**
+	 * Method to print Spaces by total Spaces
+	 */
+	public String printSpaces(int numberOfSpaces){
+		final StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < numberOfSpaces; i++){
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
+	
+	/**
+	 * Method to obtain max length of Symbolic Names 
+	 */
+	public int getSymbolicNameMaxLength(List<ObrBundle> bundles){
+		int maxSymbolicNameLength = 0;
+		for (final ObrBundle bundle : bundles) {
+			String symbolicName = bundle.getSymbolicName();
+			if(symbolicName.length() > maxSymbolicNameLength){
+				maxSymbolicNameLength = symbolicName.length();
+			}
+		}
+		return maxSymbolicNameLength;
 	}
 
 
@@ -483,8 +512,8 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 	private InstallOrUpgradeStatus installOrUpgradeAddOn(
             final ObrBundle bundle) {
 
-        boolean success = getShell().executeCommand("osgi start --url "
-                + bundle.getUri());
+        boolean success = getShell().executeCommand("osgi obr deploy --bundleSymbolicName "
+                + bundle.getSymbolicName());
         
         return success ? InstallOrUpgradeStatus.SUCCESS
                 : InstallOrUpgradeStatus.FAILED;
