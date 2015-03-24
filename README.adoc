@@ -41,8 +41,8 @@ In the instructions below, _$ROO_HOME_ refers to the location where you checked 
 
 Next double-check you meet the *installation requirements*:
 
-* A proper installation of *Java 6 or above*
-* *Maven 3.0.1+* properly installed and working with your Java 6+
+* A proper installation of *Java 7*
+* *Maven 3.0.1+* properly installed and working with your Java version
 * *Internet access* so that Maven can download required dependencies
 * A *Git command line* client installed (required by Roo's Maven build for inserting the current revision number into OSGi bundle manifests)
 
@@ -380,4 +380,3 @@ http://forum.springsource.org is now a read-only archive. All commenting, postin
 If you have any question about Spring-roo project and its functionalities, you can check http://stackoverflow.com/questions/tagged/spring-roo
 
 Thanks for your interest in Spring Roo!
-
