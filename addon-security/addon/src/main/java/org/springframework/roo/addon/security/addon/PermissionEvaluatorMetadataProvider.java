@@ -147,7 +147,7 @@ public class PermissionEvaluatorMetadataProvider extends
             return null;
         }*/
         
-        final MemberDetails permissionEvaluatorClassDetails = memberDetailsScanner
+        final MemberDetails permissionEvaluatorClassDetails = getMemberDetailsScanner()
                 .getMemberDetails(getClass().getName(),
                         permissionEvaluatorClass);
         
