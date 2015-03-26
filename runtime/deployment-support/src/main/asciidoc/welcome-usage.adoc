@@ -1,0 +1,689 @@
+[[usage]]
+Usage and Conventions
+---------------------
+
+In this chapter we'll introduce how to use the Roo tool itself. We'll
+cover typical conventions you'll experience when using Spring Roo.
+
+[[usage-usability]]
+Usability Philosophy
+--------------------
+
+As mentioned in earlier chapters and is easily experienced by simply
+using Spring Roo for a project, we placed a great deal of emphasis on
+usability during Roo's design. It is our experience that a normal
+enterprise Java developer is able to pass the ten minute test with Roo
+and build a new project without referring to documentation. There are
+several conventions that we use within Roo to ensure a highly usable
+experience:
+
+* Numerous link:#usage-shell[shell features] which ensure the primary
+Roo-specific user interface is friendly and learnable
+* Only using popular, link:#intro-why-use-it-standard-java[mainstream
+technologies and standards] within Roo applications
+* Ensuring Roo works with your link:#usage-ide[choice of IDE] or no IDE
+at all
+* Delivering an link:#architecture[application architecture] that is
+easy to understand and avoids "magic"
+* Making sure Roo works the way a reasonable person would expect it to
+* Forgiving mistakes
+
+The last two points are what we're going to discuss in this section.
+
+Making sure Roo works the way you would expect it to is reflected in a
+number of key design decisions that basically boil down to "you can do
+whatever you want, whenever you want, and Roo will automatically work in
+with you". There are obviously limits to how far we can take this, but
+as you use Roo you'll notice a few operational conventions that underpin
+this.
+
+Let's start by looking at file conventions. Roo will never change a
+`.java` file in your project unless you explicitly ask it to via a shell
+command. In particular, Roo will not modify a `.java` file just because
+you apply an annotation. Roo also handles .xml files in the same manner.
+There are only two file types that may be created, updated or deleted by
+Roo in an automatic manner, those being `.jspx` files and also AspectJ
+files which match the `*_Roo_*.aj` wildcard.
+
+In terms of the AspectJ files, Roo operates in a very specific manner. A
+given AspectJ filename indicates the "target type" the members will be
+introduced into and also the add-on which governs the file. Roo will
+only ever permit a given AspectJ file to be preserved if the target type
+exists and the corresponding add-on requests an ITD for that target
+type. Nearly all add-ons will only create an ITD if there is a "trigger
+annotation" on the target type, with the trigger annotation always
+incorporating an @Roo prefix. As such, if you never put any @Roo
+annotation on a given .java file, you can be assured Roo will never
+create any AspectJ ITD for that target type. Refer to the
+link:#usage-file-system[file system conventions] section for related
+information.
+
+You'll also notice when using Roo that it automatically responds to
+changes you make outside Roo. This is achieved by an
+link:#command-index-poll-status[auto-scaling file system monitoring]
+mechanism. This basically allows you to create, edit or delete any file
+within your project and if the Roo shell is running it will immediately
+detect your change and take the necessary action in response. This is
+how round-tripping works without you needing to include Roo as part of
+your build system or undertake any crude mass generation steps.
+
+What happens if the Roo shell isn't running? Will there be a problem if
+you forget to load it and make a change? No. When Roo starts up it
+performs a full scan of your full project file system and ensures every
+automatically-managed file that should be created, updated or deleted is
+handled accordingly. This includes a full in-memory rebuild of each
+file, and a comparison with the file on disk to detect changes. This
+results in a lot more robust approach than relying on relatively
+coarsely-grained file system timestamp models. It also explains why if
+you have a very big project it can take a few moments for the Roo shell
+to startup, as there is no alternative but to complete this check for
+actions that happened when Roo wasn't running.
+
+The automated startup-time scan is also very useful as you upgrade to
+newer versions of Roo. Often a new version of Roo will incorporate
+enhancements to the add-ons that generate files in your project. The
+startup-time scan will therefore automatically deliver improvements to
+all generated files. This is also why you cannot edit files that Roo is
+responsible for managing, because Roo will simply consider your changes
+as some "old format" of the file and rewrite the file in accordance with
+its current add-ons.
+
+Not being able to edit the generated files may sound restrictive, as
+often you'll want to fine-tune just some part of the file that Roo has
+emitted. In this case you can either write a Roo add-on, or more
+commonly just write the method (or field or constructor etc) directly in
+your .java file. Roo has a convention of detecting if any member it
+intends to introduce already exists in the target type, and if it does
+Roo will not permit the ITD to include that member. In plain English
+that means if you write a method that Roo was writing, Roo will remove
+the method from its generated file automatically and without needing an
+explicit directive to do so. In fact the Roo core infrastructure
+explicitly detects buggy add-ons that are trying to introduce members
+that an end user has written and it will throw an exception to prevent
+the add-on from doing so.
+
+This talk of exceptions also lets us cover the related usability feature
+of being forgiving. Every time Roo changes your file system or receives
+a shell command, it is executed within a quasi-transactional context
+that supports rollback. As a result, if anything goes wrong (such as you
+made a mistake when entering a command or an add-on has a problem for
+whatever reason) the file system will automatically rollback to the
+state it was before the change was attempted. The cascading nature of
+many changes (i.e. you add a field to a `.java` file and that changes an
+AspectJ ITD and that in turn changes a web `.jspx` etc) is handled in
+the same unit of work and therefore rolled back as an atomic group when
+required.
+
+Before leaving this discussion on usability, it's probably worth
+pointing out that although the Roo shell contains
+link:#command-index[numerous commands], you don't need to use them. You
+are perfectly free to perform any change to your file system by hand
+(without the help of the Roo shell). For example, there are commands
+which let you create `.java` files or add fields to them. You can use
+these commands or you can simply do this within your IDE or text editor.
+Roo's automatic file system monitoring will detect the changes and
+respond accordingly. Just work the way you feel most comfortable - Roo
+will respect it.
+
+[[usage-shell]]
+Shell Features
+--------------
+
+Many people who first look at Roo love the shell. In fact when we first
+showed Roo to an internal audience, one of the developers present said
+tounge-in-cheek, "That could only have come from someone with a deep
+love of the Linux command line!". All jokes aside, the shell is only one
+part of the Roo link:#usage-usability[usability story] - although it's a
+very important part. Here are some of the usability features that make
+the shell so nice to work with:
+
+* __Tab completion__: The cornerstone of command-line usability is tab
+assist. Hit TAB (or CTRL+SPACE if you're in link:#usage-ide[SpringSource
+Tool Suite]) and Roo will show you the applicable options.
+* __Command hiding__: Command hiding will remove commands which do not
+make sense given the current context of your project. For example, if
+you're in an empty directory, you can type
+link:#command-index-project[project], hit TAB, and see the options for
+creating a project. But once you've created the project, the project
+command is no longer visible. The same applies for most Roo commands.
+This is nice as it means you only see commands which you can actually
+use right now. Of course, a full list of commands applicable to your
+version of Roo is available in the link:#command-index[command index
+appendix] and also via link:#command-index-help[help].
+* __Contextual awareness__: Roo remembers the last Java type you are
+working with in your current shell session and automatically treats it
+as the argument to a command. You always know what Roo considers the
+current context because the shell prompt will indicate this just before
+it writes **roo>**. In the command index you might find some options
+which have a default value of '`*`'. This is the marker which indicates
+"the current context will be used for this command option unless you
+explicitly specify otherwise". You change the context by simply working
+with a different Java type (i.e. specify an operation that involves a
+different Java type and the context will change to that Java type).
+* __Hinting__: Not sure what to do next? Just use the
+link:#command-index-hint[hint] command. It's the perfect lightweight
+substitute for documentation if you're in a hurry!
+* __Inbuilt help__: If you'd like to know all the options available for
+a given command, use the link:#command-index-help[help] command. It
+lists every option directly within the shell.
+* __Automatic inline help__: Of course, it's a bit of a pain to have to
+go to the trouble of typing link:#command-index-help[help] then hitting
+enter if you're in the middle of typing a command. That's why we offer
+inline help, which is automatically displayed whenever you press TAB. It
+is listed just before the completion options. To save screen space, we
+only list the inline help once for a given command option. So if you
+type `project --template TAB TAB TAB`, the first time you press TAB
+you'd see the inline help and the completion options
+* __Scripting and script recording__: Save your Roo commands and play
+them again later.
+
+The scripting and script recording features are particularly nice,
+because they let you execute a series of Roo commands without typing
+them in.
+
+To execute a Roo script, just use the link:#command-index-script[script]
+command. When you use the script command you'll need to indicate the
+script to run. We ship a number of sample scripts with Roo, as discussed
+earlier in the link:#intro-exploring-sample[Exploring Roo Samples]
+section.
+
+What if you want to create your own scripts? All you need is a text
+editor. The syntax of the script is identical to what you'd type at the
+Roo shell. Both the Roo shell and your scripts can contain inline
+comments using the `;` and `//` markers, as well as block comments using
+the `/* */` syntax.
+
+A really nice script-related feature of the Roo shell is that it will
+automatically build a script containing the commands you entered. This
+file is named `log.roo` and exists in your current working directory.
+Here's a quick example of the contents:
+
+--------------------------------------------------------------------------------
+// Spring Roo ENGINEERING BUILD [rev 553:554M] log opened at 2009-12-31 08:10:58
+project --topLevelPackage roo.shell.is.neat
+// [failed] jpa setup --database DELIBERATE_ERROR --provider HIBERNATE 
+jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE 
+quit
+// Spring Roo ENGINEERING BUILD [rev 553:554M] log closed at 2009-12-31 08:11:37
+--------------------------------------------------------------------------------
+
+In the recorded script, you can see the version number, session start
+time and session close times are all listed. Also listed is a command I
+typed that was intentionally incorrect, and Roo has turned that command
+into a comment within the script (prefixed with `//
+    [failed]`) so that I can identify it and it will not execute should
+I run the script again later. This is a great way of reviewing what
+you've done with Roo, and sharing the results with others.
+
+[[usage-ide]]
+IDE Usage
+---------
+
+Despite Roo's really nice shell, in reality most people develop most of
+their application using an IDE or at least text editor. Roo fully
+expects this usage and supports it.
+
+Before we cover how to use an IDE, it's worth mentioning that you don't
+strictly need one. With Roo you can build an application at the command
+line, although to be honest you'll get more productivity via an IDE if
+it's anything beyond a trivial application. If you would prefer to use
+the command line, you can start a fresh application using the Roo shell,
+edit your `.java` and other files using any text editor, and use the
+link:#command-index-maven-commands[perform] commands to compile, test
+and package your application ready for deployment. You can even use
+`mvn tomcat:run` to execute a servlet container, and Roo add-ons let you
+deploy straight to a cloud environment like Google App Engine. Again,
+you'll be more productive in an IDE, but it's nice to know Roo doesn't
+force you to use an IDE unless you'd like to use one.
+
+In relation to IDEs, we highly recommend that you use
+http://www.springsource.com/products/sts[SpringSource Tool Suite] (STS).
+STS is a significantly extended version (and free!) of the pervasive
+Eclipse IDE. From a Roo perspective, STS preintegrates the latest
+http://www.eclipse.org/ajdt/[AspectJ Development Tools] (AJDT) and also
+offers an inbuilt Roo shell. The inbuilt Roo shell means you do not need
+to run the normal Roo shell if you are using STS. You'll also have other
+neat Roo-IDE integation features, like the ability to press CTRL+R (or
+Apple+R if you're on an Apple) and a popup will allow you to type a Roo
+command from anywhere within the IDE. Another nice feature is the shell
+message hotlinking, which means all shell messages emitted by Roo are
+actually links that you can click to open the corresponding file in an
+Eclipse editor. There are other goodies too, like extra commands to
+deploy to SpringSource tc Server.
+
+You'll need to use STS 2.5 if you'd like to use Roo 1.1, which at the
+time of writing represents the latest version of both tools. Because the
+release cycle of STS and Roo differ, when you download STS you'll
+generally find it includes a version of Roo that might not be the
+absolute latest. This is not a problem. All you need to do is ensure
+you're using the latest release of STS and then within the IDE select
+Window > Preferences > Spring > Roo Support. Next select "Add..." and
+find the directory which contains the latest Roo release. You probably
+also want to tick the newly-selected Roo release, making it the default
+for your projects when they're imported into STS.
+
+Naturally Roo works well with standard Eclipse as well. All you need to
+do is ensure you install the latest http://www.eclipse.org/ajdt/[AspectJ
+Development Tools] (AJDT) plugin. This will ensure code assist and
+incremental compilation works well. We also recommend you go into Window
+> Preferences > General > Workspace and switch on the "Refresh
+automatically" box. That way Eclipse will detect changes made to the
+file system by the externally-running Roo shell. It's also recommended
+to install the m2eclipse plugin, which is automatically included if you
+use STS and is particularly suitable for Roo-based projects.
+
+When using AJDT you may encounter a configuration option enabling you to
+"weave" the JDT. This is on by default in STS, so you're unlikely to see
+the message if using STS. If you are prompted (or locate the
+configuration settings yourself under the Window > Preferences > JDT
+Weaving menu), you should enable weaving. This ensures the Java Editor
+in Eclipse (or STS) gives the best AspectJ-based experience, such as
+code assist etc. You can also verify this setting is active by loading
+Eclipse (or STS) and selecting Window > Preferences > JDT Weaving.
+
+If you're using m2eclipse, you won't need to use the
+link:#command-index-perform-eclipse[perform eclipse] command to setup
+your environment. A simple import of the project using Eclipse's File >
+Import > General > Maven Projects menu option is sufficient.
+
+Irrespective of how you import your project into Eclipse (i.e. via the
+link:#command-index-perform-eclipse[perform eclipse] command or via
+m2eclipse) you should be aware that the project will not be a Web Tools
+Project (WTP) until such time as you install your first web controller.
+This is usually undertaken via the link:#command-index-web-mvc-all[web
+mvc all] or link:#command-index-web-mvc-controller[web mvc controller]
+command. If you have already imported your project into Eclipse, simply
+complete the relevant _web mvc_ command and then re-import. The project
+will then be a WTP and offer the ability to deploy to an IDE-embedded
+web container. If you attempt to start a WTP server and receive an error
+message, try right-clicking the project and selecting Maven > Update
+Project Configuration. This often resolves the issue.
+
+If you're using IntelliJ, we are pleased to report that IntelliJ now
+supports Roo. This follows the completion of ticket
+http://youtrack.jetbrains.net/issue/IDEA-26959[IDEA-26959], where you
+can obtain more information about the AspectJ support now available in
+IntelliJ.
+
+If you're using any IDE other than STS, the recommended operating
+pattern is to load the standalone Roo shell in one operating system
+window and leave it running while you interact with your IDE. There is
+no formal link between the IDE and Roo shell. The only way they "talk"
+to each other is by both monitoring the file system for changes made by
+the other. This happens so quickly that you're unlikely to notice, and
+indeed internally to Roo we have an API that allows the polling-based
+approach to be replaced with a formal notification API should it ever
+become necessary. As discussed in the link:#usage-usability[usability
+section], if you forget to load the Roo shell and start modifying your
+project anyway, all you need to do is load the Roo shell again and it
+will detect any changes it needs to make automatically.
+
+[[usage-build-system]]
+Build System Usage
+------------------
+
+Roo currently supports the use of Apache Maven. This is a common build
+system used in many enteprise applications. We routinely poll our
+community and look at public surveys which consistently show that nearly
+all enterprise development projects use either Maven or Ant, so we
+believe this is a good default for Roo projects. As per the
+link:#intro-installation[installation instructions], you must ensure you
+are using Maven 2.0.9 or above. We do recommend you use Maven 2.2 for
+best results, though.
+
+Roo will create a new `pom.xml` file whenever you use the
+link:#command-index-project[project] command. The POM will contain the
+following Roo-specific considerations:
+
+* A reference to the Roo annotations JAR. This JAR exists at development
+time only and has a scope that prevents it from being included in
+resultant WAR files.
+* A correct configuration of the Maven AspectJ plugin. This includes a
+reference to the Spring Aspects library, which is important to Roo-based
+applications. Spring Aspects is included within Spring Framework.
+
+There are no other Roo changes to the POM. In particular, there is no
+requirement for the POM to include Roo as part of any code generation
+step. Roo is never used in this "bulk generation style".
+
+If you are interested in ensuring a build includes the latest Roo code
+generation output, you can cause Maven or equivalent build system to
+execute `roo quit`. The presentation of the quit command line option
+will cause the Roo shell to load, perform its startup-time scan (which
+identifies and completes any required changes to generated files) and
+then exit.
+
+Those seeking Ant/Ivy instead of Maven support are encouraged to vote
+for issue https://jira.springsource.org/browse/ROO-91[ROO-91]. The
+internals of Roo do not rely on Maven at all. Nonetheless we have
+deferred it until we see sufficient community interest to justify
+maintaining two build system environments.
+
+[[usage-file-system]]
+File System Conventions
+-----------------------
+
+We have already covered some of Roo's file system conventions in the
+link:#usage-usability[Usability Philosophy] section. In summary Roo will
+automatically monitor the file system for changes and code generate only
+those files which match the `*_Roo_*.aj` wildcard. It will also code
+generate those link:#jsp-views[JSPs] associated with
+link:#controller-commands[scaffolded MVC controllers] that have the
+annotation `@RooWebScaffold`.
+
+Roo applications follow the standard Maven-based directory layout. We
+have also placed Spring application context-related files (both `.xml`
+and `.properties`) in the recommended classpath sub-directory for Spring
+applications, `META-INF/spring`.
+
+[[usage-addons]]
+Add-On Installation and Removal
+-------------------------------
+
+Roo supports the installation and removal of third-party add-ons. Roo
+1.1 added significant enhancements to its add-on model, as more
+thoroughly discussed in link:#internals[Part III] of this manual.
+
+[[usage-recommendations]]
+Recommended Practices
+---------------------
+
+Following some simple recommendations will ensure you have the best
+possible experience with Roo:
+
+* Don't edit any files that Roo code generates (see the
+link:#usage-usability[Usability Philosophy] for details).
+* Before installing any new technology, check if Roo offers a setup
+command and use it if present (this will ensure the seutp reflects our
+recommendations and the expectations of other add-ons).
+* Ensure you leave the Roo shell running when creating, updating or
+deleting files in your project.
+* Remember you'll still need to write Java code (and JSPs for custom
+controllers). Have the right expectations before you start using Roo. It
+just helps you - it doesn't replace the requirement to program.
+* Check the link:#upgrade-known-issues[Known Issues] section before
+upgrading or if you experience any problems.
+* Refer to the link:#resources[Roo Resources] section for details of how
+to get assistance with Roo, such as the forum and issue tracking
+database. We're happy to hear from you.
+
+[[usage-add-ons]]
+Managing Roo Add-Ons
+--------------------
+
+As detailed in the main text, Roo supports a special protocol scheme
+called `httppgp://`. This performs a Pretty Good Privacy (PGP) detached
+signature verification before proceeding to download the main resource.
+We use this as a key foundation of our add-on security model. Many Roo
+commands download items from the Internet, and anytime a `httppgp://`
+scheme is encountered a PGP verification will take place. One common
+case is if you are using the link:#command-index-addon-install-id[addon
+install] command. An example of the error if the PGP detached signature
+is untrusted is shown below: roo> *addon install* --bundleSymbolicName
+de.saxsys.roo.equals.addon Download URL
+'http://[...]equals.addon-1.2.0.jar' failed This resource was signed
+with PGP key ID '0xC3A61B10', which is not currently trusted Use 'pgp
+key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic
+trust' to trust any keysEssentially you need to decide if you trust the
+PGP key ID or not. There is a link:#command-index-pgp-key-view[pgp key
+view] command that will help you learn more about a given key ID if you
+would like to use it. You can also view keys at public PGP key servers
+such as http://pgp.mit.edu/. You essentially have two options to cause
+an untrusted httppgp download to be performed by Roo: Use the
+link:#command-index-pgp-trust[pgp trust] command to trust the PGP key ID
+shown in the error message. This will permanently trust the key ID, and
+it will show up if you use the
+link:#command-index-pgp-list-trusted-keys[pgp list trusted keys] command
+(you can of course remove it via the link:#command-index-pgp-untrust[pgp
+untrust] command as well). All of the keys you trust are stored in
+`~/.spring_roo_pgp.bpg`, which is a binary encoded PGP key store which
+you can also view and manage using normal PGP tools. An example of the
+command to trust a key is shown below:roo> *pgp trust* --keyId
+0xC3A61B10 Alternately, you can decide to simply switch off key
+verification and automatically trust any keys encountered. Such keys are
+stored in your `~/.spring_roo_pgp.bpg` file. You should use caution with
+this command, although it can be convenient if you'd simply like to
+install some new add-ons and their dependencies without considering
+every key used to sign them. To use automatic trust, simply type
+link:#command-index-pgp-automatic-trust[pgp automatic trust] and press
+enter:roo> *pgp automatic trust* Automatic PGP key trusting enabled
+(this is potentially unsafe); disable by typing 'pgp automatic trust'
+again Once one of the above have been completed, you can repeat the
+command that attempted to download a `httppgp://` resource and it should
+succeed.
+
+It is easy to extend the capabilities of Spring Roo with installable
+add-ons. This section will offer a basic overview of Roo's add-on
+distribution model and explain how to install new add-ons. If you're
+considering writing an add-on, please refer to the more advanced
+information in link:#internals[Part III] of this reference guide.
+
+First of all, it's important to recognize that Roo ships with a large
+number of base add-ons. These built-in add-ons may be all you ever
+require. Nevertheless, there is a growing community of add-ons written
+by people outside the core Roo team. Because the core Roo team do not
+write these add-ons, we've needed to implement an infrastructure so that
+external people can share their add-ons and make it easy for you to
+install them.
+
+Roo's add-on distribution system encourages individual add-on developers
+to host their add-on web site (we don't believe in a central model where
+we must host add-ons on our servers). The main requirement an add-on
+developer needs to fulfill is their add-ons must be in OSGi format and
+their web site must include an OSGi Bundle Repository (OBR) index file.
+While Roo internally uses OSGi and all modules are managed as OSGi
+bundles, this is transparent and you do not need any familiarity with
+OSGi or bundles to work with the Roo add-on installation system. An OBR
+file is usually named `repository.xml` and it is available over HTTP. If
+you're curious what these OBR files look like, you can view the Spring
+Roo OBR repository at
+http://spring-roo-repository.springsource.org/repository.xml. Within an
+OBR file each available Roo-related add-on is listed, along with the URL
+where it is published. The URLs look similar to normal URLs, except they
+will usually specify a `httppgp://` protocol scheme (instead of the more
+common `http://`).
+
+The `httppgp://` protocol scheme is how we achieve a level of security
+with add-ons. Obviously with every add-on developer able to host add-ons
+on any web site they nominate, it would be difficult for you to know
+whether a particular add-on can be trusted. You probably only want to
+trust add-ons from people you already trust or have cause to trust. To
+this end Roo offers automatic PGP-related signature capabilities for any
+URL that uses the `httppgp://` scheme. Most Roo add-ons use this scheme.
+The internal step-by-step process that takes place is Roo essentially
+downloads the URL + ".asc" over HTTP. This file is a standard PGP
+detached signature file. PGP detached signature files are increasingly
+common, with most Maven Central artifacts now also offering a signature
+file. If the user's Roo installation trusts the key ID that signed the
+PGP detached signature, Roo will proceed to download the URL. If the
+user's Roo installation does not trust the key ID, an error will be
+displayed and the download will fail (and in turn the add-on
+installation process will fail if the bundle was specified as a
+`httppgp://` URL). Please see the side-bar for details on how you can
+trust different key IDs and use the PGP-related commands in Roo.
+
+Completing the picture of Roo's add-on distribution infrastructure is
+RooBot. This is a VMware-hosted service that essentially indexes the
+important content in all public Roo OBR files. RooBot ensures that
+add-ons it indexes are only available over `httppgp://`, reflecting the
+security model above. Add-on developers can be added into RooBot's index
+in just a couple of minutes via an automated process. Every time Roo
+loads, it automatically downloads the latest RooBot index file. This is
+how it knows which public add-ons are available.
+
+Enough with the theory, let's move on to the fun piece. In Spring Roo
+you simply use the shell to locate new add-ons. To review the list of
+known add-ons you can use the link:#command-index-addon-list[addon list]
+or link:#command-index-addon-search[addon search] command. This lists
+all add-ons that are in the RooBot-maintained index mentioned above:
+
+-----------------------------------------------------------------------------------------------
+roo> addon search
+1234 found, sorted by rank; T = trusted developer; R = Roo 1.1 compatible
+ID T R DESCRIPTION -------------------------------------------------------------
+01 Y Y 2.3.0.0001 This bundle wraps the standard Maven artifact:
+       protobuf-java-2.3.0-lite.
+02 Y - 0.3.0.RELEASE Addon for Spring Roo to provide generic DAO and query
+       methods based on Hades.
+03 Y Y 0.9.94.0001 This bundle wraps the standard Maven artifact:
+       jline-0.9.94.S2-A (S2-A is a private patched version; see ROO-350 for...
+04 - - 1.1.6 Addons that adds Content Negotiating View Resolver configuration
+       to your application context: MVC multiple representations By default...
+...(output truncated for reference guide inclusion)...
+[HINT] use 'addon info id --searchResultId ..' to see details about a search result
+[HINT] use 'addon install id --searchResultId ..' to install a specific search result, or
+[HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version
+-----------------------------------------------------------------------------------------------
+
+There are various options you can pass to the search command to see more
+lines per result, perform filtering and so on. Just use --TAB as usual
+to see these options.
+
+If you can't see the add-on you're looking for, you can repeat the
+command with the optional `--refresh `option. This will refresh your
+local RooBot index from our server.
+
+To review details about a specific add-on, use the
+link:#command-index-addon-info-id[addon info id] command as mentioned in
+the hint at the bottom of the search results. There is also a related
+command called link:#command-index-addon-info-bundle[addon info bundle]
+which requires a "bundle symbolic name", which is usually the add-on's
+top-level package. However, it's often more convenient to use the search
+result "ID" number (to the left hand side of each row) rather than
+typing out a bundle symbolic name. Let's try this. To view details about
+the second add-on listed, enter this command:
+
+--------------------------------------
+roo> addon info id --searchResultId 02
+--------------------------------------
+
+An example of the output of link:#command-index-addon-info-id[addon info
+id] is shown below:
+
+--------------------------------------------------------------------------------
+roo> addon info id --searchResultId 02
+Name.........: Hades - Roo addon
+BSN..........: org.synyx.hades.roo.addon
+Version......: 0.3.0.RELEASE
+Roo Version..: 1.1.0
+Ranking......: 1.0
+JAR Size.....: 20458 bytes
+PGP Signature: 0xF2C57936 signed by Oliver Gierke (info@olivergierke.de)
+OBR URL......: http://hades.synyx.org/static/roo/repo/repository.xml
+JAR URL......: httppgp://hades.synyx.org/static/roo/repo/org/synyx/hades/org.syn
+               yx.hades.roo.addon/0.3.0.RELEASE/org.synyx.hades.roo.addon-0.3.0.
+               RELEASE.jar
+Commands.....: 'hades install' [Installs Hades for the project]
+Commands.....: 'hades repository' [Creates a Hades repository interface]
+Description..: Addon for Spring Roo to provide generic DAO and query methods
+               based on Hades.
+Comment 1....: Rating [GOOD], Date [17/12/10], Comment [Nice add-on for those
+               who want to use a separate repository layer, can be improved in
+               functionality]
+--------------------------------------------------------------------------------
+
+In the above output "BSN" means bundle symbolic name, which is the
+alternate way of referring to a given add-on. The output also shows you
+the Roo shell commands that are available via the add-on. These commands
+are automatically seen by the Roo shell, so if you typed in this case
+"hades install" without first having installed the add-on, Roo would
+have performed a search and shown you this add-on offered the command.
+This is a great feature and means you can often just type commands you
+think you might need and find out which add-ons offer them without
+performing an explicit search. A similar feature exists for JDBC
+resolution if you try to reverse engineer a database for which there is
+no installed JDBC driver (Roo will automatically suggest the add-on you
+need and instruct you which command to use to install it).
+
+If you decide to install a specific add-on, simply use the
+link:#command-index-addon-install-id[addon install id] command:
+
+--------------------------------------------------------------------------------------------------------
+roo> addon install id --searchResultId 02
+Successfully installed add-on: org.synyx.hades.roo.addon
+[Hint] Please consider rating this add-on with the following command:
+[Hint] addon feedback bundle --bundleSymbolicName org.synyx.hades.roo.addon --rating ... --comment "..."
+--------------------------------------------------------------------------------------------------------
+
+If the add-on installation is aborted with a warning that the add-on
+author is currently not trusted, please review the sidebar about
+modifying PGP trusts. To simplify identifying add-ons from developers
+you already trust, the link:#command-index-addon-search[addon search]
+results include a "T" column which means "trusted developer". If you see
+a "Y" in that column, you've already trusted that developer's PGP key
+and thus installation will work without needing to add their key. If you
+see a "-" in that column, you'll need to first tell Roo you trust their
+key (as explained in the PGP sidebar).
+
+As per the [HINT] messages that appear immediately after installing an
+add-on, we appreciate your feedback about the add-ons you use. You can
+use the link:#command-index-addon-feedback-bundle[addon feedback bundle]
+command for this purpose, as shown in the console text above. If you
+provide a rating or comment, it will show up for other people to see
+when they use the link:#command-index-addon-info-id[addon info] command.
+
+It is generally recommended to restart Roo to ensure the add-on is
+properly initialized. This theoretically isn't necessary in most cases,
+but it doesn't hurt.
+
+You can also upgrade your existing add-ons by using the addon upgrade
+commands. To do this you should first run the
+link:#command-index-addon-upgrade-settings[addon upgrade settings]
+command which allows you to define the desired stability level which is
+taken into account when performing the
+link:#command-index-addon-upgrade-all[addon upgrade all] command:
+
+-----------------------------------------------------------------------------------------
+roo> addon upgrade settings --addonStabilityLevel ANY|MILESTONE|RELEASE|RELEASE_CANDIDATE
+-----------------------------------------------------------------------------------------
+
+If you don't define a stability level through the addon upgrade settings
+command it defaults to RELEASE - meaning only release versions will be
+upgraded (if upgrades for this level are available). Other stability
+levels to choose from are RELEASE_CANDIDATE, MILESTONE, and ANY (i.e.
+snapshots).
+
+To list all available upgrades for currently installed add-ons you can
+use the link:#command-index-addon-upgrade-available[addon upgrade
+available] command. This will provide an overview of add-ons which can
+be upgraded and their respective stability levels. Furthermore, you can
+also upgrade individual add-ons by using the
+link:#command-index-addon-upgrade-bundle[addon upgrade bundle] command
+which allows you to specify the add-on bundle symbolic name (and the
+add-on version in case multiple versions are available). Finally, you
+can use the link:#command-index-addon-upgrade-id[addon upgrade id]
+command to upgrade a specific add-on which has appeared in a search
+result to the latest version available.
+
+Of course, you can remove add-ons as well. To uninstall any given
+add-on, just use the link:#command-index-addon-remove[addon remove]
+command. On this occasion we'll use the bundle symbolic name (which is
+available via TAB completion as is usual with Roo):
+
+-----------------------------------------------------------------
+roo> addon remove --bundleSymbolicName de.saxsys.roo.equals.addon
+Successfully removed add-on: de.saxsys.roo.equals.addon
+-----------------------------------------------------------------
+
+Note that all of the "addon" commands only work with add-ons listed in
+the central RooBot index file. This is fine, as most public Roo add-ons
+are listed there. However, sometimes an add-on cannot be published into
+the RooBot index file. The most common reason is that it's an add-on
+internal to your organization, or perhaps it's simply not ready for
+public consumption.
+
+Even if an add-on is not listed in RooBot, you can still install it. The
+"link:#command-index-osgi-obr-url-add[osgi obr url add]" command can be
+used to add the add-on's OBR URL to your Roo installation. This command
+is typically followed by an "link:#command-index-osgi-obr-start[osgi obr
+start]" command to download and start the add-on. Importantly, the
+additional security verifications performed by RooBot are skipped given
+RooBot is not used with these commands (or other related commands such
+as link:#command-index-osgi-start[osgi start]). That means bundles you
+start using the "osgi obr start" command may not use `httppgp://` for
+PGP signature verification. As such you should exercise caution when
+using any installation-related commands that do not start with "addon",
+as such commands do not use resources subject to the RooBot security
+verifications. Noneless there remain legitimate use cases for such
+distribution styles, so it's good to know Roo supports them as well as
+the more common, user-friendly and more secure "addon" commands.

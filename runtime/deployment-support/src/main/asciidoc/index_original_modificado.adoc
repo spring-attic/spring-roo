@@ -1,0 +1,102 @@
+//
+// Prerequisites:
+// 
+//   ruby 1.9.3+
+//   asciidoctor     (use gem to install)
+//   asciidoctor-pdf (use gem to install)
+// 
+// Build the document:
+//
+// HTML5
+//
+//   $ asciidoctor -b html5 index.adoc
+//
+// PDF
+// 
+//   $ asciidoctor-pdf index.adoc
+//
+= Spring Roo - Reference Documentation
+:author: DISID Corporation S.L. - Pivotal Software, Inc
+:description: Spring Roo - Reference Documentation
+:copyright: CC BY-NC-SA 3.0
+:doctype: book
+:toc:
+:toclevels: 3
+:backend: docbook
+
+[abstract]
+_Copyright 2009-2014 VMware, Inc. All Rights Reserved._
+_Copies of this document may be made for your own use and for
+      distribution to others, provided that you do not charge any fee for such
+      copies and further provided that each copy contains this Copyright
+      Notice, whether distributed in print or electronically._
+
+== Welcome to Spring Roo [[welcome]]
+
+Welcome to Spring Roo! In this part of the reference guide we will explore everything you need to know in order to use Roo effectively. We've designed this part so that you can read each chapter consecutively and stop at any time. However, the more you read, the more you'll learn and the easier you'll find it to work with Roo.
+
+Parts <<base,II>>, <<internals,III>> and <<appendices,V>> of this manual are more designed for reference usage and people who wish to extend Roo itself.
+
+include::welcome-intro.adoc[]
+
+include::welcome-beginning.adoc[]
+
+include::welcome-architecture.adoc[]
+
+include::welcome-usage.adoc[]
+
+include::welcome-existing.adoc[]
+
+include::welcome-removing.adoc[]
+
+== Base Add-Ons [[base]]
+
+This part of the reference guide provides a detailed reference to the major Roo base add-ons and how they work. This part goes into more detail than the <<beginning,tutorial chapter>> and offers a "bigger picture" discussion than the <<command-index,command reference>> appendix.
+
+include::base-overview.xml.adoc[]
+
+include::base-persistence.xml.adoc[]
+
+include::base-dbre.xml.adoc[]
+
+include::base-layers.xml.adoc[]
+
+include::base-web.xml.adoc[]
+
+include::base-jsf.xml.adoc[]
+
+include::base-cloud-foundry.xml.adoc[]
+
+include::base-json.xml.adoc[]
+
+include::base-solr.xml.adoc[]
+
+== Internals and Add-On Development [[internals]]
+
+In this part of the guide we reveal how Roo works internally. With this knowledge you'll be well-positioned to be able to check out the Roo codebase, build a development release, and write add-ons to extend Roo.
+
+You should be familiar with <<welcome,Part I>> of this reference guide and ideally have used Roo for a period of time to gain the most value from this part.
+
+include::internals-development.adoc[]
+
+include::internals-simple-add-ons.adoc[]
+
+include::internals-advanced-add-ons.adoc[]
+
+== External Add-Ons [[external-addons]]
+
+In this part of the guide we detail external Roo add-ons.
+
+include::add-on-tailor.adoc[]
+
+== Appendices [[appendices]]
+
+The fourth and final part of the reference guide provides appendices and background information that does not neatly belong within the other parts. The information is intended to be treated as a reference and not read consecutively.
+
+include::appendix-command-index.adoc[]
+
+include::appendix-upgrade.adoc[]
+
+include::appendix-background.adoc[]
+
+include::appendix-resources.adoc[]
