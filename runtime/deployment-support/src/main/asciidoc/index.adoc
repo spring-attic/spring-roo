@@ -19,6 +19,7 @@
 // PDF Asciidoctor:
 //   $ asciidoctor-pdf index.adoc
 //
+//= image:images/xdev-spring_logo.jpg[] 
 = {title} 
 :title:			Spring Roo - Reference Documentation
 :author: 		DISID Corporation S.L. - Pivotal Software, Inc
@@ -118,7 +119,7 @@ enjoy using Roo as much as we've enjoyed creating it.
 
 Ben Alex, Founder - Spring Roo
 
-= Welcome to Spring Roo [[welcome]]
+= I. Welcome to Spring Roo [[welcome]]
 
 Welcome to Spring Roo! In this part of the reference guide we will explore everything you need to know in order to use Roo effectively. We've designed this part so that you can read each chapter consecutively and stop at any time. However, the more you read, the more you'll learn and the easier you'll find it to work with Roo.
 
@@ -2704,46 +2705,68 @@ database. We're happy to hear from you.
 [[usage-add-ons]]
 === Managing Roo Add-Ons
 
+.Modifying PGP Trusts For httppgp:// Scheme Operation
+****
 As detailed in the main text, Roo supports a special protocol scheme
 called `httppgp://`. This performs a Pretty Good Privacy (PGP) detached
 signature verification before proceeding to download the main resource.
 We use this as a key foundation of our add-on security model. Many Roo
 commands download items from the Internet, and anytime a `httppgp://`
-scheme is encountered a PGP verification will take place. One common
-case is if you are using the link:#command-index-addon-install-id[addon
+scheme is encountered a PGP verification will take place.
+ 
+One common case is if you are using the link:#command-index-addon-install-id[addon
 install] command. An example of the error if the PGP detached signature
-is untrusted is shown below: roo> *addon install* --bundleSymbolicName
-de.saxsys.roo.equals.addon Download URL
-'http://[...]equals.addon-1.2.0.jar' failed This resource was signed
-with PGP key ID '0xC3A61B10', which is not currently trusted Use 'pgp
-key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic
-trust' to trust any keysEssentially you need to decide if you trust the
+is untrusted is shown below:
+[subs=quotes]
+----
+roo> *addon install* --bundleSymbolicName
+de.saxsys.roo.equals.addon Download URL 'http://[...]equals.addon-1.2.0.jar' 
+failed This resource was signed with PGP key ID '0xC3A61B10', which is not 
+currently trusted Use 'pgp key view' to view this key, 'pgp trust' to trust
+ it, or 'pgp automatic trust' to trust any keys
+----
+
+Essentially you need to decide if you trust the
 PGP key ID or not. There is a link:#command-index-pgp-key-view[pgp key
 view] command that will help you learn more about a given key ID if you
 would like to use it. You can also view keys at public PGP key servers
 such as http://pgp.mit.edu/. You essentially have two options to cause
-an untrusted httppgp download to be performed by Roo: Use the
-link:#command-index-pgp-trust[pgp trust] command to trust the PGP key ID
+an untrusted httppgp download to be performed by Roo: 
+
+* Use the link:#command-index-pgp-trust[pgp trust] command to trust the PGP key ID
 shown in the error message. This will permanently trust the key ID, and
 it will show up if you use the
 link:#command-index-pgp-list-trusted-keys[pgp list trusted keys] command
 (you can of course remove it via the link:#command-index-pgp-untrust[pgp
 untrust] command as well). All of the keys you trust are stored in
-`~/.spring_roo_pgp.bpg`, which is a binary encoded PGP key store which
+pass:[~/.spring_roo_pgp.bpg], which is a binary encoded PGP key store which
 you can also view and manage using normal PGP tools. An example of the
-command to trust a key is shown below:roo> *pgp trust* --keyId
-0xC3A61B10 Alternately, you can decide to simply switch off key
+command to trust a key is shown below:
++
+[subs=quotes]
+----
+roo> *pgp trust* --keyId 0xC3A61B10
+----
+* Alternately, you can decide to simply switch off key
 verification and automatically trust any keys encountered. Such keys are
-stored in your `~/.spring_roo_pgp.bpg` file. You should use caution with
+stored in your pass:[~/.spring_roo_pgp.bpg] file. You should use caution with
 this command, although it can be convenient if you'd simply like to
 install some new add-ons and their dependencies without considering
 every key used to sign them. To use automatic trust, simply type
 link:#command-index-pgp-automatic-trust[pgp automatic trust] and press
-enter:roo> *pgp automatic trust* Automatic PGP key trusting enabled
-(this is potentially unsafe); disable by typing 'pgp automatic trust'
-again Once one of the above have been completed, you can repeat the
+enter:
++
+[subs=quotes]
+----
+roo> *pgp automatic trust* Automatic PGP key trusting enabled
+(this is potentially unsafe); disable by typing "pgp automatic trust"
+again
+----
+ 
+Once one of the above have been completed, you can repeat the
 command that attempted to download a `httppgp://` resource and it should
 succeed.
+****
 
 It is easy to extend the capabilities of Spring Roo with installable
 add-ons. This section will offer a basic overview of Roo's add-on
@@ -2966,20 +2989,21 @@ internal to your organization, or perhaps it's simply not ready for
 public consumption.
 
 Even if an add-on is not listed in RooBot, you can still install it. The
-"link:#command-index-osgi-obr-url-add[osgi obr url add]" command can be
+link:#command-index-osgi-obr-url-add[osgi obr url add] command can be
 used to add the add-on's OBR URL to your Roo installation. This command
-is typically followed by an "link:#command-index-osgi-obr-start[osgi obr
-start]" command to download and start the add-on. Importantly, the
+is typically followed by an link:#command-index-osgi-obr-start[osgi obr
+start] command to download and start the add-on. Importantly, the
 additional security verifications performed by RooBot are skipped given
 RooBot is not used with these commands (or other related commands such
 as link:#command-index-osgi-start[osgi start]). That means bundles you
-start using the "osgi obr start" command may not use `httppgp://` for
-PGP signature verification. As such you should exercise caution when
-using any installation-related commands that do not start with "addon",
-as such commands do not use resources subject to the RooBot security
-verifications. Noneless there remain legitimate use cases for such
-distribution styles, so it's good to know Roo supports them as well as
-the more common, user-friendly and more secure "addon" commands.
+start using the link:#command-index-osgi-start[osgi start] command may
+not use `httppgp://` for PGP signature verification. As such you should
+exercise caution when using any installation-related commands that do 
+not start with "addon", as such commands do not use resources subject 
+to the RooBot securityverifications. Noneless there remain legitimate 
+use cases for suchdistribution styles, so it's good to know Roo
+supports them as well asthe more common, user-friendly and more secure
+"addon" commands.
 
 [[existing]]
 == Existing Building Blocks
@@ -2997,18 +3021,23 @@ recommend that you follow these steps:
 project or it's easier to amend your current project into a Roo project.
 Both approaches are valid. The following steps reflect migrating your
 current project into a Roo project.
+
 2.  Convert the project to use Maven. Ensure you use the correct Maven
 directory layouts.
+
 3.  Move your Spring configuration and other files to the same
 directories as used by Roo. Start a new Roo-based project if you're
 unsure where these files are typically stored.
+
 4.  Add the Roo annotations JAR and Maven AspectJ plugin to your POM.
 Use the same syntax as a new Roo-based project would use.
 5.  Load Roo on your project and verify it does not report any errors.
 Resolve any errors before continuing.
+
 6.  Add a test @RooToString annotation to one of your existing classes.
 Verify the ITD is created and can be used within your IDE (if you're
 using an IDE). Check the new toString() method is used.
+
 7.  Start incrementally using the simpler Roo add-ons like toString
 support and JavaBeans. When you're confident, move onto other Roo
 commands and add-ons.
@@ -3303,7 +3332,7 @@ A final tip if you'd like to return to having ITDs again is that AJDT
 in moving back to ITDs. The Edit > Undo command also generally works if
 you decide to revert immediately after a Refactor > Push In operation.
 
-= Base Add-Ons [[base]]
+= II. Base Add-Ons [[base]]
 
 This part of the reference guide provides a detailed reference to the major Roo base add-ons and how they work. This part goes into more detail than the <<beginning,tutorial chapter>> and offers a "bigger picture" discussion than the <<command-index,command reference>> appendix.
 
@@ -6453,7 +6482,7 @@ http://github.com/evolvingweb/ajax-solr It is planned to provide a out
 of the box integration with the Ajax-Solr front-end through this addon
 in the medium term.
 
-= Internals and Add-On Development [[internals]]
+= III. Internals and Add-On Development [[internals]]
 
 In this part of the guide we reveal how Roo works internally. With this knowledge you'll be well-positioned to be able to check out the Roo codebase, build a development release, and write add-ons to extend Roo.
 
@@ -7230,7 +7259,7 @@ TBC
 
 TBC
 
-= External Add-Ons [[external-addons]]
+= IV. External Add-Ons [[external-addons]]
 
 In this part of the guide we detail external Roo add-ons.
 
@@ -7607,7 +7636,7 @@ private CommandConfiguration createCommandConfigJpaSetup() {
 }
 -----------------------------------------------------------------
 
-= Appendices [[appendices]]
+= V. Appendices [[appendices]]
 
 The fourth and final part of the reference guide provides appendices and background information that does not neatly belong within the other parts. The information is intended to be treated as a reference and not read consecutively.
 
@@ -8550,6 +8579,53 @@ osgi obr start --bundleSymbolicName
 
 --bundleSymbolicName::
   The specific bundle to start; default: '__NULL__' (mandatory)
+
+[[command-index-osgi-obr-url-add]]
+==== osgi obr url add
+
+Adds a new OSGi Bundle Repository (OBR) repository file URL
+
+-----------------------------------
+osgi obr url add --url
+-----------------------------------
+
+--url::
+  The URL to add (eg pass:[http://felix.apache.org/obr/releases.xml]); default: '__NULL__' (mandatory) 
+
+[[command-index-osgi-obr-url-list]]
+==== osgi obr url list
+
+Lists the currently-configured OSGi Bundle Repository (OBR) repository file URLs
+
+-----------------------------------
+osgi obr url list
+-----------------------------------
+
+This command does not accept any options.
+
+[[command-index-osgi-obr-url-refresh]]
+==== osgi obr url refresh
+
+Refreshes an existing OSGi Bundle Repository (OBR) repository file URL
+
+-----------------------------------
+osgi obr url refresh --url
+-----------------------------------
+
+--url::
+  The URL to refresh (list existing URLs via 'osgi obr url list'); default: '__NULL__' (mandatory) 
+
+[[command-index-osgi-obr-url-remove]]
+==== osgi obr url remove
+
+Removes an existing OSGi Bundle Repository (OBR) repository file URL
+
+-----------------------------------
+osgi obr url remove --url
+-----------------------------------
+
+--url::
+  The URL to remove (list existing URLs via 'osgi obr url list'); default: '__NULL__' (mandatory) 
 
 [[command-index-osgi-ps]]
 ==== osgi ps
@@ -10332,7 +10408,7 @@ repository mongo --interface
 Os Commands are contained in
 org.springframework.roo.addon.oscommands.OsCommands.
 
-[[command-index-!]]
+[[command-index-exclamation]]
 ==== !
 
 Allows execution of operating system (OS) commands.
@@ -11174,7 +11250,7 @@ Roo.
 If you experience any difficulty with upgrading your projects, please
 use the link:#resources-forums[community support forum] for assistance.
 
-[[120RC1]]
+[[upgrade-120RC1]]
 === Upgrading to 1.2.0.RC1
 
 The main changes you need to be aware of when upgrading from Spring Roo
@@ -11214,7 +11290,7 @@ mongo + repository mongo
 mongo + repository mongo
 |=======================================================================
 
-[[120M1]]
+[[upgrade-120M1]]
 === Upgrading to 1.2.0.M1
 
 The main changes you need to be aware of when upgrading from Spring Roo
