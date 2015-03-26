@@ -1,0 +1,303 @@
+[[base-json]]
+JSON Add-On
+-----------
+
+There are a number of ways to work with JSON document serialization and
+desrialization in Roo projects: Option 1: Built-in JSON handling managed
+in domain layer (discussed in this section) This offers customizable
+http://flexjson.sourceforge.net/[FlexJson] integration Option 2: Spring
+MVC detects the http://jackson.codehaus.org/[Jackson] library in the
+application classpath simply use Spring's
+http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestbody[@RequestBody]
+and
+http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-responsebody[@ResponseBody]
+annotations in the controllers, or take advantage of Spring's
+http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-multiple-representations[ContentNegotiatingViewResolver]The
+JSON add-on offers JSON support in the domain layer as well as the
+Spring MVC scaffolding. A number of methods are provided to facilitate
+serialization and deserialization of JSON documents into domain objects.
+The JSON add-on makes use of the
+http://flexjson.sourceforge.net/[Flexjson] library.
+
+Adding JSON Functionality to Domain Types
+-----------------------------------------
+
+The add-on offers an annotation as well as two commands that support the
+integration of JSON support into the project's domain layer:
+
+1.  Annotating a target type with the default *@RooJson* annotation will
+prompt Roo to create an ITD with the following four methods:
++
+------------------------------------------------------------------
+public String toJson() {
+   return new JSONSerializer().exclude("*.class").serialize(this);
+}
+------------------------------------------------------------------
++
+This method returns a JSON representation of the current object.
++
+---------------------------------------------------------------------------------
+public static Owner fromJsonToOwner(String json) {
+   return new JSONDeserializer<Owner>().use(null, Owner.class).deserialize(json);
+}
+---------------------------------------------------------------------------------
++
+This method has a String parameter representing the JSON document and
+returns a domain type instance if the document can be serialized by the
+underlying deserializer.
++
+------------------------------------------------------------------------
+public static String toJsonArray(Collection<Owner> collection) {
+   return new JSONSerializer().exclude("*.class").serialize(collection);
+}
+------------------------------------------------------------------------
++
+This method will convert a collection of the target type, provided as
+method parameter, into a valid JSON document containing an array.
++
+-----------------------------------------------------------------------------------
+public static Collection<Owner> fromJsonArrayToOwners(String json) {
+   return new JSONDeserializer<List<Owner>>().use(null, 
+                     ArrayList.class).use("values", Owner.class).deserialize(json);
+}
+-----------------------------------------------------------------------------------
++
+This method will convert a JSON array document, passed in as a method
+parameter, into a collection of the target type.
++
+The @RooJson annotation can be used to customize the names of the
+methods being introduced to the target type. Furthermore, you can
+disable the creation of any of the above listed methods by providing an
+empty String argument for the unwanted method in the @RooJson
+annotation. Example:
++
+-----------------------------------------------------------
+@RooJson(toJsonMethod="", fromJsonMethod="myOwnMethodName")
+-----------------------------------------------------------
+2.  The link:#command-index-json-add[json add] Roo shell command will
+introduce the @RooJson annotation into the specified target type.
+3.  The link:#command-index-json-all[json all] command will detect all
+domain entities in the project and annotate all of them with the
+@RooJson annotation.
+
+JSON REST Interface in Spring MVC controllers
+---------------------------------------------
+
+Once your domain types are annotated with the @RooJson annotation, you
+can create Spring MVC scaffolding for your JSON enabled types.
+
+1.  The link:#command-index-web-mvc-json-setup[web mvc json setup] Roo
+shell command configures the current project to support JSON integration
+using Spring MVC.
+2.  The link:#command-index-web-mvc-json-add[web mvc json add] Roo shell
+command introduces the *@RooWebJson* annotation into the specified
+target type.
+3.  The link:#command-index-web-mvc-json-all[web mvc json all] Roo shell
+command finds all JSON-enabled types (**@RooJson**) in the project and
+creates Spring MVC controllers for each (if a controller does not
+already exist), or adds *@RooWebJson* to existing controllers (should
+they already exist).
+4.  Annotating an existing Spring MVC controller with the @RooWebJson
+annotation will prompt Roo to create an ITD with a number of methods:
+* listJson
++
+-------------------------------------------------------------------------------------------
+@RequestMapping(headers = "Accept=application/json")
+@ResponseBody
+public ResponseEntity<String> ToppingController.listJson() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json; charset=utf-8");
+    List<Topping> result = toppingService.findAllToppings();
+    return new ResponseEntity<String>(Topping.toJsonArray(result), headers, HttpStatus.OK);
+}
+-------------------------------------------------------------------------------------------
++
+As you can see this method takes advantage of Spring's request mappings
+and will respond to HTTP GET requests that contain an
+'Accept=application/json' header. The @ResponseBody annotation is used
+to serialize the JSON document.
++
+To test the functionality with curl, you can try out the Roo "pizza
+shop" sample script (run roo> script pizzashop.roo; then quit the Roo
+shell and start Tomcat 'mvn tomcat:run'):
++
+------------------------------------------------------------------------------
+curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings
+------------------------------------------------------------------------------
+* showJson
++
+---------------------------------------------------------------------------------------
+@RequestMapping(value = "/{id}", headers = "Accept=application/json")
+@ResponseBody
+public ResponseEntity<String> ToppingController.showJson(@PathVariable("id") Long id) {
+    Topping topping = toppingService.findTopping(id);
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json; charset=utf-8");
+    if (topping == null) {
+        return new ResponseEntity<String>(headers, HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<String>(topping.toJson(), headers, HttpStatus.OK);
+}
+---------------------------------------------------------------------------------------
++
+This method accepts an HTTP GET request with a
+http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestparam[@PathVariable]
+for the requested Topping ID. The entity is serialized and returned as a
+JSON document if found, otherwise an HTTP 404 (NOT FOUND) status code is
+returned. The accompanying curl command is as follows:
++
+--------------------------------------------------------------------------------
+curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings/1
+--------------------------------------------------------------------------------
+* createFromJson
++
+------------------------------------------------------------------------------------------
+@RequestMapping(method = RequestMethod.POST, headers = "Accept=application/json")
+public ResponseEntity<String> ToppingController.createFromJson(@RequestBody String json) {
+    Topping topping = Topping.fromJsonToTopping(json);
+    toppingService.saveTopping(topping);
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json");
+    return new ResponseEntity<String>(headers, HttpStatus.CREATED);
+}
+------------------------------------------------------------------------------------------
++
+This method accepts a JSON document sent via HTTP POST, converts it into
+a Topping instance, persists that new instance, and returns an HTTP 201
+(CREATED) status code. The accompanying curl command is as follows:
++
+---------------------------------------------------------------------------------
+curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json"
+     -d '{"name": "Thin Crust"}' http://localhost:8080/pizzashop/bases
+---------------------------------------------------------------------------------
+* createFromJsonArray
++
+-------------------------------------------------------------------------------------------------------
+@RequestMapping(value = "/jsonArray", method = RequestMethod.POST, headers = "Accept=application/json")
+public ResponseEntity<String> ToppingController.createFromJsonArray(@RequestBody String json) {
+    for (Topping topping: Topping.fromJsonArrayToToppings(json)) {
+        toppingService.saveTopping(topping);
+    }
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json");
+    return new ResponseEntity<String>(headers, HttpStatus.CREATED);
+}
+-------------------------------------------------------------------------------------------------------
++
+This method accepts a document containing a JSON array sent via HTTP
+POST and converts the array into instances that are then persisted. The
+method returns an HTTP 201 (CREATED) status code. The accompanying curl
+command is as follows:
++
+---------------------------------------------------------------------------------
+curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json"
+     -d '[{"name":"Cheesy Crust"},{"name":"Thick Crust"}]'
+     http://localhost:8080/pizzashop/bases/jsonArray
+---------------------------------------------------------------------------------
+* updateFromJson
++
+------------------------------------------------------------------------------------------
+@RequestMapping(method = RequestMethod.PUT, headers = "Accept=application/json")
+public ResponseEntity<String> ToppingController.updateFromJson(@RequestBody String json) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json");
+    Topping topping = Topping.fromJsonToTopping(json);
+    if (toppingService.updateTopping(topping) == null) {
+        return new ResponseEntity<String>(headers, HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<String>(headers, HttpStatus.OK);
+}
+------------------------------------------------------------------------------------------
++
+This method accepts a JSON document sent via HTTP PUT and converts it
+into a Topping instance before attempting to merge it with an existing
+record. If no existing record is found, an HTTP 404 (NOT FOUND) status
+code is sent to the client, otherwise an HTTP 200 (OK) status code is
+sent. The accompanying curl command is as follows:
++
+--------------------------------------------------------------------------------
+curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json"
+     -d '{id:6,name:"Mozzarella",version:1}'
+     http://localhost:8080/pizzashop/toppings
+--------------------------------------------------------------------------------
+* updateFromJsonArray
++
+--------------------------------------------------------------------------------------------
+@RequestMapping(value = "/jsonArray", method = RequestMethod.PUT,
+               headers = "Accept=application/json")
+public ResponseEntity<String> BaseController.updateFromJsonArray(@RequestBody String json) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json");
+    for (Base base: Base.fromJsonArrayToBases(json)) {
+        if (baseService.updateBase(base) == null) {
+            return new ResponseEntity<String>(headers, HttpStatus.NOT_FOUND);
+        }
+    }
+    return new ResponseEntity<String>(headers, HttpStatus.OK);
+}
+--------------------------------------------------------------------------------------------
++
+This method accepts a document containing a JSON array sent via HTTP PUT
+and converts the array into transient entities which are then merged.
+The method returns an HTTP 404 (NOT FOUND) status code if any of the
+instances to be updated are not found, otherwise it returns an HTTP 200
+(OK) status code. The accompanying curl command is as follows:
++
+----------------------------------------------------------------------------------------
+curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json"
+     -d '[{id:1,"name":"Cheesy Crust",version:0},{id:2,"name":"Thick Crust",version:0}]'
+     http://localhost:8080/pizzashop/bases/jsonArray
+----------------------------------------------------------------------------------------
+* deleteFromJson
++
+----------------------------------------------------------------------------------------------------
+@RequestMapping(value = "/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+public ResponseEntity<String> ToppingController.deleteFromJson(@PathVariable("id") Long id) {
+    Topping topping = toppingService.findTopping(id);
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Type", "application/json");
+    if (topping == null) {
+        return new ResponseEntity<String>(headers, HttpStatus.NOT_FOUND);
+    }
+    toppingService.deleteTopping(topping);
+    return new ResponseEntity<String>(headers, HttpStatus.OK);
+}
+----------------------------------------------------------------------------------------------------
++
+This method accepts an HTTP DELETE request with an @PathVariable
+identifying the Topping instance to be deleted. HTTP status code 200
+(OK) is returned if a Topping with that ID was found, otherwise HTTP
+status code 404 (NOT FOUND) is returned. The accompanying curl command
+is as follows:
++
+------------------------------------------------------------------------------------------
+curl -i -X DELETE -H "Accept: application/json" http://localhost:8080/pizzashop/toppings/1
+------------------------------------------------------------------------------------------
+* jsonFind...
++
+[Optional] Roo will also generate a method to retrieve a document
+containing a JSON array if the form backing object defines dynamic
+finders. Here is an example taken from VisitController in the pet clinic
+sample application, after adding JSON support to it:
++
+---------------------------------------------------------------------------------------------------------
+@RequestMapping(params = "find=ByDescriptionAndVisitDate", method = RequestMethod.GET, 
+                headers = "Accept=application/json")
+public String jsonFindVisitsByDescriptionAndVisitDate(@RequestParam("description") String desc, 
+        @RequestParam("visitDate") @DateTimeFormat(style = "M-") Date visitDate, Model model) {
+    return Visit.toJsonArray(Visit.findVisitsByDescriptionAndVisitDate(desc, visitDate).getResultList());
+}
+---------------------------------------------------------------------------------------------------------
++
+This method accepts an HTTP GET request with a number of request
+parameters which define the finder method as well as the finder method
+arguments. The accompanying curl command is as follows:
++
+-----------------------------------------------------------------------------------------------------------------
+curl -i -H Accept:application/json 
+     http://localhost:8080/petclinic/visits?find=ByDescriptionAndVisitDate%26description=test%26visitDate=12/1/10
+-----------------------------------------------------------------------------------------------------------------
+
+If you need help configuring how FlexJson serializes or deserializes
+JSON documents, please refer to their
+http://flexjson.sourceforge.net/[reference documentation].

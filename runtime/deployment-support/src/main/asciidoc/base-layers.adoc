@@ -1,0 +1,443 @@
+[[base-layers]]
+Application Layering
+--------------------
+
+Java enterprise applications can take many shapes and forms depending on
+their requirements. Depending on these requirements, you need to decide
+which layers your application needs. Many applications
+link:#architecture-dao[won't benefit] from additional complexity and
+maintenance cost of service or repository layers unless there is a need.
+With version 1.2.0 Spring Roo offers support for specific application
+layering tailored to the needs of the application. This section provides
+an overview of Roo's support for service and repository layers.
+
+Note: This section provides an overview of the application layering
+options Spring Roo offers since the *1.2.0.M1* release. It does not
+discuss the merits of different approaches to architecting enterprise
+applications.
+
+The Big Picture
+---------------
+
+With the Roo 1.2.0 release internals have been changed to allow the
+integration of multiple application layers. This is particularly useful
+for the support of different persistence mechanisms. In previous
+releases the only persistence supported in Roo core was the JPA Entity
+Active Record pattern. With the internal changes in place Roo can now
+support alternative persistence providers which support application
+layering.
+
+image:images/layering.png[image]
+
+While there are a number of new layering and persistence choices
+available, by default Roo will continue to support the JPA Active Record
+Entity by default (marked orange). However, you can easily change
+existing applications by adding further service or repository layers
+(details below). If you add new layers Roo will automatically change its
+ITDs in the consumer layer or service layer respectively. For example it
+will automatically inject and call a new service layer within an
+existing MVC controller, Integration test or data on demand for a given
+domain type.
+
+Persistence Layers
+------------------
+
+There are now three options available in Roo core to support data
+persistence, JPA Entities (Active Record style), JPA Repositories and
+MongoDB Repositories.
+
+JPA Entities (Active Record style)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Active record-style JPA Entities have been the default since the first
+release of Spring Roo and will remain so. In order to configure your
+project for JPA persistence, you can run the jpa setup command:
+
+--------------------------------------------------------------------
+roo> jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+--------------------------------------------------------------------
+
+This configures your project to use the Hibername object relational
+mapper along with a in-memory database (HSQLDB). Further details about
+this persistence option can be found link:#base-persistence[here].
+
+Active record-style JPA entities supported by Roo need to have a
+*@RooJpaActiveRecord* annotation which takes care of providing an ID
+field along with its accessor and mutator, In addition this annotation
+creates the typical CRUD methods to support data access.
+
+--------------------------------------
+roo> entity jpa --class ~.domain.Pizza
+--------------------------------------
+
+This command will create a Pizza domain type along with active
+record-style methods to persist, update, read and delete your entity.
+The following example also contains a number of fields which can be
+added through the link:#command-index-field-commands[field] command via
+the Roo shell.
+
+-----------------------------------------------------------
+@RooJavaBean
+@RooToString
+@RooJpaActiveRecord
+public class Pizza {
+
+    @NotNull
+    @Size(min = 2)
+    private String name;
+
+    private BigDecimal price;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<Topping> toppings = new HashSet<Topping>();
+
+    @ManyToOne
+    private Base base;
+}
+-----------------------------------------------------------
+
+Further details about command options and functionalities provided by
+active record-style JPA Entities please refer to the
+link:#base-persistence[Persistence Add-on] chapter.
+
+JPA Repository
+~~~~~~~~~~~~~~
+
+Developers who require a repository / DAO layer instead of the default
+Roo entity-based persistence approach can do so by creating a
+http://projects.spring.io/spring-data-jpa/[Spring Data JPA] backed
+repository for a given JPA domain type. The domain type backing the
+repository needs have a JPA @Entity annotation and also a ID field
+defined along with accessors and mutators. After configuring your
+project for JPA persistence via the link:#command-index-jpa-setup[jpa
+setup] command, this functionality is automatically provided by
+annotating the domain type with Roo's *@RooJpaEntity* annotation.
+
+-----------------------------------------------------------
+roo> entity jpa --class ~.domain.Pizza --activeRecord false
+-----------------------------------------------------------
+
+By defining --activeRecord false you can opt out of the otherwise
+default Active Record style. The following example also contains a
+number of fields which can be added through the
+link:#command-index-field-commands[field] command via the Roo shell.
+
+-----------------------------------------------------------
+@RooJavaBean
+@RooToString
+@RooJpaEntity
+public class Pizza {
+
+    @NotNull
+    @Size(min = 2)
+    private String name;
+
+    private BigDecimal price;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<Topping> toppings = new HashSet<Topping>();
+
+    @ManyToOne
+    private Base base;
+}
+-----------------------------------------------------------
+
+With a domain type in place you can now create a new repository for this
+type by using the link:#command-index-repository-jpa[repository jpa]
+command:
+
+------------------------------------------------------------------------------------
+roo> repository jpa --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
+------------------------------------------------------------------------------------
+
+This will create a simple interface definition which leverages Spring
+Data JPA:
+
+-------------------------------------------
+@RooJpaRepository(domainType = Pizza.class)
+public interface PizzaRepository {
+}
+-------------------------------------------
+
+Of course, you can simply add the *@RooJpaRepository* annotation on any
+interface by hand in lieu of issuing the
+link:#command-index-repository-jpa[repository jpa] command in the Roo
+shell.
+
+The adition of the *@RooJpaRepository* annotation will trigger the
+creation of a fairly trivial AspectJ ITD which adds an extends statement
+to the PizzaRepository interface resulting in the equivalent of this
+interface definition:
+
+----------------------------------------------------------------------
+public interface PizzaRepository extends JpaRepository<Pizza, Long> {}
+----------------------------------------------------------------------
+
+Note, the
+http://docs.spring.io/spring-data/data-jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html[JpaRepository]
+interface is part of the
+http://projects.spring.io/spring-data-jpa/[Spring Data JPA] API and
+provides all CRUD functionality out of the box.
+
+MongoDB Persistence
+~~~~~~~~~~~~~~~~~~~
+
+As an alternative to JPA persistence, Spring Roo offers
+http://www.mongodb.org/[MongoDB] support by leveraging the
+http://projects.spring.io/spring-data-mongodb/[Spring Data MongoDB]
+project.
+
+Setup
+^^^^^
+
+To configure a project for MongoDB persistence you can use the
+link:#command-index-mongo-setup[mongo setup] command:
+
+----------------
+roo> mongo setup
+----------------
+
+This will configure your Spring Application context to use a MongoDB
+installation running on localhost and the default port. Optional command
+attributes allow you to define host, port, database name, username and
+password. Furthermore, to configure your application for deployment on
+http://cloudfoundry.com/[VMware CloudFoundry] you can use the
+--cloudFoundry attribute.
+
+Entities
+^^^^^^^^
+
+Once the application is configured for MongoDB support, the
+link:#command-index-entity-mongo[entity mongo] and
+link:#command-index-repository-mongo[repository mongo] commands become
+available:
+
+----------------------------------------
+roo> entity mongo --class ~.domain.Pizza
+----------------------------------------
+
+This command will create a Pizza domain type annotated with
+**@RooMongoEntity**. This annotation is responsibe for triggering the
+creation of an ITD which provides a Spring Data ID annotated field as
+well as its accessor and mutator. The following example also contains a
+number of fields which can be added through the
+link:#command-index-field-commands[field] command via the Roo shell.
+
+-----------------------------------------------------------
+@RooJavaBean
+@RooToString
+@RooMongoEntity
+public class Pizza {
+
+    @NotNull
+    @Size(min = 2)
+    private String name;
+
+    private BigDecimal price;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<Topping> toppings = new HashSet<Topping>();
+
+    @ManyToOne
+    private Base base;
+}
+-----------------------------------------------------------
+
+Repository
+^^^^^^^^^^
+
+With a domain type in place you can now create a new repository for this
+type by using the
+link:#command-index-repository-mongo[link:#command-index-repository-jpa[repository]
+mongo] command (or by applying the @RooMongoRepository annotation to an
+arbitrary interface:
+
+--------------------------------------------------------------------------------------
+roo> repository mongo --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
+--------------------------------------------------------------------------------------
+
+This will create a simple interface definition which leverages
+http://projects.spring.io/spring-data-mongodb/[Spring Data MongoDB]:
+
+---------------------------------------------
+@RooMongoRepository(domainType = Pizza.class)
+public interface PizzaRepository {
+
+    List<Pizza> findAll();
+}
+---------------------------------------------
+
+Similar the Spring Data JPA driven repository seen above, this interface
+is augmented through an ITD which introduces the
+http://docs.spring.io/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html[PagingAndSortingRepository]
+provided by the Spring Data API and is responsible for providing all
+necessary CRUD functionality. In addition this interface defines a
+'custom' finder which is not offered by the
+http://docs.spring.io/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html[PagingAndSortingRepository]
+implementation: __List<Pizza> findAll();__. This method iis required by
+Spring Roo's UI scaffolding and is automatically implemented by the
+http://docs.spring.io/spring-data/data-document/docs/1.0.0.M4/reference/html/#repositories.definition-tuning[query
+builder mechanism] offered by Spring Data MongoDB.
+
+Example & Cloud Foundry Deployment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Similar to applications which use JPA persistence (see
+http://blog.springsource.com/2011/08/30/using-postgres-on-cloud-foundry/[this
+blog] for details on using JPA with Postgres) MongoDB applications can
+be easily deployed to http://cloudfoundry.com/[VMware CloudFoundry]. The
+following script provides an example of the Plink:#beginning[izza Shop
+sample application] which has been adjusted for use with a
+MongoDB-backed repository layer:
+
+-----------------------------------------------------------------------------------------------------------
+// Create a new project.
+project com.springsource.pizzashop
+
+// Create configuration for MongoDB peristence 
+mongo setup --cloudFoundry true
+
+// Define domain model.
+entity mongo --class ~.domain.Base --testAutomatically
+field string --fieldName name --sizeMin 2 --notNull --class ~.domain.Base
+entity mongo --class ~.domain.Topping --testAutomatically
+field string --fieldName name --sizeMin 2 --notNull --class ~.domain.Topping
+entity mongo --class ~.domain.Pizza --testAutomatically
+field string --fieldName name --notNull --sizeMin 2 --class ~.domain.Pizza
+field number --fieldName price --type java.lang.Float
+field set --fieldName toppings --type ~.domain.Topping
+field reference --fieldName base --type ~.domain.Base
+entity mongo --class ~.domain.PizzaOrder --testAutomatically
+field string --fieldName name --notNull --sizeMin 2 --class ~.domain.PizzaOrder
+field string --fieldName address --sizeMax 30
+field number --fieldName total --type java.lang.Float
+field date --fieldName deliveryDate --type java.util.Date
+field set --fieldName pizzas --type ~.domain.Pizza
+
+// Add layer support.
+repository mongo --interface ~.repository.ToppingRepository --entity ~.domain.Topping
+repository mongo --interface ~.repository.BaseRepository --entity ~.domain.Base
+repository mongo --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
+repository mongo --interface ~.repository.PizzaOrderRepository --entity ~.domain.PizzaOrder
+service type --interface ~.service.ToppingService --entity ~.domain.Topping
+service type --interface ~.service.BaseService --entity ~.domain.Base
+service type --interface ~.service.PizzaService --entity ~.domain.Pizza
+service type --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
+
+// Create a Web UI.
+web mvc setup
+web mvc all --package ~.web
+
+// Package the application into a war file.
+perform package
+
+// Deploy and start the application in CloudFoundry
+cloud foundry login 
+cloud foundry deploy --appName roo-pizzashop --path /target/pizzashop-0.1.0.BUILD-SNAPSHOT.war --memory 512
+cloud foundry create service --serviceName pizzashop-mongo --serviceType mongodb
+cloud foundry bind service --serviceName pizzashop-mongo --appName roo-pizzashop
+cloud foundry start app --appName roo-pizzashop
+-----------------------------------------------------------------------------------------------------------
+
+[[service-layer]]
+Service Layer
+-------------
+
+Developers can also choose to create a service layer in their
+application. By default, Roo will create a service interface (and
+implementation) for one or more domain entities. If a
+persistence-providing layer such as Roo's
+link:#architecture-entities[default entity layer] or a
+link:#repository-layer[repository layer] is present for a given domain
+entity, the service layer will expose the CRUD functionality provided by
+this persistence layer through its interface and implementation.
+
+As per Roo's conventions all functionality will be introduced via
+AspectJ ITDs therefore providing the developer a clean canvas for
+implementing custom business logic which does not naturally fit into
+domain entities. Other common use cases for service layers are security
+or integration of remoting such as Web Services. For a more detailed
+discussion please refer to the link:#architecture-services[architecture
+chapter].
+
+The integration of a services layer into a Roo project is similar to the
+repository layer by using the @RooService annotation directly or the
+link:#command-index-service[service] command in the Roo shell:
+
+-----------------------------------------------------------------------
+roo> service --interface ~.service.PizzaService --entity ~.domain.Pizza
+-----------------------------------------------------------------------
+
+This command will create the PizzaService interface in the defined
+package and additionally a PizzaServiceImpl in the same package (the
+name and package of the PizzaServiceImpl can be customized via the
+optional --class attribute).
+
+------------------------------------------
+@RooService(domainTypes = { Pizza.class })
+public interface PizzaService {
+}
+------------------------------------------
+
+Following Roo conventions the default CRUD method definitions can be
+found in the ITD:
+
+-----------------------------------------------------------------
+void savePizza(Pizza pizza);
+Pizza findPizza(Long id);    
+List<Pizza> findAllPizzas();    
+List<Pizza> findPizzaEntries(int firstResult, int maxResults);   
+long countAllPizzas();    
+Pizza updatePizza(pizza pizza);
+void deletePizza(Pizza pizza);    
+-----------------------------------------------------------------
+
+Similarly, the PizzaServiceImpl is rather empty:
+
+-------------------------------------------------------
+public class PizzaServiceImpl implements PizzaService {
+}
+-------------------------------------------------------
+
+Through the AspectJ ITD the PizzaServiceImpl type is annotated with the
+*@Service* and *@Transactional* annotations by default. Furthermore the
+ITD will introduce the following methods and fields into the target
+type:
+
+-------------------------------------------------------------------------------------------------------
+@Autowired PizzaRepository pizzaRepository;
+    
+public void savePizza(Pizza pizza) {
+    pizzaRepository.save(pizza);
+}
+
+public Pizza findPizza(Long id) {
+    return pizzaRepository.findOne(id);
+}
+
+public List<Pizza> findAllPizzas() {
+    return pizzaRepository.findAll();
+}
+
+public List<Pizza> findPizzaEntries(int firstResult, int maxResults) {
+    return pizzaRepository.findAll(new PageRequest(firstResult / maxResults, maxResults)).getContent();
+}
+
+public long countAllPizzas() {
+    return pizzaRepository.count();
+}
+
+public Pizza updatePizza(Pizza pizza) {
+    return pizzaRepository.save(pizza);
+}
+    
+public void deletePizza(Pizza pizza) {
+    pizzaRepository.delete(pizza);
+}
+-------------------------------------------------------------------------------------------------------
+
+As you can see, Roo will detect if a persistence provider layer exists
+for a given domain type and automatically inject this component in order
+to delegate all service layer calls to this layer. In case no
+persistence (or other 'lower level' layer exists, the service layer ITD
+will simply provide method stubs.
