@@ -39,7 +39,6 @@
 //:backend: 		docbook
 :numbered:
 :sectnumlevels:		5
-//:prewrap:
 
 [abstract]
 _Copyright 2009-2014 VMware, Inc. All Rights Reserved._
@@ -48,9 +47,7 @@ _Copies of this document may be made for your own use and for
       copies and further provided that each copy contains this Copyright
       Notice, whether distributed in print or electronically._
 
-//[discrete]
 [preface]
-//[float]
 [[preface]]
 = Preface
 
@@ -1314,6 +1311,7 @@ After selecting your preferred deployment method you should see the Web
 container starting and the application should be available under the
 following URL http://localhost:8080/pizzashop
 
+[[beginning-securing-app]]
 === Securing the Application
 
 As discussed with the Pizza Shop owner we need to control access to
@@ -1418,6 +1416,7 @@ With these steps completed you can restart the application and the
 'admin' user can navigate to http://localhost:8080/pizzashop/login to
 authenticate.
 
+[[beginning-customizing-look]]
 === Customizing the Look & Feel of the Web UI
 
 Roo generated Web UIs can be customized in various ways. To find your
@@ -3394,6 +3393,7 @@ commands available to configure JPA, create new JPA-compliant entities,
 and add fields to these entities. In the following a summary of the
 features offered by the Spring Roo persistence add-on:
 
+[[base-jpa-setup]]
 === JPA setup command
 
 The link:#command-index-jpa-setup[jpa setup] command provides the
@@ -3541,6 +3541,7 @@ Spring application context:
 </bean>
 ---------------------------------------------------------------------------------------------
 
+[[base-entity-jpa]]
 === Entity JPA command
 
 Using the
@@ -3735,7 +3736,7 @@ privileged aspect Person_Roo_Jpa_ActiveRecord {
 ---------------------------------------------------------------------------------------------------
 +
 The Person_Roo_Jpa_ActiveRecord.aj ITD introduces a number of methods
-such as __persist__()____, __remove__(), __merge__(), __flush__() which
+such as __persist__(), __remove__(), __merge__(), __flush__() which
 allow the execution of
 http://en.wikipedia.org/wiki/Active_record_pattern[ActiveRecord]-style
 persistence operations on each Roo-managed JPA entity. Furthermore, a
@@ -3768,6 +3769,7 @@ scripted and replayed if desired. Other attributes allow you to define
 the identifier field name as well as the identifier field type which, in
 turn, allows the use of complex identifier types.
 
+[[base-field-commands]]
 === Field commands
 
 As mentioned earlier in this chapter the
@@ -3934,8 +3936,10 @@ create an application tier of JPA 2.0 entities based on the tables in
 your database. DBRE will also incrementally maintain your application
 tier if you add or remove tables and columns.
 
+[[base-dbre-introduction]]
 === Introduction
 
+[[base-dbre-benefits]]
 ==== What are the benefits of Roo's incremental reverse engineering?
 
 Traditional JPA reverse engineering tools are designed to introspect a
@@ -3955,8 +3959,10 @@ application delivery, clutter-free .java source files, extensive
 usability features in the shell (such as tab completion and hinting) and
 so on.
 
+[[base-dbre-how]]
 ==== How does DBRE work?
 
+[[base-dbre-metadata]]
 ===== Obtaining database metadata
 
 The DBRE commands (see ? below) make live connections to the database
@@ -3972,6 +3978,7 @@ primary keys are supported (see ? for more details) and relationships
 between entities are also created using the imported and exported key
 information obtained from the metadata.
 
+[[base-dbre-creation]]
 ===== Class and field name creation
 
 DBRE creates entity classes with names that are derived from the
@@ -4068,6 +4075,7 @@ example:
 roo> osgi start --url file:///tmp/org.springframework.roo.wrapping.db2jcc4-9.7.2.0001.jar
 -----------------------------------------------------------------------------------------
 
+[[dbre-commands]]
 === DBRE Add-On commands
 
 After you have configured your persistence layer with the
@@ -4185,6 +4193,7 @@ supported. For example:
 This will reverse engineer all tables from schemas "schema1", "schema2",
 and "schema3".
 
+[[dbre-annotation]]
 === The @RooDbManaged annotation
 
 The @RooDbManaged annotation is added to all new entities created by
@@ -4269,8 +4278,8 @@ If you do not want DBRE to manage your entity any more, you can
 "push-in" refactor the fields and methods in the DbManaged ITD and
 remove the @RooDbManaged annotation from the .java file.
 
+[[dbre-features]]
 === Supported JPA 2.0 features
-
 
 DBRE will produce and maintain primary key fields, including composite
 keys, entity relationships such as many-valued and single-valued
@@ -4279,16 +4288,16 @@ annotation.
 
 The following sections describe the features currently supported.
 
+[[dbre-simple-keys]]
 ==== Simple primary keys
-
 
 For a table with a single primary key column, DBRE causes an identifier
 field to be created in the entity ITD annotated with @Id and @Column.
 This is similar to executing the link:#command-index-entity-jpa[entity
 jpa] command by itself.
 
+[[dbre-composite-keys]]
 ==== Composite primary keys
-
 
 For tables with two or more primary key columns, DBRE will create a
 primary key class annotated with @RooIdentifier(dbManaged = true) and
@@ -4371,6 +4380,7 @@ anymore, the next time you execute the database reverse engineer
 command, Roo will automatically change the entity to use a single
 primary key and remove the identifier class if it is permitted.
 
+[[dbre-entity-relationships]]
 ==== Entity relationships
 
 One of the powerful features of DBRE is its ability to create
@@ -4378,6 +4388,7 @@ relationships between entities automatically based on the foreign key
 information in the dbre.xml file. The following sections describe the
 associations that can be created.
 
+[[dbre-many-many]]
 ===== Many-valued associations with many-to-many multiplicity
 
 Many-to-many associations are created if a join table is detected by
@@ -4441,6 +4452,7 @@ privileged aspect Foo_Roo_DbManaged {
 }
 -----------------------------------------------------------------------------------
 
+[[dbre-one-one]]
 ===== Single-valued associations to other entities that have one-to-one multiplicity
 
 If the foreign key column represents the entire primary key (or the
@@ -4472,6 +4484,7 @@ privileged aspect Customer_Roo_DbManaged {
 }
 ------------------------------------------
 
+[[dbre-one-many]]
 ===== Many-valued associations with one-to-many multiplicity
 
 If the foreign key column is part of the primary key (or part of an
@@ -4488,6 +4501,7 @@ privileged aspect Order_Roo_DbManaged {
 }
 ------------------------------------------
 
+[[dbre-many-one]]
 ===== Single-valued associations to other entities that have many-to-one multiplicity
 
 When a one-to-many association is created, for example a set of LineItem
@@ -4506,6 +4520,7 @@ privileged aspect LineItem_Roo_DbManaged {
 }
 ---------------------------------------------------------------------
 
+[[dbre-multiple]]
 ===== Multiple associations in the same entity
 
 DBRE will ensure field names are not duplicated. For example, if an
@@ -4540,6 +4555,7 @@ privileged aspect Foo_Roo_DbManaged {
 }
 -----------------------------------------------------------------------------------
 
+[[dbre-other-fields]]
 ==== Other fields
 
 DBRE will detect column types from the database metadata and create and
@@ -4547,6 +4563,7 @@ maintain fields and field annotations appropriately. Strings, dates,
 booleans, numeric fields, CLOBs and BLOBs are all supported by DBRE, as
 well as the JSR 303 @NotNull validation constraint.
 
+[[dbre-existing-fields]]
 ==== Existing fields
 
 Roo checks the .java file for a field before it creates it in the ITD.
@@ -4561,6 +4578,7 @@ the @Id field is called 'id' but you also add a field with the same name
 to the .java file, DBRE will automatically rename the @Id field by
 prefixing it with an underscore character.
 
+[[dbre-troubleshooting]]
 === Troubleshooting
 
 This section explains scenarios that may be encountered when using the
@@ -4639,6 +4657,7 @@ options Spring Roo offers since the *1.2.0.M1* release. It does not
 discuss the merits of different approaches to architecting enterprise
 applications.
 
+[[layer-big-picture]]
 === The Big Picture
 
 With the Roo 1.2.0 release internals have been changed to allow the
@@ -4661,12 +4680,14 @@ will automatically inject and call a new service layer within an
 existing MVC controller, Integration test or data on demand for a given
 domain type.
 
+[[layer-persistence]]
 === Persistence Layers
 
 There are now three options available in Roo core to support data
 persistence, JPA Entities (Active Record style), JPA Repositories and
 MongoDB Repositories.
 
+[[layer-jpa-entities]]
 ==== JPA Entities (Active Record style)
 
 Active record-style JPA Entities have been the default since the first
@@ -4720,6 +4741,7 @@ Further details about command options and functionalities provided by
 active record-style JPA Entities please refer to the
 link:#base-persistence[Persistence Add-on] chapter.
 
+[[jpa-repository]]
 ==== JPA Repository
 
 Developers who require a repository / DAO layer instead of the default
@@ -4798,6 +4820,7 @@ interface is part of the
 http://projects.spring.io/spring-data-jpa/[Spring Data JPA] API and
 provides all CRUD functionality out of the box.
 
+[[mongodb-persistence]]
 ==== MongoDB Persistence
 
 As an alternative to JPA persistence, Spring Roo offers
@@ -4805,6 +4828,7 @@ http://www.mongodb.org/[MongoDB] support by leveraging the
 http://projects.spring.io/spring-data-mongodb/[Spring Data MongoDB]
 project.
 
+[[mongodb-setup]]
 ===== Setup
 
 To configure a project for MongoDB persistence you can use the
@@ -4821,6 +4845,7 @@ password. Furthermore, to configure your application for deployment on
 http://cloudfoundry.com/[VMware CloudFoundry] you can use the
 --cloudFoundry attribute.
 
+[[mongodb-entities]]
 ===== Entities
 
 Once the application is configured for MongoDB support, the
@@ -4859,6 +4884,7 @@ public class Pizza {
 }
 -----------------------------------------------------------
 
+[[mongodb-repository]]
 ===== Repository
 
 With a domain type in place you can now create a new repository for this type by using the
@@ -4893,6 +4919,7 @@ Spring Roo's UI scaffolding and is automatically implemented by the
 http://docs.spring.io/spring-data/data-document/docs/1.0.0.M4/reference/html/#repositories.definition-tuning[query
 builder mechanism] offered by Spring Data MongoDB.
 
+[[cloud-foundry]]
 ===== Example & Cloud Foundry Deployment
 
 Similar to applications which use JPA persistence (see
@@ -5651,6 +5678,7 @@ file extension of the media file in the url if applicable, however,
 where this cannot be determined you can use the --player option to
 select a suitable player.
 
+[[roojsf-managedbean]]
 === The @RooJsfManagedBean annotation
 
 The @RooJsfManagedBean annotation is added to all new classes created by
@@ -5669,6 +5697,7 @@ As mentioned before, the includeOnMenu attribute when set to false
 prevents the 'Create' and 'List all' menu selections for the entity from
 showing in the UI's menu.
 
+[[roojsf-converter]]
 === The @RooJsfConverter annotation
 
 When a new managed bean is created, a converter class is also created
@@ -5679,6 +5708,7 @@ in an ITD) to perform Object-to-String and String-to-Object conversions
 between model data objects and a String representation of those objects
 that is suitable for rendering.
 
+[[roojsf-appbean]]
 === The @RooJsfApplicationBean annotation
 
 Whenever a managed bean is created for the first time, Roo will install
@@ -5691,6 +5721,7 @@ automatically added to the *__Roo_ApplicationBean.aj ITD. Similarly,
 when a managaed bean is deleted or the includeOnMenu attribute is set to
 false, the menu selections are removed.
 
+[[bikeshop]]
 === The bikeshop example
 
 The Roo distribution contains a script called bikeshop.roo that
@@ -5728,6 +5759,7 @@ to services, deploy applications and gather statistics. In fact there
 are more than 30 unique Cloud Foundry commands added to the Spring Roo
 shell to help you explore and benefit from Cloud Foundry.
 
+[[cloudf-installing]]
 === Installing the Cloud Foundry Add-On
 
 The Cloud Foundry add-on provides the mechanism through which Cloud
@@ -5767,6 +5799,7 @@ cloud foundry login
 
 image:images/cloud-foundry/AutoInstallingTheCloudFoundryAddOn.png[image]
 
+[[cloudf-start]]
 === Getting Started
 
 The integration of Cloud Foundry into Roo has added a lot of new
@@ -5775,6 +5808,7 @@ explore these new commands and deploy a sample application to the cloud.
 After installing the Cloud Foundry add-on you will first need to login.
 To do this, use the following command:
 
+[[cloudf-logging]]
 ==== Logging In
 
 -------------------
@@ -5790,6 +5824,7 @@ cloudControllerUrl defaults the Cloud service provided by VMware,
 api.cloudfoundry.com, but can be changed to point to private Cloud
 Foundry instances.
 
+[[cloudf-commands]]
 ==== The Commands
 
 After logging in a many new Cloud Foundry comands will be presented to
@@ -5798,6 +5833,7 @@ pressing TAB.
 
 image:images/cloud-foundry/CloudFoundryFromTheRooShell.png[image]
 
+[[cloudf-deploying]]
 ==== Deploying Your Application
 
 The first command that is likely to be of use is "cloud foundry deploy".
@@ -5814,6 +5850,7 @@ pushed".
 
 image:images/cloud-foundry/CloudFoundryDeploy.png[image]
 
+[[cloudf-viewing]]
 ==== Viewing Your Applications
 
 After running the above command, and assuming that you had created a
@@ -5830,6 +5867,7 @@ the each application and that the application that was just deployed
 it. The URL has been created and mapped based on the application name,
 which is what Roo defaults to if a URL is not provided.
 
+[[cloudf-binding]]
 ==== Binding Services
 
 image:images/cloud-foundry/CloudFoundryListServices.png[image]
@@ -5858,10 +5896,12 @@ the application. To do this we run "cloud foundry view app memory". When
 we first deployed the application no memory value was specified so, as
 you can see below, the default value provisioned is 256 megabytes.
 
+[[cloudf-memory]]
 ==== Provisioning Memory
 
 image:images/cloud-foundry/CloudFoundryViewMemory.png[image]
 
+[[cloudf-starting-app]]
 ==== Starting Your Application
 
 Now that we have verified that we should have enough memory to start we
@@ -5875,6 +5915,7 @@ the URL you previously mapped to the application, in this case it is
 
 image:images/cloud-foundry/CloudFoundryNewExpenses.png[image]
 
+[[cloudf-conclusion]]
 === Conclusion
 
 Cloud Foundry is a ground breaking service and open source platform that
@@ -5909,6 +5950,7 @@ serialization and deserialization of JSON documents into domain objects.
 The JSON add-on makes use of the
 http://flexjson.sourceforge.net/[Flexjson] library.
 
+[[json-funct]]
 === Adding JSON Functionality to Domain Types
 
 The add-on offers an annotation as well as two commands that support the
@@ -5969,6 +6011,7 @@ introduce the @RooJson annotation into the specified target type.
 domain entities in the project and annotate all of them with the
 @RooJson annotation.
 
+[[json-rest]]
 === JSON REST Interface in Spring MVC controllers
 
 Once your domain types are annotated with the @RooJson annotation, you
@@ -6218,6 +6261,7 @@ configuration allows it to be tailored to almost any type of application
 without Java coding, and it has an extensive plugin architecture when
 more advanced customization is required."
 
+[[solr-installation]]
 === Solr Server Installation
 
 The addon requires a running instance of the Apache Solr server. To
@@ -6234,6 +6278,7 @@ http://www.apache.org/dyn/closer.cgi/lucene/solr/
 
 5.  Verify Solr is running correctly: http://localhost:8983/solr/admin/
 
+[[solr-addon-commands]]
 === Solr Add-On Commands
 
 Once the server is running you can setup the Solr integration for your
@@ -6360,6 +6405,7 @@ annotation.
 This command will mark all entities in the project for automatic Solr
 indexing. The generated functionality is the same as shown above.
 
+[[solr-search-annot]]
 === The @RooSolrSearchable Annotation
 
 The @RooSolrSearchable annotation allows you to change all method names
@@ -6616,6 +6662,7 @@ http://felix.apache.org/site/index.html[Apache Felix] OSGi
 implementation.
 ****
 
+[[simple-project-setup]]
 === Project Setup
 
 In addition to the general installation steps discussed in the
@@ -6774,8 +6821,7 @@ options as part of the link:#command-index-jpa-setup[jpa setup] command.
 configurations used for the packaging of the add-on.
 
 [[simple-addons-shell-interaction]]
-Shell Interaction
------------------
+=== Shell Interaction
 
 Spring Roo provides an easy way for external add-ons to contribute new
 commands to the Roo Shell. Looking at the code extract below, there are
@@ -6865,8 +6911,7 @@ See the _org.springframework.roo.shell.converters_ package for examples
 if you need to implement a custom converter.
 
 [[simple-addons-operations]]
-Operations
-----------
+=== Operations
 
 Almost all Spring Roo add-ons provide operations types. These types do
 most of the work behind Roo's passive generation principle (active
@@ -6936,8 +6981,7 @@ Roo's File manager abstraction to roll back.
 *** XML Transformer setup
 
 [[simple-addons-packaging]]
-Packaging & Distribution
-------------------------
+=== Packaging & Distribution
 
 Once your add-on is complete, you can test its functionality locally by
 generating an OSGi-compliant jar bundle and installing it in the Spring
@@ -6960,17 +7004,17 @@ troubleshooting, Roo offers the following OSGi commands:
 
 * **link:#command-index-osgi-ps[osgi ps]**- Displays OSGi bundle
 information & status. This should list your add-on as active.
-* *link:#command-index-osgi-log[osgi log]* - Access OSGi container logs.
+* **link:#command-index-osgi-log[osgi log]** - Access OSGi container logs.
 This could identify possible issues occurring during add-on activation.
 * **link:#command-index-osgi-scr-list[osgi scr list]**- Lists all
 currently registered services and components. This should list your
 add-on's command, metadata provider, and operations types.
-* link:#command-index-osgi-scr-info[*osgi scr info*] - Info about a
+* **link:#command-index-osgi-scr-info[osgi scr info]** - Info about a
 specific component. This can be used to identify possible unresolved
 dependencies.
-* *link:#command-index-osgi-start[osgi start]* - install a new add-on
+* **link:#command-index-osgi-start[osgi start]** - install a new add-on
 directly from a local or remote location.
-* *help osgi* - Help on Roo's ~20 osgi commands.
+* **help osgi** - Help on Roo's ~20 osgi commands.
 
 Once you have tested the add-on successfully in your development
 environment, you can release the add-on source code to your Google Code
@@ -6994,10 +7038,15 @@ Deployment for bundles created with Roo's "wrapping" command can be
 deployed rather than released. For example, to create a wrapped bundle
 of the PostgreSQL JDBC driver, use this command:
 
+[option=nowrap]
 ------------------------------------------------------------------------------------------------------------------------------------------------
-roo> addon create wrapper --topLevelPackage com.foo.wrapper --projectName spring-roo-postgres-wrapper --artifactId postgresql \
---groupId postgresql --version 9.0-801.jdbc3 --description "Postgres #jdbcdriver driverclass:org.postgresql.Driver." \
---licenseUrl http://jdbc.postgresql.org/license.html --docUrl http://jdbc.postgresql.org/ --vendorName "The PostgreSQL Global Development Group"
+roo> addon create wrapper --topLevelPackage com.foo.wrapper 
+	--projectName spring-roo-postgres-wrapper --artifactId postgresql 
+	--groupId postgresql --version 9.0-801.jdbc3 
+	--description "Postgres #jdbcdriver driverclass:org.postgresql.Driver." 
+	--licenseUrl http://jdbc.postgresql.org/license.html 
+	--docUrl http://jdbc.postgresql.org/ 
+	--vendorName "The PostgreSQL Global Development Group"
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
 This can then be deployed to a Google code project (set up in the same
@@ -7007,8 +7056,8 @@ way as described above) with a simple deploy command:
 <project-name>$ mvn deploy
 --------------------------
 
-Publishing to RooBot
---------------------
+[[simple-roobot]]
+=== Publishing to RooBot
 
 Once the release is complete, check your Google Code project to see that
 your add-on's pom.xml has been updated to the new version (e.g.
@@ -7020,15 +7069,20 @@ the relevant _.asc_ files. In the repo directory, you should also find
 the _repository.xml_ file which contains all relevant information for an
 OSGi OBR repository.
 
+.Raw URLs in Google Code Source Browser
+****
 When reviewing file contents via the HTTP interface provided by Google
 Code, the reader is presented with HTML documents (which provide syntax
 highlighting, etc). To get access to the real (raw) URL of a document
 (e.g. repo/repository.xml) you need to click the 'View raw file' link
 found in the 'File info' section in the right-hand menu. Example of a
-raw URL: http://<project-name>.googlecode.com/svn/repo/repository.xml.
+raw URL: \http://<project-name>.googlecode.com/svn/repo/repository.xml.
 Make sure the version appendix is *removed* from the URL before clicking
 the 'View raw file' link (i.e.
-http://<project-name>.googlecode.com/svn/repo/repository.xml**?r=25)**The
+\http://<project-name>.googlecode.com/svn/repo/repository.xml**?r=25)**
+****
+
+The
 URL to the raw (see sidebar) repository.xml artefact can then be
 registered with mailto:s2-roobot@vmware.com[RooBot]:
 
@@ -7089,8 +7143,8 @@ periodic processing, it will also automatically pick up new versions
 (add-on releases) in your repository.xml. Therefore it should not be
 necessary to explicitly notify RooBot of any changes in your repository.
 
-Upgrading Spring Roo Add-Ons from 1.0.x to 1.1.0
-------------------------------------------------
+[[simple-upgrading-addons]]
+=== Upgrading Spring Roo Add-Ons from 1.0.x to 1.1.0
 
 As OSGi is the runtime platform for Roo 1.1.0 onwards, porting addons
 from a previous version will require some small tweaks to your code.
@@ -7101,10 +7155,12 @@ Here's a step-by-step guide on what you need to do:
 As your plugin will result in an OSGi bundle, you need to change the
 packaging from `jar` to `bundle`. This will cause the Maven bundle
 plugin to create the necessary metadata for you out of the box.
+
 2.  Change the type of the dependencies to bundle
 +
 Similar to the point above, you need to reference dependencies as
 bundles. Again, let the Maven bundle plugin do its job.
+
 3.  Sync the build section of your pom with the one provided in the
 addon template
 +
@@ -7119,6 +7175,7 @@ addon create simple --topLevelPackage com.mycompany.myproject.roo.addon
 +
 The easiest way to do so is simply creating a dummy addon project using
 the template and copying the plugin configuration into your pom.
+
 4.  Replace @ScopeDevelopment annotations with @Component and @Service
 +
 Roo uses Apache Felix as OSGi runtime and thus uses @Component and
@@ -7127,7 +7184,9 @@ pluginfootnote:[for details see
 http://felix.apache.org/site/apache-felix-maven-scr-plugin.html] to
 create descriptors for the OSGi declarative services infrastructure.
 +
-code,java-------------------------------------------------- code,java
+[source,java]
+.Example 17.2. Component declaration with Apache Felix annotations
+----
 @Service
 @Component
 public class MyCommands implements CommandMarker {
@@ -7136,7 +7195,7 @@ public class MyCommands implements CommandMarker {
 
   // Your code goes here
 }
---------------------------------------------------
+----
 +
 So every @ScopeDevelopment annotation you used in your command and
 operations classes has to be replaced by @Service and @Component. If you
@@ -7147,45 +7206,39 @@ Felix can publish the component instance. Check the output of the Maven
 SCR plugin for errors to see whether any further tweaks are necessary.
 
 [[advanced-addons]]
-Advanced Add-Ons
-----------------
+== Advanced Add-Ons
 
 TBC.
 
 [[advanced-addons-metadata]]
-Metadata
---------
+=== Metadata
 
 TBC
 
 [[advanced-addons-annotations]]
-Annotations
------------
+=== Annotations
 
 TBC
 
 [[advanced-addons-itds]]
-Inter-Type Declarations
------------------------
+=== Inter-Type Declarations
 
 TBC
 
 [[advanced-addons-recommendations]]
-Recommendations
----------------
+=== Recommendations
 
 TBC
 
-== External Add-Ons [[external-addons]]
+= External Add-Ons [[external-addons]]
 
 In this part of the guide we detail external Roo add-ons.
 
 [[base-tailor]]
-Tailor Add-On
--------------
+== Tailor Add-On
 
-Introduction
-------------
+[[tailor-intro]]
+=== Introduction
 
 Roo has been become more and more powerful and offers more options for
 users on how to use Roo. This in turn makes it more challenging in some
@@ -7212,8 +7265,8 @@ project command, and make sure that the shell automatically focuses on
 the correct module for certain commands (e.g. entity > domain, web mvc >
 web).
 
-How it works
-------------
+[[tailor-how]]
+=== How it works
 
 When tailoring is activated, Roo commands are intercepted by the shell
 and transformed to a new set of commands according to user
@@ -7245,8 +7298,8 @@ the shell won't know about it while you are typing. Thus, the shell
 won't offer command completion for these commands because it thinks they
 are not available.
 
-Tailor Add-On Commands
-----------------------
+[[tailor-commands]]
+=== Tailor Add-On Commands
 
 *tailor list* - Shows the list of available tailor configurations. A
 tailor configuration defines the set of transformation you want executed
@@ -7258,7 +7311,7 @@ Available tailor configurations:
      o webstyle - Web project with 2 modules, DOMAIN and PRESENTATION
 ---------------------------------------------------------------------
 
-*tailor activate* – Activate one of the available configurations.
+*tailor activate* - Activate one of the available configurations.
 
 ------------------------------------
 roo> tailor activate --name webstyle
@@ -7272,7 +7325,7 @@ Available tailor configurations:
     o webstyle [ ACTIVE ] - Web project with 2 modules, DOMAIN and PRESENTATION
 -------------------------------------------------------------------------------
 
-*tailor deactivate* – Deactivate the tailor mode. There is no active
+*tailor deactivate* - Deactivate the tailor mode. There is no active
 configuration after this command
 
 ----------------------
@@ -7280,8 +7333,7 @@ roo> tailor deactivate
 ----------------------
 
 [[tailor-configuration]]
-Tailor Configuration
---------------------
+=== Tailor Configuration
 
 A tailor configuration can be created in two ways:
 
@@ -7311,11 +7363,11 @@ they are declared matters.
 
 The following actions are currently available:
 
-Actions
-~~~~~~~
+[[tailor-actions]]
+==== Actions
 
-execute
-^^^^^^^
+[[tailor-act-execute]]
+===== execute
 
 Adds a command to the list of commands to be executed. Note that each
 command configuration should have at least one execute action, otherwise
@@ -7331,8 +7383,8 @@ exclude::
   is executed ("command" argument not set), and it was enhanced with
   additional arguments for the benefit of the tailoring. (optional)
 
-defaultvalue
-^^^^^^^^^^^^
+[[tailor-act-defvalue]]
+===== defaultvalue
 
 If the Roo user does not provide a value for an argument with the given
 name on the shell, this default value will be chosen.
@@ -7346,8 +7398,8 @@ force::
   If "true", the default value will be chosen even if the user specified
   an alternative value in the command. (optional, defaults to "false")
 
-focus
-^^^^^
+[[tailor-act-focus]]
+===== focus
 
 module::
   Focus on a module, in form of a simple pattern to match against the
@@ -7361,8 +7413,8 @@ module::
   for a module. Use a slash "/" before a string in the list to indicate
   that this next string must "NOT" be contained in the module name.
 
-XML Configuration
-~~~~~~~~~~~~~~~~~
+[[tailor-act-xml]]
+==== XML Configuration
 
 This section describes how to create a tailor configuration with XML by
 examples.
@@ -7373,8 +7425,8 @@ system's user folder, to maintain tailor configurations that you want to
 reuse over several projects. The tailor addon will only look for this
 file if it does not find a tailor.xml file in the project root.
 
-Example 1: Tailor the "project" command
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[[tailor-act-examp1]]
+===== Example 1: Tailor the "project" command
 
 The following configuration defines a chain of commands that will be
 triggered by the project command, to create a parent project with
@@ -7416,8 +7468,8 @@ module create --moduleName myapp-web --topLevelPackage com.foo.sample --packagin
 module focus --moduleName myapp-domain
 -------------------------------------------------------------------------------------
 
-Example 2: Default target modules and default values
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[[tailor-act-ex2]]
+===== Example 2: Default target modules and default values
 
 The following example shows how to tailor the “entity jpa” command with
 a default value for the "activeRecord" argument, and a default module to
@@ -7451,8 +7503,8 @@ module focus --moduleName webapp-domain
 entity jpa --class ~.Customer --activeRecord false
 --------------------------------------------------
 
-Example 3: Alias command to create layers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[[tailor-act-ex3]]
+===== Example 3: Alias command to create layers
 
 In this example, the tailor configuration defines a new alias command
 that will trigger a set of other commands to scaffold repository,
@@ -7494,8 +7546,8 @@ module focus --moduleName webapp-web
 web mvc scaffold --class ~.CustomerController --backingType ~.Customer
 ---------------------------------------------------------------------------------------
 
-Configuration Addon
-~~~~~~~~~~~~~~~~~~~
+[[tailor-config-addon]]
+==== Configuration Addon
 
 A new tailor configuration can also be defined in Java, instead of XML.
 This requires the creation of a new simple addon that you would need to
@@ -7555,13 +7607,13 @@ private CommandConfiguration createCommandConfigJpaSetup() {
 }
 -----------------------------------------------------------------
 
-== Appendices [[appendices]]
+= Appendices [[appendices]]
 
 The fourth and final part of the reference guide provides appendices and background information that does not neatly belong within the other parts. The information is intended to be treated as a reference and not read consecutively.
 
+[appendix]
 [[command-index]]
-Command Index
--------------
+== Command Index
 
 This appendix was automatically built from Roo 1.3.0.RELEASE [rev
 770570e].
@@ -7572,15 +7624,13 @@ Most commands accept a large number of options, and all of the possible
 options for each command are presented in this appendix.
 
 [[command-index-add-on-commands]]
-Add On Commands
----------------
+=== Add On Commands
 
 Add On Commands are contained in
 org.springframework.roo.addon.roobot.client.AddOnCommands.
 
 [[command-index-addon-feedback-bundle]]
-addon feedback bundle
-~~~~~~~~~~~~~~~~~~~~~
+==== addon feedback bundle
 
 Provide anonymous ratings and comments on a Spring Roo Add-on (your
 feedback will be published publicly)
@@ -7599,8 +7649,7 @@ addon feedback bundle --bundleSymbolicName --rating
   characters; default: '__NULL__'
 
 [[command-index-addon-info-bundle]]
-addon info bundle
-~~~~~~~~~~~~~~~~~
+==== addon info bundle
 
 Provide information about a specific Spring Roo Add-on
 
@@ -7613,8 +7662,7 @@ addon info bundle --bundleSymbolicName
   '__NULL__' (mandatory)
 
 [[command-index-addon-info-id]]
-addon info id
-~~~~~~~~~~~~~
+==== addon info id
 
 Provide information about a specific Spring Roo Add-on
 
@@ -7627,8 +7675,7 @@ addon info id --searchResultId
   default: '__NULL__' (mandatory)
 
 [[command-index-addon-install-bundle]]
-addon install bundle
-~~~~~~~~~~~~~~~~~~~~
+==== addon install bundle
 
 Install Spring Roo Add-on
 
@@ -7641,8 +7688,7 @@ addon install bundle --bundleSymbolicName
   '__NULL__' (mandatory)
 
 [[command-index-addon-install-id]]
-addon install id
-~~~~~~~~~~~~~~~~
+==== addon install id
 
 Install Spring Roo Add-on
 
@@ -7655,8 +7701,7 @@ addon install id --searchResultId
   default: '__NULL__' (mandatory)
 
 [[command-index-addon-list]]
-addon list
-~~~~~~~~~~
+==== addon list
 
 List all known Spring Roo Add-ons (up to the maximum number displayed on
 a single page)
@@ -7683,8 +7728,7 @@ addon list
   present: 'true'; default if option not present: 'false'
 
 [[command-index-addon-remove]]
-addon remove
-~~~~~~~~~~~~
+==== addon remove
 
 Remove Spring Roo Add-on
 
@@ -7697,8 +7741,7 @@ addon remove --bundleSymbolicName
   '__NULL__' (mandatory)
 
 [[command-index-addon-search]]
-addon search
-~~~~~~~~~~~~
+==== addon search
 
 Search all known Spring Roo Add-ons
 
@@ -7729,8 +7772,7 @@ addon search
   default: '__NULL__'
 
 [[command-index-addon-upgrade-all]]
-addon upgrade all
-~~~~~~~~~~~~~~~~~
+==== addon upgrade all
 
 Upgrade all relevant Spring Roo Add-ons / Components for the current
 stability level
@@ -7742,8 +7784,7 @@ addon upgrade all
 This command does not accept any options.
 
 [[command-index-addon-upgrade-available]]
-addon upgrade available
-~~~~~~~~~~~~~~~~~~~~~~~
+==== addon upgrade available
 
 List available Spring Roo Add-on / Component upgrades
 
@@ -7756,8 +7797,7 @@ addon upgrade available
   upgrading (default: ANY); default: '__NULL__'
 
 [[command-index-addon-upgrade-bundle]]
-addon upgrade bundle
-~~~~~~~~~~~~~~~~~~~~
+==== addon upgrade bundle
 
 Upgrade a specific Spring Roo Add-on / Component
 
@@ -7770,8 +7810,7 @@ addon upgrade bundle --bundleSymbolicName
   '__NULL__' (mandatory)
 
 [[command-index-addon-upgrade-id]]
-addon upgrade id
-~~~~~~~~~~~~~~~~
+==== addon upgrade id
 
 Upgrade a specific Spring Roo Add-on / Component from a search result ID
 
@@ -7784,8 +7823,7 @@ addon upgrade id --searchResultId
   default: '__NULL__' (mandatory)
 
 [[command-index-addon-upgrade-settings]]
-addon upgrade settings
-~~~~~~~~~~~~~~~~~~~~~~
+==== addon upgrade settings
 
 Settings for Add-on upgrade operations
 
@@ -7798,15 +7836,13 @@ addon upgrade settings
   upgrading; default: '__NULL__'
 
 [[command-index-backup-commands]]
-Backup Commands
----------------
+=== Backup Commands
 
 Backup Commands are contained in
 org.springframework.roo.addon.backup.BackupCommands.
 
 [[command-index-backup]]
-backup
-~~~~~~
+==== backup
 
 Backup your project to a zip file
 
@@ -7817,15 +7853,13 @@ backup
 This command does not accept any options.
 
 [[command-index-classpath-commands]]
-Classpath Commands
-------------------
+=== Classpath Commands
 
 Classpath Commands are contained in
 org.springframework.roo.classpath.operations.ClasspathCommands.
 
 [[command-index-class]]
-class
-~~~~~
+==== class
 
 Creates a new Java class source file in any project path
 
@@ -7855,8 +7889,7 @@ class --class
   present: 'true'; default if option not present: 'false'
 
 [[command-index-constructor]]
-constructor
-~~~~~~~~~~~
+==== constructor
 
 Creates a class constructor
 
@@ -7872,8 +7905,7 @@ constructor
   a double-quoted list separated by spaces
 
 [[command-index-enum-constant]]
-enum constant
-~~~~~~~~~~~~~
+==== enum constant
 
 Inserts a new enum constant into an enum
 
@@ -7891,8 +7923,7 @@ enum constant --name
   present: 'true'; default if option not present: 'false'
 
 [[command-index-enum-type]]
-enum type
-~~~~~~~~~
+==== enum type
 
 Creates a new Java enum source file in any project path
 
@@ -7910,8 +7941,7 @@ enum type --class
   present: 'true'; default if option not present: 'false'
 
 [[command-index-focus]]
-focus
-~~~~~
+==== focus
 
 Changes focus to a different type
 
@@ -7923,8 +7953,7 @@ focus --class
   The type to focus on; default: '__NULL__' (mandatory)
 
 [[command-index-interface]]
-interface
-~~~~~~~~~
+==== interface
 
 Creates a new Java interface source file in any project path
 
@@ -7942,15 +7971,13 @@ interface --class
   present: 'true'; default if option not present: 'false'
 
 [[command-index-cloud-commands]]
-Cloud Commands
---------------
+=== Cloud Commands
 
 Cloud Commands are contained in
 org.springframework.roo.addon.cloud.CloudCommands.
 
 [[command-index-cloud-setup]]
-cloud setup
-~~~~~~~~~~~
+==== cloud setup
 
 Setup Cloud Provider on Spring Roo Project
 
@@ -7965,15 +7992,13 @@ cloud setup --provider
   'key=value,key2=value2,key3=value3'; default: '__NULL__'
 
 [[command-index-controller-commands]]
-Controller Commands
--------------------
+=== Controller Commands
 
 Controller Commands are contained in
 org.springframework.roo.addon.web.mvc.controller.ControllerCommands.
 
 [[command-index-controller-all]]
-controller all
-~~~~~~~~~~~~~~
+==== controller all
 
 Scaffold controllers for all project entities without an existing
 controller - deprecated, use 'web mvc setup' + 'web mvc all' instead
@@ -7987,8 +8012,7 @@ controller all --package
   '__NULL__' (mandatory)
 
 [[command-index-controller-scaffold]]
-controller scaffold
-~~~~~~~~~~~~~~~~~~~
+==== controller scaffold
 
 Create a new scaffold Controller (ie where we maintain CRUD
 automatically) - deprecated, use 'web mvc scaffold' instead
@@ -8013,8 +8037,7 @@ controller scaffold --class
   '__NULL__'
 
 [[command-index-web-mvc-all]]
-web mvc all
-~~~~~~~~~~~
+==== web mvc all
 
 Scaffold Spring MVC controllers for all project entities without an
 existing controller
@@ -8028,8 +8051,7 @@ web mvc all --package
   '__NULL__' (mandatory)
 
 [[command-index-web-mvc-scaffold]]
-web mvc scaffold
-~~~~~~~~~~~~~~~~
+==== web mvc scaffold
 
 Create a new scaffold Controller (ie where Roo maintains CRUD
 functionality automatically)
@@ -8054,15 +8076,13 @@ web mvc scaffold --class
   '__NULL__'
 
 [[command-index-creator-commands]]
-Creator Commands
-----------------
+=== Creator Commands
 
 Creator Commands are contained in
 org.springframework.roo.addon.creator.CreatorCommands.
 
 [[command-index-addon-create-advanced]]
-addon create advanced
-~~~~~~~~~~~~~~~~~~~~~
+==== addon create advanced
 
 Create a new advanced add-on for Spring Roo (commands + operations +
 metadata + trigger annotation + dependencies)
@@ -8082,8 +8102,7 @@ addon create advanced --topLevelPackage
   name will be used instead); default: '__NULL__'
 
 [[command-index-addon-create-i18n]]
-addon create i18n
-~~~~~~~~~~~~~~~~~
+==== addon create i18n
 
 Create a new Internationalization add-on for Spring Roo
 
@@ -8113,8 +8132,7 @@ addon create i18n --topLevelPackage --locale --messageBundle
   name will be used instead); default: '__NULL__'
 
 [[command-index-addon-create-simple]]
-addon create simple
-~~~~~~~~~~~~~~~~~~~
+==== addon create simple
 
 Create a new simple add-on for Spring Roo (commands + operations)
 
@@ -8133,8 +8151,7 @@ addon create simple --topLevelPackage
   name will be used instead); default: '__NULL__'
 
 [[command-index-addon-create-wrapper]]
-addon create wrapper
-~~~~~~~~~~~~~~~~~~~~
+==== addon create wrapper
 
 Create a new add-on for Spring Roo which wraps a maven artifact to
 create a OSGi compliant bundle
@@ -8168,21 +8185,19 @@ addon create wrapper --topLevelPackage --groupId --artifactId --version --vendor
   Contents of Import-Package in OSGi manifest; default: '__NULL__'
 
 [[command-index-data-on-demand-commands]]
-Data On Demand Commands
------------------------
+=== Data On Demand Commands
 
 Data On Demand Commands are contained in
 org.springframework.roo.addon.dod.DataOnDemandCommands.
 
 [[command-index-dod]]
-dod
-~~~
+==== dod
 
 Creates a new data on demand for the specified entity
 
----
+----
 dod
----
+----
 
 --entity::
   The entity which this data on demand class will create and modify as
@@ -8195,15 +8210,13 @@ dod
   present: 'true'; default if option not present: 'false'
 
 [[command-index-dbre-commands]]
-Dbre Commands
--------------
+=== Dbre Commands
 
 Dbre Commands are contained in
 org.springframework.roo.addon.dbre.DbreCommands.
 
 [[command-index-database-introspect]]
-database introspect
-~~~~~~~~~~~~~~~~~~~
+==== database introspect
 
 Displays database metadata
 
@@ -8222,8 +8235,7 @@ database introspect --schema
   option not present: 'false'
 
 [[command-index-database-reverse-engineer]]
-database reverse engineer
-~~~~~~~~~~~~~~~~~~~~~~~~~
+==== database reverse engineer
 
 Create and update entities based on database metadata
 
@@ -8269,15 +8281,13 @@ database reverse engineer --schema
   default if option not present: 'false'
 
 [[command-index-embedded-commands]]
-Embedded Commands
------------------
+=== Embedded Commands
 
 Embedded Commands are contained in
 org.springframework.roo.addon.web.mvc.embedded.EmbeddedCommands.
 
 [[command-index-web-mvc-embed-document]]
-web mvc embed document
-~~~~~~~~~~~~~~~~~~~~~~
+==== web mvc embed document
 
 Embed a document for your WEB MVC application
 
@@ -8293,8 +8303,7 @@ web mvc embed document --provider --documentId
   The name of the jspx view; default: '__NULL__'
 
 [[command-index-web-mvc-embed-generic]]
-web mvc embed generic
-~~~~~~~~~~~~~~~~~~~~~
+==== web mvc embed generic
 
 Embed media by URL into your WEB MVC application
 
@@ -8308,8 +8317,7 @@ web mvc embed generic --url
   The name of the jspx view; default: '__NULL__'
 
 [[command-index-web-mvc-embed-map]]
-web mvc embed map
-~~~~~~~~~~~~~~~~~
+==== web mvc embed map
 
 Embed a map for your WEB MVC application
 
@@ -8324,8 +8332,7 @@ web mvc embed map --location
   The name of the jspx view; default: '__NULL__'
 
 [[command-index-web-mvc-embed-photos]]
-web mvc embed photos
-~~~~~~~~~~~~~~~~~~~~
+==== web mvc embed photos
 
 Embed a photo gallery for your WEB MVC application
 
@@ -8343,8 +8350,7 @@ web mvc embed photos --provider --userId --albumId
   The name of the jspx view; default: '__NULL__'
 
 [[command-index-web-mvc-embed-stream-video]]
-web mvc embed stream video
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==== web mvc embed stream video
 
 Embed a video stream into your WEB MVC application
 
@@ -8360,8 +8366,7 @@ web mvc embed stream video --provider --streamId
   The name of the jspx view; default: '__NULL__'
 
 [[command-index-web-mvc-embed-twitter]]
-web mvc embed twitter
-~~~~~~~~~~~~~~~~~~~~~
+==== web mvc embed twitter
 
 Embed twitter messages into your WEB MVC application
 
@@ -8376,8 +8381,7 @@ web mvc embed twitter --searchTerm
   The name of the jspx view; default: '__NULL__'
 
 [[command-index-web-mvc-embed-video]]
-web mvc embed video
-~~~~~~~~~~~~~~~~~~~
+==== web mvc embed video
 
 Embed a video for your WEB MVC application
 
@@ -8393,8 +8397,7 @@ web mvc embed video --provider --videoId
   The name of the jspx view; default: '__NULL__'
 
 [[command-index-web-mvc-embed-wave]]
-web mvc embed wave
-~~~~~~~~~~~~~~~~~~
+==== web mvc embed wave
 
 Embed Google wave integration for your WEB MVC application
 
@@ -8408,15 +8411,13 @@ web mvc embed wave --waveId
   The name of the jspx view; default: '__NULL__'
 
 [[command-index-equals-commands]]
-Equals Commands
----------------
+=== Equals Commands
 
 Equals Commands are contained in
 org.springframework.roo.addon.equals.EqualsCommands.
 
 [[command-index-equals]]
-equals
-~~~~~~
+==== equals
 
 Add equals and hashCode methods to a class
 
@@ -8434,15 +8435,13 @@ equals
   field names must be a double-quoted list separated by spaces
 
 [[command-index-felix-delegator]]
-Felix Delegator
----------------
+=== Felix Delegator
 
 Felix Delegator are contained in
 org.springframework.roo.felix.FelixDelegator.
 
 [[command-index-exit]]
-exit
-~~~~
+==== exit
 
 Exits the shell
 
@@ -8453,8 +8452,7 @@ exit
 This command does not accept any options.
 
 [[command-index-osgi-framework-command]]
-osgi framework command
-~~~~~~~~~~~~~~~~~~~~~~
+==== osgi framework command
 
 Passes a command directly through to the Felix shell infrastructure
 
@@ -8467,8 +8465,7 @@ osgi framework command
   checks are performed); default: 'help'
 
 [[command-index-osgi-headers]]
-osgi headers
-~~~~~~~~~~~~
+==== osgi headers
 
 Display headers for a specific bundle
 
@@ -8480,8 +8477,7 @@ osgi headers
   Limit results to a specific bundle symbolic name; default: '__NULL__'
 
 [[command-index-osgi-install]]
-osgi install
-~~~~~~~~~~~~
+==== osgi install
 
 Installs a bundle JAR from a given URL
 
@@ -8493,8 +8489,7 @@ osgi install --url
   The URL to obtain the bundle from; default: '__NULL__' (mandatory)
 
 [[command-index-osgi-log]]
-osgi log
-~~~~~~~~
+==== osgi log
 
 Displays the OSGi log information
 
@@ -8508,8 +8503,7 @@ osgi log
   The minimum level of messages to display; default: '__NULL__'
 
 [[command-index-osgi-obr-deploy]]
-osgi obr deploy
-~~~~~~~~~~~~~~~
+==== osgi obr deploy
 
 Deploys a specific OSGi Bundle Repository (OBR) bundle
 
@@ -8521,8 +8515,7 @@ osgi obr deploy --bundleSymbolicName
   The specific bundle to deploy; default: '__NULL__' (mandatory)
 
 [[command-index-osgi-obr-info]]
-osgi obr info
-~~~~~~~~~~~~~
+==== osgi obr info
 
 Displays information on a specific OSGi Bundle Repository (OBR) bundle
 
@@ -8535,8 +8528,7 @@ osgi obr info --bundleSymbolicName
   (mandatory)
 
 [[command-index-osgi-obr-list]]
-osgi obr list
-~~~~~~~~~~~~~
+==== osgi obr list
 
 Lists all available bundles from the OSGi Bundle Repository (OBR) system
 
@@ -8548,8 +8540,7 @@ osgi obr list
   Keywords to locate; default: '__NULL__'
 
 [[command-index-osgi-obr-start]]
-osgi obr start
-~~~~~~~~~~~~~~
+==== osgi obr start
 
 Starts a specific OSGi Bundle Repository (OBR) bundle
 
@@ -8561,8 +8552,7 @@ osgi obr start --bundleSymbolicName
   The specific bundle to start; default: '__NULL__' (mandatory)
 
 [[command-index-osgi-ps]]
-osgi ps
-~~~~~~~
+==== osgi ps
 
 Displays OSGi bundle information
 
@@ -8574,8 +8564,7 @@ osgi ps
   The format of bundle information; default: 'BUNDLE_NAME'
 
 [[command-index-osgi-resolve]]
-osgi resolve
-~~~~~~~~~~~~
+==== osgi resolve
 
 Resolves a specific bundle ID
 
@@ -8587,8 +8576,7 @@ osgi resolve --bundleSymbolicName
   The specific bundle to resolve; default: '__NULL__' (mandatory)
 
 [[command-index-osgi-scr-config]]
-osgi scr config
-~~~~~~~~~~~~~~~
+==== osgi scr config
 
 Lists the current SCR configuration
 
@@ -8599,8 +8587,7 @@ osgi scr config
 This command does not accept any options.
 
 [[command-index-osgi-scr-disable]]
-osgi scr disable
-~~~~~~~~~~~~~~~~
+==== osgi scr disable
 
 Disables a specific SCR-defined component
 
@@ -8613,8 +8600,7 @@ osgi scr disable --componentId
   component identifiers); default: '__NULL__' (mandatory)
 
 [[command-index-osgi-scr-enable]]
-osgi scr enable
-~~~~~~~~~~~~~~~
+==== osgi scr enable
 
 Enables a specific SCR-defined component
 
@@ -8627,8 +8613,7 @@ osgi scr enable --componentId
   component identifiers); default: '__NULL__' (mandatory)
 
 [[command-index-osgi-scr-info]]
-osgi scr info
-~~~~~~~~~~~~~
+==== osgi scr info
 
 Lists information about a specific SCR-defined component
 
@@ -8641,8 +8626,7 @@ osgi scr info --componentId
   component identifiers); default: '__NULL__' (mandatory)
 
 [[command-index-osgi-scr-list]]
-osgi scr list
-~~~~~~~~~~~~~
+==== osgi scr list
 
 Lists all SCR-defined components
 
@@ -8654,8 +8638,7 @@ osgi scr list
   Limit results to a specific bundle; default: '__NULL__'
 
 [[command-index-osgi-start]]
-osgi start
-~~~~~~~~~~
+==== osgi start
 
 Starts a bundle JAR from a given URL
 
@@ -8667,8 +8650,7 @@ osgi start --url
   The URL to obtain the bundle from; default: '__NULL__' (mandatory)
 
 [[command-index-osgi-uninstall]]
-osgi uninstall
-~~~~~~~~~~~~~~
+==== osgi uninstall
 
 Uninstalls a specific bundle
 
@@ -8680,8 +8662,7 @@ osgi uninstall --bundleSymbolicName
   The specific bundle to uninstall; default: '__NULL__' (mandatory)
 
 [[command-index-osgi-update]]
-osgi update
-~~~~~~~~~~~
+==== osgi update
 
 Updates a specific bundle
 
@@ -8695,15 +8676,13 @@ osgi update --bundleSymbolicName
   The URL to obtain the updated bundle from; default: '__NULL__'
 
 [[command-index-field-commands]]
-Field Commands
---------------
+=== Field Commands
 
 Field Commands are contained in
 org.springframework.roo.classpath.operations.FieldCommands.
 
 [[command-index-field-boolean]]
-field boolean
-~~~~~~~~~~~~~
+==== field boolean
 
 Adds a private boolean field to an existing Java source file
 
@@ -8746,8 +8725,7 @@ field boolean --fieldName
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-date]]
-field date
-~~~~~~~~~~
+==== field date
 
 Adds a private date field to an existing Java source file
 
@@ -8800,8 +8778,7 @@ field date --fieldName --type
   default: '__NULL__'
 
 [[command-index-field-embedded]]
-field embedded
-~~~~~~~~~~~~~~
+==== field embedded
 
 Adds a private @Embedded field to an existing Java source file
 
@@ -8822,8 +8799,7 @@ field embedded --fieldName --type
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-enum]]
-field enum
-~~~~~~~~~~
+==== field enum
 
 Adds a private enum field to an existing Java source file
 
@@ -8858,8 +8834,7 @@ field enum --fieldName --type
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-file]]
-field file
-~~~~~~~~~~
+==== field file
 
 Adds a byte array field for storing uploaded file contents
 (JSF-scaffolded UIs only)
@@ -8889,8 +8864,7 @@ field file --fieldName --contentType
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-list]]
-field list
-~~~~~~~~~~
+==== field list
 
 Adds a private List field to an existing Java source file (eg the 'one'
 side of a many-to-one)
@@ -8934,8 +8908,7 @@ field list --fieldName --type
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-number]]
-field number
-~~~~~~~~~~~~
+==== field number
 
 Adds a private numeric field to an existing Java source file
 
@@ -8993,8 +8966,7 @@ field number --fieldName --type
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-other]]
-field other
-~~~~~~~~~~~
+==== field other
 
 Inserts a private field into the specified file
 
@@ -9030,8 +9002,7 @@ field other --fieldName --type
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-reference]]
-field reference
-~~~~~~~~~~~~~~~
+==== field reference
 
 Adds a private reference field to an existing Java source file (eg the
 'many' side of a many-to-one)
@@ -9072,8 +9043,7 @@ field reference --fieldName --type
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-set]]
-field set
-~~~~~~~~~
+==== field set
 
 Adds a private Set field to an existing Java source file (eg the 'one'
 side of a many-to-one)
@@ -9117,8 +9087,7 @@ field set --fieldName --type
   present: 'true'; default if option not present: 'false'
 
 [[command-index-field-string]]
-field string
-~~~~~~~~~~~~
+==== field string
 
 Adds a private string field to an existing Java source file
 
@@ -9170,15 +9139,13 @@ field string --fieldName
   present: 'true'; default if option not present: 'false'
 
 [[command-index-finder-commands]]
-Finder Commands
----------------
+=== Finder Commands
 
 Finder Commands are contained in
 org.springframework.roo.addon.finder.FinderCommands.
 
 [[command-index-finder-add]]
-finder add
-~~~~~~~~~~
+==== finder add
 
 Install finders in the given target (must be an entity)
 
@@ -9194,8 +9161,7 @@ finder add --finderName
   default: '__NULL__' (mandatory)
 
 [[command-index-finder-list]]
-finder list
-~~~~~~~~~~~
+==== finder list
 
 List all finders for a given target (must be an entity)
 
@@ -9214,15 +9180,13 @@ finder list
   be included; default: '__NULL__'
 
 [[command-index-help-commands]]
-Help Commands
--------------
+=== Help Commands
 
 Help Commands are contained in
 org.springframework.roo.felix.help.HelpCommands.
 
 [[command-index-help]]
-help
-~~~~
+==== help
 
 Shows system help
 
@@ -9234,8 +9198,7 @@ help
   Command name to provide help for; default: '__NULL__'
 
 [[command-index-reference-guide]]
-reference guide
-~~~~~~~~~~~~~~~
+==== reference guide
 
 Writes the reference guide XML fragments (in DocBook format) into the
 current working directory
@@ -9247,15 +9210,13 @@ reference guide
 This command does not accept any options.
 
 [[command-index-hint-commands]]
-Hint Commands
--------------
+=== Hint Commands
 
 Hint Commands are contained in
 org.springframework.roo.classpath.operations.HintCommands.
 
 [[command-index-hint]]
-hint
-~~~~
+==== hint
 
 Provides step-by-step hints and context-sensitive guidance
 
@@ -9267,15 +9228,13 @@ hint
   The topic for which advice should be provided
 
 [[command-index-integration-test-commands]]
-Integration Test Commands
--------------------------
+=== Integration Test Commands
 
 Integration Test Commands are contained in
 org.springframework.roo.addon.test.IntegrationTestCommands.
 
 [[command-index-test-integration]]
-test integration
-~~~~~~~~~~~~~~~~
+==== test integration
 
 Creates a new integration test for the specified entity
 
@@ -9294,8 +9253,7 @@ test integration
   Spring transaction; default: 'true'
 
 [[command-index-test-mock]]
-test mock
-~~~~~~~~~
+==== test mock
 
 Creates a mock test for the specified entity
 
@@ -9311,8 +9269,7 @@ test mock
   present: 'true'; default if option not present: 'false'
 
 [[command-index-test-stub]]
-test stub
-~~~~~~~~~
+==== test stub
 
 Creates a test stub for the specified class
 
@@ -9328,51 +9285,46 @@ test stub
   present: 'true'; default if option not present: 'false'
 
 [[command-index-j-line-shell-component]]
-J Line Shell Component
-----------------------
+=== J Line Shell Component
 
 J Line Shell Component are contained in
 org.springframework.roo.shell.jline.osgi.JLineShellComponent.
 
 [[command-index-asxfwd]]
-*/
-~~
+==== */
 
 End of block comment
 
---
+----
 */
---
+----
 
 This command does not accept any options.
 
 [[command-index-fwdasx]]
-/*
-~~
+==== /*
 
 Start of block comment
 
---
+----
 /*
---
+----
 
 This command does not accept any options.
 
 [[command-index-fwdfwd]]
-//
-~~
+==== //
 
 Inline comment markers (start of line only)
 
---
+----
 //
---
+----
 
 This command does not accept any options.
 
 [[command-index-date]]
-date
-~~~~
+==== date
 
 Displays the local date and time
 
@@ -9383,8 +9335,7 @@ date
 This command does not accept any options.
 
 [[command-index-flash-test]]
-flash test
-~~~~~~~~~~
+==== flash test
 
 Tests message flashing
 
@@ -9395,8 +9346,7 @@ flash test
 This command does not accept any options.
 
 [[command-index-script]]
-script
-~~~~~~
+==== script
 
 Parses the specified resource file and executes its commands
 
@@ -9411,8 +9361,7 @@ script --file
   present: 'true'; default if option not present: 'false'
 
 [[command-index-system-properties]]
-system properties
-~~~~~~~~~~~~~~~~~
+==== system properties
 
 Shows the shell's properties
 
@@ -9423,8 +9372,7 @@ system properties
 This command does not accept any options.
 
 [[command-index-version]]
-version
-~~~~~~~
+==== version
 
 Displays shell version
 
@@ -9436,15 +9384,13 @@ version
   Special version flags; default: '__NULL__'
 
 [[command-index-jms-commands]]
-Jms Commands
-------------
+=== Jms Commands
 
 Jms Commands are contained in
 org.springframework.roo.addon.jms.JmsCommands.
 
 [[command-index-field-jms-template]]
-field jms template
-~~~~~~~~~~~~~~~~~~
+==== field jms template
 
 Insert a JmsOperations field into an existing type
 
@@ -9463,8 +9409,7 @@ field jms template
   'false'
 
 [[command-index-jms-listener-class]]
-jms listener class
-~~~~~~~~~~~~~~~~~~
+==== jms listener class
 
 Create an asynchronous JMS consumer
 
@@ -9480,8 +9425,7 @@ jms listener class --class
   The type of the destination; default: 'QUEUE'
 
 [[command-index-jms-setup]]
-jms setup
-~~~~~~~~~
+==== jms setup
 
 Install a JMS provider into your project
 
@@ -9497,15 +9441,13 @@ jms setup --provider
   The type of the destination; default: 'QUEUE'
 
 [[command-index-jpa-commands]]
-Jpa Commands
-------------
+=== Jpa Commands
 
 Jpa Commands are contained in
 org.springframework.roo.addon.jpa.JpaCommands.
 
 [[command-index-database-properties-list]]
-database properties list
-~~~~~~~~~~~~~~~~~~~~~~~~
+==== database properties list
 
 Shows database configuration details
 
@@ -9516,8 +9458,7 @@ database properties list
 This command does not accept any options.
 
 [[command-index-database-properties-remove]]
-database properties remove
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==== database properties remove
 
 Removes a particular database property
 
@@ -9530,8 +9471,7 @@ database properties remove --key
   (mandatory)
 
 [[command-index-database-properties-set]]
-database properties set
-~~~~~~~~~~~~~~~~~~~~~~~
+==== database properties set
 
 Changes a particular database property
 
@@ -9546,8 +9486,7 @@ database properties set --key --value
   The new vale for this property key; default: '__NULL__' (mandatory)
 
 [[command-index-embeddable]]
-embeddable
-~~~~~~~~~~
+==== embeddable
 
 Creates a new Java class source file with the JPA @Embeddable annotation
 in SRC_MAIN_JAVA
@@ -9567,8 +9506,7 @@ embeddable --class
   present: 'true'; default if option not present: 'false'
 
 [[command-index-entity-jpa]]
-entity jpa
-~~~~~~~~~~
+==== entity jpa
 
 Creates a new JPA persistent entity in SRC_MAIN_JAVA
 
@@ -9642,8 +9580,7 @@ entity jpa --class
   Generate CRUD active record methods for this entity; default: 'true'
 
 [[command-index-jpa-setup]]
-jpa setup
-~~~~~~~~~
+==== jpa setup
 
 Install or updates a JPA persistence provider in your project
 
@@ -9675,8 +9612,7 @@ jpa setup --provider --database
   default: '__NULL__'
 
 [[command-index-persistence-setup]]
-persistence setup
-~~~~~~~~~~~~~~~~~
+==== persistence setup
 
 Install or updates a JPA persistence provider in your project -
 deprecated, use 'jpa setup' instead
@@ -9709,15 +9645,13 @@ persistence setup --provider --database
   default: '__NULL__'
 
 [[command-index-jsf-commands]]
-Jsf Commands
-------------
+=== Jsf Commands
 
 Jsf Commands are contained in
 org.springframework.roo.addon.jsf.JsfCommands.
 
 [[command-index-web-jsf-all]]
-web jsf all
-~~~~~~~~~~~
+==== web jsf all
 
 Create JSF managed beans for all entities
 
@@ -9730,8 +9664,7 @@ web jsf all --package
   '__NULL__' (mandatory)
 
 [[command-index-web-jsf-media]]
-web jsf media
-~~~~~~~~~~~~~
+==== web jsf media
 
 Add a cross-browser generic player to embed multimedia content
 
@@ -9745,8 +9678,7 @@ web jsf media --url
   The name of the media player; default: '__NULL__'
 
 [[command-index-web-jsf-scaffold]]
-web jsf scaffold
-~~~~~~~~~~~~~~~~
+==== web jsf scaffold
 
 Create JSF managed bean for an entity
 
@@ -9767,8 +9699,7 @@ web jsf scaffold --class
   Include this entity on the generated JSF menu; default: 'true'
 
 [[command-index-web-jsf-setup]]
-web jsf setup
-~~~~~~~~~~~~~
+==== web jsf setup
 
 Set up JSF environment
 
@@ -9784,15 +9715,13 @@ web jsf setup
   The name of the theme; default: '__NULL__'
 
 [[command-index-json-commands]]
-Json Commands
--------------
+=== Json Commands
 
 Json Commands are contained in
 org.springframework.roo.addon.json.JsonCommands.
 
 [[command-index-json-add]]
-json add
-~~~~~~~~
+==== json add
 
 Adds @RooJson annotation to target type
 
@@ -9814,8 +9743,7 @@ json add
   if option present: 'true'; default if option not present: 'false'
 
 [[command-index-json-all]]
-json all
-~~~~~~~~
+==== json all
 
 Adds @RooJson annotation to all types annotated with @RooJavaBean
 
@@ -9831,15 +9759,13 @@ json all
   if option present: 'true'; default if option not present: 'false'
 
 [[command-index-jsp-commands]]
-Jsp Commands
-------------
+=== Jsp Commands
 
 Jsp Commands are contained in
 org.springframework.roo.addon.web.mvc.jsp.JspCommands.
 
 [[command-index-controller-class]]
-controller class
-~~~~~~~~~~~~~~~~
+==== controller class
 
 Create a new manual Controller (ie where you write the methods) -
 deprecated, use 'web mvc controller' instead
@@ -9856,8 +9782,7 @@ controller class --class
   /foo/); default: '__NULL__'
 
 [[command-index-web-mvc-controller]]
-web mvc controller
-~~~~~~~~~~~~~~~~~~
+==== web mvc controller
 
 Create a new manual Controller (ie where you write the methods)
 
@@ -9873,8 +9798,7 @@ web mvc controller --class
   /foo/); default: '__NULL__'
 
 [[command-index-web-mvc-install-language]]
-web mvc install language
-~~~~~~~~~~~~~~~~~~~~~~~~
+==== web mvc install language
 
 Install new internationalization bundle for MVC scaffolded UI.
 
@@ -9887,8 +9811,7 @@ web mvc install language --code
   (mandatory)
 
 [[command-index-web-mvc-install-view]]
-web mvc install view
-~~~~~~~~~~~~~~~~~~~~
+==== web mvc install view
 
 Create a new static view.
 
@@ -9906,8 +9829,7 @@ web mvc install view --path --viewName --title
   The title of the view; default: '__NULL__' (mandatory)
 
 [[command-index-web-mvc-language]]
-web mvc language
-~~~~~~~~~~~~~~~~
+==== web mvc language
 
 Install new internationalization bundle for MVC scaffolded UI.
 
@@ -9920,8 +9842,7 @@ web mvc language --code
   (mandatory)
 
 [[command-index-web-mvc-setup]]
-web mvc setup
-~~~~~~~~~~~~~
+==== web mvc setup
 
 Setup a basic project structure for a Spring MVC / JSP application
 
@@ -9932,8 +9853,7 @@ web mvc setup
 This command does not accept any options.
 
 [[command-index-web-mvc-update-tags]]
-web mvc update tags
-~~~~~~~~~~~~~~~~~~~
+==== web mvc update tags
 
 Replace an existing application tagx library with the latest version
 (use --backup option to backup your application first)
@@ -9948,8 +9868,7 @@ web mvc update tags
   'false'
 
 [[command-index-web-mvc-view]]
-web mvc view
-~~~~~~~~~~~~
+==== web mvc view
 
 Create a new static view.
 
@@ -9967,15 +9886,13 @@ web mvc view --path --viewName --title
   The title of the view; default: '__NULL__' (mandatory)
 
 [[command-index-logging-commands]]
-Logging Commands
-----------------
+=== Logging Commands
 
 Logging Commands are contained in
 org.springframework.roo.addon.logging.LoggingCommands.
 
 [[command-index-logging-setup]]
-logging setup
-~~~~~~~~~~~~~
+==== logging setup
 
 Configure logging in your project
 
@@ -9990,15 +9907,13 @@ logging setup --level
   '__NULL__'
 
 [[command-index-mail-commands]]
-Mail Commands
--------------
+=== Mail Commands
 
 Mail Commands are contained in
 org.springframework.roo.addon.email.MailCommands.
 
 [[command-index-email-sender-setup]]
-email sender setup
-~~~~~~~~~~~~~~~~~~
+==== email sender setup
 
 Install a Spring JavaMailSender in your project
 
@@ -10020,8 +9935,7 @@ email sender setup --hostServer
   The mail account password; default: '__NULL__'
 
 [[command-index-email-template-setup]]
-email template setup
-~~~~~~~~~~~~~~~~~~~~
+==== email template setup
 
 Configures a template for a SimpleMailMessage
 
@@ -10035,8 +9949,7 @@ email template setup
   The message subject (obtional); default: '__NULL__'
 
 [[command-index-field-email-template]]
-field email template
-~~~~~~~~~~~~~~~~~~~~
+==== field email template
 
 Inserts a MailTemplate field into an existing type
 
@@ -10055,15 +9968,13 @@ field email template
   'false'
 
 [[command-index-maven-commands]]
-Maven Commands
---------------
+=== Maven Commands
 
 Maven Commands are contained in
 org.springframework.roo.project.MavenCommands.
 
 [[command-index-dependency-add]]
-dependency add
-~~~~~~~~~~~~~~
+==== dependency add
 
 Adds a new dependency to the Maven project object model (POM)
 
@@ -10083,8 +9994,7 @@ dependency add --groupId --artifactId --version
   The scope of the dependency; default: '__NULL__'
 
 [[command-index-dependency-remove]]
-dependency remove
-~~~~~~~~~~~~~~~~~
+==== dependency remove
 
 Removes an existing dependency from the Maven project object model (POM)
 
@@ -10102,8 +10012,7 @@ dependency remove --groupId --artifactId --version
   The classifier of the dependency; default: '__NULL__'
 
 [[command-index-maven-repository-add]]
-maven repository add
-~~~~~~~~~~~~~~~~~~~~
+==== maven repository add
 
 Adds a new repository to the Maven project object model (POM)
 
@@ -10119,8 +10028,7 @@ maven repository add --id --url
   The URL of the repository; default: '__NULL__' (mandatory)
 
 [[command-index-maven-repository-remove]]
-maven repository remove
-~~~~~~~~~~~~~~~~~~~~~~~
+==== maven repository remove
 
 Removes an existing repository from the Maven project object model (POM)
 
@@ -10134,8 +10042,7 @@ maven repository remove --id --url
   The URL of the repository; default: '__NULL__' (mandatory)
 
 [[command-index-module-create]]
-module create
-~~~~~~~~~~~~~
+==== module create
 
 Creates a new Maven module
 
@@ -10164,8 +10071,7 @@ module create --moduleName --topLevelPackage
   specified); default: '__NULL__'
 
 [[command-index-module-focus]]
-module focus
-~~~~~~~~~~~~
+==== module focus
 
 Changes focus to a different project module
 
@@ -10177,8 +10083,7 @@ module focus --moduleName
   The module to focus on; default: '__NULL__' (mandatory)
 
 [[command-index-perform-assembly]]
-perform assembly
-~~~~~~~~~~~~~~~~
+==== perform assembly
 
 Executes the assembly goal via Maven
 
@@ -10189,8 +10094,7 @@ perform assembly
 This command does not accept any options.
 
 [[command-index-perform-clean]]
-perform clean
-~~~~~~~~~~~~~
+==== perform clean
 
 Executes a full clean (including Eclipse files) via Maven
 
@@ -10201,8 +10105,7 @@ perform clean
 This command does not accept any options.
 
 [[command-index-perform-command]]
-perform command
-~~~~~~~~~~~~~~~
+==== perform command
 
 Executes a user-specified Maven command
 
@@ -10215,8 +10118,7 @@ perform command --mavenCommand
   (mandatory)
 
 [[command-index-perform-eclipse]]
-perform eclipse
-~~~~~~~~~~~~~~~
+==== perform eclipse
 
 Sets up Eclipse configuration via Maven (only necessary if you have not
 installed the m2eclipse plugin in Eclipse)
@@ -10228,8 +10130,7 @@ perform eclipse
 This command does not accept any options.
 
 [[command-index-perform-package]]
-perform package
-~~~~~~~~~~~~~~~
+==== perform package
 
 Packages the application using Maven, but does not execute any tests
 
@@ -10240,8 +10141,7 @@ perform package
 This command does not accept any options.
 
 [[command-index-perform-tests]]
-perform tests
-~~~~~~~~~~~~~
+==== perform tests
 
 Executes the tests via Maven
 
@@ -10252,8 +10152,7 @@ perform tests
 This command does not accept any options.
 
 [[command-index-project]]
-project
-~~~~~~~
+==== project
 
 Creates a new Maven project
 
@@ -10280,15 +10179,13 @@ project --topLevelPackage
   'jar'
 
 [[command-index-metadata-commands]]
-Metadata Commands
------------------
+=== Metadata Commands
 
 Metadata Commands are contained in
 org.springframework.roo.classpath.MetadataCommands.
 
 [[command-index-metadata-cache]]
-metadata cache
-~~~~~~~~~~~~~~
+==== metadata cache
 
 Shows detailed metadata for the indicated type
 
@@ -10301,8 +10198,7 @@ metadata cache --maximumCapacity
   (mandatory)
 
 [[command-index-metadata-for-id]]
-metadata for id
-~~~~~~~~~~~~~~~
+==== metadata for id
 
 Shows detailed information about the metadata item
 
@@ -10315,8 +10211,7 @@ metadata for id --metadataId
   (mandatory)
 
 [[command-index-metadata-for-module]]
-metadata for module
-~~~~~~~~~~~~~~~~~~~
+==== metadata for module
 
 Shows the ProjectMetadata for the indicated project module
 
@@ -10329,8 +10224,7 @@ metadata for module
   module); default: '__NULL__'
 
 [[command-index-metadata-for-type]]
-metadata for type
-~~~~~~~~~~~~~~~~~
+==== metadata for type
 
 Shows detailed metadata for the indicated type
 
@@ -10343,8 +10237,7 @@ metadata for type --type
   (mandatory)
 
 [[command-index-metadata-status]]
-metadata status
-~~~~~~~~~~~~~~~
+==== metadata status
 
 Shows metadata statistics
 
@@ -10355,8 +10248,7 @@ metadata status
 This command does not accept any options.
 
 [[command-index-metadata-trace]]
-metadata trace
-~~~~~~~~~~~~~~
+==== metadata trace
 
 Traces metadata event delivery notifications
 
@@ -10369,15 +10261,13 @@ metadata trace --level
   '__NULL__' (mandatory)
 
 [[command-index-mongo-commands]]
-Mongo Commands
---------------
+=== Mongo Commands
 
 Mongo Commands are contained in
 org.springframework.roo.addon.layers.repository.mongo.MongoCommands.
 
 [[command-index-entity-mongo]]
-entity mongo
-~~~~~~~~~~~~
+==== entity mongo
 
 Creates a domain entity which can be backed by a MongoDB repository
 
@@ -10396,8 +10286,7 @@ entity mongo --class
   present: 'true'; default if option not present: 'false'
 
 [[command-index-mongo-setup]]
-mongo setup
-~~~~~~~~~~~
+==== mongo setup
 
 Configures the project for MongoDB peristence.
 
@@ -10422,8 +10311,7 @@ mongo setup
   present: 'true'; default if option not present: 'false'
 
 [[command-index-repository-mongo]]
-repository mongo
-~~~~~~~~~~~~~~~~
+==== repository mongo
 
 Adds @RooMongoRepository annotation to target type
 
@@ -10439,35 +10327,31 @@ repository mongo --interface
   present: '*'
 
 [[command-index-os-commands]]
-Os Commands
------------
+=== Os Commands
 
 Os Commands are contained in
 org.springframework.roo.addon.oscommands.OsCommands.
 
 [[command-index-!]]
-!
-~
+==== !
 
 Allows execution of operating system (OS) commands.
 
--
+----
 !
--
+----
 
 --command::
   The command to execute; default: ''
 
 [[command-index-pgp-commands]]
-Pgp Commands
-------------
+=== Pgp Commands
 
 Pgp Commands are contained in
 org.springframework.roo.felix.pgp.PgpCommands.
 
 [[command-index-pgp-automatic-trust]]
-pgp automatic trust
-~~~~~~~~~~~~~~~~~~~
+==== pgp automatic trust
 
 Indicates to automatically trust all keys encountered until the command
 is invoked again
@@ -10479,8 +10363,7 @@ pgp automatic trust
 This command does not accept any options.
 
 [[command-index-pgp-key-view]]
-pgp key view
-~~~~~~~~~~~~
+==== pgp key view
 
 Downloads a remote key and displays it to the user (does not change any
 trusts)
@@ -10494,8 +10377,7 @@ pgp key view --keyId
   (mandatory)
 
 [[command-index-pgp-list-trusted-keys]]
-pgp list trusted keys
-~~~~~~~~~~~~~~~~~~~~~
+==== pgp list trusted keys
 
 Lists the keys you currently trust and have not been revoked at the time
 last downloaded from a public key server
@@ -10507,8 +10389,7 @@ pgp list trusted keys
 This command does not accept any options.
 
 [[command-index-pgp-refresh-all]]
-pgp refresh all
-~~~~~~~~~~~~~~~
+==== pgp refresh all
 
 Refreshes all keys from public key servers
 
@@ -10519,8 +10400,7 @@ pgp refresh all
 This command does not accept any options.
 
 [[command-index-pgp-status]]
-pgp status
-~~~~~~~~~~
+==== pgp status
 
 Displays the status of the PGP environment
 
@@ -10531,8 +10411,7 @@ pgp status
 This command does not accept any options.
 
 [[command-index-pgp-trust]]
-pgp trust
-~~~~~~~~~
+==== pgp trust
 
 Grants trust to a particular key ID
 
@@ -10545,8 +10424,7 @@ pgp trust --keyId
   (mandatory)
 
 [[command-index-pgp-untrust]]
-pgp untrust
-~~~~~~~~~~~
+==== pgp untrust
 
 Revokes your trust for a particular key ID
 
@@ -10559,15 +10437,13 @@ pgp untrust --keyId
   '__NULL__' (mandatory)
 
 [[command-index-process-manager-commands]]
-Process Manager Commands
-------------------------
+=== Process Manager Commands
 
 Process Manager Commands are contained in
 org.springframework.roo.process.manager.ProcessManagerCommands.
 
 [[command-index-development-mode]]
-development mode
-~~~~~~~~~~~~~~~~
+==== development mode
 
 Switches the system into development mode (greater diagnostic
 information)
@@ -10580,8 +10456,7 @@ development mode
   Activates development mode; default: 'true'
 
 [[command-index-poll-now]]
-poll now
-~~~~~~~~
+==== poll now
 
 Perform a manual file system poll
 
@@ -10592,8 +10467,7 @@ poll now
 This command does not accept any options.
 
 [[command-index-poll-speed]]
-poll speed
-~~~~~~~~~~
+==== poll speed
 
 Changes the file system polling speed
 
@@ -10606,8 +10480,7 @@ poll speed --ms
   (mandatory)
 
 [[command-index-poll-status]]
-poll status
-~~~~~~~~~~~
+==== poll status
 
 Display file system polling information
 
@@ -10618,15 +10491,13 @@ poll status
 This command does not accept any options.
 
 [[command-index-process-manager-diagnostics-listener]]
-Process Manager Diagnostics Listener
-------------------------------------
+=== Process Manager Diagnostics Listener
 
 Process Manager Diagnostics Listener are contained in
 org.springframework.roo.process.manager.internal.ProcessManagerDiagnosticsListener.
 
 [[command-index-process-manager-debug]]
-process manager debug
-~~~~~~~~~~~~~~~~~~~~~
+==== process manager debug
 
 Indicates if process manager debugging is desired
 
@@ -10638,15 +10509,13 @@ process manager debug
   Activates debug mode; default: 'true'
 
 [[command-index-prop-file-commands]]
-Prop File Commands
-------------------
+=== Prop File Commands
 
 Prop File Commands are contained in
 org.springframework.roo.addon.propfiles.PropFileCommands.
 
 [[command-index-properties-list]]
-properties list
-~~~~~~~~~~~~~~~
+==== properties list
 
 Shows the details of a particular properties file
 
@@ -10661,8 +10530,7 @@ properties list --name --path
   Source path to property file; default: '__NULL__' (mandatory)
 
 [[command-index-properties-remove]]
-properties remove
-~~~~~~~~~~~~~~~~~
+==== properties remove
 
 Removes a particular properties file property
 
@@ -10680,8 +10548,7 @@ properties remove --name --path --key
   (mandatory)
 
 [[command-index-properties-set]]
-properties set
-~~~~~~~~~~~~~~
+==== properties set
 
 Changes a particular properties file property
 
@@ -10701,15 +10568,13 @@ properties set --name --path --key --value
   The new vale for this property key; default: '__NULL__' (mandatory)
 
 [[command-index-proxy-configuration-commands]]
-Proxy Configuration Commands
-----------------------------
+=== Proxy Configuration Commands
 
 Proxy Configuration Commands are contained in
 org.springframework.roo.url.stream.jdk.ProxyConfigurationCommands.
 
 [[command-index-proxy-configuration]]
-proxy configuration
-~~~~~~~~~~~~~~~~~~~
+==== proxy configuration
 
 Shows the proxy server configuration
 
@@ -10720,15 +10585,13 @@ proxy configuration
 This command does not accept any options.
 
 [[command-index-repository-jpa-commands]]
-Repository Jpa Commands
------------------------
+=== Repository Jpa Commands
 
 Repository Jpa Commands are contained in
 org.springframework.roo.addon.layers.repository.jpa.RepositoryJpaCommands.
 
 [[command-index-repository-jpa]]
-repository jpa
-~~~~~~~~~~~~~~
+==== repository jpa
 
 Adds @RooJpaRepository annotation to target type
 
@@ -10744,15 +10607,13 @@ repository jpa --interface
   present: '*'
 
 [[command-index-security-commands]]
-Security Commands
------------------
+=== Security Commands
 
 Security Commands are contained in
 org.springframework.roo.addon.security.SecurityCommands.
 
 [[command-index-permissionevaluator]]
-permissionEvaluator
-~~~~~~~~~~~~~~~~~~~
+==== permissionEvaluator
 
 Create a permission evaluator
 
@@ -10765,8 +10626,7 @@ permissionEvaluator --package
   (mandatory)
 
 [[command-index-security-setup]]
-security setup
-~~~~~~~~~~~~~~
+==== security setup
 
 Install Spring Security into your project
 
@@ -10777,15 +10637,13 @@ security setup
 This command does not accept any options.
 
 [[command-index-selenium-commands]]
-Selenium Commands
------------------
+=== Selenium Commands
 
 Selenium Commands are contained in
 org.springframework.roo.addon.web.selenium.SeleniumCommands.
 
 [[command-index-selenium-test]]
-selenium test
-~~~~~~~~~~~~~
+==== selenium test
 
 Creates a new Selenium test for a particular controller
 
@@ -10803,15 +10661,13 @@ selenium test --controller
   protocol, port and hostname; default: 'http://localhost:8080/'
 
 [[command-index-service-commands]]
-Service Commands
-----------------
+=== Service Commands
 
 Service Commands are contained in
 org.springframework.roo.addon.layers.service.ServiceCommands.
 
 [[command-index-service-all]]
-service all
-~~~~~~~~~~~
+==== service all
 
 Adds @RooService annotation to all entities
 
@@ -10829,8 +10685,7 @@ service all --interfacePackage
   default behavior for services using GAE; default: '__NULL__'
 
 [[command-index-service-secure-all]]
-service secure all
-~~~~~~~~~~~~~~~~~~
+==== service secure all
 
 Adds @RooService annotation to all entities with options for
 authentication, authorization, and a permission evaluator
@@ -10858,8 +10713,7 @@ service secure all --interfacePackage
   '__NULL__'
 
 [[command-index-service-secure-type]]
-service secure type
-~~~~~~~~~~~~~~~~~~~
+==== service secure type
 
 Adds @RooService annotation to target type with options for
 authentication, authorization, and a permission evaluator
@@ -10890,8 +10744,7 @@ service secure type --interface
   '__NULL__'
 
 [[command-index-service-type]]
-service type
-~~~~~~~~~~~~
+==== service type
 
 Adds @RooService annotation to target type
 
@@ -10912,15 +10765,13 @@ service type --interface
   '__NULL__'
 
 [[command-index-solr-commands]]
-Solr Commands
--------------
+=== Solr Commands
 
 Solr Commands are contained in
 org.springframework.roo.addon.solr.SolrCommands.
 
 [[command-index-solr-add]]
-solr add
-~~~~~~~~
+==== solr add
 
 Make target type searchable
 
@@ -10932,8 +10783,7 @@ solr add
   The type to be made searchable; default if option not present: '*'
 
 [[command-index-solr-all]]
-solr all
-~~~~~~~~
+==== solr all
 
 Make all eligible project types searchable
 
@@ -10944,8 +10794,7 @@ solr all
 This command does not accept any options.
 
 [[command-index-solr-setup]]
-solr setup
-~~~~~~~~~~
+==== solr setup
 
 Install support for Solr search integration
 
@@ -10958,15 +10807,13 @@ solr setup
   'http://localhost:8983/solr'
 
 [[command-index-tailor-commands]]
-Tailor Commands
----------------
+=== Tailor Commands
 
 Tailor Commands are contained in
 org.springframework.roo.addon.tailor.TailorCommands.
 
 [[command-index-tailor-activate]]
-tailor activate
-~~~~~~~~~~~~~~~
+==== tailor activate
 
 Activate a tailor configuration.
 
@@ -10978,8 +10825,7 @@ tailor activate --name
   The name of the tailor configuration; default: '__NULL__' (mandatory)
 
 [[command-index-tailor-deactivate]]
-tailor deactivate
-~~~~~~~~~~~~~~~~~
+==== tailor deactivate
 
 Deactivate the tailor.
 
@@ -10990,8 +10836,7 @@ tailor deactivate
 This command does not accept any options.
 
 [[command-index-tailor-list]]
-tailor list
-~~~~~~~~~~~
+==== tailor list
 
 List available tailor configurations.
 
@@ -11002,14 +10847,12 @@ tailor list
 This command does not accept any options.
 
 [[command-index-uaa-commands]]
-Uaa Commands
-------------
+=== Uaa Commands
 
 Uaa Commands are contained in org.springframework.roo.uaa.UaaCommands.
 
 [[command-index-download-accept-terms-of-use]]
-download accept terms of use
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==== download accept terms of use
 
 Accepts the Spring User Agent Analysis (UAA) Terms of Use
 
@@ -11020,8 +10863,7 @@ download accept terms of use
 This command does not accept any options.
 
 [[command-index-download-privacy-level]]
-download privacy level
-~~~~~~~~~~~~~~~~~~~~~~
+==== download privacy level
 
 Changes the Spring User Agent Analysis (UAA) privacy level
 
@@ -11033,8 +10875,7 @@ download privacy level --privacyLevel
   The new UAA privacy level to use; default: '__NULL__' (mandatory)
 
 [[command-index-download-reject-terms-of-use]]
-download reject terms of use
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==== download reject terms of use
 
 Rejects the Spring User Agent Analysis (UAA) Terms of Use
 
@@ -11045,8 +10886,7 @@ download reject terms of use
 This command does not accept any options.
 
 [[command-index-download-status]]
-download status
-~~~~~~~~~~~~~~~
+==== download status
 
 Provides a summary of the Spring User Agent Analysis (UAA) status and
 commands
@@ -11058,8 +10898,7 @@ download status
 This command does not accept any options.
 
 [[command-index-download-view]]
-download view
-~~~~~~~~~~~~~
+==== download view
 
 Displays the Spring User Agent Analysis (UAA) header content in plain
 text
@@ -11072,15 +10911,13 @@ download view
   The file to save the UAA JSON content to; default: '__NULL__'
 
 [[command-index-web-finder-commands]]
-Web Finder Commands
--------------------
+=== Web Finder Commands
 
 Web Finder Commands are contained in
 org.springframework.roo.addon.web.mvc.controller.finder.WebFinderCommands.
 
 [[command-index-web-mvc-finder-add]]
-web mvc finder add
-~~~~~~~~~~~~~~~~~~
+==== web mvc finder add
 
 Adds @RooWebFinder annotation to MVC controller type
 
@@ -11095,8 +10932,7 @@ web mvc finder add --formBackingType
   option not present: '*'
 
 [[command-index-web-mvc-finder-all]]
-web mvc finder all
-~~~~~~~~~~~~~~~~~~
+==== web mvc finder all
 
 Adds @RooWebFinder annotation to existing MVC controllers
 
@@ -11107,15 +10943,13 @@ web mvc finder all
 This command does not accept any options.
 
 [[command-index-web-flow-commands]]
-Web Flow Commands
------------------
+=== Web Flow Commands
 
 Web Flow Commands are contained in
 org.springframework.roo.addon.web.flow.WebFlowCommands.
 
 [[command-index-web-flow]]
-web flow
-~~~~~~~~
+==== web flow
 
 Install Spring Web Flow configuration artifacts into your project
 
@@ -11127,15 +10961,13 @@ web flow
   The name for your web flow; default: '__NULL__'
 
 [[command-index-web-json-commands]]
-Web Json Commands
------------------
+=== Web Json Commands
 
 Web Json Commands are contained in
 org.springframework.roo.addon.web.mvc.controller.json.WebJsonCommands.
 
 [[command-index-web-mvc-json-add]]
-web mvc json add
-~~~~~~~~~~~~~~~~
+==== web mvc json add
 
 Adds @RooJson annotation to target type
 
@@ -11151,8 +10983,7 @@ web mvc json add --jsonObject
   present: '*'
 
 [[command-index-web-mvc-json-all]]
-web mvc json all
-~~~~~~~~~~~~~~~~
+==== web mvc json all
 
 Adds or creates MVC controllers annotated with @RooWebJson annotation
 
@@ -11165,8 +10996,7 @@ web mvc json all
   '__NULL__'
 
 [[command-index-web-mvc-json-setup]]
-web mvc json setup
-~~~~~~~~~~~~~~~~~~
+==== web mvc json setup
 
 Set up Spring MVC to support JSON
 
@@ -11176,13 +11006,12 @@ web mvc json setup
 
 This command does not accept any options.
 
+[appendix]
 [[upgrade]]
-Upgrade Notes and Known Issues
-------------------------------
+== Upgrade Notes and Known Issues
 
 [[upgrade-known-issues]]
-Known Issues
-------------
+=== Known Issues
 
 Because Spring Roo integrates a large number of other technologies,
 invariably some people using Roo may experience issues when using
@@ -11260,8 +11089,8 @@ required when using Spring Framework 3.0.5+):
 <mvc:default-servlet-handler default-servlet-name="_ah_default" />
 ------------------------------------------------------------------
 
-Version Numbering Approach
---------------------------
+[[upgrade-version-numbering]]
+=== Version Numbering Approach
 
 Spring Roo observes version number standards based on the
 http://apr.apache.org/versioning.html[Apache Portable Runtime (APR)
@@ -11310,8 +11139,7 @@ and therefore the changes you may need to make to your project are
 cumulative.
 
 [[upgrade-any]]
-Upgrading To Any New Release
-----------------------------
+=== Upgrading To Any New Release
 
 Before upgrading any project to the next release of Spring Roo, you
 should always:
@@ -11346,8 +11174,8 @@ Roo.
 If you experience any difficulty with upgrading your projects, please
 use the link:#resources-forums[community support forum] for assistance.
 
-Upgrading to 1.2.0.RC1
-----------------------
+[[120RC1]]
+=== Upgrading to 1.2.0.RC1
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.2.0.M1 to Spring Roo 1.2.0.RC1 are as follows:
@@ -11386,8 +11214,8 @@ mongo + repository mongo
 mongo + repository mongo
 |=======================================================================
 
-Upgrading to 1.2.0.M1
----------------------
+[[120M1]]
+=== Upgrading to 1.2.0.M1
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.1.5.RELEASE to Spring Roo 1.2.0.M1 are as follows:
@@ -11408,8 +11236,7 @@ link:#command-index-web-mvc-finder-all[web mvc finder all] command.
 link:#command-index-web-gwt-setup[web gwt setup]
 
 [[upgrade-1.1.3.RELEASE]]
-Upgrading to 1.1.3.RELEASE
---------------------------
+=== Upgrading to 1.1.3.RELEASE
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.1.2.RELEASE to Spring Roo 1.1.3.RELEASE are as follows:
@@ -11422,8 +11249,7 @@ copying the list.tagx file into your project. This process will be
 automated through a new 'web mvc update tags' command in Roo 1.1.4+.
 
 [[upgrade-1.1.2.RELEASE]]
-Upgrading to 1.1.2.RELEASE
---------------------------
+=== Upgrading to 1.1.2.RELEASE
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.1.1.RELEASE to Spring Roo 1.1.2.RELEASE are as follows:
@@ -11432,8 +11258,7 @@ The main changes you need to be aware of when upgrading from Spring Roo
 Any New Release] section.
 
 [[upgrade-1.1.1.RELEASE]]
-Upgrading to 1.1.1.RELEASE
---------------------------
+=== Upgrading to 1.1.1.RELEASE
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.1.0.RELEASE to Spring Roo 1.1.1.RELEASE are as follows:
@@ -11462,8 +11287,7 @@ converters or formatter registrations to the new ConversionService
 installed by Spring Roo.
 
 [[upgrade-1.1.0.RELEASE]]
-Upgrading to 1.1.0.RELEASE
---------------------------
+=== Upgrading to 1.1.0.RELEASE
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.1.0.RC1 to Spring Roo 1.1.0.RELEASE are as follows:
@@ -11472,8 +11296,7 @@ The main changes you need to be aware of when upgrading from Spring Roo
 Any New Release] section.
 
 [[upgrade-1.1.0.RC1]]
-Upgrading to 1.1.0.RC1
-----------------------
+=== Upgrading to 1.1.0.RC1
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.1.0.M3 to Spring Roo 1.1.0.RELEASE are as follows:
@@ -11487,12 +11310,11 @@ deployment of GWT scaffolded applications to GAE. Please compare a
 project's `web.xml` to identify differences.
 * The GWT maven artifacts in your local maven repository should be
 removed so they can be replaced with the latest versions. Make sure to
-delete ~/.m2/repository/com/google/gwt and
+delete pass:[~/.m2/repository/com/google/gwt] and
 org/codehaus/mojo/gwt-maven-plugin.
 
 [[upgrade-1.1.0.M3]]
-Upgrading to 1.1.0.M3
----------------------
+=== Upgrading to 1.1.0.M3
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.1.0.M2 to Spring Roo 1.1.0.M3 are as follows:
@@ -11510,8 +11332,7 @@ please be aware that from Spring Roo 1.1.0.M3 until Spring Roo
 to have access to the latest improvements in GWT 2.1.
 
 [[upgrade-1.1.0.M2]]
-Upgrading to 1.1.0.M2
----------------------
+=== Upgrading to 1.1.0.M2
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.1.0.M1 to Spring Roo 1.1.0.M2 are as follows:
@@ -11520,8 +11341,7 @@ The main changes you need to be aware of when upgrading from Spring Roo
 Any New Release] section.
 
 [[upgrade-1.1.0.M1]]
-Upgrading to 1.1.0.M1
----------------------
+=== Upgrading to 1.1.0.M1
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.0.2.RELEASE to Spring Roo 1.1.0.M1 are as follows:
@@ -11535,8 +11355,7 @@ therefore to start a new project with Roo 1.1.0.M1 to identify the
 changes that are needed to `src/main/webapp`.
 
 [[upgrade-1.0.2.RELEASE]]
-Upgrading to 1.0.2.RELEASE
---------------------------
+=== Upgrading to 1.0.2.RELEASE
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.0.1.RELEASE to Spring Roo 1.0.2.RELEASE are as follows:
@@ -11549,8 +11368,7 @@ http://jira.springframework.org/browse/ROO-579[ROO-579] and consider
 disabling the `ShallowEtagHeaderFilter` filter in your `web.xml`.
 
 [[upgrade-1.0.1.RELEASE]]
-Upgrading to 1.0.1.RELEASE
---------------------------
+=== Upgrading to 1.0.1.RELEASE
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.0.0.RELEASE to Spring Roo 1.0.1.RELEASE are as follows:
@@ -11559,8 +11377,7 @@ The main changes you need to be aware of when upgrading from Spring Roo
 Any New Release] section.
 
 [[upgrade-1.0.0.RELEASE]]
-Upgrading to 1.0.0.RELEASE
---------------------------
+=== Upgrading to 1.0.0.RELEASE
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.0.0.RC4 to Spring Roo 1.0.0.RELEASE are as follows:
@@ -11574,8 +11391,7 @@ adjustment. To update these three files, please replace them with the
 same files generated in a dummy project using Roo 1.0.0.RELEASE.
 
 [[upgrade-1.0.0.RC4]]
-Upgrading to 1.0.0.RC4
-----------------------
+=== Upgrading to 1.0.0.RC4
 
 When upgrading from Spring Roo 1.0.0.RC3 to Spring Roo 1.0.0.RC4 you
 should be aware that a large number of changes have been applied to the
@@ -11612,9 +11428,7 @@ link:#command-index-controller-scaffold[controller scaffold] command.
 This will recreate all web artifacts.
 
 [[upgrade-1.0.0.RC3]]
-Upgrading to 1.0.0.RC3
-
-----------------------
+=== Upgrading to 1.0.0.RC3
 
 The main changes you need to be aware of when upgrading from Spring Roo
 1.0.0.RC2 to Spring Roo 1.0.0.RC3 are as follows:
@@ -11648,19 +11462,16 @@ Roo outside of any version of STS without any issue. The upgrade
 requirement is simply to access the STS integration, such as CTRL + R
 commands and STS' embedded Roo shell.
 
----------------
-
+[appendix]
 [[background]]
-Project Background
-------------------
+== Project Background
 
 This chapter briefly covers the link:#background-history[history] of the
 Spring Roo project, and also explains its
 link:#background-mission[mission statement] in detail.
 
 [[background-history]]
-History
--------
+=== History
 
 The Spring Roo available today is the result of relatively recent
 engineering, but the inspiration for the project can be found several
@@ -11773,8 +11584,7 @@ large number of conferences, user group meetings and development
 projects - all before it had even reached 1.0.0 General Availability!
 
 [[background-mission]]
-Mission Statement
------------------
+=== Mission Statement
 
 Spring Roo's mission is to "__fundamentally and sustainably improve Java
 developer productivity without compromising engineering integrity or
@@ -11825,11 +11635,9 @@ this mission statement. While we still have work to do in identified
 feature areas such as Generation IV web clients, these are
 easily-achieved future directions upon the existing Roo foundation.
 
---------
-
+[appendix]
 [[resources]]
-Roo Resources
--------------
+== Roo Resources
 
 As an open source project, Spring Roo offers a large number of resources
 to assist the community learn, interact with one another and become more
@@ -11837,8 +11645,7 @@ involved in the project. Below you'll find a short summary of the
 official project resources.
 
 [[resources-home]]
-Project Home Page
------------------
+=== Project Home Page
 
 Web: http://projects.spring.io/spring-roo/
 
@@ -11853,8 +11660,7 @@ of the services shown below, as well as third-party add-ons you are able
 to install.
 
 [[resources-downloads]]
-Downloads and Maven Repositories
---------------------------------
+=== Downloads and Maven Repositories
 
 Web: http://www.springsource.com/download/community?project=Spring%20Roo
 
@@ -11871,8 +11677,7 @@ in the POM for add-ons created via the
 link:#simple-addons-fast-creation[add-on creator].
 
 [[resources-forums]]
-Community Forums
-----------------
+=== Community Forums
 
 Web: http://forum.springsource.org/forumdisplay.php?f=67
 
@@ -11922,8 +11727,7 @@ started on the forum, as it will help other people cross-reference the
 two systems.
 
 [[resources-twitter]]
-Twitter
--------
+=== Twitter
 
 Roo Hash Code (please include in your tweets, and also follow for
 low-volume announcements):
@@ -11949,8 +11753,7 @@ allow us to provide in-depth technical support or provide a growing
 archive of historical answers that people can search against.
 
 [[resources-issue-tracking]]
-Issue Tracking
---------------
+=== Issue Tracking
 
 Web: https://jira.springsource.org/browse/ROO
 
@@ -11991,8 +11794,7 @@ not, whether perhaps writing it as an link:#simple-addons[add-on] would
 be a good alternative.
 
 [[resources-source-repository]]
-Source Repository
------------------
+=== Source Repository
 
 Read repository: https://github.com/spring-projects/spring-roo.git
 
@@ -12008,8 +11810,7 @@ Subversion, please refer to the link:#development[Development Processes]
 chapter.
 
 [[resources-source-web-browsing]]
-Source Web Browsing
--------------------
+=== Source Web Browsing
 
 Web: https://github.com/spring-projects/spring-roo.git
 
@@ -12023,8 +11824,7 @@ If you need to link to source code from an issue report or forum post,
 please use the FishEye service to provide a fully-qualified URI.
 
 [[resources-commercial]]
-Commercial Products and Services
---------------------------------
+=== Commercial Products and Services
 
 Web: http://spring.io/
 
@@ -12039,8 +11839,7 @@ about SpringSource products and services and how these can add value to
 your build-run-manage application lifecycle.
 
 [[resources-other]]
-Other
------
+=== Other
 
 Please let us know if you believe it would be helpful to list any other
 resources in this documentation.
