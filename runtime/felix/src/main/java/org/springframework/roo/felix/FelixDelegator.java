@@ -132,10 +132,14 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
 
     @CliCommand(value = "osgi obr deploy", help = "Deploys a specific OSGi Bundle Repository (OBR) bundle")
     public void obrDeploy(
-            @CliOption(key = "bundleSymbolicName", mandatory = true, optionContext = "obr", help = "The specific bundle to deploy") final BundleSymbolicName bsn)
+            @CliOption(key = "bundleSymbolicName", mandatory = true, optionContext = "obr", help = "The specific bundle to deploy") final BundleSymbolicName bsn,
+            @CliOption(key = "start", mandatory = false, unspecifiedDefaultValue="true" , optionContext = "obr", help = "true if you want to start bundle and false if you don't") final boolean start)
             throws Exception {
 
         perform("obr:deploy " + bsn.getKey());
+        if(start){
+        	perform("obr:start " + bsn.getKey());
+        }
     }
 
     @CliCommand(value = "osgi obr info", help = "Displays information on a specific OSGi Bundle Repository (OBR) bundle")
@@ -164,7 +168,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
             @CliOption(key = "bundleSymbolicName", mandatory = true, optionContext = "obr", help = "The specific bundle to start") final BundleSymbolicName bsn)
             throws Exception {
 
-        perform("start " + bsn.getKey());
+        perform("obr:start " + bsn.getKey());
     }
 
     @CliCommand(value = "osgi obr url add", help = "Adds a new OSGi Bundle Repository (OBR) repository file URL")

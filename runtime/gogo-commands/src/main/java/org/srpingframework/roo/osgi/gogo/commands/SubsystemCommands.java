@@ -16,6 +16,13 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.subsystem.Subsystem;
 
+/**
+ * 
+ * Adding Subsystem Gogo commands
+ * 
+ * @author Juan Carlos García
+ * @since 2.0
+ */
 @Component(immediate = true)
 @Service
 public class SubsystemCommands implements BundleActivator {
