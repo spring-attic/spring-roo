@@ -42,30 +42,51 @@ public class SubsystemCommands implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		bundleContext = context;
 		Dictionary<String, Object> props = new Hashtable<String, Object>();
-		props.put("osgi.command.function", new String[] { "install",
-				"uninstall", "start", "stop", "list" });
+		props.put("osgi.command.function", new String[] { "deploy", "install",
+				"uninstall", "start", "stop", "list", });
 		props.put("osgi.command.scope", "subsystem");
 		context.registerService(getClass().getName(), this, props);
 	}
+	
+	public void deploy(String url) throws IOException{
+		// Install subsystem using url
+		Subsystem subsystem = install(url);
+		// Starting installed subsystem
+		start(subsystem.getSubsystemId());
+	}
 
-	public void install(String url) throws IOException {
+	public Subsystem install(String url) throws IOException {
+		System.out.println("Installing subsystem by URL: " + url);
 		Subsystem rootSubsystem = getSubsystem(0);
-		System.out.println("Installing subsystem: " + url);
 		Subsystem s = rootSubsystem.install(url, new URL(url).openStream());
 		System.out.println("Subsystem successfully installed: "
 				+ s.getSymbolicName() + "; id: " + s.getSubsystemId());
+		return s;
 	}
 
 	public void uninstall(long id) {
-		getSubsystem(id).uninstall();
+		System.out.println("Uninstalling subsystem: " + id);
+		Subsystem subsystem = getSubsystem(id);
+		subsystem.uninstall();
+		System.out.println("Subsystem successfully uninstalled: "
+				+ subsystem.getSymbolicName() + "; id: " + subsystem.getSubsystemId());
 	}
 
 	public void start(long id) {
-		getSubsystem(id).start();
+		System.out.println("Starting subsystem: " + id);
+		Subsystem subsystem = getSubsystem(id);
+		subsystem.start();
+		System.out.println("Subsystem successfully started: "
+				+ subsystem.getSymbolicName() + "; id: " + subsystem.getSubsystemId());
 	}
 
 	public void stop(long id) {
-		getSubsystem(id).stop();
+		System.out.println("Stopping subsystem: " + id);
+		Subsystem subsystem = getSubsystem(id);
+		subsystem.stop();
+		System.out.println("Subsystem successfully stopped: "
+				+ subsystem.getSymbolicName() + "; id: " + subsystem.getSubsystemId());
+		
 	}
 
 	public void list() throws InvalidSyntaxException {
