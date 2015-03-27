@@ -2,11 +2,20 @@ package org.srpingframework.roo.osgi.gogo.commands;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
+import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.Repository;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleActivator;
@@ -15,6 +24,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.subsystem.Subsystem;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * 
@@ -26,7 +36,16 @@ import org.osgi.service.subsystem.Subsystem;
 @Component(immediate = true)
 @Service
 public class SubsystemCommands implements BundleActivator {
+	
+	private static final Logger LOGGER = HandlerUtils
+            .getLogger(SubsystemCommands.class);
+	
 	private BundleContext bundleContext;
+	private RepositoryAdmin repositoryAdmin;
+	
+	private List<Repository> repositories;
+	
+	private static final String CAPABILITY_SUBSYSTEM_NAME = "subsystem-url";
 	
 	// TODO: Improve Gogo commands ROO implementation using
 	// apache felix @Command annotation
@@ -48,9 +67,14 @@ public class SubsystemCommands implements BundleActivator {
 		context.registerService(getClass().getName(), this, props);
 	}
 	
-	public void deploy(String url) throws IOException{
-		// Install subsystem using url
-		Subsystem subsystem = install(url);
+	public void deploy(String symbolicName) throws IOException{
+		repositories = new ArrayList<Repository>();
+		// Getting all installed repositories
+        populateRepositories();
+        // Searching subsystem URL
+        String subsystemURL = getSubsystemURL(symbolicName);
+        // Install subsystem using symbolicName
+		Subsystem subsystem = install(subsystemURL);
 		// Starting installed subsystem
 		start(subsystem.getSubsystemId());
 	}
@@ -106,6 +130,50 @@ public class SubsystemCommands implements BundleActivator {
 			System.out.println(entry);
 		}
 	}
+	
+	/**
+     * Method to populate current Repositories using OSGi Serive
+     */
+    private void populateRepositories() {
+        // Cleaning Repositories
+        repositories.clear();
+        // Validating that RepositoryAdmin exists
+        Validate.notNull(getRepositoryAdmin(), "RepositoryAdmin not found");
+        for (Repository repo : getRepositoryAdmin().listRepositories()) {
+            repositories.add(repo);
+        }
+    }
+    
+    /**
+     * Method to get RepositoryAdmin Service implementation
+     * 
+     * @return
+     */
+    public RepositoryAdmin getRepositoryAdmin() {
+        if (repositoryAdmin == null) {
+            // Get all Services implement RepositoryAdmin interface
+            try {
+                ServiceReference<?>[] references = bundleContext
+                        .getAllServiceReferences(
+                                RepositoryAdmin.class.getName(), null);
+
+                for (ServiceReference<?> ref : references) {
+                    repositoryAdmin = (RepositoryAdmin) bundleContext.getService(ref);
+                    return repositoryAdmin;
+                }
+
+                return null;
+
+            }
+            catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load RepositoryAdmin on SubsystemCommands.");
+                return null;
+            }
+        }
+        else {
+            return repositoryAdmin;
+        }
+    }
 
 	private Subsystem getSubsystem(long id) {
 		try {
@@ -121,6 +189,61 @@ public class SubsystemCommands implements BundleActivator {
 		}
 		throw new RuntimeException("Unable to find subsystem " + id);
 	}
+	
+	/**
+     * Method to obtain subsystemURL by  symbolicName
+     * 
+     * @return
+     */
+    private String getSubsystemURL(String symbolicName) {
+        for (Repository repo : repositories) {
+            // Getting all resources from every repo
+            Resource[] repoResources = repo.getResources();
+
+            for (Resource resource : repoResources) {
+                // Getting resource
+                if (resource.getSymbolicName().equals(symbolicName)) {
+                    // Getting all resource capabilities
+                    Capability[] resourceCapabilities = resource
+                            .getCapabilities();
+                    for (Capability capability : resourceCapabilities) {
+                        // Getting subsystem url capability
+                        if (capability.getName().equals(
+                                CAPABILITY_SUBSYSTEM_NAME)) {
+                            // Getting all resource properties
+                            Map<String, Object> capabilityProperties = capability
+                                    .getPropertiesAsMap();
+                            for (Entry capabilityProperty : capabilityProperties
+                                    .entrySet()) {
+                                String capabilityUrl = (String) capabilityProperty
+                                        .getValue();
+                                // Returns full URI of .esa file
+                                return getRepositoryUrl(repo).concat(
+                                        capabilityUrl);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        throw new RuntimeException("Unable to find any Roo Addon Suite on installed repositories "
+        		+ "with symbolic name  " + symbolicName);
+    }
+    
+    /**
+     * Method to obtain final repository URL
+     * 
+     * @param repo
+     * @return
+     */
+    private String getRepositoryUrl(Repository repo) {
+        // Getting repoUrl
+        String repoUrl = repo.getURI();
+        // Removing .xml file
+        int xmlUrlPosition = repoUrl.lastIndexOf("/");
+        return repoUrl.substring(0, xmlUrlPosition).concat("/");
+    }
 
 	public void stop(BundleContext context) throws Exception {
 	}
