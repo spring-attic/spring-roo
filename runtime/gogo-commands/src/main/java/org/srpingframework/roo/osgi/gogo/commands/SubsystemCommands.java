@@ -7,12 +7,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.felix.bundlerepository.Capability;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
@@ -44,8 +42,6 @@ public class SubsystemCommands implements BundleActivator {
 	private RepositoryAdmin repositoryAdmin;
 	
 	private List<Repository> repositories;
-	
-	private static final String CAPABILITY_SUBSYSTEM_NAME = "subsystem-url";
 	
 	// TODO: Improve Gogo commands ROO implementation using
 	// apache felix @Command annotation
@@ -203,26 +199,7 @@ public class SubsystemCommands implements BundleActivator {
             for (Resource resource : repoResources) {
                 // Getting resource
                 if (resource.getSymbolicName().equals(symbolicName)) {
-                    // Getting all resource capabilities
-                    Capability[] resourceCapabilities = resource
-                            .getCapabilities();
-                    for (Capability capability : resourceCapabilities) {
-                        // Getting subsystem url capability
-                        if (capability.getName().equals(
-                                CAPABILITY_SUBSYSTEM_NAME)) {
-                            // Getting all resource properties
-                            Map<String, Object> capabilityProperties = capability
-                                    .getPropertiesAsMap();
-                            for (Entry capabilityProperty : capabilityProperties
-                                    .entrySet()) {
-                                String capabilityUrl = (String) capabilityProperty
-                                        .getValue();
-                                // Returns full URI of .esa file
-                                return getRepositoryUrl(repo).concat(
-                                        capabilityUrl);
-                            }
-                        }
-                    }
+                    return resource.getURI();
                 }
             }
         }
@@ -231,20 +208,6 @@ public class SubsystemCommands implements BundleActivator {
         		+ "with symbolic name  " + symbolicName);
     }
     
-    /**
-     * Method to obtain final repository URL
-     * 
-     * @param repo
-     * @return
-     */
-    private String getRepositoryUrl(Repository repo) {
-        // Getting repoUrl
-        String repoUrl = repo.getURI();
-        // Removing .xml file
-        int xmlUrlPosition = repoUrl.lastIndexOf("/");
-        return repoUrl.substring(0, xmlUrlPosition).concat("/");
-    }
-
 	public void stop(BundleContext context) throws Exception {
 	}
 }
