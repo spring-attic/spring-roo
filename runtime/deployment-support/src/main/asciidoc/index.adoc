@@ -33,7 +33,7 @@
 :toc-title:		Title menu
 :toc-placement:		right
 :toclevels: 		5
-//:source-highlighter:	pygments
+:source-highlighter:	pygments
 //:pygments-style:	bw
 //:pagenums:
 //:backend: 		docbook
@@ -526,6 +526,7 @@ as `sudo ln -s $ROO_HOME/bin/roo.sh
 Next verify Roo has been installed correctly. This can be done using the
 following commands:
 
+[options=nowrap]
 ------------------------------------------------------------------------------
 $ mkdir roo-test
 $ cd roo-test
@@ -1374,7 +1375,7 @@ resources in the Pizza Shop application you need to open the
 `applicationContext-security.xml` file in the
 `src/main/resources/META-INF/spring` folder:
 
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <!-- HTTP security configurations -->
 <http auto-config="true" use-expressions="true">
@@ -1394,6 +1395,7 @@ resources in the Pizza Shop application you need to open the
 As a next step you can use the Spring Security JSP tag library to
 restrict access to the relevant menu items in the `menu.jspx` file:
 
+[source,xml,options=nowrap]
 ----
 <div xmlns:jsp="..." xmlns:sec="http://www.springframework.org/security/tags" id="menu" version="2.0">
    <jsp:directive.page contentType="text/html;charset=UTF-8"/>
@@ -1426,7 +1428,7 @@ delete and the update use case for the pizza order view are not
 desirable. The easiest way to take care of this is to adjust the
 `@RooWebScaffold` annotation in the `PizzaOrderController.java` source:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooWebScaffold(path = "pizzaorder", 
                 formBackingObject = PizzaOrder.class, 
@@ -1449,9 +1451,13 @@ Roo generated Web UIs can be customized in various ways. To find your
 way around the installed Web-tier artifacts take a look at the following
 table:
 
+image:images/webfolders.png[]
+
 The easiest way to customize the look & feel of the Roo Web UI is to
 change CSS and image resources to suit your needs. The following look &
 feel was created for the specific purpose of the Pizza Shop application:
+
+image:images/altui.png[]
 
 Spring Roo also configures
 http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-themeresolver[theming
@@ -1673,11 +1679,11 @@ ITD file and the whole process is completely transparent.
 Let's have a look at how ITDs work. In a new directory, type the
 following commands and note the console output:
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> project --topLevelPackage com.aspectj.rocks
-roo> jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE
-roo> entity jpa --class ~.Hello
+roo> *project --topLevelPackage com.aspectj.rocks*
+roo> *jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE*
+roo> *entity jpa --class ~.Hello*
 Created SRC_MAIN_JAVA/com/aspectj/rocks
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello.java
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_JpaActiveRecord.aj
@@ -1691,14 +1697,14 @@ Managed SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_ToString.aj
 ----
 
 Notice how there is a standard `Hello.java` file, as well as a series of
-`Hello_Roo_*.aj` files. Any file ending in `*_Roo_*.aj` is an AspectJ
+`Hello_Roo_*.aj` files. Any file ending in pass:[*_Roo_*.aj] is an AspectJ
 ITD and will be managed by Roo. You should not edit these files
 directly, as Roo will automatically maintain them (this includes even
 deleting files that aren't required, as we'll see shortly).
 
 The `Hello.java` is just a normal Java file. It looks like this:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 package com.aspectj.rocks;
 
@@ -1725,7 +1731,7 @@ you find them with code assist.
 By this stage you're probably wondering what the ITD files look like.
 Let's have a look at one of them, `Hello_Roo_ToString.aj`:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 package com.aspectj.rocks;
 
@@ -1752,10 +1758,10 @@ command. All we need to do is run the compiler and view the resulting
 class. From the same directory as you created the project in, enter the
 following commands and observe the final output:
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-$ mvn compile
-$ javap -classpath target/classes/.:target/test-classes/. com.aspectj.rocks.Hello
+$ *mvn compile*
+$ *javap -classpath target/classes/.:target/test-classes/. com.aspectj.rocks.Hello*
 Compiled from "Hello.java"
 public class com.aspectj.rocks.Hello extends java.lang.Object implements org.springframework.beans.factory.aspectj.ConfigurableObject{
     transient javax.persistence.EntityManager entityManager;
@@ -1817,9 +1823,9 @@ You'll notice the `Hello_Roo_ToString.aj` and `Hello_Roo_JavaBean.aj`
 files are instantly and automatically updated by Roo to include your new
 field. Now go and write your own `toString` method in the `.java` file.
 Notice Roo deletes the `Hello_Roo_ToString.aj` file, as it detects your
-`toString `method should take priority over a generated `toString`
+`toString` method should take priority over a generated `toString`
 method. But let's say you want a generated `toString` as well, so change
-the `Hello.java`'s `@RooToString` annotation to read
+the `Hello.java`pass:['s] `@RooToString` annotation to read
 `@RooToString(toStringMethod="generatedToString")`. Now you'll notice
 the `Hello_Roo_ToString.aj` file is immediately re-created, but this
 time it introduces a `generatedToString` method instead of the original
@@ -1908,11 +1914,11 @@ freeing you from even needing to know which annotation(s) should be
 used.
 
 Let's consider a simple entity that has been created using the
-link:#command-index-entity-jpa[link:#command-index-entity[entity] jpa]
+link:#command-index-entity-jpa[entity jpa]
 command and following it with a single
 link:#command-index-field-commands[field] command:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 package com.springsource.vote.domain;
 
@@ -1982,7 +1988,7 @@ relationships involving collections. The method also formats Java
 your own `toString()` method by hand and Roo will automatically remove
 its generated `toString()` method, even if you still have the
 `@RooToString` annotation present. You can of course also remove the
-`@RooToString `annotation if you no longer wish to have a generated
+`@RooToString` annotation if you no longer wish to have a generated
 `toString()` method.
 
 Before leaving this discussion on entities, it's worth mentioning that
@@ -2222,9 +2228,8 @@ PackagingProvider, so that it's detected by Roo's
 ** Run "`mvn install`" in the addon directory to create the OSGi bundle.
 ** Change to the directory of the project that will be using the custom
 packaging provider.
-** Run "`osgi start --url
-                file:///path/to/addon/project/target/com.example.foo-0.1.0.BUILD-SNAPSHOT.jar`"
-** Run "`osgi scr list`"; your custom PackagingProvider component should
+** Run `pass:["osgi start --url file://path/to/addon/project/target/com.example.foo-0.1.0.BUILD-SNAPSHOT.jar"]`
+** Run `pass:["osgi scr list"]`; your custom PackagingProvider component should
 appear somewhere in the list.
 * Whenever you run the "project" or "module create" commands, your
 custom PackagingProvider's ID should appear in the list of possible
@@ -2248,7 +2253,7 @@ used as follows:
 * Change into the "ui/mvc"" directory.
 * Run "`mvn tomcat:run`" or "`mvn
           jetty:run`".
-* Point your browser to `http://localhost:8080/mvc`.
+* Point your browser to `pass:[http://localhost:8080/mvc]`.
 
 The rest of this section assumes that you are familiar with multi-module
 projects, in particular the difference between POM inheritance (one POM
@@ -2298,18 +2303,18 @@ Roo's multi-module support has the following limitations:
 * Limited automatic creation of dependencies between modules. If your
 project needs any inter-module dependencies beyond those added by Roo,
 simply create them using the
-"link:#command-index-dependency-add[`dependency
-              add`]" command.
+"link:#command-index-dependency-add[dependency
+              add]" command.
 * No command for removing a module; this is in line with the absence of
 commands for removing other project artifacts such as classes, enums,
 JSPs, and POMs. In any event, it's simple enough to do manually; just
-delete the directory, delete the relevant "`<module>`" element from the
+delete the directory, delete the relevant pass:["]`<module>`pass:["] element from the
 parent module's POM, and delete the module as a dependency from any
 other modules' POMs.
 * One area where there's considerable scope for improvement is in the
 management of dependencies in general. In an ideal Maven project,
-dependency information in the form of both "`dependencyManagement`"
-entries and live "`dependency`" elements themselves would be pushed as
+dependency information in the form of both pass:["]`dependencyManagement`pass:["]
+entries and live pass:["]`dependency`pass:["] elements themselves would be pushed as
 far up the POM inheritance hierarchy as possible, in order to minimise
 duplication and reduce the incidence of version conflicts. As it stands,
 Roo adds and removes dependencies to and from the currently focused
@@ -2327,7 +2332,7 @@ arbitrary values, as this could require too many other changes to the
 user’s project. However, Roo does change a module's packaging in two
 specific circumstances:
 ** Adding a module to the currently focused module changes the latter's
-packaging to "pom", as described above under the "`module create`"
+packaging to "pom", as described above under the pass:["]`module create`pass:["]
 command.
 ** Adding web support to a module changes its packaging to "war".
 * Roo does not create any parent-child relationships between different
@@ -2376,8 +2381,8 @@ Let's start by looking at file conventions. Roo will never change a
 command. In particular, Roo will not modify a `.java` file just because
 you apply an annotation. Roo also handles .xml files in the same manner.
 There are only two file types that may be created, updated or deleted by
-Roo in an automatic manner, those being `.jspx` files and also AspectJ
-files which match the `*_Roo_*.aj` wildcard.
+Roo in an automatic manner, those being link:#jsp-views[`.jspx`] files and also AspectJ
+files which match the `pass:[*_Roo_*.aj]` wildcard.
 
 In terms of the AspectJ files, Roo operates in a very specific manner. A
 given AspectJ filename indicates the "target type" the members will be
@@ -2697,7 +2702,7 @@ maintaining two build system environments.
 We have already covered some of Roo's file system conventions in the
 link:#usage-usability[Usability Philosophy] section. In summary Roo will
 automatically monitor the file system for changes and code generate only
-those files which match the `*_Roo_*.aj` wildcard. It will also code
+those files which match the `pass:[*_Roo_*.aj]` wildcard. It will also code
 generate those link:#jsp-views[JSPs] associated with
 link:#controller-commands[scaffolded MVC controllers] that have the
 annotation `@RooWebScaffold`.
@@ -2868,9 +2873,9 @@ known add-ons you can use the link:#command-index-addon-list[addon list]
 or link:#command-index-addon-search[addon search] command. This lists
 all add-ons that are in the RooBot-maintained index mentioned above:
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> addon search
+roo> *addon search*
 1234 found, sorted by rank; T = trusted developer; R = Roo 1.1 compatible
 ID T R DESCRIPTION -------------------------------------------------------------
 01 Y Y 2.3.0.0001 This bundle wraps the standard Maven artifact:
@@ -2892,7 +2897,7 @@ lines per result, perform filtering and so on. Just use --TAB as usual
 to see these options.
 
 If you can't see the add-on you're looking for, you can repeat the
-command with the optional `--refresh `option. This will refresh your
+command with the optional `--refresh` option. This will refresh your
 local RooBot index from our server.
 
 To review details about a specific add-on, use the
@@ -2905,16 +2910,17 @@ result "ID" number (to the left hand side of each row) rather than
 typing out a bundle symbolic name. Let's try this. To view details about
 the second add-on listed, enter this command:
 
+[subs=quotes]
 --------------------------------------
-roo> addon info id --searchResultId 02
+roo> *addon info id* --searchResultId 02
 --------------------------------------
 
 An example of the output of link:#command-index-addon-info-id[addon info
 id] is shown below:
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> addon info id --searchResultId 02
+roo> *addon info id* --searchResultId 02
 Name.........: Hades - Roo addon
 BSN..........: org.synyx.hades.roo.addon
 Version......: 0.3.0.RELEASE
@@ -2951,9 +2957,9 @@ need and instruct you which command to use to install it).
 If you decide to install a specific add-on, simply use the
 link:#command-index-addon-install-id[addon install id] command:
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> addon install id --searchResultId 02
+roo> *addon install id* --searchResultId 02
 Successfully installed add-on: org.synyx.hades.roo.addon
 [Hint] Please consider rating this add-on with the following command:
 [Hint] addon feedback bundle --bundleSymbolicName org.synyx.hades.roo.addon --rating ... --comment "..."
@@ -2987,9 +2993,9 @@ command which allows you to define the desired stability level which is
 taken into account when performing the
 link:#command-index-addon-upgrade-all[addon upgrade all] command:
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> addon upgrade settings --addonStabilityLevel ANY|MILESTONE|RELEASE|RELEASE_CANDIDATE
+roo> addon upgrade settings --addonStabilityLevel ANY|MILESTONE|*RELEASE*|RELEASE_CANDIDATE
 ----
 
 If you don't define a stability level through the addon upgrade settings
@@ -3015,9 +3021,9 @@ add-on, just use the link:#command-index-addon-remove[addon remove]
 command. On this occasion we'll use the bundle symbolic name (which is
 available via TAB completion as is usual with Roo):
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> addon remove --bundleSymbolicName de.saxsys.roo.equals.addon
+roo> *addon remove* --bundleSymbolicName de.saxsys.roo.equals.addon
 Successfully removed add-on: de.saxsys.roo.equals.addon
 ----
 
@@ -3029,10 +3035,10 @@ internal to your organization, or perhaps it's simply not ready for
 public consumption.
 
 Even if an add-on is not listed in RooBot, you can still install it. The
-link:#command-index-osgi-obr-url-add[osgi obr url add] command can be
+"link:#command-index-osgi-obr-url-add[osgi obr url add]" command can be
 used to add the add-on's OBR URL to your Roo installation. This command
-is typically followed by an link:#command-index-osgi-obr-start[osgi obr
-start] command to download and start the add-on. Importantly, the
+is typically followed by an "link:#command-index-osgi-obr-start[osgi obr
+start]" command to download and start the add-on. Importantly, the
 additional security verifications performed by RooBot are skipped given
 RooBot is not used with these commands (or other related commands such
 as link:#command-index-osgi-start[osgi start]). That means bundles you
@@ -3151,7 +3157,7 @@ also think about the absence of executable code anywhere in your project
 classpath, there is no scope for possible Roo bugs to affect your
 project, and there is no risk of upgrading to a later version of Roo.
 
-Because we recommend people check their Roo-generated `*_Roo_*.aj` files
+Because we recommend people check their Roo-generated `pass:[*_Roo_*.aj]` files
 into source control, you don't even need to load Roo to perform a build
 of your project. The source-level annotation library referred to in the
 previous paragraph is in a public Maven repository and will
@@ -3160,13 +3166,13 @@ present. This means Roo is not part of your build process and your
 normal source control system branching and tagging processes will work.
 
 This also means that a project can "stop using Roo" by simply never
-loading the Roo shell again. Because the `*_Roo_*.aj` files are written
+loading the Roo shell again. Because the `pass:[*_Roo_*.aj]` files are written
 to disk by the Roo shell when it last ran, even if it's never loaded
 again those files will still be present. The removal procedures in this
 chapter therefore focus on a more complete removal, in that you no
-longer even want the `*_Roo_*.aj` files any more. That said, there's
+longer even want the `pass:[*_Roo_*.aj]` files any more. That said, there's
 nothing wrong with just never loading Roo again and keeping the
-`*_Roo_*.aj` files. The only possible problem of adopting the "never
+`pass:[*_Roo_*.aj]` files. The only possible problem of adopting the "never
 load Roo again" approach is that someone might load Roo again and those
 files will be updated to reflect the latest optimisations that Roo can
 provide for you.
@@ -3175,7 +3181,7 @@ provide for you.
 === Pros and Cons of Removing Roo
 
 By removing Roo, you eliminate the Roo-generated source files from your
-project. These are inter-type declarations stored in `*_Roo_*.aj` files.
+project. These are inter-type declarations stored in `pass:[*_Roo_*.aj]` files.
 You also remove the Roo annotation library from your project. This might
 be attractive if you've made a decision to no longer use Roo for some
 reason, or you'd like to ship the finished project to your client and
@@ -3187,7 +3193,7 @@ barrier to adopting Roo for real projects in the first place.
 Even though it's easy to do so, there are downsides of removing Roo from
 your project:
 
-* __Cluttered Java classes__: If the `*_Roo_*.aj` files are removed,
+* __Cluttered Java classes__: If the `pass:[*_Roo_*.aj]` files are removed,
 their contents need to go somewhere. That somewhere is into your `.java`
 source files. This means your `.java` source files will be considerably
 longer and contain code that no developer actually wrote. When
@@ -3206,14 +3212,14 @@ detects your change and appropriately updates the generated code. If you
 remove Roo, you'll lose this valuable round-trip support and be doing a
 lot more tedious work by hand.
 * __No optimisations to generated files__: With each version of Roo we
-make improvements to the automatically-created `*_Roo_*.aj` files. These
-improvements are automatically made to your `*_Roo_*.aj` files when you
+make improvements to the automatically-created `pass:[*_Roo_*.aj]` files. These
+improvements are automatically made to your `pass:[*_Roo_*.aj]` files when you
 load a new version of Roo. These improvements occasionally fix bugs, but
 more often provide new features and implement existing features more
 efficiently (remember eliminating engineering trade-offs and therefore
 maximising efficiency is a major objective in our
 link:#background-mission[mission statement]). If you remove the
-`*_Roo_*.aj` files, you'll receive the code as of that date and you'll
+`pass:[*_Roo_*.aj]` files, you'll receive the code as of that date and you'll
 miss out on further improvements we make.
 * __Loss of Roo commands__: There are dozens of Roo commands available
 to assist you adapt to evolving project requirements. Next month you
@@ -3260,14 +3266,14 @@ directory and symbolic link. This section instead focuses on the removal
 from your projects.
 
 As mentioned above, a simple way of stopping to use Roo is to simply
-never load it again. The `*_Roo_*.aj` files will still be on disk and
+never load it again. The `pass:[*_Roo_*.aj]` files will still be on disk and
 your project will continue to work regardless of whether the Roo shell
 is never launched again. You can even uninstall the Roo system from your
 computer and your project will still work. The advantage of this
 approach is you haven't lost most of the benefits of using Roo and it's
 very easy to simply reload the Roo shell again in the future. This
 section covers the more complete removal option should you not even want
-the `*_Roo_*.aj` files any more.
+the `pass:[*_Roo_*.aj]` files any more.
 
 Please be aware that enhancement request
 https://jira.springsource.org/browse/ROO-222[ROO-222] exists to replace
@@ -3296,7 +3302,7 @@ that you have a recent version of AJDT installed. After selecting the
 push-in refactor menu option, a list of all Roo inter-type declarations
 will be displayed. Simply click OK. AJDT will have now moved all of the
 Roo inter-type declarations into your standard `.java` files. The old
-`*_Roo_*.aj` files will have automatically been deleted.
+`pass:[*_Roo_*.aj]` files will have automatically been deleted.
 
 [[removing-step-by-step-2]]
 ==== Step 2: Annotation Source Code Removal
@@ -3306,8 +3312,8 @@ files will still have `@Roo` annotations within them. In addition, there
 will be `import` directives at the top of your `.java` files to import
 those `@Roo` annotations. You can easily remove these unwanted members
 by clicking Search > Search > File Search, containing text
-"`\n.*[@\.]Roo[^t_]+?.*$`" (without the quotes), file name pattern
-"`*.java`" (without the quotes), ticking the "Regular expression" and
+pass:["]`\n.pass:[*][@\.]Roo[^t_]+?.pass:[*]$`pass:["] (without the quotes), file name pattern
+pass:["]`*.java`pass:["] (without the quotes), ticking the "Regular expression" and
 "Case sensitive" check-boxes and clicking "Replace". When the next
 window appears and asks you for a replacement pattern, leave it blank
 and continue. All of the Roo statements will have now been removed. We
@@ -3399,8 +3405,8 @@ infrastructure-related features (like
 "link:#command-index-poll-status[poll status]" or
 "link:#command-index-metadata-for-id[metadata for id]") or sometimes
 aggregate the features provided by several individual base add-ons (e.g.
-"link:#command-index-entity-jpa[link:#command-index-entity[entity] jpa]
---testAutomatically").
+pass:["]`link:#command-index-entity-jpa[entity jpa]
+--testAutomatically`pass:["]).
 
 Add-ons that do not ship with Spring Roo but are nevertheless about to
 be used with it are known as "installable add-ons" (these were
@@ -3484,7 +3490,7 @@ Database Options:
 * http://db.apache.org/derby/[Apache Derby] (Java DB)
 * http://www.firebirdsql.org/[Firebird]
 
-* The JDBC driver dependencies for these databases are not available in
+pass:[*] The JDBC driver dependencies for these databases are not available in
 public Maven repositories. As such, Roo configures a default dependency
 in your project `pom.xml`. You need to adjust it according to your
 specific version of your database driver available in your private Maven
@@ -3536,7 +3542,7 @@ Commons Pool
 based on your choice of ORM provider and Database. Here is an example
 for the EclipseLink ORM provider and HSQL database:
 +
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <persistence xmlns="http://java.sun.com/xml/ns/persistence" 
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" 
@@ -3592,7 +3598,7 @@ properties file or use any of these commands at any time.
 4.  A DataSource definition and a transaction manager are added to the
 Spring application context:
 +
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 [...]
 <bean class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" id="dataSource">
@@ -3643,6 +3649,7 @@ shell):
 
 1.  Person.java:
 +
+[source,aj]
 ---------------------
 @RooJavaBean
 @RooToString
@@ -3698,7 +3705,7 @@ implementation of your choice will create a table definition in your
 database for this type. Once fields are added to the Person type, they
 will be added as columns to the Person table.
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Person_Roo_Jpa_Entity {
     
@@ -3741,7 +3748,7 @@ triggers the creation of the Person_Roo_Jpa_ActiveRecord.aj ITD. This
 contains a number of persistence related CRUD methods into your Person
 type via the ITD:
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Person_Roo_Jpa_ActiveRecord {
     
@@ -3828,12 +3835,13 @@ Similar to the @RooToString annotation you can change the default method
 name for all persistence-related methods generated through the
 @RooJpaActiveRecord annotation. For example:
 +
--------------------------------------------
+[source,aj,options=nowrap]
+----
 @RooJpaActiveRecord(persistMethod = "save")
--------------------------------------------
+----
 
-The link:#command-index-entity-jpa[link:#command-index-entity[entity]
-jpa] command offers a number of optional (but very useful) attributes
+The link:#command-index-entity-jpa[entity jpa] 
+command offers a number of optional (but very useful) attributes
 worth mentioning. For example the *--testAutomatically* attribute can be
 used to have Roo to generate and maintain integration tests for the
 Person type (and the persistence methods generated as part of it).
@@ -3867,11 +3875,12 @@ Managed SRC_MAIN_JAVA/com/foo/Person_Roo_ToString.aj
 
 ... yields the following field definition in Person.java:
 
----------------------------------
+[source,aj]
+----
 @Temporal(TemporalType.TIMESTAMP)
 @DateTimeFormat(style = "M-")
 private Date birthDay;
----------------------------------
+----
 
 You'll notice that the @Temporal annotation is part of the JPA
 specification and defines how date values are persisted to and retrieved
@@ -3907,6 +3916,7 @@ will create a JPA many-to-one (default) or one-to-one relationship:
 The field definition added to the Person type contains the appropriate
 JPA annotations:
 +
+[source,aj]
 ----------------
 @ManyToOne
 @JoinColumn
@@ -3917,6 +3927,7 @@ The optional --cardinality command attribute allows you to define a
 one-to-one relationship (via JPAs @OneToOne annotation) between Person
 and Car if you wish:
 +
+[source,aj]
 ----------------
 @OneToOne
 @JoinColumn
@@ -3931,7 +3942,7 @@ they have should also be deleted, but not vice versa (i.e. you should be
 able to delete a Car without deleting its owner). In the database, the
 foreign key should be in the "car" table.
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @Entity
 @RooJavaBean
@@ -3945,7 +3956,7 @@ public class Person {
 }
 ----
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @Entity
 @RooJavaBean
@@ -3965,7 +3976,7 @@ transaction will roll back and you will see an exception due it being
 referenced by a person. To overcome this situation you can add the
 following method to your Car.java:
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @PreRemove
 private void preRemove() {
@@ -3987,7 +3998,7 @@ field set --fieldName cars --type com.foo.Car
 The field definition added to the Person type contains the appropriate
 JPA annotation:
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @ManyToMany(cascade = CascadeType.ALL)
 private Set<Car> cars = new HashSet<Car>();
@@ -3999,7 +4010,7 @@ link:#command-index-field-set[field set] commands for both sides of the
 relationship.
 
 Like the
-link:#command-index-entity-jpa[link:#command-index-entity[entity] jpa]
+link:#command-index-entity-jpa[entity jpa]
 command, the link:#command-index-field-commands[field] command offeres a
 number of optional (but very useful) attributes worth mentioning. For
 example, you can change the field / column name translations with the
@@ -4048,7 +4059,8 @@ so on.
 [[base-dbre-metadata]]
 ===== Obtaining database metadata
 
-The DBRE commands (see ? below) make live connections to the database
+The DBRE commands (see link:#dbre-commands[Section 9.3, “DBRE Add-On commands”] below)
+make live connections to the database
 configured in your Roo project and obtain database metadata from the
 JDBC driver's implementation of the standard
 http://download.oracle.com/javase/6/docs/api/java/sql/DatabaseMetaData.html[java.sql.DatabaseMetadata]
@@ -4057,7 +4069,8 @@ information is converted to XML and is stored and maintained in the
 dbre.xml file in the src/main/resources directory of your project. DBRE
 creates JPA entities based on the table names in your database and
 fields based on the column names in the tables. Simple and composite
-primary keys are supported (see ? for more details) and relationships
+primary keys are supported (see link:#dbre-composite-keys[Section 9.5.2, “Composite primary keys”] 
+for more details) and relationships
 between entities are also created using the imported and exported key
 information obtained from the metadata.
 
@@ -4097,8 +4110,9 @@ http://www.microsoft.com/sqlserver[MS SQL], and
 http://www.postgresql.org/[PostgreSQL]. These drivers are auto-detected
 by Roo and you will be prompted by the Roo shell to download your
 configured database's JDBC driver when you first issue the database
-introspect or database reverse engineer commands (see ? below). For
-example, if you have configured your Roo project to use a MySQL
+introspect or database reverse engineer commands 
+(see link:#dbre-commands[Section 9.3, “DBRE Add-On commands”] below).
+For example, if you have configured your Roo project to use a MySQL
 database, when the database introspect command is first issued, you will
 see the following console output:
 
@@ -4144,7 +4158,7 @@ roo> addon install bundle --bundleSymbolicName org.springframework.roo.wrapping.
 
 The JDBC driver for MySQL is immediately available for you to use. You
 can now enter the database introspect and database reverse engineer
-commands (see ? below).
+commands (see link:#dbre-commands[Section 9.3, “DBRE Add-On commands”] below).
 
 **Note**: currently there are no open-source JDBC drivers for Oracle or
 DB2 and Roo does not provide OSGi drivers for these databases. If you
@@ -4171,10 +4185,10 @@ link:#command-index-jpa-setup[jpa setup] command and installed all the
 JDBC drivers, you can introspect and reverse engineer the database
 configured for your project. DBRE contains two commands:
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 .1 
 ----
-roo> database introspect --schema --file --enableViews
+roo> *database introspect --schema* --file --enableViews
 ----
 
 This command displays the database structure, or schema, in XML format.
@@ -4195,9 +4209,9 @@ required but Roo's tab assist feature will display "no-schema-required".
 * PostgreSQL upper case schema names are not supported.
 
 .2 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> database reverse engineer --schema --package --activeRecord --repository
+roo> *database reverse engineer --schema* --package --activeRecord --repository
 				--service --testAutomatically --enableViews
 				--includeTables --excludeTables
 				--includeNonPortableAttributes
@@ -4306,7 +4320,7 @@ columns of the matching employee table will cause fields to be created
 in the entity's DbManaged ITD. An example of a DBRE-created entity is as
 follows:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -4322,7 +4336,7 @@ from a primary key column. For example, if the employee table has
 mandatory employee name and employee number columns, and a nullable age
 column the ITD could look like this:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Employee_Roo_DbManaged {
     
@@ -4398,7 +4412,7 @@ line_item table has two primary keys, line_item_id and order_id. DBRE
 will create the LineItem entity class and LineItemPK identifier class as
 follows:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -4408,7 +4422,7 @@ public class LineItem {
 }
 ----
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooIdentifier(dbManaged = true)
 public class LineItemPK {
@@ -4418,7 +4432,7 @@ public class LineItemPK {
 Roo will automatically create the JPA entity ITD containing a field
 annotated with @EmbeddedId with type LineItemPK as follows:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect LineItem_Roo_JpaEntity {
     
@@ -4444,7 +4458,7 @@ privileged aspect LineItem_Roo_JpaEntity {
 and an identifier ITD for the LineItemPK class containing the primary
 key fields and the type annotation for @Embeddable, as follows:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect LineItemPK_Roo_Identifier {
     
@@ -4502,7 +4516,7 @@ association. DBRE will designate which entities are the owning and
 inverse sides of the association respectively and annotate the fields
 accordingly as shown in the following code snippets:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Product_Roo_DbManaged {
     
@@ -4518,7 +4532,7 @@ privileged aspect Product_Roo_DbManaged {
 }
 ----
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Supplier_Roo_DbManaged {
     
@@ -4532,7 +4546,7 @@ privileged aspect Supplier_Roo_DbManaged {
 DBRE will also create many-to-many associations where the two tables
 each have composite primary keys. For example:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Foo_Roo_DbManaged {
 
@@ -4561,7 +4575,7 @@ For example, the database contains a customer table and an address table
 and a customer can only have one address. The following code snippets
 show the one-to-one mappings:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Address_Roo_DbManaged {
     
@@ -4573,7 +4587,7 @@ privileged aspect Address_Roo_DbManaged {
 }
 ----
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Customer_Roo_DbManaged {
     
@@ -4591,7 +4605,7 @@ If the foreign key column is part of the primary key (or part of an
 index) then the relationship between the tables will be one to many. An
 example is shown below:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Order_Roo_DbManaged {
     
@@ -4610,7 +4624,7 @@ entities in the Order entity in the example above, DBRE will also create
 a corresponding many-to-one association in the LineItem entity, as
 follows:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect LineItem_Roo_DbManaged {
     
@@ -4630,7 +4644,7 @@ entity has more than one association to another entity, the field names
 will be created with unique names. The following code snippet
 illustrates this:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Foo_Roo_DbManaged {
 
@@ -4693,7 +4707,8 @@ oracle.jdbc.OracleDriver' to be displayed*
 +
 This is due to the Oracle JDBC driver not having been installed. The
 driver must be installed if you have installed Roo for the first time.
-See ?. This also applies to other databases, for example, HSQL and H2.
+See link:#dbre_installation[Section 9.2, “Installation”]. 
+This also applies to other databases, for example, HSQL and H2.
 * *Executing the database introspect or database reverse engineer
 commands with the Firebird database configured causes the message
 'Exception in thread "JLine Shell" java.lang.NoClassDefFoundError:
@@ -4709,7 +4724,7 @@ osgi start --url
         http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.connector/1.0.0010/org.springframework.roo.wrapping.connector-1.0.0010.jar     
 ----
 +
-Re-install the Firebird driver. See ?.
+Re-install the Firebird driver. See link:#dbre_installation[Section 9.2, “Installation”].
 * *The error message 'Caused by: org.hibernate.HibernateException:
 Missing sequence or table: hibernate_sequence' appears when starting
 Tomcat*
@@ -4754,10 +4769,12 @@ With version 1.2.0 Spring Roo offers support for specific application
 layering tailored to the needs of the application. This section provides
 an overview of Roo's support for service and repository layers.
 
+****
 Note: This section provides an overview of the application layering
 options Spring Roo offers since the *1.2.0.M1* release. It does not
 discuss the merits of different approaches to architecting enterprise
 applications.
+****
 
 [[layer-big-picture]]
 === The Big Picture
@@ -4796,9 +4813,9 @@ Active record-style JPA Entities have been the default since the first
 release of Spring Roo and will remain so. In order to configure your
 project for JPA persistence, you can run the jpa setup command:
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+roo> *jpa setup* --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 ----
 
 This configures your project to use the Hibername object relational
@@ -4810,9 +4827,9 @@ Active record-style JPA entities supported by Roo need to have a
 field along with its accessor and mutator, In addition this annotation
 creates the typical CRUD methods to support data access.
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> entity jpa --class ~.domain.Pizza
+roo> *entity jpa* --class ~.domain.Pizza
 ----
 
 This command will create a Pizza domain type along with active
@@ -4821,7 +4838,7 @@ The following example also contains a number of fields which can be
 added through the link:#command-index-field-commands[field] command via
 the Roo shell.
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -4859,9 +4876,9 @@ project for JPA persistence via the link:#command-index-jpa-setup[jpa
 setup] command, this functionality is automatically provided by
 annotating the domain type with Roo's *@RooJpaEntity* annotation.
 
-[options=nowrap]
+[options=nowrap,subs=quotes]
 ----
-roo> entity jpa --class ~.domain.Pizza --activeRecord false
+roo> *entity jpa* --class ~.domain.Pizza *--activeRecord false*
 ----
 
 By defining --activeRecord false you can opt out of the otherwise
@@ -4869,7 +4886,7 @@ default Active Record style. The following example also contains a
 number of fields which can be added through the
 link:#command-index-field-commands[field] command via the Roo shell.
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -4894,15 +4911,15 @@ With a domain type in place you can now create a new repository for this
 type by using the link:#command-index-repository-jpa[repository jpa]
 command:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-roo> repository jpa --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
+roo> *repository jpa* --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
 ----
 
 This will create a simple interface definition which leverages Spring
 Data JPA:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooJpaRepository(domainType = Pizza.class)
 public interface PizzaRepository {
@@ -4919,7 +4936,7 @@ creation of a fairly trivial AspectJ ITD which adds an extends statement
 to the PizzaRepository interface resulting in the equivalent of this
 interface definition:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 public interface PizzaRepository extends JpaRepository<Pizza, Long> {}
 ----
@@ -4944,9 +4961,9 @@ project.
 To configure a project for MongoDB persistence you can use the
 link:#command-index-mongo-setup[mongo setup] command:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-roo> mongo setup
+roo> *mongo setup*
 ----
 
 This will configure your Spring Application context to use a MongoDB
@@ -4964,9 +4981,9 @@ link:#command-index-entity-mongo[entity mongo] and
 link:#command-index-repository-mongo[repository mongo] commands become
 available:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-roo> entity mongo --class ~.domain.Pizza
+roo> *entity mongo* --class ~.domain.Pizza
 ----
 
 This command will create a Pizza domain type annotated with
@@ -4976,7 +4993,7 @@ well as its accessor and mutator. The following example also contain a
 number of fields which can be added through the 
 link:#command-index-field-commands[field] command via the Roo shell.
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -5001,19 +5018,19 @@ public class Pizza {
 ===== Repository
 
 With a domain type in place you can now create a new repository for this type by using the
-link:#command-index-repository-mongo[link:#command-index-repository-jpa[repository]
-mongo] command (or by applying the @RooMongoRepository annotation to an
+link:#command-index-repository-mongo[repository mongo] 
+command (or by applying the @RooMongoRepository annotation to an
 arbitrary interface:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-roo> repository mongo --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
+roo> *repository mongo* --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
 ----
 
 This will create a simple interface definition which leverages
 http://projects.spring.io/spring-data-mongodb/[Spring Data MongoDB]:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooMongoRepository(domainType = Pizza.class)
 public interface PizzaRepository {
@@ -5041,17 +5058,17 @@ Similar to applications which use JPA persistence (see
 http://blog.springsource.com/2011/08/30/using-postgres-on-cloud-foundry/[this
 blog] for details on using JPA with Postgres) MongoDB applications can
 be easily deployed to http://cloudfoundry.com/[VMware CloudFoundry]. The
-following script provides an example of the Plink:#beginning[izza Shop
+following script provides an example of the link:#beginning[Pizza Shop
 sample application] which has been adjusted for use with a
 MongoDB-backed repository layer:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
 // Create a new project.
 project com.springsource.pizzashop
 
 // Create configuration for MongoDB peristence 
-mongo setup --cloudFoundry true
+mongo setup *--cloudFoundry true*
 
 // Define domain model.
 entity mongo --class ~.domain.Base --testAutomatically
@@ -5090,8 +5107,8 @@ perform package
 // Deploy and start the application in CloudFoundry
 cloud foundry login 
 cloud foundry deploy --appName roo-pizzashop --path /target/pizzashop-0.1.0.BUILD-SNAPSHOT.war --memory 512
-cloud foundry create service --serviceName pizzashop-mongo --serviceType mongodb
-cloud foundry bind service --serviceName pizzashop-mongo --appName roo-pizzashop
+*cloud foundry create service --serviceName pizzashop-mongo --serviceType mongodb*
+*cloud foundry bind service --serviceName pizzashop-mongo --appName roo-pizzashop*
 cloud foundry start app --appName roo-pizzashop
 ----
 
@@ -5103,7 +5120,7 @@ application. By default, Roo will create a service interface (and
 implementation) for one or more domain entities. If a
 persistence-providing layer such as Roo's
 link:#architecture-entities[default entity layer] or a
-link:#repository-layer[repository layer] is present for a given domain
+link:#jpa-repository[repository layer] is present for a given domain
 entity, the service layer will expose the CRUD functionality provided by
 this persistence layer through its interface and implementation.
 
@@ -5117,11 +5134,11 @@ chapter].
 
 The integration of a services layer into a Roo project is similar to the
 repository layer by using the @RooService annotation directly or the
-link:#command-index-service[service] command in the Roo shell:
+link:#command-index-service-commands[service] command in the Roo shell:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-roo> service --interface ~.service.PizzaService --entity ~.domain.Pizza
+roo> *service* --interface ~.service.PizzaService --entity ~.domain.Pizza
 ----
 
 This command will create the PizzaService interface in the defined
@@ -5129,7 +5146,7 @@ package and additionally a PizzaServiceImpl in the same package (the
 name and package of the PizzaServiceImpl can be customized via the
 optional --class attribute).
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooService(domainTypes = { Pizza.class })
 public interface PizzaService {
@@ -5152,7 +5169,7 @@ void deletePizza(Pizza pizza);
 
 Similarly, the PizzaServiceImpl is rather empty:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 public class PizzaServiceImpl implements PizzaService {
 }
@@ -5163,7 +5180,7 @@ Through the AspectJ ITD the PizzaServiceImpl type is annotated with the
 ITD will introduce the following methods and fields into the target
 type:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @Autowired PizzaRepository pizzaRepository;
     
@@ -5205,13 +5222,17 @@ will simply provide method stubs.
 [[base-web]]
 == Web MVC Add-On
 
+****
 __CSS considerations__: The Web UI has been tested successfully with
 FireFox, Opera, Safari, Chrome, and IE. Given that IE6 is not supported
 any more by most players in the market, it has a number of severe
 technical limitations and it has a
 http://en.wikipedia.org/wiki/Internet_Explorer_6#Criticism[fast
 declining user base] Spring Roo does not support IE6. Your mileage may
-vary - there will likely be issues with CSS support.The Web MVC add-ons
+vary - there will likely be issues with CSS support.
+****
+
+The Web MVC add-ons
 allow you to conveniently scaffold Spring MVC controllers and JSP(X)
 views for an existing domain model. Currently this domain model is
 derived from the Roo supported JPA integration through the entity jpa
@@ -5253,13 +5274,13 @@ round-tripping model introduced in Roo 1.1.
 The Web MVC addon offers a number of commands to generate and maintain
 various Web artifacts: 
 
-* `~.Person roo> web mvc setup`
+* `~.Person roo> *web mvc setup*`
 +
 The first time the link:#command-index-web-mvc-setup[web mvc setup]
 command is executed Roo will install all artifacts required for the Web
 UI.
 
-* `~.Person roo> web mvc scaffold --class com.foo.web.PersonController`
+* `~.Person roo> *web mvc scaffold* --class com.foo.web.PersonController`
 +
 The controller scaffold command will create a Spring MVC controller for
 the Person entity with the following method signatures:
@@ -5333,7 +5354,7 @@ comma-separated list (i.e.: --disallowedOperations
 delete,update,create). You can also specify which methods should be
 generated and which not in the PersonController.java source:
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooWebScaffold(path = "people", formBackingObject = Person.class, create = false, update = false, delete = false)
 @RequestMapping("/people")
@@ -5352,7 +5373,7 @@ Person entity. One with the default path (/people) for public access
 admin access (/admin/people). This way you can easily secure the
 /admin/* path with the Spring Security addon.
 
-* `roo> web mvc all --package ~.web`
+* `roo> *web mvc all* --package ~.web`
 +
 The link:#command-index-web-mvc-all[web mvc all] command provides a
 convenient way to quickly generate Web MVC controllers for all JPA
@@ -5362,7 +5383,7 @@ be generated. While the web mvc all command is convenient, it does not
 give you the same level of control compared to the
 link:#command-index-web-mvc-scaffold[web mvc scaffold] command.
 
-* `roo> web mvc controller --class com.foo.web.CarController --preferredMapping /public/car`
+* `roo> *web mvc controller* --class com.foo.web.CarController --preferredMapping /public/car`
 
  Created SRC_MAIN_JAVA/com/foo/web/CarController.java
  Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car
@@ -5379,7 +5400,7 @@ controller to help you get started for developing a custom functionality
 by stubbing a simple __get__(), __post__() and __index__() method inside
 the controller:
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping("/public/car/**")
 @Controller
@@ -5406,13 +5427,13 @@ In addition, this controller is registered in the Web MVC menu and the
 application Tiles definition. Furthermore, a simple view (under
 WEB-INF/views/public/car/index.jspx).
 
-* `roo> web mvc finder add --class ~.web.PersonController --formBackingType ~.domain.Person`
+* `roo> *web mvc finder add* --class ~.web.PersonController --formBackingType ~.domain.Person`
 +
 The link:#command-index-web-mvc-finder-add[web mvc finder add] command
 used from the Roo shell will introdroduce the *@RooWebFinder* annotation
 into the specified target type.
 
-* `roo> web mvc finder all`
+* `roo> *web mvc finder all*`
 +
 The link:#command-index-web-mvc-finder-all[web mvc finder all] command
 used from the Roo shell will introdroduce the *@RooWebFinder*
@@ -5426,7 +5447,7 @@ Whenever a controller is created for the first time in an application,
 Roo will also install an application-wide ConversionService and
 configure it for use in webmvc-config.xml as follows:
 
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <mvc:annotation-driven conversion-service="applicationConversionService"/>
 ...
@@ -5442,7 +5463,7 @@ documentation.
 The ApplicationConversionServiceFactoryBean is a Roo-managed Java class
 and it looks like this:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooConversionService
 public class ApplicationConversionServiceFactoryBean extends FormattingConversionServiceFactoryBean {
@@ -5465,17 +5486,19 @@ association need to be displayed in one of the JSP views. Rather than
 using the toString() method for that, a Converter defines the formatting
 logic for how to present the associated entity as a String.
 
+****
 Note, a custom written or pushed in converter method needs to be
 registered manually via the _installFormatters_ method which is already
 present in your _ApplicationConversionServiceFactoryBean.java_ source
 code.
+****
 
 In some cases you may wish to customize how a specific entity is
 formatted as a String in JSP views. For example suppose we have an
 entity called Vote. To customize how it is displayed in the JSP views
 add a method like this:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooConversionService
 public class ApplicationConversionServiceFactoryBean extends FormattingConversionServiceFactoryBean {
@@ -5541,7 +5564,7 @@ WEB-INF/views are maintained in addition to the menu.jspx.
 Here is an example of a typical roo managed jspx file (i.e.:
 WEB-INF/views/people/update.jspx):
 
-[options=nowrap]
+[source,jsp,options=nowrap]
 ----
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <div xmlns:field="urn:jsptagdir:/WEB-INF/tags/form/fields" 
@@ -5689,15 +5712,15 @@ is recognized) |Input (with JS Date chooser)
 relationship is managed from the many-side
 |=======================================================================
 
-* As mentioned above, Roo does not scaffold a HTML form element for the
+pass:[*] As mentioned above, Roo does not scaffold a HTML form element for the
 'one' side of a @OneToMany relationship. To make this relationship work,
 you need to provide a @ManyToOne annotated field on the opposite side:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-field set --fieldName students --type com.foo.domain.Person --class com.foo.domain.School --cardinality ONE_TO_MANY
+field set --fieldName students --type com.foo.domain.Person *--class com.foo.domain.School --cardinality ONE_TO_MANY*
 
-field reference --fieldName school --type com.foo.domain.School --class com.foo.domain.Person --cardinality MANY_TO_ONE
+field reference --fieldName school --type com.foo.domain.School --class com.foo.domain.Person *--cardinality MANY_TO_ONE*
 ----
 
 In case a field is annotated with @Pattern, the regular expression is
@@ -5751,7 +5774,7 @@ including automatic scaffolding of PrimeFaces controls such as:
 The JSF add-on contains four commands:
 
 [horizontal]
-1:: `roo> web jsf setup --implementation --library --theme`
+1:: `roo> *web jsf setup* --implementation --library --theme`
 +
 When this command is run for the first time in a single-module project
 or an empty module, the necessary JSF artifacts are copied to the
@@ -5770,13 +5793,13 @@ The --library option has only one selectable value, being PRIMEFACES.
 The --theme option lets you select one of 30 PrimeFaces themes for your
 UI.
 
-2:: `roo> web jsf all --package`
+2:: `roo> *web jsf all --package*`
 +
 The web jsf all command creates JSF managed beans and converters for all
 entities in the specified package. A JSF XHTML page is also created in
 the src/main/webapp/pages directory for each entity.
 
-3:: `roo> web jsf scaffold --class --entity --beanName --includeOnMenu`
+3:: `roo> *web jsf scaffold --class* --entity --beanName --includeOnMenu`
 +
 The web jsf scaffold command lets you create a managed bean for a
 particular entity in your project.
@@ -5792,7 +5815,7 @@ If you do not wish the 'create' and 'list' menu selections to appear for
 the entity in the menu on the generated UI, specify false in the
 --includeOnMenu option.
 
-4:: `roo> web jsf media --url --player`
+4:: `roo> *web jsf media --url* --player`
 +
 The web jsf media command is used for embedding multimedia content such
 as videos and music on your JSF home page.
@@ -5878,7 +5901,7 @@ image:images/jsf-bikeshop.png[image]
 [[base-cloud-foundry]]
 == Cloud Foundry Add-On
 
-VMware link:www.cloudfoundry.org[Cloud Foundry] is a recently-released
+VMware http://cloudfoundry.org/index.html[Cloud Foundry] is a recently-released
 platform as a service (PaaS) offering for developers on many popular
 programming languages, including Java.
 
@@ -6065,18 +6088,31 @@ expanded on in the future.
 [[base-json]]
 == JSON Add-On
 
+****
 There are a number of ways to work with JSON document serialization and
-desrialization in Roo projects: Option 1: Built-in JSON handling managed
-in domain layer (discussed in this section) This offers customizable
-http://flexjson.sourceforge.net/[FlexJson] integration Option 2: Spring
+desrialization in Roo projects:
+
+Option 1: Built-in JSON handling managed
+in domain layer (discussed in this section)
+
+- This offers customizable
+http://flexjson.sourceforge.net/[FlexJson] integration 
+
+Option 2: Spring
 MVC detects the http://jackson.codehaus.org/[Jackson] library in the
-application classpath simply use Spring's
+application classpath
+
+- simply use Spring's
 http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestbody[@RequestBody]
 and
 http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-responsebody[@ResponseBody]
-annotations in the controllers, or take advantage of Spring's
-http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-multiple-representations[ContentNegotiatingViewResolver]The
-JSON add-on offers JSON support in the domain layer as well as the
+annotations in the controllers, or
+
+- take advantage of Spring's
+http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-multiple-representations[ContentNegotiatingViewResolver]
+****
+
+The JSON add-on offers JSON support in the domain layer as well as the
 Spring MVC scaffolding. A number of methods are provided to facilitate
 serialization and deserialization of JSON documents into domain objects.
 The JSON add-on makes use of the
@@ -6091,7 +6127,7 @@ integration of JSON support into the project's domain layer:
 1.  Annotating a target type with the default *@RooJson* annotation will
 prompt Roo to create an ITD with the following four methods:
 +
-[options=nowrap]
+[source,java,options=nowrap]
 ----
 public String toJson() {
    return new JSONSerializer().exclude("*.class").serialize(this);
@@ -6100,7 +6136,7 @@ public String toJson() {
 +
 This method returns a JSON representation of the current object.
 +
-[options=nowrap]
+[source,java,options=nowrap]
 ----
 public static Owner fromJsonToOwner(String json) {
    return new JSONDeserializer<Owner>().use(null, Owner.class).deserialize(json);
@@ -6111,7 +6147,7 @@ This method has a String parameter representing the JSON document and
 returns a domain type instance if the document can be serialized by the
 underlying deserializer.
 +
-[options=nowrap]
+[source,java,options=nowrap]
 ----
 public static String toJsonArray(Collection<Owner> collection) {
    return new JSONSerializer().exclude("*.class").serialize(collection);
@@ -6121,7 +6157,7 @@ public static String toJsonArray(Collection<Owner> collection) {
 This method will convert a collection of the target type, provided as
 method parameter, into a valid JSON document containing an array.
 +
-[options=nowrap]
+[source,java,options=nowrap]
 ----
 public static Collection<Owner> fromJsonArrayToOwners(String json) {
    return new JSONDeserializer<List<Owner>>().use(null, 
@@ -6138,7 +6174,7 @@ disable the creation of any of the above listed methods by providing an
 empty String argument for the unwanted method in the @RooJson
 annotation. Example:
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RooJson(toJsonMethod="", fromJsonMethod="myOwnMethodName")
 ----
@@ -6172,7 +6208,7 @@ they already exist).
 annotation will prompt Roo to create an ITD with a number of methods:
 * listJson
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping(headers = "Accept=application/json")
 @ResponseBody
@@ -6199,7 +6235,7 @@ curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings
 ----
 * showJson
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping(value = "/{id}", headers = "Accept=application/json")
 @ResponseBody
@@ -6226,7 +6262,7 @@ curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings/1
 ----
 * createFromJson
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping(method = RequestMethod.POST, headers = "Accept=application/json")
 public ResponseEntity<String> ToppingController.createFromJson(@RequestBody String json) {
@@ -6249,7 +6285,7 @@ curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json
 ----
 * createFromJsonArray
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping(value = "/jsonArray", method = RequestMethod.POST, headers = "Accept=application/json")
 public ResponseEntity<String> ToppingController.createFromJsonArray(@RequestBody String json) {
@@ -6275,7 +6311,7 @@ curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json
 ----
 * updateFromJson
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping(method = RequestMethod.PUT, headers = "Accept=application/json")
 public ResponseEntity<String> ToppingController.updateFromJson(@RequestBody String json) {
@@ -6303,7 +6339,7 @@ curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json"
 ----
 * updateFromJsonArray
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping(value = "/jsonArray", method = RequestMethod.PUT,
                headers = "Accept=application/json")
@@ -6333,7 +6369,7 @@ curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json"
 ----
 * deleteFromJson
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
 public ResponseEntity<String> ToppingController.deleteFromJson(@PathVariable("id") Long id) {
@@ -6365,7 +6401,7 @@ containing a JSON array if the form backing object defines dynamic
 finders. Here is an example taken from VisitController in the pet clinic
 sample application, after adding JSON support to it:
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @RequestMapping(params = "find=ByDescriptionAndVisitDate", method = RequestMethod.GET, 
                 headers = "Accept=application/json")
@@ -6449,7 +6485,7 @@ This command allows you to mark an individual entity for automatic Solr
 indexing. The @RooSolrSearchable annotation will be added to the target
 entity (Person). Furthermore, the following ITD is generated:
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 privileged aspect Person_Roo_SolrSearch {
     
@@ -6571,7 +6607,7 @@ By default all fields in a domain entity are indexed as dynamic fields
 (defined in the default schema.xml which Solr ships with). The default
 format of a field name is as follows:
 
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <simple-entity-name>.<field-name>_<field-type>
 person.birthday_dt
@@ -6584,7 +6620,7 @@ field names by adding a @Field annotation to a field in the domain
 object (i.e. Person) which contains your own field (you need to provide
 a field definition in the Solr schema for it as well):
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @Field("my:field:name:birthday")
 @Temporal(TemporalType.TIMESTAMP)
@@ -6595,7 +6631,7 @@ private Date birthDay;
 To index existing DB entity tables each entity exposes a convenience
 method (example for Person entity):
 
-[options=nowrap]
+[source,java,options=nowrap]
 ----
 Person.indexPeople(Person.findAllPeople()); 
 ----
@@ -6817,7 +6853,7 @@ Furthermore, http://en.wikipedia.org/wiki/OSGi[OSGi] allows automatic
 provisioning of external add-on repositories and provides very good
 infrastructure for developing modular, as well as embedded, and
 service-oriented applications. Under the hood, Spring Roo uses the
-http://felix.apache.org/site/index.html[Apache Felix] OSGi
+http://felix.apache.org/[Apache Felix] OSGi
 implementation.
 ****
 
@@ -6847,22 +6883,22 @@ branches and a wiki folder. In order to host a Maven repository in your
 Google code project, you should also create a repo folder as root for
 the new repository:
 +
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-$ svn mkdir -m "create maven repository" https://<project-name>.googlecode.com/svn/repo --username <username> --password <password>
+$ *svn mkdir* -m "create maven repository" https://<project-name>.googlecode.com/svn/repo --username <username> --password <password>
 ----
 
 3.  Check out your newly created project from SVN:
 +
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-$ svn checkout https://<project-name>.googlecode.com/svn/trunk/ <project-name> --username <username>
+$ *svn checkout* https://<project-name>.googlecode.com/svn/trunk/ <project-name> --username <username>
 ----
 
 4.  (optional) Enter your Google Code SVN credentials into your local
 maven repository settings.xml:
 +
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
   <servers>
@@ -6941,7 +6977,7 @@ is provided in the following sections.
 The add-on developer should open up the pom.xml file and modify some
 project specific references and documentation (marked in bold font):
 +
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project [...]>
@@ -6995,54 +7031,55 @@ command in the Roo Shell; your type needs to implement the
 *CommandMarker* interface, and you need to create a method annotated
 with **@CliCommand**. Let us review some details:
 
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
-[1] @Component
-[1] @Service
-[2] public class BatchCommands implements CommandMarker {
+@Component  // <1> 
+@Service  // <1>
+public class BatchCommands implements CommandMarker {  // <2>
 
-[3]    @Reference private BatchOperations operations;
-       @Reference private StaticFieldConverter staticFieldConverter;
+    @Reference private BatchOperations operations;  // <3>
+    @Reference private StaticFieldConverter staticFieldConverter;
 
-[4]    protected void activate(ComponentContext context) {
-          staticFieldConverter.add(BatchPropertyName.class);
-       }
+    protected void activate(ComponentContext context) {  // <4>
+       staticFieldConverter.add(BatchPropertyName.class);
+    }
 
-[4]    protected void deactivate(ComponentContext context) {
-          staticFieldConverter.remove(BatchPropertyName.class);
-       }
+    protected void deactivate(ComponentContext context) {  // <4>
+       staticFieldConverter.remove(BatchPropertyName.class);
+    }
 
-[5]    @CliAvailabilityIndicator("welcome property")
-       public boolean isPropertyAvailable() {
-          return operations.isProjectAvailable();  
-       }
+    @CliAvailabilityIndicator("welcome property")  // <5>
+    public boolean isPropertyAvailable() {
+       return operations.isProjectAvailable();  
+    }
 
-[6]    @CliCommand(value="welcome property", help="Obtains a pre-defined system property")
-[7]    public String property(@CliOption(key="name", mandatory=false, specifiedDefaultValue="USERNAME", unspecifiedDefaultValue="USERNAME", help="The property name you'd like to display") BatchPropertyName propertyName) {
-          return operations.getProperty(propertyName);
-       }
+    @CliCommand(value="welcome property", help="Obtains a pre-defined system property")  // <6>
+    public String property(@CliOption  // <7>
+	(key="name", mandatory=false, specifiedDefaultValue="USERNAME", unspecifiedDefaultValue="USERNAME", help="The property name you'd like to display") BatchPropertyName propertyName) {  
+    	return operations.getProperty(propertyName);
+    }
 ----
 
 There are a few artefacts of interest when developing Spring Roo
 add-ons:
 
-1.  To register components and services in the Roo shell, the type needs
+<1> To register components and services in the Roo shell, the type needs
 to be annotated with the *@Component* & *@Service* annotations provided
 by Felix. These components can be injected into other add-ons (more
 interesting for functionalities exposed by operations types).
 
-2.  The command type needs to implement the *CommandMarker* interface,
+<2> The command type needs to implement the *CommandMarker* interface,
 which Spring Roo scans for in order to detect classes that contribute
 commands to the Roo Shell.
 
-3.  The Felix *@Reference* annotations are used to inject services and
+<3> The Felix *@Reference* annotations are used to inject services and
 components offered by other Spring Roo core components or even other
 add-ons. In this example, we are injecting a reference to the add-on's
 own BatchOperations interface and the StaticFieldConverter component
 offered by the Roo Shell OSGi bundle. The Felix *@Reference* annotation
 is similar in purpose to Spring's @Autowired and @Inject annotations.
 
-4.  The *activate* and *deactivate* methods can optionally be
+<4> The *activate* and *deactivate* methods can optionally be
 implemented to get access to the lifecycle of the addon's bundle as
 managed by the underlying OSGi container. Roo add-on developers can use
 these lifecycle hooks for registration and deregistration of converters
@@ -7050,13 +7087,13 @@ these lifecycle hooks for registration and deregistration of converters
 dependencies (typically in ITD-providing add-ons) or any other component
 initialization activities.
 
-5.  The optional *@CliAvailabilityIndicator* annotation allows you to
+<5> The optional *@CliAvailabilityIndicator* annotation allows you to
 limit when a command is available in the Spring Roo Shell. Methods thus
 annotated should return a boolean to indicate whether a command should
 be visible to the Roo Shell. For example, many commands are hidden
 before a project has been created.
 
-6.  The *@CliCommand* annotation plays a central role for Roo add-on
+<6> The *@CliCommand* annotation plays a central role for Roo add-on
 developers. It allows the registration of new commands for the Roo
 Shell. Methods annotated with *@CliCommand* can optionally return a
 String value to contribute a log statement to the Spring Roo Shell.
@@ -7066,7 +7103,7 @@ to present color-coded messages to the user in the Roo shell, with the
 color coding being dependent on the log level (warning, info, error,
 etc).
 
-7.  The optional *@CliOption* annotation can be used to annotate method
+<7> The optional *@CliOption* annotation can be used to annotate method
 parameters. These parameters define command attributes that are
 presented as part of a command. Roo will attempt to automatically
 convert user-entered values into the Java type of the annotated method
@@ -7153,18 +7190,18 @@ Once your add-on is complete, you can test its functionality locally by
 generating an OSGi-compliant jar bundle and installing it in the Spring
 Roo Shell:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-<project-name>$ mvn clean install
+<project-name>$ *mvn clean install*
 ----
 
 This will generate your add-on OSGi bundle in the project's _target_
 directory. In a separate directory, you can start the Spring Roo Shell
 and use the following command to test your new add-on:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-roo> osgi start --url file:///<path-to-addon-project/target/<addon-bundle-name>.<version>.jar
+roo> *osgi start* --url file:///<path-to-addon-project/target/<addon-bundle-name>.<version>.jar
 ----
 
 This should install and activate your new Spring Roo Add-On. For
@@ -7189,13 +7226,13 @@ environment, you can release the add-on source code to your Google Code
 project, create a tag, and install all relevant artifacts in the
 project's Maven repository:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-<project-name>$ svn add pom.xml src/ legal/ readme.txt
+<project-name>$ *svn add pom.xml src/ legal/ readme.txt*
 
-<project-name>$ svn commit -m "initial commit"
+<project-name>$ *svn commit* -m "initial commit"
 
-<project-name>$ mvn release:prepare release:perform 
+<project-name>$ *mvn release:prepare release:perform* 
 ----
 
 The Maven release plugin will ask for tag and release artefact names.
@@ -7207,9 +7244,9 @@ Deployment for bundles created with Roo's "wrapping" command can be
 deployed rather than released. For example, to create a wrapped bundle
 of the PostgreSQL JDBC driver, use this command:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-roo> addon create wrapper --topLevelPackage com.foo.wrapper 
+roo> *addon create wrapper* --topLevelPackage com.foo.wrapper 
 	--projectName spring-roo-postgres-wrapper --artifactId postgresql 
 	--groupId postgresql --version 9.0-801.jdbc3 
 	--description "Postgres #jdbcdriver driverclass:org.postgresql.Driver." 
@@ -7221,9 +7258,9 @@ roo> addon create wrapper --topLevelPackage com.foo.wrapper
 This can then be deployed to a Google code project (set up in the same
 way as described above) with a simple deploy command:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
-<project-name>$ mvn deploy
+<project-name>$ *mvn deploy*
 ----
 
 [[simple-roobot]]
@@ -7288,7 +7325,7 @@ add-on.
 * [Important] To ensure your repository is valid, RooBot will download
 all defined resources in the repository. To do that, it will read the
 uri attribute and perform an HTTP GET request against the defined URL
-(after replacing the httppgp:// protocol handler with http://). Should
+(after replacing the httppgp:// protocol handler with \http://). Should
 the download or verification of any of the defined resources in the
 respository fail, RooBot will abort the processing of the entire
 repository and try again later.
@@ -7340,6 +7377,7 @@ link:#command-index-addon-create-simple[addon create] command (see
 below). This is mostly related to the Maven bundle plugin as well as the
 Maven SCR plugin (see next point for details).
 +
+.Example 17.1. Creating a Roo addon project
 [options=nowrap]
 ----
 addon create simple --topLevelPackage com.mycompany.myproject.roo.addon
@@ -7356,7 +7394,7 @@ pluginfootnote:[for details see
 http://felix.apache.org/site/apache-felix-maven-scr-plugin.html] to
 create descriptors for the OSGi declarative services infrastructure.
 +
-[options=nowrap]
+[source,aj,options=nowrap]
 .Example 17.2. Component declaration with Apache Felix annotations
 ----
 @Service
@@ -7493,11 +7531,11 @@ roo> tailor activate --name webstyle
 
 "tailor list" indicates which configuration is currently activated:
 
-[options=nowrap]
+[subs=quotes,options=nowrap]
 ----
 roo> tailor list
 Available tailor configurations:
-    o webstyle [ ACTIVE ] - Web project with 2 modules, DOMAIN and PRESENTATION
+    o webstyle *[ ACTIVE ]* - Web project with 2 modules, DOMAIN and PRESENTATION
 ----
 
 *tailor deactivate* - Deactivate the tailor mode. There is no active
@@ -7583,11 +7621,11 @@ module::
   "contains" match. Use this instead of an "execute command 'module
   focus...'" if you do not want to hard code your module names into the
   reusable tailor configuration. (mandatory)
-  +
-  __Advanced usage__: Use a comma-separated list of strings to look for
-  in module names. The comma will be interpreted as "AND" by the search
-  for a module. Use a slash "/" before a string in the list to indicate
-  that this next string must "NOT" be contained in the module name.
++
+__Advanced usage__: Use a comma-separated list of strings to look for
+in module names. The comma will be interpreted as "AND" by the search
+for a module. Use a slash "/" before a string in the list to indicate
+that this next string must "NOT" be contained in the module name.
 
 [[tailor-act-xml]]
 ==== XML Configuration
@@ -7614,7 +7652,7 @@ placeholders by using “**$\{argumentname}**”.
 
 *tailor.xml:*
 
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <tailor name="mywebstyle" description="Standards for web projects with 2 modules">
    <config command="project">
@@ -7661,7 +7699,7 @@ named "$\{projectName]-domain".
 
 *tailor.xml:*
 
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <config command="entity jpa">
    <action type="focus" module="domain"/>
@@ -7700,7 +7738,7 @@ command completion support for this alias from the shell.
 
 *tailor.xml:*
 
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <config command="layer">
    <action type="focus" module="domain"/>
@@ -7747,7 +7785,7 @@ configuration to a large group of users.
 After you created a new (simple) addon, you need to do the following:
 
 Add dependency to addon-tailor::
-[options=nowrap]
+[source,xml,options=nowrap]
 ----
 <dependency>
      <groupId>org.springframework.roo</groupId>
@@ -7755,7 +7793,7 @@ Add dependency to addon-tailor::
   </dependency>
 ----
 Create a class that implements TailorConfigurationFactory::
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @Component
 @Service
@@ -7764,7 +7802,7 @@ public class TailorWebSimpleConfiguration implements TailorConfigurationFactory 
 }
 ----
 Override createTailorConfiguration()::
-[options=nowrap]
+[source,aj,options=nowrap]
 ----
 @Override
 public TailorConfiguration createTailorConfiguration() {
@@ -7779,7 +7817,7 @@ Implement and add the CommandConfiguration objects you want to support::
   Add a chain of actions similar to how you would do in an XML
   configuration file, as described above.
   +
-[options=nowrap]
+[source,java,options=nowrap]
 ----
 private CommandConfiguration createCommandConfigJpaSetup() {
       CommandConfiguration config = new CommandConfiguration();
@@ -11379,7 +11417,8 @@ for your platform. There is also a known issue with OpenJDK. You can
 read about our testing of different JDKs in issue
 https://jira.springsource.org/browse/ROO-106[ROO-106].
 * __Human language support__: Pluralisation within Roo delegates to the
-https://inflector.dev.java.net/[Inflector] library. Due to some issues
+http://mvnrepository.com/artifact/net.java.dev.inflector/inflector/0.7.0[Inflector] 
+library. Due to some issues
 with Inflector, only English pluralisation is supported. If you wish to
 override the plural selected by Inflector (and in turn used by Roo), you
 can specify a particular plural for either a Java type or Java field by
@@ -11432,9 +11471,9 @@ https://jira.springframework.org/browse/ROO-1006[ROO-1006] for details.
 `src/main/webapp/WEB-INF/spring/webmvc-config.xml` (this will not be
 required when using Spring Framework 3.0.5+):
 +
-[options=nowrap]
+[subs="verbatim,macros",options=nowrap]
 ----
-<mvc:default-servlet-handler default-servlet-name="_ah_default" />
+<mvc:default-servlet-handler pass:quotes[*default-servlet-name="_ah_default"*] />
 ----
 
 [[upgrade-version-numbering]]
@@ -11580,8 +11619,8 @@ annotation has been deprecated and will be removed for subsequent
 releases. To create Spring MVC Finder integration please see
 link:#base-web[MVC chapter] or simply use the
 link:#command-index-web-mvc-finder-all[web mvc finder all] command.
-* To update a Roo GWT project please run
-link:#command-index-web-gwt-setup[web gwt setup]
+* To update a Roo GWT project please run `web gwt setup`
+//link:#command-index-web-gwt-setup[web gwt setup]
 
 [[upgrade-1.1.3.RELEASE]]
 === Upgrading to 1.1.3.RELEASE
@@ -11750,15 +11789,15 @@ therefore recommend the following:
 Any New Release] section.
 * Roo 1.0.0.RC4 takes advantage of the new type conversion API
 introduced in Spring Framework 3.0.0.RC3 (see
-http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/ch05.html[chapter
-5] of the Spring reference documentation) which is aimed to replace
+http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#validation[chapter 7] 
+of the Spring reference documentation) which is aimed to replace
 property editors. To remove existing property editors from your current
 project you can issue the following command: `rm -rf
         src/main/java/com/foo/domain/*Editor.java` (depending on your
 package naming convention)
 * The easiest way to update the web artifacts is to delete the old ones
 completely. You can use the following command from a *nix prompt to
-achieve this: `rm -rf src/main/webapp/*`
+achieve this:* `rm -rf src/main/webapp/`
 * Another (optional) step is to replace the web controllers. This step
 is only required if you have used the dateFormat
 `@RooWebScaffold(dateFormat="..")` attribute in the @RooWebScaffold
@@ -11793,13 +11832,18 @@ been a dependency of all Roo projects). This will mean you automatically
 receive improvements made to these features in the future as part of the
 Spring Framework release cycle. You should therefore delete the
 following files if your project contains them:
-`Jpa_Exception_Translator.aj`, `AbstractMethodMockingControl.aj`,
-`JUnitStaticEntityMockingControl.aj` and `MockStaticEntityMethods.aj`.
+`Jpa_Exception_Translator.aj`,
+`AbstractMethodMockingControl.aj`,
+`JUnitStaticEntityMockingControl.aj` 
+and 
+`MockStaticEntityMethods.aj`.
++
 You must also ensure you use Spring Framework 3.0.0.RC2 or above (which
 is the project which contains the Spring Aspects project). See
 https://jira.springsource.org/browse/ROO-315[ROO-315] and
 https://jira.springsource.org/browse/ROO-314[ROO-316] for further
 information.
+
 * Do not attempt to use the Spring Roo integration built into
 SpringSource Tool Suite (STS) 2.2.0 or earlier with Spring Roo 1.0.0.RC3
 or above. You must upgrade to STS 2.2.1 or above if you wish to use Roo
@@ -11857,9 +11901,9 @@ ROO was presented to audiences at the SpringOne Americas 2006 and TSSJS
 Europe 2007 conferences, plus the Stockholm Spring User Group and
 Enterprise Java Association of Australia. The audiences were
 enthusiastic about the highly productive solution, with remarks like
-"http://blog.zepag.org/2007/06/spring-one-day3-roo.html[it is the really
+"link:http://blog.zepag.org/2007/06/spring-one-day3-roo.html[it is the really
 neatest and newest stuff I've seen in this conference]" and
-"http://raibledesigns.com/rd/entry/tse_hop_into_real_object[if ROO ever
+"link:http://raibledesigns.com/rd/entry/tse_hop_into_real_object[if ROO ever
 becomes an open source project, I'm guessing it will be very polished
 and well-received]". Nonetheless, other priorities (like the existing
 http://projects.spring.io/spring-security/[Spring Security] project)
@@ -11903,7 +11947,7 @@ name "ROO" was preserved as a temporary codename, given that we planned
 to select a final name closer to official release. The "ROO" project was
 then publicly presented on 27 April 2009 during Rod Johnson's SpringOne
 Europe keynote,
-"http://www.infoq.com/presentations/SpringOne-Keynote-Rod-Johnson[The
+"link:http://www.infoq.com/presentations/SpringOne-Keynote-Rod-Johnson[The
 Future of Java Innovation]". As part of the keynote the ROO system was
 used to build a voting application that would allow the community to
 select a final name for the new project. The "ROO" name was left as an
@@ -12059,7 +12103,7 @@ IDE you are using (and, if an Eclipse-based IDE, the version of
 link:#usage-ide[AspectJ Development Tools] in use). Another good source
 of advice on how to ask questions on the forum can be found in Eric
 Raymond's often-cited essay,
-"http://catb.org/~esr/faqs/smart-questions.html[How to Ask Smart
+"link:http://catb.org/~esr/faqs/smart-questions.html[How to Ask Smart
 Questions]".
 
 If you believe you have found a bug or are experiencing an issue, it is
