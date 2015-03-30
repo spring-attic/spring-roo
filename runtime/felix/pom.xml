@@ -11,7 +11,7 @@
     <packaging>bundle</packaging>
     <name>Spring Roo - Runtime - Felix Interoperability</name>
     <dependencies>
-        <!-- OSGi -->
+    	<!-- OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -20,7 +20,91 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>
-        <!-- Apache Felix -->
+		<!-- Subsystem API -->
+		<dependency>
+			<groupId>org.apache.aries.subsystem</groupId>
+			<artifactId>org.apache.aries.subsystem.api</artifactId>
+			<version>1.0.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.aries</groupId>
+					<artifactId>org.apache.aries.util</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Subsystem Core -->
+		<dependency>
+			<groupId>org.apache.aries.subsystem</groupId>
+			<artifactId>org.apache.aries.subsystem.core</artifactId>
+			<version>1.1.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.aries.application</groupId>
+					<artifactId>org.apache.aries.application.api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.aries.application</groupId>
+					<artifactId>org.apache.aries.application.utils</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.equinox</groupId>
+					<artifactId>org.eclipse.equinox.coordinator</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.aries</groupId>
+					<artifactId>org.apache.aries.util</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- Apache Aries Util -->
+		<dependency>
+			<groupId>org.apache.aries</groupId>
+			<artifactId>org.apache.aries.util</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		<!-- Apache Felix ConfigAdmin -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.configadmin</artifactId>
+			<version>1.8.2</version>
+		</dependency>
+		<!-- Apache Felix Coordinator -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.coordinator</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<!-- Apache Felix Resolver -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.resolver</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<!-- Eclipse Equinox Region -->
+		<dependency>
+			<groupId>org.eclipse.equinox</groupId>
+			<artifactId>org.eclipse.equinox.region</artifactId>
+			<version>1.1.0.v20120522-1841</version>
+		</dependency>
+		<!-- SLF4J Simple -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<!-- SLF4J Api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.5</version>
+		</dependency>
+		<!-- Metatype -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.metatype</artifactId>
+			<version>1.0.10</version>
+		</dependency>
+       	<!-- Apache Felix -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
