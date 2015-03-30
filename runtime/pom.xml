@@ -15,7 +15,6 @@
 	<modules>
 		<module>deployment-support</module>
 		<module>osgi-bundle</module>
-		<module>osgi-subsystem</module>
 		<module>gogo-commands</module>
 		<module>bootstrap</module>
 		<module>startlevel</module>
@@ -34,7 +33,8 @@
 		<module>classpath</module>
 		<module>classpath-antlrjavaparser</module>
 		<module>url-stream</module>
-		<module>obr-addon-search</module>
+		<module>obr-manager</module>
+		<module>suite-manager</module>
 	</modules>
 
 </project>
