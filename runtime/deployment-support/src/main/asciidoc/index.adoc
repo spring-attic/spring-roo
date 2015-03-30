@@ -17,7 +17,7 @@
 //   asciidoctor -b html5 -a linkcss -a data-uri index.adoc
 //
 // PDF Asciidoctor:
-//   $ asciidoctor-pdf index.adoc
+//   $ asciidoctor -b pdf index.adoc
 //
 = {title} 
 :title:			Spring Roo - Reference Documentation
@@ -34,12 +34,12 @@
 :toc-placement:		right
 :toclevels: 		5
 :source-highlighter:	pygments
+//:backend:		book
 //:pygments-style:	bw
 //:pagenums:
 //:backend: 		docbook
 :numbered:
 :sectnumlevels:		5
-:icon:			"./images/xdev-sring_logo.jpg"
 
 [abstract]
 _Copyright 2009-2014 VMware, Inc. All Rights Reserved._
