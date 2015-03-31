@@ -718,15 +718,16 @@ public class SimpleParser implements Parser {
         synchronized (mutex) {
         	
         	if(commands.isEmpty() || hasToReloadComponents()){
+        		// Cleaning commands
+        		commands.clear();
+        		availabilityIndicators.clear();
         		// Get all Services implement CommandMarker interface
         		try {
         			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
         			
         			for(ServiceReference<?> ref : references){
         				CommandMarker command = (CommandMarker) this.context.getService(ref);
-        				if(!commands.contains(command)){
-        					add(command);
-        				}
+    					add(command);
         			}
         			
         		} catch (InvalidSyntaxException e) {
@@ -774,15 +775,16 @@ public class SimpleParser implements Parser {
             final boolean checkAvailabilityIndicators) {
     	
     	if(commands.isEmpty() || hasToReloadComponents()){
+    		// Cleaning commands
+    		commands.clear();
+    		availabilityIndicators.clear();
     		// Get all Services implement CommandMarker interface
     		try {
     			ServiceReference<?>[] references = this.context.getAllServiceReferences(CommandMarker.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
     				CommandMarker command = (CommandMarker) this.context.getService(ref);
-    				if(!commands.contains(command)){
-    					add(command);
-    				}
+					add(command);
     			}
     			
     		} catch (InvalidSyntaxException e) {
@@ -1127,12 +1129,16 @@ public class SimpleParser implements Parser {
     
     public final void loadConverters(){
     	if(converters.isEmpty() || hasToReloadComponents()){
+    		// Cleaning converters
+    		converters.clear();
+    		availabilityIndicators.clear();
     		// Get all Services implement Converter interface
     		try {
     			ServiceReference<?>[] references = this.context.getAllServiceReferences(Converter.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				add((Converter<?>) this.context.getService(ref));
+    				Converter<?> converter = (Converter<?>) this.context.getService(ref);
+					add(converter);
     			}
     			
     		} catch (InvalidSyntaxException e) {
