@@ -17,7 +17,7 @@
 //   asciidoctor -b html5 -a linkcss -a data-uri index.adoc
 //
 // PDF Asciidoctor:
-//   $ asciidoctor -b pdf index.adoc
+//   $ asciidoctor-pdf -a pdf-style=asciidoctor index.adoc
 //
 = {title} 
 :title:			Spring Roo - Reference Documentation
@@ -31,9 +31,9 @@
 :revdate:		Date: yyyy-mm-dd (month, X month 2015)
 :toc:
 :toc-title:		Title menu
-:toc-placement:		right
+//:toc-placement:		right
 :toclevels: 		5
-:source-highlighter:	pygments
+//:source-highlighter:	pygments
 //:backend:		book
 //:pygments-style:	bw
 //:pagenums:
@@ -1395,7 +1395,7 @@ resources in the Pizza Shop application you need to open the
 As a next step you can use the Spring Security JSP tag library to
 restrict access to the relevant menu items in the `menu.jspx` file:
 
-[source,xml,options=nowrap]
+[source,jsp,options=nowrap]
 ----
 <div xmlns:jsp="..." xmlns:sec="http://www.springframework.org/security/tags" id="menu" version="2.0">
    <jsp:directive.page contentType="text/html;charset=UTF-8"/>
@@ -7033,29 +7033,28 @@ with **@CliCommand**. Let us review some details:
 
 [source,aj,options=nowrap]
 ----
-@Component  // <1> 
-@Service  // <1>
-public class BatchCommands implements CommandMarker {  // <2>
+[1] @Component   
+[1] @Service  
+[2] public class BatchCommands implements CommandMarker {
 
-    @Reference private BatchOperations operations;  // <3>
+[3] @Reference private BatchOperations operations;
     @Reference private StaticFieldConverter staticFieldConverter;
 
-    protected void activate(ComponentContext context) {  // <4>
+[4] protected void activate(ComponentContext context) {
        staticFieldConverter.add(BatchPropertyName.class);
     }
 
-    protected void deactivate(ComponentContext context) {  // <4>
+[5] protected void deactivate(ComponentContext context) {
        staticFieldConverter.remove(BatchPropertyName.class);
     }
 
-    @CliAvailabilityIndicator("welcome property")  // <5>
+[6] @CliAvailabilityIndicator("welcome property") 
     public boolean isPropertyAvailable() {
        return operations.isProjectAvailable();  
     }
 
-    @CliCommand(value="welcome property", help="Obtains a pre-defined system property")  // <6>
-    public String property(@CliOption  // <7>
-	(key="name", mandatory=false, specifiedDefaultValue="USERNAME", unspecifiedDefaultValue="USERNAME", help="The property name you'd like to display") BatchPropertyName propertyName) {  
+[7] @CliCommand(value="welcome property", help="Obtains a pre-defined system property")
+    public String property(@CliOption(key="name", mandatory=false, specifiedDefaultValue="USERNAME", unspecifiedDefaultValue="USERNAME", help="The property name you'd like to display") BatchPropertyName propertyName) {  
     	return operations.getProperty(propertyName);
     }
 ----
@@ -7063,23 +7062,23 @@ public class BatchCommands implements CommandMarker {  // <2>
 There are a few artefacts of interest when developing Spring Roo
 add-ons:
 
-<1> To register components and services in the Roo shell, the type needs
+1. To register components and services in the Roo shell, the type needs
 to be annotated with the *@Component* & *@Service* annotations provided
 by Felix. These components can be injected into other add-ons (more
 interesting for functionalities exposed by operations types).
 
-<2> The command type needs to implement the *CommandMarker* interface,
+2. The command type needs to implement the *CommandMarker* interface,
 which Spring Roo scans for in order to detect classes that contribute
 commands to the Roo Shell.
 
-<3> The Felix *@Reference* annotations are used to inject services and
+3. The Felix *@Reference* annotations are used to inject services and
 components offered by other Spring Roo core components or even other
 add-ons. In this example, we are injecting a reference to the add-on's
 own BatchOperations interface and the StaticFieldConverter component
 offered by the Roo Shell OSGi bundle. The Felix *@Reference* annotation
 is similar in purpose to Spring's @Autowired and @Inject annotations.
 
-<4> The *activate* and *deactivate* methods can optionally be
+4. The *activate* and *deactivate* methods can optionally be
 implemented to get access to the lifecycle of the addon's bundle as
 managed by the underlying OSGi container. Roo add-on developers can use
 these lifecycle hooks for registration and deregistration of converters
@@ -7087,13 +7086,13 @@ these lifecycle hooks for registration and deregistration of converters
 dependencies (typically in ITD-providing add-ons) or any other component
 initialization activities.
 
-<5> The optional *@CliAvailabilityIndicator* annotation allows you to
+5. The optional *@CliAvailabilityIndicator* annotation allows you to
 limit when a command is available in the Spring Roo Shell. Methods thus
 annotated should return a boolean to indicate whether a command should
 be visible to the Roo Shell. For example, many commands are hidden
 before a project has been created.
 
-<6> The *@CliCommand* annotation plays a central role for Roo add-on
+6. The *@CliCommand* annotation plays a central role for Roo add-on
 developers. It allows the registration of new commands for the Roo
 Shell. Methods annotated with *@CliCommand* can optionally return a
 String value to contribute a log statement to the Spring Roo Shell.
@@ -7103,7 +7102,7 @@ to present color-coded messages to the user in the Roo shell, with the
 color coding being dependent on the log level (warning, info, error,
 etc).
 
-<7> The optional *@CliOption* annotation can be used to annotate method
+7. The optional *@CliOption* annotation can be used to annotate method
 parameters. These parameters define command attributes that are
 presented as part of a command. Roo will attempt to automatically
 convert user-entered values into the Java type of the annotated method
