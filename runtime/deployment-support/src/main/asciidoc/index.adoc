@@ -52,98 +52,89 @@ electronically._
 [[preface]]
 = Preface
 
-[[intro-installation]]
-=== 1. Installation
+[[preface-overview]]
+=== 1. Overview
 
-Roo is a standard Java application that is fully self-contained within
-the Roo distribution ZIPs. You can download Roo from one of the
-link:#resources-downloads[download sites], or
-link:#development-setup[build] a distribution ZIP yourself from our
-link:#resources-source-repository[source control repository].
+Spring Roo is an easy-to-use productivity tool for rapidly building 
+enterprise applications in the Java programming language. It allows 
+you to build high-quality, high-performance, lock-in-free enterprise 
+applications in just minutes. Best of all, Roo works alongside your 
+existing Javaknowledge, skills and experience. You probably won’t 
+need to learn anything new to use Roo, as there’s no new language 
+or runtime platform needed. You simply program in your normal Java 
+way and Roo just works, sitting in the background taking care of the 
+things you don’t want to worry about.
 
-If you are upgrading from an existing version of Spring Roo, you should
-consult the link:#upgrade[upgrade notes] for important information.
+[[preface-requirements]]
+=== 2. Requirements
+ 
+To get started, please ensure you have the following system dependencies:
 
-Before attempting to install Roo, please ensure you have the following
-system dependencies:
+* A Linux, Apple or Windows-based operating system (other operating 
+systems may work but are not guaranteed).
+* A http://www.oracle.com/technetwork/java/javase/downloads/[Java JDK 6] 
+or newer installed. Java JDK 7 is recommended.
+* https://maven.apache.org/download.cgi[Apache Maven 3.0] or above installed and in the path.
+ 
+We have listed various considerations concerning the Java Development 
+Kit (JDK) and operating systems in the 
+link:#upgrade-known-issues[known issues section] of this 
+documentation. We always recommend you use the latest version of Java 
+and Maven that are available for your platform. We also recommend that 
+you use Spring Tool Suite (STS), which is our free Eclipse-based IDE 
+that includes a number of features that make working with Roo even 
+easier (you can of course use Roo with normal Eclipse or without an 
+IDE at all if you prefer)
 
-* A Linux, Apple or Windows-based operating system (other operating
-systems may work but are not guaranteed)
-* A Java 6 or 7 installation, with the `$JAVA_HOME` environment variable
-pointing to the installation. Note that Java 8 is currently not
-supported.
-* Apache Maven 2.0.9 or above installed and in the path
+[[preface-download]]
+=== 3. Download Spring Roo
+ 
+You can download the current release from Spring Roo project page 
+http://projects.spring.io/spring-roo/#download-widget[downloads section] 
+and the 
+http://projects.spring.io/spring-roo/#instant-results---making-java-fun[related documentation].
+ 
+You can also build a distribution ZIP yourself from our source 
+control repository.
+ 
+[[preface-install]]
+=== 4. Install Spring
 
-We have listed various considerations concerning the Java Development
-Kit (JDK) and operating systems in the link:#upgrade-known-issues[known
-issues] section of this documentation. We always recommend you use the
-latest version of Java and Maven that are available for your platform.
-We also recommend that you use http://spring.io/tools/sts[Spring Tool
-Suite] (STS), which is our free Eclipse-based IDE that includes a number
-of features that make working with Roo even easier (you can of course
-use Roo with normal Eclipse or without an IDE at all if you prefer).
-
-Once you have satisfied the initial requirements, you can install Roo by
-following these steps:
-
-1.  Unzip the Roo installation ZIP to a directory of your choice; this
-will be known as `$ROO_HOME` in the directions below
-2.  If using Windows, add `$ROO_HOME\bin` to your `%PATH%` environment
+Once you have satisfied the initial requirements, you can install 
+Roo by following these steps:
+ 
+1. Unzip the distribution which will unpack to a single installation 
+directory; this will be known as $ROO_HOME in the directions below 
+2. If using Windows, add `$ROO_HOME\bin` to your *PATH* environment 
 variable
-3.  If using Linux or Apple, create a symbolic link using a command such
-as `sudo ln -s $ROO_HOME/bin/roo.sh
-        /usr/bin/roo`
+3. If using Linux or Apple, create a symbolic link using a command such 
+as `sudo ln -s $ROO_HOME/bin/roo.sh /usr/bin/roo`
+ 
+Next verify Roo has been installed correctly. This can be done using 
+the following commands:
 
-Next verify Roo has been installed correctly. This can be done using the
-following commands:
-
-[options=nowrap]
-------------------------------------------------------------------------------
+[opstions=nowrap]
+----
 $ mkdir roo-test
 $ cd roo-test
 $ roo quit
-    ____  ____  ____  
-   / __ \/ __ \/ __ \ 
-  / /_/ / / / / / / / 
- / _, _/ /_/ / /_/ /  
+    ____  ____  ____
+   / __ \/ __ \/ __ \
+  / /_/ / / / / / / /
+ / _, _/ /_/ / /_/ /
 /_/ |_|\____/\____/    W.X.Y.ZZ [rev RRR]
-
 
 Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
 $ cd ..
 $ rmdir roo-test
-------------------------------------------------------------------------------
+----
 
-If you see the logo appear, you've installed Roo successfully. For those
-curious, the "[rev RRR]" refers to the Git commit ID used to compile
-that particular build of Roo.
-
-[[intro-roo-opts]]
-=== 2. Optional ROO_OPTS Configuration
-
-The standalone Roo shell supports fine-tuning display-related
-configuration via the ROO_OPTS environment variable. An environment
-variable is used so that these configuration settings can be applied
-before the shell is instantiated and the first messages displayed. The
-ROO_OPTS settings does not apply within Spring Tool Suite's embedded Roo
-shell.
-
-At present the only configuration settings available is roo.bright. This
-causes foreground messages in the shell to be displayed with brighter
-colors. This is potentially useful if your background color is light
-(e.g. white). You can set the variable using the following commands:
-
-`$ export ROO_OPTS="-Droo.bright=true"`  // Linux or Apple
-
-`$ set ROO_OPTS="-Droo.bright=true`      // Windows users
-
-There is an enhancement request within our issue tracker for
-customisable shell color schemes. If you're interested in seeing this
-supported by Roo, you may wish to consider voting for
-http://jira.springframework.org/browse/ROO-549[ROO-549].
+If you see the logo appear, you’ve installed Roo successfully. For 
+those curious, the "[rev RRR]" refers to the Git commit ID used to 
+compile that particular build of Roo.
 
 :numbered:
-= I. Welcome to Spring Roo [[welcome]]
+= I. Getting Started [[getting-started]]
 
 Welcome to Spring Roo! In this part of the reference guide we will explore everything you need to know in order to use Roo effectively. We've designed this part so that you can read each chapter consecutively and stop at any time. However, the more you read, the more you'll learn and the easier you'll find it to work with Roo.
 
@@ -154,22 +145,6 @@ Parts <<base,II>>, <<internals,III>>, <<external-addons,IV>> and <<appendices,V>
 
 [[intro-what-is-roo]]
 === What is Roo?
-
-http://projects.spring.io/spring-roo/[Spring Roo] is an
-link:#intro-why-use-it-usable-learnable[easy-to-use] productivity tool
-for rapidly building enterprise applications in the Java programming
-language. It allows you to build
-link:#intro-why-use-it-no-engineering-tradeoffs[high-quality],
-high-performance, link:#intro-why-use-it-easy-removal[lock-in-free]
-enterprise applications link:#intro-why-use-it-productivity[in just
-minutes]. Best of all, Roo works alongside your
-link:#intro-why-use-it-standard-java[existing Java knowledge], skills
-and experience. You probably won't need to learn anything new to use
-Roo, as there's no new language or runtime platform needed. You simply
-program in your normal Java way and Roo just works, sitting in the
-background taking care of the things you don't want to worry about.
-_It's an approach unlike anything you've ever seen before, we guarantee
-it!_
 
 You work with Roo by loading its "shell" in a window and leaving it
 running. You can interact with Roo via commands typed into the shell if
@@ -1329,7 +1304,7 @@ resources in the Pizza Shop application you need to open the
 As a next step you can use the Spring Security JSP tag library to
 restrict access to the relevant menu items in the `menu.jspx` file:
 
-[source,jsp,options=nowrap]
+[source,xml,options=nowrap]
 ----
 <div xmlns:jsp="..." xmlns:sec="http://www.springframework.org/security/tags" id="menu" version="2.0">
    <jsp:directive.page contentType="text/html;charset=UTF-8"/>
@@ -2501,10 +2476,9 @@ line, although to be honest you'll get more productivity via an IDE if
 it's anything beyond a trivial application. If you would prefer to use
 the command line, you can start a fresh application using the Roo shell,
 edit your `.java` and other files using any text editor, and use the
-link:#command-index-maven-commands[perform] commands to compile, test
+link:#command-index[perform] commands to compile, test
 and package your application ready for deployment. You can even use
-`mvn tomcat:run` to execute a servlet container, and Roo add-ons let you
-deploy straight to a cloud environment like Google App Engine. Again,
+`mvn tomcat:run` to execute a servlet container. Again,
 you'll be more productive in an IDE, but it's nice to know Roo doesn't
 force you to use an IDE unless you'd like to use one.
 
@@ -2513,26 +2487,16 @@ http://www.springsource.com/products/sts[SpringSource Tool Suite] (STS).
 STS is a significantly extended version (and free!) of the pervasive
 Eclipse IDE. From a Roo perspective, STS preintegrates the latest
 http://www.eclipse.org/ajdt/[AspectJ Development Tools] (AJDT) and also
-offers an inbuilt Roo shell. The inbuilt Roo shell means you do not need
+offers Roo shell as extension plugin. To install the Roo STS plugin go to Spring Roo project page http://projects.spring.io/spring-roo/#working-with-spring-tool-suite-%28sts%29[Working with STS section]
+
+The STS Roo shell means you do not need
 to run the normal Roo shell if you are using STS. You'll also have other
 neat Roo-IDE integation features, like the ability to press CTRL+R (or
 Apple+R if you're on an Apple) and a popup will allow you to type a Roo
 command from anywhere within the IDE. Another nice feature is the shell
 message hotlinking, which means all shell messages emitted by Roo are
 actually links that you can click to open the corresponding file in an
-Eclipse editor. There are other goodies too, like extra commands to
-deploy to SpringSource tc Server.
-
-You'll need to use STS 2.5 if you'd like to use Roo 1.1, which at the
-time of writing represents the latest version of both tools. Because the
-release cycle of STS and Roo differ, when you download STS you'll
-generally find it includes a version of Roo that might not be the
-absolute latest. This is not a problem. All you need to do is ensure
-you're using the latest release of STS and then within the IDE select
-Window > Preferences > Spring > Roo Support. Next select "Add..." and
-find the directory which contains the latest Roo release. You probably
-also want to tick the newly-selected Roo release, making it the default
-for your projects when they're imported into STS.
+Eclipse editor.
 
 Naturally Roo works well with standard Eclipse as well. All you need to
 do is ensure you install the latest http://www.eclipse.org/ajdt/[AspectJ
@@ -5498,7 +5462,7 @@ WEB-INF/views are maintained in addition to the menu.jspx.
 Here is an example of a typical roo managed jspx file (i.e.:
 WEB-INF/views/people/update.jspx):
 
-[source,jsp,options=nowrap]
+[source,xml,options=nowrap]
 ----
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <div xmlns:field="urn:jsptagdir:/WEB-INF/tags/form/fields" 
