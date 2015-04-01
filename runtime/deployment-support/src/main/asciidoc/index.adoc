@@ -29,7 +29,7 @@
 :keywords:		SpringRoo, Reference
 :toc:
 :toc-placement:		left
-:toc-title:		Title menu
+:toc-title:		Table of Contents
 :toclevels: 		5
 :numbered:
 :sectnumlevels:		5
@@ -5801,8 +5801,8 @@ generated from this annotation contains the PrimeFaces menu with the
 'Create' and 'List all' operations for each entity. Whenever a managed
 bean is created, provding the @RooJsfManagedBean includeOnMenu attribute
 is either not specifed or set to 'true', new menu selections are
-automatically added to the *__Roo_ApplicationBean.aj ITD. Similarly,
-when a managaed bean is deleted or the includeOnMenu attribute is set to
+automatically added to the *_Roo_ApplicationBean.aj ITD. Similarly,
+when a managed bean is deleted or the includeOnMenu attribute is set to
 false, the menu selections are removed.
 
 [[bikeshop]]
