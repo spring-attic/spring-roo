@@ -69,7 +69,7 @@ public class SubsystemCommands implements BundleActivator {
 		context.registerService(getClass().getName(), this, props);
 	}
 	
-	public void deploy(String symbolicName) throws IOException{
+	public void deploy(String symbolicName) throws Exception{
 		repositories = new ArrayList<Repository>();
 		// Getting all installed repositories
         populateRepositories();
@@ -151,8 +151,9 @@ public class SubsystemCommands implements BundleActivator {
 	 * or any related subsystem are going to be installed.
 	 *  
 	 * @param subsystemResource
+	 * @throws Exception 
 	 */
-	private void installSubsystemDependencies(Resource subsystemResource) {
+	private void installSubsystemDependencies(Resource subsystemResource) throws Exception {
 
 		// Getting capabilites of subsytem resource
 		Capability[] capabilities = subsystemResource.getCapabilities();
@@ -191,12 +192,8 @@ public class SubsystemCommands implements BundleActivator {
 				Property[] repositoryList = repositoryCapability.getProperties();
 				for(Property repository : repositoryList){
 					String repoURL = repository.getValue();
-					try {
-						getRepositoryAdmin().addRepository(repoURL);
-						LOGGER.log(Level.INFO, "      " + repoURL + " added");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					getRepositoryAdmin().addRepository(repoURL);
+					LOGGER.log(Level.INFO, "      " + repoURL + " added");
 				}
 			}
 			
@@ -213,12 +210,8 @@ public class SubsystemCommands implements BundleActivator {
 				Property[] subsystemList = subsystemCapability.getProperties();
 				for(Property subsystem : subsystemList){
 					String subsystemURL = subsystem.getValue();
-					try {
-						getSubsystem(0).install(subsystemURL);
-						LOGGER.log(Level.INFO, "      " + subsystemURL + " installed");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					getSubsystem(0).install(subsystemURL);
+					LOGGER.log(Level.INFO, "      " + subsystemURL + " installed");
 				}
 			}
 			
