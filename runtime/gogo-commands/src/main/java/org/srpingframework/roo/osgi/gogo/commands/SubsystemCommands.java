@@ -8,9 +8,12 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.felix.bundlerepository.Capability;
+import org.apache.felix.bundlerepository.Property;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
@@ -37,6 +40,9 @@ public class SubsystemCommands implements BundleActivator {
 	
 	private static final Logger LOGGER = HandlerUtils
             .getLogger(SubsystemCommands.class);
+
+	private static final String REPOSITORY_DEPENDENCY_CAPABILITY_NAME = "repositories";
+	private static final String SUBSYSTEM_DEPENDENCY_CAPABILITY_NAME = "subsystems";
 	
 	private BundleContext bundleContext;
 	private RepositoryAdmin repositoryAdmin;
@@ -67,45 +73,58 @@ public class SubsystemCommands implements BundleActivator {
 		repositories = new ArrayList<Repository>();
 		// Getting all installed repositories
         populateRepositories();
-        // Searching subsystem URL
-        String subsystemURL = getSubsystemURL(symbolicName);
+        // Getting subsystem resource from OBR Repository by resource
+        // symbolicName
+        Resource subsystemResource = getSubsystemResource(symbolicName);
+        // Install related repositories or related subsystems if needed
+        LOGGER.log(Level.INFO, "Subsystem dependency manager started.");
+        LOGGER.log(Level.INFO, "");
+        installSubsystemDependencies(subsystemResource);
+        LOGGER.log(Level.INFO, "Subsystem dependency manager finished.");
+        LOGGER.log(Level.INFO, "");
         // Install subsystem using symbolicName
-		Subsystem subsystem = install(subsystemURL);
+		Subsystem subsystem = install(subsystemResource.getURI());
 		// Starting installed subsystem
 		start(subsystem.getSubsystemId());
 	}
 
 	public Subsystem install(String url) throws IOException {
-		System.out.println("Installing subsystem by URL: " + url);
+		LOGGER.log(Level.INFO, "Installing subsystem " + url);
 		Subsystem rootSubsystem = getSubsystem(0);
 		Subsystem s = rootSubsystem.install(url, new URL(url).openStream());
-		System.out.println("Subsystem successfully installed: "
+		LOGGER.log(Level.INFO, "Subsystem successfully installed: "
 				+ s.getSymbolicName() + "; id: " + s.getSubsystemId());
+		LOGGER.log(Level.INFO, " ");
 		return s;
 	}
 
 	public void uninstall(long id) {
-		System.out.println("Uninstalling subsystem: " + id);
+		LOGGER.log(Level.INFO, "Uninstalling subsystem: " + id);
+		LOGGER.log(Level.INFO, " ");
 		Subsystem subsystem = getSubsystem(id);
 		subsystem.uninstall();
-		System.out.println("Subsystem successfully uninstalled: "
+		LOGGER.log(Level.INFO, "Subsystem successfully uninstalled: "
 				+ subsystem.getSymbolicName() + "; id: " + subsystem.getSubsystemId());
+		LOGGER.log(Level.INFO, " ");
 	}
 
 	public void start(long id) {
-		System.out.println("Starting subsystem: " + id);
+		LOGGER.log(Level.INFO, "Starting subsystem: " + id);
 		Subsystem subsystem = getSubsystem(id);
 		subsystem.start();
-		System.out.println("Subsystem successfully started: "
+		LOGGER.log(Level.INFO, "Subsystem successfully started: "
 				+ subsystem.getSymbolicName() + "; id: " + subsystem.getSubsystemId());
+		LOGGER.log(Level.INFO, " ");
 	}
 
 	public void stop(long id) {
-		System.out.println("Stopping subsystem: " + id);
+		LOGGER.log(Level.INFO, "Stopping subsystem: " + id);
+		LOGGER.log(Level.INFO, " ");
 		Subsystem subsystem = getSubsystem(id);
 		subsystem.stop();
-		System.out.println("Subsystem successfully stopped: "
+		LOGGER.log(Level.INFO, "Subsystem successfully stopped: "
 				+ subsystem.getSymbolicName() + "; id: " + subsystem.getSubsystemId());
+		LOGGER.log(Level.INFO, " ");
 		
 	}
 
@@ -123,10 +142,139 @@ public class SubsystemCommands implements BundleActivator {
 			}
 		}
 		for (String entry : subsystems.values()) {
-			System.out.println(entry);
+			LOGGER.log(Level.INFO, entry);
 		}
 	}
 	
+	/**
+	 * Method that checks capabilities of selected subsystem resource and if appears any related repository 
+	 * or any related subsystem are going to be installed.
+	 *  
+	 * @param subsystemResource
+	 */
+	private void installSubsystemDependencies(Resource subsystemResource) {
+
+		// Getting capabilites of subsytem resource
+		Capability[] capabilities = subsystemResource.getCapabilities();
+		
+		// Creating lists to save repositories and subsystems
+		List<Capability> repositoriesCapability = new ArrayList<Capability>();
+		List<Capability> subsystemsCapability= new ArrayList<Capability>();
+		
+		LOGGER.log(Level.INFO, "Getting 'Roo Addon Suite' dependencies...");
+		LOGGER.log(Level.INFO, " ");
+		
+		// Saving repositories and subsystems
+		for(Capability capability : capabilities){
+			if(capability.getName().equals(REPOSITORY_DEPENDENCY_CAPABILITY_NAME)){
+				repositoriesCapability.add(capability);
+			}else if(capability.getName().equals(SUBSYSTEM_DEPENDENCY_CAPABILITY_NAME)){
+				subsystemsCapability.add(capability);
+			}
+		}
+		
+		showDependenciesInfo(repositoriesCapability, subsystemsCapability);
+		
+		// If selected Roo Addon Suite doesn't have any dependency
+		// continue installing individual 'Roo Addon Suite'
+		if(repositoriesCapability.isEmpty() && subsystemsCapability.isEmpty()){
+			return;
+		}
+		
+		// Installing repositories if needed
+		if(!repositoriesCapability.isEmpty()){
+			LOGGER.log(Level.INFO, "   Adding repositories to Spring Roo installation");
+			LOGGER.log(Level.INFO, "   ----------------------------------------------------------");
+			LOGGER.log(Level.INFO, "");
+			// Adding all repositories in order
+			for(Capability repositoryCapability : repositoriesCapability){
+				Property[] repositoryList = repositoryCapability.getProperties();
+				for(Property repository : repositoryList){
+					String repoURL = repository.getValue();
+					try {
+						getRepositoryAdmin().addRepository(repoURL);
+						LOGGER.log(Level.INFO, "      " + repoURL + " added");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			LOGGER.log(Level.INFO, "");
+		}
+		
+		// Installing subsystems if needed
+		if(!subsystemsCapability.isEmpty()){
+			LOGGER.log(Level.INFO, "   Installing subsystems into Spring Roo installation");
+			LOGGER.log(Level.INFO, "   ----------------------------------------------------------");
+			LOGGER.log(Level.INFO, "");
+			// Installing subsystems in order
+			for(Capability subsystemCapability : subsystemsCapability){
+				Property[] subsystemList = subsystemCapability.getProperties();
+				for(Property subsystem : subsystemList){
+					String subsystemURL = subsystem.getValue();
+					try {
+						getSubsystem(0).install(subsystemURL);
+						LOGGER.log(Level.INFO, "      " + subsystemURL + " installed");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			LOGGER.log(Level.INFO, "");
+		}
+		
+	}
+	
+	/**
+	 * Method to show Subsystem dependencies on Spring Roo Shell
+	 * 
+	 * @param repositories
+	 * @param subsystems
+	 */
+	private void showDependenciesInfo(List<Capability> repositories,
+			List<Capability> subsystems) {
+		
+		// If empty dependencies
+		if(repositories.isEmpty() && subsystems.isEmpty()){
+			LOGGER.log(Level.INFO, "   0 dependencies were found on selected 'Roo Addon Suite'");
+			LOGGER.log(Level.INFO, "");
+			return;
+		}
+		
+		// If selected subsystem has some repositories dependency
+		if(!repositories.isEmpty()){
+			LOGGER.log(Level.INFO, "   Repository Dependencies");
+			LOGGER.log(Level.INFO, "   ---------------------------------");
+			for(Capability repo : repositories){
+				Property[] repositoriesProperties = repo.getProperties();
+				for(Property prop : repositoriesProperties){
+					LOGGER.log(Level.INFO, "      " + prop.getValue());
+				}
+				LOGGER.log(Level.INFO, " ");
+				LOGGER.log(Level.INFO, String.format("   %s repository dependencies were found on selected 'Roo Addon Suite'", repositoriesProperties.length));
+				LOGGER.log(Level.INFO, "");
+			}
+		}
+		
+		// If selected subsystem has some subsystem dependency
+		if(!subsystems.isEmpty()){
+			LOGGER.log(Level.INFO, "   Subsystem Dependencies");
+			LOGGER.log(Level.INFO, "   ---------------------------------");
+			for(Capability subsystem : subsystems){
+				Property[] subsystemProperties = subsystem.getProperties();
+				for(Property prop : subsystemProperties){
+					LOGGER.log(Level.INFO, "      " + prop.getValue());
+				}
+				LOGGER.log(Level.INFO, " ");
+				LOGGER.log(Level.INFO, String.format("   %s subsystem dependencies were found on selected 'Roo Addon Suite'", subsystemProperties.length));
+				LOGGER.log(Level.INFO, "");
+			}
+		}
+		
+	}
+
 	/**
      * Method to populate current Repositories using OSGi Serive
      */
@@ -187,11 +335,11 @@ public class SubsystemCommands implements BundleActivator {
 	}
 	
 	/**
-     * Method to obtain subsystemURL by  symbolicName
+     * Method to obtain subsystem resource by symbolicName
      * 
      * @return
      */
-    private String getSubsystemURL(String symbolicName) {
+    private Resource getSubsystemResource(String symbolicName) {
         for (Repository repo : repositories) {
             // Getting all resources from every repo
             Resource[] repoResources = repo.getResources();
@@ -199,7 +347,7 @@ public class SubsystemCommands implements BundleActivator {
             for (Resource resource : repoResources) {
                 // Getting resource
                 if (resource.getSymbolicName().equals(symbolicName)) {
-                    return resource.getURI();
+                    return resource;
                 }
             }
         }
