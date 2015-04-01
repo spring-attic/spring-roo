@@ -28,6 +28,7 @@
 :doctype: 		book
 :keywords:		SpringRoo, Reference
 :toc:
+:toc-placement:		left
 :toc-title:		Title menu
 :toclevels: 		5
 :numbered:
@@ -40,82 +41,108 @@ ifdef::backend-pdf[]
 endif::[]
 
 [abstract]
-_Copyright 2009-2014 VMware, Inc. All Rights Reserved._
-_Copies of this document may be made for your own use and for
-      distribution to others, provided that you do not charge any fee for such
-      copies and further provided that each copy contains this Copyright
-      Notice, whether distributed in print or electronically._
+_© 2015 The original authors._ +
+_Copies of this document may be made for your own use and for distribution to others, 
+provided that you do not charge any fee for such copies and further provided that 
+each copy contains this Copyright Notice, whether distributed in print or 
+electronically._ 
 
+:numbered!:
 [preface]
 [[preface]]
 = Preface
-I still recall the moment when I realised that I would like to program.
-The motivation for me was recognition that creativity with software is
-mostly constrained by your imagination and skills, whereas creativity
-outside the software world is typically constrained by whatever physical
-items you happen to possess. Of course at that early stage I hadn't yet
-come across the subtle constraints in my optimistic assessment of
-software (such as CPU capabilities, memory, CAP theory etc!), but the
-key principle that software was almost boundlessly flexible sparked an
-interest that continues to this day.
 
-Of course, the creativity potential of software implies an abundance of
-time, as it is time that is the principal ingredient in building and
-maintaining software. Ever since the "castle clock" in 1206 we have been
-exploring better ways of programming ever-increasingly sophisticated
-computers, and the last decade in particular has seen a surge in new
-languages and techniques for doing so.
+[[intro-installation]]
+=== 1. Installation
 
-Despite this 800 year history of programming, software projects are no
-different from other projects in that they are still bound by the
-project management triangle: "cost, scope or schedule: pick any two".
-Professional software developers grapple with this reality every day,
-constantly striving for new tools and techniques that might help them
-deliver quality software more quickly.
+Roo is a standard Java application that is fully self-contained within
+the Roo distribution ZIPs. You can download Roo from one of the
+link:#resources-downloads[download sites], or
+link:#development-setup[build] a distribution ZIP yourself from our
+link:#resources-source-repository[source control repository].
 
-While initial delivery remains the key priority for most software
-projects, the long-term operational dimensions of that software are even
-more critical. The criticality of these operational dimensions is easily
-understood given that most software needs to be executed, managed,
-maintained and enhanced for many years into the future. Architectural
-standards are therefore established to help ensure that software is of
-high quality and preferably based on well-understood, vendor-agnostic
-and standards-based mainstream engineering approaches.
+If you are upgrading from an existing version of Spring Roo, you should
+consult the link:#upgrade[upgrade notes] for important information.
 
-There is of course a natural tension between the visibility of initial
-delivery and the conservatism typically embodied in architectural
-standards. Innovative new approaches often result in greater
-productivity and in turn faster project delivery, whereas architectural
-standards tend to restrict these new approaches. Furthermore, there is a
-social dimension in that most developers focus their time on acquiring
-knowledge, skills and experience with those technologies that will
-realistically be used, and this in turn further cements the dominance of
-those technologies in architectural standards.
+Before attempting to install Roo, please ensure you have the following
+system dependencies:
 
-It was within this historical and present-day context that we set out to
-build something that would offer both genuine innovation and
-architectural desirability. We sought to build something that would
-deliver compelling developer productivity without compromising on
-engineering integrity or discarding mainstream existing technologies
-that benefit from architectural standards approval, excellent tooling
-and a massive pool of existing developer knowledge, skills and
-experience.
+* A Linux, Apple or Windows-based operating system (other operating
+systems may work but are not guaranteed)
+* A Java 6 or 7 installation, with the `$JAVA_HOME` environment variable
+pointing to the installation. Note that Java 8 is currently not
+supported.
+* Apache Maven 2.0.9 or above installed and in the path
 
-Spring Roo is the modern-day answer to enterprise Java productivity.
-It's the normal Java platform you know, but with productivity levels
-you're unlikely to have experienced before (at least on Java!). It's
-simple to understand and easy to learn. Best of all, you can use Roo
-without needing to seek architectural approval, as the resulting
-applications use nothing but the mainstream Java technologies you
-already use. Plus all your existing Java knowledge, skills and
-experience are directly applicable when using Roo, and applications
-built with Roo enjoy zero CPU or memory overhead at runtime.
+We have listed various considerations concerning the Java Development
+Kit (JDK) and operating systems in the link:#upgrade-known-issues[known
+issues] section of this documentation. We always recommend you use the
+latest version of Java and Maven that are available for your platform.
+We also recommend that you use http://spring.io/tools/sts[Spring Tool
+Suite] (STS), which is our free Eclipse-based IDE that includes a number
+of features that make working with Roo even easier (you can of course
+use Roo with normal Eclipse or without an IDE at all if you prefer).
 
-Thank you for taking the time to explore Spring Roo. We hope that you
-enjoy using Roo as much as we've enjoyed creating it.
+Once you have satisfied the initial requirements, you can install Roo by
+following these steps:
 
-Ben Alex, Founder - Spring Roo
+1.  Unzip the Roo installation ZIP to a directory of your choice; this
+will be known as `$ROO_HOME` in the directions below
+2.  If using Windows, add `$ROO_HOME\bin` to your `%PATH%` environment
+variable
+3.  If using Linux or Apple, create a symbolic link using a command such
+as `sudo ln -s $ROO_HOME/bin/roo.sh
+        /usr/bin/roo`
 
+Next verify Roo has been installed correctly. This can be done using the
+following commands:
+
+[options=nowrap]
+------------------------------------------------------------------------------
+$ mkdir roo-test
+$ cd roo-test
+$ roo quit
+    ____  ____  ____  
+   / __ \/ __ \/ __ \ 
+  / /_/ / / / / / / / 
+ / _, _/ /_/ / /_/ /  
+/_/ |_|\____/\____/    W.X.Y.ZZ [rev RRR]
+
+
+Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
+$ cd ..
+$ rmdir roo-test
+------------------------------------------------------------------------------
+
+If you see the logo appear, you've installed Roo successfully. For those
+curious, the "[rev RRR]" refers to the Git commit ID used to compile
+that particular build of Roo.
+
+[[intro-roo-opts]]
+=== 2. Optional ROO_OPTS Configuration
+
+The standalone Roo shell supports fine-tuning display-related
+configuration via the ROO_OPTS environment variable. An environment
+variable is used so that these configuration settings can be applied
+before the shell is instantiated and the first messages displayed. The
+ROO_OPTS settings does not apply within Spring Tool Suite's embedded Roo
+shell.
+
+At present the only configuration settings available is roo.bright. This
+causes foreground messages in the shell to be displayed with brighter
+colors. This is potentially useful if your background color is light
+(e.g. white). You can set the variable using the following commands:
+
+`$ export ROO_OPTS="-Droo.bright=true"`  // Linux or Apple
+
+`$ set ROO_OPTS="-Droo.bright=true`      // Windows users
+
+There is an enhancement request within our issue tracker for
+customisable shell color schemes. If you're interested in seeing this
+supported by Roo, you may wish to consider voting for
+http://jira.springframework.org/browse/ROO-549[ROO-549].
+
+:numbered:
 = I. Welcome to Spring Roo [[welcome]]
 
 Welcome to Spring Roo! In this part of the reference guide we will explore everything you need to know in order to use Roo effectively. We've designed this part so that you can read each chapter consecutively and stop at any time. However, the more you read, the more you'll learn and the easier you'll find it to work with Roo.
@@ -477,96 +504,6 @@ keep it. If you're considering alternative productivity tools, consider
 whether they also respect your right to decide to leave and easily
 implement that decision, or if they know you're locked in and can't do
 much about it.
-
-[[intro-installation]]
-=== Installation
-
-Roo is a standard Java application that is fully self-contained within
-the Roo distribution ZIPs. You can download Roo from one of the
-link:#resources-downloads[download sites], or
-link:#development-setup[build] a distribution ZIP yourself from our
-link:#resources-source-repository[source control repository].
-
-If you are upgrading from an existing version of Spring Roo, you should
-consult the link:#upgrade[upgrade notes] for important information.
-
-Before attempting to install Roo, please ensure you have the following
-system dependencies:
-
-* A Linux, Apple or Windows-based operating system (other operating
-systems may work but are not guaranteed)
-* A Java 6 or 7 installation, with the `$JAVA_HOME` environment variable
-pointing to the installation. Note that Java 8 is currently not
-supported.
-* Apache Maven 2.0.9 or above installed and in the path
-
-We have listed various considerations concerning the Java Development
-Kit (JDK) and operating systems in the link:#upgrade-known-issues[known
-issues] section of this documentation. We always recommend you use the
-latest version of Java and Maven that are available for your platform.
-We also recommend that you use http://spring.io/tools/sts[Spring Tool
-Suite] (STS), which is our free Eclipse-based IDE that includes a number
-of features that make working with Roo even easier (you can of course
-use Roo with normal Eclipse or without an IDE at all if you prefer).
-
-Once you have satisfied the initial requirements, you can install Roo by
-following these steps:
-
-1.  Unzip the Roo installation ZIP to a directory of your choice; this
-will be known as `$ROO_HOME` in the directions below
-2.  If using Windows, add `$ROO_HOME\bin` to your `%PATH%` environment
-variable
-3.  If using Linux or Apple, create a symbolic link using a command such
-as `sudo ln -s $ROO_HOME/bin/roo.sh
-        /usr/bin/roo`
-
-Next verify Roo has been installed correctly. This can be done using the
-following commands:
-
-[options=nowrap]
-------------------------------------------------------------------------------
-$ mkdir roo-test
-$ cd roo-test
-$ roo quit
-    ____  ____  ____  
-   / __ \/ __ \/ __ \ 
-  / /_/ / / / / / / / 
- / _, _/ /_/ / /_/ /  
-/_/ |_|\____/\____/    W.X.Y.ZZ [rev RRR]
-
-
-Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
-$ cd ..
-$ rmdir roo-test
-------------------------------------------------------------------------------
-
-If you see the logo appear, you've installed Roo successfully. For those
-curious, the "[rev RRR]" refers to the Git commit ID used to compile
-that particular build of Roo.
-
-[[intro-roo-opts]]
-=== Optional ROO_OPTS Configuration
-
-The standalone Roo shell supports fine-tuning display-related
-configuration via the ROO_OPTS environment variable. An environment
-variable is used so that these configuration settings can be applied
-before the shell is instantiated and the first messages displayed. The
-ROO_OPTS settings does not apply within Spring Tool Suite's embedded Roo
-shell.
-
-At present the only configuration settings available is roo.bright. This
-causes foreground messages in the shell to be displayed with brighter
-colors. This is potentially useful if your background color is light
-(e.g. white). You can set the variable using the following commands:
-
-`$ export ROO_OPTS="-Droo.bright=true"`  // Linux or Apple
-
-`$ set ROO_OPTS="-Droo.bright=true`      // Windows users
-
-There is an enhancement request within our issue tracker for
-customisable shell color schemes. If you're interested in seeing this
-supported by Roo, you may wish to consider voting for
-http://jira.springframework.org/browse/ROO-549[ROO-549].
 
 [[intro-first-steps]]
 === First Steps: Your Own Web App in Under 10 Minutes
@@ -1425,7 +1362,7 @@ delete and the update use case for the pizza order view are not
 desirable. The easiest way to take care of this is to adjust the
 `@RooWebScaffold` annotation in the `PizzaOrderController.java` source:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooWebScaffold(path = "pizzaorder", 
                 formBackingObject = PizzaOrder.class, 
@@ -1701,7 +1638,7 @@ deleting files that aren't required, as we'll see shortly).
 
 The `Hello.java` is just a normal Java file. It looks like this:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 package com.aspectj.rocks;
 
@@ -1728,7 +1665,7 @@ you find them with code assist.
 By this stage you're probably wondering what the ITD files look like.
 Let's have a look at one of them, `Hello_Roo_ToString.aj`:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 package com.aspectj.rocks;
 
@@ -1915,7 +1852,7 @@ link:#command-index-entity-jpa[entity jpa]
 command and following it with a single
 link:#command-index-field-commands[field] command:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 package com.springsource.vote.domain;
 
@@ -3646,7 +3583,7 @@ shell):
 
 1.  Person.java:
 +
-[source,aj]
+[source,java]
 ---------------------
 @RooJavaBean
 @RooToString
@@ -3702,7 +3639,7 @@ implementation of your choice will create a table definition in your
 database for this type. Once fields are added to the Person type, they
 will be added as columns to the Person table.
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Person_Roo_Jpa_Entity {
     
@@ -3745,7 +3682,7 @@ triggers the creation of the Person_Roo_Jpa_ActiveRecord.aj ITD. This
 contains a number of persistence related CRUD methods into your Person
 type via the ITD:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Person_Roo_Jpa_ActiveRecord {
     
@@ -3832,7 +3769,7 @@ Similar to the @RooToString annotation you can change the default method
 name for all persistence-related methods generated through the
 @RooJpaActiveRecord annotation. For example:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooJpaActiveRecord(persistMethod = "save")
 ----
@@ -3872,7 +3809,7 @@ Managed SRC_MAIN_JAVA/com/foo/Person_Roo_ToString.aj
 
 ... yields the following field definition in Person.java:
 
-[source,aj]
+[source,java]
 ----
 @Temporal(TemporalType.TIMESTAMP)
 @DateTimeFormat(style = "M-")
@@ -3913,7 +3850,7 @@ will create a JPA many-to-one (default) or one-to-one relationship:
 The field definition added to the Person type contains the appropriate
 JPA annotations:
 +
-[source,aj]
+[source,java]
 ----------------
 @ManyToOne
 @JoinColumn
@@ -3924,7 +3861,7 @@ The optional --cardinality command attribute allows you to define a
 one-to-one relationship (via JPAs @OneToOne annotation) between Person
 and Car if you wish:
 +
-[source,aj]
+[source,java]
 ----------------
 @OneToOne
 @JoinColumn
@@ -3939,7 +3876,7 @@ they have should also be deleted, but not vice versa (i.e. you should be
 able to delete a Car without deleting its owner). In the database, the
 foreign key should be in the "car" table.
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @Entity
 @RooJavaBean
@@ -3953,7 +3890,7 @@ public class Person {
 }
 ----
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @Entity
 @RooJavaBean
@@ -3973,7 +3910,7 @@ transaction will roll back and you will see an exception due it being
 referenced by a person. To overcome this situation you can add the
 following method to your Car.java:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @PreRemove
 private void preRemove() {
@@ -3995,7 +3932,7 @@ field set --fieldName cars --type com.foo.Car
 The field definition added to the Person type contains the appropriate
 JPA annotation:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @ManyToMany(cascade = CascadeType.ALL)
 private Set<Car> cars = new HashSet<Car>();
@@ -4317,7 +4254,7 @@ columns of the matching employee table will cause fields to be created
 in the entity's DbManaged ITD. An example of a DBRE-created entity is as
 follows:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -4333,7 +4270,7 @@ from a primary key column. For example, if the employee table has
 mandatory employee name and employee number columns, and a nullable age
 column the ITD could look like this:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Employee_Roo_DbManaged {
     
@@ -4409,7 +4346,7 @@ line_item table has two primary keys, line_item_id and order_id. DBRE
 will create the LineItem entity class and LineItemPK identifier class as
 follows:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -4419,7 +4356,7 @@ public class LineItem {
 }
 ----
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooIdentifier(dbManaged = true)
 public class LineItemPK {
@@ -4429,7 +4366,7 @@ public class LineItemPK {
 Roo will automatically create the JPA entity ITD containing a field
 annotated with @EmbeddedId with type LineItemPK as follows:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect LineItem_Roo_JpaEntity {
     
@@ -4455,7 +4392,7 @@ privileged aspect LineItem_Roo_JpaEntity {
 and an identifier ITD for the LineItemPK class containing the primary
 key fields and the type annotation for @Embeddable, as follows:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect LineItemPK_Roo_Identifier {
     
@@ -4513,7 +4450,7 @@ association. DBRE will designate which entities are the owning and
 inverse sides of the association respectively and annotate the fields
 accordingly as shown in the following code snippets:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Product_Roo_DbManaged {
     
@@ -4529,7 +4466,7 @@ privileged aspect Product_Roo_DbManaged {
 }
 ----
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Supplier_Roo_DbManaged {
     
@@ -4543,7 +4480,7 @@ privileged aspect Supplier_Roo_DbManaged {
 DBRE will also create many-to-many associations where the two tables
 each have composite primary keys. For example:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Foo_Roo_DbManaged {
 
@@ -4572,7 +4509,7 @@ For example, the database contains a customer table and an address table
 and a customer can only have one address. The following code snippets
 show the one-to-one mappings:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Address_Roo_DbManaged {
     
@@ -4584,7 +4521,7 @@ privileged aspect Address_Roo_DbManaged {
 }
 ----
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Customer_Roo_DbManaged {
     
@@ -4602,7 +4539,7 @@ If the foreign key column is part of the primary key (or part of an
 index) then the relationship between the tables will be one to many. An
 example is shown below:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Order_Roo_DbManaged {
     
@@ -4621,7 +4558,7 @@ entities in the Order entity in the example above, DBRE will also create
 a corresponding many-to-one association in the LineItem entity, as
 follows:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect LineItem_Roo_DbManaged {
     
@@ -4641,7 +4578,7 @@ entity has more than one association to another entity, the field names
 will be created with unique names. The following code snippet
 illustrates this:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Foo_Roo_DbManaged {
 
@@ -4835,7 +4772,7 @@ The following example also contains a number of fields which can be
 added through the link:#command-index-field-commands[field] command via
 the Roo shell.
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -4883,7 +4820,7 @@ default Active Record style. The following example also contains a
 number of fields which can be added through the
 link:#command-index-field-commands[field] command via the Roo shell.
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -4916,7 +4853,7 @@ roo> *repository jpa* --interface ~.repository.PizzaRepository --entity ~.domain
 This will create a simple interface definition which leverages Spring
 Data JPA:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooJpaRepository(domainType = Pizza.class)
 public interface PizzaRepository {
@@ -4933,7 +4870,7 @@ creation of a fairly trivial AspectJ ITD which adds an extends statement
 to the PizzaRepository interface resulting in the equivalent of this
 interface definition:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 public interface PizzaRepository extends JpaRepository<Pizza, Long> {}
 ----
@@ -4990,7 +4927,7 @@ well as its accessor and mutator. The following example also contain a
 number of fields which can be added through the 
 link:#command-index-field-commands[field] command via the Roo shell.
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooJavaBean
 @RooToString
@@ -5027,7 +4964,7 @@ roo> *repository mongo* --interface ~.repository.PizzaRepository --entity ~.doma
 This will create a simple interface definition which leverages
 http://projects.spring.io/spring-data-mongodb/[Spring Data MongoDB]:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooMongoRepository(domainType = Pizza.class)
 public interface PizzaRepository {
@@ -5143,7 +5080,7 @@ package and additionally a PizzaServiceImpl in the same package (the
 name and package of the PizzaServiceImpl can be customized via the
 optional --class attribute).
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooService(domainTypes = { Pizza.class })
 public interface PizzaService {
@@ -5166,7 +5103,7 @@ void deletePizza(Pizza pizza);
 
 Similarly, the PizzaServiceImpl is rather empty:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 public class PizzaServiceImpl implements PizzaService {
 }
@@ -5177,7 +5114,7 @@ Through the AspectJ ITD the PizzaServiceImpl type is annotated with the
 ITD will introduce the following methods and fields into the target
 type:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @Autowired PizzaRepository pizzaRepository;
     
@@ -5351,7 +5288,7 @@ comma-separated list (i.e.: --disallowedOperations
 delete,update,create). You can also specify which methods should be
 generated and which not in the PersonController.java source:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooWebScaffold(path = "people", formBackingObject = Person.class, create = false, update = false, delete = false)
 @RequestMapping("/people")
@@ -5397,7 +5334,7 @@ controller to help you get started for developing a custom functionality
 by stubbing a simple __get__(), __post__() and __index__() method inside
 the controller:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping("/public/car/**")
 @Controller
@@ -5460,7 +5397,7 @@ documentation.
 The ApplicationConversionServiceFactoryBean is a Roo-managed Java class
 and it looks like this:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooConversionService
 public class ApplicationConversionServiceFactoryBean extends FormattingConversionServiceFactoryBean {
@@ -5495,7 +5432,7 @@ formatted as a String in JSP views. For example suppose we have an
 entity called Vote. To customize how it is displayed in the JSP views
 add a method like this:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooConversionService
 public class ApplicationConversionServiceFactoryBean extends FormattingConversionServiceFactoryBean {
@@ -6171,7 +6108,7 @@ disable the creation of any of the above listed methods by providing an
 empty String argument for the unwanted method in the @RooJson
 annotation. Example:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RooJson(toJsonMethod="", fromJsonMethod="myOwnMethodName")
 ----
@@ -6205,7 +6142,7 @@ they already exist).
 annotation will prompt Roo to create an ITD with a number of methods:
 * listJson
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping(headers = "Accept=application/json")
 @ResponseBody
@@ -6232,7 +6169,7 @@ curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings
 ----
 * showJson
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping(value = "/{id}", headers = "Accept=application/json")
 @ResponseBody
@@ -6259,7 +6196,7 @@ curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings/1
 ----
 * createFromJson
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping(method = RequestMethod.POST, headers = "Accept=application/json")
 public ResponseEntity<String> ToppingController.createFromJson(@RequestBody String json) {
@@ -6282,7 +6219,7 @@ curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json
 ----
 * createFromJsonArray
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping(value = "/jsonArray", method = RequestMethod.POST, headers = "Accept=application/json")
 public ResponseEntity<String> ToppingController.createFromJsonArray(@RequestBody String json) {
@@ -6308,7 +6245,7 @@ curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json
 ----
 * updateFromJson
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping(method = RequestMethod.PUT, headers = "Accept=application/json")
 public ResponseEntity<String> ToppingController.updateFromJson(@RequestBody String json) {
@@ -6336,7 +6273,7 @@ curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json"
 ----
 * updateFromJsonArray
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping(value = "/jsonArray", method = RequestMethod.PUT,
                headers = "Accept=application/json")
@@ -6366,7 +6303,7 @@ curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json"
 ----
 * deleteFromJson
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
 public ResponseEntity<String> ToppingController.deleteFromJson(@PathVariable("id") Long id) {
@@ -6398,7 +6335,7 @@ containing a JSON array if the form backing object defines dynamic
 finders. Here is an example taken from VisitController in the pet clinic
 sample application, after adding JSON support to it:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @RequestMapping(params = "find=ByDescriptionAndVisitDate", method = RequestMethod.GET, 
                 headers = "Accept=application/json")
@@ -6482,7 +6419,7 @@ This command allows you to mark an individual entity for automatic Solr
 indexing. The @RooSolrSearchable annotation will be added to the target
 entity (Person). Furthermore, the following ITD is generated:
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 privileged aspect Person_Roo_SolrSearch {
     
@@ -6617,7 +6554,7 @@ field names by adding a @Field annotation to a field in the domain
 object (i.e. Person) which contains your own field (you need to provide
 a field definition in the Solr schema for it as well):
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @Field("my:field:name:birthday")
 @Temporal(TemporalType.TIMESTAMP)
@@ -7028,7 +6965,7 @@ command in the Roo Shell; your type needs to implement the
 *CommandMarker* interface, and you need to create a method annotated
 with **@CliCommand**. Let us review some details:
 
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 [1] @Component   
 [1] @Service  
@@ -7390,7 +7327,7 @@ pluginfootnote:[for details see
 http://felix.apache.org/site/apache-felix-maven-scr-plugin.html] to
 create descriptors for the OSGi declarative services infrastructure.
 +
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 .Example 17.2. Component declaration with Apache Felix annotations
 ----
 @Service
@@ -7789,7 +7726,7 @@ Add dependency to addon-tailor::
   </dependency>
 ----
 Create a class that implements TailorConfigurationFactory::
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @Component
 @Service
@@ -7798,7 +7735,7 @@ public class TailorWebSimpleConfiguration implements TailorConfigurationFactory 
 }
 ----
 Override createTailorConfiguration()::
-[source,aj,options=nowrap]
+[source,java,options=nowrap]
 ----
 @Override
 public TailorConfiguration createTailorConfiguration() {
