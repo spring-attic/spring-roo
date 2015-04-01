@@ -14,10 +14,10 @@
 //
 // HTML5 Asciidoctor:
 //   # Embed images in XHTML
-//   asciidoctor -b html5 index.adoc
+//   asciidoctor -b html5 -a linkcss -a data-uri index.adoc
 //
 // PDF Asciidoctor:
-//   $ asciidoctor-pdf index.adoc
+//   $ asciidoctor-pdf -a pdf-style=asciidoctor index.adoc
 //
 = {title} 
 :title:			Spring Roo - Reference Documentation
@@ -27,16 +27,23 @@
 :copyright: 		CC BY-NC-SA 3.0
 :doctype: 		book
 :keywords:		SpringRoo, Reference
+:revnumber:		Rev: xxx
+:revdate:		Date: yyyy-mm-dd (month, X month 2015)
 :toc:
 :toc-title:		Title menu
+//:toc-placement:		right
 :toclevels: 		5
+//:source-highlighter:	pygments
+//:backend:		book
+//:pygments-style:	bw
+//:pagenums:
+//:backend: 		docbook
 :numbered:
 :sectnumlevels:		5
 ifdef::backend-pdf[]
-:pdf-style:		asciidoctor
 :pagenums:
-//:pygments-style: 	bw
-//:source-highlighter: 	pygments
+:pygments-style: bw
+:source-highlighter: pygments
 endif::[]
 
 [abstract]
@@ -45,6 +52,7 @@ _Copies of this document may be made for your own use and for
       distribution to others, provided that you do not charge any fee for such
       copies and further provided that each copy contains this Copyright
       Notice, whether distributed in print or electronically._
+image:./images/xdev-spring_logo.jpg[]
 
 [preface]
 [[preface]]
@@ -680,7 +688,7 @@ your FireFox web browser execute the generated Selenium tests. You can
 also visit your new web application at http://localhost:8080/tenminutes,
 which should look similar to the picture below.
 
-image::tenminutes.png[tenminutes,align=center]
+image:images/tenminutes.png[image]
 
 Naturally in this short ten minute test we've skipped dozens of features
 that Roo can provide, and didn't go into any detail on how you could
@@ -829,7 +837,7 @@ orders of Pizzas by his customers for delivery.
 After this short discussion with the Pizza Shop owner, we have created a
 simple class diagram for the initial domain model:
 
-image::pizza.png[pizza,align=center]
+image:images/pizza.png[]
 
 While this class diagram represents a simplified model of the problem
 domain for the pizza shop problem domain, it is a good starting point
@@ -1258,7 +1266,7 @@ working in action you can open an existing integration test and use the
 `testMarkerMethod()` method to test it. For example you can open the
 `BaseIntegrationTest.java` source file and try it out:
 
-image::codecompletion.png[code completion,align=center]
+image:images/codecompletion.png[]
 
 Note, most of the methods visible in the STS code assist are actually
 not in the Java sources but rather part of the AspectJ ITD and are
@@ -1306,7 +1314,7 @@ leveraging new features introduced with the release of Spring Framework
 v3. The following URI - Resource mappings are applied in Roo generated
 controllers:
 
-image::restmappings.png[rest mappings,align=center]
+image:images/restmappings.png[]
 
 [[beginning-step-6]]
 === Step 6: Loading the Web Server
@@ -1330,7 +1338,7 @@ After selecting your preferred deployment method you should see the Web
 container starting and the application should be available under the
 following URL http://localhost:8080/pizzashop
 
-image::standardui.png[standard UI,align=center]
+image:images/standardui.png[]
 
 [[beginning-securing-app]]
 === Securing the Application
@@ -1448,13 +1456,13 @@ Roo generated Web UIs can be customized in various ways. To find your
 way around the installed Web-tier artifacts take a look at the following
 table:
 
-image::webfolders.png[web folders,align=center]
+image:images/webfolders.png[]
 
 The easiest way to customize the look & feel of the Roo Web UI is to
 change CSS and image resources to suit your needs. The following look &
 feel was created for the specific purpose of the Pizza Shop application:
 
-image::altui.png[alternative UI,align=center]
+image:images/altui.png[]
 
 Spring Roo also configures
 http://docs.spring.io/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-themeresolver[theming
@@ -3309,8 +3317,8 @@ files will still have `@Roo` annotations within them. In addition, there
 will be `import` directives at the top of your `.java` files to import
 those `@Roo` annotations. You can easily remove these unwanted members
 by clicking Search > Search > File Search, containing text
-pass:["]`\n.pass:[*][@\.]Roo[^t_]+?.pass:[*]$`pass:["] (without the quotes), file name pattern
-pass:["]`*.java`pass:["] (without the quotes), ticking the "Regular expression" and
+//pass:["]`\n.pass:[*][@\.]Roo[^t_]+?.pass:[*]$`pass:["] (without the quotes), file name pattern
+//pass:["]`*.java`pass:["] (without the quotes), ticking the "Regular expression" and
 "Case sensitive" check-boxes and clicking "Replace". When the next
 window appears and asks you for a replacement pattern, leave it blank
 and continue. All of the Roo statements will have now been removed. We
@@ -4081,18 +4089,18 @@ upper case letter is substituted for each of these characters. This is
 also similar for column and field names. The following tables contain
 some examples.
 
-[cols="2*<",options="header"]
+[options="header"]
 |==================================================
-^|Table name ^|DBRE-produced entity class name
+|Table name |DBRE-produced entity class name
 |order |Order.java
 |line_item |LineItem.java
 |EAM_MEASUREMENT_DATA_1H |EamMeasurementData1h.java
 |COM-FOO\BAR |ComFooBar.java
 |==================================================
 
-[cols="2*<,",options="header"]
+[cols=",",options="header",]
 |=====================================
-^|Column name ^|DBRE-produced field name
+|Column name |DBRE-produced field name
 |order |order
 |EMPLOYEE_NUMBER |employeeNumber
 |USR_CNT |usrCnt
@@ -4784,7 +4792,7 @@ Active Record pattern. With the internal changes in place Roo can now
 support alternative persistence providers which support application
 layering.
 
-image::layering.png[layering,align=center]
+image:images/layering.png[image]
 
 While there are a number of new layering and persistence choices
 available, by default Roo will continue to support the JPA Active Record
@@ -5282,9 +5290,9 @@ UI.
 The controller scaffold command will create a Spring MVC controller for
 the Person entity with the following method signatures:
 +
-[cols="2*<",options="header"]
+[cols=",",options="header",]
 |=======================================================================
-^|Method Signature  ^|Comment 
+|Method Signature  |Comment 
 |public String **create**(@Valid Person person, BindingResult result,
 ModelMap modelMap) \{..} |The create method is triggered by HTTP POST
 requests to /<app-name>/people. The submitted form data will be
@@ -5538,7 +5546,7 @@ message property files, a complete tag library and a web.xml file. These
 artifacts are arranged in different folders which is best illustrated in
 the following picture:
 
-image::web-project-structure.png[web project structure,align=center]
+image:images/web-project-structure.png[image]
 
 The i18n folder contains translations of the Web UI. The
 messages_XX.properties files are static resources (which will never be
@@ -5621,9 +5629,9 @@ yet Roo will be able to merge in changes to the JSPX successfully. The
 hash key shown in the "z" attribute is calculated as shown in the
 following table:
 
-[cols="2*<",options="header"]
+[cols=",",options="header",]
 |=======================================================================
-^|Included in hash key calculation  ^|_Not_ included in hash key
+|Included in hash key calculation  |_Not_ included in hash key
 calculation 
 |Element name (name only, not namespace) |Namespace of element name
 
@@ -5682,9 +5690,9 @@ The Roo JSP addon will read JSR 303 (bean validation API) annotations
 found in a form-backing object. The following convention is applied for
 the generation of create and update (and finder) forms:
 
-[cols="2*<",options="header"]
+[cols=",",options="header",]
 |=======================================================================
-^|Data type / JPA annotation ^|Scaffolded HTML Element
+|Data type / JPA annotation |Scaffolded HTML Element
 |String (sizeMax < 30; @Size) |Input
 
 |String (sizeMax >=30, @Size) |Textarea
@@ -5893,7 +5901,7 @@ mvn jetty:run-exploded
 
 View the application at http://localhost:8080/bikeshop:
 
-image::jsf-bikeshop.png[bikeshop,align=center]
+image:images/jsf-bikeshop.png[image]
 
 [[base-cloud-foundry]]
 == Cloud Foundry Add-On
@@ -5922,7 +5930,7 @@ pgp automatic trust
 addon install bundle --bundleSymbolicName org.springframework.roo.addon.cloud.foundry 
 ----
 
-image::cloud-foundry/ManuallyInstallingTheCloudFoundryAddOn.png[manually installing Cloud Foundry addon,align=center]
+image:images/cloud-foundry/ManuallyInstallingTheCloudFoundryAddOn.png[image]
 
 The “pgp” command simply ensures the signed bundles needed by the Cloud
 Foundry add-on can be installed. The “addon install” command instructs
@@ -5948,7 +5956,7 @@ pgp automatic trust
 cloud foundry login
 ----
 
-image::cloud-foundry/AutoInstallingTheCloudFoundryAddOn.png[auto installing CF addon,align=center]
+image:images/cloud-foundry/AutoInstallingTheCloudFoundryAddOn.png[image]
 
 [[cloudf-start]]
 === Getting Started
@@ -5983,7 +5991,7 @@ After logging in a many new Cloud Foundry comands will be presented to
 you. You can see these by typing "cloud foundry" in the shell and then
 pressing TAB.
 
-image::cloud-foundry/CloudFoundryFromTheRooShell.png[CF from the Roo Shell,align=center]
+image:images/cloud-foundry/CloudFoundryFromTheRooShell.png[image]
 
 [[cloudf-deploying]]
 ==== Deploying Your Application
@@ -6000,7 +6008,7 @@ deployable application. Onece the application has been successfully
 deployed when you see "The application 'new-expenses' was successfully
 pushed".
 
-image::cloud-foundry/CloudFoundryDeploy.png[CF deploy,align=center]
+image:images/cloud-foundry/CloudFoundryDeploy.png[image]
 
 [[cloudf-viewing]]
 ==== Viewing Your Applications
@@ -6010,7 +6018,7 @@ project in the first place your application will be deployed to Cloud
 Foundry. To verify this you can run the command "cloud foundry list
 apps", which will display all applications currently deployed.
 
-image::cloud-foundry/CloudFoundryApps.png[CF apps,align=center]
+image:images/cloud-foundry/CloudFoundryApps.png[image]
 
 There are two other application deployed, both of which are started and
 bound to services. You will also notice that a URL has been mapped to
@@ -6022,7 +6030,7 @@ which is what Roo defaults to if a URL is not provided.
 [[cloudf-binding]]
 ==== Binding Services
 
-image::cloud-foundry/CloudFoundryListServices.png[CF list services,align=center]
+image:images/cloud-foundry/CloudFoundryListServices.png[image]
 
 The next step is to bind the application "new-expenses" to a service,
 before we do this though we need to check that we have a service to bind
@@ -6038,7 +6046,7 @@ To bind "new-expenses" to a service we use the "cloud foundry bind
 service --serviceName misql --appName new-expenses" command. Roo's
 auto-completion makes navigating the options a breeze.
 
-image::cloud-foundry/CloudFoundryServiceBinding.png[CF service binding,align=center]
+image:images/cloud-foundry/CloudFoundryServiceBinding.png[image]
 
 If you were to run "cloud foundry list apps" at this point you would see
 that the application "new-expenses" is now bound to the MySQL service
@@ -6051,7 +6059,7 @@ you can see below, the default value provisioned is 256 megabytes.
 [[cloudf-memory]]
 ==== Provisioning Memory
 
-image::cloud-foundry/CloudFoundryViewMemory.png[CF view memory,align=center]
+image:images/cloud-foundry/CloudFoundryViewMemory.png[image]
 
 [[cloudf-starting-app]]
 ==== Starting Your Application
@@ -6059,13 +6067,13 @@ image::cloud-foundry/CloudFoundryViewMemory.png[CF view memory,align=center]
 Now that we have verified that we should have enough memory to start we
 simple run "cloud foundry start app --appName new-expenses".
 
-image::cloud-foundry/CloudFoundryStartApp.png[CF start app,align=center]
+image:images/cloud-foundry/CloudFoundryStartApp.png[image]
 
 To verify that the application has actually started simply navigate to
 the URL you previously mapped to the application, in this case it is
 "new-expenses.cloudfoundry.com", and you should see your application.
 
-image::cloud-foundry/CloudFoundryNewExpenses.png[CF new expenses,align=center]
+image:images/cloud-foundry/CloudFoundryNewExpenses.png[image]
 
 [[cloudf-conclusion]]
 === Conclusion
@@ -11572,9 +11580,9 @@ changes please refer to
 https://jira.springsource.org/browse/ROO-2833[ROO-2833]:
 +
 .Old Annotations & Commands
-[cols="5*<",options="header"]
+[cols=",,,,",options="header",]
 |=======================================================================
-^| ^|Active Record ^|Repository ^|Entity ^|Command
+| |Active Record |Repository |Entity |Command
 |JPA |@RooEntity | | |entity
 
 |Spring Data JPA | |@RooRepositoryJpa |@RooJpaEntity |entity
@@ -11585,9 +11593,9 @@ mongo + repository mongo
 |=======================================================================
 +
 .New Annotations & Commands
-[cols="5*<",options="header"]
+[cols=",,,,",options="header",]
 |=======================================================================
-^| ^|Active Record ^|Repository ^|Entity ^|Command
+| |Active Record |Repository |Entity |Command
 |JPA |*@RooJpaActiveRecord* | | |entity *jpa*
 
 |Spring Data JPA | |*@RooJpaRepository* |@RooJpaEntity |entity *jpa*

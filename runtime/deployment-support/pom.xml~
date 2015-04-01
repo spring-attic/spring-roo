@@ -151,7 +151,7 @@
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
                 <version>1.5.0</version>
-                <!--<dependencies>
+                <dependencies>
                     <dependency>
                         <groupId>org.asciidoctor</groupId>
                         <artifactId>asciidoctorj</artifactId>
@@ -162,7 +162,7 @@
                         <artifactId>asciidoctorj-pdf</artifactId>
                         <version>1.5.0-alpha.6</version>
                     </dependency>
-                </dependencies>-->
+                </dependencies>
                 <executions>
                     <execution>
                         <id>output-html</id>
@@ -171,13 +171,11 @@
                             <goal>process-asciidoc</goal>
                         </goals>
                         <configuration>
-                            <sourceHighlighter>coderay</sourceHighlighter>
                             <backend>html5</backend>
                             <sourceHighlighter>coderay</sourceHighlighter>
                             <attributes>
-                                <imagesdir>./images</imagesdir>
-                                <toc>left</toc>
-                                <icons>font</icons>
+                                <toc/>
+								<toc-placement>left</toc-placement> 
                                 <sectanchors>true</sectanchors>
                                 <!-- set the idprefix to blank -->
                                 <idprefix/>
@@ -194,7 +192,7 @@
                         </goals>
                         <configuration>
                             <backend>pdf</backend>
-                            <!-- WARNING callout bullets don't yet work with CodeRay -->
+                            <!--WARNING callout bullets don't yet work with CodeRay-->
                             <sourceHighlighter>coderay</sourceHighlighter>
                             <attributes>
                                 <pagenums/>
@@ -209,7 +207,8 @@
 					<doctype>book</doctype>
                     <sourceDirectory>src/main/asciidoc</sourceDirectory>
                     <headerFooter>true</headerFooter>
-                    <outputDirectory>target/generated-docs</outputDirectory>
+					<data-uri/>                    
+					<outputDirectory>target/generated-docs</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>
