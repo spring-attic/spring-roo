@@ -88,10 +88,10 @@ public class SubsystemCommands implements BundleActivator {
 		start(subsystem.getSubsystemId());
 	}
 
-	public Subsystem install(String url) throws IOException {
-		LOGGER.log(Level.INFO, "Installing subsystem " + url);
+	public Subsystem install(String url) {
+		LOGGER.log(Level.INFO, "Installing subsystem...");
 		Subsystem rootSubsystem = getSubsystem(0);
-		Subsystem s = rootSubsystem.install(url, new URL(url).openStream());
+		Subsystem s = rootSubsystem.install(url);
 		LOGGER.log(Level.INFO, "Subsystem successfully installed: "
 				+ s.getSymbolicName() + "; id: " + s.getSubsystemId());
 		LOGGER.log(Level.INFO, " ");
