@@ -11947,16 +11947,15 @@ project as well as links to articles, blogs and new documentation.
 Please use this URI if you are referring other people to the Spring Roo project,
 as it is the main landing point for the project.
 
-
 [[resources-downloads]]
 === Downloads and Maven Repositories
 
-Web: http://www.springsource.com/download/community?project=Spring%20Roo
+You can always access the latest Spring Roo release ZIP by visiting Downloads section at
+http://projects.spring.io/spring-roo/#running-from-shell[Spring Roo Home Page].
 
-You can always access the latest Spring Roo release ZIP by visiting the
-above URI. The download site not only provides the download itself, but
-also provides access to all historically released versions plus SHA1
-hash codes of those files.
+////
+The site not only provides the download itself, but also provides access
+to all historically released versions plus SHA1 hash codes of those files.
 
 We publish all Roo modules to a Maven repository at
 http://spring-roo-repository.springsource.org/release. This Maven
@@ -11964,17 +11963,26 @@ repository is automatically included in user project so that the
 annotation library can be downloaded. It is also automatically included
 in the POM for add-ons created via the
 link:#simple-addons-fast-creation[add-on creator].
+////
 
 [[resources-forums]]
-=== Community Forums
+=== Community Forum
 
-Web: http://forum.springsource.org/forumdisplay.php?f=67
+Web: http://stackoverflow.com/questions/tagged/spring-roo
 
 For fast and free end user support for all official Spring projects, the
-Spring Community Forum is an excellent place to visit. Because Roo is an
+Spring Roo Forum is an excellent place to visit. Because Roo is an
 official top-level Spring project, of course you'll find there is a
-dedicated "Spring Roo forum" for all your questions, comments and
-experiences.
+dedicated "Spring Roo" tag at Stack Overflow for all your questions, comments
+and experiences.
+
+If you have any question about Spring Roo project and its functionalities,
+you can check and ask a questions at
+http://stackoverflow.com/questions/tagged/spring-roo[Spring Roo tagged questions at Stack Overflow].
+We monitor stackoverflow.com for questions tagged with spring-roo.
+
+http://forum.springsource.org is now a read-only archive.
+All commenting, posting, registration services have been turned off.
 
 The Roo project does not have a "mailing list" or "newsgroup" as you
 might be familiar with from other open source projects, although
@@ -12020,21 +12028,27 @@ two systems.
 
 Roo Hash Code (please include in your tweets, and also follow for
 low-volume announcements):
-https://twitter.com/springroo[@SpringRoo]
+https://twitter.com/#springroo[#SpringRoo]
+
+If you use Twitter, you're encouraged to follow @SpringRoo. Also
+please use @SpringRoo in your tweets so everyone can easily see them.
+
+The Roo team also uses and monitors tweets that include #SpringRoo, so
+if you're tweeting about Roo, please remember to include #SpringRoo somewhere in
+the tweet. If you like Roo or have found it helpful on a project, please
+tweet about it and help spread the word!
 
 Follow the core Roo development team for interesting Roo news and
 progress (higher volume than just following @SpringRoo, but only a few
-Tweets per week): http://twitter.com/alankstewart[@alankstewart].
+Tweets per week):
+http://twitter.com/disid_corp[@disid_corp],
+http://twitter.com/juanCaFX[@juanCaFX],
+https://twitter.com/enrique_ruiz_[@enrique_ruiz_].
 
 Many people who use Roo also use Twitter, including the core Roo
 development team. If you're a Twitter user, you're welcome to follow the
 Roo development team (using the Twitter IDs above) to receive
 up-to-the-minute Tweets on Roo activities, usage and events.
-
-The Roo team also monitors Tweets that include @SpringRoo, so if you're
-Tweeting about Roo, please remember to include @SpringRoo somewhere in
-the Tweet. If you like Roo or have found it helpful on a project, please
-Tweet about it and help spread the word!
 
 We do request that you use the link:#resources-forums[Community Forums]
 if you have a question or issue with Roo, as 140 characters doesn't
@@ -12044,7 +12058,7 @@ archive of historical answers that people can search against.
 [[resources-issue-tracking]]
 === Issue Tracking
 
-Web: https://jira.springsource.org/browse/ROO
+Web: https://jira.spring.io/browse/ROO/
 
 Spring projects use Atlassian Jira for tracking bugs, improvements,
 feature requests and tasks. Roo uses a public Jira instance you're
@@ -12093,6 +12107,9 @@ development.
 Historical releases of Roo can be accessed by browsing the tags branches
 within our Git repository. The mainline development of Roo occurs on the
 "master" branch.
+
+"gh-pages" branch is used to build and publish Spring Roo's project page site
+based on Jekyll and GitHub Pages.
 
 To detailed information about how to check out and build Roo from
 Subversion, please refer to the link:#development[Development Processes]
