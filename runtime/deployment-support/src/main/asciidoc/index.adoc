@@ -12098,34 +12098,28 @@ To detailed information about how to check out and build Roo from
 Subversion, please refer to the link:#development[Development Processes]
 chapter.
 
-[[resources-source-web-browsing]]
-=== Source Web Browsing
-
-Web: https://github.com/spring-projects/spring-roo.git
-
-To assist those who wish to simply review the current Roo code but not
-check it out fully onto their own computer, Spring Roo offers a public
-Atlassian FishEye instance. You can use this to not only view the
-current source code, but also access old releases, perform sophisticated
-searches and even build graphs and reports.
-
-If you need to link to source code from an issue report or forum post,
-please use the FishEye service to provide a fully-qualified URI.
-
 [[resources-commercial]]
 === Commercial Products and Services
 
+Web: http://www.disid.com/en/
+
+DISID Corporation employs the Roo development team and offers a wide range of
+products and professional services around Roo and the technologies which Roo
+enables. Available professional services include software factory, geographic
+information systems, web application development, mobile application
+development, training, consulting and mentoring. Please visit the above URI
+to learn more about DISID products and services.
+
 Web: http://spring.io/
 
-http://gopivotal.com/[Pivitol Software] employs the Roo development team
-and offers a wide range of products and professional services around Roo
-and the technologies which Roo enables. Available professional services
-include training, consulting, design reviews and mentoring, with
-products including service level agreement (SLA) backed support
-subscriptions, certified builds, indemnification and integration with
-various commercial products. Please visit the above URI to learn more
-about SpringSource products and services and how these can add value to
-your build-run-manage application lifecycle.
+Pivotal Software offers a wide range of products and professional services
+around Roo and the technologies which Roo enables. Available professional
+services include training, consulting, design reviews and mentoring, with
+products including service level agreement (SLA) backed support subscriptions,
+certified builds, indemnification and integration with various commercial products.
+Please visit the above URI to learn more about SpringSource products and
+services and how these can add value to your build-run-manage application
+lifecycle.
 
 [[resources-other]]
 === Other
