@@ -11953,17 +11953,8 @@ as it is the main landing point for the project.
 You can always access the latest Spring Roo release ZIP by visiting Downloads section at
 http://projects.spring.io/spring-roo/#running-from-shell[Spring Roo Home Page].
 
-////
-The site not only provides the download itself, but also provides access
-to all historically released versions plus SHA1 hash codes of those files.
-
-We publish all Roo modules to a Maven repository at
-http://spring-roo-repository.springsource.org/release. This Maven
-repository is automatically included in user project so that the
-annotation library can be downloaded. It is also automatically included
-in the POM for add-ons created via the
-link:#simple-addons-fast-creation[add-on creator].
-////
+We publish all Roo modules to Maven Central, the default repository from which
+Maven will download the Spring Roo artifacts automatically.
 
 [[resources-forums]]
 === Community Forum
