@@ -8,19 +8,20 @@
   <c:if test="${empty render or render}">
     <spring:url var="img" value="/resources/images/${locale}.png" />
     <spring:url var="url" value="">
-      <c:if test="${null ne param.form}">
-        <spring:param name="form" />
-      </c:if>
-      <c:if test="${not empty param.find}">
-        <spring:param name="find" value="${param.find}" />
-      </c:if>
+      <c:forEach var="myParms" items="${param}">
+        <c:choose>
+          <c:when test="${myParms.key eq 'lang'}">
+            <!-- ignore -->
+          </c:when>
+          <c:when test="${not empty myParms.value}">
+            <spring:param name="${myParms.key}" value="${myParms.value}" />
+          </c:when>
+          <c:otherwise>
+            <spring:param name="${myParms.key}" />
+          </c:otherwise>
+        </c:choose>
+      </c:forEach>
       <spring:param name="lang" value="${locale}" />
-      <c:if test="${not empty param.page}">
-        <spring:param name="page" value="${param.page}" />
-      </c:if>
-      <c:if test="${not empty param.size}">
-        <spring:param name="size" value="${param.size}" />
-      </c:if>
     </spring:url>
     <spring:message code="global_language_switch" arguments="${label}" var="lang_label" htmlEscape="false" />
     <a href="${url}" title="${fn:escapeXml(lang_label)}">
