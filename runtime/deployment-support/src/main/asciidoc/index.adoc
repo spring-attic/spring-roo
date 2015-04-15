@@ -93,17 +93,10 @@ You can download the current release from Spring Roo project page
 http://projects.spring.io/spring-roo/#download-widget[downloads section]
 and the
 http://projects.spring.io/spring-roo/#instant-results---making-java-fun[related documentation].
-<<<<<<< HEAD
 
-You can also build a distribution ZIP yourself from our source
-control repository.
-
-=======
- 
 You can also build a distribution ZIP yourself from our 
 link:#resources-source-repository[source control repository.]
  
->>>>>>> Few changes to index.adoc
 [[preface-install]]
 === 4. Install Spring Roo
 
