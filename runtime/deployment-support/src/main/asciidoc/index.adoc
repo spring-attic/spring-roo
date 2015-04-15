@@ -5036,7 +5036,7 @@ link:#command-index-service-commands[service] command in the Roo shell:
 
 [subs=quotes,options=nowrap]
 ----
-roo> *service* --interface ~.service.PizzaService --entity ~.domain.Pizza
+roo> *service type* --interface ~.service.PizzaService --entity ~.domain.Pizza
 ----
 
 This command will create the PizzaService interface in the defined
@@ -7642,7 +7642,7 @@ command completion support for this alias from the shell.
    <!-- Create spring data JPA repository -->
    <action type="execute" command="repository jpa --interface ${entity}Repository --entity ${entity}"/>
    <!-- Create service interface and implementation class-->
-   <action type="execute" command="service --interface ${entity}Service --class ${entity}ServiceImpl --entity ${entity}"/>
+   <action type="execute" command="service type --interface ${entity}Service --class ${entity}ServiceImpl --entity ${entity}"/>
    <action type="focus" module="web"/>
    <action type="execute" command="web mvc scaffold --class ${entity}Controller --backingType ${entity}"/>
 </config>
@@ -7661,7 +7661,7 @@ layer --entity ~.Customer
 ----
 module focus --moduleName webapp-domain
 repository jpa --interface ~.CustomerRepository --entity ~.Customer
-service --interface ~.CustomerService --class ~.CustomerServiceImpl --entity ~.Customer
+service type --interface ~.CustomerService --class ~.CustomerServiceImpl --entity ~.Customer
 module focus --moduleName webapp-web
 web mvc scaffold --class ~.CustomerController --backingType ~.Customer
 ----
