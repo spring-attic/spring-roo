@@ -687,6 +687,11 @@
   border: none;
 }
 
+.body--container .project-documentation--container.marketplace table img
+  {
+  max-width: 120px;
+}
+
 .body--container .project-documentation--container.marketplace table td
   {
   padding: 6px 12px 6px 0;
