@@ -1,0 +1,54 @@
+---
+# The name of your project
+title: Spring Roo's Marketplace
+---
+<!DOCTYPE HTML>
+<html lang="en-US">
+{% capture billboard_description %}
+A next-generation rapid application development tool for Java developers.
+With Roo you can easily build full Java applications in minutes.
+{% endcapture %}
+
+{% capture main_content %}
+
+<a name="roo-addon-suites"></a>
+
+##  Roo Addon Suites
+
+<!-- Addon gvNIX -->
+{% capture project_description %}
+gvNIX is an open source tool for rapid application development (RAD) with which you can create Java
+web applications in minutes.
+It is a distribution of Spring Roo that provides the set of Spring Roo tools
+plus a suite of features that increase development productivity and improve
+the user experience by integrating frameworks like jQuery, Bootstrap 3,
+Leaflet, DataTables, Dandelion DataTables, among other.
+{% endcapture %}
+
+{% include project_block_marketplace.md project_title="Addon gvNIX" logo_url="http://www.gvnix.org/assets/themes/gvnix-omega-multilanguage/images/logo-negativo-300.png" repo_url="http://repository.gvnix.org/" esa_url="http://sourceforge.net/projects/gvnix/files/gvNIX-1.4.1.RELEASE.zip/download" project_description=project_description %}
+
+<!-- Addon demo con class img -->
+{% capture project_description %}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
+ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl
+ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit
+{% endcapture %}
+
+{% include project_block_marketplace.md project_title="Addon Title" project_class_logo="logo-spring-security" repo_url="http://" esa_url="http://" project_description=project_description %}
+
+<!-- Addon demo con url img -->
+{% capture project_description %}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
+ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl
+ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit
+{% endcapture %}
+
+{% include project_block_marketplace.md project_title="Addon Title" logo_url="http://www.gvnix.org/assets/themes/gvnix-omega-multilanguage/images/logo-negativo-300.png" repo_url="http://" esa_url="http://" project_description=project_description %}
+
+
+{% endcapture %}
+
+{% include project_group_page.html %}
+</html>

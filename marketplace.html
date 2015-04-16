@@ -1,0 +1,104 @@
+---
+# The name of your project
+title: Spring Roo's Marketplace
+---
+
+<!DOCTYPE HTML>
+<html lang="en-US">
+{% capture billboard_description %}
+A next-generation rapid application development tool for Java developers.
+With Roo you can easily build full Java applications in minutes.
+{% endcapture %}
+
+{% capture main_content %}
+
+<a name="roo-addon-suites"></a>
+
+##  Roo Addon Suites
+
+Birth, a very small stage in a vast cosmic
+arena extraordinary claims require extraordinary evidence! Flatland
+Apollonius of Perga culture inconspicuous motes of rock and gas realm
+of the galaxies quasar, corpus callosum, galaxies Drake Equation ship
+
+<!-- Roo Addons Suite incluid (as widget downloads HTML) -->
+  <div id="download-widget">
+    <div class="row-fluid download-widget--container">
+      <div class="download-widget--header js-item-dropdown-widget--wrapper">
+        <div class="download-widget--title"> Roo Addons Suites  </div>
+        <div data-download-widget-controls style="display: inline-block"></div>
+      </div>
+      <div class="download-widget--body">
+        <div class="project-documentation--container marketplace">
+              <div class="item-dropdown-widget">
+                  <div class="item--dropdown">
+                      <div class="item--body">
+                          <table>
+                            <thead>
+                              <tr class="item--body-title">
+                                <th>Addon</th>
+                                <th>Description</th>
+                                <th>Download</th>
+                              </tr>
+                            </thead>
+                            <tbody>{% include roo_addons_suites.md %}</tbody>
+                          </table>
+                     </div>
+                  </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{% endcapture %}
+
+{% capture related_resources %}
+
+
+**INTRODUCTORY PARAGRAPHS** Birth, a very small stage in a vast cosmic
+arena extraordinary claims require extraordinary evidence! Flatland
+Apollonius of Perga culture inconspicuous motes of rock and gas realm
+of the galaxies quasar, corpus callosum, galaxies Drake Equation ship
+of the imagination [Jean-François Champollion](#). Galaxies Hypatia!
+Trillion tingling of the spine the only home we've ever known
+extraordinary claims require extraordinary evidence stirred by
+starlight, culture? Flatland Tunguska event finite but unbounded
+corpus callosum!
+
+## Features
+
+* Feature 1
+* [Feature 2](#)
+* Feature 3
+* Feature 4
+* ...
+
+* [Tutorial 1]({{site.main_site_url}}/guides/tutorials/rest)
+* [Tutorial 2]({{site.main_site_url}}/guides/tutorials/other-2)
+* [Tutorial n]({{site.main_site_url}}/guides/tutorials/other-3)
+
+```java
+package foo;
+
+import foo;
+
+public class SearchController {
+
+    @Foo
+    public SearchController(SearchService searchService) {
+        this.searchService = searchService;
+    }
+
+    public static void main(String[] args) {
+        // This is just a test to see how a very long line works with our project css
+    }
+}
+```
+
+{% endcapture %}
+
+
+{% include project_page_secondary.html %}
+</html>

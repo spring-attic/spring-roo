@@ -235,6 +235,11 @@
     margin-top: 30px;
 }
 
+.project-header--wrapper .project-marketplace-btn {
+    margin-top: 30px;
+    margin-left: 20px;
+}
+
 .project-header--wrapper .project-download-widget-btn {
     margin-top: 40px;
 }
@@ -614,3 +619,98 @@
 .download-widget--body .copy-button  {
     margin-left: 574px;
 }
+
+/*** Spring Roo Marketplace as Project Group ***/
+
+.projects--wrapper.project-aggregator .project--container.project--container-marketplace
+  {
+    height: 500px;
+  }
+
+.projects--wrapper .project--container .project-links--container-marketplace {
+    width: 327px;
+    display: table;
+    margin-top: 30px;
+    }
+
+.projects--wrapper .project--container .project-links--container-marketplace .project-link
+    {
+    display: inline;
+    width: 123.5px;
+    float: left;
+    overflow: hidden;
+    height: 30px;
+    margin: 0;
+    padding: 20px;
+}
+
+.projects--wrapper .project--container .project-links--container-marketplace .project-link.left
+    {
+    background: #34302d;
+    color: white;
+    }
+.projects--wrapper .project--container .project-links--container-marketplace .project-link.right
+    {
+    background: #6db33f;
+    }
+
+.projects--wrapper .project--container .project-links--container-marketplace .project-link:hover
+    {
+    text-decoration: none;
+}
+
+.projects--wrapper .project--container .project-links--container-marketplace .project-link.right:hover i
+    {
+    color: white;
+}
+
+.projects--wrapper .project--container .project-links--container-marketplace .project-link.left:hover i
+    {
+    color: #6db33f;
+}
+
+/*** Spring Roo Marketplace as table ***/
+
+ .body--container .project-documentation--container.marketplace table tr
+  {
+  background-color: transparent;
+  border-top: none;
+}
+.body--container .project-documentation--container.marketplace table th
+  {
+  background-color: transparent;
+  font-weight: normal;
+  padding: 20px 0;
+  }
+.body--container .project-documentation--container.marketplace table
+  {
+  border: none;
+}
+
+.body--container .project-documentation--container.marketplace table td
+  {
+  padding: 6px 12px 6px 0;
+  text-align: justify;
+}
+
+.body--container .project-documentation--container.marketplace table td:first-child
+  {
+  width: 25%;
+  text-align: left;
+}
+
+.body--container .project-documentation--container.marketplace table td a
+ {
+  color: #6db33f;
+ }
+.body--container .project-documentation--container.marketplace table td a + a
+ {
+  border-left: 1px solid #ccc;
+  padding-left: 15px;
+  margin-left: 10px;
+ }
+.body--container .project-documentation--container.marketplace table td a:hover
+ {
+  color: #333;
+  text-decoration: none;
+ }
