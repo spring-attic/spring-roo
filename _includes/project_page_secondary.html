@@ -15,6 +15,38 @@
                 <div class="span8">
                     <div class="project-body--section">
                         {{ main_content | markdownify }}
+
+                        <!-- Roo Addons Suite incluid (as widget downloads HTML) -->
+                        <div id="download-widget">
+                          <div class="row-fluid download-widget--container">
+                            <div class="download-widget--header js-item-dropdown-widget--wrapper">
+                              <div class="download-widget--title"> Roo Addon Suites  </div>
+                              <div data-download-widget-controls style="display: inline-block"></div>
+                            </div>
+                            <div class="download-widget--body">
+                              <div class="project-documentation--container marketplace">
+                                    <div class="item-dropdown-widget">
+                                        <div class="item--dropdown">
+                                            <div class="item--body">
+                                            <table>
+                                              <thead>
+                                                <tr class="item--body-title">
+                                                  <th>Addon</th>
+                                                  <th>Description</th>
+                                                  <th>Repository</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                {{ addons }}
+                                              </tbody>
+                                            </table>
+                                           </div>
+                                        </div>
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                     </div>
                 </div>
                 <div class="span4">

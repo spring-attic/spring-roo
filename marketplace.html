@@ -21,43 +21,12 @@ arena extraordinary claims require extraordinary evidence! Flatland
 Apollonius of Perga culture inconspicuous motes of rock and gas realm
 of the galaxies quasar, corpus callosum, galaxies Drake Equation ship
 
-<!-- Roo Addons Suite incluid (as widget downloads HTML) -->
-  <div id="download-widget">
-    <div class="row-fluid download-widget--container">
-      <div class="download-widget--header js-item-dropdown-widget--wrapper">
-        <div class="download-widget--title"> Roo Addon Suites  </div>
-        <div data-download-widget-controls style="display: inline-block"></div>
-      </div>
-      <div class="download-widget--body">
-        <div class="project-documentation--container marketplace">
-              <div class="item-dropdown-widget">
-                  <div class="item--dropdown">
-                      <div class="item--body">
-                          <table>
-                            <thead>
-                              <tr class="item--body-title">
-                                <th>Addon</th>
-                                <th>Description</th>
-                                <th>Repository</th>
-                              </tr>
-                            </thead>
-                            <tbody>{% include roo_addons_suites.md %}</tbody>
-                          </table>
-                     </div>
-                  </div>
-            </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-To submit your own Roo Addon Suite to this page, just send a pull request with
-the addition to Spring Roo repo&#8217;s
-[gh-pages branch](https://github.com/spring-projects/spring-roo/blob/gh-pages/_includes/roo_addons_suites.md)
-(<i>roo_addons_suites.md</i> file).
-
 {% endcapture %}
+
+{% capture addons %}
+{% include roo_addons_suites.html %}
+{% endcapture %}
+
 
 {% capture related_resources %}
 
