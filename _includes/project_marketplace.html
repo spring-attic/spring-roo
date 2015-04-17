@@ -4,7 +4,7 @@
 {% endcapture %}
 
 {% capture content %}
-{% include billboard_page_secondary.html %}
+{% include billboard_marketplace.html %}
 <div class="github-fork-ribbon--container">
 <a href="{{ site.github_repo_url }}"><img style="position: absolute; top: 0; right: 0; border: 0;" src="{{site.baseurl}}/img/forkme.png" alt="Fork me on GitHub"></a>
 </div>
@@ -47,10 +47,13 @@
                             </div>
                           </div>
                         </div>
+
+                       {{ addons_git | markdownify }}
+
                     </div>
                 </div>
                 <div class="span4">
-                    {% include project_page_secondary_sidebar.html %}
+                    {% include project_marketplace_sidebar.html %}
                 </div>
             </div>
         </div>
