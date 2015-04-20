@@ -7,6 +7,7 @@
     <link href='http://fonts.googleapis.com/css?family=Varela+Round|Montserrat:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/bootstrap/css/bootstrap-select.css" />
+    <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/bootstrap/css/bootstrap-responsive.css" />
 
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/css/main.css.css" />
     <link rel="stylesheet" type="text/css" href="{{site.baseurl}}/css/typography.css.css" />
@@ -60,26 +61,50 @@
     <header class="navbar header--navbar">
         <div class="navbar-inner">
             <div class="container-fluid">
-                <div class="spring-logo--container">
+
+                <!-- Be sure to leave the brand out there if you want it shown -->
+                <div class="spring-logo--container pull-left">
                     <a class="spring-logo" href="{{site.main_site_url}}"><span></span></a>
                 </div>
-                <ul class="nav pull-right">
-                    <li class="navbar-link"><a href="{{site.main_site_url}}/docs">Docs</a>
-                    </li>
-                    <li class="navbar-link"><a
-                        href="{{site.main_site_url}}/guides">Guides</a></li>
-                    <li class="navbar-link active"><a
-                        href="{{site.main_site_url}}/projects">Projects</a></li>
-                    <li class="navbar-link"><a href="{{site.main_site_url}}/blog">Blog</a>
-                    </li>
-                    <li class="navbar-link"><a href="{{site.questions_url}}">Questions</a>
-                    </li>
-                    <li class="navbar-link nav-search"><i
-                        class="icon-search navbar-search--icon js-search-input-open"></i>
-                        <div class="search-input-close js-search-input-close">x</div></li>
-                </ul>
+
+                <!-- ico search -->
+                <!-- <div class="navbar-link nav-search pull-right">
+                  <i class="icon-search navbar-search--icon js-search-input-open"></i>
+                  <div class="search-input-close js-search-input-close">x</div>
+                </div> -->
+
+                <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+                <div class="navbar-inverse">
+                  <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </a>
+                </div>
+
+                <!-- Everything you want hidden at 940px or less, place within here -->
+                <div class="nav-collapse collapse">
+                  <ul class="nav pull-right">
+                      <li class="navbar-link"><a href="{{site.main_site_url}}/docs">Docs</a>
+                      </li>
+                      <li class="navbar-link"><a
+                          href="{{site.main_site_url}}/guides">Guides</a></li>
+                      <li class="navbar-link active"><a
+                          href="{{site.main_site_url}}/projects">Projects</a></li>
+                      <li class="navbar-link"><a href="{{site.main_site_url}}/blog">Blog</a>
+                      </li>
+                      <li class="navbar-link"><a href="{{site.questions_url}}">Questions</a>
+                      </li>
+                      <li class="navbar-link nav-search"><i
+                      class="icon-search navbar-search--icon js-search-input-open"></i>
+                        <div class="search-input-close js-search-input-close">x</div>
+                      </li>
+                  </ul>
+                </div>
             </div>
         </div>
+
+        <!-- search box -->
         <div class="search-dropdown--container js-search-dropdown">
             <div class="container-fluid">
                 <div class="search-form--container">
@@ -103,7 +128,7 @@
     <footer class="footer">
         <div class="container-fluid">
             <div class="row-fluid">
-                <div class="span8">
+                <div class="span7">
                     <div class="navbar">
                         <div class="container">
                             <ul class="nav">
@@ -118,11 +143,13 @@
                     <a href="http://www.pivotal.io/terms-of-use">Terms of Use</a> and
                     <a href="http://www.pivotal.io/privacy-policy">Privacy</a>
                 </div>
-                <div class="span4 footer-newsletter--wrapper pull-right">
+                <div class="span5">
+                  <div class="footer-newsletter--wrapper pull-right">
                     <div class="footer-newsletter--container">
                         <label>Subscribe to our newsletter</label>
-                        <iframe frameborder="0" height="42px" scrolling="no" src="http://play.gopivotal.com/OSS_Website_Spring_SpringNewsletterSubscriptionEmailOnly.html" style="border:none" width="324px"></iframe>
+                        <iframe frameborder="0" height="42px" scrolling="no" src="http://play.gopivotal.com/OSS_Website_Spring_SpringNewsletterSubscriptionEmailOnly.html" style="border:none" width="100%"></iframe>
                     </div>
+
                 </div>
             </div>
         </div>

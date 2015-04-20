@@ -1,11 +1,10 @@
 .projects--wrapper {
     margin-left: -8px;
+    display: table; /*responsive span4 container */
 }
 
 .projects--wrapper .project--container {
     border: 1px solid #34302d;
-    display: inline-block;
-    width: 327px;
     height: 337px;
     margin: 0 6px 20px 6px;
     vertical-align: top;
@@ -128,8 +127,12 @@
     -moz-transition: all 0.20s;
     -ms-transition: all 0.20s;
     -o-transition: all 0.20s;
-    height: auto;
 }
+  @media (max-width: 767px) {
+   .projects--wrapper.project-aggregator .project--container {
+    height: auto;
+   }
+  }
 
 .projects--wrapper.project-aggregator .project--container:hover {
     text-decoration: none;
@@ -144,7 +147,7 @@
 .projects--wrapper.project-aggregator .project--container a {
     padding: 30px 20px;
     height: 160px;
-    width: 288px;
+    width: 85%;
     display: inline-block;
     color: #34302D;
     text-decoration: none;
@@ -158,6 +161,7 @@
 .project-header--wrapper {
     background-color: #666;
     border-bottom: 1px solid #34302D;
+    padding: 0 20px;
 }
 
 .project-header--wrapper .content--title a {
@@ -267,17 +271,15 @@
     height: 370px;
     position: absolute;
     top: 20px;
-    left: 677px;
+    left: 100%;
+    margin-left: -370px;
     opacity: 0.15;
-}
-
-.project-body--wrapper {
-    min-width: 1100px;
 }
 
 .project-body--container {
     margin: 100px auto;
-    width: 1024px;
+    max-width: 1024px;
+    padding: 0 20px;
 }
 
 .project-body--container .project-body--section#download-widget {
@@ -537,7 +539,6 @@
 
 .github-fork-ribbon--container {
     position: relative;
-    min-width: 1100px;
 }
 
 .github-fork-ribbon--wrapper {
@@ -612,8 +613,10 @@
 }
 
 .project-body--container .copy-button  {
-    position: absolute;
-    margin-left: 614px;
+    position: relative;
+    right: 0;
+    margin-left: -40px;
+    float: right;
 }
 
 .download-widget--body .copy-button  {
@@ -622,14 +625,7 @@
 
 /*** Spring Roo Marketplace as Project Group ***/
 
-.projects--wrapper.project-aggregator .project--container.project--container-marketplace
-  {
-    height: 500px;
-  }
-
 .projects--wrapper .project--container .project-links--container-marketplace {
-    width: 327px;
-    display: table;
     margin-top: 30px;
     }
 

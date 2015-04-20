@@ -1,4 +1,4 @@
-<div class="project--container parent-project project--links--container-marketplace">
+<div class="project--container parent-project project--links--container-marketplace span4">
 
    <div class="project-logo--container">
      <div class="project--logo">

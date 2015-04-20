@@ -6,23 +6,21 @@
     margin-bottom: 0;
 }
 
-.navbar-inner {
-    min-width: 1060px;
-}
-
 .navbar-inner .container-fluid {
     max-width: 1024px;
     margin: 0 auto;
 }
 
-.billboard--wrapper,.key-feature--wrapper,.offset-feature--container,.support--wrapper,footer,.search-dropdown--container,.team-map--wrapper,.billboard-bg
-    {
-    min-width: 1100px;
-}
-
 body {
     background-color: #f1f1f1;
 }
+  @media (max-width: 767px) {
+    body {
+      padding: 0;
+    }
+    .project-body--container {
+    padding: 0 20px;}
+  }
 
 #scrim {
     display: none;
@@ -61,8 +59,10 @@ body {
     line-height: 13px;
 }
 
-.header--navbar {
-
+.header--navbar a.btn.btn-navbar{
+  margin: 20px 0;
+  border: 2px solid #6DB33F;
+  margin-right: 10px;
 }
 
 .header--navbar .navbar-inner {
@@ -214,6 +214,25 @@ a:hover.spring-logo span {
     padding: 25px 0;
     width: 93%;
 }
+  @media (max-width: 620px) {
+    .header--navbar .search-dropdown--container .form-search .search-form--form
+    {
+      width: 90%;
+    }
+  }
+  @media (max-width: 500px) {
+    .header--navbar .search-dropdown--container .form-search .search-form--form
+    {
+      font-size: 16px;
+      width: 80%;
+    }
+  }
+  @media (max-width: 480px) {
+    .header--navbar .search-dropdown--container .form-search .search-form--form
+    {
+      font-size: 12px;
+    }
+  }
 
 .header--navbar .search-dropdown--container .form-search .search-form--form::-webkit-input-placeholder
     {
@@ -240,7 +259,7 @@ a:hover.spring-logo span {
     background-color: transparent;
     border: none;
     float: right;
-    padding: 28px 16px 24px 0;
+    padding: 28px 16px 24px 16px;
 }
 
 .header--navbar .search-dropdown--container .form-search .icon-search {
@@ -596,7 +615,7 @@ footer .container-fluid {
 .footer {
   background-color: #34302d;
   color: #eeeeee;
-  padding: 30px 0;
+  padding: 30px 20px;
 }
 .footer a {
   color: #6db33f;
@@ -619,7 +638,6 @@ footer .container-fluid {
   padding-left: 0;
 }
 .footer .footer-newsletter--wrapper {
-  width: auto;
   margin: 0;
 }
 .footer .footer-newsletter--container form {

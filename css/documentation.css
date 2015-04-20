@@ -1,5 +1,6 @@
 .project-body--container {
     margin: 40px auto;
+    padding: 0 20px;
 }
 
 .body--container h1 {
@@ -26,6 +27,8 @@
 }
 
 .project-body--container .copy-button  {
-    position: absolute;
-    margin-left: 963px;
+    position: relative;
+    right: 0;
+    margin-left: -40px;
+    float: right;
 }
