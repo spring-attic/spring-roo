@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.roo.addon.configurable.annotations.RooConfigurable;
-import org.springframework.roo.addon.javabean.addon.RooSerializable;
+import org.springframework.roo.addon.javabean.annotations.RooSerializable;
 
 /**
  * Provides identifier services related to JPA.
