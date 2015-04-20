@@ -686,6 +686,7 @@
 .body--container .project-documentation--container.marketplace table img
   {
   max-width: 120px;
+  margin-bottom: 10px;
 }
 
 .body--container .project-documentation--container.marketplace table td
@@ -697,7 +698,7 @@
 .body--container .project-documentation--container.marketplace table td:first-child
   {
   width: 25%;
-  text-align: left;
+  text-align: center;
 }
 
 .body--container .project-documentation--container.marketplace table td:last-child
