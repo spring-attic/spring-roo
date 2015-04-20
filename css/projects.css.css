@@ -237,13 +237,46 @@
 
 .project-header--wrapper .project-quickstart-btn {
     margin-top: 30px;
+     margin-left: 10px;
+     padding: 21px 50px;
 }
 
 .project-header--wrapper .project-marketplace-btn {
     margin-top: 30px;
-    margin-left: 20px;
+    margin-left: 0;
+    padding: 21px 50px;
+}
+.project-header--wrapper .project-download-btn {
+    margin-top: 30px;
+    margin-left: 10px;
 }
 
+.btn.btn-black.project-quickstart-btn,
+.btn.btn-black.project-marketplace-btn,
+.btn.btn-black.project-download-btn{
+      padding: 21px 40px;
+}
+  @media (max-width: 1024px) {
+    .btn.btn-black.project-quickstart-btn,
+    .btn.btn-black.project-marketplace-btn,
+    .btn.btn-black.project-download-btn{
+      padding: 11px 18px;
+      z-index: 10;
+      position: relative;
+    }
+  }
+  @media (max-width: 500px) {
+    .btn.btn-black.project-quickstart-btn,
+    .btn.btn-black.project-marketplace-btn,
+    .btn.btn-black.project-download-btn{
+      padding: 10px 15px;
+      font-size: 14px;
+      margin-top: 10px;
+      margin-left: 0;
+      float: left;
+      width: 90%;
+    }
+  }
 .project-header--wrapper .project-download-widget-btn {
     margin-top: 40px;
 }
