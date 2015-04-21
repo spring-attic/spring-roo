@@ -54,7 +54,7 @@ public class CreatorCommands implements CommandMarker {
     }
 
     @CliAvailabilityIndicator({ "addon create i18n", "addon create simple",
-            "addon create advanced" })
+            "addon create advanced", "addon create wrapper" })
     public boolean isCreateAddonAvailable() {
         return creatorOperations.isAddonCreatePossible();
     }
