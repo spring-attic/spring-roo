@@ -123,7 +123,14 @@ public class MavenCommands implements CommandMarker {
     	
         return getMavenOperations().isFocusedProjectAvailable();
     }
-
+    
+    @CliAvailabilityIndicator({ REPOSITORY_ADD_COMMAND,
+    	REPOSITORY_REMOVE_COMMAND })
+	public boolean isRepositoryModificationAllowed() {
+		
+	    return getMavenOperations().isFocusedProjectAvailable();
+	}
+    
     @CliAvailabilityIndicator(MODULE_CREATE_COMMAND)
     public boolean isModuleCreationAllowed() {
 
