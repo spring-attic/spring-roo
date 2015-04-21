@@ -19,14 +19,16 @@ public interface ObrRepositoryOperations {
 	/**
 	 * Removes an existing OBR Repository from Spring Roo Shell
 	 * @param url
+	 * @throws Exception 
 	 */
-	void removeRepo(String url);
+	void removeRepo(String url) throws Exception;
 	
 	
 	/**
 	 * Lists all installed OBR repositories
+	 * @throws Exception 
 	 */
-	void listRepos();
+	void listRepos() throws Exception;
 
 
 }

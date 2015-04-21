@@ -1,6 +1,9 @@
 package org.springframework.roo.obr.addon.search;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,6 +16,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -34,23 +39,47 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 
 	private RepositoryAdmin repositoryAdmin;
 	private List<Repository> repositories;
+	private ConfigurationAdmin configurationAdmin;
+	private Configuration config;
+	private Dictionary installedRepos;
 
-	protected void activate(final ComponentContext cContext) {
+	protected void activate(final ComponentContext cContext) throws Exception {
 		context = cContext.getBundleContext();
 		repositories = new ArrayList<Repository>();
+		
+		config = getConfigurationAdmin().getConfiguration(
+			    "installedRepositories");
+		installedRepos = config.getProperties();
+		if (installedRepos == null) {
+			installedRepos = new Hashtable();
+		}
+
+		populateRepositories();
 	}
 
 	/**
-	 * Method to populate current Repositories using OSGi Serive
+	 * Method to populate current Repositories using OSGi Service
+	 * @throws Exception 
 	 */
-	private void populateRepositories() {
-
+	private void populateRepositories() throws Exception {
+		
 		// Cleaning Repositories
 		repositories.clear();
 
 		// Validating that RepositoryAdmin exists
 		Validate.notNull(getRepositoryAdmin(), "RepositoryAdmin not found");
-
+		
+		// Checking if exists installed Repos and adding to repositories
+		Enumeration persistedRepos = installedRepos.keys();
+		while(persistedRepos.hasMoreElements()){
+			String repositoryURL = (String) persistedRepos.nextElement();
+			// Checking if is a valid URL
+			if(repositoryURL.startsWith("http") || repositoryURL.startsWith("file")){
+				// Installing persisted repositories 
+				getRepositoryAdmin().addRepository(repositoryURL);
+			}
+		}
+		
 		for (Repository repo : getRepositoryAdmin().listRepositories()) {
 			repositories.add(repo);
 		}
@@ -60,21 +89,28 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 	public void addRepository(String url) throws Exception {
 		LOGGER.log(Level.INFO, "Adding repository " + url + "...");
 		getRepositoryAdmin().addRepository(url);
+		// Including repos into installed Repos list
+		installedRepos.put(url, "");
+		// Updating configuration service with installed repos
+		config.update(installedRepos);
 		LOGGER.log(Level.INFO, "Repository '" + url + "' added!");
-
 	}
 
 	@Override
-	public void removeRepo(String url) {
+	public void removeRepo(String url) throws Exception {
 		LOGGER.log(Level.INFO, "Removing repository " + url + "...");
 		getRepositoryAdmin().removeRepository(url);
+		// Removing repos from installed Repos list
+		installedRepos.remove(url);
+		// Updating configuration service with installed repos
+		config.update(installedRepos);
 		LOGGER.log(Level.INFO, "Repository '" + url + "' removed!");
 
 	}
 
 	@Override
-	public void listRepos() {
-		LOGGER.log(Level.INFO, "Getting current Repositories...");
+	public void listRepos() throws Exception {
+		LOGGER.log(Level.INFO, "Getting current installed repositories...");
 		// Populating repositories
 		populateRepositories();
 		LOGGER.log(Level.INFO, "");
@@ -109,11 +145,40 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 				return null;
 
 			} catch (InvalidSyntaxException e) {
-				LOGGER.warning("Cannot load RepositoryAdmin on AddonSearchImpl.");
+				LOGGER.warning("Cannot load RepositoryAdmin on ObrRepositoryOperationsImpl.");
 				return null;
 			}
 		} else {
 			return repositoryAdmin;
+		}
+	}
+	
+	/**
+	 * Method to get ConfigurationAdmin Service implementation
+	 * 
+	 * @return
+	 */
+	public ConfigurationAdmin getConfigurationAdmin() {
+		if (configurationAdmin == null) {
+			// Get all Services implement ConfigurationAdmin interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								ConfigurationAdmin.class.getName(), null);
+
+				for (ServiceReference<?> ref : references) {
+					configurationAdmin = (ConfigurationAdmin) context.getService(ref);
+					return configurationAdmin;
+				}
+
+				return null;
+
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load ConfigurationAdmin on ObrRepositoryOperationsImpl.");
+				return null;
+			}
+		} else {
+			return configurationAdmin;
 		}
 	}
 }
