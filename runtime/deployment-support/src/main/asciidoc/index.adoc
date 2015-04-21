@@ -9558,17 +9558,6 @@ date
 
 This command does not accept any options.
 
-[[command-index-flash-test]]
-==== flash test
-
-Tests message flashing
-
-----------
-flash test
-----------
-
-This command does not accept any options.
-
 [[command-index-script]]
 ==== script
 

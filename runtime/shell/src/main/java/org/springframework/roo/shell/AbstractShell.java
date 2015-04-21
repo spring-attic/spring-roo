@@ -323,31 +323,6 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
         }
     }
 
-    @CliCommand(value = { "flash test" }, help = "Tests message flashing")
-    public void flashCustom() throws Exception {
-        flash(Level.FINE, "Hello world", "a");
-        Thread.sleep(150);
-        flash(Level.FINE, "Short world", "a");
-        Thread.sleep(150);
-        flash(Level.FINE, "Small", "a");
-        Thread.sleep(150);
-        flash(Level.FINE, "Downloading xyz", "b");
-        Thread.sleep(150);
-        flash(Level.FINE, "", "a");
-        Thread.sleep(150);
-        flash(Level.FINE, "Downloaded xyz", "b");
-        Thread.sleep(150);
-        flash(Level.FINE, "System online", "c");
-        Thread.sleep(150);
-        flash(Level.FINE, "System ready", "c");
-        Thread.sleep(150);
-        flash(Level.FINE, "System farewell", "c");
-        Thread.sleep(150);
-        flash(Level.FINE, "", "c");
-        Thread.sleep(150);
-        flash(Level.FINE, "", "b");
-    }
-
     protected abstract ExecutionStrategy getExecutionStrategy();
 
     public ExitShellRequest getExitShellRequest() {
