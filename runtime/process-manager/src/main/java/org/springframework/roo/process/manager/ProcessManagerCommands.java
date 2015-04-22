@@ -3,30 +3,34 @@ package org.springframework.roo.process.manager;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
-
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Shell;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Commands related to file system monitoring and process management.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.1
  */
 @Component
 @Service
 public class ProcessManagerCommands implements CommandMarker {
 	
+	private static final String DEVELOPMENT_MODE_COMMAND = "development mode";
+	private static final String PROJECT_SCAN_SPEED_COMMAND = "project scan speed";
+	private static final String PROJECT_SCAN_STATUS_COMMAND = "project scan status";
+	private static final String PROJECT_SCAN_NOW_COMMAND = "project scan now";
+
 	protected final static Logger LOGGER = HandlerUtils.getLogger(ProcessManagerCommands.class);
 	
     // ------------ OSGi component attributes ----------------
@@ -39,7 +43,7 @@ public class ProcessManagerCommands implements CommandMarker {
     	this.context = context.getBundleContext();
     }
 
-    @CliCommand(value = "development mode", help = "Switches the system into development mode (greater diagnostic information)")
+    @CliCommand(value = DEVELOPMENT_MODE_COMMAND, help = "Switches the system into development mode (greater diagnostic information)")
     public String developmentMode(
             @CliOption(key = { "", "enabled" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Activates development mode") final boolean enabled) {
         
@@ -60,8 +64,8 @@ public class ProcessManagerCommands implements CommandMarker {
         return "Development mode set to " + enabled;
     }
 
-    @CliCommand(value = "poll now", help = "Perform a manual file system poll")
-    public String poll() {
+    @CliCommand(value = PROJECT_SCAN_NOW_COMMAND, help = "Perform a manual file system scan")
+    public String scan() {
     	if(processManager == null){
     		processManager = getProcessManager();
     	}
@@ -69,59 +73,59 @@ public class ProcessManagerCommands implements CommandMarker {
     	Validate.notNull(processManager, "ProcessManager is required");
     	
         final long originalSetting = processManager
-                .getMinimumDelayBetweenPoll();
+                .getMinimumDelayBetweenScan();
         try {
-            processManager.setMinimumDelayBetweenPoll(1);
-            processManager.timerBasedPoll();
+            processManager.setMinimumDelayBetweenScan(1);
+            processManager.timerBasedScan();
         }
         finally {
-            // Switch on manual polling again
-            processManager.setMinimumDelayBetweenPoll(originalSetting);
+            // Switch on manual scan again
+            processManager.setMinimumDelayBetweenScan(originalSetting);
         }
-        return "Manual poll completed";
+        return "Manual scan completed";
     }
 
-    @CliCommand(value = "poll status", help = "Display file system polling information")
-    public String pollingInfo() {
+    @CliCommand(value = PROJECT_SCAN_STATUS_COMMAND, help = "Display file system scanning information")
+    public String scanningInfo() {
     	if(processManager == null){
     		processManager = getProcessManager();
     	}
     	
     	Validate.notNull(processManager, "ProcessManager is required");
     	
-        final StringBuilder sb = new StringBuilder("File system polling ");
-        final long duration = processManager.getLastPollDuration();
+        final StringBuilder sb = new StringBuilder("File system scanning ");
+        final long duration = processManager.getLastScanDuration();
         if (duration == 0) {
             sb.append("never executed; ");
         }
         else {
             sb.append("last took ").append(duration).append(" ms; ");
         }
-        final long minimum = processManager.getMinimumDelayBetweenPoll();
+        final long minimum = processManager.getMinimumDelayBetweenScan();
         if (minimum == 0) {
-            sb.append("automatic polling is disabled");
+            sb.append("automatic scanning is disabled");
         }
         else if (minimum < 0) {
-            sb.append("auto-scaled polling is enabled");
+            sb.append("auto-scaled scanning is enabled");
         }
         else {
-            sb.append("polling frequency has a minimum interval of ")
+            sb.append("scanning frequency has a minimum interval of ")
                     .append(minimum).append(" ms");
         }
         return sb.toString();
     }
 
-    @CliCommand(value = "poll speed", help = "Changes the file system polling speed")
-    public String pollingSpeed(
-            @CliOption(key = { "", "ms" }, mandatory = true, help = "The number of milliseconds between each poll") final long minimumDelayBetweenPoll) {
+    @CliCommand(value = PROJECT_SCAN_SPEED_COMMAND, help = "Changes the file system scanning speed")
+    public String scanningSpeed(
+            @CliOption(key = { "", "ms" }, mandatory = true, help = "The number of milliseconds between each scan") final long minimumDelayBetweenScan) {
     	if(processManager == null){
     		processManager = getProcessManager();
     	}
     	
     	Validate.notNull(processManager, "ProcessManager is required");
     	
-    	processManager.setMinimumDelayBetweenPoll(minimumDelayBetweenPoll);
-        return pollingInfo();
+    	processManager.setMinimumDelayBetweenScan(minimumDelayBetweenScan);
+        return scanningInfo();
     }
     
     public ProcessManager getProcessManager(){

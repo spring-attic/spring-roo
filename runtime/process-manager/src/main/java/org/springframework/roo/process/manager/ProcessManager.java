@@ -15,7 +15,7 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
  * {@link ProcessManagerStatusProvider}</li>
  * <li>Startup-time registration of the initial monitoring requests (after the
  * {@link #completeStartup()} method has been called)</li>
- * <li>Specific polling of {@link FileMonitorService} at well-defined times</li>
+ * <li>Specific scanning of {@link FileMonitorService} at well-defined times</li>
  * <li>The ability to execute {@link CommandCallback}s for user-requested
  * operations</li>
  * <li>An assurance the above is conducted within a "transaction-like" model</li>
@@ -26,7 +26,7 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
  * that shares the same {@link UndoManager}.
  * <p>
  * Once available, a {@link ProcessManager} will ordinarily wait for either
- * {@link #backgroundPoll()} or {@link #execute(CommandCallback)}. It will block
+ * {@link #backgroundScan()} or {@link #execute(CommandCallback)}. It will block
  * until the state of the {@link ProcessManager} returns to
  * {@link ProcessManagerStatus#AVAILABLE}.
  * <p>
@@ -41,7 +41,7 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
  * to retrieve metadata produced before they were listening and (ii) can freely
  * modify the file system pursuant to {@link FileManager} with assurance of
  * correct "transaction" behaviour.</li>
- * <li>At the end of a successful startup, background poll or command execution,
+ * <li>At the end of a successful startup, background scan or command execution,
  * {@link UndoManager#reset()} method will be called.</li>
  * <li>An uncaught exception will cause {@link UndoManager#undo()} to be called
  * (before re-throwing the exception).</li>
@@ -74,9 +74,9 @@ public interface ProcessManager extends ProcessManagerStatusProvider {
      */
     <T> T execute(CommandCallback<T> callback);
 
-    long getLastPollDuration();
+    long getLastScanDuration();
 
-    long getMinimumDelayBetweenPoll();
+    long getMinimumDelayBetweenScan();
 
     /**
      * @return true if the system is in development mode, which generally means
@@ -87,7 +87,7 @@ public interface ProcessManager extends ProcessManagerStatusProvider {
 
     void setDevelopmentMode(boolean developmentMode);
 
-    void setMinimumDelayBetweenPoll(long minimumDelayBetweenPoll);
+    void setMinimumDelayBetweenScan(long minimumDelayBetweenScan);
 
     /**
      * Allows the process manager to terminate gracefully. In particular this
@@ -97,5 +97,5 @@ public interface ProcessManager extends ProcessManagerStatusProvider {
      */
     void terminate();
 
-    void timerBasedPoll();
+    void timerBasedScan();
 }

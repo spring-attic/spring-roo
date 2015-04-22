@@ -12,8 +12,9 @@ import org.springframework.roo.process.manager.ProcessManager;
  * every state.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public enum ProcessManagerStatus {
-    AVAILABLE, BUSY_EXECUTING, BUSY_POLLING, COMPLETING_STARTUP, RESETTING_UNDOS, STARTING, TERMINATED, UNDOING
+    AVAILABLE, BUSY_EXECUTING, BUSY_SCANNING, COMPLETING_STARTUP, RESETTING_UNDOS, STARTING, TERMINATED, UNDOING
 }

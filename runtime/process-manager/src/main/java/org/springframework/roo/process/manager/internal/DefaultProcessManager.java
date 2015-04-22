@@ -8,10 +8,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.startlevel.StartLevel;
 import org.springframework.roo.file.monitor.FileMonitorService;
@@ -25,10 +27,6 @@ import org.springframework.roo.process.manager.event.AbstractProcessManagerStatu
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Default implementation of {@link ProcessManager} interface.
@@ -49,9 +47,9 @@ public class DefaultProcessManager extends
 
     private boolean developmentMode = false;
     private FileMonitorService fileMonitorService;
-    private long lastPollDuration = 0;
-    private long lastPollTime = 0; // What time the last poll was completed
-    private long minimumDelayBetweenPoll = -1; // How many ms must pass at
+    private long lastScanDuration = 0;
+    private long lastScanTime = 0; // What time the last scan was completed
+    private long minimumDelayBetweenScan = -1; // How many ms must pass at
     private StartLevel startLevel;
     private UndoManager undoManager;
     private String workingDir;
@@ -81,19 +79,19 @@ public class DefaultProcessManager extends
     }
 
     /**
-     * @return how many milliseconds the last poll execution took to complete (0
+     * @return how many milliseconds the last scan execution took to complete (0
      *         = never ran; >0 = last execution time)
      */
-    public long getLastPollDuration() {
-        return lastPollDuration;
+    public long getLastScanDuration() {
+        return lastScanDuration;
     }
 
     /**
-     * @return how many milliseconds must pass between each poll (0 = manual
+     * @return how many milliseconds must pass between each scan (0 = manual
      *         only; <0 = auto-scaled; >0 = interval)
      */
-    public long getMinimumDelayBetweenPoll() {
-        return minimumDelayBetweenPoll;
+    public long getMinimumDelayBetweenScan() {
+        return minimumDelayBetweenScan;
     }
 
     public boolean isDevelopmentMode() {
@@ -116,11 +114,11 @@ public class DefaultProcessManager extends
     }
 
     /**
-     * @param minimumDelayBetweenPoll how many milliseconds must pass between
-     *            each poll
+     * @param minimumDelayBetweenScan how many milliseconds must pass between
+     *            each scan
      */
-    public void setMinimumDelayBetweenPoll(final long minimumDelayBetweenPoll) {
-        this.minimumDelayBetweenPoll = minimumDelayBetweenPoll;
+    public void setMinimumDelayBetweenScan(final long minimumDelayBetweenScan) {
+        this.minimumDelayBetweenScan = minimumDelayBetweenScan;
     }
 
     public void terminate() {
@@ -136,43 +134,43 @@ public class DefaultProcessManager extends
         }
     }
 
-    public void timerBasedPoll() {
+    public void timerBasedScan() {
         try {
-            if (minimumDelayBetweenPoll == 0) {
-                // Manual polling only, we never allow the timer to kick of a
-                // poll
+            if (minimumDelayBetweenScan == 0) {
+                // Manual scanning only, we never allow the timer to kick of a
+                // scan
                 return;
             }
 
-            long effectiveMinimumDelayBetweenPoll = minimumDelayBetweenPoll;
-            if (effectiveMinimumDelayBetweenPoll < 0) {
-                // A negative minimum delay between poll means auto-scaling is
+            long effectiveMinimumDelayBetweenScan = minimumDelayBetweenScan;
+            if (effectiveMinimumDelayBetweenScan < 0) {
+                // A negative minimum delay between scan means auto-scaling is
                 // used
-                if (lastPollDuration < 500) {
-                    // We've never done a poll, or they are very fast
-                    effectiveMinimumDelayBetweenPoll = 0;
+                if (lastScanDuration < 500) {
+                    // We've never done a scan, or they are very fast
+                    effectiveMinimumDelayBetweenScan = 0;
                 }
                 else {
                     // Use the last duration (we might make this sliding scale
                     // in the future)
-                    effectiveMinimumDelayBetweenPoll = lastPollDuration;
+                    effectiveMinimumDelayBetweenScan = lastScanDuration;
                 }
             }
             final long started = System.currentTimeMillis();
-            if (started < lastPollTime + effectiveMinimumDelayBetweenPoll) {
-                // Too soon to re-poll
+            if (started < lastScanTime + effectiveMinimumDelayBetweenScan) {
+                // Too soon to re-scan
                 return;
             }
-            backgroundPoll();
-            // Record the completion time so we can ensure we don't re-poll too
+            backgroundScan();
+            // Record the completion time so we can ensure we don't re-scan too
             // soon
-            lastPollTime = System.currentTimeMillis();
+            lastScanTime = System.currentTimeMillis();
 
             // Compute how many milliseconds it took to run
-            lastPollDuration = lastPollTime - started;
-            if (lastPollDuration == 0) {
+            lastScanDuration = lastScanTime - started;
+            if (lastScanDuration == 0) {
                 // Ensure it correctly reflects that it has ever run
-                lastPollDuration = 1;
+                lastScanDuration = 1;
             }
         }
         catch (final Throwable t) {
@@ -207,16 +205,16 @@ public class DefaultProcessManager extends
                     }
                 });
 
-        // Now start a thread that will undertake a background poll every second
+        // Now start a thread that will undertake a background scan every second
         final Thread t = new Thread(new Runnable() {
             public void run() {
                 // Unsynchronized lookup of terminated status to avoid anything
                 // blocking the termination of the thread
                 while (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
-                    // We only bother doing a poll if we seem to be available (a
+                    // We only bother doing a scan if we seem to be available (a
                     // proper synchronized check happens later)
                     if (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE) {
-                        timerBasedPoll();
+                        timerBasedScan();
                     }
                     try {
                         Thread.sleep(1000);
@@ -225,7 +223,7 @@ public class DefaultProcessManager extends
                     }
                 }
             }
-        }, "Spring Roo Process Manager Background Polling Thread");
+        }, "Spring Roo Process Manager Background Scanning Thread");
         t.start();
     }
 
@@ -234,7 +232,7 @@ public class DefaultProcessManager extends
         terminate(); // Safe to call even if we'd terminated earlier
     }
 
-    private boolean backgroundPoll() {
+    private boolean backgroundScan() {
         // Quickly determine if another thread is running; we don't need to sit
         // around and wait (we'll get called again in a few hundred milliseconds
         // anyway)
@@ -251,13 +249,13 @@ public class DefaultProcessManager extends
                                 + " but background thread acquired synchronization lock");
             }
 
-            setProcessManagerStatus(ProcessManagerStatus.BUSY_POLLING);
+            setProcessManagerStatus(ProcessManagerStatus.BUSY_SCANNING);
 
             try {
                 doTransactionally(null);
             }
             catch (final Throwable t) {
-                // We don't want a poll failure to cause the background polling
+                // We don't want a scan failure to cause the background scanning
                 // thread to die
                 logException(t);
             }
