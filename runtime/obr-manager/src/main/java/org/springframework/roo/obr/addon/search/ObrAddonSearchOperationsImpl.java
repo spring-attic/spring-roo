@@ -18,6 +18,7 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
@@ -393,21 +394,21 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 	@Override
 	public InstallOrUpgradeStatus removeAddOn(BundleSymbolicName bsn) {
 		synchronized (mutex) {
-            Validate.notNull(bsn, "Bundle symbolic name required");
-            boolean success = false;
-            success = getShell()
-                    .executeCommand("osgi uninstall --bundleSymbolicName "
-                            + bsn.getKey());
-            InstallOrUpgradeStatus status;
-            if (!success) {
-                LOGGER.warning("Unable to remove add-on: " + bsn.getKey());
+			InstallOrUpgradeStatus status;
+            try {
+            	
+                Validate.notNull(bsn, "Bundle symbolic name required");
+				bsn.findBundleWithoutFail(context).uninstall();
+				
+				LOGGER.log(Level.INFO, String.format("Bundle '%s' : Uninstalled!", bsn.getKey()));
+		    	LOGGER.log(Level.INFO, "");
+		    	status = InstallOrUpgradeStatus.SUCCESS;
+                return status;
+			} catch (BundleException e) {
+				LOGGER.warning("Unable to remove add-on: " + bsn.getKey());
                 status = InstallOrUpgradeStatus.FAILED;
-            }
-            else {
-                LOGGER.info("Successfully removed add-on: " + bsn.getKey());
-                status = InstallOrUpgradeStatus.SUCCESS;
-            }
-            return status;
+                return status;
+			}
         }
 	}
 	
@@ -512,7 +513,9 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 	private InstallOrUpgradeStatus installOrUpgradeAddOn(
             final ObrBundle bundle) {
 
-        boolean success = getShell().executeCommand("osgi obr deploy --bundleSymbolicName "
+        boolean success = getShell().executeCommand("!g obr:deploy "
+                + bundle.getSymbolicName());
+        success = getShell().executeCommand("!g obr:start "
                 + bundle.getSymbolicName());
         
         return success ? InstallOrUpgradeStatus.SUCCESS
