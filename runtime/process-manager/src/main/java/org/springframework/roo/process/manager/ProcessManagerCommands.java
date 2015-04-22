@@ -9,6 +9,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
@@ -38,9 +40,16 @@ public class ProcessManagerCommands implements CommandMarker {
 
     private ProcessManager processManager;
     private Shell shell;
+    private ProjectOperations projectOperations;
 
     protected void activate(final ComponentContext context) {
     	this.context = context.getBundleContext();
+    }
+    
+    @CliAvailabilityIndicator({PROJECT_SCAN_SPEED_COMMAND, PROJECT_SCAN_STATUS_COMMAND,
+    	PROJECT_SCAN_NOW_COMMAND})
+    public boolean isProjecScanAvailable() {
+        return getProjectOperations().isFocusedProjectAvailable();
     }
 
     @CliCommand(value = DEVELOPMENT_MODE_COMMAND, help = "Switches the system into development mode (greater diagnostic information)")
@@ -160,5 +169,30 @@ public class ProcessManagerCommands implements CommandMarker {
 			LOGGER.warning("Cannot load Shell on ProcessManagerCommands.");
 			return null;
 		}
+    }
+    
+    public ProjectOperations getProjectOperations() {
+        if (projectOperations == null) {
+            // Get all Services implement ProjectOperations interface
+            try {
+                ServiceReference<?>[] references = this.context
+                        .getAllServiceReferences(
+                        		ProjectOperations.class.getName(), null);
+
+                for (ServiceReference<?> ref : references) {
+                    return (ProjectOperations) this.context.getService(ref);
+                }
+
+                return null;
+
+            }
+            catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load ProjectOperations on ProcessManagerCommands.");
+                return null;
+            }
+        }
+        else {
+            return projectOperations;
+        }
     }
 }
