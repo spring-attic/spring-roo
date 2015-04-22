@@ -47,7 +47,7 @@ public class MavenCommands implements CommandMarker {
     private static final String PERFORM_ECLIPSE_COMMAND = "perform eclipse";
     private static final String PERFORM_PACKAGE_COMMAND = "perform package";
     private static final String PERFORM_TESTS_COMMAND = "perform tests";
-    private static final String PROJECT_COMMAND = "project";
+    private static final String PROJECT_COMMAND = "project setup";
     private static final String REPOSITORY_ADD_COMMAND = "maven repository add";
     private static final String REPOSITORY_REMOVE_COMMAND = "maven repository remove";
 
