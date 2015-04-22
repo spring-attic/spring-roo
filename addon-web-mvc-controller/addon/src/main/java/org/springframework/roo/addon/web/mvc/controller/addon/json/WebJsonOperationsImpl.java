@@ -175,14 +175,16 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
         return projectOperations
                 .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
                 && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF)
+                        && projectOperations.isFocusedProjectAvailable();
     }
 
     public boolean isWebJsonInstallationPossible() {
         return !projectOperations
                 .isFeatureInstalledInFocusedModule(FeatureNames.MVC)
                 && !projectOperations
-                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+                        .isFeatureInstalledInFocusedModule(FeatureNames.JSF)
+                        && projectOperations.isFocusedProjectAvailable();
     }
 
     public void setup() {
