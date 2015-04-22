@@ -267,10 +267,8 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 			sb.setLength(0);
 		}
 		LOGGER.warning("--------------------------------------------------------------------------------");
-		LOGGER.info("[HINT] use 'addon info id --searchResultId ..' to see details about a search result");
-		LOGGER.info("[HINT] use 'addon info bundle --bundleSymbolicName ..' to see details about a search result");
-		LOGGER.info("[HINT] use 'addon install id --searchResultId ..' to install a specific search result, or");
-		LOGGER.info("[HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version");
+		LOGGER.info("[HINT] use 'addon info bundle --bundleSymbolicName' to see details about a search result");
+		LOGGER.info("[HINT] use 'addon install bundle --bundleSymbolicName' to install a specific add-on version");
 	}
 	
 	

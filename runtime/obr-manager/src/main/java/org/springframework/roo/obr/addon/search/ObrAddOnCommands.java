@@ -28,24 +28,10 @@ public class ObrAddOnCommands implements CommandMarker {
     	operations.addOnInfo(bsn);
     }
 
-    @CliCommand(value = "addon info id", help = "Provide information about a specific Spring Roo Add-on")
-    public void infoId(
-            @CliOption(key = { "", "searchResultId" }, mandatory = true, help = "The bundle ID as presented via the addon list or addon search command") final String bundleId) {
-
-    	operations.addOnInfo(bundleId);
-    }
-
     @CliCommand(value = "addon install bundle", help = "Install Spring Roo Add-on")
     public void installBsn(
             @CliOption(key = "bundleSymbolicName", mandatory = true, help = "The bundle symbolic name for the add-on of interest") final ObrAddOnBundleSymbolicName bsn) {
     	operations.installAddOn(bsn);
-    }
-
-    @CliCommand(value = "addon install id", help = "Install Spring Roo Add-on")
-    public void installId(
-            @CliOption(key = { "", "searchResultId" }, mandatory = true, help = "The bundle ID as presented via the addon list or addon search command") final String bundleId) {
-
-    	operations.installAddOn(bundleId);
     }
 
     @CliCommand(value = "addon remove", help = "Remove Spring Roo Add-on")
