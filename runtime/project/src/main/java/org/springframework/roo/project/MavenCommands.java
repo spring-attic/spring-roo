@@ -47,7 +47,6 @@ public class MavenCommands implements CommandMarker {
     private static final String PERFORM_ECLIPSE_COMMAND = "perform eclipse";
     private static final String PERFORM_PACKAGE_COMMAND = "perform package";
     private static final String PERFORM_TESTS_COMMAND = "perform tests";
-    private static final String PROJECT_COMMAND = "project setup";
     private static final String REPOSITORY_ADD_COMMAND = "maven repository add";
     private static final String REPOSITORY_REMOVE_COMMAND = "maven repository remove";
 
@@ -92,29 +91,11 @@ public class MavenCommands implements CommandMarker {
                 packaging, majorJavaVersion, artifactId);
     }
 
-    @CliCommand(value = PROJECT_COMMAND, help = "Creates a new Maven project")
-    public void createProject(
-            @CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
-            @CliOption(key = "projectName", help = "The name of the project (last segment of package name used as default)") final String projectName,
-            @CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
-            @CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
-            @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
-
-        getMavenOperations().createProject(topLevelPackage, projectName,
-                majorJavaVersion, parentPom, packaging);
-    }
-
     @CliCommand(value = MODULE_FOCUS_COMMAND, help = "Changes focus to a different project module")
     public void focusModule(
             @CliOption(key = "moduleName", mandatory = true, help = "The module to focus on") final Pom module) {
 
         getMavenOperations().setModule(module);
-    }
-
-    @CliAvailabilityIndicator(PROJECT_COMMAND)
-    public boolean isCreateProjectAvailable() {
-    	
-        return getMavenOperations().isCreateProjectAvailable();
     }
 
     @CliAvailabilityIndicator({ DEPENDENCY_ADD_COMMAND,

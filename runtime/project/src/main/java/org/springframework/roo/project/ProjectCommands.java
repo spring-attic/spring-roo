@@ -1,4 +1,4 @@
-package org.springframework.roo.process.manager;
+package org.springframework.roo.project;
 
 import java.util.logging.Logger;
 
@@ -9,7 +9,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.process.manager.ProcessManager;
+import org.springframework.roo.project.packaging.JarPackaging;
+import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -26,14 +29,15 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Component
 @Service
-public class ProcessManagerCommands implements CommandMarker {
+public class ProjectCommands implements CommandMarker {
 	
 	private static final String DEVELOPMENT_MODE_COMMAND = "development mode";
+	private static final String PROJECT_SETUP_COMMAND = "project setup";
 	private static final String PROJECT_SCAN_SPEED_COMMAND = "project scan speed";
 	private static final String PROJECT_SCAN_STATUS_COMMAND = "project scan status";
 	private static final String PROJECT_SCAN_NOW_COMMAND = "project scan now";
 
-	protected final static Logger LOGGER = HandlerUtils.getLogger(ProcessManagerCommands.class);
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ProjectCommands.class);
 	
     // ------------ OSGi component attributes ----------------
    	private BundleContext context;
@@ -41,9 +45,28 @@ public class ProcessManagerCommands implements CommandMarker {
     private ProcessManager processManager;
     private Shell shell;
     private ProjectOperations projectOperations;
+    private MavenOperations mavenOperations;
 
     protected void activate(final ComponentContext context) {
     	this.context = context.getBundleContext();
+    }
+    
+    @CliAvailabilityIndicator(PROJECT_SETUP_COMMAND)
+    public boolean isCreateProjectAvailable() {
+    	
+        return getMavenOperations().isCreateProjectAvailable();
+    }
+    
+    @CliCommand(value = PROJECT_SETUP_COMMAND, help = "Creates a new Maven project")
+    public void createProject(
+            @CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+            @CliOption(key = "projectName", help = "The name of the project (last segment of package name used as default)") final String projectName,
+            @CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
+            @CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
+            @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
+
+        getMavenOperations().createProject(topLevelPackage, projectName,
+                majorJavaVersion, parentPom, packaging);
     }
     
     @CliAvailabilityIndicator({PROJECT_SCAN_SPEED_COMMAND, PROJECT_SCAN_STATUS_COMMAND,
@@ -194,5 +217,27 @@ public class ProcessManagerCommands implements CommandMarker {
         else {
             return projectOperations;
         }
+    }
+    
+    public MavenOperations getMavenOperations(){
+    	if(mavenOperations == null){
+    		// Get all Services implement MavenOperations interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MavenOperations.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (MavenOperations) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MavenOperations on MavenCommands.");
+    			return null;
+    		}
+    	}else{
+    		return mavenOperations;
+    	}
+    	
     }
 }
