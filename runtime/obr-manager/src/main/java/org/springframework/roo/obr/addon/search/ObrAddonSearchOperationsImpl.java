@@ -17,6 +17,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
@@ -174,6 +175,11 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 						repoResource.getPresentationName(), repoResource.getSize(), 
 						repoResource.getVersion(), repoResource.getURI());
 				
+				// If current bundle is installed, continue with the next one
+				if(checkIfBundleIsInstalled(bundle)){
+					continue;
+				}
+				
 				// Getting Resource Capabilites
 				Capability[] resourceCapabilities = repoResource.getCapabilities();
 				
@@ -205,8 +211,23 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 		}
 	}
 	
-	
-	
+	/**
+	 * Method to check if some bundle is installed on OSGi
+	 * @param bundle
+	 * @return
+	 */
+	private boolean checkIfBundleIsInstalled(ObrBundle bundle) {
+		// Refreshing installed bundles
+		Bundle[] allInstalledBundles = context.getBundles();
+		// Checking if bundles is installed
+		for(Bundle installedBundle : allInstalledBundles){
+			if(installedBundle.getSymbolicName().equals(bundle.getSymbolicName())){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Method to populate current Bundles on installed repositories
 	 */
@@ -267,8 +288,8 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 			sb.setLength(0);
 		}
 		LOGGER.warning("--------------------------------------------------------------------------------");
-		LOGGER.info("[HINT] use 'addon info --bundleSymbolicName' to see details about a search result");
-		LOGGER.info("[HINT] use 'addon install --bundleSymbolicName' to install a specific add-on version");
+		LOGGER.info("[HINT] use 'addon info bundle --bundleSymbolicName' to see details about a search result");
+		LOGGER.info("[HINT] use 'addon install bundle --bundleSymbolicName' to install a specific add-on version");
 	}
 	
 	
@@ -386,6 +407,20 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
             }
             return installAddon(bundle,
                     bundle.getSymbolicName());
+        }
+	}
+	
+	@Override
+	public InstallOrUpgradeStatus installAddOnByUrl(String url) {
+		synchronized (mutex) {
+			Validate.notNull(url, "Valid url is required");
+			 boolean success = getShell().executeCommand("!g felix:install "
+			        + url);
+			 success = getShell().executeCommand("!g felix:start "
+				        + url);
+			
+			return success ? InstallOrUpgradeStatus.SUCCESS
+			        : InstallOrUpgradeStatus.FAILED;
         }
 	}
 
@@ -519,6 +554,13 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
         return success ? InstallOrUpgradeStatus.SUCCESS
                 : InstallOrUpgradeStatus.FAILED;
     }
+	
+	@Override
+	public void list() {
+		synchronized (mutex) {
+			getShell().executeCommand("!g lb");
+        }
+	}
 	
 	/**
 	 * Method to get RepositoryAdmin Service implementation

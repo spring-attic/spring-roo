@@ -29,6 +29,13 @@ public interface ObrRepositoryOperations {
 	 * @throws Exception 
 	 */
 	void listRepos() throws Exception;
+	
+	
+	/**
+	 * Introspects all installed OBR Repositories and list all their addons
+	 * @throws Exception 
+	 */
+	void introspectRepos() throws Exception;
 
 
 }

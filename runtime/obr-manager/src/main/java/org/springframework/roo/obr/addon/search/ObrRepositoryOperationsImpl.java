@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -122,6 +123,29 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 		LOGGER.log(Level.INFO, String.format(
 				"%s installed repositories on Spring Roo were found",
 				getRepositoryAdmin().listRepositories().length));
+	}
+	
+	@Override
+	public void introspectRepos() throws Exception {
+		LOGGER.log(Level.INFO, "Getting current installed repositories...");
+		// Populating repositories
+		populateRepositories();
+		LOGGER.log(Level.INFO, "");
+		// Getting all addons installed on repositories
+		int totalAddons = 0;
+		for (Repository repo : repositories) {
+			Resource[] allResources = repo.getResources();
+			// Getting all resources for repo
+			for(Resource resource : allResources){
+				// Printing all resources
+				LOGGER.log(Level.INFO, resource.getPresentationName() + "(" + resource.getVersion() + ")");
+				totalAddons++;
+			}
+		}
+		LOGGER.log(Level.INFO, "");
+		LOGGER.log(Level.INFO, String.format(
+				"%s available addons on installed repositories were found",
+				totalAddons));
 	}
 
 	/**

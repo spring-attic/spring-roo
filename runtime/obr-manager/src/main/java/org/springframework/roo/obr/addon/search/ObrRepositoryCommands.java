@@ -37,6 +37,11 @@ public class ObrRepositoryCommands implements CommandMarker {
     	operations.listRepos();
     }
     
+    @CliCommand(value = "addon repository introspect", help = "Introspects all installed OBR Repositories and list all their addons")
+    public void introspectRepos() throws Exception{
+    	operations.introspectRepos();
+    }
+    
     
 
 }

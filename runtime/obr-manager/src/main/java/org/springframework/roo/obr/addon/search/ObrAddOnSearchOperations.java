@@ -79,6 +79,15 @@ public interface ObrAddOnSearchOperations extends AddOnSearch {
      * @param bsn the bundle symbolic name (required)
      */
     InstallOrUpgradeStatus installAddOn(ObrAddOnBundleSymbolicName bsn);
+    
+    
+    /**
+     * Install addon with given URL
+     * 
+     * @param url
+     * @return
+     */
+    InstallOrUpgradeStatus installAddOnByUrl(String url);
 
     /**
      * Install addon with given Add-On ID.
@@ -93,5 +102,10 @@ public interface ObrAddOnSearchOperations extends AddOnSearch {
      * @param bsn the bundle symbolic name (required)
      */
     InstallOrUpgradeStatus removeAddOn(BundleSymbolicName bsn);
+    
+    /**
+     * List all installed addons. Equivalent to 'lb' felix command
+     */
+    void list();
 
 }
