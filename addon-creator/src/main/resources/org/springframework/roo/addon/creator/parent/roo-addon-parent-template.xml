@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <licenses>
+	<license>
+	  <name>&gt;GNU General Public License (GPL), Version 3.0</name>
+ 	  <url>http://www.gnu.org/copyleft/gpl.html</url>
+	  <distribution>repo</distribution>
+	</license>
+  </licenses>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>TO_BE_CHANGED_BY_ADDON</groupId>
+  <artifactId>TO_BE_CHANGED_BY_ADDON</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0.0.BUILD-SNAPSHOT</version>
+  <name>TO_BE_CHANGED_BY_ADDON</name>
+  <organization>
+        <name>Your project/company name goes here (used in copyright and vendor information in the manifest)</name>
+  </organization>
+  <description>An Spring Roo Addon Suite created by Spring Roo's addon creator feature.</description>
+  <url>http://www.some.company</url>
+  <properties>
+    <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <osgi.version>5.0.0</osgi.version>
+    <scr.plugin.version>1.20.0</scr.plugin.version>
+    <public.repository.url>scp://your.osgirepository.org</public.repository.url> 
+  </properties>
+
+  <modules>
+    <module>osgi-bundles</module>
+    <module>addon-simple</module>
+    <module>addon-advanced</module>
+    
+    <!-- Generate the subsystem .esa file -->
+    <module>roo-addon-suite</module>
+    
+    <!-- Create the local repository and publish it -->
+    <module>repository</module>
+  </modules>
+  
+  <repositories>
+    <repository>
+      <id>spring-roo-repository-release</id>
+      <name>Spring Roo Repository</name>
+      <url>http://spring-roo-repository.springsource.org/release</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>spring-roo-repository-snapshot</id>
+      <name>Spring Roo Repository</name>
+      <url>http://spring-roo-repository.springsource.org/snapshot</url>
+      <snapshots>
+        <updatePolicy>never</updatePolicy>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+   
+  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>spring-maven-release</id>
+      <name>Spring Maven Release Repository</name>
+      <url>http://maven.springframework.org/release</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>spring-roo-repository-bundles</id>
+      <name>Spring Roo Repository</name>
+      <url>http://spring-roo-repository.springsource.org/bundles</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>atlassian-maven-release</id>
+      <name>Atlassian Maven Release Repository</name>
+      <url>http://maven.atlassian.com/repository/public</url>
+    </pluginRepository>
+  </pluginRepositories>
+  
+
+  <dependencyManagement>
+  	<dependencies>
+   		<!-- OSGi -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>${osgi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <version>${osgi.version}</version>
+        </dependency>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <version>1.9.10</version>
+        </dependency>
+        <!-- Spring Roo modules -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.metadata</artifactId>
+            <version>${roo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.process.manager</artifactId>
+            <version>${roo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.project</artifactId>
+            <version>${roo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support</artifactId>
+            <version>${roo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.shell</artifactId>
+            <version>${roo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.bootstrap</artifactId>
+            <version>${roo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.model</artifactId>
+            <version>${roo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.classpath</artifactId>
+            <version>${roo.version}</version>
+        </dependency>
+        <!-- Apache commons -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.1</version>
+        </dependency>
+      </dependencies>
+  </dependencyManagement>
+
+  <build>
+      
+     <pluginManagement>
+    	<plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-scr-plugin</artifactId>
+          <version>${scr.plugin.version}</version>
+          <executions>
+            <execution>
+              <id>generate-scr-scrdescriptor</id>
+              <goals>
+                <goal>scr</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <parseJavaDoc>false</parseJavaDoc>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.5.3</version>
+          <configuration>
+            <finalName>${project.name}-${project.version}</finalName>
+            <descriptors>
+              <descriptor>src/main/assembly/repo-assembly.xml</descriptor>
+            </descriptors>
+          </configuration>
+        </plugin>
+    	</plugins>
+    </pluginManagement>
+  
+    <plugins>
+
+      <plugin>
+        <!--
+        Each module updates the local OBR index.xml file during the install 
+        phase.
+        Then the add-on deploy bundle details to the local OBR repository at
+        ${target.osgi-repository.directory}.
+        -->
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>2.5.3</version>
+        <extensions>true</extensions>
+        <executions>
+        	<execution>
+        		<id>install-bundle</id>
+	          <phase>install</phase>
+	          <goals>
+	            <goal>install</goal>
+	          </goals>
+        	</execution>
+        	<execution>
+            <id>deploy-bundle</id>
+	          <phase>install</phase>
+	          <goals>
+	            <goal>deploy</goal>
+	          </goals>
+        	</execution>
+        </executions>
+        <configuration>
+          <supportedProjectTypes>
+            <supportedProjectTypes>bundle</supportedProjectTypes>
+	          <supportedProjectTypes>jar</supportedProjectTypes>
+	          <supportedProjectTypes>esa</supportedProjectTypes>
+	        </supportedProjectTypes>
+          <prefixUrl></prefixUrl>
+          <remoteOBR>index.xml</remoteOBR>
+          <obrDeploymentRepository>local::default::file://${target.osgi-repository.directory}</obrDeploymentRepository>
+          <instructions>
+            <Export-Package>${project.artifactId}.*;version=${project.version}</Export-Package>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
+            <Bundle-Copyright>Copyright ${project.organization.name}.
+              All Rights Reserved.</Bundle-Copyright>
+            <Bundle-DocURL>${project.url}</Bundle-DocURL>
+          </instructions>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.3</version>
+        <configuration>
+          <useAgent>true</useAgent>
+        </configuration>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-help-plugin</artifactId>
+        <version>2.1.1</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.3.1</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.7</version>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>

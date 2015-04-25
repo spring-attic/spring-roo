@@ -1,0 +1,28 @@
+table, td, th { 
+	font-family: Verdana, Arial, sans-serif; 
+	font-weight: normal; 
+	vertical-align:top;
+  	font-size: small;
+	font-family: verdana;
+	font-weight:normal;
+	line-height:120%;
+}
+h1  		{ font-size: large; font-weight: normal;  color:#00669C; margin-bottom: 10px; padding-left:4px; border-left: 4px #4B731D solid;}
+h2  		{ font-size: medium; font-weight: bold;  margin-bottom: 2px; }
+h3  		{ font-size: medium; font-weight: normal; }
+h4  		{ font-size: small; font-weight: bold; }
+td  		{ vertical-align:top; text-align:left; padding-right:6px; padding-top:2px;}
+th  		{ padding:10px 5px 10px 5px; background-color: #4B731D; color:#fff; font-weight:bold; }
+pre 		{ font-family: Courier }
+
+.table a:link {
+  color:#4B731D; 
+  text-decoration: none; 
+}
+.table a:visited {
+  color:#333 !important; 
+  text-decoration: none; 
+}
+.table a:hover {
+ text-decoration: underline !important; 
+}

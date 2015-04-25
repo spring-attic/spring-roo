@@ -1,0 +1,97 @@
+#!/bin/bash
+
+this_file=`readlink -f $0`
+this_dir=`dirname $this_file`
+
+echo ""
+echo "Executing suite-dev!"
+
+# Defining vars
+export SUITE_HOME="$this_dir"
+export SUITE_TARGET="$SUITE_HOME/target"
+export SUITE_CACHE="$SUITE_TARGET/roo/cache"
+export SUITE_BUNDLES="$SUITE_TARGET/roo/bundle"
+
+
+# Checking if ROO_HOME was specified
+if [ "${ROO_HOME}x" == "x" ]; then
+  echo "### ERROR: You must define ROO_HOME variable to execute suite-dev" 
+  exit
+fi
+
+# Checking if mvn clean install was executed before execute suite-dev
+if [ ! -d "$SUITE_TARGET" ]; then
+  echo "### ERROR: You must execute 'mvn clean install' in $SUITE_HOME before execute suite-dev"
+  exit
+fi
+
+# Showing variables
+echo ""
+echo "ROO Home..................: $ROO_HOME"
+echo "Suite Home................: $SUITE_HOME"
+echo "Suite target dir..........: $SUITE_TARGET"
+echo "Suite cache dir.............: $SUITE_CACHE"
+echo "Suite bundle dir............: $SUITE_BUNDLES"
+echo ""
+
+# Suite: Remove OSGi cache and bundles if roo directory exists
+if [ -d "$SUITE_TARGET/roo" ]; then
+  rm -r "$SUITE_TARGET/roo"
+fi
+
+# Suite: Creating Bundle and Cache folders
+mkdir -p "$SUITE_CACHE"
+mkdir -p "$SUITE_BUNDLES"
+
+# Suite: copy add-ons to Suite ROO bundles
+cp `find $SUITE_TARGET/osgi-repository-bin/ -iname *.jar` "$SUITE_BUNDLES"
+
+# ROO: copy ROO add-ons to Suite ROO Bundles
+cp -r "$ROO_HOME/bundle/." "$SUITE_BUNDLES"
+
+# Store file locations in variables to facilitate Cygwin conversion if needed
+
+# Build a classpath containing our two magical startup JARs (we look for " /" as per ROO-905)
+ROO_CP=`echo "$ROO_HOME"/bin/*.jar | sed 's/ \//:\//g'`
+# echo ROO_CP: $ROO_CP
+
+ROO_OSGI_FRAMEWORK_STORAGE="$SUITE_CACHE"
+# echo "ROO_OSGI_FRAMEWORK_STORAGE: $ROO_OSGI_FRAMEWORK_STORAGE"
+
+ROO_AUTO_DEPLOY_DIRECTORY="$SUITE_BUNDLES"
+# echo "ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
+
+ROO_CONFIG_FILE_PROPERTIES="$SUITE_HOME/conf/config.properties"
+# echo "ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
+
+cygwin=false;
+case "`uname`" in
+    CYGWIN*)
+        cygwin=true
+        ;;
+esac
+
+if [ "$cygwin" = "true" ]; then
+	export ROO_HOME=`cygpath -wp "$ROO_HOME"`
+	export ROO_CP=`cygpath -wp "$ROO_CP"`
+	export ROO_OSGI_FRAMEWORK_STORAGE=`cygpath -wp "$ROO_OSGI_FRAMEWORK_STORAGE"`
+	export ROO_AUTO_DEPLOY_DIRECTORY=`cygpath -wp "$ROO_AUTO_DEPLOY_DIRECTORY"`
+	export ROO_CONFIG_FILE_PROPERTIES=`cygpath -wp "$ROO_CONFIG_FILE_PROPERTIES"`
+fi
+
+# make sure to disable the flash message feature for the default OSX terminal, we recommend to use a ANSI compliant terminal such as iTerm if flash message support is desired
+APPLE_TERMINAL=false;
+if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+	APPLE_TERMINAL=true
+fi
+
+# Hop, hop, hop...
+DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
+PAUSE=
+#PAUSE="-Droo.pause=true"
+METADATA_TRACE=
+#METADATA_TRACE="-Droo.metadata.trace=true"
+ANSI="-Droo.console.ansi=true"
+java $PAUSE $DEBUG $METADATA_TRACE $ANSI -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
+EXITED=$?
+echo Roo exited with code $EXITED

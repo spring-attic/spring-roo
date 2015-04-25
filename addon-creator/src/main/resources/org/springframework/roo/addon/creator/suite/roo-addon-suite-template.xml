@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <licenses>
+		<license>
+		  <name>&gt;GNU General Public License (GPL), Version 3.0</name>
+	 	  <url>http://www.gnu.org/copyleft/gpl.html</url>
+		  <distribution>repo</distribution>
+		</license>
+    </licenses>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>TO_BE_CHANGED_BY_ADDON</groupId>
+        <artifactId>TO_BE_CHANGED_BY_ADDON</artifactId>
+        <version>1.0.0.BUILD-SNAPSHOT</version>
+        <relativePath>../osgi-bundles</relativePath>
+    </parent>
+    <artifactId>TO_BE_CHANGED_BY_ADDON</artifactId>
+    <packaging>esa</packaging>
+    <name>TO_BE_CHANGED_BY_ADDON</name>
+    <description>Generates Spring Roo Addon Suite</description>
+    <properties>
+        <target.osgi-repository.directory>${basedir}/../target/osgi-repository-bin</target.osgi-repository.directory>
+    </properties>
+    
+	<!-- Subsystem Dependencies -->
+
+	<dependencies>
+	    
+	</dependencies>
+
+	<build>
+	    <plugins>
+	      <plugin>
+	        <groupId>org.apache.aries</groupId>
+	        <artifactId>esa-maven-plugin</artifactId>
+	        <version>1.0.0</version>
+	        <extensions>true</extensions>
+	        <configuration>
+			  <archiveContent>none</archiveContent>
+	          <generateManifest>true</generateManifest>
+			  <instructions>
+			    <Subsystem-SymbolicName>${project.artifactId}</Subsystem-SymbolicName>
+			    <startOrder>dependencies</startOrder>
+			    <Subsystem-Type>osgi.subsystem.feature</Subsystem-Type>
+			  </instructions>
+	        </configuration>
+	      </plugin>
+	    </plugins>
+	  </build>
+</project>
