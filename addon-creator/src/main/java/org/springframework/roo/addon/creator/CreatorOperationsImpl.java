@@ -4,7 +4,6 @@ import static java.io.File.separatorChar;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,7 +19,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -138,7 +136,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
     	// Creating repository project
     	createProject(topLevelPackage, Type.REPOSITORY, description, projectName, "repository");
     	
-    	// Creating parent Spring Roo Addon Suite
+    	// Creating parent project
     	createProject(topLevelPackage, Type.PARENT, description, projectName, null);
     	
     	// Including suite-dev file on ROOT
@@ -172,9 +170,75 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 Type.ADVANCED, projectName, folder);
         install("configuration.xml", topLevelPackage, Path.SRC_MAIN_RESOURCES,
                 Type.ADVANCED, projectName, folder);
+        
+        createObrFile(topLevelPackage.getFullyQualifiedPackageName(), Type.ADVANCED, folder);
     }
 
-    public void createI18nAddon(final JavaPackage topLevelPackage,
+    
+	private void createObrFile(String topLevelPackageName, Type type, String folder) {
+		
+		// Getting obr location
+    	String obrLocation = folder + "/src/main/resources/obr.xml";
+    	fileManager.createFile(obrLocation);
+    	
+    	final InputStream templateInputStream = FileUtils.getInputStream(
+                getClass(), type.name().toLowerCase() + "/obr-template.xml");
+        final Document docXml = XmlUtils.readXml(templateInputStream);
+        final Element document = docXml.getDocumentElement();
+         
+        Element capabilityElement = XmlUtils.findFirstElement(
+                 "resource/capability", document);
+         
+         if(capabilityElement != null){
+        	 
+        	 if(type.equals(Type.ADVANCED)){
+        		 
+        		 String commandInit = topLevelPackageName.substring(
+                         topLevelPackageName.lastIndexOf(".") + 1)
+                         .toLowerCase();
+        		 
+        		 Element commandAddElement = docXml.createElement("p");
+        		 commandAddElement.setAttribute("n", "command-add");
+        		 commandAddElement.setAttribute("v", commandInit + " add");
+        		 
+        		 Element commandAllElement = docXml.createElement("p");
+        		 commandAllElement.setAttribute("n", "command-all");
+        		 commandAllElement.setAttribute("v", commandInit + " all");
+        		 
+        		 Element commandSetupElement = docXml.createElement("p");
+        		 commandSetupElement.setAttribute("n", "command-setup");
+        		 commandSetupElement.setAttribute("v", commandInit + " setup");
+        		 
+        		 
+        		 capabilityElement.appendChild(commandAddElement);
+        		 capabilityElement.appendChild(commandAllElement);
+        		 capabilityElement.appendChild(commandSetupElement);
+        		 
+        	 }
+        	 
+        	 
+        	 if(type.equals(Type.SIMPLE)){
+        		 
+        		 Element commandSayHelloElement = docXml.createElement("p");
+        		 commandSayHelloElement.setAttribute("n", "command-say-hello");
+        		 commandSayHelloElement.setAttribute("v", "say hello");
+        		 
+        		 Element commandInstallElement = docXml.createElement("p");
+        		 commandInstallElement.setAttribute("n", "command-install-tags");
+        		 commandInstallElement.setAttribute("v", "web mvc install tags");
+        		 
+        		 capabilityElement.appendChild(commandSayHelloElement);
+        		 capabilityElement.appendChild(commandInstallElement);
+
+        	 }
+        	 
+        	 XmlUtils.writeXml(fileManager.updateFile(obrLocation)
+                     .getOutputStream(), docXml);
+         }
+		
+	}
+
+	public void createI18nAddon(final JavaPackage topLevelPackage,
             String language, final Locale locale, final File messageBundle,
             final File flagGraphic, String description, final String projectName) {
         Validate.notNull(topLevelPackage, "Top Level Package required");
@@ -590,6 +654,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 Type.SIMPLE, projectName, folder);
         install("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES,
                 Type.SIMPLE, projectName, folder);
+        
+        createObrFile(topLevelPackage.getFullyQualifiedPackageName(), Type.SIMPLE, folder);
     }
 
     public void createWrapperAddon(final JavaPackage topLevelPackage,

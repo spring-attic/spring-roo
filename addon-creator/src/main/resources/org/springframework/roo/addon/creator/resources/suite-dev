@@ -1,6 +1,19 @@
 #!/bin/bash
 
-this_file=`readlink -f $0`
+PRG="$0"
+
+cd `dirname "$PRG"`
+TARGET_FILE=`basename $PRG`
+
+while [ -L "$TARGET_FILE" ]
+do
+    TARGET_FILE=`readlink $TARGET_FILE`
+    cd `dirname $TARGET_FILE`
+    TARGET_FILE=`basename $TARGET_FILE`
+done
+
+PHYS_DIR=`pwd -P`
+this_file=$PHYS_DIR/$TARGET_FILE
 this_dir=`dirname $this_file`
 
 echo ""
@@ -15,7 +28,7 @@ export SUITE_BUNDLES="$SUITE_TARGET/roo/bundle"
 
 # Checking if ROO_HOME was specified
 if [ "${ROO_HOME}x" == "x" ]; then
-  echo "### ERROR: You must define ROO_HOME variable to execute suite-dev" 
+  echo "### ERROR: You must define ROO_HOME variable to execute suite-dev"
   exit
 fi
 
@@ -61,7 +74,7 @@ ROO_OSGI_FRAMEWORK_STORAGE="$SUITE_CACHE"
 ROO_AUTO_DEPLOY_DIRECTORY="$SUITE_BUNDLES"
 # echo "ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
 
-ROO_CONFIG_FILE_PROPERTIES="$SUITE_HOME/conf/config.properties"
+ROO_CONFIG_FILE_PROPERTIES="$ROO_HOME/conf/config.properties"
 # echo "ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
 
 cygwin=false;
@@ -72,17 +85,17 @@ case "`uname`" in
 esac
 
 if [ "$cygwin" = "true" ]; then
-	export ROO_HOME=`cygpath -wp "$ROO_HOME"`
-	export ROO_CP=`cygpath -wp "$ROO_CP"`
-	export ROO_OSGI_FRAMEWORK_STORAGE=`cygpath -wp "$ROO_OSGI_FRAMEWORK_STORAGE"`
-	export ROO_AUTO_DEPLOY_DIRECTORY=`cygpath -wp "$ROO_AUTO_DEPLOY_DIRECTORY"`
-	export ROO_CONFIG_FILE_PROPERTIES=`cygpath -wp "$ROO_CONFIG_FILE_PROPERTIES"`
+        export ROO_HOME=`cygpath -wp "$ROO_HOME"`
+        export ROO_CP=`cygpath -wp "$ROO_CP"`
+        export ROO_OSGI_FRAMEWORK_STORAGE=`cygpath -wp "$ROO_OSGI_FRAMEWORK_STORAGE"`
+        export ROO_AUTO_DEPLOY_DIRECTORY=`cygpath -wp "$ROO_AUTO_DEPLOY_DIRECTORY"`
+        export ROO_CONFIG_FILE_PROPERTIES=`cygpath -wp "$ROO_CONFIG_FILE_PROPERTIES"`
 fi
 
 # make sure to disable the flash message feature for the default OSX terminal, we recommend to use a ANSI compliant terminal such as iTerm if flash message support is desired
 APPLE_TERMINAL=false;
 if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-	APPLE_TERMINAL=true
+        APPLE_TERMINAL=true
 fi
 
 # Hop, hop, hop...
