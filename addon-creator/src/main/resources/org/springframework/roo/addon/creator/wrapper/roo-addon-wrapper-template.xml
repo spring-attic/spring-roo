@@ -14,8 +14,6 @@
         <pkgVendor>TO_BE_CHANGED_BY_ADDON</pkgVendor>
         <pkgDocUrl></pkgDocUrl>
         <pkgLicense>TO_BE_CHANGED_BY_ADDON</pkgLicense>
-        <repo.folder>TO_BE_CHANGED_BY_ADDON</repo.folder>
-        <google.code.project.name>${project.name}</google.code.project.name>
     </properties>
     <dependencies>
         <dependency>
@@ -25,17 +23,6 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-    <scm>
-        <connection>scm:svn:https://${google.code.project.name}.googlecode.com/svn/trunk</connection>
-        <developerConnection>scm:svn:https://${google.code.project.name}.googlecode.com/svn/trunk</developerConnection>
-        <url>http://code.google.com/p/${google.code.project.name}/source/browse</url>
-    </scm>
-    <distributionManagement>
-        <repository>
-            <id>Google Code</id>
-            <url>dav:https://${google.code.project.name}.googlecode.com/svn/repo</url>
-        </repository>
-    </distributionManagement>
     <build>
         <extensions>
             <extension>
@@ -66,7 +53,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <remoteOBR>true</remoteOBR>
-                    <bundleUrl>httppgp://${google.code.project.name}.googlecode.com/svn/repo/${repo.folder}/${project.artifactId}/${project.version}/${project.artifactId}-${project.version}.jar</bundleUrl>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>*;version=${project.version}</Export-Package>

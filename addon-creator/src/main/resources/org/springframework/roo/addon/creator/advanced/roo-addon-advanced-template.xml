@@ -21,8 +21,6 @@
     <properties>
         <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <google.code.project.name>${project.name}</google.code.project.name>
-        <repo.folder>TO_BE_CHANGED_BY_ADDON</repo.folder>
         <osgi.version>5.0.0</osgi.version>
         <scr.plugin.version>1.20.0</scr.plugin.version>
     </properties>
@@ -56,7 +54,7 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <version>1.6.0</version>
+            <version>1.9.10</version>
         </dependency>
         <!-- Spring Roo modules -->
         <dependency>
@@ -106,17 +104,6 @@
             <version>3.1</version>
         </dependency>
     </dependencies>
-    <scm>
-        <connection>scm:svn:https://${google.code.project.name}.googlecode.com/svn/trunk</connection>
-        <developerConnection>scm:svn:https://${google.code.project.name}.googlecode.com/svn/trunk</developerConnection>
-        <url>http://code.google.com/p/${google.code.project.name}/source/browse</url>
-    </scm>
-    <distributionManagement>
-        <repository>
-            <id>Google Code</id>
-            <url>dav:https://${google.code.project.name}.googlecode.com/svn/repo</url>
-        </repository>
-    </distributionManagement>
     <build>
         <extensions>
             <extension>
@@ -205,7 +192,6 @@
                         <Bundle-DocURL>${project.url}</Bundle-DocURL>
                     </instructions>
                     <remoteOBR>true</remoteOBR>
-                    <bundleUrl>httppgp://${google.code.project.name}.googlecode.com/svn/repo/${repo.folder}/${project.artifactId}/${project.version}/${project.artifactId}-${project.version}.jar</bundleUrl>
                 </configuration>
             </plugin>
             <plugin>

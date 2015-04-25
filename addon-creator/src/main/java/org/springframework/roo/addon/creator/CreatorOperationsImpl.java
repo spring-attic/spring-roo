@@ -4,6 +4,7 @@ import static java.io.File.separatorChar;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,6 +20,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -37,6 +39,7 @@ import org.w3c.dom.Element;
  * Implementation of {@link CreatorOperations}.
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.1
  */
 @Component
@@ -45,6 +48,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
     /**
      * The types of project that can be created
+     * and some project utilities
      */
     private enum Type {
 
@@ -52,12 +56,42 @@ public class CreatorOperationsImpl implements CreatorOperations {
          * A simple addon
          */
         SIMPLE,
+        
+        /**
+         * A simple addon as Child Project
+         */
+        SIMPLECHILD,
 
         /**
          * An advanced addon
          */
         ADVANCED,
-
+        
+        /**
+         * An advanced addon as Child project
+         */
+        ADVANCEDCHILD,
+        
+        /**
+         * Parent Project
+         */
+        PARENT,
+        
+        /**
+         * Osgi Bundles project
+         */
+        OSGIBUNDLES,
+        
+        /**
+         * Roo Addon Suite
+         */
+        SUITE,
+        
+        /**
+         * Roo Addon Suite Repository project
+         */
+        REPOSITORY,
+        
         /**
          * A language bundle
          */
@@ -86,29 +120,58 @@ public class CreatorOperationsImpl implements CreatorOperations {
             iconSetUrl = ICON_SET_URL;
         }
     }
+    
+    public void createRooAddonSuite(final JavaPackage topLevelPackage,
+            final String description, String projectName){
+    	// Creating advancedAddon on Spring Roo Addon Suite
+    	createAdvancedAddon(topLevelPackage, description, projectName, "addon-advanced");
+    	
+    	// Creating simple addon on Spring Roo Addon Suite
+    	createSimpleAddon(topLevelPackage, description, projectName, "addon-simple");
+    	
+    	// Creating osgi-addon 
+    	createProject(topLevelPackage, Type.OSGIBUNDLES, description, projectName, "osgi-bundles");
+    	
+    	// Creating roo-addon-suite
+    	createProject(topLevelPackage, Type.SUITE, description, projectName, "roo-addon-suite");
+    	
+    	// Creating repository project
+    	createProject(topLevelPackage, Type.REPOSITORY, description, projectName, "repository");
+    	
+    	// Creating parent Spring Roo Addon Suite
+    	createProject(topLevelPackage, Type.PARENT, description, projectName, null);
+    	
+    	// Including suite-dev file on ROOT
+    	copyFile("suite-dev", null);
+    }
+    
 
-    public void createAdvancedAddon(final JavaPackage topLevelPackage,
-            final String description, final String projectName) {
+    
+
+	public void createAdvancedAddon(final JavaPackage topLevelPackage,
+            final String description, final String projectName, String folder) {
         Validate.notNull(topLevelPackage, "Top-level package required");
 
-        createProject(topLevelPackage, Type.ADVANCED, description, projectName);
+        if(folder != null){
+        	createProject(topLevelPackage, Type.ADVANCEDCHILD, description, projectName, folder);
+        }else{
+        	createProject(topLevelPackage, Type.ADVANCED, description, projectName, folder);
+        }
 
         install("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.ADVANCED, projectName);
+                Type.ADVANCED, projectName, folder);
         install("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.ADVANCED, projectName);
+                Type.ADVANCED, projectName, folder);
         install("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.ADVANCED, projectName);
+                Type.ADVANCED, projectName, folder);
         install("Metadata.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.ADVANCED, projectName);
+                Type.ADVANCED, projectName, folder);
         install("MetadataProvider.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.ADVANCED, projectName);
+                Type.ADVANCED, projectName, folder);
         install("RooAnnotation.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.ADVANCED, projectName);
-        install("assembly.xml", topLevelPackage, Path.ROOT, Type.ADVANCED,
-                projectName);
+                Type.ADVANCED, projectName, folder);
         install("configuration.xml", topLevelPackage, Path.SRC_MAIN_RESOURCES,
-                Type.ADVANCED, projectName);
+                Type.ADVANCED, projectName, folder);
     }
 
     public void createI18nAddon(final JavaPackage topLevelPackage,
@@ -169,10 +232,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
             description = description + "; #mvc,#localization,locale:"
                     + locale.getCountry().toLowerCase();
         }
-        createProject(topLevelPackage, Type.I18N, description, projectName);
-
-        install("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N,
-                projectName);
+        createProject(topLevelPackage, Type.I18N, description, projectName, null);
 
         OutputStream outputStream = null;
         try {
@@ -265,9 +325,11 @@ public class CreatorOperationsImpl implements CreatorOperations {
      * @param description the description to put into the POM (can be blank)
      * @param projectName if blank, a sanitised version of the given top-level
      *            package is used for the project name
+     * @param folder  
      */
     private void createProject(final JavaPackage topLevelPackage,
-            final Type type, final String description, String projectName) {
+            final Type type, final String description, String projectName, String folder) {
+    	
         if (StringUtils.isBlank(projectName)) {
             projectName = topLevelPackage.getFullyQualifiedPackageName()
                     .replace(".", "-");
@@ -281,52 +343,253 @@ public class CreatorOperationsImpl implements CreatorOperations {
         final Element root = pom.getDocumentElement();
 
         // Populate it from the given inputs
-        XmlUtils.findRequiredElement("/project/artifactId", root)
-                .setTextContent(topLevelPackage.getFullyQualifiedPackageName());
-        XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(
-                topLevelPackage.getFullyQualifiedPackageName());
-        XmlUtils.findRequiredElement("/project/name", root).setTextContent(
-                projectName);
-        XmlUtils.findRequiredElement("/project/properties/repo.folder", root)
-                .setTextContent(
-                        topLevelPackage.getFullyQualifiedPackageName().replace(
-                                ".", "/"));
-        if (StringUtils.isNotBlank(description)) {
-            XmlUtils.findRequiredElement("/project/description", root)
-                    .setTextContent(description);
+        if(type.equals(Type.PARENT)){
+        	XmlUtils.findRequiredElement("/project/artifactId", root)
+            .setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ".root");
+        }else if(type.name().contains("CHILD") || type.equals(Type.SUITE)){
+        	XmlUtils.findRequiredElement("/project/parent/artifactId", root)
+            .setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ".osgi.bundles");
+        	XmlUtils.findRequiredElement("/project/artifactId", root)
+            .setTextContent(topLevelPackage.getFullyQualifiedPackageName() + "." + folder);
+        }else if(type.equals(Type.OSGIBUNDLES)){
+        	XmlUtils.findRequiredElement("/project/parent/artifactId", root)
+            .setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ".root");
+        	XmlUtils.findRequiredElement("/project/artifactId", root)
+            .setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ".osgi.bundles");
+        }else if(type.equals(Type.REPOSITORY)){
+        	XmlUtils.findRequiredElement("/project/parent/artifactId", root)
+            .setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ".root");
+        	XmlUtils.findRequiredElement("/project/artifactId", root)
+            .setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ".repository");
+        }else{
+        	XmlUtils.findRequiredElement("/project/artifactId", root)
+            .setTextContent(topLevelPackage.getFullyQualifiedPackageName());
         }
-
+        if(type.name().contains("CHILD") || type.equals(Type.OSGIBUNDLES) || type.equals(Type.SUITE) || type.equals(Type.REPOSITORY)){
+        	XmlUtils.findRequiredElement("/project/parent/groupId", root).setTextContent(
+                    topLevelPackage.getFullyQualifiedPackageName());
+        }else{
+        	XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(
+                    topLevelPackage.getFullyQualifiedPackageName());
+        }
+        
+    	if(folder != null){
+            XmlUtils.findRequiredElement("/project/name", root).setTextContent(
+                    projectName + " - " + folder);
+        }else{
+            XmlUtils.findRequiredElement("/project/name", root).setTextContent(
+                    projectName);
+            
+            if (StringUtils.isNotBlank(description)) {
+                XmlUtils.findRequiredElement("/project/description", root)
+                        .setTextContent(description);
+            }
+        }
+    	
         // Write the new POM to disk
-        writePomFile(pom);
+        writePomFile(pom, folder);
+        
+       	// Updating dependencies when pom.xml
+        // is generated
+    	if(type.equals(Type.SUITE) || type.equals(Type.REPOSITORY)){
+    		addAddonsDependencies(pom, folder, topLevelPackage);
+    	}
+    	
+    	// Including MANIFEST.MF file only when is a Suite project
+    	if(type.equals(Type.SUITE)){
+    		writeTextFile("MANIFEST.MF", generateManifestContent(topLevelPackage, description, projectName), folder + "/src/main/esa/META-INF");
+    	}
+    	
+    	// Including src/main/assembly/repo-assembly.xml when is a repository project
+    	if(type.equals(Type.REPOSITORY)){
+    		writeAssemblyFile(topLevelPackage, "repo-assembly-template.xml", folder);
+    		copyFile("suite.css", folder);
+    		copyFile("obr2html.xsl", folder);
+    		copyFile("style.css", folder);
+    		copyFile("bootstrap.min.css", folder);
+    	}
 
         // Write the other root files
-        writeTextFile("readme.txt", "Welcome to my addon!");
+        writeTextFile("readme.txt", "Welcome to my addon!", folder);
         writeTextFile("legal" + separatorChar + "LICENSE.TXT",
-                "Your license goes here");
-
+                "Your license goes here", folder);
         fileManager.scan();
     }
 
-    public void createSimpleAddon(final JavaPackage topLevelPackage,
-            final String description, final String projectName) {
+    private void copyFile(String fileName, String folder) {
+    	
+    	String file = "";
+    	if(folder != null){
+    		file = folder + "/src/main/resources/" + fileName;
+    	}else{
+    		file = pathResolver.getFocusedIdentifier(
+                    Path.ROOT, fileName);
+    	}
+    	
+    	
+    	InputStream inputStream = null;
+        OutputStream outputStream = null;
+        try {
+            inputStream = FileUtils.getInputStream(getClass(),
+                    "resources/" + fileName);
+            if (!fileManager.exists(file)) {
+                outputStream = fileManager.createFile(file)
+                        .getOutputStream();
+            }
+            
+            if (outputStream != null) {
+                IOUtils.copy(inputStream, outputStream);
+            }
+        }
+        catch (final IOException ioe) {
+            throw new IllegalStateException(ioe);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+            if (outputStream != null) {
+                IOUtils.closeQuietly(outputStream);
+            }
+
+        }
+    	
+	}
+
+	private void writeAssemblyFile(JavaPackage topLevelPackage, String templateName, String destinationFolder) {
+    	final InputStream templateInputStream = FileUtils.getInputStream(
+                getClass(), "xml/" + templateName);
+    	
+    	final Document assemblyDoc = XmlUtils.readXml(templateInputStream);
+        final Element root = assemblyDoc.getDocumentElement();
+        
+        String projectFolder = topLevelPackage.getFullyQualifiedPackageName().replaceAll("\\.", "/");
+        
+        XmlUtils.findRequiredElement("/assembly/moduleSets/moduleSet/binaries/outputDirectory", root)
+        .setTextContent(projectFolder + "/${module.artifactId}/${module.version}");
+        
+        // Add includes
+        Element includes = XmlUtils.findFirstElement(
+                "moduleSets/moduleSet/includes", root);
+        
+        if(includes != null){
+        	
+        	 // Adding addon-advanced include
+        	 Element includeAdvancedElement = assemblyDoc.createElement("include");
+        	 includeAdvancedElement.setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ":" + topLevelPackage.getFullyQualifiedPackageName() + ".addon-advanced");
+        	 
+        	 // Adding addon-simple include
+        	 Element includeSimpleElement = assemblyDoc.createElement("include");
+        	 includeSimpleElement.setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ":" + topLevelPackage.getFullyQualifiedPackageName() + ".addon-simple");
+        	 
+        	 // Adding roo-addon-suite include
+        	 Element includeSuiteElement = assemblyDoc.createElement("include");
+        	 includeSuiteElement.setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ":" + topLevelPackage.getFullyQualifiedPackageName() + ".roo-addon-suite");
+        	
+        	 includes.appendChild(includeAdvancedElement);
+        	 includes.appendChild(includeSimpleElement);
+        	 includes.appendChild(includeSuiteElement);
+        }
+        
+        MutableFile assemblyFile = fileManager.createFile("src/main/assembly/repo-assembly.xml");
+        
+        XmlUtils.writeXml(assemblyFile.getOutputStream(), assemblyDoc);
+		
+	}
+
+	private String generateManifestContent(JavaPackage topLevelPackage, String description, String projectName) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("Manifest-Version: 1.0\n");
+		sb.append("Bnd-LastModified: 1427459113830\n");
+		sb.append("Build-Jdk: 1.7.0_60\n");
+		sb.append("Bundle-Description: " + description + "\n");
+		sb.append("Bundle-License: http://www.gnu.org/licenses/gpl-3.0.html\n");
+		sb.append("Bundle-ManifestVersion: 2\n");
+		sb.append("Bundle-Name: " + projectName + " - Roo Addon Suite\n");
+		sb.append("Bundle-SymbolicName: " + topLevelPackage.getFullyQualifiedPackageName() + ".roo.addon.suite\n");
+		sb.append("Bundle-Version: 1.0.0.BUILD-SNAPSHOT\n");
+		sb.append("Created-By: Apache Maven Bundle Plugin\n");
+		sb.append("Tool: Bnd-2.3.0.201405100607");
+		
+		return sb.toString();
+
+	}
+
+	private void addAddonsDependencies(Document pom, String folder, JavaPackage topLevelPackage) {
+		// Getting Roo Addon Suite pom.xml file
+    	String pomRooAddonSuite = projectOperations.getPathResolver()
+                .getIdentifier(Path.ROOT.getModulePathId(""), folder + "/pom.xml");
+    	
+    	Validate.isTrue(fileManager.exists(pomRooAddonSuite),
+                folder + "/pom.xml not found");
+    	
+    	InputStream inputStream = fileManager.getInputStream(pomRooAddonSuite);
+    	
+    	 Document docXml = XmlUtils.readXml(inputStream);
+    	 
+    	// Getting root element
+         Element document = docXml.getDocumentElement();
+         
+         Element dependenciesElement = XmlUtils.findFirstElement(
+                 "dependencies", document);
+         
+         if(dependenciesElement != null){
+        	 
+        	 // Adding addon-advanced dependencies
+        	 Element dependencyAdvancedElement = docXml.createElement("dependency");
+        	 Element groupIdAdvancedElement = docXml.createElement("groupId");
+        	 groupIdAdvancedElement.setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+        	 Element artifactIdAdvancedElement = docXml.createElement("artifactId");
+        	 artifactIdAdvancedElement.setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ".addon-advanced");
+        	 Element versionAdvancedElement = docXml.createElement("version");
+        	 versionAdvancedElement.setTextContent("${project.parent.version}");
+        	 dependencyAdvancedElement.appendChild(groupIdAdvancedElement);
+        	 dependencyAdvancedElement.appendChild(artifactIdAdvancedElement);
+        	 dependencyAdvancedElement.appendChild(versionAdvancedElement);
+        	 
+        	 // Adding addon-simple dependencies
+        	 Element dependencyElement = docXml.createElement("dependency");
+        	 Element groupIdElement = docXml.createElement("groupId");
+        	 groupIdElement.setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+        	 Element artifactIdElement = docXml.createElement("artifactId");
+        	 artifactIdElement.setTextContent(topLevelPackage.getFullyQualifiedPackageName() + ".addon-simple");
+        	 Element versionElement = docXml.createElement("version");
+        	 versionElement.setTextContent("${project.parent.version}");
+        	 dependencyElement.appendChild(groupIdElement);
+        	 dependencyElement.appendChild(artifactIdElement);
+        	 dependencyElement.appendChild(versionElement);
+        	 
+        	 dependenciesElement.appendChild(dependencyElement);
+        	 dependenciesElement.appendChild(dependencyAdvancedElement);
+        	 
+        	 XmlUtils.writeXml(fileManager.updateFile(pomRooAddonSuite)
+                     .getOutputStream(), docXml);
+        	 
+         }
+		
+	}
+
+	public void createSimpleAddon(final JavaPackage topLevelPackage,
+            final String description, final String projectName, String folder) {
         Validate.notNull(topLevelPackage, "Top Level Package required");
 
-        createProject(topLevelPackage, Type.SIMPLE, description, projectName);
+        if(folder != null){
+        	createProject(topLevelPackage, Type.SIMPLECHILD, description, projectName, folder);
+        }else{
+        	createProject(topLevelPackage, Type.SIMPLE, description, projectName, folder);
+        }
 
         install("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.SIMPLE, projectName);
+                Type.SIMPLE, projectName, folder);
         install("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.SIMPLE, projectName);
+                Type.SIMPLE, projectName, folder);
         install("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.SIMPLE, projectName);
+                Type.SIMPLE, projectName, folder);
         install("PropertyName.java", topLevelPackage, Path.SRC_MAIN_JAVA,
-                Type.SIMPLE, projectName);
-        install("assembly.xml", topLevelPackage, Path.ROOT, Type.SIMPLE,
-                projectName);
+                Type.SIMPLE, projectName, folder);
         install("info.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES,
-                Type.SIMPLE, projectName);
+                Type.SIMPLE, projectName, folder);
         install("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES,
-                Type.SIMPLE, projectName);
+                Type.SIMPLE, projectName, folder);
     }
 
     public void createWrapperAddon(final JavaPackage topLevelPackage,
@@ -396,7 +659,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
                     + descriptionE.getTextContent());
         }
 
-        writePomFile(pom);
+        writePomFile(pom, null);
     }
 
     private String getErrorMsg(final String localeStr) {
@@ -406,7 +669,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
     private void install(final String targetFilename,
             final JavaPackage topLevelPackage, final Path path,
-            final Type type, String projectName) {
+            final Type type, String projectName, String folder) {
         if (StringUtils.isBlank(projectName)) {
             projectName = topLevelPackage.getFullyQualifiedPackageName()
                     .replace(".", "-");
@@ -418,36 +681,43 @@ public class CreatorOperationsImpl implements CreatorOperations {
         String destinationFile = "";
 
         if (targetFilename.endsWith(".java")) {
-            destinationFile = pathResolver.getFocusedIdentifier(
-                    path,
-                    packagePath
-                            + separatorChar
-                            + StringUtils.capitalize(topLevelPackageName
-                                    .substring(topLevelPackageName
-                                            .lastIndexOf(".") + 1))
-                            + targetFilename);
+        	
+        	if(folder != null){
+        		destinationFile =  folder + "/" + path.getDefaultLocation() + "/" + packagePath + separatorChar
+                        + StringUtils.capitalize(topLevelPackageName
+                                .substring(topLevelPackageName
+                                        .lastIndexOf(".") + 1))
+                        + targetFilename;
+        	}else{
+        		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar
+                        + StringUtils.capitalize(topLevelPackageName
+                                .substring(topLevelPackageName
+                                        .lastIndexOf(".") + 1))
+                        + targetFilename;
+        	}
         }
         else {
-            destinationFile = pathResolver.getFocusedIdentifier(path,
-                    packagePath + separatorChar + targetFilename);
+        	if(folder != null){
+        		destinationFile =  folder + "/" + path.getDefaultLocation() + "/" + packagePath + separatorChar + targetFilename;
+        	}else{
+        		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar + targetFilename;
+        	}
         }
 
-        // Different destination for assembly.xml
-        if ("assembly.xml".equals(targetFilename)) {
-            destinationFile = pathResolver.getFocusedIdentifier(path, "src"
-                    + separatorChar + "main" + separatorChar + "assembly"
-                    + separatorChar + targetFilename);
-        }
         // Adjust name for Roo Annotation
-        else if (targetFilename.startsWith("RooAnnotation")) {
-            destinationFile = pathResolver.getFocusedIdentifier(
-                    path,
-                    packagePath
-                            + separatorChar
-                            + "Roo"
-                            + StringUtils.capitalize(topLevelPackageName
-                                    .substring(topLevelPackageName
-                                            .lastIndexOf(".") + 1)) + ".java");
+        if (targetFilename.startsWith("RooAnnotation")) {
+        	
+        	if(folder != null){
+        		destinationFile =  folder + "/" + path.getDefaultLocation() + "/" + packagePath + separatorChar + "Roo"
+                        + StringUtils.capitalize(topLevelPackageName
+                                .substring(topLevelPackageName
+                                        .lastIndexOf(".") + 1)) + ".java";
+        	}else{
+        		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar + "Roo"
+                        + StringUtils.capitalize(topLevelPackageName
+                                .substring(topLevelPackageName
+                                        .lastIndexOf(".") + 1)) + ".java";
+        	}
         }
 
         if (!fileManager.exists(destinationFile)) {
@@ -544,22 +814,35 @@ public class CreatorOperationsImpl implements CreatorOperations {
      * 
      * @param pom the POM to write (required)
      */
-    private void writePomFile(final Document pom) {
-        final LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
-        final MutableFile pomFile = fileManager.createFile(pathResolver
-                .getIdentifier(rootPath, POM_XML));
+    private void writePomFile(final Document pom, String folder) {
+    	MutableFile pomFile;
+    	if(folder != null){
+    		pomFile = fileManager.createFile(folder + "/" + POM_XML);
+    	}else{
+    		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+    		pomFile = fileManager.createFile(pathResolver
+                    .getIdentifier(rootPath, POM_XML));
+    	}
+        
         XmlUtils.writeXml(pomFile.getOutputStream(), pom);
     }
 
     private void writeTextFile(final String fullPathFromRoot,
-            final String message) {
+            final String message, String folder) {
         Validate.notBlank(fullPathFromRoot,
                 "Text file name to write is required");
         Validate.notBlank(message, "Message required");
-        final String path = pathResolver.getFocusedIdentifier(Path.ROOT,
-                fullPathFromRoot);
-        final MutableFile mutableFile = fileManager.exists(path) ? fileManager
-                .updateFile(path) : fileManager.createFile(path);
+        
+        MutableFile mutableFile;
+        if(folder != null){
+        	mutableFile = fileManager.createFile(folder + "/" + fullPathFromRoot);
+        }else{
+        	String path = pathResolver.getFocusedIdentifier(Path.ROOT,
+                    fullPathFromRoot);
+        	mutableFile = fileManager.exists(path) ? fileManager
+                    .updateFile(path) : fileManager.createFile(path);
+        }
+        
         OutputStream outputStream = null;
         try {
             outputStream = mutableFile.getOutputStream();
@@ -572,4 +855,5 @@ public class CreatorOperationsImpl implements CreatorOperations {
             IOUtils.closeQuietly(outputStream);
         }
     }
+
 }
