@@ -178,14 +178,16 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	private void createObrFile(String topLevelPackageName, Type type, String folder) {
 		
 		// Getting obr location
-		String obrLocation;
-		if(folder != null){
-			obrLocation = folder + "/src/main/resources/obr.xml";			
-		}else{
-			obrLocation = "src/main/resources/obr.xml";
-		}
-    	fileManager.createFile(obrLocation);
-    	
+        if(folder != null){
+    		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+    		fileManager.createFile(pathResolver
+                    .getIdentifier(rootPath, folder + "/" + "src/main/resources/obr.xml"));
+    	}else{
+    		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+    		fileManager.createFile(pathResolver
+                    .getIdentifier(rootPath, "src/main/resources/obr.xml"));
+    	}
+		
     	final InputStream templateInputStream = FileUtils.getInputStream(
                 getClass(), type.name().toLowerCase() + "/obr-template.xml");
         final Document docXml = XmlUtils.readXml(templateInputStream);
@@ -237,8 +239,18 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
         	 }
         	 
-        	 XmlUtils.writeXml(fileManager.updateFile(obrLocation)
-                     .getOutputStream(), docXml);
+         	if(folder != null){
+         		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+        		XmlUtils.writeXml(fileManager.updateFile(pathResolver
+                        .getIdentifier(rootPath, folder + "/" + "src/main/resources/obr.xml"))
+                        .getOutputStream(), docXml);
+        		
+        	}else{
+        		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+        		XmlUtils.writeXml(fileManager.updateFile(pathResolver
+                        .getIdentifier(rootPath, "src/main/resources/obr.xml"))
+                        .getOutputStream(), docXml);
+        	}
          }
 		
 	}
@@ -486,15 +498,14 @@ public class CreatorOperationsImpl implements CreatorOperations {
     }
 
     private void copyFile(String fileName, String folder) {
-    	
-    	String file = "";
+
+    	String file;
+    	LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
     	if(folder != null){
-    		file = folder + "/src/main/resources/" + fileName;
+    		file = pathResolver.getIdentifier(rootPath, folder + "/src/main/resources/" + fileName);
     	}else{
-    		file = pathResolver.getFocusedIdentifier(
-                    Path.ROOT, fileName);
+    		file = pathResolver.getIdentifier(rootPath, fileName);
     	}
-    	
     	
     	InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -558,7 +569,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
         	 includes.appendChild(includeSuiteElement);
         }
         
-        MutableFile assemblyFile = fileManager.createFile("src/main/assembly/repo-assembly.xml");
+		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+		MutableFile assemblyFile = fileManager.createFile(pathResolver
+                    .getIdentifier(rootPath, "src/main/assembly/repo-assembly.xml"));
         
         XmlUtils.writeXml(assemblyFile.getOutputStream(), assemblyDoc);
 		
@@ -752,46 +765,26 @@ public class CreatorOperationsImpl implements CreatorOperations {
         String destinationFile = "";
 
         if (targetFilename.endsWith(".java")) {
-        	
-        	if(folder != null){
-        		destinationFile =  folder + "/" + path.getDefaultLocation() + "/" + packagePath + separatorChar
-                        + StringUtils.capitalize(topLevelPackageName
-                                .substring(topLevelPackageName
-                                        .lastIndexOf(".") + 1))
-                        + targetFilename;
-        	}else{
-        		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar
-                        + StringUtils.capitalize(topLevelPackageName
-                                .substring(topLevelPackageName
-                                        .lastIndexOf(".") + 1))
-                        + targetFilename;
-        	}
+    		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar
+                    + StringUtils.capitalize(topLevelPackageName
+                            .substring(topLevelPackageName
+                                    .lastIndexOf(".") + 1))
+                    + targetFilename;
         }
         else {
-        	if(folder != null){
-        		destinationFile =  folder + "/" + path.getDefaultLocation() + "/" + packagePath + separatorChar + targetFilename;
-        	}else{
-        		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar + targetFilename;
-        	}
+    		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar + targetFilename;
         }
 
         // Adjust name for Roo Annotation
         if (targetFilename.startsWith("RooAnnotation")) {
-        	
-        	if(folder != null){
-        		destinationFile =  folder + "/" + path.getDefaultLocation() + "/" + packagePath + separatorChar + "Roo"
-                        + StringUtils.capitalize(topLevelPackageName
-                                .substring(topLevelPackageName
-                                        .lastIndexOf(".") + 1)) + ".java";
-        	}else{
-        		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar + "Roo"
-                        + StringUtils.capitalize(topLevelPackageName
-                                .substring(topLevelPackageName
-                                        .lastIndexOf(".") + 1)) + ".java";
-        	}
+    		destinationFile =  path.getDefaultLocation() + "/" + packagePath + separatorChar + "Roo"
+                    + StringUtils.capitalize(topLevelPackageName
+                            .substring(topLevelPackageName
+                                    .lastIndexOf(".") + 1)) + ".java";
         }
-
+        
         if (!fileManager.exists(destinationFile)) {
+        	
             final InputStream templateInputStream = FileUtils.getInputStream(
                     getClass(), type.name().toLowerCase() + "/"
                             + targetFilename + "-template");
@@ -814,9 +807,20 @@ public class CreatorOperationsImpl implements CreatorOperations {
                 input = input.replace("__PROJECT_NAME__",
                         projectName.toLowerCase());
 
+                
                 // Output the file for the user
-                final MutableFile mutableFile = fileManager
-                        .createFile(destinationFile);
+                MutableFile mutableFile;
+            	if(folder != null){
+            		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+            		mutableFile = fileManager.createFile(pathResolver
+                            .getIdentifier(rootPath, folder + "/" + destinationFile));
+            	}else{
+            		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+            		mutableFile = fileManager.createFile(pathResolver
+                            .getIdentifier(rootPath, destinationFile));
+            	}
+                
+                
                 outputStream = mutableFile.getOutputStream();
                 IOUtils.write(input, outputStream);
             }
@@ -888,7 +892,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
     private void writePomFile(final Document pom, String folder) {
     	MutableFile pomFile;
     	if(folder != null){
-    		pomFile = fileManager.createFile(folder + "/" + POM_XML);
+    		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+    		pomFile = fileManager.createFile(pathResolver
+                    .getIdentifier(rootPath, folder + "/" + POM_XML));
     	}else{
     		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
     		pomFile = fileManager.createFile(pathResolver
@@ -906,13 +912,14 @@ public class CreatorOperationsImpl implements CreatorOperations {
         
         MutableFile mutableFile;
         if(folder != null){
-        	mutableFile = fileManager.createFile(folder + "/" + fullPathFromRoot);
-        }else{
-        	String path = pathResolver.getFocusedIdentifier(Path.ROOT,
-                    fullPathFromRoot);
-        	mutableFile = fileManager.exists(path) ? fileManager
-                    .updateFile(path) : fileManager.createFile(path);
-        }
+    		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+    		mutableFile = fileManager.createFile(pathResolver
+                    .getIdentifier(rootPath, folder + "/" + fullPathFromRoot));
+    	}else{
+    		LogicalPath rootPath = LogicalPath.getInstance(Path.ROOT, "");
+    		mutableFile = fileManager.createFile(pathResolver
+                    .getIdentifier(rootPath, fullPathFromRoot));
+    	}
         
         OutputStream outputStream = null;
         try {
