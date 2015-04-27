@@ -27,8 +27,8 @@ public final class __APP_NAME__MetadataProvider extends AbstractItdMetadataProvi
      * 
      * @param context the component context can be used to get access to the OSGi container (ie find out if certain bundles are active)
      */
-    protected void activate(ComponentContext context) {
-        metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+    protected void activate(ComponentContext cContext) {
+        context = cContext.getBundleContext();
         addMetadataTrigger(new JavaType(Roo__APP_NAME__.class.getName()));
     }
     
@@ -39,7 +39,6 @@ public final class __APP_NAME__MetadataProvider extends AbstractItdMetadataProvi
      * @param context the component context can be used to get access to the OSGi container (ie find out if certain bundles are active)
      */
     protected void deactivate(ComponentContext context) {
-        metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
         removeMetadataTrigger(new JavaType(Roo__APP_NAME__.class.getName()));    
     }
     

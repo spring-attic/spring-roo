@@ -73,7 +73,9 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
         // metadata item will be returned successfully
         getMetadataService().put(metadataItem);
 
-        getMetadataDependencyRegistry().notifyDownstream(metadataItem.getId());
+        if(getMetadataDependencyRegistry() != null){
+        	metadataDependencyRegistry.notifyDownstream(metadataItem.getId());
+        }
     }
     
     public MetadataDependencyRegistry getMetadataDependencyRegistry(){
@@ -83,7 +85,8 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
     			ServiceReference<?>[] references = context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				return (MetadataDependencyRegistry) context.getService(ref);
+    				metadataDependencyRegistry = (MetadataDependencyRegistry) context.getService(ref);
+    				return metadataDependencyRegistry;
     			}
     			
     			return null;
@@ -105,7 +108,8 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
     			ServiceReference<?>[] references = context.getAllServiceReferences(MetadataService.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				return (MetadataService) context.getService(ref);
+    				metadataService = (MetadataService) context.getService(ref);
+    				return metadataService;
     			}
     			
     			return null;

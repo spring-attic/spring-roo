@@ -116,7 +116,7 @@
 	                </p>
 	                <p class="rss-subscribe text-center">
 	                 <a data-original-title="Spring Roo Project Page" href="http://projects.spring.io/spring-roo/" target="_blank" data-toggle="tooltip" title="">Spring Roo</a> |
-	                  <a data-original-title="Spring Roo MarketPlace" href="http://projects.spring.io/spring-roo/marketplace.html" target="_blank" data-toggle="tooltip" title="">Marketplace</a>
+	                  <a data-original-title="Spring Roo MarketPlace" href="http://projects.spring.io/spring-roo/marketplace" target="_blank" data-toggle="tooltip" title="">Marketplace</a>
 	                </p>
 	            </div>
 	        </div>

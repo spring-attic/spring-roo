@@ -178,7 +178,12 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	private void createObrFile(String topLevelPackageName, Type type, String folder) {
 		
 		// Getting obr location
-    	String obrLocation = folder + "/src/main/resources/obr.xml";
+		String obrLocation;
+		if(folder != null){
+			obrLocation = folder + "/src/main/resources/obr.xml";			
+		}else{
+			obrLocation = "src/main/resources/obr.xml";
+		}
     	fileManager.createFile(obrLocation);
     	
     	final InputStream templateInputStream = FileUtils.getInputStream(
