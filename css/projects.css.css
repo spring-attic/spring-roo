@@ -755,3 +755,18 @@
   color: #333;
   text-decoration: none;
  }
+
+ /** sidebar **/
+ .right-pane-widget--container.marketplace li {
+  display: list-item;
+  padding: 12px 6.2%;
+  line-height: 16px;
+  border-top: none;
+}
+
+ .right-pane-widget--container.marketplace p {
+  font-size: 14px;
+}
+ .right-pane-widget--container.marketplace code {
+   white-space: inherit;
+ }
