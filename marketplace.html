@@ -1,6 +1,7 @@
 ---
 # The name of your project
 title: Spring Roo Marketplace
+permalink: marketplace/
 ---
 
 <!DOCTYPE HTML>
@@ -17,7 +18,7 @@ a place to find and keep track on third party addons and Roo Addon Suites.
 
 <a name="roo-addon-suites"></a>
 
-##  Roo Addon Suites
+## Roo Addon Suites
 
 A *Roo Addon Suite* is a great way to package and distribute a set of add-ons
 together, for example if you want to distribute Roo custom distributions.
@@ -44,31 +45,49 @@ Thanks to the awesome community behind Spring Roo!
 {% capture related_resources %}
 
 
-## Simple Add-Ons
+## Getting Started
 
-This chapter will provide an introduction to Spring Roo add-on development.
-The intention is to provide a step-by-step guide that walks the developer
-from zero code to a fully deployed and published add-on that is immediately
-available to all Spring Roo users.
+Spring Roo Addon Suites make it easy to manage 3rd party add-ons. To install a Roo Addon Suite:
 
+1. Run Spring Roo 2.0
+1. Install the URL of the repository that contains the Roo Addon Suite:
+  ```
+  roo> addon repository add --url http://host/repo/index.xml
+  ```
 
-## Project Setup
+  Look the table on the left, the _REPOSITORY_ column contains the URL of the repository for each Roo Addon Suite published in this marketplace. Just copy it and feel free to use the URL in the command above.
 
-* Feature 1
-* [Feature 2](#)
-* Feature 3
-* Feature 4
-* ...
+1. To know how many Roo Addon Suites contains the repository, you run the command below:
+  ```
+  roo> addon suite list --repository http://host/repo/index.xml
+  ```
 
-## Fast Creation
+  You will see the list of Roo Addon Suite symbolic names available in that repository, something like:
 
-* [Tutorial 1]({{site.main_site_url}}/guides/tutorials/rest)
-* [Tutorial 2]({{site.main_site_url}}/guides/tutorials/other-2)
-* [Tutorial n]({{site.main_site_url}}/guides/tutorials/other-3)
+  ```
+  Getting all 'Roo Addon Suites' located on 'http://host/repo/index.xml' repository...
 
+     [SYMBOLIC NAME OF THE ROO ADDON SUITE 1]
+     [SYMBOLIC NAME OF THE ROO ADDON SUITE 2]
 
-* http://docs.spring.io/spring-roo/reference/html/simple-addons.html#d4e3384
+  2 Roo Addon Suites were found on 'http://host/repo/index.xml' repository
+  ```
 
+1. Then install the Roo Addon Suite as follows:
+  ```
+  roo> addon suite install name --symbolicName [SYMBOLIC NAME OF THE ROO ADDON SUITE]
+  ```
+
+  On success installation you will see something like:
+
+  ```
+  Installing subsystem...
+  Subsystem successfully installed: [SYMBOLIC NAME OF THE ROO ADDON SUITE]; id:
+  ```
+
+Now you have new addons and commands in Roo, run help to see them.
+
+Enjoy with Roo!
 
 {% endcapture %}
 
