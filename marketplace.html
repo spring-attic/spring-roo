@@ -56,6 +56,7 @@ Spring Roo Addon Suites make it easy to manage 3rd party add-ons. To install a R
   ```
   roo> addon repository add --url http://host/repo/index.xml
   ```
+  
   Look the table on the left, the _REPOSITORY_ column contains the URL of the repository for each Roo Addon Suite published in this marketplace. Just copy it and feel free to use the URL in the command above.
   
 3. To know how many Roo Addon Suites contains the repository, you run the command below:
@@ -65,6 +66,7 @@ Spring Roo Addon Suites make it easy to manage 3rd party add-ons. To install a R
   ```
   
   You will see the list of Roo Addon Suite symbolic names available in that repository, something like:
+  
   ```
   Getting all 'Roo Addon Suites' located on 'http://host/repo/index.xml' repository...
 
@@ -75,14 +77,18 @@ Spring Roo Addon Suites make it easy to manage 3rd party add-ons. To install a R
   ```
   
 4. Then install the Roo Addon Suite as follows:
+
   ```
   roo> addon suite install name --symbolicName [SYMBOLIC NAME OF THE ROO ADDON SUITE]
   ```
+  
   On success installation you will see something like:
+  
   ```
   Installing subsystem...
   Subsystem successfully installed: [SYMBOLIC NAME OF THE ROO ADDON SUITE]; id:
   ```
+  
   Now you have new addons and commands in Roo, run help to see them.
 
 Enjoy with Roo!
