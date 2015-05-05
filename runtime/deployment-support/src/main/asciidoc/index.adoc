@@ -81,7 +81,7 @@ Kit (JDK) and operating systems in the
 link:#upgrade-known-issues[known issues section] of this
 documentation. We always recommend you use the latest version of Java
 and Maven that are available for your platform. We also recommend that
-you use Spring Tool Suite (STS), which is our free Eclipse-based IDE
+you use http://spring.io/tools/sts[Spring Tool Suite (STS)], which is our free Eclipse-based IDE
 that includes a number of features that make working with Roo even
 easier (you can of course use Roo with normal Eclipse or without an
 IDE at all if you prefer)
@@ -527,7 +527,7 @@ next. Let's do that:
 
 [options=nowrap]
 ----
-roo> project --topLevelPackage com.tenminutes
+roo> project setup --topLevelPackage com.tenminutes
 Created /home/balex/ten-minutes/pom.xml
 Created SRC_MAIN_JAVA
 Created SRC_MAIN_RESOURCES
@@ -811,7 +811,7 @@ To create an actual project we can use the
 
 [options=nowrap]
 ----
-roo> project --topLevelPackage com.springsource.roo.pizzashop
+roo> project setup --topLevelPackage com.springsource.roo.pizzashop
 Created ROOT/pom.xml
 Created SRC_MAIN_RESOURCES
 Created SRC_MAIN_RESOURCES/log4j.properties
@@ -1590,7 +1590,7 @@ following commands and note the console output:
 
 [options=nowrap,subs=quotes]
 ----
-roo> *project --topLevelPackage com.aspectj.rocks*
+roo> *project setup --topLevelPackage com.aspectj.rocks*
 roo> *jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE*
 roo> *entity jpa --class ~.Hello*
 Created SRC_MAIN_JAVA/com/aspectj/rocks
@@ -2448,7 +2448,7 @@ Here's a quick example of the contents:
 [options=nowrap]
 ----
 // Spring Roo ENGINEERING BUILD [rev 553:554M] log opened at 2009-12-31 08:10:58
-project --topLevelPackage roo.shell.is.neat
+project setup --topLevelPackage roo.shell.is.neat
 // [failed] jpa setup --database DELIBERATE_ERROR --provider HIBERNATE
 jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE
 quit
@@ -3300,7 +3300,7 @@ those with "`addon`" as the next package name segment, as in that case
 they'd be a "base add-on"). Roo core provides very few commands, and
 whatever commands it provides are generally internal
 infrastructure-related features (like
-"link:#command-index-poll-status[poll status]" or
+"link:#command-index-poll-status[project scan status]" or
 "link:#command-index-metadata-for-id[metadata for id]") or sometimes
 aggregate the features provided by several individual base add-ons (e.g.
 pass:["]`link:#command-index-entity-jpa[entity jpa]
@@ -7568,14 +7568,14 @@ placeholders by using “**$\{argumentname}**”.
 [options=nowrap]
 ----
 tailor activate --name mywebstyle
-project --topLevelPackage com.foo.sample --projectName myapp
+project setup --topLevelPackage com.foo.sample --projectName myapp
 ----
 
 *Will result in:*
 
 [options=nowrap]
 ----
-project --topLevelPackage com.foo.sample --projectName mywebapp --packaging pom
+project setup --topLevelPackage com.foo.sample --projectName mywebapp --packaging pom
 module create --moduleName myapp-domain --topLevelPackage com.foo.sample
 module focus --moduleName ~
 module create --moduleName myapp-web --topLevelPackage com.foo.sample --packaging war
@@ -10399,7 +10399,7 @@ Creates a new Maven project
 
 [options=nowrap]
 ----
-project --topLevelPackage
+project setup --topLevelPackage
 ----
 
 --topLevelPackage::
@@ -10709,23 +10709,23 @@ development mode
   Activates development mode; default: 'true'
 
 [[command-index-poll-now]]
-==== poll now
+==== project scan now
 
 Perform a manual file system poll
 
 --------
-poll now
+project scan now
 --------
 
 This command does not accept any options.
 
 [[command-index-poll-speed]]
-==== poll speed
+==== project scan speed
 
 Changes the file system polling speed
 
 ---------------
-poll speed --ms
+project scan speed --ms
 ---------------
 
 --ms::
@@ -10733,12 +10733,12 @@ poll speed --ms
   (mandatory)
 
 [[command-index-poll-status]]
-==== poll status
+==== project scan status
 
 Display file system polling information
 
 -----------
-poll status
+project scan status
 -----------
 
 This command does not accept any options.
