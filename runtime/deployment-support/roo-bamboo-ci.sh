@@ -175,6 +175,8 @@ if [[ ! "$EXITED" = "0" ]]; then
     l_error "Maven main build failed (exit code $EXITED)." >&2; exit 1;
 fi
 
+pushd $ROO_HOME/runtime/deployment-support &>/dev/null
+
 # Build (and test if user used -T or -t) the assembly
 ./roo-bamboo-deploy-dist.sh -c assembly -s $SUFFIX $ROO_DEPLOY_OPTS $TEST
 EXITED=$?
