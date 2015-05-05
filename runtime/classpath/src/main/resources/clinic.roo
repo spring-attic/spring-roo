@@ -1,4 +1,4 @@
-project --topLevelPackage com.springsource.petclinic
+project setup --topLevelPackage com.springsource.petclinic
 
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
