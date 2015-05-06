@@ -665,18 +665,18 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
                 
                 // ROO-3622: Validate if version change
             	if(!isDifferentVersion()){
-            		// Publishing pendant events if needed
+            		// Publishing pending events if needed
             		if(!eventsPendingToPublish.isEmpty()){
             			publish(eventsPendingToPublish);
-            			// Clear events pendant to publish
+            			// Clear events pending to publish
             			eventsPendingToPublish.clear();
             		}
             		publish(eventsToPublish);
             		
             	}else{
-            		for(FileEvent pendantEvent : eventsToPublish){
-            			if(eventsPendingToPublish.indexOf(pendantEvent) == -1){
-            				eventsPendingToPublish.add(pendantEvent);
+            		for(FileEvent event : eventsToPublish){
+            			if(eventsPendingToPublish.indexOf(event) == -1){
+            				eventsPendingToPublish.add(event);
             			}
             		}
             		

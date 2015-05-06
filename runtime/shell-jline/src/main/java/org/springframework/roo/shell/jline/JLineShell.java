@@ -568,10 +568,10 @@ public abstract class JLineShell extends AbstractShell implements
 			if (isDifferentVersion()) {
 				logger.warning("WARNING: You are using Spring Roo "
 						+ versionInfoWithoutGit() + ", but "
-						+ "project was generated using "
-						+ getRooProjectVersion()
-						+ ". If you continue with the execution "
-						+ "your application may not work properly.");
+						+ "project was generated using Spring Roo "
+						+ getRooProjectVersion() + ".");
+				logger.warning("If you continue with the execution "
+						+ "your project might suffer some changes.");
 				promptConfirmLoop();
 				promptLoop();
 			} else {

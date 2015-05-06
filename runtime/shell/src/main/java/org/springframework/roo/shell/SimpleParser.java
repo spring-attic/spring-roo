@@ -4,8 +4,15 @@ import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
 import static org.springframework.roo.shell.CliOption.EMPTY;
 import static org.springframework.roo.shell.CliOption.NULL;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,7 +26,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -29,6 +39,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.CollectionUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Default implementation of {@link Parser}.
@@ -198,6 +211,11 @@ public class SimpleParser implements Parser {
     public int completeAdvanced(String buffer, int cursor,
             final List<Completion> candidates) {
         synchronized (mutex) {
+        	
+        	// ROO-3622: Validate if version change
+			if (isDifferentVersion()) {
+				return 0;
+			}
         	
         	// Loading converters if needed
         	loadConverters();
@@ -1206,5 +1224,86 @@ public class SimpleParser implements Parser {
             return rooBundleActivator;
         }
 
+    }
+    
+    private boolean isDifferentVersion() {
+		String rooVersion = getRooProjectVersion();
+
+		if ("UNKNOWN".equals(rooVersion)) {
+			return false;
+		}
+
+		return !rooVersion.equals(versionInfoWithoutGit());
+	}
+    
+    private String getRooProjectVersion() {
+		String homePath = new File(".").getPath();
+		String pomPath = homePath + "/pom.xml";
+		File pom = new File(pomPath);
+		try {
+			if (pom.exists()) {
+				InputStream is = new FileInputStream(pom);
+				Document docXml = XmlUtils.readXml(is);
+				Element document = docXml.getDocumentElement();
+				Element rooVersionElement = XmlUtils.findFirstElement(
+						"properties/roo.version", document);
+				String rooVersion = rooVersionElement.getTextContent();
+
+				return rooVersion;
+			}
+
+			return "UNKNOWN";
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return "";
+	}
+    
+    public static String versionInfoWithoutGit() {
+        // Try to determine the bundle version
+        String bundleVersion = null;
+        JarFile jarFile = null;
+        try {
+            final URL classContainer = AbstractShell.class
+                    .getProtectionDomain().getCodeSource().getLocation();
+            if (classContainer.toString().endsWith(".jar")) {
+                // Attempt to obtain the "Bundle-Version" version from the
+                // manifest
+                jarFile = new JarFile(new File(classContainer.toURI()), false);
+                final ZipEntry manifestEntry = jarFile
+                        .getEntry("META-INF/MANIFEST.MF");
+                final Manifest manifest = new Manifest(
+                        jarFile.getInputStream(manifestEntry));
+                bundleVersion = manifest.getMainAttributes().getValue(
+                        "Bundle-Version");
+            }
+        }
+        catch (final IOException ignoreAndMoveOn) {
+        }
+        catch (final URISyntaxException ignoreAndMoveOn) {
+        }
+        finally {
+            if (jarFile != null) {
+                try {
+                    jarFile.close();
+                }
+                catch (final IOException ignored) {
+                }
+            }
+        }
+
+        final StringBuilder sb = new StringBuilder();
+
+        if (bundleVersion != null) {
+            sb.append(bundleVersion);
+        }
+
+        if (sb.length() == 0) {
+            sb.append("UNKNOWN VERSION");
+        }
+
+        return sb.toString();
     }
 }
