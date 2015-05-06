@@ -1,7 +1,12 @@
 package org.springframework.roo.file.monitor.polling;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +20,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
 
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
@@ -25,7 +34,12 @@ import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
+import org.springframework.roo.shell.AbstractShell;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * A simple polling-based {@link FileMonitorService}.
@@ -47,9 +61,13 @@ import org.springframework.roo.support.util.FileUtils;
  * deletion was first detected.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
+	
+	protected final static Logger LOGGER = HandlerUtils
+			.getLogger(PollingFileMonitorService.class);
 
     private final Set<String> allFiles = new HashSet<String>();
     private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
@@ -60,7 +78,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
     private final Set<String> notifyDeleted = new HashSet<String>();
     private final Map<MonitoringRequest, Map<File, Long>> priorExecution = new WeakHashMap<MonitoringRequest, Map<File, Long>>();
     private final Set<MonitoringRequest> requests = new LinkedHashSet<MonitoringRequest>();
-
+    private final List<FileEvent> eventsPendingToPublish = new ArrayList<FileEvent>();
+    
     public final void add(final FileEventListener e) {
         synchronized (lock) {
             fileEventListeners.add(e);
@@ -643,13 +662,114 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
                             file.lastModified()), FileOperation.UPDATED, null));
                 }
                 notifyChanged.clear();
-                publish(eventsToPublish);
+                
+                // ROO-3622: Validate if version change
+            	if(!isDifferentVersion()){
+            		// Publishing pendant events if needed
+            		if(!eventsPendingToPublish.isEmpty()){
+            			publish(eventsPendingToPublish);
+            			// Clear events pendant to publish
+            			eventsPendingToPublish.clear();
+            		}
+            		publish(eventsToPublish);
+            		
+            	}else{
+            		for(FileEvent pendantEvent : eventsToPublish){
+            			if(eventsPendingToPublish.indexOf(pendantEvent) == -1){
+            				eventsPendingToPublish.add(pendantEvent);
+            			}
+            		}
+            		
+            		
+            	}
 
                 changes += eventsToPublish.size();
             }
 
             return changes;
         }
+    }
+    
+    private String getRooProjectVersion(){
+    	String homePath = new File(".").getPath();
+    	String pomPath = homePath + "/pom.xml";
+    	File pom = new File(pomPath);
+    	try {
+    		if(pom.exists()){
+    			InputStream is = new FileInputStream(pom);
+    			Document docXml = XmlUtils.readXml(is);
+    			Element document = docXml.getDocumentElement();
+    			Element rooVersionElement = XmlUtils.findFirstElement(
+    	                 "properties/roo.version", document);
+    			String rooVersion = rooVersionElement.getTextContent();
+    			
+    			return rooVersion;
+    		}
+    		
+    		return "UNKNOWN";
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+    	
+    	return "";
+    }
+
+    
+    private boolean isDifferentVersion() {
+    	String rooVersion = getRooProjectVersion();
+    	
+    	if("UNKNOWN".equals(rooVersion)){
+    		return false;
+    	}
+    	
+		return !rooVersion.equals(versionInfoWithoutGit());
+	}
+    
+    public static String versionInfoWithoutGit() {
+        // Try to determine the bundle version
+        String bundleVersion = null;
+        JarFile jarFile = null;
+        try {
+            final URL classContainer = AbstractShell.class
+                    .getProtectionDomain().getCodeSource().getLocation();
+            if (classContainer.toString().endsWith(".jar")) {
+                // Attempt to obtain the "Bundle-Version" version from the
+                // manifest
+                jarFile = new JarFile(new File(classContainer.toURI()), false);
+                final ZipEntry manifestEntry = jarFile
+                        .getEntry("META-INF/MANIFEST.MF");
+                final Manifest manifest = new Manifest(
+                        jarFile.getInputStream(manifestEntry));
+                bundleVersion = manifest.getMainAttributes().getValue(
+                        "Bundle-Version");
+            }
+        }
+        catch (final IOException ignoreAndMoveOn) {
+        }
+        catch (final URISyntaxException ignoreAndMoveOn) {
+        }
+        finally {
+            if (jarFile != null) {
+                try {
+                    jarFile.close();
+                }
+                catch (final IOException ignored) {
+                }
+            }
+        }
+
+        final StringBuilder sb = new StringBuilder();
+
+        if (bundleVersion != null) {
+            sb.append(bundleVersion);
+        }
+
+        if (sb.length() == 0) {
+            sb.append("UNKNOWN VERSION");
+        }
+
+        return sb.toString();
     }
 
     public int scanNotified() {

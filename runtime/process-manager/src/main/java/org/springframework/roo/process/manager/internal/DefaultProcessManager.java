@@ -281,7 +281,7 @@ public class DefaultProcessManager extends
             }
             setProcessManagerStatus(ProcessManagerStatus.COMPLETING_STARTUP);
             try {
-                // Register the initial monitoring request
+            	// Register the initial monitoring request
                 doTransactionally(new MonitoringRequestCommand(
                         fileMonitorService,
                         MonitoringRequest

@@ -27,10 +27,7 @@ import java.util.zip.ZipEntry;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
@@ -110,6 +107,52 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
             sb.append("[rev ");
             sb.append(gitCommitHash.substring(0, 7));
             sb.append("]");
+        }
+
+        if (sb.length() == 0) {
+            sb.append("UNKNOWN VERSION");
+        }
+
+        return sb.toString();
+    }
+    
+    public static String versionInfoWithoutGit() {
+        // Try to determine the bundle version
+        String bundleVersion = null;
+        JarFile jarFile = null;
+        try {
+            final URL classContainer = AbstractShell.class
+                    .getProtectionDomain().getCodeSource().getLocation();
+            if (classContainer.toString().endsWith(".jar")) {
+                // Attempt to obtain the "Bundle-Version" version from the
+                // manifest
+                jarFile = new JarFile(new File(classContainer.toURI()), false);
+                final ZipEntry manifestEntry = jarFile
+                        .getEntry("META-INF/MANIFEST.MF");
+                final Manifest manifest = new Manifest(
+                        jarFile.getInputStream(manifestEntry));
+                bundleVersion = manifest.getMainAttributes().getValue(
+                        "Bundle-Version");
+            }
+        }
+        catch (final IOException ignoreAndMoveOn) {
+        }
+        catch (final URISyntaxException ignoreAndMoveOn) {
+        }
+        finally {
+            if (jarFile != null) {
+                try {
+                    jarFile.close();
+                }
+                catch (final IOException ignored) {
+                }
+            }
+        }
+
+        final StringBuilder sb = new StringBuilder();
+
+        if (bundleVersion != null) {
+            sb.append(bundleVersion);
         }
 
         if (sb.length() == 0) {
@@ -531,6 +574,15 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher
     public void setPromptPath(final String path) {
         shellPrompt = (StringUtils.isNotBlank(path) ? path + " " : "")
                 + ROO_PROMPT;
+    }
+    
+    /**
+     * This method changes setPromptPath with a new one
+     * 
+     * @param path
+     */
+    public void setRooPrompt(final String prompt){
+    	shellPrompt = StringUtils.isNotBlank(prompt) ? prompt + "> " : ROO_PROMPT;
     }
 
     /**
