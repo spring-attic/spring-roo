@@ -61,9 +61,11 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 		bundlesToInstall = new ArrayList<ObrBundle>();
 		bundleCache = new HashMap<String, ObrBundle>();
 		searchResultCache = new HashMap<String, ObrBundle>();
+		// Add default repositories
+		addDefaultRepositories();
 		// Populate Repositories
 		populateRepositories();
-		// Populate Bundle Chache
+		// Populate Bundle Cache
 		populateBundleCache();
 	}
 
@@ -128,6 +130,19 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 
 		return bundlesToInstall;
 
+	}
+	
+	private void addDefaultRepositories(){
+		
+		// Getting wrapping repository url
+		String wrappingRepoUrl = context.getProperty(
+                "wrapping.repository.url");
+		try{
+			getRepositoryAdmin().addRepository(wrappingRepoUrl);
+			
+		}catch(Exception e){
+			LOGGER.log(Level.WARNING, "WARNING: Wrapping repository could not be installed");
+		}
 	}
 	
 	/**
