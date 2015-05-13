@@ -7,6 +7,7 @@ import org.springframework.roo.felix.BundleSymbolicName;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.support.api.AddOnSearch.SearchType;
 
 /**
  * Commands to manage Addons on OBR repositories
@@ -57,8 +58,7 @@ public class ObrAddOnCommands implements CommandMarker {
     public void search(
             @CliOption(key = "requiresCommand", mandatory = true, help = "Only display add-ons in search results that offer this command") final String requiresCommand) {
 
-    	operations.searchAddOns(false, null, false, 1, 99, false,
-                false, false, requiresCommand);
+    	operations.searchAddOns(requiresCommand, SearchType.ADDON);
     }
 
 }

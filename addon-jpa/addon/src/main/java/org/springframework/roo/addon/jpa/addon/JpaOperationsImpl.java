@@ -9,7 +9,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 import static org.springframework.roo.model.SpringJavaType.JPA_TRANSACTION_MANAGER;
 import static org.springframework.roo.model.SpringJavaType.LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN;
-import static org.springframework.roo.model.SpringJavaType.LOCAL_ENTITY_MANAGER_FACTORY_BEAN;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,8 +35,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -51,7 +53,6 @@ import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.LogicalPath;
@@ -70,18 +71,12 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import org.osgi.service.component.ComponentContext;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.springframework.roo.support.logging.HandlerUtils;
-
 /**
  * Implementation of {@link JpaOperations}.
  * 
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -161,12 +156,10 @@ public class JpaOperationsImpl implements JpaOperations {
         final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
         final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
 
-        if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
-            updateEclipsePlugin(false);
-            updateDataNucleusPlugin(false);
-            projectOperations.updateDependencyScope(moduleName,
-                    JSTL_IMPL_DEPENDENCY, null);
-        }
+        updateEclipsePlugin(false);
+        updateDataNucleusPlugin(false);
+        projectOperations.updateDependencyScope(moduleName,
+                JSTL_IMPL_DEPENDENCY, null);
 
         updateApplicationContext(ormProvider, jdbcDatabase, jndi,
                 transactionManager, persistenceUnit);
@@ -608,57 +601,13 @@ public class JpaOperationsImpl implements JpaOperations {
         final boolean loggingPropertiesPathExists = fileManager
                 .exists(loggingPropertiesPath);
 
-        if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
-            if (appenginePathExists) {
-                fileManager.delete(appenginePath,
-                        "database is " + jdbcDatabase.name());
-            }
-            if (loggingPropertiesPathExists) {
-                fileManager.delete(loggingPropertiesPath, "database is "
-                        + jdbcDatabase.name());
-            }
-            return;
-        }
-
-        final InputStream inputStream;
         if (appenginePathExists) {
-            inputStream = fileManager.getInputStream(appenginePath);
+            fileManager.delete(appenginePath,
+                    "database is " + jdbcDatabase.name());
         }
-        else {
-            inputStream = FileUtils.getInputStream(getClass(),
-                    "appengine-web-template.xml");
-        }
-        final Document appengine = XmlUtils.readXml(inputStream);
-
-        final Element root = appengine.getDocumentElement();
-        final Element applicationElement = XmlUtils.findFirstElement(
-                "/appengine-web-app/application", root);
-        final String textContent = StringUtils.defaultIfEmpty(applicationId,
-                getProjectName(moduleName));
-        if (!textContent.equals(applicationElement.getTextContent())) {
-            applicationElement.setTextContent(textContent);
-            fileManager.createOrUpdateTextFileIfRequired(appenginePath,
-                    XmlUtils.nodeToString(appengine), false);
-            LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
-        }
-
-        if (!loggingPropertiesPathExists) {
-            InputStream templateInputStream = null;
-            OutputStream outputStream = null;
-            try {
-                templateInputStream = FileUtils.getInputStream(getClass(),
-                        "logging.properties");
-                outputStream = fileManager.createFile(loggingPropertiesPath)
-                        .getOutputStream();
-                IOUtils.copy(templateInputStream, outputStream);
-            }
-            catch (final IOException e) {
-                throw new IllegalStateException(e);
-            }
-            finally {
-                IOUtils.closeQuietly(templateInputStream);
-                IOUtils.closeQuietly(outputStream);
-            }
+        if (loggingPropertiesPathExists) {
+            fileManager.delete(loggingPropertiesPath, "database is "
+                    + jdbcDatabase.name());
         }
     }
 
@@ -968,29 +917,16 @@ public class JpaOperationsImpl implements JpaOperations {
         entityManagerFactory = appCtx.createElement("bean");
         entityManagerFactory.setAttribute("id", "entityManagerFactory");
 
-        switch (jdbcDatabase) {
-        case GOOGLE_APP_ENGINE:
-            entityManagerFactory.setAttribute("class",
-                    LOCAL_ENTITY_MANAGER_FACTORY_BEAN
-                            .getFullyQualifiedTypeName());
-            entityManagerFactory
-                    .appendChild(createPropertyElement("persistenceUnitName",
-                            StringUtils.defaultIfEmpty(persistenceUnit,
-                                    GAE_PERSISTENCE_UNIT_NAME), appCtx));
-            break;
-        default:
-            entityManagerFactory.setAttribute("class",
-                    LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN
-                            .getFullyQualifiedTypeName());
-            entityManagerFactory
-                    .appendChild(createPropertyElement("persistenceUnitName",
-                            StringUtils.defaultIfEmpty(persistenceUnit,
-                                    DEFAULT_PERSISTENCE_UNIT), appCtx));
-            if (ormProvider != OrmProvider.DATANUCLEUS) {
-                entityManagerFactory.appendChild(createRefElement("dataSource",
-                        "dataSource", appCtx));
-            }
-            break;
+        entityManagerFactory.setAttribute("class",
+                LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN
+                        .getFullyQualifiedTypeName());
+        entityManagerFactory
+                .appendChild(createPropertyElement("persistenceUnitName",
+                        StringUtils.defaultIfEmpty(persistenceUnit,
+                                DEFAULT_PERSISTENCE_UNIT), appCtx));
+        if (ormProvider != OrmProvider.DATANUCLEUS) {
+            entityManagerFactory.appendChild(createRefElement("dataSource",
+                    "dataSource", appCtx));
         }
 
         root.appendChild(entityManagerFactory);
@@ -1039,12 +975,6 @@ public class JpaOperationsImpl implements JpaOperations {
         projectOperations.addBuildPlugins(moduleName, requiredPlugins);
         projectOperations.removeBuildPlugins(moduleName, redundantPlugins);
 
-        if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {
-            updateEclipsePlugin(true);
-            updateDataNucleusPlugin(true);
-            projectOperations.updateDependencyScope(moduleName,
-                    JSTL_IMPL_DEPENDENCY, DependencyScope.PROVIDED);
-        }
     }
 
     private void updateDatabaseDotComConfigProperties(
@@ -1067,35 +997,10 @@ public class JpaOperationsImpl implements JpaOperations {
                 Path.SRC_MAIN_RESOURCES, persistenceUnit + ".properties");
         final boolean configExists = fileManager.exists(configPath);
 
-        if (jdbcDatabase != JdbcDatabase.DATABASE_DOT_COM) {
-            if (configExists) {
-                fileManager.delete(configPath,
-                        "database is " + jdbcDatabase.name());
-            }
-            return;
+        if (configExists) {
+            fileManager.delete(configPath,
+                    "database is " + jdbcDatabase.name());
         }
-
-        final String connectionString = getConnectionString(jdbcDatabase,
-                hostName, null /* databaseName */, moduleName).replace(
-                "USER_NAME",
-                StringUtils.defaultIfEmpty(userName, "${userName}"))
-                .replace("PASSWORD",
-                        StringUtils.defaultIfEmpty(password, "${password}"));
-        final Properties props = readProperties(configPath, configExists,
-                "database-dot-com-template.properties");
-
-        final boolean hasChanged = !props.get("url").equals(
-                StringUtils.stripToEmpty(connectionString));
-        if (!hasChanged) {
-            return;
-        }
-
-        props.put("url", StringUtils.stripToEmpty(connectionString));
-
-        writeProperties(configPath, configExists, props);
-
-        LOGGER.warning("Please update your database details in src/main/resources/"
-                + persistenceUnit + ".properties.");
     }
 
     private void updateDatabaseProperties(final OrmProvider ormProvider,
@@ -1483,8 +1388,7 @@ public class JpaOperationsImpl implements JpaOperations {
                     .findFirstElement(
                             PERSISTENCE_UNIT
                                     + "[@name = '"
-                                    + (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE ? GAE_PERSISTENCE_UNIT_NAME
-                                            : DEFAULT_PERSISTENCE_UNIT) + "']",
+                                    + DEFAULT_PERSISTENCE_UNIT + "']",
                             persistenceElement);
         }
 
@@ -1502,28 +1406,11 @@ public class JpaOperationsImpl implements JpaOperations {
 
         // Add provider element
         final Element provider = persistence.createElement("provider");
-        switch (jdbcDatabase) {
-        case GOOGLE_APP_ENGINE:
-            persistenceUnitElement
-                    .setAttribute("name", StringUtils.defaultIfEmpty(
-                            persistenceUnit, GAE_PERSISTENCE_UNIT_NAME));
-            persistenceUnitElement.removeAttribute("transaction-type");
-            provider.setTextContent(ormProvider.getAdapter());
-            break;
-        case DATABASE_DOT_COM:
-            persistenceUnitElement.setAttribute("name", StringUtils
-                    .defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT));
-            persistenceUnitElement.removeAttribute("transaction-type");
-            provider.setTextContent("com.force.sdk.jpa.PersistenceProviderImpl");
-            break;
-        default:
-            persistenceUnitElement.setAttribute("name", StringUtils
-                    .defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT));
-            persistenceUnitElement.setAttribute("transaction-type",
-                    "RESOURCE_LOCAL");
-            provider.setTextContent(ormProvider.getAdapter());
-            break;
-        }
+        persistenceUnitElement.setAttribute("name", StringUtils
+                .defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT));
+        persistenceUnitElement.setAttribute("transaction-type",
+                "RESOURCE_LOCAL");
+        provider.setTextContent(ormProvider.getAdapter());
         persistenceUnitElement.appendChild(provider);
 
         // Add properties
@@ -1601,63 +1488,35 @@ public class JpaOperationsImpl implements JpaOperations {
         case DATANUCLEUS:
             String connectionString = getConnectionString(jdbcDatabase,
                     hostName, databaseName, moduleName);
-            switch (jdbcDatabase) {
-            case GOOGLE_APP_ENGINE:
-                properties
-                        .appendChild(createPropertyElement(
-                                "datanucleus.NontransactionalRead", "true",
-                                persistence));
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.NontransactionalWrite", "true",
-                        persistence));
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.autoCreateSchema", "false", persistence));
-                break;
-            case DATABASE_DOT_COM:
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.storeManagerType", "force", persistence));
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.Optimistic", "false", persistence));
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.datastoreTransactionDelayOperations",
-                        "true", persistence));
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.autoCreateSchema",
-                        Boolean.toString(!isDbreProject), persistence));
-                break;
-            default:
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.ConnectionDriverName",
-                        jdbcDatabase.getDriverClassName(), persistence));
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.autoCreateSchema",
-                        Boolean.toString(!isDbreProject), persistence));
-                connectionString = connectionString.replace(
-                        "TO_BE_CHANGED_BY_ADDON",
-                        projectOperations.getProjectName(moduleName));
-                if (jdbcDatabase.getKey().equals("HYPERSONIC")
-                        || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY
-                        || jdbcDatabase == JdbcDatabase.SYBASE) {
-                    userName = StringUtils.defaultIfEmpty(userName, "sa");
-                }
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.storeManagerType", "rdbms", persistence));
+            properties.appendChild(createPropertyElement(
+                    "datanucleus.ConnectionDriverName",
+                    jdbcDatabase.getDriverClassName(), persistence));
+            properties.appendChild(createPropertyElement(
+                    "datanucleus.autoCreateSchema",
+                    Boolean.toString(!isDbreProject), persistence));
+            connectionString = connectionString.replace(
+                    "TO_BE_CHANGED_BY_ADDON",
+                    projectOperations.getProjectName(moduleName));
+            if (jdbcDatabase.getKey().equals("HYPERSONIC")
+                    || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY
+                    || jdbcDatabase == JdbcDatabase.SYBASE) {
+                userName = StringUtils.defaultIfEmpty(userName, "sa");
             }
+            properties.appendChild(createPropertyElement(
+                    "datanucleus.storeManagerType", "rdbms", persistence));
 
-            if (jdbcDatabase != JdbcDatabase.DATABASE_DOT_COM) {
-                // These are specified in the connection properties file
-                properties.appendChild(createPropertyElement(
-                        "datanucleus.ConnectionURL", connectionString,
-                        persistence));
-                properties
-                        .appendChild(createPropertyElement(
-                                "datanucleus.ConnectionUserName", userName,
-                                persistence));
-                properties
-                        .appendChild(createPropertyElement(
-                                "datanucleus.ConnectionPassword", password,
-                                persistence));
-            }
+            // These are specified in the connection properties file
+            properties.appendChild(createPropertyElement(
+                    "datanucleus.ConnectionURL", connectionString,
+                    persistence));
+            properties
+                    .appendChild(createPropertyElement(
+                            "datanucleus.ConnectionUserName", userName,
+                            persistence));
+            properties
+                    .appendChild(createPropertyElement(
+                            "datanucleus.ConnectionPassword", password,
+                            persistence));
 
             properties.appendChild(createPropertyElement(
                     "datanucleus.autoCreateTables",
@@ -1682,8 +1541,7 @@ public class JpaOperationsImpl implements JpaOperations {
         fileManager.createOrUpdateTextFileIfRequired(persistencePath,
                 XmlUtils.nodeToString(persistence), false);
 
-        if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE
-                && ormProvider == OrmProvider.DATANUCLEUS) {
+        if (ormProvider == OrmProvider.DATANUCLEUS) {
             LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
         }
     }

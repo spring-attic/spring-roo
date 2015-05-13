@@ -11,13 +11,11 @@ import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.AbstractShell;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.SimpleParser;
 import org.springframework.roo.support.api.AddOnSearch;
+import org.springframework.roo.support.api.AddOnSearch.SearchType;
 
 /**
  * OSGi component launcher for {@link SimpleParser}.
@@ -63,8 +61,7 @@ public class SimpleParserComponent extends SimpleParser implements
 
         // Do a silent (console message free) lookup of matches
         Integer matches = null;
-        matches = addOnSearch.searchAddOns(false, null, false, 1, 99, false,
-                false, false, command);
+        matches = addOnSearch.searchAddOns(command, SearchType.ADDON);
 
         // Render to screen if required
         if (matches == null) {

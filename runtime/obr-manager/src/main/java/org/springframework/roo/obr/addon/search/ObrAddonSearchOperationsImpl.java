@@ -42,6 +42,8 @@ import org.springframework.roo.support.logging.HandlerUtils;
 public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 
 	private static final String CAPABILITY_COMMANDS_NAME = "commands";
+	private static final String CAPABILITY_JDBCDRIVER_NAME = "jdbcdriver";
+	private static final String CAPABILITY_LIBRARY_NAME = "library";
 	private BundleContext context;
 	private static final Logger LOGGER = HandlerUtils
 			.getLogger(ObrAddonSearchOperationsImpl.class);
@@ -70,35 +72,19 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 	}
 
 	@Override
-	public Integer searchAddOns(boolean showFeedback, String searchTerms,
-			boolean refresh, int linesPerResult, int maxResults,
-			boolean trustedOnly, boolean compatibleOnly, boolean communityOnly,
-			String requiresCommand) {
+	public Integer searchAddOns(String searchTerms, SearchType type) {
 
-		final List<ObrBundle> result = findAddons(showFeedback, searchTerms,
-				refresh, linesPerResult, maxResults, trustedOnly,
-				compatibleOnly, communityOnly, requiresCommand);
+		final List<ObrBundle> result = findAddons(searchTerms, type);
 		return result != null ? result.size() : null;
 
 	}
 
-	public List<ObrBundle> findAddons(final boolean showFeedback,
-			final String searchTerms, boolean refresh,
-			final int linesPerResult, int maxResults,
-			final boolean trustedOnly, final boolean compatibleOnly,
-			final boolean communityOnly, final String requiresCommand) {
+	public List<ObrBundle> findAddons(final String searchTerms, final SearchType type) {
 		synchronized (mutex) {
 			
-			LOGGER.log(Level.INFO, String.format("Searching command '%s' on installed repositories", 
-					requiresCommand));
+			LOGGER.log(Level.INFO, String.format("Searching '%s' on installed repositories", 
+					searchTerms));
 
-			if (maxResults > 99) {
-				maxResults = 99;
-			}
-			if (maxResults < 1) {
-				maxResults = 10;
-			}
-			
 			// Populating Repositories
 			populateRepositories();
 			
@@ -107,18 +93,18 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 				return bundlesToInstall;
 			}
 			
-			// Loading bundles which commands match with the required command
-			populateBundlesToInstallByCommand(requiresCommand);
+			// Loading bundles to install depending of search type
+			populateBundlesToInstall(searchTerms, type);
 			
 			// Showing info about matches found
 			if(bundlesToInstall.isEmpty()){
-				LOGGER.log(Level.INFO, String.format("0 matches found with command '%s' on installed repositories",
-						requiresCommand));
+				LOGGER.log(Level.INFO, String.format("0 matches found with '%s' on installed repositories",
+						searchTerms));
 				return bundlesToInstall;
 			}
 				
-			LOGGER.log(Level.INFO, String.format("%s matches found with command '%s' on installed repositories",
-					bundlesToInstall.size(), requiresCommand));
+			LOGGER.log(Level.INFO, String.format("%s matches found with '%s' on installed repositories",
+					bundlesToInstall.size(), searchTerms));
 			
 			// Showing list about how to install bundles
 			printResultList(bundlesToInstall);
@@ -162,12 +148,13 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 	}
 	
 	/**
-	 * Method to populate bundles to install which commands match with
-	 * the required command
+	 * Method to populate bundles to install. Depending of the search type, will be displayed 
+	 * different kinds of bundles.
 
 	 * @param requiresCommand
+	 * @param type
 	 */
-	private void populateBundlesToInstallByCommand(String requiresCommand){
+	private void populateBundlesToInstall(String searchTerms, SearchType type){
 		
 		// Refreshing Repositories
 		populateRepositories();
@@ -199,27 +186,66 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 				Capability[] resourceCapabilities = repoResource.getCapabilities();
 				
 				for(Capability capability : resourceCapabilities){
-					// Getting resource commands
-					if(capability.getName().equals(CAPABILITY_COMMANDS_NAME)){
-						// Getting all resource properties
-						Map<String, Object> capabilityProperties = capability.getPropertiesAsMap();
+					
+					// Depending of search type, is necessary to look for different
+					// capabilities
+					if(type.equals(SearchType.ADDON)){
 						
-						boolean match = false;
-						
-						for(Entry capabilityProperty : capabilityProperties.entrySet()){
-							String capabilityCommand = (String) capabilityProperty.getValue();
-							bundle.addCommand(capabilityCommand);
-							if(capabilityCommand.startsWith(requiresCommand)){
-								match = true;
+						// Getting resource commands
+						if(capability.getName().equals(CAPABILITY_COMMANDS_NAME)){
+							// Getting all resource properties
+							Map<String, Object> capabilityProperties = capability.getPropertiesAsMap();
+							
+							boolean match = false;
+							
+							for(Entry capabilityProperty : capabilityProperties.entrySet()){
+								String capabilityCommand = (String) capabilityProperty.getValue();
+								bundle.addCommand(capabilityCommand);
+								if(capabilityCommand.startsWith(searchTerms)){
+									match = true;
+								}
+							}
+							
+							if(match){
+								bundleId++;
+								bundlesToInstall.add(bundle);
+								searchResultCache.put(String.format("%02d",
+										bundleId), bundle);
 							}
 						}
 						
-						if(match){
-							bundleId++;
-							bundlesToInstall.add(bundle);
-							searchResultCache.put(String.format("%02d",
-									bundleId), bundle);
+						
+					}else if (type.equals(SearchType.JDBCDRIVER)){
+
+						// Getting resource driver
+						if(capability.getName().equals(CAPABILITY_JDBCDRIVER_NAME)){
+							// Getting all resource properties
+							Map<String, Object> capabilityProperties = capability.getPropertiesAsMap();
+							
+							boolean match = false;
+							
+							for(Entry capabilityProperty : capabilityProperties.entrySet()){
+								String capabilityKey = (String) capabilityProperty.getKey();
+								// Getting driver class
+								if(capabilityKey.toLowerCase().equals("driver")){
+									String capabilityDriver = (String) capabilityProperty.getValue();
+									if(capabilityDriver.startsWith(searchTerms)){
+										match = true;
+									}
+								}
+							}
+							
+							if(match){
+								bundleId++;
+								bundlesToInstall.add(bundle);
+								searchResultCache.put(String.format("%02d",
+										bundleId), bundle);
+							}
 						}
+						
+						
+					}else if(type.equals(SearchType.LIBRARY)){
+						// TODO: Implement library bundle search
 					}
 				}
 			}
@@ -268,7 +294,9 @@ public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 				
 				for(Capability capability : resourceCapabilities){
 					// Getting resource commands
-					if(capability.getName().equals(CAPABILITY_COMMANDS_NAME)){
+					if(capability.getName().equals(CAPABILITY_COMMANDS_NAME) || 
+							capability.getName().equals(CAPABILITY_JDBCDRIVER_NAME) || 
+								capability.getName().equals(CAPABILITY_LIBRARY_NAME)){
 						// Getting all resource properties
 						Map<String, Object> capabilityProperties = capability.getPropertiesAsMap();
 						

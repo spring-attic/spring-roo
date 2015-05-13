@@ -8,12 +8,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * 
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.0
  */
 public enum JdbcDatabase {
 
-    DATABASE_DOT_COM("DATABASE.COM", "",
-            "force://HOST_NAME;user=USER_NAME;password=PASSWORD"), //
     DB2_400("DB2_400", "com.ibm.as400.access.AS400JDBCDriver",
             "jdbc:as400://HOST_NAME"), //
     DB2_EXPRESS_C("DB2_EXPRESS_C", "com.ibm.db2.jcc.DB2Driver",
@@ -24,7 +23,6 @@ public enum JdbcDatabase {
             "jdbc:derby:TO_BE_CHANGED_BY_ADDON;create=true"), //
     FIREBIRD("FIREBIRD", "org.firebirdsql.jdbc.FBDriver",
             "jdbc:firebirdsql://HOST_NAME:3050"), //
-    GOOGLE_APP_ENGINE("GAE", "", "appengine"), //
     H2_IN_MEMORY("H2", "org.h2.Driver",
             "jdbc:h2:mem:TO_BE_CHANGED_BY_ADDON;DB_CLOSE_DELAY=-1"), //
     HYPERSONIC_IN_MEMORY("HYPERSONIC", "org.hsqldb.jdbcDriver",

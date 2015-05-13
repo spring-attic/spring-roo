@@ -15,6 +15,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.jdbc.JdbcDriverManager;
 import org.springframework.roo.addon.jdbc.polling.JdbcDriverProvider;
 import org.springframework.roo.support.api.AddOnSearch;
+import org.springframework.roo.support.api.AddOnSearch.SearchType;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -65,13 +66,8 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
 
             // No implementation could provide it
 
-            // Compute a suitable search term for a JDBC driver
-            final String searchTerms = "#jdbcdriver,driverclass:"
-                    + driverClassName;
-
             // Do a silent (console message free) lookup of matches
-            final Integer matches = addOnSearch.searchAddOns(false,
-                    searchTerms, false, 1, 99, false, false, false, null);
+            final Integer matches = addOnSearch.searchAddOns(driverClassName, SearchType.JDBCDRIVER);
 
             // Render to screen if required
             if (matches == null) {
@@ -80,8 +76,6 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
             else if (matches > 0) {
                 LOGGER.info("Located add-on" + (matches == 1 ? "" : "s")
                         + " that may offer this JDBC driver");
-                addOnSearch.searchAddOns(true, searchTerms, false, 1, 99,
-                        false, false, false, null);
             }
 
             return null;

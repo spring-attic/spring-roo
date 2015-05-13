@@ -127,20 +127,6 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
             @CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit) {
 
-        if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE
-                && ormProvider != OrmProvider.DATANUCLEUS) {
-            LOGGER.warning("Provider must be " + OrmProvider.DATANUCLEUS.name()
-                    + " for the Google App Engine");
-            return;
-        }
-
-        if (jdbcDatabase == JdbcDatabase.DATABASE_DOT_COM
-                && ormProvider != OrmProvider.DATANUCLEUS) {
-            LOGGER.warning("Provider must be " + OrmProvider.DATANUCLEUS.name()
-                    + " for Database.com");
-            return;
-        }
-
         if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
             LOGGER.warning("JDK must be 1.6 or higher to use Firebird");
             return;
