@@ -14,6 +14,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -85,7 +86,7 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 			repositories.add(repo);
 		}
 	}
-
+	
 	@Override
 	public void addRepository(String url) throws Exception {
 		LOGGER.log(Level.INFO, "Adding repository " + url + "...");
@@ -127,25 +128,52 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 	
 	@Override
 	public void introspectRepos() throws Exception {
-		LOGGER.log(Level.INFO, "Getting current installed repositories...");
+		LOGGER.log(Level.INFO, "Getting available bundles on installed repositories...");
 		// Populating repositories
 		populateRepositories();
 		LOGGER.log(Level.INFO, "");
+		// Getting all names of installed bundles 
+		List<String> installedBundles = getNamesOfInstalledBundles();
 		// Getting all addons installed on repositories
 		int totalAddons = 0;
+		LOGGER.log(Level.INFO, "Status               Bundle Description and version");
+		LOGGER.log(Level.INFO, "-------------------------------------------------------------------------------");
 		for (Repository repo : repositories) {
 			Resource[] allResources = repo.getResources();
 			// Getting all resources for repo
 			for(Resource resource : allResources){
+				String status = "";
+				// Checking if resource is installed or not
+				if(installedBundles.indexOf(resource.getSymbolicName()) != -1){
+					status = "Installed    ";
+				}else{
+					status = "Not Installed";
+				}
 				// Printing all resources
-				LOGGER.log(Level.INFO, resource.getPresentationName() + "(" + resource.getVersion() + ")");
+				LOGGER.log(Level.INFO, status + "        "  + resource.getPresentationName() + " (" + resource.getVersion() + ")");
 				totalAddons++;
 			}
 		}
 		LOGGER.log(Level.INFO, "");
 		LOGGER.log(Level.INFO, String.format(
-				"%s available addons on installed repositories were found",
+				"%s available bundles on installed repositories were found",
 				totalAddons));
+	}
+
+	/**
+	 * Method to get all names of installed bundles on 
+	 * Spring Roo Shell
+	 * 
+	 * @return list with all names of installed bundles
+	 */
+	private List<String> getNamesOfInstalledBundles() {
+		List<String> names = new ArrayList<String>();
+		// Getting all installed bundles
+		Bundle[] bundles = context.getBundles();
+		for(Bundle bundle : bundles){
+			names.add(bundle.getSymbolicName());
+		}
+		return names;
 	}
 
 	/**
