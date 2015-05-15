@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="447.0" prefWidth="650.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.springframework.roo.obr.manager.visual.FXMLController">
+    <children>
+      <ComboBox fx:id="repositoriesCombo" layoutX="98.0" layoutY="134.0" onAction="#onChangeRepository" prefHeight="25.0" prefWidth="459.0" />
+      <Label layoutX="16.0" layoutY="138.0" prefHeight="16.0" prefWidth="78.0" text="Repository:" />
+      <Button fx:id="addRepository" layoutX="567.0" layoutY="134.0" mnemonicParsing="false" onAction="#onAddRepository" prefHeight="25.0" prefWidth="69.0" text="Add..." />
+      <TableView fx:id="bundlesTable" layoutX="16.0" layoutY="189.0" prefHeight="181.0" prefWidth="623.0">
+        <columns>
+            <TableColumn fx:id="checkCol" prefWidth="30.0" />
+          <TableColumn fx:id="statusCol" prefWidth="114.0" text="Status" />
+          <TableColumn fx:id="presentationNameCol" minWidth="0.0" prefWidth="361.0" text="Name" />
+            <TableColumn fx:id="versionCol" prefWidth="117.0" text="Version" />
+        </columns>
+      </TableView>
+      <Button fx:id="installBtn" layoutX="536.0" layoutY="401.0" mnemonicParsing="false" onAction="#onPressInstall" prefHeight="25.0" prefWidth="103.0" text="Apply" />
+      <ImageView fitHeight="86.0" fitWidth="103.0" layoutX="555.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="icons/roo_wizban.png" />
+         </image>
+      </ImageView>
+      <Separator layoutY="86.0" prefHeight="3.0" prefWidth="655.0" />
+      <Label layoutX="14.0" layoutY="14.0" prefHeight="72.0" prefWidth="540.0" text="Add, edit, remove OSGi repositories and addons from your Spring Roo shell." />
+    </children>
+</AnchorPane>

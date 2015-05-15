@@ -1,5 +1,7 @@
 package org.springframework.roo.obr.addon.search;
 
+import java.io.IOException;
+
 
 /**
  * Interface for operations offered by this addon.
@@ -36,6 +38,12 @@ public interface ObrRepositoryOperations {
 	 * @throws Exception 
 	 */
 	void introspectRepos() throws Exception;
+
+	/**
+	 * Starts Spring Roo Repository Manager application
+	 * @throws IOException 
+	 */
+	void startManager();
 
 
 }

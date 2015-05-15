@@ -1,5 +1,10 @@
 package org.springframework.roo.obr.addon.search;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -21,6 +26,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -38,6 +44,8 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 	private BundleContext context;
 	private static final Logger LOGGER = HandlerUtils
 			.getLogger(ObrRepositoryOperationsImpl.class);
+	
+	private Shell shell;
 
 	private RepositoryAdmin repositoryAdmin;
 	private List<Repository> repositories;
@@ -159,6 +167,59 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 				"%s available bundles on installed repositories were found",
 				totalAddons));
 	}
+	
+	
+	@Override
+	public void startManager() {
+		try{
+			// Getting Spring Roo runtime directory
+			String runtimeDir = System.getProperty("runtime.directory");
+			// Executing .jar
+			ProcessBuilder pb = new ProcessBuilder("java", "-DinstalledRepositories=" + getAllRepositoriesString(), "-DinstalledBundles=" + getAllInstalledBundlesString(), "-jar", runtimeDir + "/obr-manager-visual-2.0.0.BUILD-SNAPSHOT.jar" );
+			pb.directory(new File(runtimeDir));
+			Process p = pb.start();
+			// Adding reader to get all executed actions
+			ManagerReader reader = new ManagerReader(p.getInputStream());
+            Thread thread = new Thread(reader, "ManagerReader");
+            thread.start();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Method to get all installed repositories and return
+	 * repositories URL separated by commas
+	 * 
+	 * @return list of URLs separated by commas
+	 * @throws Exception 
+	 */
+	private String getAllRepositoriesString() throws Exception {
+		populateRepositories();
+		String urls = "";
+		for(Repository repo : repositories){
+			urls+=repo.getURI()+",";
+		}
+		return urls.substring(0, urls.length() - 1);
+		
+	}
+	
+	/**
+	 * Method to get all installed bundles and return
+	 * bundles names separated by commas
+	 * 
+	 * @return list of URLs separated by commas
+	 * @throws Exception 
+	 */
+	private String getAllInstalledBundlesString() throws Exception {
+		Bundle[] bundles = context.getBundles();
+		String names = "";
+		for(Bundle bundle : bundles){
+			names+=bundle.getSymbolicName()+",";
+		}
+		return names.substring(0, names.length() - 1);
+		
+	}
 
 	/**
 	 * Method to get all names of installed bundles on 
@@ -232,5 +293,57 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 		} else {
 			return configurationAdmin;
 		}
+	}
+	
+	/**
+	 * Method to get Shell Service implementation
+	 * 
+	 * @return
+	 */
+	public Shell getShell() {
+		if (shell == null) {
+			// Get all Services implement Shell interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								Shell.class.getName(), null);
+
+				for (ServiceReference<?> ref : references) {
+					shell = (Shell) context.getService(ref);
+					return shell;
+				}
+
+				return null;
+
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load Shell on ObrRepositoryOperationsImpl.");
+				return null;
+			}
+		} else {
+			return shell;
+		}
+	}
+	
+	
+	class ManagerReader implements Runnable {
+
+	    private BufferedReader reader;
+
+	    public ManagerReader(InputStream is) {
+	        this.reader = new BufferedReader(new InputStreamReader(is));
+	    }
+
+	    public void run() {
+	        try {
+	            String line = reader.readLine();
+	            while (line != null) {
+	            	getShell().executeCommand(line);
+	                line = reader.readLine();
+	            }
+	            reader.close();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 }
