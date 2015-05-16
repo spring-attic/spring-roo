@@ -26,6 +26,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.subsystem.Subsystem;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -49,13 +50,16 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 
 	private RepositoryAdmin repositoryAdmin;
 	private List<Repository> repositories;
+	private List<Subsystem> installedSubsystems;
 	private ConfigurationAdmin configurationAdmin;
 	private Configuration config;
 	private Dictionary installedRepos;
+	
 
 	protected void activate(final ComponentContext cContext) throws Exception {
 		context = cContext.getBundleContext();
 		repositories = new ArrayList<Repository>();
+		installedSubsystems = new ArrayList<Subsystem>();
 		
 		config = getConfigurationAdmin().getConfiguration(
 			    "installedRepositories");
@@ -92,6 +96,27 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 		
 		for (Repository repo : getRepositoryAdmin().listRepositories()) {
 			repositories.add(repo);
+		}
+	}
+	
+	/**
+	 * Method to populate current Roo Addon Suites using OSGi Serive
+	 */
+	private void populateRooAddonSuites() {
+
+		installedSubsystems.clear();
+
+		// Get all Services implement Subsystem interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(
+					Subsystem.class.getName(), null);
+			for (ServiceReference<?> ref : references) {
+				Subsystem subsystem = (Subsystem) context.getService(ref);
+				installedSubsystems.add(subsystem);
+			}
+
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load Subsystem on AddonSymbolicName.");
 		}
 	}
 	
@@ -175,7 +200,11 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 			// Getting Spring Roo runtime directory
 			String runtimeDir = System.getProperty("runtime.directory");
 			// Executing .jar
-			ProcessBuilder pb = new ProcessBuilder("java", "-DinstalledRepositories=" + getAllRepositoriesString(), "-DinstalledBundles=" + getAllInstalledBundlesString(), "-jar", runtimeDir + "/obr-manager-visual-2.0.0.BUILD-SNAPSHOT.jar" );
+			ProcessBuilder pb = new ProcessBuilder("java", 
+					"-DinstalledRepositories=" + getAllRepositoriesString(), 
+					"-DinstalledBundles=" + getAllInstalledBundlesString(), 
+					"-DinstalledSuites=" + getAllInstalledSuitesString(),
+					"-jar", runtimeDir + "/obr-manager-visual-2.0.0.BUILD-SNAPSHOT.jar" );
 			pb.directory(new File(runtimeDir));
 			Process p = pb.start();
 			// Adding reader to get all executed actions
@@ -185,6 +214,24 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Method to get all installed suites and return
+	 * suites symbolic names separated by commas
+	 * 
+	 * @return list of URLs separated by commas
+	 * @throws Exception 
+	 */
+	private String getAllInstalledSuitesString() throws Exception {
+		String names = "";
+		populateRooAddonSuites();
+
+		for (Subsystem subsystem : installedSubsystems) {
+			names+=subsystem.getSymbolicName()+",";
+		}
+		return names.substring(0, names.length() - 1);
+		
 	}
 
 	/**
@@ -337,6 +384,9 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 	        try {
 	            String line = reader.readLine();
 	            while (line != null) {
+	            	LOGGER.log(Level.WARNING, "###");
+	            	LOGGER.log(Level.WARNING, "### Executing Spring Roo Repository Manager action...");
+	            	LOGGER.log(Level.WARNING, "###");
 	            	getShell().executeCommand(line);
 	                line = reader.readLine();
 	            }

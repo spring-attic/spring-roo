@@ -9,17 +9,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.springframework.roo.obr.manager.visual.model.Bundle;
-import static org.springframework.roo.obr.manager.visual.model.Commands.SPRING_ROO_ADD_REPOSITORY_COMMAND;
 import static org.springframework.roo.obr.manager.visual.model.Commands.SPRING_ROO_INSTALL_BUNDLE;
 import static org.springframework.roo.obr.manager.visual.model.Commands.SPRING_ROO_REMOVE_BUNDLE;
+import static org.springframework.roo.obr.manager.visual.model.Commands.SPRING_ROO_INSTALL_SUITE;
+import static org.springframework.roo.obr.manager.visual.model.Commands.SPRING_ROO_REMOVE_SUITE;
 import static org.springframework.roo.obr.manager.visual.model.Commands.SPRING_ROO_REPOSITORY_MANAGER;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
 /**
  * 
@@ -78,21 +74,24 @@ public class ConfirmController implements Initializable {
             if(bundle.getChecked()){
                 String currentStatus = bundle.getStatus();
                 String command = "";
-                if(currentStatus.toLowerCase().equals("not installed")){
-                    command = SPRING_ROO_INSTALL_BUNDLE;
+                
+                if(bundle.getType().equals("Suite")){
+                    if(currentStatus.toLowerCase().equals("not installed")){
+                        command = SPRING_ROO_INSTALL_SUITE;
+                    }else{
+                        command = SPRING_ROO_REMOVE_SUITE;
+                    }     
                 }else{
-                    command = SPRING_ROO_REMOVE_BUNDLE;
-                }                
+                    if(currentStatus.toLowerCase().equals("not installed")){
+                        command = SPRING_ROO_INSTALL_BUNDLE;
+                    }else{
+                        command = SPRING_ROO_REMOVE_BUNDLE;
+                    }     
+                }           
                 
                 System.out.println( command.concat(" ").concat(bundle.getSymbolicName()));
             }
         }
-        
-        
-        
-        // After install/remove selected bundles, 
-        // restart view to refresh installed bundles
-        System.out.println(SPRING_ROO_REPOSITORY_MANAGER);
         
         // Exiting from UI
         System.exit(0);

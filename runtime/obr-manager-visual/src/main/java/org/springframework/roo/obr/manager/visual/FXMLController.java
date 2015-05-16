@@ -1,15 +1,22 @@
 package org.springframework.roo.obr.manager.visual;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,18 +26,20 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.springframework.roo.obr.manager.visual.model.Bundle;
-import static org.springframework.roo.obr.manager.visual.model.Commands.SPRING_ROO_INSTALL_BUNDLE;
-import static org.springframework.roo.obr.manager.visual.model.Commands.SPRING_ROO_REPOSITORY_MANAGER;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -47,13 +56,25 @@ import org.xml.sax.SAXException;
  */
 public class FXMLController implements Initializable {
     
+    public static final String ADDON_CAPABILITY_NAME = "commands";
+    public static final String JDBC_CAPABILITY_NAME = "jdbcdriver";
+    public static final String LIBRARY_CAPABILITY_NAME = "library";
+    
+    public static final String ALL_CATEGORY_OPTION = "-- All --";
+    
+    public static final String SPRING_ROO_MARKETPLACE_URL = "http://projects.spring.io/spring-roo/marketplace/";
+    
+    ObservableList<Bundle> data;
+    ObservableList<Bundle> filteredData;
+    
     public static List<String> installedRepositories;
     public static List<String> installedBundles;
-    
-    private CheckBox selectAllCheckBox;
-    
+    public static List<String> installedSuites;
+
     @FXML
     public static ComboBox repositoriesCombo;
+    @FXML
+    public static ComboBox categoryCombo;
     @FXML
     public static TableView bundlesTable;
     @FXML
@@ -68,6 +89,10 @@ public class FXMLController implements Initializable {
     public static Button addRepository;
     @FXML
     public static Button installBtn;
+    @FXML
+    public static TextField textFilter;
+    @FXML
+    public static Hyperlink marketPlaceURL;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -82,17 +107,41 @@ public class FXMLController implements Initializable {
         String[] repositories = propertyRepos.split(",");
         installedRepositories = new ArrayList<>(Arrays.asList(repositories));
         
+        // Getting installed Suites
+        String propertySuites = System.getProperty("installedSuites");
+        String[] suites = propertySuites.split(",");
+        installedSuites = new ArrayList<>(Arrays.asList(suites));
+        
         // Initializing combobox with installed repositories
-        initializeCombobox();
+        initializeRepositoriesCombobox("");
+        
+        // Initializing category combobox
+        initializeCategoryCombobox();
+        
+        // Initializing text filter
+        initializeFilter();
         
         // Initializing Table
         initializeTable();
+        
+        // Initializing Hyperlinks
+        initializeHyperLinks();
     } 
     
     @FXML
     private void onChangeRepository(ActionEvent event){
+        // Cleaning filter text and category filter
+        textFilter.clear();
+        categoryCombo.getSelectionModel().select("-- All --");
+        
         String url = (String) repositoriesCombo.getValue();
         populateTableUsingURL(url);
+    }
+    
+    @FXML
+    private void onChangeCategory(ActionEvent event){
+        String filterText = textFilter.getText();
+        updateTableWithFilter(filterText, (String) categoryCombo.getValue());
     }
     
     @FXML
@@ -118,6 +167,12 @@ public class FXMLController implements Initializable {
     
     @FXML
     private void onPressInstall(ActionEvent event){
+        
+        // If there aren't any bundles to install, close visual component
+         if(!hasBundlesToInstall()){
+             System.exit(0);
+         }
+        
          try{
             // Creating view
             Parent root = FXMLLoader.load(FXMLController.class.getResource("/fxml/Confirmation.fxml"));
@@ -138,7 +193,7 @@ public class FXMLController implements Initializable {
     private void populateTableUsingURL(String url) { 
         
       
-        ObservableList<Bundle> data = FXCollections.observableArrayList();
+        data = FXCollections.observableArrayList();
         
         try{
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -147,29 +202,64 @@ public class FXMLController implements Initializable {
             
             doc.getDocumentElement().normalize();
             
+            // Getting resources
             NodeList resources = doc.getElementsByTagName("resource");        
 
             for (int i = 0; i < resources.getLength(); i++) {
  		Node nNode = resources.item(i);
  		if (nNode.getNodeType() == Node.ELEMENT_NODE) {
  
-			Element eElement = (Element) nNode;
-                        
-                        // Getting symbolicName
-                        String symbolicName = eElement.getAttribute("symbolicname");
-                        
-                        // Calculating bundle status
-                        String status = "Not installed";
-                        
-                        if(installedBundles.indexOf(symbolicName) != -1){
-                            status = "Installed";
+                    Element eElement = (Element) nNode;
+
+                    // Getting capabilities
+                    NodeList resourceCapabilities = eElement.getElementsByTagName("capability");
+                    for(int x = 0; x < resourceCapabilities.getLength(); x++){
+                        Node nCapability = resourceCapabilities.item(x);
+
+                        if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+
+                            Element eCapability = (Element) nCapability;
+
+                            String capabilityName = eCapability.getAttribute("name");
+
+                            // Getting resource type
+                            String type = "";
+
+                            if(capabilityName.equals(ADDON_CAPABILITY_NAME)){
+                                type = "Addon";
+                            }else if(capabilityName.equals(JDBC_CAPABILITY_NAME)){
+                                type = "JDBCDriver";
+                            }else if(capabilityName.equals(LIBRARY_CAPABILITY_NAME)){
+                                type = "Library";
+                            }else if(eElement.getAttribute("uri").endsWith(".esa")){ // Check Roo Addon Suite
+                                type = "Suite";
+                            }
+
+                            // Is is a valid type, add to list
+                            if("".equals(type)){
+                                continue;
+                            }
+
+                            // Getting symbolicName
+                            String symbolicName = eElement.getAttribute("symbolicname");
+
+                            // Calculating bundle status
+                            String status = "Not installed";
+
+                            if(installedSuites.indexOf(symbolicName) != -1 
+                                    || installedBundles.indexOf(symbolicName) != -1){
+                                status = "Installed";
+                            }
+
+                            
+                            Bundle bundle = new Bundle(false, status,
+                                    symbolicName,
+                                    eElement.getAttribute("presentationname"),
+                                    eElement.getAttribute("version"),
+                                    type);
+                            data.add(bundle);
                         }
-                        
-                        Bundle bundle = new Bundle(false, status,
-                                symbolicName,
-                                eElement.getAttribute("presentationname"),
-                                eElement.getAttribute("version"));
-                        data.add(bundle);
+                    }
 		}
             }
             
@@ -181,13 +271,36 @@ public class FXMLController implements Initializable {
     }
 
     /**
-     * Method to initialize Repository combobox
+     * Method to initialize Repositories combobox
+     * 
+     * @param url
      */
-    public static void initializeCombobox() {
+    public static void initializeRepositoriesCombobox(String url) {
                 // Initializing combo
         ObservableList<String> options = FXCollections.observableArrayList();
         options.addAll(installedRepositories);
         repositoriesCombo.setItems(options);
+        
+        if(url == ""){
+            return;
+        }
+        
+        // Selecting repository
+        repositoriesCombo.getSelectionModel().select(url);
+    } 
+    
+     /**
+     * Method to initialize Category Combobox
+     */
+    public static void initializeCategoryCombobox() {
+        // Initializing combo
+        ObservableList<String> options = FXCollections.observableArrayList();
+        options.add(ALL_CATEGORY_OPTION);
+        options.add("Addon");
+        options.add("Suite");
+        options.add("JDBCDriver");
+        options.add("Library");
+        categoryCombo.setItems(options);
     } 
 
     /**
@@ -236,4 +349,108 @@ public class FXMLController implements Initializable {
         );
         
     }   
+
+    /**
+     * Method to initialize filter textField
+     */
+    private void initializeFilter() {
+        // Listen for text changes in the filter text field
+        textFilter.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable,
+                    String oldValue, String newValue) {
+
+                updateTableWithFilter(newValue, (String) categoryCombo.getValue());
+            }
+        });
+    }
+    
+    /**
+     * Method to initialize hyperlinks
+     */
+    private void initializeHyperLinks(){
+
+    }
+    
+    /**
+     * Method to update table with results that matches with
+     * filter
+     * 
+     * @param filter 
+     * @param category
+     */
+    private void updateTableWithFilter(String filter, String category) {
+        
+        // Checking if some repository was selected
+        if(data == null || data.isEmpty()){
+            return;
+        }
+        
+        // Initialize filtered data
+        if(filteredData == null){
+            filteredData = FXCollections.observableArrayList();
+        }
+        
+        // Cleaning filteredData
+        filteredData.clear();
+        
+        bundlesTable.setItems(filteredData);
+        
+        for(Bundle bundle : data){
+            if(match(bundle, filter, category)){
+                filteredData.add(bundle);
+            }
+            
+        }
+        
+        bundlesTable.setItems(filteredData);
+        
+    }
+
+    /**
+     * Method that checks if filter terms matchs with 
+     * selected Bundle
+     * 
+     * @param bundle
+     * @param filter
+     * @param category
+     * @return 
+     */
+    private boolean match(Bundle bundle, String filter, String category) {
+        
+        filter = filter.toLowerCase();
+        category = category.toLowerCase();
+        String allOption = ALL_CATEGORY_OPTION.toLowerCase();
+        
+        String symbolicName = bundle.getSymbolicName().toLowerCase();
+        String version = bundle.getVersion().toLowerCase();
+        String presentationName = bundle.getPresentationName().toLowerCase();
+        String type = bundle.getType().toLowerCase();
+
+        if((symbolicName.indexOf(filter) != -1 || version.indexOf(filter) != -1 
+                || presentationName.indexOf(filter) != -1) && ("".equals(category) || allOption.equals(category) || category.equals(type))){
+                return true;
+        }
+        
+        return false;
+        
+    }
+
+    /**
+     * Method that checks if some bundle is checked on bundles table
+     * 
+     * @return 
+     */
+    private boolean hasBundlesToInstall() {
+        ObservableList currentItems = bundlesTable.getItems();
+        Iterator it = currentItems.iterator();
+        
+        while(it.hasNext()){
+            Bundle bundle = (Bundle) it.next();
+            if(bundle.getChecked()){
+                return true;
+            }
+        }
+        return false;
+    }
 }

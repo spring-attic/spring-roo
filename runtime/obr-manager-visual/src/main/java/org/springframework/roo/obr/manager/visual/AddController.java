@@ -69,7 +69,7 @@ public class AddController implements Initializable {
         
         // Updating FXMLController.repositoriesCombo
         FXMLController.installedRepositories.add(url);
-        FXMLController.initializeCombobox();
+        FXMLController.initializeRepositoriesCombobox(url);
         
         // Closing Add New Repository window
         Stage stage = (Stage) cancelBtn.getScene().getWindow();

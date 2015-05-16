@@ -22,10 +22,19 @@ public class Commands {
     public static final String SPRING_ROO_INSTALL_BUNDLE = "addon install bundle --bundleSymbolicName";
     
     /**
-     * Command to remove new Bundle
+     * Command to remove installed Bundle
      */
     public static final String SPRING_ROO_REMOVE_BUNDLE = "addon remove --bundleSymbolicName";
     
+    /**
+     * Command to install new Roo Addon Suite
+     */
+    public static final String SPRING_ROO_INSTALL_SUITE = "addon suite install name --symbolicName";
+    
+    /**
+     * Command to remove installed Roo Addon Suite
+     */
+    public static final String SPRING_ROO_REMOVE_SUITE = "addon suite uninstall --symbolicName";
     
      /**
      * Command to start repository manager UI
