@@ -1,5 +1,6 @@
 package org.springframework.roo.obr.manager.visual;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -9,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,15 +33,18 @@ public class AddController implements Initializable {
     @FXML
     Button okBtn;
     @FXML
+    Button archiveBtn;
+    @FXML
     TextField urlTextField;
     @FXML
     Label infoLabel;
     
+    
        
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
-       
+        // Adding default http URL
+        urlTextField.setText("http://");
     } 
     
     
@@ -84,6 +89,28 @@ public class AddController implements Initializable {
     private void onPressCancel(ActionEvent event){
         Stage stage = (Stage) cancelBtn.getScene().getWindow();
         stage.close();
+    }
+    
+    @FXML
+    private void onPressArchive(ActionEvent event){
+        
+        // Creating new stage
+        Stage stage = new Stage();
+        
+        FileChooser fileChooser = new FileChooser();
+        // Set extension filter
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("XML Files" ,"*.xml");
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setTitle("Select your OSGi Repository XML File");
+        File indexFile = fileChooser.showOpenDialog(stage);
+        
+        if(indexFile == null){
+            return;
+        }
+        
+        // Addin file url to Repository URL text field
+        urlTextField.setText("file://".concat(indexFile.getAbsolutePath()));
+        
     }
 
     /**

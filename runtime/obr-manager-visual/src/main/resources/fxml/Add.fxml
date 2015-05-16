@@ -8,8 +8,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
-
 <AnchorPane id="AnchorPane" prefHeight="206.0" prefWidth="655.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.springframework.roo.obr.manager.visual.AddController">
     <children>
       <Label layoutX="16.0" layoutY="14.0" text="Spring Roo Repository Manager">
@@ -31,7 +29,8 @@
       </Label>
       <Button fx:id="cancelBtn" layoutX="421.0" layoutY="161.0" mnemonicParsing="false" onAction="#onPressCancel" prefHeight="25.0" prefWidth="103.0" text="Cancel" />
       <Label layoutX="15.0" layoutY="89.0" prefHeight="52.0" prefWidth="42.0" text="URL:" />
-      <TextField fx:id="urlTextField" layoutX="63.0" layoutY="103.0" prefHeight="25.0" prefWidth="578.0" />
+      <TextField fx:id="urlTextField" layoutX="63.0" layoutY="103.0" prefHeight="26.0" prefWidth="473.0" />
       <Label fx:id="infoLabel" layoutX="60.0" layoutY="137.0" style="-fx-font-style: italic;" text="(Ex: http://localhost/repo/index.xml)" />
+      <Button fx:id="archiveBtn" layoutX="548.0" layoutY="103.0" mnemonicParsing="false" onAction="#onPressArchive" prefHeight="26.0" prefWidth="83.0" text="Archive..." />
     </children>
 </AnchorPane>
