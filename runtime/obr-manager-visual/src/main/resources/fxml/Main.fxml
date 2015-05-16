@@ -59,7 +59,7 @@
             <Font size="10.0" />
          </font>
       </Hyperlink>
-      <Hyperlink layoutX="271.0" layoutY="116.0" text="Repository Preferences" textFill="#ff8800" underline="true">
+      <Hyperlink fx:id="preferencesURL" layoutX="271.0" layoutY="116.0" onAction="#openPreferences" text="Repository Preferences" textFill="#ff8800" underline="true">
          <font>
             <Font size="10.0" />
          </font>

@@ -15,6 +15,10 @@ public class Commands {
      */
     public static final String SPRING_ROO_ADD_REPOSITORY_COMMAND = "addon repository add --url";
     
+    /**
+     * Command to remove installed repository
+     */
+    public static final String SPRING_ROO_REMOVE_REPOSITORY_COMMAND = "addon repository remove --url";
     
     /**
      * Command to install new Bundle

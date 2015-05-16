@@ -22,7 +22,7 @@ public class MainApp extends Application {
     public void start(Stage stage) throws Exception {
                        
         // Creating view
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Scene.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");

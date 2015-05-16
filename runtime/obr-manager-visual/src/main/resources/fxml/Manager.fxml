@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="365.0" prefWidth="398.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.springframework.roo.obr.manager.visual.ManagerController">
+    <children>
+       <Label layoutX="16.0" layoutY="14.0" text="Spring Roo Repository Manager">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </Label>
+      <Button fx:id="okBtn" layoutX="281.0" layoutY="325.0" mnemonicParsing="false" onAction="#onPressOk" prefHeight="25.0" prefWidth="103.0" text="Ok" />
+      <ImageView fitHeight="66.0" fitWidth="75.0" layoutX="328.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="icons/roo_wizban.png" />
+         </image>
+      </ImageView>
+      <Separator layoutY="66.0" prefHeight="2.0" prefWidth="398.0" />
+      <Label layoutX="43.0" layoutY="30.0" prefHeight="32.0" prefWidth="285.0" text="Repository Preferences">
+         <font>
+            <Font size="11.0" />
+         </font>
+      </Label>
+      <Button fx:id="cancelBtn" layoutX="164.0" layoutY="325.0" mnemonicParsing="false" onAction="#onPressCancel" prefHeight="25.0" prefWidth="103.0" text="Cancel" />
+      <TableView fx:id="repositoriesTable" layoutX="18.0" layoutY="78.0" prefHeight="226.0" prefWidth="276.0">
+        <columns>
+          <TableColumn fx:id="repositoryCol" prefWidth="275.0" text="Repository" />
+        </columns>
+      </TableView>
+      <Button fx:id="addBtn" layoutX="305.0" layoutY="87.0" mnemonicParsing="false" onAction="#onPressAdd" prefHeight="26.0" prefWidth="84.0" text="Add" />
+      <Button fx:id="removeBtn" layoutX="305.0" layoutY="122.0" mnemonicParsing="false" onAction="#onPressRemove" prefHeight="26.0" prefWidth="84.0" text="Remove" />
+    </children>
+</AnchorPane>

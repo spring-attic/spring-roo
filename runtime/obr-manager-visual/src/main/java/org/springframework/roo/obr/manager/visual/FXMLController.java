@@ -1,22 +1,17 @@
 package org.springframework.roo.obr.manager.visual;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -32,8 +27,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.xml.parsers.DocumentBuilder;
@@ -93,6 +86,8 @@ public class FXMLController implements Initializable {
     public static TextField textFilter;
     @FXML
     public static Hyperlink marketPlaceURL;
+    @FXML
+    public static Hyperlink preferencesURL;
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -123,9 +118,6 @@ public class FXMLController implements Initializable {
         
         // Initializing Table
         initializeTable();
-        
-        // Initializing Hyperlinks
-        initializeHyperLinks();
     } 
     
     @FXML
@@ -190,9 +182,33 @@ public class FXMLController implements Initializable {
         }       
     }
     
+    @FXML
+    private void openPreferences(ActionEvent event){
+        try{
+            // Creating view
+            Parent root = FXMLLoader.load(FXMLController.class.getResource("/fxml/Manager.fxml"));
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add("/styles/Styles.css");
+            Stage stage = new Stage();
+            stage.setTitle("Spring Roo Repository Manager");
+            stage.setScene(scene);
+            stage.setResizable(false);
+            // Modal Dialog
+            stage.showAndWait();
+                                 
+        }catch(Exception e){
+            System.out.println(e.getLocalizedMessage());
+        }     
+    }
+    
     private void populateTableUsingURL(String url) { 
         
-      
+        if("".equals(url) || url == null){
+            data = FXCollections.observableArrayList();
+            bundlesTable.setItems(data);
+            return;
+        }
+        
         data = FXCollections.observableArrayList();
         
         try{
@@ -264,6 +280,7 @@ public class FXMLController implements Initializable {
             }
             
         }catch(ParserConfigurationException | IOException | SAXException e){
+            System.out.println("AAAAAAAAAAA");
             System.out.println(e.getMessage());
         }
             
@@ -276,12 +293,12 @@ public class FXMLController implements Initializable {
      * @param url
      */
     public static void initializeRepositoriesCombobox(String url) {
-                // Initializing combo
+        // Initializing combo
         ObservableList<String> options = FXCollections.observableArrayList();
         options.addAll(installedRepositories);
         repositoriesCombo.setItems(options);
         
-        if(url == ""){
+        if("".equals(url)){
             return;
         }
         
@@ -365,12 +382,6 @@ public class FXMLController implements Initializable {
         });
     }
     
-    /**
-     * Method to initialize hyperlinks
-     */
-    private void initializeHyperLinks(){
-
-    }
     
     /**
      * Method to update table with results that matches with
