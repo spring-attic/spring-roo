@@ -52,6 +52,18 @@ public class AddController implements Initializable {
     private void onPressOk(ActionEvent event){
         // Getting URL
         String url = urlTextField.getText();
+        
+        // Formating URL before add
+        if(!url.endsWith(".xml")){
+            url = url.concat("/");
+        }
+        
+        // If repository was added before, show an error on info label
+        if(FXMLController.installedRepositories.indexOf(url) != -1){
+            infoLabel.setTextFill(Color.RED);
+            infoLabel.setText("'"+url+"' is already installed.");
+            return;
+        }
              
         // Checking URL before adding
         boolean validRepo = checkOSGiRepository(url);
@@ -59,13 +71,8 @@ public class AddController implements Initializable {
         // If is not valid, show an error on info label
         if(!validRepo){
             infoLabel.setTextFill(Color.RED);
-            infoLabel.setText("'"+url+"' is not a valid OSGi repository");
+            infoLabel.setText("'"+url+"' is not a valid OSGi repository.");
             return;
-        }
-        
-        // Formating URL before add
-        if(!url.endsWith(".xml")){
-            url = url.concat("/");
         }
         
         // If is a valid OSGi repository, execute Spring Roo command
