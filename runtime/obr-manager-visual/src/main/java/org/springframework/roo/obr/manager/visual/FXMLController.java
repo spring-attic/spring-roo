@@ -27,6 +27,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.xml.parsers.DocumentBuilder;
@@ -63,6 +64,8 @@ public class FXMLController implements Initializable {
     public static List<String> installedRepositories;
     public static List<String> installedBundles;
     public static List<String> installedSuites;
+    
+    public static Bundle currentSelection;
 
     @FXML
     public static ComboBox repositoriesCombo;
@@ -201,6 +204,37 @@ public class FXMLController implements Initializable {
         }     
     }
     
+    @FXML
+    private void onClickRow(MouseEvent event){
+        if(event.getClickCount() == 2){
+            Bundle bundle = (Bundle) bundlesTable.getSelectionModel().getSelectedItem();
+            
+            // Checking that bundles is not null
+            if(bundle != null){
+                // Saving current selection
+                currentSelection = bundle;
+                
+                // Opening info window
+                try{
+                    // Creating view
+                    Parent root = FXMLLoader.load(FXMLController.class.getResource("/fxml/Info.fxml"));
+                    Scene scene = new Scene(root);
+                    scene.getStylesheets().add("/styles/Styles.css");
+                    Stage stage = new Stage();
+                    stage.setTitle("Spring Roo Repository Manager");
+                    stage.setScene(scene);
+                    stage.setResizable(false);
+                    // Modal Dialog
+                    stage.showAndWait();
+
+                }catch(Exception e){
+                    System.out.println(e.getLocalizedMessage());
+                }    
+            }
+            
+        }
+    }
+    
     private void populateTableUsingURL(String url) { 
         
         if("".equals(url) || url == null){
@@ -272,7 +306,8 @@ public class FXMLController implements Initializable {
                                     symbolicName,
                                     eElement.getAttribute("presentationname"),
                                     eElement.getAttribute("version"),
-                                    type);
+                                    type,
+                                    eElement.getAttribute("uri"));
                             data.add(bundle);
                         }
                     }
@@ -280,7 +315,6 @@ public class FXMLController implements Initializable {
             }
             
         }catch(ParserConfigurationException | IOException | SAXException e){
-            System.out.println("AAAAAAAAAAA");
             System.out.println(e.getMessage());
         }
             

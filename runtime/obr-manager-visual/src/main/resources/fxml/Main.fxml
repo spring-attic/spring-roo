@@ -13,7 +13,7 @@
       <ComboBox fx:id="repositoriesCombo" layoutX="97.0" layoutY="91.0" onAction="#onChangeRepository" prefHeight="25.0" prefWidth="459.0" promptText="-- select repository --" />
       <Label layoutX="15.0" layoutY="95.0" prefHeight="16.0" prefWidth="78.0" text="Repository:" />
       <Button fx:id="addRepository" layoutX="566.0" layoutY="91.0" mnemonicParsing="false" onAction="#onAddRepository" prefHeight="25.0" prefWidth="69.0" text="Add..." />
-      <TableView fx:id="bundlesTable" layoutX="16.0" layoutY="188.0" prefHeight="181.0" prefWidth="623.0">
+      <TableView fx:id="bundlesTable" layoutX="16.0" layoutY="188.0" onMouseClicked="#onClickRow" prefHeight="181.0" prefWidth="623.0">
         <columns>
             <TableColumn fx:id="checkCol" prefWidth="30.0" resizable="false" />
           <TableColumn fx:id="statusCol" prefWidth="114.0" resizable="false" text="Status" />

@@ -18,14 +18,16 @@ public class Bundle {
     public final SimpleStringProperty presentationName;
     public final SimpleStringProperty version;
     public final SimpleStringProperty type;
+    public final SimpleStringProperty uri;
     
-    public Bundle(Boolean fChecked, String fStatus, String fSymbolicName, String fPresentationName, String fVersion, String fType) {
+    public Bundle(Boolean fChecked, String fStatus, String fSymbolicName, String fPresentationName, String fVersion, String fType, String fUri) {
         this.checked = new SimpleBooleanProperty(fChecked);
         this.status = new SimpleStringProperty(fStatus);
         this.symbolicName = new SimpleStringProperty(fSymbolicName);
         this.presentationName = new SimpleStringProperty(fPresentationName);
         this.version = new SimpleStringProperty(fVersion);
         this.type = new SimpleStringProperty(fType);
+        this.uri = new SimpleStringProperty(fUri);
     }
     
     public Boolean getChecked(){
@@ -69,6 +71,13 @@ public class Bundle {
     }
     public void setType(String fType) {
         type.set(fType);
+    }
+    
+    public String getUri() {
+        return uri.get();
+    }
+    public void setUri(String fUri) {
+        uri.set(fUri);
     }
     
 }
