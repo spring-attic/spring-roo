@@ -198,14 +198,14 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 	public void startManager() {
 		try{
 			// Getting Spring Roo runtime directory
-			String runtimeDir = System.getProperty("runtime.directory");
+			String visualComponentsDir = System.getProperty("visual.components.directory");
 			// Executing .jar
 			ProcessBuilder pb = new ProcessBuilder("java", 
 					"-DinstalledRepositories=" + getAllRepositoriesString(), 
 					"-DinstalledBundles=" + getAllInstalledBundlesString(), 
 					"-DinstalledSuites=" + getAllInstalledSuitesString(),
-					"-jar", runtimeDir + "/obr-manager-visual-2.0.0.BUILD-SNAPSHOT.jar" );
-			pb.directory(new File(runtimeDir));
+					"-jar", visualComponentsDir + "/obr-manager-visual.jar" );
+			pb.directory(new File(visualComponentsDir));
 			Process p = pb.start();
 			// Adding reader to get all executed actions
 			ManagerReader reader = new ManagerReader(p.getInputStream());
