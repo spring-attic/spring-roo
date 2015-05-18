@@ -456,6 +456,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
     mkdir -p $WORK_DIR/bin
     mkdir -p $WORK_DIR/bundle
     mkdir -p $WORK_DIR/conf
+    mkdir -p $WORK_DIR/visual-components
     mkdir -p $WORK_DIR/docs/pdf
     mkdir -p $WORK_DIR/docs/html
     mkdir -p $WORK_DIR/legal
@@ -474,6 +475,8 @@ if [[ "$COMMAND" = "assembly" ]]; then
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/index.pdfmarks $WORK_DIR/docs/pdf
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/images $WORK_DIR/docs/html
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/index.html $WORK_DIR/docs/html
+    # Copying visual components
+    cp $ROO_HOME/runtime/obr-manager-visual/target/obr-manager-visual.jar $WORK_DIR/visual-components
 
 
     # Prepare to write the ZIP
