@@ -41,7 +41,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class ObrAddonSearchOperationsImpl implements ObrAddOnSearchOperations {
 
-	private static final String CAPABILITY_COMMANDS_NAME = "commands";
+	private static final String CAPABILITY_COMMANDS_NAME = "roo-addon";
 	private static final String CAPABILITY_JDBCDRIVER_NAME = "jdbcdriver";
 	private static final String CAPABILITY_LIBRARY_NAME = "library";
 	private BundleContext context;
