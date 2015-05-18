@@ -38,8 +38,8 @@ ROO_OSGI_FRAMEWORK_STORAGE="$ROO_HOME/cache"
 ROO_AUTO_DEPLOY_DIRECTORY="$ROO_HOME/bundle"
 # echo "ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
 
-ROO_VISUAL_COMPONENTS_DIRECTORY="$ROO_HOME/visual-components"
-# echo "ROO_VISUAL_COMPONENTS_DIRECTORY: $ROO_VISUAL_COMPONENTS_DIRECTORY"
+ROO_VISUAL_TOOLS_DIRECTORY="$ROO_HOME/visual-tools"
+# echo "ROO_VISUAL_TOOLS_DIRECTORY: $ROO_VISUAL_TOOLS_DIRECTORY"
 
 ROO_CONFIG_FILE_PROPERTIES="$ROO_HOME/conf/config.properties"
 # echo "ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
@@ -57,13 +57,13 @@ if [ "$cygwin" = "true" ]; then
     export ROO_OSGI_FRAMEWORK_STORAGE=`cygpath -wp "$ROO_OSGI_FRAMEWORK_STORAGE"`
     export ROO_AUTO_DEPLOY_DIRECTORY=`cygpath -wp "$ROO_AUTO_DEPLOY_DIRECTORY"`
     export ROO_CONFIG_FILE_PROPERTIES=`cygpath -wp "$ROO_CONFIG_FILE_PROPERTIES"`
-    export ROO_VISUAL_COMPONENTS_DIRECTORY=`cygpath -wp "$ROO_VISUAL_COMPONENTS_DIRECTORY"`
+    export ROO_VISUAL_TOOLS_DIRECTORY=`cygpath -wp "$ROO_VISUAL_TOOLS_DIRECTORY"`
     # echo "Modified ROO_HOME: $ROO_HOME"
     # echo "Modified ROO_CP: $ROO_CP"
     # echo "Modified ROO_OSGI_FRAMEWORK_STORAGE: $ROO_OSGI_FRAMEWORK_STORAGE"
     # echo "Modified ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
     # echo "Modified ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
-    # echo "Modified ROO_VISUAL_COMPONENTS_DIRECTORY: $ROO_VISUAL_COMPONENTS_DIRECTORY" 
+    # echo "Modified ROO_VISUAL_TOOLS_DIRECTORY: $ROO_VISUAL_TOOLS_DIRECTORY" 
 fi
 
 # make sure to disable the flash message feature for the default OSX terminal, we recommend to use a ANSI compliant terminal such as iTerm if flash message support is desired
@@ -74,6 +74,6 @@ fi
 
 ANSI="-Droo.console.ansi=true"
 # Hop, hop, hop...
-java -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS $ANSI -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -Dvisual.components.directory="$ROO_VISUAL_COMPONENTS_DIRECTORY" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
+java -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS $ANSI -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -Dvisual.tools.directory="$ROO_VISUAL_TOOLS_DIRECTORY" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 # echo Roo exited with code $EXITED

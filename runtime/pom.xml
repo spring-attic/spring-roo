@@ -34,7 +34,6 @@
 		<module>classpath-antlrjavaparser</module>
 		<module>url-stream</module>
 		<module>obr-manager</module>
-    	<module>obr-manager-visual</module>
 		<module>suite-manager</module>
   </modules>
 

@@ -1,0 +1,5 @@
+== Spring Roo Visual Tools
+
+Spring Roo 2.0+ will include visual tools that will make Roo Shell easier to use. 
+
+This folder will contain these new visual tools.

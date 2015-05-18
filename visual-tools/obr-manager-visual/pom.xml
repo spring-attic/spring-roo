@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.roo</groupId>
-        <artifactId>org.springframework.roo.runtime</artifactId>
+        <artifactId>org.springframework.roo.visual.tools</artifactId>
         <version>2.0.0.BUILD-SNAPSHOT</version>
-        <relativePath>../../runtime</relativePath>
+        <relativePath>../../visual-tools</relativePath>
     </parent>
     <artifactId>obr-manager-visual</artifactId>
     <packaging>jar</packaging>
-    <name>Spring Roo - Runtime - Repository Manager Visual</name>
+    <name>Spring Roo - Visual Tools - Repository Manager Visual</name>
     <description>Spring Roo Repository Manager provides a visual tool to manage your OSGi Repositories.</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

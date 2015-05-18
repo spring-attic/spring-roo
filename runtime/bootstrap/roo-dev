@@ -23,7 +23,7 @@ rm -rf "$ROO_HOME"/bootstrap/target/osgi
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/bin
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/bundle
 mkdir -p "$ROO_HOME"/bootstrap/target/osgi/conf
-mkdir -p "$ROO_HOME"/bootstrap/target/osgi/visual-components
+mkdir -p "$ROO_HOME"/bootstrap/target/osgi/visual-tools
 
 cp "$ROO_HOME"/bootstrap/src/main/bin/* "$ROO_HOME"/bootstrap/target/osgi/bin
 chmod +x "$ROO_HOME"/bootstrap/target/osgi/bin/*.sh
@@ -35,8 +35,8 @@ cp "$ROO_HOME"/bootstrap/src/main/conf/* "$ROO_HOME"/bootstrap/target/osgi/conf
 cp "$ROO_HOME"/../target/all/*.jar "$ROO_HOME"/bootstrap/target/osgi/bundle
 # Copy Runtime Bundles
 cp "$ROO_HOME"/target/all/*.jar "$ROO_HOME"/bootstrap/target/osgi/bundle
-# Copy visual components to visual-components folder
-cp "$ROO_HOME"/obr-manager-visual/target/obr-manager-visual.jar "$ROO_HOME"/bootstrap/target/osgi/visual-components
+# Copy visual tools to visual-tools folder
+cp "$ROO_HOME"/../visual-tools/obr-manager-visual/target/obr-manager-visual.jar "$ROO_HOME"/bootstrap/target/osgi/visual-tools
 
 # Move the startup-related JAR from the "bundle" directory to the "bin" directory
 mv "$ROO_HOME"/bootstrap/target/osgi/bundle/org.springframework.roo.bootstrap-*.jar "$ROO_HOME"/bootstrap/target/osgi/bin
@@ -57,8 +57,8 @@ ROO_AUTO_DEPLOY_DIRECTORY="$ROO_HOME/bootstrap/target/osgi/bundle"
 ROO_CONFIG_FILE_PROPERTIES="$ROO_HOME/bootstrap/target/osgi/conf/config.properties"
 # echo "ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
 
-ROO_VISUAL_COMPONENTS_DIRECTORY="$ROO_HOME/bootstrap/target/osgi/visual-components"
-# echo "ROO_VISUAL_COMPONENTS_DIRECTORY: $ROO_VISUAL_COMPONENTS_DIRECTORY"
+ROO_VISUAL_TOOLS_DIRECTORY="$ROO_HOME/bootstrap/target/osgi/visual-tools"
+# echo "ROO_VISUAL_TOOLS_DIRECTORY: $ROO_VISUAL_TOOLS_DIRECTORY"
 
 cygwin=false;
 case "`uname`" in
@@ -94,6 +94,6 @@ PAUSE=
 METADATA_TRACE=
 #METADATA_TRACE="-Droo.metadata.trace=true"
 ANSI="-Droo.console.ansi=true"
-java $PAUSE $DEBUG $METADATA_TRACE $ANSI -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -Dvisual.components.directory="$ROO_VISUAL_COMPONENTS_DIRECTORY" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
+java $PAUSE $DEBUG $METADATA_TRACE $ANSI -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -Dvisual.tools.directory="$ROO_VISUAL_TOOLS_DIRECTORY" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 echo Roo exited with code $EXITED

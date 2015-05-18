@@ -198,7 +198,7 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
 	public void startManager() {
 		try{
 			// Getting Spring Roo runtime directory
-			String visualComponentsDir = System.getProperty("visual.components.directory");
+			String visualComponentsDir = System.getProperty("visual.tools.directory");
 			// Executing .jar
 			ProcessBuilder pb = new ProcessBuilder("java", 
 					"-DinstalledRepositories=" + getAllRepositoriesString(), 
