@@ -50,7 +50,7 @@ import org.xml.sax.SAXException;
  */
 public class FXMLController implements Initializable {
     
-    public static final String ADDON_CAPABILITY_NAME = "commands";
+    public static final String ADDON_CAPABILITY_NAME = "roo-addon";
     public static final String JDBC_CAPABILITY_NAME = "jdbcdriver";
     public static final String LIBRARY_CAPABILITY_NAME = "library";
     
