@@ -1,7 +1,7 @@
 == Spring Roo Visual Tools
 
-As usual, Spring Roo 2.0 includes shell commands for installing and
-managing its new features, but now a new way to interact with Roo have 
+As usual, Spring Roo includes shell commands for installing and
+managing its features, but since Roo 2.0 a new way to interact with Roo have 
 been introduced, the visual tools.
 
 Despite Roo's really nice shell, there are features that are easier to execute
