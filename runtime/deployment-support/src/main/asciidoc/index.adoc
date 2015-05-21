@@ -27,6 +27,7 @@
 :copyright: 		CC BY-NC-SA 3.0
 :doctype: 		book
 :keywords:		SpringRoo, Reference
+:imagesdir:     ./images
 :toc:
 :toc-placement:		left
 :toc-title:		Table of Contents
@@ -113,7 +114,7 @@ as `sudo ln -s $ROO_HOME/bin/roo.sh /usr/bin/roo`
 Next verify Roo has been installed correctly. This can be done using
 the following commands:
 
-[opstions=nowrap]
+[source,sh]
 ----
 $ mkdir roo-test
 $ cd roo-test
@@ -279,7 +280,7 @@ already be familiar to you.
 
 Some of the common technologies Roo projects use include
 link:#architecture-critical-technologies-spring[Spring] (such as Spring
-Framework, Spring Security and Spring Web Flow), Maven, Java Server
+Framework and Spring Security), Maven, Java Server
 Pages (JSP), Java Persistence API (JPA, such as Hibernate), Tiles and
 link:#architecture-critical-technologies-aspectj[AspectJ]. We've chosen
 technologies which are extremely commonly used in enterprise Java
@@ -306,7 +307,7 @@ first start a new project Roo will only assume you want to build a
 simple JAR. As such it will have next to no dependencies. Only when you
 ask to add a persistence provider will JPA be installed, and only when
 you add a field using JavaBean Validation annotations will that library
-be installed. The same holds true for Spring Security, Spring Web Flow
+be installed. The same holds true for Spring Security
 and the other technologies Roo supports. With Roo you really do start
 small and incrementally add technologies if and when you want to, which
 is consistent with Roo's philosophy of there being
@@ -493,7 +494,7 @@ try to teach you about some usability features as we go along, though.
 
 Please start by typing the following commands:
 
-[options=nowrap]
+[source,sh]
 ----
 $ mkdir ten-minutes
 $ cd ten-minutes
@@ -519,13 +520,13 @@ Your new project will then be created in the current working directory.
 
 Note that Roo frequently allows the use of TAB, so press TAB regularly.
 Once your project is created, type 'hint' and ENTER for the next suggestion.
-You're also welcome to visit http://forum.springframework.org for Roo help.
+You're also welcome to visit http://stackoverflow.com/questions/tagged/spring-roo for Roo help.
 ----
 
 Notice the output from the "hint" command guides you through what to do
 next. Let's do that:
 
-[options=nowrap]
+[source,sh]
 ----
 roo> project setup --topLevelPackage com.tenminutes
 Created /home/balex/ten-minutes/pom.xml
@@ -555,7 +556,7 @@ I'll just include the commands you should type below. Be sure to try
 using the TAB key when using the shell, as it will save you from having
 to type most of these commands:
 
-[options=nowrap]
+[source,sh]
 ----
 roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 roo> hint
@@ -609,11 +610,11 @@ Now that you've built your first application during the
 link:#intro-first-steps[ten minute test], you have a rough idea of how
 Roo works. To help you learn Roo we ship several sample scripts that can
 be used to build new applications. These sample scripts can be found in
-your $ROO_HOME/classpath/src/main/resources/ directory. These sample
+your $ROO_HOME/samples/ directory. These sample
 scripts available from roo classpath. You can run any sample script by
 using the following command format:
 
-[options=nowrap]
+[source,sh]
 ----
 $ mkdir sample
 $ cd sample
@@ -726,7 +727,7 @@ number of interesting Roo capabilities:
 * Creating a WAR for deployment
 
 You can find the wedding tutorial at
-http://blog.springsource.com/2009/05/27/roo-part-2/.
+http://spring.io/blog/2009/05/27/getting-started-with-spring-roo
 
 [[beginning-tutorial-application-use-cases]]
 === Tutorial Application Details
@@ -794,7 +795,8 @@ Your new project will then be created in the current working directory.
 
 Note that Roo frequently allows the use of TAB, so press TAB regularly.
 Once your project is created, type 'hint' and ENTER for the next suggestion.
-You're also welcome to visit http://forum.springframework.org for Roo help.
+You're also welcome to visit http://stackoverflow.com/questions/tagged/spring-roo
+for Roo help.
 roo>
 ----
 
@@ -830,6 +832,8 @@ each time you load Roo).
 
 The following folder structure now exists in your file system:
 
+image::projectfolders.png[projectfolders,center]
+
 For those familiar with http://maven.apache.org/[Maven] you will notice
 that this folder structure follows standard Maven conventions by
 creating separate folders for your main project resources and tests. Roo
@@ -852,7 +856,7 @@ auto-complete your commands, options and even obtain contextual help):
 ----
 com.springsource.roo.pizzashop roo> hint
 Roo requires the installation of a persistence configuration,
-for example, JPA or MongoDB.
+for example, JPA.
 
 For JPA, type 'jpa setup' and then hit TAB three times.
 We suggest you type 'H' then TAB to complete "HIBERNATE".
@@ -862,8 +866,6 @@ If you press TAB again, you'll see there are no more options.
 As such, you're ready to press ENTER to execute the command.
 
 Once JPA is installed, type 'hint' and ENTER for the next suggestion.
-
-Similarly, for MongoDB persistence, type 'mongo setup' and ENTER.
 com.springsource.roo.pizzashop roo>
 com.springsource.roo.pizzashop roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 Created SPRING_CONFIG_ROOT/database.properties
@@ -1489,7 +1491,6 @@ more about how to use Roo, we suggest the following specific sections if
 you'd like to know more about commonly-used Roo add-ons:
 
 * link:#command-index-finder-commands[Dynamic Finders]
-* link:#command-index-web-flow-commands[Spring Web Flow] addon
 * link:#command-index-logging-commands[Logging] addon
 * link:#command-index-jms-commands[JMS] addon
 * link:#command-index-email-sender-setup[Email] (SMTP) addon
@@ -1759,7 +1760,7 @@ AspectJ.
 
 Spring Roo applications all use Spring. By "Spring" we not only mean
 Spring Framework, but also the other Spring projects like Spring
-Security and Spring Web Flow. Of course, only Spring Framework is
+Security. Of course, only Spring Framework is
 installed into a user project by default and there are fine-grained
 commands provided to install each additional Spring project beyond
 Spring Framework.
@@ -1912,7 +1913,7 @@ help you with those objects.
 [[architecture-web]]
 === Web Layer
 
-Roo 1.0 can optionally provide a scaffolded Spring MVC web layer. The
+Spring Roo can optionally provide a scaffolded Spring MVC web layer. The
 scaffolded MVC web layer features are explored in some depth in the
 link:#beginning[Beginning With Roo: The Tutorial] chapter, including how
 to customise the appearance. From an architectural perspective, the
@@ -1920,14 +1921,6 @@ scaffolded layer includes a number of URL rewriting rules to ensure
 requests can be made in accordance with REST conventions. Roo's
 scaffolding model also includes Apache Tiles, Spring JavaScript, plus
 ensures easy setup of Spring Security with a single command.
-
-In Spring Roo 1.1 we also added comprehensive support for Google Web
-Toolkit (GWT). This allows you to build Generation IV web HTML5-based
-web front-ends. These front-ends access the Spring backend using highly
-optimized remoting protocols, and the GWT application represents the GWT
-team's recommended best practice architecture. In fact, the GWT team at
-Google wrote most of the Roo GWT add-on, so you can be sure it uses the
-best GWT 2.1 features.
 
 Scaffolded web controllers always delegate directly to methods provided
 on an `@RooJpaActiveRecord` class. For maximum compatibility with
@@ -3342,7 +3335,6 @@ JPA-QL for them)
 * JUnit testing (with integration and mock testing)
 * Spring MVC (including URL rewriting, JSP services, controller
 management)
-* Spring Web Flow
 * Spring Security
 * Selenium testing
 * Java Message Service (JMS)
@@ -3384,7 +3376,6 @@ Database Options:
 * http://www.oracle.com/index.html[Oracle] *
 * http://www.ibm.com/db2[DB2] *
 * http://www.ibm.com/db2[DB2/400]
-* http://code.google.com/appengine/[Google App Engine] (GAE)
 * http://db.apache.org/derby/[Apache Derby] (Java DB)
 * http://www.firebirdsql.org/[Firebird]
 
@@ -4701,8 +4692,7 @@ domain type.
 === Persistence Layers
 
 There are now three options available in Roo core to support data
-persistence, JPA Entities (Active Record style), JPA Repositories and
-MongoDB Repositories.
+persistence, JPA Entities (Active Record style) and JPA Repositories
 
 [[layer-jpa-entities]]
 ==== JPA Entities (Active Record style)
@@ -4845,170 +4835,6 @@ interface is part of the
 http://projects.spring.io/spring-data-jpa/[Spring Data JPA] API and
 provides all CRUD functionality out of the box.
 
-[[mongodb-persistence]]
-==== MongoDB Persistence
-
-As an alternative to JPA persistence, Spring Roo offers
-http://www.mongodb.org/[MongoDB] support by leveraging the
-http://projects.spring.io/spring-data-mongodb/[Spring Data MongoDB]
-project.
-
-[[mongodb-setup]]
-===== Setup
-
-To configure a project for MongoDB persistence you can use the
-link:#command-index-mongo-setup[mongo setup] command:
-
-[subs=quotes,options=nowrap]
-----
-roo> *mongo setup*
-----
-
-This will configure your Spring Application context to use a MongoDB
-installation running on localhost and the default port. Optional command
-attributes allow you to define host, port, database name, username and
-password. Furthermore, to configure your application for deployment on
-http://cloudfoundry.com/[VMware CloudFoundry] you can use the
---cloudFoundry attribute.
-
-[[mongodb-entities]]
-===== Entities
-
-Once the application is configured for MongoDB support, the
-link:#command-index-entity-mongo[entity mongo] and
-link:#command-index-repository-mongo[repository mongo] commands become
-available:
-
-[subs=quotes,options=nowrap]
-----
-roo> *entity mongo* --class ~.domain.Pizza
-----
-
-This command will create a Pizza domain type annotated with
-**@RooMongoEntity**. This annotation is responsibe for triggering the
-creation of an ITD which provides a Spring Data ID annotated field as
-well as its accessor and mutator. The following example also contain a
-number of fields which can be added through the
-link:#command-index-field-commands[field] command via the Roo shell.
-
-[source,java,options=nowrap]
-----
-@RooJavaBean
-@RooToString
-@RooMongoEntity
-public class Pizza {
-
-    @NotNull
-    @Size(min = 2)
-    private String name;
-
-    private BigDecimal price;
-
-    @ManyToMany(cascade = CascadeType.ALL)
-    private Set<Topping> toppings = new HashSet<Topping>();
-
-    @ManyToOne
-    private Base base;
-}
-----
-
-[[mongodb-repository]]
-===== Repository
-
-With a domain type in place you can now create a new repository for this type by using the
-link:#command-index-repository-mongo[repository mongo]
-command (or by applying the @RooMongoRepository annotation to an
-arbitrary interface:
-
-[subs=quotes,options=nowrap]
-----
-roo> *repository mongo* --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
-----
-
-This will create a simple interface definition which leverages
-http://projects.spring.io/spring-data-mongodb/[Spring Data MongoDB]:
-
-[source,java,options=nowrap]
-----
-@RooMongoRepository(domainType = Pizza.class)
-public interface PizzaRepository {
-
-    List<Pizza> findAll();
-}
-----
-
-Similar the Spring Data JPA driven repository seen above, this interface
-is augmented through an ITD which introduces the
-http://docs.spring.io/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html[PagingAndSortingRepository]
-provided by the Spring Data API and is responsible for providing all
-necessary CRUD functionality. In addition this interface defines a
-'custom' finder which is not offered by the
-http://docs.spring.io/spring-data/data-commons/docs/1.1.0.RELEASE/api/org/springframework/data/repository/PagingAndSortingRepository.html[PagingAndSortingRepository]
-implementation: __List<Pizza> findAll();__. This method iis required by
-Spring Roo's UI scaffolding and is automatically implemented by the
-http://docs.spring.io/spring-data/data-document/docs/1.0.0.M4/reference/html/#repositories.definition-tuning[query
-builder mechanism] offered by Spring Data MongoDB.
-
-[[cloud-foundry]]
-===== Example & Cloud Foundry Deployment
-
-Similar to applications which use JPA persistence (see
-http://blog.springsource.com/2011/08/30/using-postgres-on-cloud-foundry/[this
-blog] for details on using JPA with Postgres) MongoDB applications can
-be easily deployed to http://cloudfoundry.com/[VMware CloudFoundry]. The
-following script provides an example of the link:#beginning[Pizza Shop
-sample application] which has been adjusted for use with a
-MongoDB-backed repository layer:
-
-[subs=quotes,options=nowrap]
-----
-// Create a new project.
-project com.springsource.pizzashop
-
-// Create configuration for MongoDB peristence
-mongo setup *--cloudFoundry true*
-
-// Define domain model.
-entity mongo --class ~.domain.Base --testAutomatically
-field string --fieldName name --sizeMin 2 --notNull --class ~.domain.Base
-entity mongo --class ~.domain.Topping --testAutomatically
-field string --fieldName name --sizeMin 2 --notNull --class ~.domain.Topping
-entity mongo --class ~.domain.Pizza --testAutomatically
-field string --fieldName name --notNull --sizeMin 2 --class ~.domain.Pizza
-field number --fieldName price --type java.lang.Float
-field set --fieldName toppings --type ~.domain.Topping
-field reference --fieldName base --type ~.domain.Base
-entity mongo --class ~.domain.PizzaOrder --testAutomatically
-field string --fieldName name --notNull --sizeMin 2 --class ~.domain.PizzaOrder
-field string --fieldName address --sizeMax 30
-field number --fieldName total --type java.lang.Float
-field date --fieldName deliveryDate --type java.util.Date
-field set --fieldName pizzas --type ~.domain.Pizza
-
-// Add layer support.
-repository mongo --interface ~.repository.ToppingRepository --entity ~.domain.Topping
-repository mongo --interface ~.repository.BaseRepository --entity ~.domain.Base
-repository mongo --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
-repository mongo --interface ~.repository.PizzaOrderRepository --entity ~.domain.PizzaOrder
-service type --interface ~.service.ToppingService --entity ~.domain.Topping
-service type --interface ~.service.BaseService --entity ~.domain.Base
-service type --interface ~.service.PizzaService --entity ~.domain.Pizza
-service type --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
-
-// Create a Web UI.
-web mvc setup
-web mvc all --package ~.web
-
-// Package the application into a war file.
-perform package
-
-// Deploy and start the application in CloudFoundry
-cloud foundry login
-cloud foundry deploy --appName roo-pizzashop --path /target/pizzashop-0.1.0.BUILD-SNAPSHOT.war --memory 512
-*cloud foundry create service --serviceName pizzashop-mongo --serviceType mongodb*
-*cloud foundry bind service --serviceName pizzashop-mongo --appName roo-pizzashop*
-cloud foundry start app --appName roo-pizzashop
-----
 
 [[service-layer]]
 === Service Layer
@@ -5640,161 +5466,7 @@ Roo will silently skip the generation of jsp view artifacts for the
 dynamic finder in question). More detail can be found in ticket
 https://jira.springsource.org/browse/ROO-1027[ROO-1027].
 
-[[base-jsf]]
-== JavaServer Faces (JSF) Add-On
 
-The JSF add-on allows you to conveniently scaffold JSF managed beans and
-XHTML views for an existing domain model. Currently this domain model is
-derived from the Roo supported JPA integration through the entity jpa
-and related field commands. The following features are included:
-
-* Automatic update of JSF managed beans and converters reflecting
-changes in the domain model
-* Choice of either Oracle Mojarra or Apache MyFaces JSF 2
-implementations
-* Server-side validation based on JSR 303 constraints defined in the
-domain layer
-* Integration of http://primefaces.org/[PrimeFaces] JSF Component Suite,
-including automatic scaffolding of PrimeFaces controls such as:
-** AutoComplete
-** Calendar
-** FileUpload
-** InputText
-** InputTextarea
-** Media
-** SelectManyMenu
-** Spinner
-* User-selectable PrimeFaces themes
-
-[[jsf-commands]]
-=== JSF commands
-
-The JSF add-on contains four commands:
-
-[horizontal]
-1:: `roo> *web jsf setup* --implementation --library --theme`
-+
-When this command is run for the first time in a single-module project
-or an empty module, the necessary JSF artifacts are copied to the
-project or module such as the pom dependencies and repositories and the
-web.xml file. A default PrimeFaces theme called "south-street" is
-configured as well in the web.xml.
-+
-The web jsf setup command can be run as many times as you like to change
-the JSF implementation and the theme.
-+
-The --implementation option when specifed allows you to chouse either
-the Oracle Mojarra or Apache MyFaces JSF implementations.
-+
-The --library option has only one selectable value, being PRIMEFACES.
-+
-The --theme option lets you select one of 30 PrimeFaces themes for your
-UI.
-
-2:: `roo> *web jsf all --package*`
-+
-The web jsf all command creates JSF managed beans and converters for all
-entities in the specified package. A JSF XHTML page is also created in
-the src/main/webapp/pages directory for each entity.
-
-3:: `roo> *web jsf scaffold --class* --entity --beanName --includeOnMenu`
-+
-The web jsf scaffold command lets you create a managed bean for a
-particular entity in your project.
-+
-The --class option is where you specify the name of the managed bean
-class.
-+
-The --entity option lets you specify the entity for the managed bean and
-is only required if the focus is not on the entity you want to create
-the managed bean for.
-+
-If you do not wish the 'create' and 'list' menu selections to appear for
-the entity in the menu on the generated UI, specify false in the
---includeOnMenu option.
-
-4:: `roo> *web jsf media --url* --player`
-+
-The web jsf media command is used for embedding multimedia content such
-as videos and music on your JSF home page.
-+
-The --url option is where you specify the url of the the media content,
-such as a YouTube video.
-+
-The media player used is automaticallly selected based on the url or
-file extension of the media file in the url if applicable, however,
-where this cannot be determined you can use the --player option to
-select a suitable player.
-
-[[roojsf-managedbean]]
-=== The @RooJsfManagedBean annotation
-
-The @RooJsfManagedBean annotation is added to all new classes created by
-the web jsf all and web jsf scaffold commands. The annotation causes the
-introduction of the javax.faces.bean.ManagedBean and
-javax.faces.bean.SessionScoped annotations in the *_Roo_ManagedBean.aj
-ITD. Note that if you specify a scope other than @SessionScoped in the
-managed bean .java file, the scope annotation is removed from the ITD.
-For example, if you want your bean to be @RequestScoped, simply annotate
-your managed bean with the @RequestScoped annotation.
-
-Use the beanName attribute to force the naming of the managed bean
-referred to by other beans and in XHTML pages.
-
-As mentioned before, the includeOnMenu attribute when set to false
-prevents the 'Create' and 'List all' menu selections for the entity from
-showing in the UI's menu.
-
-[[roojsf-converter]]
-=== The @RooJsfConverter annotation
-
-When a new managed bean is created, a converter class is also created
-containing the @RooJsfConverter annotation. The JSF converter class
-implements the javax.faces.convert.Converter interface and has
-implementations of the getAsObject and getAsString methods (introduced
-in an ITD) to perform Object-to-String and String-to-Object conversions
-between model data objects and a String representation of those objects
-that is suitable for rendering.
-
-[[roojsf-appbean]]
-=== The @RooJsfApplicationBean annotation
-
-Whenever a managed bean is created for the first time, Roo will install
-a class containing the @RooJsfApplicationBean annotation. The ITD
-generated from this annotation contains the PrimeFaces menu with the
-'Create' and 'List all' operations for each entity. Whenever a managed
-bean is created, provding the @RooJsfManagedBean includeOnMenu attribute
-is either not specifed or set to 'true', new menu selections are
-automatically added to the *_Roo_ApplicationBean.aj ITD. Similarly,
-when a managed bean is deleted or the includeOnMenu attribute is set to
-false, the menu selections are removed.
-
-[[bikeshop]]
-=== The bikeshop example
-
-The Roo distribution contains a script called bikeshop.roo that
-demonstrates the JSF add-on capability. Please note that the --equals
-attribute should be specified as true on the entity jpa command for all
-entities intended to be scaffolded with JSF. Alternatively, add the
-@RooEquals annotation to existing entities.
-
-In the Roo shell, type:
-
-[options=nowrap]
-----
-roo> script bikeshop.roo
-----
-
-When complete, exit the shell and run Jetty as follows:
-
-[options=nowrap]
-----
-mvn jetty:run-exploded
-----
-
-View the application at http://localhost:8080/bikeshop:
-
-image::jsf-bikeshop.png[bikeshop,align=center]
 
 [[base-cloud-foundry]]
 == Cloud Foundry Add-On
@@ -6323,226 +5995,6 @@ If you need help configuring how FlexJson serializes or deserializes
 JSON documents, please refer to their
 http://flexjson.sourceforge.net/[reference documentation].
 
-[[base-solr]]
-== Apache Solr Add-On
-
-The http://lucene.apache.org/solr/[Apache Solr] add-on provides
-integration between the Roo generated domain model and the Apache Solr
-search platform. If you haven't heard of the open source Solr system,
-here's a quick description from the project web site:
-
-"Solr is the popular, blazing fast open source enterprise search
-platform from the Apache Lucene project. Its major features include
-powerful full-text search, hit highlighting, faceted search, dynamic
-clustering, database integration, and rich document (e.g., Word, PDF)
-handling. Solr is highly scalable, providing distributed search and
-index replication, and it powers the search and navigation features of
-many of the world's largest internet sites."
-
-"Solr is written in Java and runs as a standalone full-text search
-server within a servlet container such as Tomcat. Solr uses the Lucene
-Java search library at its core for full-text indexing and search, and
-has REST-like HTTP/XML and JSON APIs that make it easy to use from
-virtually any programming language. Solr's powerful external
-configuration allows it to be tailored to almost any type of application
-without Java coding, and it has an extensive plugin architecture when
-more advanced customization is required."
-
-[[solr-installation]]
-=== Solr Server Installation
-
-The addon requires a running instance of the Apache Solr server. To
-install a Solr server just follow these four easy steps:
-
-1.  Download the server:
-http://www.apache.org/dyn/closer.cgi/lucene/solr/
-
-2.  Unzip (untar) the download: tar xf apache-solr-1.4.0.tgz
-
-3.  Change into the solr example directory: cd apache-solr-1.4.0/example
-
-4.  Start the Solr server: java -jar start.jar
-
-5.  Verify Solr is running correctly: http://localhost:8983/solr/admin/
-
-[[solr-addon-commands]]
-=== Solr Add-On Commands
-
-Once the server is running you can setup the Solr integration for your
-project using the following Roo commands:
-
-* `roo> solr setup`
-+
-This command installs the SolrJ driver dependency into the project
-pom.xml and registers your Solr server in application context so it can
-be injected whereever you need it in your project.
-+
-* `~.Person roo> solr add`
-+
-This command allows you to mark an individual entity for automatic Solr
-indexing. The @RooSolrSearchable annotation will be added to the target
-entity (Person). Furthermore, the following ITD is generated:
-+
-[source,java,options=nowrap]
-----
-privileged aspect Person_Roo_SolrSearch {
-
-    @Autowired
-    transient SolrServer Person.solrServer;
-
-    public static QueryResponse Person.search(String queryString) {
-        return search(new SolrQuery("person.solrsummary_t:" + queryString.toLowerCase()));
-    }
-
-    public static QueryResponse Person.search(SolrQuery query) {
-        try {
-            QueryResponse rsp = solrServer().query(query);
-            return rsp;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return new QueryResponse();
-    }
-
-    public static void Person.indexPerson(Person person) {
-        List<Person> people = new ArrayList<Person>();
-        people.add(person);
-        indexPeople(people);
-    }
-
-    public static void Person.indexPeople(Collection<Person> people) {
-        List<SolrInputDocument> documents = new ArrayList<SolrInputDocument>();
-        for (Person person : people) {
-            SolrInputDocument sid = new SolrInputDocument();
-            sid.addField("id", "person." + person.getId());
-            sid.addField("person.birthday_dt", person.getBirthDay());
-            sid.addField("person.id_l", person.getId());
-            sid.addField("person.name_s", person.getName());
-            //add summary field to allow searching documents for objects of this type
-            sid.addField("person.solrsummary_t", new StringBuilder().append(
-                          person.getBirthDay()).append(" ").append(
-                          person.getId()).append(" ").append(person.getName()));
-            documents.add(sid);
-        }
-        try {
-            SolrServer solrServer = solrServer();
-            solrServer.add(documents);
-            solrServer.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void Person.deleteIndex(Person person) {
-        SolrServer solrServer = solrServer();
-        try {
-            solrServer.deleteById("person." + person.getId());
-            solrServer.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @PostUpdate
-    @PostPersist
-    private void Person.postPersistOrUpdate() {
-        indexPerson(this);
-    }
-
-    @PreRemove
-    private void Person.preRemove() {
-        deleteIndex(this);
-    }
-
-    public static final SolrServer Person.solrServer() {
-        SolrServer _solrServer = new Person().solrServer;
-        if (_solrServer == null) throw new IllegalStateException("Entity manager \
-                                    has not been injected (is the Spring Aspects JAR \
-                                    configured as an AJC/AJDT aspects library?)");
-        return _solrServer;
-    }
-
-}
-----
-+
-The ITD introduces two search methods; one for conducting simple
-searches against Solr documents for Person, and another one which works
-with a preconfigured SolrQuery object. The SolrQuery object allows you
-to leverage all functionalities of the Solr search server (like
-faceting, sorting, term highliting, pagination, etc).
-+
-The __indexPerson__(..) and __indexPeople__(..) methods allow you to add
-new person instances or even collections of persons to the Solr index.
-The __deleteIndex__(..) method allows you to remove a person from the
-Solr index.
-+
-All indexing, and delete operations are executed in s separate thread
-and will therefore not impact the performance of your Web application
-(this is currently achieved through the _SolrSearchAsyncTaskExecutor.aj_
-aspect).
-+
-Furthermore, to trigger automatic indexing of new person instances (or
-updated person instances) this itd registers the
-__postPersistOrUpdate__() method which hooks into the JPA lifecycle
-through the JPA @PostUpdate and @PostPersist annotations. Similarly, the
-__preRemove__() method hooks in the JPA lifecylce through the @PreRemove
-annotation.
-+
-* `roo> solr all`
-+
-This command will mark all entities in the project for automatic Solr
-indexing. The generated functionality is the same as shown above.
-
-[[solr-search-annot]]
-=== The @RooSolrSearchable Annotation
-
-The @RooSolrSearchable annotation allows you to change all method names
-through their respective attributes in the annotation. Marking a method
-name with an empty String will instruct the Roo Solr add-on to not
-generate that method (i.e. @RooSolrSearchable(preRemoveMethod="")).
-
-By default all fields in a domain entity are indexed as dynamic fields
-(defined in the default schema.xml which Solr ships with). The default
-format of a field name is as follows:
-
-[source,xml,options=nowrap]
-----
-<simple-entity-name>.<field-name>_<field-type>
-person.birthday_dt
-----
-
-This ensures each field is uniquely mapped across your domain model by
-prepending the entity name followed by the field name and field type
-(which is used to trigger the dynamic field mapping). You can change
-field names by adding a @Field annotation to a field in the domain
-object (i.e. Person) which contains your own field (you need to provide
-a field definition in the Solr schema for it as well):
-
-[source,java,options=nowrap]
-----
-@Field("my:field:name:birthday")
-@Temporal(TemporalType.TIMESTAMP)
-@DateTimeFormat(style = "M-")
-private Date birthDay;
-----
-
-To index existing DB entity tables each entity exposes a convenience
-method (example for Person entity):
-
-[source,java,options=nowrap]
-----
-Person.indexPeople(Person.findAllPeople());
-----
-
-The URL of the solr server location can be changed in the project
-src/main/resources/META-INF/spring/solr.properties config file.
-
-Front-end (controller and MVC/JSP views) are currently a
-work-in-progress. However, the following Ajax Library offers a neat
-front-end for those who want to take this a step further:
-http://github.com/evolvingweb/ajax-solr It is planned to provide a out
-of the box integration with the Ajax-Solr front-end through this addon
-in the medium term.
 
 = III. Internals and Add-On Development [[internals]]
 
@@ -9865,79 +9317,6 @@ persistence setup --provider --database
   The persistence unit name to be used in the persistence.xml file;
   default: '__NULL__'
 
-[[command-index-jsf-commands]]
-=== Jsf Commands
-
-Jsf Commands are contained in
-org.springframework.roo.addon.jsf.JsfCommands.
-
-[[command-index-web-jsf-all]]
-==== web jsf all
-
-Create JSF managed beans for all entities
-
-[options=nowrap]
-----
-web jsf all --package
-----
-
---package::
-  The package in which new JSF managed beans will be placed; default:
-  '__NULL__' (mandatory)
-
-[[command-index-web-jsf-media]]
-==== web jsf media
-
-Add a cross-browser generic player to embed multimedia content
-
-[options=nowrap]
-----
-web jsf media --url
-----
-
---url::
-  The url of the media source; default: '__NULL__' (mandatory)
---player::
-  The name of the media player; default: '__NULL__'
-
-[[command-index-web-jsf-scaffold]]
-==== web jsf scaffold
-
-Create JSF managed bean for an entity
-
-[options=nowrap]
-----
-web jsf scaffold --class
-----
-
---class::
-  The path and name of the JSF managed bean to be created; default:
-  '__NULL__' (mandatory)
---entity::
-  The entity which this JSF managed bean class will create and modify as
-  required; default if option not present: '*'
---beanName::
-  The name of the managed bean to use in the 'name' attribute of the
-  @ManagedBean annotation; default: '__NULL__'
---includeOnMenu::
-  Include this entity on the generated JSF menu; default: 'true'
-
-[[command-index-web-jsf-setup]]
-==== web jsf setup
-
-Set up JSF environment
-
--------------
-web jsf setup
--------------
-
---implementation::
-  The JSF implementation to use; default: '__NULL__'
---library::
-  The JSF component library to use; default: '__NULL__'
---theme::
-  The name of the theme; default: '__NULL__'
-
 [[command-index-json-commands]]
 === Json Commands
 
@@ -10507,92 +9886,6 @@ metadata trace --level
   The verbosity of notifications (0=none, 1=some, 2=all); default:
   '__NULL__' (mandatory)
 
-[[command-index-mongo-commands]]
-=== Mongo Commands
-
-Mongo Commands are contained in
-org.springframework.roo.addon.layers.repository.mongo.MongoCommands.
-
-[[command-index-entity-mongo]]
-==== entity mongo
-
-Creates a domain entity which can be backed by a MongoDB repository
-
-[options=nowrap]
-----
-entity mongo --class
-----
-
---class::
-  Implementation class for the specified interface; default: '__NULL__'
-  (mandatory)
---identifierType::
-  The ID type to be used for this domain type (defaults to BigInteger);
-  default: '__NULL__'
---testAutomatically::
-  Create automatic integration tests for this entity; default if option
-  present: 'true'; default if option not present: 'false'
-
-[[command-index-mongo-setup]]
-==== mongo setup
-
-Configures the project for MongoDB peristence.
-
------------
-mongo setup
------------
-
---username::
-  Username for accessing the database (defaults to ''); default:
-  '__NULL__'
---password::
-  Password for accessing the database (defaults to ''); default:
-  '__NULL__'
---databaseName::
-  Name of the database (defaults to project name); default: '__NULL__'
---port::
-  Port for the database (defaults to '27017'); default: '__NULL__'
---host::
-  Host for the database (defaults to '127.0.0.1'); default: '__NULL__'
---cloudFoundry::
-  Deploy to CloudFoundry (defaults to 'false'); default if option
-  present: 'true'; default if option not present: 'false'
-
-[[command-index-repository-mongo]]
-==== repository mongo
-
-Adds @RooMongoRepository annotation to target type
-
-[options=nowrap]
-----
-repository mongo --interface
-----
-
---interface::
-  The java interface to apply this annotation to; default: '__NULL__'
-  (mandatory)
---entity::
-  The domain entity this repository should expose; default if option not
-  present: '*'
-
-[[command-index-os-commands]]
-=== Os Commands
-
-Os Commands are contained in
-org.springframework.roo.addon.oscommands.OsCommands.
-
-[[command-index-exclamation]]
-==== !
-
-Allows execution of operating system (OS) commands.
-
-----
-!
-----
-
---command::
-  The command to execute; default: ''
-
 [[command-index-pgp-commands]]
 === Pgp Commands
 
@@ -11028,47 +10321,6 @@ service type --interface
   When true, Spring Roo will configure services using XML.; default:
   '__NULL__'
 
-[[command-index-solr-commands]]
-=== Solr Commands
-
-Solr Commands are contained in
-org.springframework.roo.addon.solr.SolrCommands.
-
-[[command-index-solr-add]]
-==== solr add
-
-Make target type searchable
-
---------
-solr add
---------
-
---class::
-  The type to be made searchable; default if option not present: '*'
-
-[[command-index-solr-all]]
-==== solr all
-
-Make all eligible project types searchable
-
---------
-solr all
---------
-
-This command does not accept any options.
-
-[[command-index-solr-setup]]
-==== solr setup
-
-Install support for Solr search integration
-
-----------
-solr setup
-----------
-
---searchServerUrl::
-  The URL of the Solr search server; default:
-  'http://localhost:8983/solr'
 
 [[command-index-tailor-commands]]
 === Tailor Commands
@@ -11211,23 +10463,6 @@ web mvc finder all
 
 This command does not accept any options.
 
-[[command-index-web-flow-commands]]
-=== Web Flow Commands
-
-Web Flow Commands are contained in
-org.springframework.roo.addon.web.flow.WebFlowCommands.
-
-[[command-index-web-flow]]
-==== web flow
-
-Install Spring Web Flow configuration artifacts into your project
-
---------
-web flow
---------
-
---flowName::
-  The name for your web flow; default: '__NULL__'
 
 [[command-index-web-json-commands]]
 === Web Json Commands
@@ -11948,11 +11183,7 @@ Maven will download the Spring Roo artifacts automatically.
 [[resources-forums]]
 === Community Forum
 
-Web: http://stackoverflow.com/questions/tagged/spring-roo
-
-For fast and free end user support for all official Spring projects, the
-Spring Roo Forum is an excellent place to visit. Because Roo is an
-official top-level Spring project, of course you'll find there is a
+Because Roo is an official top-level Spring project, of course you'll find there is a
 dedicated "Spring Roo" tag at Stack Overflow for all your questions, comments
 and experiences.
 

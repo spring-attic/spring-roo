@@ -61,7 +61,7 @@
                             <sourceHighlighter>coderay</sourceHighlighter>
                             <attributes>
                                 <toc/>
-								<toc-placement>left</toc-placement> 
+								                <toc-placement>left</toc-placement> 
                                 <sectanchors>true</sectanchors>
                                 <!-- set the idprefix to blank -->
                                 <idprefix/>
