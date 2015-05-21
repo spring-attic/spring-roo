@@ -34,11 +34,10 @@
 :toclevels: 		5
 :numbered:
 :sectnumlevels:		5
+:source-highlighter:  coderay
 ifdef::backend-pdf[]
 :pdf-style:		asciidoctor
 :pagenums:
-//:pygments-style: 	bw
-//:source-highlighter: 	pygments
 endif::[]
 
 [abstract]
@@ -95,9 +94,9 @@ http://projects.spring.io/spring-roo/#download-widget[downloads section]
 and the
 http://projects.spring.io/spring-roo/#instant-results---making-java-fun[related documentation].
 
-You can also build a distribution ZIP yourself from our 
+You can also build a distribution ZIP yourself from our
 link:#resources-source-repository[source control repository.]
- 
+
 [[preface-install]]
 === 4. Install Spring Roo
 
