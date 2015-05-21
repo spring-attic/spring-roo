@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="581.0" prefWidth="934.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.springframework.roo.project.wizard.Step2Controller">
+   <children>
+      <ImageView fitHeight="66.0" fitWidth="75.0" layoutX="860.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="icons/roo_wizban.png" />
+         </image>
+      </ImageView>
+      <Separator layoutY="66.0" prefHeight="3.0" prefWidth="930.0" />
+      <Label layoutX="16.0" layoutY="14.0" text="Spring Roo Project Wizard">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </Label>
+      <Label fx:id="infoLabel" layoutX="43.0" layoutY="30.0" prefHeight="32.0" prefWidth="434.0" text="Create Entity Layer">
+         <font>
+            <Font size="11.0" />
+         </font>
+      </Label>
+      <Button fx:id="nextBtn" layoutX="622.0" layoutY="535.0" mnemonicParsing="false" onAction="#onPressNext" prefHeight="25.0" prefWidth="92.0" text="Next &gt;" />
+      <Button fx:id="backBtn" layoutX="523.0" layoutY="535.0" mnemonicParsing="false" onAction="#onPressBack" prefHeight="25.0" prefWidth="92.0" text="&lt; Back" />
+      <Button fx:id="cancelBtn" layoutX="724.0" layoutY="535.0" mnemonicParsing="false" onAction="#onPressCancel" prefHeight="25.0" prefWidth="92.0" text="Cancel" />
+      <Button fx:id="finishBtn" layoutX="824.0" layoutY="535.0" mnemonicParsing="false" onAction="#onPressFinish" prefHeight="25.0" prefWidth="92.0" text="Finish" />
+      <TreeView fx:id="entitiesTree" layoutX="24.0" layoutY="111.0" prefHeight="413.0" prefWidth="231.0" />
+      <Button fx:id="addBtn" layoutX="24.0" layoutY="80.0" mnemonicParsing="false" onAction="#onPressAdd" prefHeight="25.0" prefWidth="29.0">
+      	<graphic>
+            <ImageView fitHeight="13.0" fitWidth="13.0">
+               <image>
+                   <Image url="icons/add.png" />
+               </image>
+            </ImageView>
+        </graphic>
+      </Button>
+      <Button fx:id="removeEntityBtn" disable="true" layoutX="65.0" layoutY="80.0" mnemonicParsing="false" onAction="#onPressRemove" prefHeight="25.0" prefWidth="29.0">
+      <graphic>
+            <ImageView fitHeight="13.0" fitWidth="13.0">
+               <image>
+                   <Image url="icons/remove.png" />
+               </image>
+            </ImageView>
+        </graphic>
+      </Button>
+      <Pane fx:id="drawPane" layoutX="267.0" layoutY="111.0" prefHeight="413.0" prefWidth="650.0" style="-fx-border-color: black;">
+         <children>
+            <Group fx:id="drawGroup" layoutX="5.0" layoutY="5.0" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
