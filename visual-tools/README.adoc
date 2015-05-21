@@ -1,5 +1,15 @@
 == Spring Roo Visual Tools
 
-Spring Roo 2.0+ will include visual tools that will make Roo Shell easier to use. 
+As usual, Spring Roo 2.0 includes shell commands for installing and
+managing its new features, but now a new way to interact with Roo have 
+been introduced, the visual tools.
+
+Despite Roo's really nice shell, there are features that are easier to execute
+using a graphical user interface, like the management of the OSGi repositories
+list or the workflow to create new projects among others.
+
+For that reason, Spring Roo 2.0 includes graphical user tools or visual tools
+that make some Roo tasks easier to execute.
 
 This folder will contain these new visual tools.
+
