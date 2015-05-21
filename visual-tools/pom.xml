@@ -14,6 +14,7 @@
 
 	<modules>
 		<module>obr-manager-visual</module>
-  	</modules>
+    <module>project-wizard</module>
+  </modules>
 
 </project>

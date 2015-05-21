@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="258.0" prefWidth="555.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.springframework.roo.project.wizard.NewFieldController">
+   <children>
+      <ImageView fitHeight="66.0" fitWidth="75.0" layoutX="491.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="icons/roo_wizban.png" />
+         </image>
+      </ImageView>
+      <Separator layoutY="66.0" prefHeight="3.0" prefWidth="555.0" />
+      <Label layoutX="16.0" layoutY="14.0" text="Spring Roo Project Wizard">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </Label>
+      <Label fx:id="infoLabel" layoutX="43.0" layoutY="30.0" prefHeight="32.0" prefWidth="434.0" text="Add new field on current Entity">
+         <font>
+            <Font size="11.0" />
+         </font>
+      </Label>
+      <Label layoutX="26.0" layoutY="94.0" text="Field Name:" />
+      <TextField fx:id="fieldNameField" layoutX="121.0" layoutY="89.0" prefHeight="25.0" prefWidth="411.0" />
+      <Button fx:id="cancelBtn" layoutX="339.0" layoutY="217.0" mnemonicParsing="false" onAction="#onPressCancel" prefHeight="25.0" prefWidth="92.0" text="Cancel" />
+      <Button fx:id="addBtn" layoutX="439.0" layoutY="217.0" mnemonicParsing="false" onAction="#onPressAdd" prefHeight="25.0" prefWidth="92.0" text="Add" />
+      <Label layoutX="26.0" layoutY="133.0" text="Field Type:" />
+      <ComboBox fx:id="fieldTypeCombo" layoutX="121.0" layoutY="128.0" onAction="#onChangeFieldType" prefHeight="25.0" prefWidth="411.0" />
+      <ComboBox fx:id="classCombo" layoutX="121.0" layoutY="167.0" prefHeight="25.0" prefWidth="411.0" />
+      <Label fx:id="classLabel" layoutX="26.0" layoutY="172.0" text="Class:" />
+   </children>
+</AnchorPane>

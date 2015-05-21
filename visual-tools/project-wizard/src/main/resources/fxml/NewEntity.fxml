@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="429.0" prefWidth="555.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.springframework.roo.project.wizard.NewEntityController">
+   <children>
+      <ImageView fitHeight="66.0" fitWidth="75.0" layoutX="491.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="icons/roo_wizban.png" />
+         </image>
+      </ImageView>
+      <Separator layoutY="66.0" prefHeight="3.0" prefWidth="555.0" />
+      <Label layoutX="16.0" layoutY="14.0" text="Spring Roo Project Wizard">
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font>
+      </Label>
+      <Label fx:id="infoLabel" layoutX="43.0" layoutY="30.0" prefHeight="32.0" prefWidth="434.0" text="Add new Entity">
+         <font>
+            <Font size="11.0" />
+         </font>
+      </Label>
+      <Label layoutX="26.0" layoutY="94.0" text="Entity Name:" />
+      <TextField fx:id="entityNameField" layoutX="121.0" layoutY="89.0" prefHeight="25.0" prefWidth="411.0" />
+      <Button fx:id="cancelBtn" layoutX="337.0" layoutY="385.0" mnemonicParsing="false" onAction="#onPressCancel" prefHeight="25.0" prefWidth="92.0" text="Cancel" />
+      <Button fx:id="addBtn" layoutX="437.0" layoutY="385.0" mnemonicParsing="false" onAction="#onPressAdd" prefHeight="25.0" prefWidth="92.0" text="Add" />
+      <Button fx:id="addFieldBtn" layoutX="458.0" layoutY="137.0" mnemonicParsing="false" onAction="#onPressAddField" prefHeight="25.0" prefWidth="29.0">
+      	<graphic>
+            <ImageView fitHeight="13.0" fitWidth="13.0">
+               <image>
+                   <Image url="icons/add.png" />
+               </image>
+            </ImageView>
+        </graphic>
+      </Button>
+      <Button fx:id="removeFieldBtn" disable="true" layoutX="499.0" layoutY="137.0" mnemonicParsing="false" onAction="#onPressRemove" prefHeight="25.0" prefWidth="29.0">
+      <graphic>
+            <ImageView fitHeight="13.0" fitWidth="13.0">
+               <image>
+                   <Image url="icons/remove.png" />
+               </image>
+            </ImageView>
+        </graphic>
+      </Button>
+      <TableView fx:id="fieldsTable" layoutX="26.0" layoutY="167.0" prefHeight="196.0" prefWidth="508.0">
+        <columns>
+          <TableColumn fx:id="typeColumn" prefWidth="87.0" resizable="false" text="Type" />
+          <TableColumn fx:id="nameColumn" prefWidth="420.0" resizable="false" text="Name" />
+        </columns>
+      </TableView>
+      <Label layoutX="27.0" layoutY="141.0" text="Fields:" />
+   </children>
+</AnchorPane>
