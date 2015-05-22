@@ -34,7 +34,7 @@
 :toclevels: 		5
 :numbered:
 :sectnumlevels:		5
-:source-highlighter:  coderay
+//:source-highlighter:  coderay
 ifdef::backend-pdf[]
 :pdf-style:		asciidoctor
 :pagenums:
@@ -480,205 +480,205 @@ whether they also respect your right to decide to leave and easily
 implement that decision, or if they know you're locked in and can't do
 much about it.
 
-[[intro-first-steps]]
-=== First Steps: Your Own Web App in Under 10 Minutes
-
-Now that you have installed Roo, let's spend a couple of minutes
-building an enterprise application using Roo.
-
-The purpose of this application is just to try out Roo. We won't explain
-what's going on in these steps, but don't worry - we'll do that in the
-next chapter, link:#beginning[Beginning With Roo: The Tutorial]. We will
-try to teach you about some usability features as we go along, though.
-
-Please start by typing the following commands:
-
-[source,sh]
-----
-$ mkdir ten-minutes
-$ cd ten-minutes
-$ roo
-    ____  ____  ____
-   / __ \/ __ \/ __ \
-  / /_/ / / / / / / /
- / _, _/ /_/ / /_/ /
-/_/ |_|\____/\____/    W.X.Y.ZZ [rev RRR]
-
-
-Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
-roo> hint
-Welcome to Roo! We hope you enjoy your stay!
-
-Before you can use many features of Roo, you need to start a new project.
-
-To do this, type 'project' (without the quotes) and then hit TAB.
-
-Enter a --topLevelPackage like 'com.mycompany.projectname' (no quotes).
-When you've finished completing your --topLevelPackage, press ENTER.
-Your new project will then be created in the current working directory.
-
-Note that Roo frequently allows the use of TAB, so press TAB regularly.
-Once your project is created, type 'hint' and ENTER for the next suggestion.
-You're also welcome to visit http://stackoverflow.com/questions/tagged/spring-roo for Roo help.
-----
-
-Notice the output from the "hint" command guides you through what to do
-next. Let's do that:
-
-[source,sh]
-----
-roo> project setup --topLevelPackage com.tenminutes
-Created /home/balex/ten-minutes/pom.xml
-Created SRC_MAIN_JAVA
-Created SRC_MAIN_RESOURCES
-Created SRC_TEST_JAVA
-Created SRC_TEST_RESOURCES
-Created SRC_MAIN_WEBAPP
-Created SRC_MAIN_RESOURCES/META-INF/spring
-Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
-roo> hint
-Roo requires the installation of a JPA provider and associated database.
-
-Type 'jpa setup' and then hit TAB three times.
-We suggest you type 'H' then TAB to complete "HIBERNATE".
-After the --provider, press TAB twice for database choices.
-For testing purposes, type (or TAB) HYPERSONIC_IN_MEMORY.
-If you press TAB again, you'll see there are no more options.
-As such, you're ready to press ENTER to execute the command.
-
-Once JPA is installed, type 'hint' and ENTER for the next suggestion.
-----
-
-At this point you've now got a viable Maven-based project setup. But
-let's make it more useful by setting up JPA. In the interests of time,
-I'll just include the commands you should type below. Be sure to try
-using the TAB key when using the shell, as it will save you from having
-to type most of these commands:
-
-[source,sh]
-----
-roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
-roo> hint
-roo> entity jpa --class ~.Timer --testAutomatically
-roo> hint
-roo> field string --fieldName message --notNull
-roo> hint web mvc
-roo> web mvc setup
-roo> web mvc all --package ~.web
-roo> selenium test --controller ~.web.TimerController
-roo> perform tests
-roo> perform package
-roo> perform eclipse
-roo> quit
-$ mvn tomcat:run
-----
-
-The "link:#command-index-maven-commands[perform]" commands could have
-been easily undertaken from the command prompt using "mvn" instead. We
-just did them from within Roo to benefit from TAB completion. You could
-have also skipped the "link:#command-index-perform-eclipse[perform
-eclipse]" command if you are using the m2eclipse plugin. If you are
-using Spring Tool Suite (STS), it automatically includes m2eclipse and
-as such you do not need to use the "perform eclipse" command. Indeed if
-you're an STS user, you could have started your Roo project right from
-within the IDE by selecting the File > New > Spring Roo menu option and
-completing the steps. In that case a Roo Shell view will open within STS
-and from there you can enter the remaining commands.
-
-Now that you've loaded Tomcat, let's run the Selenium tests. You can do
-this by loading a new command window, changing into the ten-minutes
-directory, and then executing `mvn selenium:selenese`. You should see
-your FireFox web browser execute the generated Selenium tests. You can
-also visit your new web application at http://localhost:8080/tenminutes,
-which should look similar to the picture below.
-
-image::tenminutes.png[tenminutes,align=center]
-
-Naturally in this short ten minute test we've skipped dozens of features
-that Roo can provide, and didn't go into any detail on how you could
-have customised the application. We just wanted to show you that Roo
-works and you can build an application in record-time. The
-link:#beginning[Beginning With Roo: The Tutorial] chapter will go
-through the process of building an application in much more depth,
-including how to work with your IDE and so on.
-
-[[intro-exploring-sample]]
-=== Exploring the Roo Samples
-
-Now that you've built your first application during the
-link:#intro-first-steps[ten minute test], you have a rough idea of how
-Roo works. To help you learn Roo we ship several sample scripts that can
-be used to build new applications. These sample scripts can be found in
-your $ROO_HOME/samples/ directory. These sample
-scripts available from roo classpath. You can run any sample script by
-using the following command format:
-
-[source,sh]
-----
-$ mkdir sample
-$ cd sample
-$ roo
-roo> script --file filename.roo
-roo> quit
-$ mvn tomcat:run
-----
-
-The `filename.roo` shown in the statements above should be substituted
-with one of the filenames from this list (note that you get filename
-completion using TAB):
-
-* __clinic.roo__: The Petclinic sample script is our most comprehensive.
-It builds a large number of entities, controllers, Selenium tests and
-dynamic finders. It also sets up Log4J and demonstrates entity
-relationships of different cardinalities.
-* __vote.roo__: The Voting sample script was built live on-stage during
-SpringOne Europe 2009, as detailed in the project
-link:#background-history[history] section. This is a nice sample script
-because it's quite small and only has two entities. It also demonstrates
-Spring Security usage.
-* __wedding.roo__: The Wedding RSVP sample script is the result of the
-link:#beginning-wedding-tutorial[wedding RSVP tutorial]. If you're
-looking for another Roo tutorial, this sample script (along with the
-associated blog entry) is a good choice. This project includes Selenium
-tests, dynamic finders and Log4j configuration.
-* __pizzashop.roo__: The PizzaShop sample script demonstrates Roo's
-integration of JPA composite primary keys. It produces a headless
-application which is accessible via JSON (available through Spring MVC
-REST integration). To add a Web UI on top of it, simply run the
-link:#command-index-web-mvc-all[web mvc all] command. The application is
-described in greater detail in our link:#beginning[tutorial].
-
-[[intro-suggested-steps]]
-=== Suggested Steps to Roo Productivity
-
-As we draw to the close of this first chapter, you know what Roo is, why
-you'd like to use it, have installed it and completed the ten minute
-test, plus you know which samples are available. You could probably stop
-at this point and apply Roo productively to your projects, but we
-recommend that you spend a couple of hours learning more about Roo. It
-will be time well spent and easily recouped by the substantially greater
-productivity Roo will soon deliver on your projects.
-
-The next step is to complete the link:#beginning[Beginning With Roo: The
-Tutorial] chapter. In the tutorial chapter you'll learn how to use Roo
-with your preferred IDE and how flexible and natural it is to develop
-with Roo. After that you should read the link:#architecture[application
-architecture] chapter to understand what Roo applications look like.
-From there you might wish to wrap up the recommended tour of Roo with a
-skim over the link:#usage[usage and conventions] chapter. This final
-recommended chapter will focus more on using the Roo tool and less on
-the applications that Roo creates.
-
-If you can't find the information you're looking for in this reference
-guide, the link:#resources[resources chapter] contains numerous
-Roo-related web sites and other community resources.
-
-We welcome your comments and suggestions as you go about using Roo. One
-convenient way to share your experiences is to Tweet with the
-https://twitter.com/springroo[@springroo] hash code. You
-can also follow Roo's link:#resources-twitter[core development team] via
-Twitter for the latest Roo updates. In any event, we thank you for
-exploring Roo and hope that you enjoy your Roo journey.
+//[[intro-first-steps]]
+//=== First Steps: Your Own Web App in Under 10 Minutes
+//
+//Now that you have installed Roo, let's spend a couple of minutes
+//building an enterprise application using Roo.
+//
+//The purpose of this application is just to try out Roo. We won't explain
+//what's going on in these steps, but don't worry - we'll do that in the
+//next chapter, link:#beginning[Beginning With Roo: The Tutorial]. We will
+//try to teach you about some usability features as we go along, though.
+//
+//Please start by typing the following commands:
+//
+//[source,sh]
+//----
+//$ mkdir ten-minutes
+//$ cd ten-minutes
+//$ roo
+//    ____  ____  ____
+//   / __ \/ __ \/ __ \
+//  / /_/ / / / / / / /
+// / _, _/ /_/ / /_/ /
+//_/ |_|\____/\____/    W.X.Y.ZZ [rev RRR]
+//
+//
+//Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
+//roo> hint
+//Welcome to Roo! We hope you enjoy your stay!
+//
+//Before you can use many features of Roo, you need to start a new project.
+//
+//To do this, type 'project' (without the quotes) and then hit TAB.
+//
+//Enter a --topLevelPackage like 'com.mycompany.projectname' (no quotes).
+//When you've finished completing your --topLevelPackage, press ENTER.
+//Your new project will then be created in the current working directory.
+//
+//Note that Roo frequently allows the use of TAB, so press TAB regularly.
+//Once your project is created, type 'hint' and ENTER for the next suggestion.
+//You're also welcome to visit http://stackoverflow.com/questions/tagged/spring-roo for Roo help.
+//----
+//
+//Notice the output from the "hint" command guides you through what to do
+//next. Let's do that:
+//
+//[source,sh]
+//----
+//roo> project setup --topLevelPackage com.tenminutes
+//Created /home/balex/ten-minutes/pom.xml
+//Created SRC_MAIN_JAVA
+//Created SRC_MAIN_RESOURCES
+//Created SRC_TEST_JAVA
+//Created SRC_TEST_RESOURCES
+//Created SRC_MAIN_WEBAPP
+//Created SRC_MAIN_RESOURCES/META-INF/spring
+//Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
+//roo> hint
+//Roo requires the installation of a JPA provider and associated database.
+//
+//Type 'jpa setup' and then hit TAB three times.
+//We suggest you type 'H' then TAB to complete "HIBERNATE".
+//After the --provider, press TAB twice for database choices.
+//For testing purposes, type (or TAB) HYPERSONIC_IN_MEMORY.
+//If you press TAB again, you'll see there are no more options.
+//As such, you're ready to press ENTER to execute the command.
+//
+//Once JPA is installed, type 'hint' and ENTER for the next suggestion.
+//----
+//
+//At this point you've now got a viable Maven-based project setup. But
+//let's make it more useful by setting up JPA. In the interests of time,
+//I'll just include the commands you should type below. Be sure to try
+//using the TAB key when using the shell, as it will save you from having
+//to type most of these commands:
+//
+//[source,sh]
+//----
+//roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+//roo> hint
+//roo> entity jpa --class ~.Timer --testAutomatically
+//roo> hint
+//roo> field string --fieldName message --notNull
+//roo> hint web mvc
+//roo> web mvc setup
+//roo> web mvc all --package ~.web
+//roo> selenium test --controller ~.web.TimerController
+//roo> perform tests
+//roo> perform package
+//roo> perform eclipse
+//roo> quit
+//$ mvn tomcat:run
+//----
+//
+//The "link:#command-index-maven-commands[perform]" commands could have
+//been easily undertaken from the command prompt using "mvn" instead. We
+//just did them from within Roo to benefit from TAB completion. You could
+//have also skipped the "link:#command-index-perform-eclipse[perform
+//eclipse]" command if you are using the m2eclipse plugin. If you are
+//using Spring Tool Suite (STS), it automatically includes m2eclipse and
+//as such you do not need to use the "perform eclipse" command. Indeed if
+//you're an STS user, you could have started your Roo project right from
+//within the IDE by selecting the File > New > Spring Roo menu option and
+//completing the steps. In that case a Roo Shell view will open within STS
+//and from there you can enter the remaining commands.
+//
+//Now that you've loaded Tomcat, let's run the Selenium tests. You can do
+//this by loading a new command window, changing into the ten-minutes
+//directory, and then executing `mvn selenium:selenese`. You should see
+//your FireFox web browser execute the generated Selenium tests. You can
+//also visit your new web application at http://localhost:8080/tenminutes,
+//which should look similar to the picture below.
+//
+//image::tenminutes.png[tenminutes,align=center]
+//
+//Naturally in this short ten minute test we've skipped dozens of features
+//that Roo can provide, and didn't go into any detail on how you could
+//have customised the application. We just wanted to show you that Roo
+//works and you can build an application in record-time. The
+//link:#beginning[Beginning With Roo: The Tutorial] chapter will go
+//through the process of building an application in much more depth,
+//including how to work with your IDE and so on.
+//
+//[[intro-exploring-sample]]
+//=== Exploring the Roo Samples
+//
+//Now that you've built your first application during the
+//link:#intro-first-steps[ten minute test], you have a rough idea of how
+//Roo works. To help you learn Roo we ship several sample scripts that can
+//be used to build new applications. These sample scripts can be found in
+//your $ROO_HOME/samples/ directory. These sample
+//scripts available from roo classpath. You can run any sample script by
+//using the following command format:
+//
+//[source,sh]
+//----
+//$ mkdir sample
+//$ cd sample
+//$ roo
+//roo> script --file filename.roo
+//roo> quit
+//$ mvn tomcat:run
+//----
+//
+//The `filename.roo` shown in the statements above should be substituted
+//with one of the filenames from this list (note that you get filename
+//completion using TAB):
+//
+//* __clinic.roo__: The Petclinic sample script is our most comprehensive.
+//It builds a large number of entities, controllers, Selenium tests and
+//dynamic finders. It also sets up Log4J and demonstrates entity
+//relationships of different cardinalities.
+//* __vote.roo__: The Voting sample script was built live on-stage during
+//SpringOne Europe 2009, as detailed in the project
+//link:#background-history[history] section. This is a nice sample script
+//because it's quite small and only has two entities. It also demonstrates
+//Spring Security usage.
+//* __wedding.roo__: The Wedding RSVP sample script is the result of the
+//link:#beginning-wedding-tutorial[wedding RSVP tutorial]. If you're
+//looking for another Roo tutorial, this sample script (along with the
+//associated blog entry) is a good choice. This project includes Selenium
+//tests, dynamic finders and Log4j configuration.
+//* __pizzashop.roo__: The PizzaShop sample script demonstrates Roo's
+//integration of JPA composite primary keys. It produces a headless
+//application which is accessible via JSON (available through Spring MVC
+//REST integration). To add a Web UI on top of it, simply run the
+//link:#command-index-web-mvc-all[web mvc all] command. The application is
+//described in greater detail in our link:#beginning[tutorial].
+//
+//[[intro-suggested-steps]]
+//=== Suggested Steps to Roo Productivity
+//
+//As we draw to the close of this first chapter, you know what Roo is, why
+//you'd like to use it, have installed it and completed the ten minute
+//test, plus you know which samples are available. You could probably stop
+//at this point and apply Roo productively to your projects, but we
+//recommend that you spend a couple of hours learning more about Roo. It
+//will be time well spent and easily recouped by the substantially greater
+//productivity Roo will soon deliver on your projects.
+//
+//The next step is to complete the link:#beginning[Beginning With Roo: The
+//Tutorial] chapter. In the tutorial chapter you'll learn how to use Roo
+//with your preferred IDE and how flexible and natural it is to develop
+//with Roo. After that you should read the link:#architecture[application
+//architecture] chapter to understand what Roo applications look like.
+//From there you might wish to wrap up the recommended tour of Roo with a
+//skim over the link:#usage[usage and conventions] chapter. This final
+//recommended chapter will focus more on using the Roo tool and less on
+//the applications that Roo creates.
+//
+//If you can't find the information you're looking for in this reference
+//guide, the link:#resources[resources chapter] contains numerous
+//Roo-related web sites and other community resources.
+//
+//We welcome your comments and suggestions as you go about using Roo. One
+//convenient way to share your experiences is to Tweet with the
+//https://twitter.com/springroo[@springroo] hash code. You
+//can also follow Roo's link:#resources-twitter[core development team] via
+//Twitter for the latest Roo updates. In any event, we thank you for
+//exploring Roo and hope that you enjoy your Roo journey.
 
 [[beginning]]
 == Beginning With Roo: The Tutorial
