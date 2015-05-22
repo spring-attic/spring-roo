@@ -126,6 +126,16 @@ public class NewEntityController implements Initializable {
             return false;
         }
         
+        
+        // Checking that not exists other entity with the same name
+        for(Entity existingEntity : Step2Controller.entitiesToAdd){
+            if(existingEntity.getEntityName().equals(entityNameField.getText())){
+                infoLabel.setTextFill(Color.RED);
+                infoLabel.setText("Entity " + entityNameField.getText() + " already exists in the project.");
+                return false;
+            }
+        }
+        
         return true;
     }
     

@@ -59,7 +59,7 @@ public class NewFieldController implements Initializable {
             Field newField = new Field(fieldNameField.getText(), (String) fieldTypeCombo.getValue());
             
             // Adding class reference if needed
-            if(classCombo.getValue() != null){
+            if(fieldTypeCombo.getValue().equals("reference") && classCombo.getValue() != null){
                 for(Entity entity : Step2Controller.entitiesToAdd){
                     if(entity.getEntityName().equals(classCombo.getValue())){
                         newField.setReferencedClass(entity);
@@ -92,6 +92,7 @@ public class NewFieldController implements Initializable {
         if(fieldTypeCombo.getValue().equals("reference")){
             classCombo.setVisible(true);
             classLabel.setVisible(true);
+            
         }else{
             classCombo.setVisible(false);
             classLabel.setVisible(false);
@@ -118,6 +119,16 @@ public class NewFieldController implements Initializable {
             infoLabel.setTextFill(Color.RED);
             infoLabel.setText("Reference field needs a class to reference");
             return false;
+        }
+        
+        // Check if other field with the same name was declared in the entity
+        for(Field existingField : NewEntityController.entityFields){
+            if(existingField.getFieldName().equals(fieldNameField.getText())){
+                infoLabel.setTextFill(Color.RED);
+                infoLabel.setText("Field " + fieldNameField.getText() + " is already"
+                        + "declared in this Entity.");
+                return false;
+            }
         }
         
         return true;

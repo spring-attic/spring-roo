@@ -57,7 +57,6 @@ public class UMLEntity extends Group{
             
             // If entity has some reference field
             // , is necessary to paint it
-            System.out.println(field.getReferencedClass());
             if(field.getReferencedClass() != null){
                Entity referencedEntity = field.getReferencedClass();
                double referencedPositionX = referencedEntity.getPositionUMLX();
@@ -173,6 +172,7 @@ public class UMLEntity extends Group{
             public void handle(MouseEvent t) {
                 // Getting entity
                 UMLEntity entity = ((UMLEntity)(t.getSource()));
+                Entity entityToAdd = Step2Controller.entitiesToAdd.get(Step2Controller.entitiesToAdd.indexOf(entity.getEntity()));
                                 
                 double offsetX = t.getSceneX() - orgSceneX;
                 double offsetY = t.getSceneY() - orgSceneY;
@@ -183,39 +183,47 @@ public class UMLEntity extends Group{
                 if(newTranslateX > initialXPosition*-1 && newTranslateX < (640 - entity.getEntityWidth()) - initialXPosition){
                     entity.setTranslateX(newTranslateX);
                     // Updating entity
-                    Entity entityToAdd = Step2Controller.entitiesToAdd.get(Step2Controller.entitiesToAdd.indexOf(entity.getEntity()));
-                    entityToAdd.setPositionUMLX(newTranslateX);
+                    entityToAdd.setPositionUMLX(t.getSceneX());
                 }
                 
                 if(newTranslateY > initialYPosition*-1 && newTranslateY < (395 - entity.getEntityHeight()) - initialYPosition){
                     entity.setTranslateY(newTranslateY);
                     // Updating entity
-                    Entity entityToAdd = Step2Controller.entitiesToAdd.get(Step2Controller.entitiesToAdd.indexOf(entity.getEntity()));
-                    entityToAdd.setPositionUMLY(newTranslateY);
-                }
+                    entityToAdd.setPositionUMLY(t.getSceneY());
+                }                
                 
-
-                
+                System.out.println(t.getSceneX() + " - " + t.getSceneY());
 
                 // Moving references
                 if(!references.isEmpty()){
+                    
+                    // Referenced entity
+                    Entity relatedEntity = null;
+                    
+                    // Getting reference fields
+                    for(Field field : entityToAdd.getEntityFields()){
+                        if(field.getType().equals("reference")){
+                            relatedEntity = field.getReferencedClass();
+                        }
+                    }
+                    
                     // Cleaning old references positions
                     for(Line reference : references){
                         
                         if(!(newTranslateX > initialXPosition*-1 && newTranslateX < (640 - entity.getEntityWidth()) - initialXPosition)){
                             if(newTranslateX > 0){
-                                newTranslateX = (Step2Controller.entitiesToAdd.get(0).getPositionUMLX() + reference.getEndX());
+                                newTranslateX = (relatedEntity.getPositionUMLX() + reference.getEndX());
                             }else{
-                                newTranslateX = (Step2Controller.entitiesToAdd.get(0).getPositionUMLX() - reference.getEndX());
+                                newTranslateX = (relatedEntity.getPositionUMLX() - reference.getEndX());
                             }
                             
                         }
                         
                         if(!(newTranslateY > initialYPosition*-1 && newTranslateY < (395 - entity.getEntityHeight()) - initialYPosition)){
                             if(newTranslateY > 0){
-                                newTranslateY = Step2Controller.entitiesToAdd.get(0).getPositionUMLY() + reference.getEndY();
+                                newTranslateY = relatedEntity.getPositionUMLY() + reference.getEndY();
                             }else{
-                                newTranslateY = Step2Controller.entitiesToAdd.get(0).getPositionUMLY() - reference.getEndY();
+                                newTranslateY = relatedEntity.getPositionUMLY() - reference.getEndY();
                             }
                             
                         }
@@ -227,13 +235,9 @@ public class UMLEntity extends Group{
                     Line referenceLine = new Line();
                     referenceLine.setStartX(0);
                     referenceLine.setStartY(0);
-                    referenceLine.setEndX(Step2Controller.entitiesToAdd.get(0).getPositionUMLX() - newTranslateX);
-                    referenceLine.setEndY(Step2Controller.entitiesToAdd.get(0).getPositionUMLY() - newTranslateY);
+                    referenceLine.setEndX(relatedEntity.getPositionUMLX() - newTranslateX);
+                    referenceLine.setEndY(relatedEntity.getPositionUMLY() - newTranslateY);
 
-                    /*System.out.println("Posicion Entidad: " + Step2Controller.entitiesToAdd.get(0).getPositionUMLX());
-                    System.out.println("TranslateX: " + newTranslateX + " - TranslateY: " + newTranslateY);
-                    System.out.println("Movimiento: " + (Step2Controller.entitiesToAdd.get(0).getPositionUMLX() - newTranslateX) + " - " + (Step2Controller.entitiesToAdd.get(0).getPositionUMLY() - newTranslateY));
-                    */
                     entity.getChildren().add(referenceLine);
 
                     references.add(referenceLine);

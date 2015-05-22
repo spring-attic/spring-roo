@@ -239,6 +239,7 @@ public class Step2Controller implements Initializable {
         
         // Adding all entities to UML view
         for(Entity entity : entitiesToAdd){         
+            System.out.println("RefreshUML: " + entity.getPositionUMLX() + " - " + entity.getPositionUMLY());
             UMLEntity umlEntity = new UMLEntity(entity);
             uMLEntitiesAdded.add(umlEntity);
             drawGroup.getChildren().add(umlEntity);
