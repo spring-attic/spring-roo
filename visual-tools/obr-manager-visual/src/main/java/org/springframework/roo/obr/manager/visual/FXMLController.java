@@ -98,17 +98,17 @@ public class FXMLController implements Initializable {
         // Getting installed Bundles
         String propertyBundles = System.getProperty("installedBundles");
         String[] bundles = propertyBundles.split(",");
-        installedBundles = new ArrayList<>(Arrays.asList(bundles));
+        installedBundles = new ArrayList<String>(Arrays.asList(bundles));
         
         // Getting installed repositories
         String propertyRepos = System.getProperty("installedRepositories");
         String[] repositories = propertyRepos.split(",");
-        installedRepositories = new ArrayList<>(Arrays.asList(repositories));
+        installedRepositories = new ArrayList<String>(Arrays.asList(repositories));
         
         // Getting installed Suites
         String propertySuites = System.getProperty("installedSuites");
         String[] suites = propertySuites.split(",");
-        installedSuites = new ArrayList<>(Arrays.asList(suites));
+        installedSuites = new ArrayList<String>(Arrays.asList(suites));
         
         // Initializing combobox with installed repositories
         initializeRepositoriesCombobox("");
@@ -314,7 +314,7 @@ public class FXMLController implements Initializable {
 		}
             }
             
-        }catch(ParserConfigurationException | IOException | SAXException e){
+        }catch(Exception e){
             System.out.println(e.getMessage());
         }
             
