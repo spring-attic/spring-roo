@@ -13,3 +13,9 @@ that make some Roo tasks easier to execute.
 
 This folder will contain these new visual tools.
 
+=== Requirements
+
+Visual tools are developed using JavaFX 2, for that reason to be able to compile
+this module you need JDK 1.7.
+
+Note that Spring Roo can run the Visual Tools if the Shell runs in Java 7 or greater.
