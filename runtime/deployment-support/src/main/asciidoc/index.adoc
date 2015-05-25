@@ -709,24 +709,24 @@ will learn how to use the Roo shell for:
 * creating and running Selenium tests
 * deployment and backup of your application
 
-[[beginning-wedding-tutorial]]
-=== Alternative Tutorial: The Wedding RSVP Application
+//[[beginning-wedding-tutorial]]
+//=== Alternative Tutorial: The Wedding RSVP Application
+//
+//In addition to the tutorial in this chapter, we've published a separate
+//step-by-step tutorial in the form of a blog entry. This blog entry
+//covers the process of building a wedding RSVP application. It is kept
+//updated to reflect the current major version of Roo, and features a
+//number of interesting Roo capabilities:
+//
+//* Standard MVC web application with JPA entities etc
+//* Spring Security usage, including login page customisation
+//* Sending emails via SMTP
+//* Testing both via JUnit and Selenium
+//* Usage with Eclipse
+//* Creating a WAR for deployment
 
-In addition to the tutorial in this chapter, we've published a separate
-step-by-step tutorial in the form of a blog entry. This blog entry
-covers the process of building a wedding RSVP application. It is kept
-updated to reflect the current major version of Roo, and features a
-number of interesting Roo capabilities:
-
-* Standard MVC web application with JPA entities etc
-* Spring Security usage, including login page customisation
-* Sending emails via SMTP
-* Testing both via JUnit and Selenium
-* Usage with Eclipse
-* Creating a WAR for deployment
-
-You can find the wedding tutorial at
-http://spring.io/blog/2009/05/27/getting-started-with-spring-roo
+//You can find the wedding tutorial at
+//http://spring.io/blog/2009/05/27/getting-started-with-spring-roo
 
 [[beginning-tutorial-application-use-cases]]
 === Tutorial Application Details
@@ -1491,8 +1491,10 @@ you'd like to know more about commonly-used Roo add-ons:
 
 * link:#command-index-finder-commands[Dynamic Finders]
 * link:#command-index-logging-commands[Logging] addon
-* link:#command-index-jms-commands[JMS] addon
 * link:#command-index-email-sender-setup[Email] (SMTP) addon
+* link:#roo-addon-suites[Roo Addon Suites]
+* link:#obr-management[Add-On management using OSGi Repositories]
+* link:#roo-market-place[Spring Roo Marketplace]
 
 [[architecture]]
 == Application Architecture
