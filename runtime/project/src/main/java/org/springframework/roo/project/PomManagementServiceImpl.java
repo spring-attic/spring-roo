@@ -13,12 +13,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -27,6 +30,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.maven.PomFactory;
 import org.springframework.roo.shell.Shell;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -36,6 +40,18 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class PomManagementServiceImpl implements PomManagementService {
+	
+	private BundleContext context;
+	private static final Logger LOGGER = HandlerUtils
+			.getLogger(PomManagementServiceImpl.class);
+	
+	protected void activate(final ComponentContext cContext) {
+		context = cContext.getBundleContext();
+        final File projectDirectory = new File(StringUtils.defaultIfEmpty(
+                OSGiUtils.getRooWorkingDirectory(cContext),
+                FileUtils.CURRENT_DIRECTORY));
+        projectRootDirectory = FileUtils.getCanonicalPath(projectDirectory);
+	}
 
     private static class PomComparator implements Comparator<String> {
         private final Map<String, Pom> pomMap;
@@ -67,24 +83,17 @@ public class PomManagementServiceImpl implements PomManagementService {
     private static final String DEFAULT_RELATIVE_PATH = ".." + SEPARATOR
             + DEFAULT_POM_NAME;
 
-    @Reference FileManager fileManager;
-    @Reference FileMonitorService fileMonitorService;
-    @Reference MetadataDependencyRegistry metadataDependencyRegistry;
-    @Reference MetadataService metadataService;
-    @Reference PomFactory pomFactory;
-    @Reference Shell shell;
+    FileManager fileManager;
+    FileMonitorService fileMonitorService;
+    MetadataDependencyRegistry metadataDependencyRegistry;
+    MetadataService metadataService;
+    PomFactory pomFactory;
+    Shell shell;
 
     private String focusedModulePath;
     private final Map<String, Pom> pomMap = new LinkedHashMap<String, Pom>();
     private String projectRootDirectory;
     private final Set<String> toBeParsed = new HashSet<String>();
-
-    protected void activate(final ComponentContext context) {
-        final File projectDirectory = new File(StringUtils.defaultIfEmpty(
-                OSGiUtils.getRooWorkingDirectory(context),
-                FileUtils.CURRENT_DIRECTORY));
-        projectRootDirectory = FileUtils.getCanonicalPath(projectDirectory);
-    }
 
     /**
      * For test cases to set up the state of this service
@@ -96,7 +105,7 @@ public class PomManagementServiceImpl implements PomManagementService {
     }
 
     private void findUnparsedPoms() {
-        for (final String change : fileMonitorService.getDirtyFiles(getClass()
+        for (final String change : getFileMonitorService().getDirtyFiles(getClass()
                 .getName())) {
             if (change.endsWith(DEFAULT_POM_NAME)) {
                 toBeParsed.add(change);
@@ -207,7 +216,7 @@ public class PomManagementServiceImpl implements PomManagementService {
                     resolvePoms(rootElement, pathToChangedPom, pomModuleMap);
                     final String moduleName = getModuleName(FileUtils
                             .getFirstDirectory(pathToChangedPom));
-                    final Pom pom = pomFactory.getInstance(rootElement,
+                    final Pom pom = getPomFactory().getInstance(rootElement,
                             pathToChangedPom, moduleName);
                     Validate.notNull(pom,
                             "POM is null for module '%s' and path '%s'",
@@ -233,7 +242,7 @@ public class PomManagementServiceImpl implements PomManagementService {
                         .containsKey(modulePath);
                 pomSet.put(modulePath, moduleName);
                 if (!alreadyDiscovered) {
-                    final Document pomDocument = XmlUtils.readXml(fileManager
+                    final Document pomDocument = XmlUtils.readXml(getFileManager()
                             .getInputStream(modulePath));
                     final Element root = pomDocument.getDocumentElement();
                     resolvePoms(root, modulePath, pomSet);
@@ -251,7 +260,7 @@ public class PomManagementServiceImpl implements PomManagementService {
         if (!alreadyDiscovered) {
             pomSet.put(parentPomPath, pomSet.get(parentPomPath));
             if (new File(parentPomPath).isFile()) {
-                final Document pomDocument = XmlUtils.readXml(fileManager
+                final Document pomDocument = XmlUtils.readXml(getFileManager()
                         .getInputStream(parentPomPath));
                 final Element root = pomDocument.getDocumentElement();
                 resolvePoms(root, parentPomPath, pomSet);
@@ -320,7 +329,7 @@ public class PomManagementServiceImpl implements PomManagementService {
             return;
         }
         focusedModulePath = focusedModule.getPath();
-        shell.setPromptPath(focusedModule.getModuleName());
+        getShell().setPromptPath(focusedModule.getModuleName());
     }
 
     private void sortPomMap() {
@@ -348,8 +357,183 @@ public class PomManagementServiceImpl implements PomManagementService {
         for (final Pom pom : newPoms) {
             final String projectMetadataId = ProjectMetadata
                     .getProjectIdentifier(pom.getModuleName());
-            metadataService.evictAndGet(projectMetadataId);
-            metadataDependencyRegistry.notifyDownstream(projectMetadataId);
+            getMetadataService().evictAndGet(projectMetadataId);
+            getMetadataDependencyRegistry().notifyDownstream(projectMetadataId);
         }
     }
+    
+	/**
+	 * Method to get FileMonitorService Service implementation
+	 * 
+	 * @return
+	 */
+	public FileMonitorService getFileMonitorService() {
+		if (fileMonitorService == null) {
+			// Get all Services implement FileMonitorService interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								FileMonitorService.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					fileMonitorService = (FileMonitorService) context.getService(ref);
+					return fileMonitorService;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load FileMonitorService on PomManagementServiceImpl.");
+				return null;
+			}
+		} else {
+			return fileMonitorService;
+		}
+	}
+    
+	/**
+	 * Method to get PomFactory Service implementation
+	 * 
+	 * @return
+	 */
+	public PomFactory getPomFactory() {
+		if (pomFactory == null) {
+			// Get all Services implement PomFactory interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								PomFactory.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					pomFactory = (PomFactory) context.getService(ref);
+					return pomFactory;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load PomFactory on PomManagementServiceImpl.");
+				return null;
+			}
+		} else {
+			return pomFactory;
+		}
+	}
+    
+	/**
+	 * Method to get FileManager Service implementation
+	 * 
+	 * @return
+	 */
+	public FileManager getFileManager() {
+		if (fileManager == null) {
+			// Get all Services implement FileManager interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								FileManager.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					fileManager = (FileManager) context.getService(ref);
+					return fileManager;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load FileManager on PomManagementServiceImpl.");
+				return null;
+			}
+		} else {
+			return fileManager;
+		}
+	}
+    
+	/**
+	 * Method to get MetadataService Service implementation
+	 * 
+	 * @return
+	 */
+	public MetadataService getMetadataService() {
+		if (metadataService == null) {
+			// Get all Services implement MetadataService interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								MetadataService.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					metadataService = (MetadataService) context.getService(ref);
+					return metadataService;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load MetadataService on PomManagementServiceImpl.");
+				return null;
+			}
+		} else {
+			return metadataService;
+		}
+	}
+    
+	/**
+	 * Method to get MetadataDependencyRegistry Service implementation
+	 * 
+	 * @return
+	 */
+	public MetadataDependencyRegistry getMetadataDependencyRegistry() {
+		if (metadataDependencyRegistry == null) {
+			// Get all Services implement MetadataDependencyRegistry interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								MetadataDependencyRegistry.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					metadataDependencyRegistry = (MetadataDependencyRegistry) context.getService(ref);
+					return metadataDependencyRegistry;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load MetadataDependencyRegistry on PomManagementServiceImpl.");
+				return null;
+			}
+		} else {
+			return metadataDependencyRegistry;
+		}
+	}
+    
+    
+	/**
+	 * Method to get Shell Service implementation
+	 * 
+	 * @return
+	 */
+	public Shell getShell() {
+		if (shell == null) {
+			// Get all Services implement Shell interface
+			try {
+				ServiceReference<?>[] references = context
+						.getAllServiceReferences(
+								Shell.class.getName(), null);
+				
+				for (ServiceReference<?> ref : references) {
+					shell = (Shell) context.getService(ref);
+					return shell;
+				}
+				
+				return null;
+				
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load Shell on PomManagementServiceImpl.");
+				return null;
+			}
+		} else {
+			return shell;
+		}
+	}
 }
