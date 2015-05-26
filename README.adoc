@@ -41,7 +41,7 @@ In the instructions below, _$ROO_HOME_ refers to the location where you checked 
 
 Next double-check you meet the *installation requirements*:
 
-* A proper installation of *Java 7*
+* To get started, make sure your system has as a minimum Java JDK 1.6 or newer installed. *Java JDK 1.7* is recommended.
 * *Maven 3.0.1+* properly installed and working with your Java version
 * *Internet access* so that Maven can download required dependencies
 * A *Git command line* client installed (required by Roo's Maven build for inserting the current revision number into OSGi bundle manifests)
