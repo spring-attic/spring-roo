@@ -11,10 +11,32 @@
     <packaging>pom</packaging>
     <name>Spring Roo - Visual Tools - Visual Tools Module Parent</name>
     <description>Provides Spring Roo Visual Tools modules.</description>
-
-	<modules>
-		<module>obr-manager-visual</module>
-    <module>project-wizard</module>
-  </modules>
-
+    
+    <modules>
+        <!-- Modules are managed by profiles jdk6 and jdk7+ to exclude modules
+        that depends of an specific JDK version to be compiled -->
+    </modules>
+    
+    <profiles>
+    	 <profile>
+    	 	<id>jdk6</id>
+    	 	<activation>
+        		<jdk>1.6</jdk>
+        	</activation>
+        	<modules>
+        		<!-- Visual tools are developed using JavaFX 2, for that reason 
+        		to be able to compile visual tools modules you need JDK 1.7. -->
+        	</modules>
+    	 </profile>
+    	 <profile>
+        	<id>jdk7+</id>
+        	<activation>
+        		<jdk>[1.7,)</jdk>
+        	</activation>
+        	<modules>
+   				<module>obr-manager-visual</module>
+    			<module>project-wizard</module>
+        	</modules>
+       	</profile>
+    </profiles>
 </project>
