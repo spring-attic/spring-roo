@@ -212,7 +212,9 @@ public class ObrRepositoryOperationsImpl implements ObrRepositoryOperations {
             Thread thread = new Thread(reader, "ManagerReader");
             thread.start();
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Error executing 'Repository Manager Visual Tool'"
+					+ "".concat(" - ").concat(e.getLocalizedMessage()));
+			
 		}
 	}
 	
