@@ -58,7 +58,7 @@
                         </goals>
                         <configuration>
                             <backend>html5</backend>
-                            <sourceHighlighter>coderay</sourceHighlighter>
+                            <sourceHighlighter>highlightjs</sourceHighlighter>
                             <attributes>
                                 <toc/>
 								                <toc-placement>left</toc-placement> 
