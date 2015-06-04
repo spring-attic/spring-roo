@@ -5529,14 +5529,77 @@ with yout OSGi Repository URL.
 [[roo-addon-suites]]
 == Roo Addon Suites
 
-TBC.
+A “Roo Addon Suite” is a great way to package and distribute a set of add-ons together, for 
+example if you want to distribute Roo custom distributions. 
+
+Roo Addon Suite is based on OSGi R5 Subsystems that provides a really convenient deployment model, 
+without compromising the modularity of Roo.
+
+To generate a simple Roo Addon Suite example, you could execute the following command:
+
+----
+roo> *addon create suite* --topLevelPackage org.suite.test --projectName MySuiteProject --description "New Roo Add-On Suite"
+----
+
+This will generate a multi-module project that contains all necessary components to generate and distribute
+your own "Roo Add-On Suite".
+
+These generated modules are:
+
+* addon-simple: A simple Spring Roo Add-On.
+* addon-advanced: An advanced Spring Roo Add-On.
+* osgi-bundles: Module that configure bundles.
+* roo-addon-suite: Module that generates a .esa file (OSGi R5 Subsystem)
+* repository: Module that generates an OSGi Repository ready to distribute your Roo Addon Suite.
+
+=== Add-On Simple
+
+This module is a simple Spring Roo Add-On like the explained before. The only difference is that includes
+an *obr.xml* file. 
+
+This obr.xml file is really important in the new Spring Roo arquitechture. This file contains 
+available commands of the add-on and allows Spring Roo to locate add-on on installed repositories
+when the developer types an add-on command that is not installed yet.
+
+=== Add-On Advanced
+
+This module is an advanced Spring Roo Add-On that contains Metadatas and some annotations. As the Add-On 
+Simple, contains an *obr.xml* file that contains available commands of the add-on.
+
+=== OSGi Bundles
+
+This module contains only a pom.xml, and it is the responsible of configure all bundles of Spring Roo
+Add-On suite correctly. 
+
+Every Add-On has this bundle as parent on pom.xml.
+
+=== Roo Add-On Suite
+
+This module contains necessary maven plugins to generate an OSGi Subsystem in .esa file with all required
+add-ons.
+
+=== Repository
+
+This module generates an OSGi Repository ready to distribute your Roo Addon Suite in your own server
+ after compile. 
+
+=== Test your Spring Roo Add-On Suite
+
+This generated Spring Roo Add-On Suite contains "suite-dev" file, that allows you to test your generated
+Roo Add-On Suite using an Spring Roo 2.0+. 
 
 
 [[roo-marketplace]]
 == Publishing - Spring Roo Marketplace
 
-TBC.
+Spring Roo Marketplace is the alternative to Roobot, easier to maintain and available for everyone,
+ a place to find and keep track on third party addons and Roo Addon Suites. 
+ 
+After develop your own Roo Addon Suite or your own Add-On, you could publish it in your own server using
+an OSGi Repository as we see in the link:#roo-addon-suites[point above].
 
+To include your own OSGi Repository on Spring Roo Marketplace page, just send a pull request with the addition
+ to Spring Roo repo’s gh-pages branch (roo_addons_suites.html file).
 
 
 //= IV. External Add-Ons [[external-addons]]
