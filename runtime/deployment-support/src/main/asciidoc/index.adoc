@@ -5995,9 +5995,12 @@ To include your own OSGi Repository on Spring Roo Marketplace page, just send a 
 //}
 //----
 
-= V. Appendices [[appendices]]
+:numbered:
+= IV. Appendices [[appendices]]
 
-The fifth and final part of the reference guide provides appendices and background information that does not neatly belong within the other parts. The information is intended to be treated as a reference and not read consecutively.
+The fifth and final part of the reference guide provides appendices and background information that does not neatly belong within the other parts.
+
+The information is intended to be treated as a reference and not read consecutively.
 
 [appendix]
 [[command-index]]
