@@ -9914,6 +9914,39 @@ community had caught a glimpse of Roo and it was starting to appear in a
 large number of conferences, user group meetings and development
 projects - all before it had even reached 1.0.0 General Availability!
 
+Spring Roo 1.1.0 was released on 21 October 2010. It was the major
+architecture refactoring: the transition to an OSGi foundation. Since
+then Roo ensures Roo's add-on infrastructure based on a modular, proven, remote
+dependency-resolvable classpath management model. Modern IDEs such as Eclipse
+are also built on OSGi, so this approach for tooling modularity and
+extensibility is well established.
+
+On 24 April 2014 http://www.disid.com/en/[DISID Corporation] got the
+leadership of the Spring Roo project and it continued the goal of providing a
+code-generation style of RAD tools, focused on helping developers get Java
+projects done on time.
+
+Spring Roo 1.3.0 was the first version released by DISID Corporation 
+as project lead, released on 20 November 2014, it included complete support
+for JDK 8 and it was the first time that Spring Roo jar files had been 
+published to Maven Central!
+
+At the time of writing this document, DISID Spring Roo team was busily 
+working towards the 2.0 release. Spring Roo 2.0 will:
+
+* Create applications based on the extensive set of Spring technologies:
+  Spring Boot, Spring Data, Spring MVC, Spring Security, etc.
+* Generate applications based on N-layered architecture pattern: 
+  View, Controller, Entity Layer, Service Layer and Repository Layer.
+* Generate a fully functional responsive UI based on jQuery and Bootstrap.
+* Improve extensibility and increase the collaboration of the Spring Roo
+  project:
+** The "Roo Marketplace": the alternative to Roobot, easier
+   to maintain and available for everyone, a place to find and keep track on
+   third party addons and Roo Addon Suites.
+** A "Roo Addon Suite" is a great way to package and distribute a set of
+   add-ons together.
+
 [[background-mission]]
 === Mission Statement
 
