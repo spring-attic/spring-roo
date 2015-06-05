@@ -52,6 +52,8 @@
 		<module>addon-jms</module>
 		<module>addon-email</module>
 		<module>annotations</module>
+		<!-- Web UI -->
+		<module>web-ui</module>
     </modules>
     <distributionManagement>
         <snapshotRepository>
