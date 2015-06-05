@@ -42,9 +42,9 @@ public class ServletRegister implements BundleActivator {
 		context = cContext.getBundleContext();
 		try {
 			start(context);
-			LOGGER.log(Level.INFO, "Spring Roo Web Tool started at 'http://localhost:9191/spring-roo'");
+			LOGGER.log(Level.INFO, "Spring Roo Web UI started at 'http://localhost:9191/'");
 		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Unabled to connect to 'http://localhost:9191/spring-roo'");
+			LOGGER.log(Level.WARNING, "Unabled to connect to 'http://localhost:9191/'");
 		}
 	}
 
