@@ -41,12 +41,4 @@ public class ObrRepositoryCommands implements CommandMarker {
     public void introspectRepos() throws Exception{
     	operations.introspectRepos();
     }
-    
-    @CliCommand(value = "addon repository manager", help = "Starts Spring Roo Repository Manager")
-    public void startManager() throws Exception{
-    	operations.startManager();
-    }
-    
-    
-
 }

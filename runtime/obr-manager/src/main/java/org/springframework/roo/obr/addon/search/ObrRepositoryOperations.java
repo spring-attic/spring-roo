@@ -39,11 +39,4 @@ public interface ObrRepositoryOperations {
 	 */
 	void introspectRepos() throws Exception;
 
-	/**
-	 * Starts Spring Roo Repository Manager application
-	 * @throws IOException 
-	 */
-	void startManager();
-
-
 }
