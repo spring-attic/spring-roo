@@ -4865,9 +4865,9 @@ where it is published. The URLs look similar to normal URLs.
 [[osgi-repositories]]
 === OSGi Repositories
 
-An OSGi Repository is a collection of OSGi bundles, optionally with and index file 
-that reports the content of the repository along with the capabilities and requirements 
-of each resource listed.
+An OSGi Repository is a collection of OSGi bundles. Optionally, the repository
+contains an index file which reports the content of the repository along with 
+the capabilities and requirements of each resource listed.
 
 A repository may be located anywhere: somewhere else on the local file system; 
 or on a remote server.
