@@ -35,6 +35,7 @@
 		<module>url-stream</module>
 		<module>obr-manager</module>
 		<module>suite-manager</module>
+		<module>web-ui</module>
   </modules>
 
 </project>

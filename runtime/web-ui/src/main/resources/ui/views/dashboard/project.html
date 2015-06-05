@@ -1,0 +1,29 @@
+<div>
+	<h2>
+		Project Configuration
+	</h2>
+	<span class="glyphicon glyphicon-cog bg-fade"></span>
+	<div class=jumbotron>
+		<div class=container>
+			<h3>Configure your project</h3>
+			<br/>
+			<form ng-submit="processForm()">
+				 <div class="form-group">
+				 	<div ng-show="success != null" class="{{messageClass}}">{{message}}</div>
+				 </div>
+				 <div class="form-group">
+				  <label for="projectName">Project Name:</label>
+				  <input type="text" class="form-control" ng-model="formData.projectName" ng-disabled="projectExists"  required>
+				</div>
+				<div class="form-group">
+				  <label for="topLevelPackage">Toplevel Package:</label>
+				  <input type="text" class="form-control" ng-model="formData.topLevelPackage" ng-disabled="projectExists"  required>
+				</div>
+				<br/>
+				<div class="form-group" >
+					<input value="Apply" type="submit" class="form-control btn-primary" ng-disabled="projectExists">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

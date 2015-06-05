@@ -1,0 +1,41 @@
+<div>
+	<h2>Persistence Configuration</h2>
+	<span class="fa fa-database bg-fade"></span>
+	<div class=jumbotron>
+		<div class=container>
+			<h3>Configure Project Persistence</h3>
+			<br />
+			<form ng-submit="processForm()">
+				<div class="form-group">
+					<div ng-show="success != null" class="{{messageClass}}">{{message}}</div>
+					<div ng-show="!persistenceAvailable" class="alert alert-danger">You have to create new Spring
+					Roo Project to configure persistence. <a href="index.html#/dashboard/project">Create Project</a></div>
+				</div>
+				<div class="form-group">
+					<label for="providerName">Persistence Provider:</label> 
+					<select
+						class="form-control" ng-model="formData.providerName"
+						ng-options="item.providerName as item.providerName for item in ormProviders" ng-disabled="!persistenceAvailable"></select>
+				</div>
+				<div class="form-group">
+					<label for="database">Database:</label> 
+					<select
+						class="form-control" ng-model="formData.database"
+						ng-options="item.databaseName as item.databaseName for item in databases" ng-disabled="!persistenceAvailable"></select>
+				</div>
+				<div class="form-group">
+					<label for="username">Username:</label>
+					<input type="text" class="form-control" ng-model="formData.username" ng-disabled="!persistenceAvailable">
+				</div>
+				<div class="form-group">
+					<label for="password">Password:</label>
+					<input type="password" class="form-control" ng-model="formData.password" ng-disabled="!persistenceAvailable">
+				</div>
+				<br />
+				<div class="form-group">
+					<input value="Apply" type="submit" class="form-control btn-primary" ng-disabled="!persistenceAvailable">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

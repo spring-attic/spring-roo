@@ -19,7 +19,7 @@ public class ManagedMessageRenderer {
     private final FilenameResolver filenameResolver;
     private String hashCode;
     private boolean includeHashCode;
-
+    
     public ManagedMessageRenderer(final FilenameResolver filenameResolver,
             final File file, final boolean createOperation) {
         Validate.notNull(filenameResolver, "Filename resolver required");
