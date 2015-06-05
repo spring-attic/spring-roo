@@ -9151,7 +9151,7 @@ http://www.springsource.com/products/sts[SpringSource Tool Suite] (STS).
 STS is a significantly extended version (and free!) of the pervasive
 Eclipse IDE. From a Roo perspective, STS preintegrates the latest
 http://www.eclipse.org/ajdt/[AspectJ Development Tools] (AJDT) and also
-offers Roo shell as extension plugin. To install the Roo STS plugin go to Spring Roo project page http://projects.spring.io/spring-roo/#working-with-spring-tool-suite-%28sts%29[Working with STS section]
+offers Roo shell as link:#install-roo-support[extension plugin]. 
 
 The STS Roo shell means you do not need
 to run the normal Roo shell if you are using STS. You'll also have other
@@ -9218,6 +9218,12 @@ section], if you forget to load the Roo shell and start modifying your
 project anyway, all you need to do is load the Roo shell again and it
 will detect any changes it needs to make automatically.
 
+[[install-roo-support]]
+==== Install the Roo STS plugin
+
+To install the Roo STS plugin go to Spring Roo project page 
+http://projects.spring.io/spring-roo/#install-roo-sts
+
 [[usage-build-system]]
 === Build System Usage
 
@@ -9227,8 +9233,8 @@ community and look at public surveys which consistently show that nearly
 all enterprise development projects use either Maven or Ant, so we
 believe this is a good default for Roo projects. As per the
 link:#intro-installation[installation instructions], you must ensure you
-are using Maven 2.0.9 or above. We do recommend you use Maven 2.2 for
-best results, though.
+are using Maven 3.0.5 or above. We do recommend you use last version of Maven 
+for best results, though.
 
 Roo will create a new `pom.xml` file whenever you use the
 link:#command-index[project] command. The POM will contain the
@@ -9780,322 +9786,12 @@ help create a ZIP of your project, which may help if you need to revert.
 Don't install the new version of Roo until you've firstly completed this
 backup. Naturally you can skip this step if you have an alternate backup
 technique and have confidence in it.
-* Edit your project's `pom.xml` and verify the Spring Roo annotations
-JAR matches the new Roo release you are installing. Spring Roo 1.1.0.M3
-and above will do this automatically on your behalf when you load it on
-an existing project.
-* Edit your project's `pom.xml` and verify that major libraries match
-the new versions that are now used by Roo. The simplest approach to
-doing this is to create a new directory and use
-"`roo script clinic.roo`" and then `diff` your existing `pom.xml`
-against the newly-created Petclinic `pom.xml`.
-* After modifying the `pom.xml` as described above, you will need to
-update your Eclipse `.classpath` file. The simplest way to achieve this
-is to use `mvn eclipse:clean
-        eclipse:eclipse` from the command prompt, or use the
-link:#command-index[perform eclipse] command at the
-`roo>` shell prompt. You can skip this step if you use m2eclipse, as
-would be the case for any SpringSource Tool Suite user.
 
-Please refer to the specific upgrade section of this appendix for
-further instructions concerning upgrading to a particular version of
-Roo.
+Spring Roo will update your project's `pom.xml` versions automatically 
+on your behalf when you load it on an existing project.
 
 If you experience any difficulty with upgrading your projects, please
 use the link:#resources-forums[community support forum] for assistance.
-
-[[upgrade-120RC1]]
-=== Upgrading to 1.2.0.RC1
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.2.0.M1 to Spring Roo 1.2.0.RC1 are as follows:
-
-* To align with the new persistence and repository choices introduced
-with Roo 1.2.0.M1 the entity command has been adjusted to take the
-target persistence type into account. Please change your log.roo scripts
-to use the new link:#command-index[entity jpa] command. More
-details about the new entity JPA command as well as related annotation
-changes please refer to
-https://jira.springsource.org/browse/ROO-2833[ROO-2833]:
-+
-.Old Annotations & Commands
-[cols="5*<",options="header"]
-|=======================================================================
-^| ^|Active Record ^|Repository ^|Entity ^|Command
-|JPA |@RooEntity | | |entity
-
-|Spring Data JPA | |@RooRepositoryJpa |@RooJpaEntity |entity
---activeRecord false + repository jpa
-
-|Spring Data MongoDB | |@RooRepositoryMongo |@RooMongoEntity |entity
-mongo + repository mongo
-|=======================================================================
-+
-.New Annotations & Commands
-[cols="5*<",options="header"]
-|=======================================================================
-^| ^|Active Record ^|Repository ^|Entity ^|Command
-|JPA |*@RooJpaActiveRecord* | | |entity *jpa*
-
-|Spring Data JPA | |*@RooJpaRepository* |@RooJpaEntity |entity *jpa*
---activeRecord false + repository jpa
-
-|Spring Data MongoDB | |*@RooMongoRepository* |@RooMongoEntity |entity
-mongo + repository mongo
-|=======================================================================
-
-[[upgrade-120M1]]
-=== Upgrading to 1.2.0.M1
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.1.5.RELEASE to Spring Roo 1.2.0.M1 are as follows:
-
-* The presence of @RooWebScaffold does not automatically trigger Spring
-MVC JSON integration any more. The exposeJson attribute in this
-annotation has been deprecated and will be removed for subsequent
-releases. To create Spring MVC JSON integration please see the
-link:#base-json[JSON chapter] or simply use the
-link:#command-index[web mvc json all] command.
-* The presence of @RooWebScaffold does not automatically trigger Spring
-MVC Finder integration any more. The exposeFinders attribute in this
-annotation has been deprecated and will be removed for subsequent
-releases. To create Spring MVC Finder integration please see
-link:#base-web[MVC chapter] or simply use the
-link:#command-index[web mvc finder all] command.
-* To update a Roo GWT project please run `web gwt setup`
-//link:#command-index[web gwt setup]
-
-[[upgrade-1.1.3.RELEASE]]
-=== Upgrading to 1.1.3.RELEASE
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.1.2.RELEASE to Spring Roo 1.1.3.RELEASE are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-* For MVC scaffolded applications it is recommended to manually replace
-the list.tagx in your application by creating a dummy project and
-copying the list.tagx file into your project. This process will be
-automated through a new 'web mvc update tags' command in Roo 1.1.4+.
-
-[[upgrade-1.1.2.RELEASE]]
-=== Upgrading to 1.1.2.RELEASE
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.1.1.RELEASE to Spring Roo 1.1.2.RELEASE are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-
-[[upgrade-1.1.1.RELEASE]]
-=== Upgrading to 1.1.1.RELEASE
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.1.0.RELEASE to Spring Roo 1.1.1.RELEASE are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-* Converters for displaying related entities on JSP pages are now
-registered from a centralized ConversionService artifact rather than
-from individual controllers. The change is transparent if you've never
-set `@RooWebScaffold(registerConverters=false)` or plugged in a custom
-ConversionService through `<mvc:annotation-driven
-        conversion-service="myConversionService"/>`. If you have then
-read on.
-+
-Remove all "registerConverters" attributes from `@RooWebScaffold`
-annotations and make sure the "conversion-service" attribute from
-<mvc:annotation-driven
-conversion-service="applicationConversionService"/> is set. Then run the
-Spring Roo 1.1.1 shell and let it install the new ConversionService.
-When Roo is done making changes, manually move any custom
-`getXxxConverter()` methods to the new ConversionService, delete the
-GenericConversionService field from all controllers that have it, and
-delete any `@PostContruct` methods used to register the converters. If
-you had previously configured your own ConversionService, move any
-converters or formatter registrations to the new ConversionService
-installed by Spring Roo.
-
-[[upgrade-1.1.0.RELEASE]]
-=== Upgrading to 1.1.0.RELEASE
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.1.0.RC1 to Spring Roo 1.1.0.RELEASE are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-
-[[upgrade-1.1.0.RC1]]
-=== Upgrading to 1.1.0.RC1
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.1.0.M3 to Spring Roo 1.1.0.RELEASE are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-
-* There have been changes made to the `web.xml` configuration to allow
-deployment of GWT scaffolded applications to GAE. Please compare a
-`web.xml` produced in a new Spring Roo project with your current
-project's `web.xml` to identify differences.
-* The GWT maven artifacts in your local maven repository should be
-removed so they can be replaced with the latest versions. Make sure to
-delete pass:[~/.m2/repository/com/google/gwt] and
-org/codehaus/mojo/gwt-maven-plugin.
-
-[[upgrade-1.1.0.M3]]
-=== Upgrading to 1.1.0.M3
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.1.0.M2 to Spring Roo 1.1.0.M3 are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-* There have been changes made to the `web.xml` configuration following
-the adoption of Spring Framework 3.0.4 improvements around root servlet
-mapping of `DispatcherServlet`. Please compare a `web.xml
-        `produced in a new Spring Roo project with your current
-project's `web.xml` to identify differences.
-* If you are trying the early-access Google Web Toolkit (GWT) support,
-please be aware that from Spring Roo 1.1.0.M3 until Spring Roo
-1.1.0.RELEASE we will be using GWT 2.1 "snapshot" JARs. This enables you
-to have access to the latest improvements in GWT 2.1.
-
-[[upgrade-1.1.0.M2]]
-=== Upgrading to 1.1.0.M2
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.1.0.M1 to Spring Roo 1.1.0.M2 are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-
-[[upgrade-1.1.0.M1]]
-=== Upgrading to 1.1.0.M1
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.0.2.RELEASE to Spring Roo 1.1.0.M1 are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-* If you used Roo 1.0.2's web MVC scaffolding, be aware there are
-considerable changes to the web tier to support our new MVC features
-(such as JSPX round-tripping and easy tags). The recommended approach is
-therefore to start a new project with Roo 1.1.0.M1 to identify the
-changes that are needed to `src/main/webapp`.
-
-[[upgrade-1.0.2.RELEASE]]
-=== Upgrading to 1.0.2.RELEASE
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.0.1.RELEASE to Spring Roo 1.0.2.RELEASE are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-* If you are using Spring Security in your Roo application, it is
-recommended you review issue
-http://jira.springframework.org/browse/ROO-579[ROO-579] and consider
-disabling the `ShallowEtagHeaderFilter` filter in your `web.xml`.
-
-[[upgrade-1.0.1.RELEASE]]
-=== Upgrading to 1.0.1.RELEASE
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.0.0.RELEASE to Spring Roo 1.0.1.RELEASE are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-
-[[upgrade-1.0.0.RELEASE]]
-=== Upgrading to 1.0.0.RELEASE
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.0.0.RC4 to Spring Roo 1.0.0.RELEASE are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-* Due to CSS issues discovered in the Roo RC4 release
-(http://jira.springframework.org/browse/ROO-480[ROO-480]), the
-`standard.css`, `alt.css` and the `layout.jspx` files required
-adjustment. To update these three files, please replace them with the
-same files generated in a dummy project using Roo 1.0.0.RELEASE.
-
-[[upgrade-1.0.0.RC4]]
-=== Upgrading to 1.0.0.RC4
-
-When upgrading from Spring Roo 1.0.0.RC3 to Spring Roo 1.0.0.RC4 you
-should be aware that a large number of changes have been applied to the
-web scaffolding functionality. This has impacted the Web layer. We
-therefore recommend the following:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-* Roo 1.0.0.RC4 takes advantage of the new type conversion API
-introduced in Spring Framework 3.0.0.RC3 (see
-http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#validation[chapter 7]
-of the Spring reference documentation) which is aimed to replace
-property editors. To remove existing property editors from your current
-project you can issue the following command: `rm -rf
-        src/main/java/com/foo/domain/*Editor.java` (depending on your
-package naming convention)
-* The easiest way to update the web artifacts is to delete the old ones
-completely. You can use the following command from a *nix prompt to
-achieve this:* `rm -rf src/main/webapp/`
-* Another (optional) step is to replace the web controllers. This step
-is only required if you have used the dateFormat
-`@RooWebScaffold(dateFormat="..")` attribute in the @RooWebScaffold
-annotation: `rm -rf
-        src/main/java/com/foo/web/*` (depending on your package naming
-convention). Alternatively, you can simply remove this attribute from
-the @RooWebScaffold annotation. Note, date formats can now be defined
-via the `field date` command (see
-https://jira.springsource.org/browse/ROO-453[ROO-453] for further
-information).
-* Run the controller command again to regenerate all necessary web
-artifacts. You might wish to use either the
-link:#command-index[controller all] or
-link:#command-index[controller scaffold] command.
-This will recreate all web artifacts.
-
-[[upgrade-1.0.0.RC3]]
-=== Upgrading to 1.0.0.RC3
-
-The main changes you need to be aware of when upgrading from Spring Roo
-1.0.0.RC2 to Spring Roo 1.0.0.RC3 are as follows:
-
-* Complete the steps recommended in the link:#upgrade-any[Upgrading To
-Any New Release] section.
-* Edit your project's `src/main/webapp/WEB-INF/urlrewrite.xml` and
-ensure it protects the resources as discussed in the
-https://jira.springsource.org/browse/ROO-271[ROO-271].
-* If you had previously used the "`test mock`" or
-"`persistence exception translation`" commands, we have moved the
-resulting AspectJ files to the Spring Aspects project (which has always
-been a dependency of all Roo projects). This will mean you automatically
-receive improvements made to these features in the future as part of the
-Spring Framework release cycle. You should therefore delete the
-following files if your project contains them:
-`Jpa_Exception_Translator.aj`,
-`AbstractMethodMockingControl.aj`,
-`JUnitStaticEntityMockingControl.aj`
-and
-`MockStaticEntityMethods.aj`.
-+
-You must also ensure you use Spring Framework 3.0.0.RC2 or above (which
-is the project which contains the Spring Aspects project). See
-https://jira.springsource.org/browse/ROO-315[ROO-315] and
-https://jira.springsource.org/browse/ROO-314[ROO-316] for further
-information.
-
-* Do not attempt to use the Spring Roo integration built into
-SpringSource Tool Suite (STS) 2.2.0 or earlier with Spring Roo 1.0.0.RC3
-or above. You must upgrade to STS 2.2.1 or above if you wish to use Roo
-1.0.0.RC3 with the STS integration. This is due to an internal API
-change made to support third-party add-on development. If you are using
-STS 2.2.0 (or earlier) and are unable to upgrade, you can of course use
-Roo outside of any version of STS without any issue. The upgrade
-requirement is simply to access the STS integration, such as CTRL + R
-commands and STS' embedded Roo shell.
 
 [appendix]
 [[background]]
