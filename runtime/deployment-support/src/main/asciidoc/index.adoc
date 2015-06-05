@@ -4872,8 +4872,8 @@ the capabilities and requirements of each resource listed.
 A repository may be located anywhere: somewhere else on the local file system; 
 or on a remote server.
 
-The OSGi repositories provides to Roo the capability to search, retrieve and install addons 
-from remote servers.
+The OSGi repositories provides to Roo the capability to search, retrieve and
+install addons from remote servers.
 
 Spring Roo includes a default OSGi repository
 (http://repo.spring.io/spring-roo/index.xml) that contains external components 
