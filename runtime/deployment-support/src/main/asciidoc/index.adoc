@@ -3965,7 +3965,7 @@ the Person entity with the following method signatures:
 +
 [cols="2*<",options="header"]
 |=======================================================================
-^|Method Signature  ^|Comment 
+^|Method Signature  ^|Comment 
 |public String **create**(@Valid Person person, BindingResult result,
 ModelMap modelMap) \{..} |The create method is triggered by HTTP POST
 requests to /<app-name>/people. The submitted form data will be
@@ -4304,8 +4304,8 @@ following table:
 
 [cols="2*<",options="header"]
 |=======================================================================
-^|Included in hash key calculation  ^|_Not_ included in hash key
-calculation 
+^|Included in hash key calculation  ^|_Not_ included in hash key
+calculation 
 |Element name (name only, not namespace) |Namespace of element name
 
 |Attribute names present in element |White spaces used in the element
@@ -4865,7 +4865,17 @@ where it is published. The URLs look similar to normal URLs.
 [[osgi-repositories]]
 === OSGi Repositories
 
-Spring Roo Shell includes a default OSGi repository
+An OSGi Repository is a collection of OSGi bundles, optionally with and index file 
+that reports the content of the repository along with the capabilities and requirements 
+of each resource listed.
+
+A repository may be located anywhere: somewhere else on the local file system; 
+or on a remote server.
+
+The OSGi repositories provides to Roo the capability to search, retrieve and install addons 
+from remote servers.
+
+Spring Roo includes a default OSGi repository
 (http://repo.spring.io/spring-roo/index.xml) that contains external components 
 that could be used by developers during development.
 
@@ -4890,6 +4900,8 @@ distrbution you can execute the following commands:
 roo> addon repository add --url http://localhost/repo/index.xml
 ----
 
+NOTE: _http://localhost/repo/index.xml is the index file URL of the repository you want install._
+
 To remove some installed OSGi repository you can do it using
 addon repository remove command:
 
@@ -4898,11 +4910,13 @@ addon repository remove command:
 roo> addon repository remove --url http://localhost/repo/index.xml
 ----
 
-In Spring Roo you simply use the shell to locate new available add-ons on installed 
-OSGi repositories. To review the list of known add-ons you can use the 
-link:#command-index[addon repository introspect]
-or link:#command-index[addon search] command. This lists
-all add-ons that are in the installed OSGi repositories mentioned above:
+
+Spring Roo provides you commands to locate new available add-ons on installed OSGi 
+repositories. To get the list of known add-ons you can use the addon repository 
+introspect or addon search command.
+
+For example, addon repository introspect lists all add-ons that are in the installed 
+OSGi repositories mentioned above:
 
 [options=nowrap,subs=quotes]
 ----
@@ -4929,8 +4943,8 @@ Not Installed        Spring Roo - Wrapping - postgresql-jdbc3 (9.1.0.901_0003)
 To review details about a specific add-on, use the
 link:#command-index[addon info bundle]
 which requires a "bundle symbolic name", which is usually the add-on's
-top-level package. Let's try this. To view details about
-the second add-on listed, enter this command:
+top-level package. Let's try this. To view details about the second add-on 
+listed above, enter this command:
 
 [subs=quotes]
 --------------------------------------
@@ -5122,37 +5136,20 @@ and locally start changing source code as you see fit. Then test your
 changes and if all works well, you can create a git patch and attach it
 to the JIRA ticket. 
 
-To create a patch with Git you can
-simply use the following command in Roo's source code root directory:
+Feel free to submit a pull request at https://github.com/spring-projects/spring-roo/pulls
+ to fix this issue.
 
-[options=nowrap]
-----
-<spring-roo>$ git status
-<spring-roo>$ git add (files)
-<spring-roo>$ git commit -m 'Explain what I changed'
-<spring-roo>$ git format-patch origin/master --stdout > ROO-XXXX.patch
-----
-
-The resulting .patch file can then be attached to the ROO-XXXX ticket in
-JIRA.
 
 [[development-committer-path]]
 === Path to Committer Status
 
-Essentially if you submit a patch and we think it is useful to commit to
-the code base, we will ask you to complete our contributor agreement.
-This is just a simple web form that deals with issues like patents and
-copyrights. Once this is done, we can apply your patch to the source
-code repository.
+Essentially if you submit a patch and we think it is useful to commit to the code base, 
+we will ask you to complete our contributor agreement. 
+This is just a simple web form that deals with issues like patents and copyrights. 
+Once this is done, we can apply your patch to the source code repository.
 
-If you're working on a large module that is part of the Roo Git
-repository, and you have a history of providing quality patches and
-"looking after" the code you've previously written, we will likely
-invite you to join us as a committer. We have certain commit policies
-which are more fully detailed in the `readme.txt` that is in the root of
-the checkout location. We have numerous committers external to VMware,
-so Roo is very much a welcoming project in terms of committers. We look
-forward to you joining us.
+Feel free to complete the online individual contributers agreement 
+at https://support.springsource.com/spring_committer_signup so we can apply your patch.
 
 [[simple-addons]]
 == Simple Add-Ons
@@ -5161,48 +5158,14 @@ This chapter will provide an introduction to Spring
 Roo add-on development. The intention is to provide a step-by-step guide
 that walks the developer from zero code to a fully deployed and
 published add-on that is immediately available to all Spring Roo users.
-With the release of Spring Roo 1.1, a new set of commands is available
-that are designed to provide a fast introduction to add-on development,
-as well as easy access to registered add-ons by Spring Roo 1.1 users.
 
 A new add-on named 'Add-On Creator' has been developed
-that facilitates the creation of a new Spring Roo add-on. Furthermore,
-it offers out of the box support for the
-http://subversion.apache.org/[Subversion] integration provided by
-http://code.google.com/[Google Code] as well as zero setup for hosting
-the add-on in a public Maven repository hosted as part of a
-http://code.google.com/[Google Code] project. In order to register the
-add-on with RooBot - a Spring Roo add-on registration service - the
-add-on is also required to be http://en.wikipedia.org/wiki/OSGi[OSGi]
-compliant, needs to be signed with PgP keys and the addon bundle needs
-to be registered through the httppgp protocol. Add-on developers get all
-these features automatically configured if they use the new 'Add-On
-Creator' feature that ships with Spring Roo 1.1.
+that facilitates the creation of a new Spring Roo simple add-ons, 
+advanced add-ons and roo add-on suites.
 
 The following sections will present a complete step-by-step guide
-demonstrating how to bootstrap a new Spring Roo add-on, publish and
-release it as your own Google Code project, and register it with the
-RooBot service.
-
-.Pretty Good Privacy in Spring Roo
-****
-The introduction of
-http://en.wikipedia.org/wiki/Pretty_Good_Privacy[PGP] with Spring Roo
-1.1 allows the Roo user to indicate exactly which developers he trusts
-to sign software that Roo will download and activate in the Roo Shell.
-Roo itself is now also
-http://en.wikipedia.org/wiki/Pretty_Good_Privacy[PGP] signed in every
-release. To support these capabilities, a new protocol handler called
-`httppgp://` has been introduced into Roo. This tells Roo that a given
-HTTP URL also has a PGP armour detached signature available. By
-requiring PGP signatures for all add-ons, we're able to conveniently and
-safely host all Roo add-ons for the community. It's up to the user to
-decide if he trusts a given PGP key, and without trusting that key, Roo
-will refuse to even spend time downloading the `httppgp://` resource.
-Roo's approach also means you can use standalone PGP tools like GnuPG to
-perform signature-related operations to independently verify Roo's
-correct operation.
-****
+demonstrating how to bootstrap a new Spring Roo add-on, publish,
+release it and register it on Spring Roo Marketplace.
 
 .OSGi in Spring Roo
 ****
@@ -5216,6 +5179,11 @@ infrastructure for developing modular, as well as embedded, and
 service-oriented applications. Under the hood, Spring Roo uses the
 http://felix.apache.org/[Apache Felix] OSGi
 implementation.
+
+Spring Roo runs in an OSGi R5 container since version 2.0. This improvement allows 
+Roo to include new OSGi R5 services like Subsystem Service, Repository Service, 
+Config Administration and HTTP Service among others. These OSGi services give to Roo 
+the ability to implement new features for the developers like the Roo Addon Suites and the Web UI.
 ****
 
 [[simple-addons-fast-creation]]
@@ -5240,9 +5208,8 @@ Spring Roo offers the following commands to help developers quickly create new a
 ****
 
 Once you have
-installed Java, Maven, PGP, and SVN tools, and have created and checked
-out your Google Code project, you can change into the <project-name>
-directory, which at this stage should contain only the .svn directory.
+installed Java, Maven, PGP you can change into the <project-name>
+directory.
 In the <project-name> directory, you can start the Spring Roo shell and
 use one of the new commands for add-on creation:
 
@@ -5538,7 +5505,7 @@ without compromising the modularity of Roo.
 To generate a simple Roo Addon Suite example, you could execute the following command:
 
 ----
-roo> *addon create suite* --topLevelPackage org.suite.test --projectName MySuiteProject --description "New Roo Add-On Suite"
+roo> addon create suite --topLevelPackage org.suite.test --projectName MySuiteProject --description "New Roo Add-On Suite"
 ----
 
 This will generate a multi-module project that contains all necessary components to generate and distribute
@@ -5590,10 +5557,12 @@ Roo Add-On Suite using an Spring Roo 2.0+.
 
 
 [[roo-marketplace]]
-== Publishing - Spring Roo Marketplace
+== Spring Roo Marketplace
 
 Spring Roo Marketplace is the alternative to Roobot, easier to maintain and available for everyone,
- a place to find and keep track on third party addons and Roo Addon Suites. 
+ a place to find and keep track on third party addons and Roo Addon Suites.
+
+=== Place your Addon Suite in the Roo Marketplace
  
 After develop your own Roo Addon Suite or your own Add-On, you could publish it in your own server using
 an OSGi Repository as we see in the link:#roo-addon-suites[point above].
@@ -5998,7 +5967,8 @@ To include your own OSGi Repository on Spring Roo Marketplace page, just send a 
 :numbered:
 = IV. Appendices [[appendices]]
 
-The fifth and final part of the reference guide provides appendices and background information that does not neatly belong within the other parts.
+The fifth and final part of the reference guide provides appendices and background information that 
+does not neatly belong within the other parts.
 
 The information is intended to be treated as a reference and not read consecutively.
 
