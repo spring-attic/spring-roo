@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.roo</groupId>
         <artifactId>org.springframework.roo.addon.json</artifactId>
-        <version>2.0.0.BUILD-SNAPSHOT</version>
+        <version>2.0.0.M1</version>
         <relativePath>../../addon-json</relativePath>
     </parent>
     <artifactId>org.springframework.roo.addon.json.addon</artifactId>
