@@ -25,6 +25,7 @@
                           <div class="item--body--version">
                               <div class="item--left-column">
                                   <p>2.0.0.M1</p>
+                                  <div class="spring-icon spring-icon-pre-release"></div>
                               </div>
                                   <div class="item--right-column">
                                       <a href="http://spring-roo-repository.springsource.org.s3.amazonaws.com/milestone/ROO/spring-roo-2.0.0.M1.zip" class="docs-link">Download</a>
