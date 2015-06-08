@@ -21,29 +21,29 @@
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>
         <!-- Apache Felix: Http Servlet-API -->
-        <!-- <dependency>
+        <dependency>
 		    <groupId>org.apache.felix</groupId>
 		    <artifactId>org.apache.felix.http.servlet-api</artifactId>
 		    <version>1.0.1</version>
-		</dependency>-->
+		</dependency>
 		<!-- Apache Felix: HTTP Jetty -->
-		<!-- <dependency>
+		<dependency>
 		    <groupId>org.apache.felix</groupId>
 		    <artifactId>org.apache.felix.http.jetty</artifactId>
 		    <version>2.3.2</version>
-		</dependency>-->
+		</dependency>
    		<!-- Apache Felix: HTTP API -->
-		<!-- <dependency>
+		<dependency>
 		    <groupId>org.apache.felix</groupId>
 		    <artifactId>org.apache.felix.http.api</artifactId>
 		    <version>2.3.2</version>
-		</dependency> -->
+		</dependency>
 		<!-- Apache Felix:  Event Admin-->
-		<!-- <dependency>
+		<dependency>
 		    <groupId>org.apache.felix</groupId>
 		    <artifactId>org.apache.felix.eventadmin</artifactId>
 		    <version>1.4.2</version>
-		</dependency> -->
+		</dependency>
 		<!-- Subsystem API -->
 		<dependency>
 			<groupId>org.apache.aries.subsystem</groupId>
