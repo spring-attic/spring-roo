@@ -6019,8 +6019,7 @@ The information is intended to be treated as a reference and not read consecutiv
 [[command-index]]
 == Command Index
 
-This appendix was automatically built from Roo 2.0.0.M1 [rev
-cd16e63].
+This appendix was automatically built from Roo 2.0.0.M2
 
 Commands are listed in alphabetic order, and are shown in monospaced
 font with any mandatory options you must specify when using the command.
