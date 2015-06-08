@@ -1491,7 +1491,7 @@ you'd like to know more about Roo:
 
 * link:#roo-addon-suites[Roo Addon Suites]
 * link:#obr-management[Add-On management using OSGi Repositories]
-* link:#roo-market-place[Spring Roo Marketplace]
+* link:#roo-marketplace[Spring Roo Marketplace]
 
 [[architecture]]
 == Application Architecture
@@ -5011,6 +5011,47 @@ roo> addon remove --bundleSymbolicName org.springframework.roo.wrapping.postgres
 Bundle 'org.springframework.roo.wrapping.postgresql-jdbc3' : Uninstalled!
 ----
 
+[[available-roo-addon-suites]]
+=== Available Roo Add-On Suites in OSGi Repositories
+
+A “Roo Addon Suite” is a great way to package and distribute a set of add-ons together, for example 
+if you want to distribute Roo custom distributions.
+
+Roo Addon Suite is based on OSGi R5 Subsystems that provides a really convenient deployment model, 
+without compromising the modularity of Roo.
+
+To know which Roo Add-On Suites are installed on your Spring Roo distribution, you could execute the 
+following command:
+
+[subs=quotes]
+--------------------------------------
+roo> addon suite list
+--------------------------------------
+
+All Roo Add-On Suites should be located in OSGi Repositories, so to install a new Roo Add-On Suite on your 
+Spring Roo distribution is necessary to install an OSGi Repository as we saw above.
+
+After install the OSGi repository that contains the Roo Add-On Suite, you could install all available Roo Add-On 
+Suites executing the following command:
+
+[subs=quotes]
+--------------------------------------
+roo> addon suite install name --symbolicName org.mysuite.roo.addon.suite
+--------------------------------------
+
+NOTE: _Symbolic Name_ param will be autocompleted with available Roo Add-On Suites on installed OSGi Repositories. 
+
+After install the selected Roo Add-On Suite, you will have available on your Spring Roo distribution all components of that
+Suite. If you want to stop them, you can do it executing the following command:
+
+[subs=quotes]
+--------------------------------------
+roo> addon suite stop --symbolicName org.mysuite.roo.addon.suite 
+--------------------------------------
+
+
+NOTE: _Visit link:#roo-marketplace[Spring Roo Marketplace] to get available Roo Add-On Suites repositories._ 
+
 
 [[obr-conclusions]]
 === Conclusions
@@ -5165,7 +5206,7 @@ advanced add-ons and roo add-on suites.
 
 The following sections will present a complete step-by-step guide
 demonstrating how to bootstrap a new Spring Roo add-on, publish,
-release it and register it on Spring Roo Marketplace.
+release it and register it on link:#roo-marketplace[Spring Roo Marketplace]
 
 .OSGi in Spring Roo
 ****
@@ -5561,6 +5602,8 @@ Roo Add-On Suite using an Spring Roo 2.0+.
 
 Spring Roo Marketplace is the alternative to Roobot, easier to maintain and available for everyone,
  a place to find and keep track on third party addons and Roo Addon Suites.
+
+http://projects.spring.io/spring-roo/
 
 === Place your Addon Suite in the Roo Marketplace
  
