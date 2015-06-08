@@ -127,7 +127,7 @@ mkdir hello
 cd hello
 roo
 roo> hint
-roo> project --topLevelPackage com.foo
+roo> project setup --topLevelPackage com.foo
 roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 roo> entity jpa --class ~.domain.Timer --testAutomatically
 roo> field string --fieldName message --notNull
