@@ -646,6 +646,6 @@ if [[ "$COMMAND" = "next" ]]; then
     log "Updating project templates"
     sed -i "s/<roo.version>.*<\/roo.version>/<roo.version>$NEXT<\/roo.version>/" `find $ROO_HOME -iname *-template.xml`
     log "Updating documentation"
-    sed -i "s/<releaseinfo>.*<\/releaseinfo>/<releaseinfo>$NEXT<\/releaseinfo>/" $ROO_HOME/runtime/deployment-support/src/site/docbook/reference/index.xml
+    sed -i "s/<releaseinfo>.*<\/releaseinfo>/<releaseinfo>$NEXT<\/releaseinfo>/" $ROO_HOME/runtime/deployment-support/src/main/asciidoc/index.adoc
 fi
 
