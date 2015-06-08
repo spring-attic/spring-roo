@@ -8316,16 +8316,6 @@ addon repository list
 
 This command does not accept any options.
 
-addon repository manager
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Starts Spring Roo Repository Manager
-
-------------------------
-addon repository manager
-------------------------
-
-This command does not accept any options.
 
 addon repository remove
 ~~~~~~~~~~~~~~~~~~~~~~~
