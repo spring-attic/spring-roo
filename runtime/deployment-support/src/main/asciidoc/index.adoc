@@ -59,7 +59,7 @@ Spring Roo is an easy-to-use productivity tool for rapidly building
 enterprise applications in the Java programming language. It allows
 you to build high-quality, high-performance, lock-in-free enterprise
 applications in just minutes. Best of all, Roo works alongside your
-existing Javaknowledge, skills and experience. You probably won’t
+existing Java knowledge, skills and experience. You probably won’t
 need to learn anything new to use Roo, as there’s no new language
 or runtime platform needed. You simply program in your normal Java
 way and Roo just works, sitting in the background taking care of the
@@ -1114,54 +1114,16 @@ you're not using SpringSource Tool Suite, please refer to the
 link:#usage-ide[IDE usage] section of this reference guide for a more
 detailed discussion of IDE interoperability.
 
-By default Roo projects do not contain any IDE-specific workspace
-configuration artifacts. This means your IDE won't be able to import
-your Pizza Shop project by default. The Roo shell can help us create
-IDE-specific workspace configuration artifacts by means of the
-link:#command-index[*perform eclipse*] command. However,
-you should not use this command if you have the m2eclipse plugin
-installed. If you're an STS user, you have the m2eclipse plugin
-installed and as such you can skip the "perform eclipse" command. All
-people not using STS or m2eclipse should use the following command:
+Roo creates projects that follow standard Maven conventions. This means your
+IDE will be able to import your Pizza Shop project, just import it as any
+other Maven project. If you're an STS user, you can import your project into 
+STS by clicking 'File > Import > Maven > Existing Maven Projects'.
 
-[options=nowrap]
-----
-~.domain.PizzaOrder roo> perform eclipse
-...
-[INFO] Adding support for WTP version 2.0.
-[INFO] Using Eclipse Workspace: null
-[INFO] Adding default classpath container: org.eclipse.jdt.launching.JRE_CONTAINER
-[INFO] Wrote settings to /Users/stewarta/projects/roo-test/pizzashop/.settings/org.eclipse.jdt.core.prefs
-[INFO] Wrote Eclipse project for "pizzashop" to /Users/stewarta/projects/roo-test/pizzashop.
-[INFO] n.PizzaOrder roo>
-       Javadoc for some artifacts is not available.
-       Please run the same goal with the -DdownloadJavadocs=true parameter in order to check remote repositories for javadoc.
-       List of artifacts without a javadoc archive:
-         o org.springframework.roo:org.springframework.roo.annotations:1.2.1.RELEASE
-...
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.685s
-[INFO] Finished at: Tue Feb 14 18:04:20 EST 2012
-[INFO] Final Memory: 7M/81M
-[INFO] ------------------------------------------------------------------------
-----
+Then select the new project and build it by executing 'Project > Clean ...'.
 
-Note, when issuing this command for the first time you can expect delays
-while Maven downloads the dependencies and their sources into your local
-repository. Once this command has completed you are ready to import your
-project into STS by clicking 'File > Import > General > Existing
-Projects into Workspace'. Once your project is imported into STS you can
-take a look at the Java sources. For example you can run the included
-JUnit tests by right clicking the pizzashop project and then selecting
-'Run As > JUnit Test'.
-
-If you're using STS or have installed m2eclipse into an Eclipse-based
-IDE, as mentioned earlier you can skip the
-link:#command-index[*perform eclipse*] command entirely.
-In this case you simply need to select in STS/Eclipse the 'File > Import
-> General > Maven Projects' menu option.
+Once your project is imported and built you can take a look at the Java 
+sources. For example you can run the included JUnit tests by right clicking 
+the pizzashop project and then selecting 'Run As > JUnit Test'.
 
 As detailed in the link:#architecture[Application Architecture] chapter
 of this documentation Roo projects leverage AspectJ Intertype
@@ -1176,6 +1138,40 @@ image::codecompletion.png[code completion,align=center]
 Note, most of the methods visible in the STS code assist are actually
 not in the Java sources but rather part of the AspectJ ITD and are
 therefore introduced into the Java bytecode at compile time.
+
+==== Edit, modify and customize the Roo-generated code
+
+You can easily modify the Roo-generated code by using AJDT Refactoring
+Push-in feature.
+
+As detailed in the link:#architecture-critical-technologies[Critical
+Technologies] chapter, the AJDT refactoring moves intertype declarations 
+(methods, fields, etc) into their target types. From then, the method, field, 
+etc. will be in the Java source file. Roo detects that change in the project 
+and the declaration in the Java file will take priority over code generation 
+so Roo won't re-generate it whereas the declaration is in the Java file.
+
+To _push-in_ the Roo-generated code:
+
+. Edit Java source file.
+. Open the http://www.eclipse.org/ajdt/xref/[Cross References] view.
++
+TIP: If the Cross References view appears empty you must re-build the project
+by executing 'Project > Clean ...'. It occurs when the crosscutting 
+information is missing, so you must re-build the project in order to
+re-generate the crosscutting information shown in the Cross References view.
++
+image::x-ref-view-short.png[Cross Reference view,align=center]
+. Double click on the aspect declaration. The the ITD file is opened in the
+  AspectJ/Java editor.
+. Right click ont he aspect declaration, then run 'AspectJ Refactoring > Push In ...'.
++
+image::ajdt-editor-push-in-short.png[AspectJ Refactoring,align=center]
+. Finally re-build the project by executing 'Project > Clean ...'
+
+From there, the developer can modify the Java source file directly, Roo will 
+not neither overwrite nor modify any Java source file, they are available for 
+customization by you from that point forward.
 
 [[beginning-step-5]]
 === Step 5: Creating A Web Tier
