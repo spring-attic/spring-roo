@@ -119,6 +119,8 @@
                 todir="${project.parent.build.directory}/osgi-repository-bin" />
               <copy file="${basedir}/src/main/resources/bootstrap.min.css" 
                 todir="${project.parent.build.directory}/osgi-repository-bin" />
+              <copy file="${project.parent.build.directory}/osgi-repository-bin/index.xml"
+              	tofile="${project.parent.build.directory}/osgi-repository-bin/index_${project.parent.version}.xml" />
               </tasks>
             </configuration>
           </execution>
