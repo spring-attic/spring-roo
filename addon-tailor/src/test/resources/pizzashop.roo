@@ -1,6 +1,6 @@
 tailor activate --name web-simple
 // Create a new project
-project --topLevelPackage com.springsource.pizzashop --projectName pizzashop
+project setup --topLevelPackage com.springsource.pizzashop --projectName pizzashop
 
 // Setup JPA persistence using EclipseLink and H2
 jpa setup --provider ECLIPSELINK --database H2_IN_MEMORY

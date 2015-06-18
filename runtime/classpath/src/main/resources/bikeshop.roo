@@ -1,4 +1,4 @@
-project --topLevelPackage com.springsource.bikeshop
+project setup --topLevelPackage com.springsource.bikeshop
 jpa setup --provider ECLIPSELINK --database H2_IN_MEMORY 
 
 enum type --class ~.reference.ProductType 

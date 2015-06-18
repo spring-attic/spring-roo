@@ -1,4 +1,4 @@
-project --topLevelPackage com.wedding
+project setup --topLevelPackage com.wedding
 jpa setup --provider OPENJPA --database HYPERSONIC_PERSISTENT
 database properties list
 database properties set --key database.url --value jdbc:hsqldb:${user.home}/my-wedding

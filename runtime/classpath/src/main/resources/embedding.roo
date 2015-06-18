@@ -1,4 +1,4 @@
-project --topLevelPackage org.springsource.embedding
+project setup --topLevelPackage org.springsource.embedding
 web mvc setup
 // These commands are sorted by command name then by provider
 web mvc embed document --provider GOOGLE_PRESENTATION --documentId 0AcgEqD3JotEpZGQ4cmY4dDlfMzFjOWYyZmNnZA --viewName Google_Presentation

@@ -1,4 +1,4 @@
-project --topLevelPackage com.springsource.vote
+project setup --topLevelPackage com.springsource.vote
 
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 

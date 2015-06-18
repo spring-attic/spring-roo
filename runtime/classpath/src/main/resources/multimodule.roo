@@ -1,4 +1,4 @@
-project --topLevelPackage com.springsource.petclinic --packaging POM
+project setup --topLevelPackage com.springsource.petclinic --packaging POM
 
 module create --moduleName core --topLevelPackage com.example.petclinic
 
