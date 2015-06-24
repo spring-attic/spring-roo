@@ -24,6 +24,7 @@
 :author: 		DISID Corporation S.L. - Pivotal Software, Inc
 :authorsite: 		www.disid.com
 :description: 		Spring Roo - Reference Documentation
+:version:       2.0.0.M2
 :copyright: 		CC BY-NC-SA 3.0
 :doctype: 		book
 :keywords:		SpringRoo, Reference
@@ -39,6 +40,8 @@ ifdef::backend-pdf[]
 :pdf-style:		asciidoctor
 :pagenums:
 endif::[]
+
+_{version}_
 
 [abstract]
 _© 2015 The original authors._ +
