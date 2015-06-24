@@ -37,6 +37,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
@@ -88,6 +90,8 @@ public class JavaBeanMetadata extends
 	private Map<FieldMetadata, JavaSymbolName> declaredFields;
 
 	private List<? extends MethodMetadata> interfaceMethods;
+	
+	private MemberDetailsScanner memberDetailsScanner;
 
 	/**
 	 * Constructor
@@ -102,12 +106,14 @@ public class JavaBeanMetadata extends
 	 *            the values of the {@link RooJavaBean} annotation (required)
 	 * @param declaredFields
 	 *            the fields declared in the governor (required, can be empty)
+	 * @param memberDetailsScanner
+	 * 			  the memberDetailsScanner used to get declared methods
 	 */
 	public JavaBeanMetadata(final String identifier, final JavaType aspectName,
 			final PhysicalTypeMetadata governorPhysicalTypeMetadata,
 			final JavaBeanAnnotationValues annotationValues,
 			final Map<FieldMetadata, JavaSymbolName> declaredFields,
-			List<? extends MethodMetadata> interfaceMethods) {
+			List<? extends MethodMetadata> interfaceMethods, MemberDetailsScanner memberDetailsScanner) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Validate.isTrue(
 				isValid(identifier),
@@ -126,6 +132,7 @@ public class JavaBeanMetadata extends
 		this.annotationValues = annotationValues;
 		this.declaredFields = declaredFields;
 		this.interfaceMethods = interfaceMethods;
+		this.memberDetailsScanner = memberDetailsScanner;
 
 		// Add getters and setters
 		for (final Entry<FieldMetadata, JavaSymbolName> entry : declaredFields
@@ -595,7 +602,8 @@ public class JavaBeanMetadata extends
 	}
 	
 	/**
-	 * To check if current method was implemented on _JavaBean.aj.
+	 * To check if current method was implemented on all Java classes or ITds
+	 * associated to this entity class.
 	 * If method was implemented, is not necessary to add again.
 	 * 
 	 * @param methodBuilder
@@ -603,15 +611,28 @@ public class JavaBeanMetadata extends
 	 */
 	private boolean checkIfInterfaceMethodWasImplemented(
 			MethodMetadataBuilder methodBuilder) {
-		// Obtain current declared methods
-		List<MethodMetadataBuilder> declaredMethods = builder.getDeclaredMethods();
 		
-		for(MethodMetadataBuilder method : declaredMethods){
+		// ROO-3584: Obtain current declared methods
+		List<MethodMetadataBuilder> declaredMethods = builder.getDeclaredMethods();
+		for (MethodMetadataBuilder method : declaredMethods) {
 			// If current method equals to interface method, return false
-			if(method.getMethodName().equals(methodBuilder.getMethodName())){
+			if (method.getMethodName().equals(methodBuilder.getMethodName())) {
 				return true;
 			}
 		}
+		
+		// ROO-3587: Obtain ALL declared methods from Java classes and ITDs.
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(
+				getClass().getName(), governorTypeDetails);
+		List<MethodMetadata> allMethods = memberDetails.getMethods();
+
+		for (MethodMetadata method : allMethods) {
+			// If current method equals to interface method, return false
+			if (method.getMethodName().equals(methodBuilder.getMethodName())) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 
