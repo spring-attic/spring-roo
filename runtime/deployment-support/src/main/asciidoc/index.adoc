@@ -24,11 +24,11 @@
 :author: 		DISID Corporation S.L. - Pivotal Software, Inc
 :authorsite: 		www.disid.com
 :description: 		Spring Roo - Reference Documentation
-:version:       2.0.0.M2
+:version:		2.0.0.M2
 :copyright: 		CC BY-NC-SA 3.0
 :doctype: 		book
 :keywords:		SpringRoo, Reference
-:imagesdir:     ./images
+:imagesdir:		./images
 :toc:
 :toc-placement:		left
 :toc-title:		Table of Contents
@@ -86,7 +86,7 @@ Kit (JDK) and operating systems in the
 link:#upgrade-known-issues[known issues section] of this
 documentation. We always recommend you use the latest version of Java
 and Maven that are available for your platform. We also recommend that
-you use http://spring.io/tools/sts[Spring Tool Suite (STS)] which 
+you use http://spring.io/tools/sts[Spring Tool Suite (STS) 3.7] which 
 includes a number of features that make working with Roo even
 easier (you can of course use Roo with normal Eclipse or without an
 IDE at all if you prefer).
@@ -9252,10 +9252,38 @@ project anyway, all you need to do is load the Roo shell again and it
 will detect any changes it needs to make automatically.
 
 [[install-roo-support]]
-==== Install the Roo STS plugin
+==== Install the STS Roo Support 
 
-To install the Roo STS plugin go to Spring Roo project page 
-http://projects.spring.io/spring-roo/#install-roo-sts
+STS Roo Support for Spring Roo 2.0.0 is available in STS 3.7.0 and later
+only. Go to https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and 
+follow the instructions.
+
+Now download Spring Roo 2.0.0 from http://projects.spring.io/spring-roo/#running-from-shell[Spring Roo project] page and unzip the distribution.
+
+To include Roo on your STS follow the instructions below:
+
+. Open your STS IDE.
+. Open STS dashboard.
+. Click on Extensions bottom tab and search Spring Roo.
+. Install Spring IDE - Roo Extension.
++
+image::roo-extension.png[STS Spring IDE - Roo Extension,align=center]
+. Restart STS IDE
+
+Configure Spring Roo 2.0.0 on your STS:
+
+. Open "Preferences > Spring > Roo Support".
+. In "Roo Support" press "Add" new installation button.
+. In "Roo Configure Roo Installation" press "Browse" button, then select the
+  the directory in which Spring Roo 2.0.0 was unpacked.
++
+image::sts-add-installation-01.png[Select Roo installation,align=center,width=50%]
+. Confirm the new Roo installation.
++
+image::sts-add-installation-02.png[Confirm Roo installation,align=center,width=50%]
+. Now Roo is installed in your STS.
++
+image::sts-add-installation-03.png[Roo support installed,align=center,width=50%]
 
 [[usage-build-system]]
 === Build System Usage
