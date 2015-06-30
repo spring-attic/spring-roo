@@ -50,6 +50,8 @@ provided that you do not charge any fee for such copies and further provided tha
 each copy contains this Copyright Notice, whether distributed in print or
 electronically._
 
+// Disable auto-numbering on Preface only in order to chapter one start at 1. Then on first chapter
+// re-enable the auto-numbering.
 :numbered!:
 [preface]
 [[preface]]
