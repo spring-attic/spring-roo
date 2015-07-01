@@ -379,6 +379,50 @@ quit
     section</link>, if you forget to load the Roo shell and start modifying
     your project anyway, all you need to do is load the Roo shell again and it
     will detect any changes it needs to make automatically.</para>
+
+    <section xml:id="install-roo-support">
+      <title>Install the STS Roo Support</title>
+      <para><emphasis role="bold">Installing Spring Tool Suite (STS)</emphasis></para>
+      <para>Install STS 3.6.2. Go to <link xlink:href="https://spring.io/tools/sts/all">Spring Tool Suite™ Downloads</link> and follow the instructions.</para>
+
+      <para><emphasis role="bold">Installing Roo Extension</emphasis></para>
+      <para>To include Roo Support on your STS, follow the instructions below:</para> 
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>Open your STS IDE</para>
+        </listitem>
+        <listitem>
+          <para>Open STS dashboard</para>
+        </listitem>
+        <listitem>
+          <para>Click on Extensions bottom tab and search Spring Roo</para>
+        </listitem>
+        <listitem>
+          <para>Install Spring Roo (current production release)</para>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/current-production-release.jpg"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </listitem>
+        <listitem>
+          <para>Install Spring IDE - Roo Extension</para>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/roo-extension.png"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </listitem>
+        <listitem>
+          <para>Restart STS IDE</para>
+          <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/roo-shell-eclipse.png"></imagedata>
+            </imageobject>
+          </mediaobject>
+        </listitem>
+      </orderedlist>
+    </section>
   </section>
 
   <section xml:id="usage-build-system">
