@@ -138,6 +138,41 @@ If you see the logo appear, you’ve installed Roo successfully. For
 those curious, the "[rev RRR]" refers to the Git commit ID used to
 compile that particular build of Roo.
 
+[[whats-new]]
+=== 5. What's new in Spring Roo 2.0.0.M1
+
+==== Improved extensibility
+
+Due to the OSGi container has been upgraded to OSGi R5, now Roo provides a 
+new way to package and distribute a set of addons together: the 
+link:#roo-addon-suites[Roo Addon Suite].
+
+Roo Addon Suite is based on OSGi R5 Subsystems that provides a really 
+convenient deployment model, without compromising the modularity of Roo.
+
+==== Community Addons
+
+Now Spring Roo is centered in Spring technologies so addons like GWT addon and
+JSF addon have been moved to their own projects in order to be maintained by 
+Roo community.
+
+Feel free to contribute to Roo project by maintaining the
+https://github.com/spring-projects/spring-roo-community-addons[Spring Roo Community] addons.
+
+==== Easier to share your addons
+
+A place to share, to find and keep track on third party addons has been
+created. This place is the link:#roo-marketplace[Roo Marketplace].
+
+==== Backward compatibility
+
+Spring Roo 2.0 has important changes to achieve its goals, due to that,
+it contains API changes and less add-ons than previous version so this release
+is not backward compatible with 1.x.
+
+It means Spring Roo 2.0 cannot neither update nor modify applications created 
+with Spring Roo 1.x.
+
 :numbered:
 = I. Getting Started [[getting-started]]
 
@@ -5594,26 +5629,25 @@ This module generates an OSGi Repository ready to distribute your Roo Addon Suit
 
 === Test your Spring Roo Add-On Suite
 
-This generated Spring Roo Add-On Suite contains "suite-dev" file, that allows you to test your generated
-Roo Add-On Suite using an Spring Roo 2.0+. 
-
+This generated Spring Roo Add-On Suite contains "suite-dev" file, that allows
+you to test your generated Roo Add-On Suite using an Spring Roo 2.0+. 
 
 [[roo-marketplace]]
 == Spring Roo Marketplace
 
-Spring Roo Marketplace is the alternative to Roobot, easier to maintain and available for everyone,
- a place to find and keep track on third party addons and Roo Addon Suites.
-
-http://projects.spring.io/spring-roo/
+The http://projects.spring.io/spring-roo/marketplace/[Spring Roo Marketplace] 
+is the alternative to Roobot, easier to maintain and available for everyone, a 
+place to find and keep track on third party addons and Roo Addon Suites.
 
 === Place your Addon Suite in the Roo Marketplace
  
-After develop your own Roo Addon Suite or your own Add-On, you could publish it in your own server using
-an OSGi Repository as we see in the link:#roo-addon-suites[point above].
+After develop your own Roo Addon Suite or your own Add-On, you could publish 
+it in your own server using an OSGi Repository as we saw in 
+the link:#roo-addon-suites[point above].
 
-To include your own OSGi Repository on Spring Roo Marketplace page, just send a pull request with the addition
- to Spring Roo repo’s gh-pages branch (roo_addons_suites.html file).
-
+To include your own OSGi Repository on Spring Roo Marketplace page, just 
+send a pull request with the addition to Spring Roo repo's gh-pages 
+branch (roo_addons_suites.html file).
 
 //= IV. External Add-Ons [[external-addons]]
 //
