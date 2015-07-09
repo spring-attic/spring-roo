@@ -9197,96 +9197,73 @@ you've done with Roo, and sharing the results with others.
 [[usage-ide]]
 === IDE Usage
 
-Despite Roo's really nice shell, in reality most people develop most of
-their application using an IDE or at least text editor. Roo fully
-expects this usage and supports it.
+[[ide-instalation]]
+==== Instalation
 
-Before we cover how to use an IDE, it's worth mentioning that you don't
-strictly need one. With Roo you can build an application at the command
-line, although to be honest you'll get more productivity via an IDE if
-it's anything beyond a trivial application. If you would prefer to use
-the command line, you can start a fresh application using the Roo shell,
-edit your `.java` and other files using any text editor, and use the
-link:#command-index[perform] commands to compile, test
-and package your application ready for deployment. You can even use
-`mvn tomcat:run` to execute a servlet container. Again,
-you'll be more productive in an IDE, but it's nice to know Roo doesn't
-force you to use an IDE unless you'd like to use one.
+Spring has developed an extension for Eclipse called SpringSource
+Tool Suite or STS, which supports work in Eclipse with
+Spring applications, including Spring Roo. Between
+other features includes an Spring Roo Shell that allows to execute commands without 
+leaving Eclipse.
 
-In relation to IDEs, we highly recommend that you use
-http://www.springsource.com/products/sts[SpringSource Tool Suite] (STS).
-STS is a significantly extended version (and free!) of the pervasive
-Eclipse IDE. From a Roo perspective, STS preintegrates the latest
-http://www.eclipse.org/ajdt/[AspectJ Development Tools] (AJDT) and also
-offers Roo shell as link:#install-roo-support[extension plugin]. 
+There are two ways to install STS, the first is as a distribution
+itself and the second is like a Eclipse plugin. We
+recommend the first one by its ease installation and better performance.
 
-The STS Roo shell means you do not need
-to run the normal Roo shell if you are using STS. You'll also have other
-neat Roo-IDE integation features, like the ability to press CTRL+R (or
-Apple+R if you're on an Apple) and a popup will allow you to type a Roo
-command from anywhere within the IDE. Another nice feature is the shell
-message hotlinking, which means all shell messages emitted by Roo are
-actually links that you can click to open the corresponding file in an
-Eclipse editor.
+[[sts-as-a-distribution]]
+===== STS as a distribution
 
-Naturally Roo works well with standard Eclipse as well. All you need to
-do is ensure you install the latest http://www.eclipse.org/ajdt/[AspectJ
-Development Tools] (AJDT) plugin. This will ensure code assist and
-incremental compilation works well. We also recommend you go into Window
-> Preferences > General > Workspace and switch on the "Refresh
-automatically" box. That way Eclipse will detect changes made to the
-file system by the externally-running Roo shell. It's also recommended
-to install the m2eclipse plugin, which is automatically included if you
-use STS and is particularly suitable for Roo-based projects.
+__To Install the IDE as a distribution itself follow
+next steps:__
 
-When using AJDT you may encounter a configuration option enabling you to
-"weave" the JDT. This is on by default in STS, so you're unlikely to see
-the message if using STS. If you are prompted (or locate the
-configuration settings yourself under the Window > Preferences > JDT
-Weaving menu), you should enable weaving. This ensures the Java Editor
-in Eclipse (or STS) gives the best AspectJ-based experience, such as
-code assist etc. You can also verify this setting is active by loading
-Eclipse (or STS) and selecting Window > Preferences > JDT Weaving.
+* Download the latest version from SpringSource Tool Suite
+link:#[http://spring.io/tools]
+* Unzip the downloaded file and move it to a folder,
+such as $HOME/software.
+* Run STS
+($HOME/software/SpringSource-XXX/sts-XXXRELEASE/STS). STS is a Java application 
+that requires having a Java Virtual Machine installed on your system.
 
-If you're using m2eclipse, you won't need to use the
-link:#command-index[perform eclipse] command to setup
-your environment. A simple import of the project using Eclipse's File >
-Import > General > Maven Projects menu option is sufficient.
+[[sts-as-a-eclipse-plugin]]
+===== STS as a Eclipse Plugin
 
-Irrespective of how you import your project into Eclipse (i.e. via the
-link:#command-index[perform eclipse] command or via
-m2eclipse) you should be aware that the project will not be a Web Tools
-Project (WTP) until such time as you install your first web controller.
-This is usually undertaken via the link:#command-index[web
-mvc all] or link:#command-index[web mvc controller]
-command. If you have already imported your project into Eclipse, simply
-complete the relevant _web mvc_ command and then re-import. The project
-will then be a WTP and offer the ability to deploy to an IDE-embedded
-web container. If you attempt to start a WTP server and receive an error
-message, try right-clicking the project and selecting Maven > Update
-Project Configuration. This often resolves the issue.
+__To Install STS plugin into an existing Eclipse IDE follow these
+steps:__
 
-If you're using IntelliJ, we are pleased to report that IntelliJ now
-supports Roo. This follows the completion of ticket
-http://youtrack.jetbrains.net/issue/IDEA-26959[IDEA-26959], where you
-can obtain more information about the AspectJ support now available in
-IntelliJ.
-
-If you're using any IDE other than STS, the recommended operating
-pattern is to load the standalone Roo shell in one operating system
-window and leave it running while you interact with your IDE. There is
-no formal link between the IDE and Roo shell. The only way they "talk"
-to each other is by both monitoring the file system for changes made by
-the other. This happens so quickly that you're unlikely to notice, and
-indeed internally to Roo we have an API that allows the polling-based
-approach to be replaced with a formal notification API should it ever
-become necessary. As discussed in the link:#usage-usability[usability
-section], if you forget to load the Roo shell and start modifying your
-project anyway, all you need to do is load the Roo shell again and it
-will detect any changes it needs to make automatically.
+* If you still do not have it, download Eclipse IDE for Java EE
+Developers of link:#[http://www.eclipse.org/downloads/]
+* Create the Eclipse classpath variable M2_REPO, then:
+1. *__Window > Preferences > Java> Build Path > Classpath variables__*, "New ..." button.
+2. Define the following:
+** __`Name`__ = __`M2_REPO`__.
+** __`Path`__ = Corresponding to Maven repository directory
+(Usually in Unix: $HOME/.m2/repository)
+3. _Ok_ to create the variable, and _Ok_ again to close the window
+preferences and save changes.
+* Install m2eclipse plugin for Eclipse
+(Http://m2eclipse.sonatype.org/installing-m2eclipse.html)
++
+In the *__Help > Install New Software__* menu, in the text field "Work
+with:" insert link:#[http://m2eclipse.sonatype.org/sites/m2e]. 
+Select "Maven Integration for Eclipse". Press Next and after
+accept the license to install the plugin.
+* Enables __`Enable Window> Preferences> General> option
+              Workspace> Refresh Automatically`__.
+* Optionally, install the plugin Subeclipse to work on
+version control system Subversion (SVN).
++
+To do this in Eclipse, in the _Help > Install New Software_ menu. In the
+window that opens click on the _Add_ button. In the opened dialog, indicate Subclipse as name and 
+_http://subclipse.tigris.org/update_1.6.x_ as URL. Save with _OK_. In the available plugin list 
+select and keep clicking on _Next_. The specified URL is
+the current version, check out the official site http://subclipse.tigris.org/[Subeclipse] to
+more information and future versions.
+* To install the STS plugin follow the instructions in point "UPDATE
+SITE INSTALLATION" document _Spring Installation Source Tool Suite
+Instructions_.
 
 [[install-roo-support]]
-==== Install the STS Roo Support 
+===== Install the STS Roo Support 
 
 STS Roo Support for Spring Roo 2.0.0 is available in STS 3.7.0 and later
 only. Go to https://spring.io/tools/sts/all[Spring Tool Suite™ Downloads] and 
@@ -9318,6 +9295,37 @@ image::sts-add-installation-02.png[Confirm Roo installation,align=center,width=5
 . Now Roo is installed in your STS.
 +
 image::sts-add-installation-03.png[Roo support installed,align=center,width=50%]
+
+
+[[create-project-from-ide]]
+==== Create Spring Roo Project using IDE
+
+Create new Spring Project using Eclipse is really easy using menu option: __File > New >
+Spring Roo Project__:
+
+image::eclipse_new_roo_project.png[New Spring Roo Project, align=center]
+
+[[import-spring-roo-project]]
+==== Import Spring Roo Project to IDE
+
+Roo allows you to create projects from the command line, although
+it may happen that will need to import an existing project to
+IDE. If you are running Spring Roo on the command line, run the command `perform eclipse` 
+to create the Eclipse project structure:
+
+-------------------------------
+roo> perform eclipse
+-------------------------------
+
+This command runs system command "mvn eclipse: eclipse" in the project, so it is indifferent
+using either of the two methods. Keep in mind that the latter
+command needs maven to work.
+
+Now, you should import your project to IDE using menu option 
+*__File > Import > General > Existing Projects into workspace__*.
+
+Also, is possible to delete eclipse configuration from a project executing
+the command "mvn eclipse:clean" in a system shell.
 
 [[usage-build-system]]
 === Build System Usage
