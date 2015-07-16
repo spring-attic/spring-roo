@@ -62,7 +62,7 @@ You're almost finished.
 You just need to wrap up with a *symbolic link* (Windows users instead add _$ROO_HOME/bootstrap_ to your path):
 
 [source, shell]
-sudo ln -s $ROO_HOME/bootstrap/roo-dev /usr/bin/roo-dev
+sudo ln -s $ROO_HOME/runtime/bootstrap/roo-dev /usr/bin/roo-dev
 sudo chmod +x /usr/bin/roo-dev
 
 [[gpg-pgp-setup]]
@@ -137,8 +137,8 @@ To try Roo out, you should type the following:
 
 [source, shell]
 cd $ROO_HOME
-mvn install
-cd ~/some-directory
+mvn clean install
+cd ~/new-project-directory
 roo-dev
 
 It's important that you run *roo-dev* from a directory that you'd like to eventually contain a Roo-created project. 
@@ -149,7 +149,9 @@ If this fails, please review the *"OSGi Wrapping JARs"* section above.
 
 Notice we used _"mvn install"_ rather than _"mvn package"_. This is simply for convenience, as it will allow you to "cd" into any Roo module subdirectory and "mvn install". This saves considerable build time if changes are only being made in a single module.
 
-Roo ships with a command line tool called *"roo-dev"*. This is also a Windows equivalent. It copies all relevant JARs from the Roo directories into _~/roo/bootstrap/target/osgi_. This directory represents a configured Roo OSGi instance. 
+Roo ships with a command line tool called *"roo-dev"*. This is also a Windows
+equivalent. It copies all relevant JARs from the Roo directories into
+_$ROO_HOME/runtime/bootstrap/roo-dev/target/osgi_. This directory represents a configured Roo OSGi instance. 
 
 *"roo-dev"* also launches the OSGi container, which is currently http://felix.apache.org/[Apache Felix]. It also activate *"development mode"*, which gives fuller exceptions, more file activity reporting, extra flash messages related to OSGi events etc.
 
@@ -340,7 +342,7 @@ cd $ROO_HOME/deployment-support
 ./roo-deploy-dist.sh -c next -n 4.5.6.BUILD-SNAPSHOT (use -v for logging)
 cd $ROO_HOME
 mvn clean install eclipse:clean eclipse:eclipse
-cd ~/some-directory; roo-dev script clinic.roo; mvn test
+cd ~/new-project-directory; roo-dev script clinic.roo; mvn test
 cd $ROO_HOME
 git diff
 git commit -a -m "ROO-XXXX: Update to next version"
