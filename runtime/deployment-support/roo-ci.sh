@@ -31,7 +31,7 @@ RETURNS:
     1 if there was a failure of any kind
 
 REQUIRES:
-    See requirements in readme.txt for releasing (ie SSH, GPG etc)
+    See "Releasing > Prerequisites" section in the README.adoc at root dir (ie SSH, GPG etc)
 EOF
 }
 
