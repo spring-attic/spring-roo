@@ -20,6 +20,15 @@
 			<artifactId>org.springframework.roo.addon.plural.annotations</artifactId>
 			<version>${project.parent.version}</version>    	
     	</dependency>
+        <!-- Test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+        </dependency>
     </dependencies>
     
    	<properties>

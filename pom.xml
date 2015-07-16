@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.springframework.roo</groupId>
     <artifactId>org.springframework.roo.root</artifactId>
@@ -8,52 +9,53 @@
     <name>Spring Roo</name>
     <url>http://projects.spring.io/spring-roo/</url>
     <licenses>
-    	<license>
-		    <name>Apache License, Version 2.0</name>
-		    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-		    <distribution>repo</distribution>
-		    <comments>A business-friendly OSS license</comments>
-	  	</license>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
     </licenses>
     <scm>
-	    <url>https://github.com/spring-projects/spring-roo</url>
-  	</scm>
+        <url>https://github.com/spring-projects/spring-roo</url>
+    </scm>
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
     <modules>
-        <!-- NB: Update the <dependencyManagement> section in this pom.xml if you add/remove/rename any module below! -->
-		<!-- ROO Core -->
-		<module>runtime</module>
-		<!-- ROO Addons -->
-		<module>addon-javabean</module>
-		<module>addon-plural</module>
-		<module>addon-propfiles</module>
-		<module>addon-configurable</module>
-		<module>addon-jpa</module>
-		<module>addon-finder</module>
-		<module>addon-logging</module>
-		<module>addon-dod</module>
-		<module>addon-test</module>
-		<module>addon-backup</module>
-		<module>addon-web-mvc-controller</module>
-		<module>addon-web-mvc-embedded</module>
-		<module>addon-web-mvc-jsp</module>
-		<module>addon-security</module>
-		<module>addon-web-selenium</module>
-		<module>addon-jdbc</module>
-		<module>addon-dbre</module>
-		<module>addon-creator</module>
-		<module>addon-json</module>
-		<module>addon-layers-service</module>
-		<module>addon-layers-repository-jpa</module>
-		<module>addon-oscommands</module>
-		<module>addon-tailor</module>
-		<module>addon-cloud</module>
-		<module>addon-jms</module>
-		<module>addon-email</module>
-		<module>annotations</module>
-		<!-- Web UI -->
-		<module>web-ui</module>
+        <!-- NB: Update the <dependencyManagement> section in this pom.xml if you 
+            add/remove/rename any module below! -->
+        <!-- ROO Core -->
+        <module>runtime</module>
+        <!-- ROO Addons -->
+        <module>addon-javabean</module>
+        <module>addon-plural</module>
+        <module>addon-propfiles</module>
+        <module>addon-configurable</module>
+        <module>addon-jpa</module>
+        <module>addon-finder</module>
+        <module>addon-logging</module>
+        <module>addon-dod</module>
+        <module>addon-test</module>
+        <module>addon-backup</module>
+        <module>addon-web-mvc-controller</module>
+        <module>addon-web-mvc-embedded</module>
+        <module>addon-web-mvc-jsp</module>
+        <module>addon-security</module>
+        <module>addon-web-selenium</module>
+        <module>addon-jdbc</module>
+        <module>addon-dbre</module>
+        <module>addon-creator</module>
+        <module>addon-json</module>
+        <module>addon-layers-service</module>
+        <module>addon-layers-repository-jpa</module>
+        <module>addon-oscommands</module>
+        <module>addon-tailor</module>
+        <module>addon-cloud</module>
+        <module>addon-jms</module>
+        <module>addon-email</module>
+        <module>annotations</module>
+        <!-- Web UI -->
+        <module>web-ui</module>
     </modules>
     <distributionManagement>
         <snapshotRepository>
@@ -64,16 +66,6 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
-        <!-- <snapshotRepository>
-          <id>repo</id>
-          <name>libs-snapshot-local</name>
-          <url>http://repo.spring.io/libs-snapshot-local</url>
-        </snapshotRepository>
-        <repository>
-          <id>repo</id>
-          <name>libs-release-local</name>
-          <url>http://repo.spring.io/libs-release-local</url>
-        </repository>-->
     </distributionManagement>
     <repositories>
         <repository>
@@ -111,10 +103,16 @@
     </pluginRepositories>
     <developers>
         <developer>
-            <name>Alan Stewart</name>
-            <id>alankstewart</id>
-            <email>alankstewart at gmail dot com</email>
-            <timezone>+10</timezone>
+            <name>Enrique Ruiz Valenciano</name>
+            <id>eruiz</id>
+            <email>jenrique.ruiz at gmail dot com</email>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <name>Jose Manuel Vivó Arnal</name>
+            <id>jmvivo</id>
+            <email>jmvivoa1 at gmail dot com</email>
+            <timezone>+1</timezone>
         </developer>
         <developer>
             <name>Juan Carlos García del Canto</name>
@@ -123,69 +121,8 @@
             <timezone>+1</timezone>
         </developer>
     </developers>
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
-    </dependencies>
     <dependencyManagement>
         <dependencies>
-            <!-- Test-scoped dependencies (not OSGi, but not included in any assemblies either) -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.11</version>
-                <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.hamcrest</groupId>
-                        <artifactId>hamcrest-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>1.8.5</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-api-mockito</artifactId>
-                <version>${powermock.version}</version>
-                <scope>test</scope>
-            </dependency>
             <!-- OSGi APIs -->
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -224,29 +161,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!--<dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.ipojo</artifactId>
-                <version>1.12.0</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>org.osgi.compendium</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.felix</groupId>
-                        <artifactId>org.apache.felix.ipojo.metadata</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>asm</groupId>
-                        <artifactId>asm-all</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>-->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.log</artifactId>
@@ -325,18 +239,19 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.5</version>
+                <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-nop</artifactId>
-                <version>1.7.5</version>
+                <version>${slf4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.7.5</version>
+                <version>${slf4j.version}</version>
             </dependency>
+            <!-- Apache Commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
@@ -380,7 +295,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-asm</artifactId>
-                <version>3.1.4</version>
+                <version>${spring.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>aopalliance</groupId>
@@ -513,6 +428,11 @@
                 <artifactId>org.springframework.roo.wrapping.json-simple</artifactId>
                 <version>1.1.0.0010</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.roo.wrapping</groupId>
+                <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
+                <version>1.0.7.0011</version>
+            </dependency>
             <!-- Roo Addons -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
@@ -639,7 +559,7 @@
                 <artifactId>org.springframework.roo.addon.layers.repository.jpa.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
- 			<dependency>
+            <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.layers.service.addon</artifactId>
                 <version>${project.version}</version>
@@ -659,7 +579,7 @@
                 <artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <!-- End Roo Addons -->
+            <!-- /Roo Addons -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.bootstrap</artifactId>
@@ -675,7 +595,7 @@
                 <artifactId>org.springframework.roo.classpath.antlrjavaparser</artifactId>
                 <version>${project.version}</version>
             </dependency>
-             <dependency>
+            <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.deployment.support</artifactId>
                 <version>${project.version}</version>
@@ -765,6 +685,40 @@
                 <artifactId>org.springframework.roo.url.stream</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- 
+            Test-scoped dependencies (not OSGi, but not included in any 
+            assemblies either)
+            -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>1.8.5</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -777,15 +731,15 @@
         </extensions>
         <plugins>
             <plugin>
-              <groupId>org.sonatype.plugins</groupId>
-              <artifactId>nexus-staging-maven-plugin</artifactId>
-              <version>1.6.3</version>
-              <extensions>true</extensions>
-              <configuration>
-                <serverId>ossrh</serverId>
-                <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                <autoReleaseAfterClose>true</autoReleaseAfterClose>
-              </configuration>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -857,34 +811,33 @@
                 </configuration>
             </plugin>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-source-plugin</artifactId>
-              <version>2.2.1</version>
-              <executions>
-                <execution>
-                  <id>attach-sources</id>
-                  <goals>
-                    <goal>jar-no-fork</goal>
-                  </goals>
-                </execution>
-              </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.9.1</version>
-              <executions>
-                <execution>
-                  <id>attach-javadocs</id>
-                  <goals>
-                    <goal>jar</goal>
-                  </goals>
-                  <!-- To compile ROO using Java 8 uncomment this -->
-                  <!--<configuration>
-	                  <additionalparam>-Xdoclint:none</additionalparam>
-            	    </configuration>-->
-                </execution>
-              </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <!-- To compile ROO using Java 8 uncomment this -->
+                        <!--<configuration> <additionalparam>-Xdoclint:none</additionalparam> 
+                            </configuration> -->
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -920,28 +873,12 @@
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.7</version>
             </plugin>
-	        <!--
-            <plugin>
-                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-                <artifactId>maven-java-formatter-plugin</artifactId>
-                <version>0.4.0.e371sr1</version>
-                <configuration>
-                    <lineEnding>LF</lineEnding>
-                    <configFile>../deployment-support/eclipse-formatter-config.xml</configFile>
-                     <excludes>
-                        <exclude>org/springframework/roo/bootstrap/Main.java</exclude>
-                        <exclude>org/springframework/roo/bootstrap/AutoProcessor.java</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
+            <!-- <plugin> <groupId>com.googlecode.maven-java-formatter-plugin</groupId> 
+                <artifactId>maven-java-formatter-plugin</artifactId> <version>0.4.0.e371sr1</version> 
+                <configuration> <lineEnding>LF</lineEnding> <configFile>../deployment-support/eclipse-formatter-config.xml</configFile> 
+                <excludes> <exclude>org/springframework/roo/bootstrap/Main.java</exclude> <exclude>org/springframework/roo/bootstrap/AutoProcessor.java</exclude> 
+                </excludes> </configuration> <executions> <execution> <goals> <goal>format</goal> 
+                </goals> </execution> </executions> </plugin> -->
             <!-- IDE -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -965,56 +902,59 @@
         </plugins>
     </build>
     <properties>
+        <junit.version>4.11</junit.version>
         <powermock.version>1.4.12</powermock.version>
         <spring.version>3.2.8.RELEASE</spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <osgi.version>5.0.0</osgi.version>
         <scr.plugin.version>1.20.0</scr.plugin.version>
+        <slf4j.version>1.7.5</slf4j.version>
     </properties>
-    <!-- Adding Profiles to deactivating GPG on Build process --> 
+    <!-- Adding Profiles to deactivating GPG on Build process -->
     <profiles>
-    	<!-- JDK 8 profile to prevent errors if Spring Roo is compiled using Java 8 -->
-    	<profile>
-    		<id>jdk8</id>
-    		<activation>
-    			<jdk>1.8</jdk>
-    		</activation>
-    		<build>
-    			<plugins>
-    				<plugin>
-		              <groupId>org.apache.maven.plugins</groupId>
-		              <artifactId>maven-javadoc-plugin</artifactId>
-		              <version>2.9.1</version>
-		              <executions>
-		                <execution>
-		                  <id>attach-javadocs</id>
-		                  <goals>
-		                    <goal>jar</goal>
-		                  </goals>
-		                  <!-- To compile ROO using Java 8 uncomment this -->
-		                  <configuration>
-			                  <additionalparam>-Xdoclint:none</additionalparam>
-		            	    </configuration>
-		                </execution>
-		              </executions>
-		            </plugin>
-    			</plugins>
-    		</build>
-    	</profile>
-    	<!-- Bamboo profile created to CI -->
-	    <profile>
-		   <id>bamboo-build</id>
-		   <build>
-		      <plugins>
-	  		<plugin>
-	    		  <groupId>org.apache.maven.plugins</groupId>
-	    		  <artifactId>maven-gpg-plugin</artifactId>
-	    		  <configuration>
-	        	    <skip>true</skip>
-	    		  </configuration>
-			</plugin>
-		     </plugins>
-		   </build>
-		</profile>
-    </profiles>	
+        <!-- JDK 8 profile to prevent errors if Spring Roo is compiled using Java 
+            8 -->
+        <profile>
+            <id>jdk8</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <!-- To compile ROO using Java 8 uncomment this -->
+                                <configuration>
+                                    <additionalparam>-Xdoclint:none</additionalparam>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- Bamboo profile created to CI -->
+        <profile>
+            <id>bamboo-build</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
