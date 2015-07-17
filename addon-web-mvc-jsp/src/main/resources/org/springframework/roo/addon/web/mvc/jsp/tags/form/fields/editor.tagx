@@ -10,6 +10,7 @@
   <jsp:directive.attribute name="validationMessageCode" type="java.lang.String" required="false" rtexprvalue="true" description="Specify the message (message property code) to be displayed if the regular expression validation fails" />
   <jsp:directive.attribute name="validationMessage" type="java.lang.String" required="false" rtexprvalue="true" description="Specify the message to be displayed if the regular expression validation fails" />
   <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+  <jsp:directive.attribute name="renderLabel" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of the label should be rendered (default 'true')" />
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
 
   <c:if test="${empty render or render}">
@@ -33,8 +34,15 @@
     <script type="text/javascript">dojo.require("dijit.Editor");</script>
     <div id="_${fn:escapeXml(id)}_id">
       <label for="_${sec_field}_id">
-        <c:out value="${fn:escapeXml(label)}" />
-        :
+        <c:choose>
+          <c:when test="${empty renderLabel or renderLabel}">
+            <c:out value="${fn:escapeXml(label)}" />
+            :
+          </c:when>
+          <c:otherwise>
+            &amp;nbsp;
+          </c:otherwise>
+        </c:choose>
       </label>
       <form:hidden id="_${sec_field}_id" path="${sec_field}" />
       <div>
