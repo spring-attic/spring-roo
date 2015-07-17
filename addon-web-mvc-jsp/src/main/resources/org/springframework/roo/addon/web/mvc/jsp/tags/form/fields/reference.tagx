@@ -17,8 +17,15 @@
 
     <div id="_${fn:escapeXml(id)}_id">
       <label for="_${fn:escapeXml(field)}_id">
-        <c:out value="${fn:escapeXml(label)}" />
-        :
+        <c:choose>
+          <c:when test="${empty renderLabel or renderLabel}">
+            <c:out value="${fn:escapeXml(label)}" />
+            :
+          </c:when>
+          <c:otherwise>
+            &amp;nbsp;
+          </c:otherwise>
+        </c:choose>
       </label>
       <spring:url value="${path}" var="create_url">
         <spring:param name="form" />

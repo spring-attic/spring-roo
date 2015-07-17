@@ -35,12 +35,17 @@
 
     <script type="text/javascript">dojo.require('dijit.form.DateTextBox')</script>
     <div id="_${sec_id}_id">
-      <c:if test="${empty renderLabel or renderLabel}">
-        <label for="_${sec_field}_id">
-          <c:out value="${label}" />
-          :
-        </label>
-      </c:if>
+      <label for="_${sec_field}_id">
+        <c:choose>
+          <c:when test="${empty renderLabel or renderLabel}">
+            <c:out value="${label}" />
+            :
+          </c:when>
+          <c:otherwise>
+            &amp;nbsp;
+          </c:otherwise>
+        </c:choose>
+      </label>
       <c:choose>
         <c:when test="${disableFormBinding}">
           <input id="_${sec_field}_id" name="${sec_field}" />

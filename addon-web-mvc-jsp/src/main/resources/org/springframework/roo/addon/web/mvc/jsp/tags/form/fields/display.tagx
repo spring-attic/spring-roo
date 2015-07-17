@@ -22,12 +22,17 @@
     </c:if>
 
     <div id="_${fn:escapeXml(id)}_id">
-      <c:if test="${empty renderLabel or renderLabel}">
-        <label for="_${fn:escapeXml(field)}_id">
-          <c:out value="${label}" />
-          :
-        </label>
-      </c:if>
+      <label for="_${fn:escapeXml(field)}_id">
+        <c:choose>
+          <c:when test="${empty renderLabel or renderLabel}">
+            <c:out value="${label}" />
+            :
+          </c:when>
+          <c:otherwise>
+            &amp;nbsp;
+          </c:otherwise>
+        </c:choose>
+      </label>
       <div class="box" id="_${fn:escapeXml(id)}_${fn:escapeXml(field)}_id">
         <c:choose>
           <c:when test="${date}">
