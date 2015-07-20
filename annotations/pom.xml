@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.roo</groupId>
@@ -10,67 +11,67 @@
     <artifactId>org.springframework.roo.annotations</artifactId>
     <packaging>pom</packaging>
     <name>Spring Roo - Annotations (ASLv2 Licensed)</name>
-    
+
     <dependencies>
-    	<!-- Roo Configurable Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.configurable.annotations</artifactId>		
-		</dependency>
-		<!-- Roo Dbre Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>		
-		</dependency>
-		<!-- Roo Dod Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.dod.annotations</artifactId>		
-		</dependency>
-		<!--Roo JavaBean Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.javabean.annotations</artifactId>		
-		</dependency>
-		<!-- Roo JPA Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.jpa.annotations</artifactId>		
-		</dependency>
-		<!-- Roo JSON Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.json.annotations</artifactId>		
-		</dependency>
-		<!-- Roo Layers Repository JPA Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.layers.repository.jpa.annotations</artifactId>		
-		</dependency>
-		<!-- Roo Layers Service Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.layers.service.annotations</artifactId>		
-		</dependency>
-		<!-- Roo Plural Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.plural.annotations</artifactId>		
-		</dependency>
-		<!-- Roo Security Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.security.annotations</artifactId>		
-		</dependency>
-		<!-- Roo Test Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.test.annotations</artifactId>		
-		</dependency>
-		<!-- Roo Web MVC Controller Annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.web.mvc.controller.annotations</artifactId>		
-		</dependency>
+        <!-- Roo Configurable Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.configurable.annotations</artifactId>
+        </dependency>
+        <!-- Roo Dbre Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>
+        </dependency>
+        <!-- Roo Dod Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.dod.annotations</artifactId>
+        </dependency>
+        <!-- Roo JavaBean Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.javabean.annotations</artifactId>
+        </dependency>
+        <!-- Roo JPA Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.jpa.annotations</artifactId>
+        </dependency>
+        <!-- Roo JSON Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.json.annotations</artifactId>
+        </dependency>
+        <!-- Roo Layers Repository JPA Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.layers.repository.jpa.annotations</artifactId>
+        </dependency>
+        <!-- Roo Layers Service Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.layers.service.annotations</artifactId>
+        </dependency>
+        <!-- Roo Plural Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.plural.annotations</artifactId>
+        </dependency>
+        <!-- Roo Security Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.security.annotations</artifactId>
+        </dependency>
+        <!-- Roo Test Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.test.annotations</artifactId>
+        </dependency>
+        <!-- Roo Web MVC Controller Annotations -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.mvc.controller.annotations</artifactId>
+        </dependency>
     </dependencies>
 </project>
