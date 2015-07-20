@@ -77,10 +77,12 @@ quick_zip_gpg_tests() {
     # Test the signature is OK
     # (for script testing purposes only:) sed -i 's/0/1/g' $ASSEMBLY_ASC
     if [ "$VERBOSE" = "1" ]; then
-        gpg -v --batch --verify $ASSEMBLY_ASC
+        # DEBUG
+        log "Verifying ... gpg -v --batch --verify $ASSEMBLY_ASC $ASSEMBLY_ZIP" 
+        gpg -v --batch --verify $ASSEMBLY_ASC $ASSEMBLY_ZIP
         EXITED=$?
     else
-        gpg --batch --verify $ASSEMBLY_ASC &>/dev/null
+        gpg --batch --verify $ASSEMBLY_ASC $ASSEMBLY_ZIP &>/dev/null
         EXITED=$?
     fi
     if [[ ! "$EXITED" = "0" ]]; then
@@ -511,6 +513,8 @@ if [[ "$COMMAND" = "assembly" ]]; then
         echo "$PASSPHRASE" | gpg $GPG_OPTS --batch --passphrase-fd 0 -a --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
     else
         log "gpg.passphrase NOT found in ~/.m2/settings.xml. Trying with gpg agent."
+        # DEBUG
+        log "Verifying ... gpg $GPG_OPTS -a --use-agent --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP"
         gpg $GPG_OPTS -a --use-agent --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
     fi
     EXITED=$?
