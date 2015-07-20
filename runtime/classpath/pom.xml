@@ -66,9 +66,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <!-- Compile scope because this module provides test cases -->
-            <scope>compile</scope>
-            <!-- Optional because we don't want to make it transitive -->
+            <!-- 
+            Provided scope because src/main/java has classes that depends on
+            junit but we wan't copy junit.jar to runtime
+            -->
+            <scope>provided</scope>
+            <!-- Optional resolution at runtime -->
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -76,30 +79,4 @@
             <artifactId>mockito-all</artifactId>
         </dependency>
     </dependencies>
-    <build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<outputDirectory>${project.build.directory}/../../target/all</outputDirectory>
-					<silent>false</silent>
-					<includeScope>compile</includeScope>
-					<excludeArtifactIds>org.apache.felix.scr.annotations</excludeArtifactIds>
-					<excludeGroupIds>org.osgi, junit</excludeGroupIds>
-					<excludeTransitive>true</excludeTransitive>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>
