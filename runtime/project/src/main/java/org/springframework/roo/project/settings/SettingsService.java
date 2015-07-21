@@ -3,8 +3,7 @@ package org.springframework.roo.project.settings;
 import java.util.Map;
 
 /**
- * Provides service API to manage Spring Roo user configuration located on .roo
- * project folder.
+ * Provides service API to manage settings declared on generated Spring Roo Project
  * 
  * @author Juan Carlos García
  * @since 2.0
