@@ -5,6 +5,7 @@ import static org.springframework.roo.project.Path.ROOT;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -169,7 +170,7 @@ public class Pom {
      */
     public boolean canAddDependency(final Dependency newDependency) {
         return newDependency != null
-                && !isDependencyRegistered(newDependency)
+                && !isDependencyRegistered(newDependency, false)
                 && !Dependency.isHigherLevel(
                         newDependency.getType().toString(), packaging);
     }
@@ -442,7 +443,7 @@ public class Pom {
             final Collection<? extends Dependency> dependencies) {
         if (dependencies != null) {
             for (final Dependency dependency : dependencies) {
-                if (dependency != null && !isDependencyRegistered(dependency)) {
+                if (dependency != null && !isDependencyRegistered(dependency, false)) {
                     return false;
                 }
             }
@@ -521,7 +522,7 @@ public class Pom {
             final Collection<? extends Dependency> dependencies) {
         if (dependencies != null) {
             for (final Dependency dependency : dependencies) {
-                if (isDependencyRegistered(dependency)) {
+                if (isDependencyRegistered(dependency, false)) {
                     return true;
                 }
             }
@@ -561,16 +562,31 @@ public class Pom {
     }
 
     /**
-     * Indicates whether the given dependency is registered, by checking the
-     * result of {@link Dependency#equals(Object)}.
-     * 
-     * @param dependency the dependency to check (can be <code>null</code>)
-     * @return <code>false</code> if a <code>null</code> dependency is given
-     */
-    public boolean isDependencyRegistered(final Dependency dependency) {
-        return dependency != null && dependencies.contains(dependency);
-    }
-
+	 * Indicates whether the given dependency is registered without checking dependency version
+	 * , by checking the result of {@link Dependency#equals(Object)}.
+	 * 
+	 * @param dependency
+	 *            the dependency to check (can be <code>null</code>)
+	 * @return <code>false</code> if a <code>null</code> dependency is given
+	 */
+	public boolean isDependencyRegistered(final Dependency dependency, boolean checkVersion) {
+		if(checkVersion){
+			return dependency != null && dependencies.contains(dependency);
+		}
+		
+		boolean registered = false;
+		Iterator<Dependency> it = dependencies.iterator();
+		while (it.hasNext()) {
+			Dependency dp = it.next();
+			if (dependency.getGroupId().equals(dp.getGroupId())
+					&& dependency.getArtifactId().equals(dp.getArtifactId())) {
+				registered = true;
+				break;
+			}
+		}
+		return dependency != null && registered;
+	}
+	
     /**
      * Indicates whether the given filter is registered.
      * 

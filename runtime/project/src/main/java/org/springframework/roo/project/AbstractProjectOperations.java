@@ -505,9 +505,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     // TODO doesn't seem to work
     private void detectCircularDependency(final Pom module1, final Pom module2) {
-        if (module1.isDependencyRegistered(module2.asDependency(COMPILE))
+        if (module1.isDependencyRegistered(module2.asDependency(COMPILE), false)
                 && module2
-                        .isDependencyRegistered(module1.asDependency(COMPILE))) {
+                        .isDependencyRegistered(module1.asDependency(COMPILE), false)) {
             throw new IllegalStateException("Circular dependency detected, '"
                     + module1.getModuleName() + "' depends on '"
                     + module2.getModuleName() + "' and vice versa");
@@ -770,7 +770,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                 "dependency", dependenciesElement);
         final List<String> removedDependencies = new ArrayList<String>();
         for (final Dependency dependencyToRemove : dependenciesToRemove) {
-            if (pom.isDependencyRegistered(dependencyToRemove)) {
+            if (pom.isDependencyRegistered(dependencyToRemove, false)) {
                 for (final Iterator<Element> iter = existingDependencyElements
                         .iterator(); iter.hasNext();) {
                     final Element candidate = iter.next();
@@ -824,7 +824,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         final Pom pom = getPomFromModuleName(moduleName);
         Validate.notNull(pom,
                 "The pom is not available, so dependency removal cannot be performed");
-        if (!pom.isDependencyRegistered(dependency)) {
+        if (!pom.isDependencyRegistered(dependency, false)) {
             return;
         }
 
@@ -1087,7 +1087,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         final Pom pom = getPomFromModuleName(moduleName);
         Validate.notNull(pom,
                 "The pom is not available, so updating a dependency cannot be performed");
-        if (!pom.isDependencyRegistered(dependency)) {
+        if (!pom.isDependencyRegistered(dependency, false)) {
             return;
         }
 

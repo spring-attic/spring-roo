@@ -159,7 +159,7 @@ public class MavenOperationsImplTest {
         final Collection<Dependency> dependencies = Arrays.asList(
                 mockDependency, mockDependency);
         when(pom.isAnyDependenciesRegistered(dependencies)).thenReturn(true);
-        when(pom.isDependencyRegistered(mockDependency)).thenReturn(true);
+        when(pom.isDependencyRegistered(mockDependency, false)).thenReturn(true);
 
         // Invoke
         projectOperations.removeDependencies("", dependencies);
