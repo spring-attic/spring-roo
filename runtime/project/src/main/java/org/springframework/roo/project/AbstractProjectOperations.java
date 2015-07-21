@@ -171,7 +171,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         }
     }
 
-    public void addDependencies(final String moduleName,
+    public List<Dependency> addDependencies(final String moduleName,
             final Collection<? extends Dependency> newDependencies) {
         Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited; no such module '%s'",
@@ -187,6 +187,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         final List<Element> existingDependencyElements = XmlUtils.findElements(
                 "dependency", dependenciesElement);
 
+        final List<Dependency> finalDependencies = new ArrayList<Dependency>();
         final List<String> addedDependencies = new ArrayList<String>();
         final List<String> removedDependencies = new ArrayList<String>();
         final List<String> skippedDependencies = new ArrayList<String>();
@@ -210,6 +211,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                                     existingDependency.getVersion())) {
                                 // It's a genuine version change => mention the
                                 // old and new versions in the message
+                            	finalDependencies.add(newDependency);
                                 addedDependencies.add(newDependency
                                         .getSimpleDescription());
                                 removedDependencies.add(existingDependency
@@ -228,11 +230,13 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                     // same coordinates; add it now
                     dependenciesElement.appendChild(newDependency
                             .getElement(document));
+                    finalDependencies.add(newDependency);
                     addedDependencies.add(newDependency.getSimpleDescription());
                 }
             }
             else {
                 skippedDependencies.add(newDependency.getSimpleDescription());
+                finalDependencies.add(newDependency);
             }
         }
         if (!newDependencies.isEmpty() || !skippedDependencies.isEmpty()) {
@@ -241,28 +245,30 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
             fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
                     XmlUtils.nodeToString(document), message, false);
         }
+        
+        return finalDependencies;
     }
 
-    public void addDependency(final String moduleName,
+    public Dependency addDependency(final String moduleName,
             final Dependency dependency) {
         Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited at this time");
         Validate.notNull(dependency, "Dependency required");
-        addDependencies(moduleName, Collections.singletonList(dependency));
+        return addDependencies(moduleName, Collections.singletonList(dependency)).get(0);
     }
 
-    public final void addDependency(final String moduleName,
+    public final Dependency addDependency(final String moduleName,
             final String groupId, final String artifactId, final String version) {
-        addDependency(moduleName, groupId, artifactId, version, COMPILE);
+        return addDependency(moduleName, groupId, artifactId, version, COMPILE);
     }
 
-    public final void addDependency(final String moduleName,
+    public final Dependency addDependency(final String moduleName,
             final String groupId, final String artifactId,
             final String version, final DependencyScope scope) {
-        addDependency(moduleName, groupId, artifactId, version, scope, "");
+        return addDependency(moduleName, groupId, artifactId, version, scope, "");
     }
 
-    public final void addDependency(final String moduleName,
+    public final Dependency addDependency(final String moduleName,
             final String groupId, final String artifactId,
             final String version, DependencyScope scope, final String classifier) {
         Validate.isTrue(isProjectAvailable(moduleName),
@@ -275,7 +281,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         }
         final Dependency dependency = new Dependency(groupId, artifactId,
                 version, DependencyType.JAR, scope, classifier);
-        addDependency(moduleName, dependency);
+        return addDependency(moduleName, dependency);
     }
 
     public void addFilter(final String moduleName, final Filter filter) {

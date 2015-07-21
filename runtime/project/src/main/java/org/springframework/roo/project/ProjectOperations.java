@@ -1,6 +1,7 @@
 package org.springframework.roo.project;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.maven.Pom;
@@ -55,8 +56,9 @@ public interface ProjectOperations {
      * 
      * @param moduleName the name of the module to act upon (required)
      * @param dependencies the dependencies to add (required)
+     * @return List of dependencies added on current operation
      */
-    void addDependencies(final String moduleName,
+    List<Dependency> addDependencies(final String moduleName,
             Collection<? extends Dependency> dependencies);
 
     /**
@@ -71,8 +73,9 @@ public interface ProjectOperations {
      * 
      * @param moduleName the name of the module to act upon (required)
      * @param dependency the dependency to add (required)
+     * @return added dependency
      */
-    void addDependency(final String moduleName, Dependency dependency);
+    Dependency addDependency(final String moduleName, Dependency dependency);
 
     /**
      * Allows addition of a JAR dependency to the POM.
@@ -85,8 +88,9 @@ public interface ProjectOperations {
      * @param groupId the group id of the dependency (required)
      * @param artifactId the artifact id of the dependency (required)
      * @param version the version of the dependency (required)
+     * @return added dependency
      */
-    void addDependency(final String moduleName, String groupId,
+    Dependency addDependency(final String moduleName, String groupId,
             String artifactId, String version);
 
     /**
@@ -101,8 +105,9 @@ public interface ProjectOperations {
      * @param artifactId the artifact id of the dependency (required)
      * @param version the version of the dependency (required)
      * @param scope the scope of the dependency
+     * @return added dependency
      */
-    void addDependency(final String moduleName, String groupId,
+    Dependency addDependency(final String moduleName, String groupId,
             String artifactId, String version, DependencyScope scope);
 
     /**
@@ -118,8 +123,9 @@ public interface ProjectOperations {
      * @param version the version of the dependency (required)
      * @param scope the scope of the dependency
      * @param classifier the classifier of the dependency
+     * @return added dependency
      */
-    void addDependency(final String moduleName, String groupId,
+    Dependency addDependency(final String moduleName, String groupId,
             String artifactId, String version, DependencyScope scope,
             String classifier);
 
