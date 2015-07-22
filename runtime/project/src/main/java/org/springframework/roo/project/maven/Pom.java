@@ -168,9 +168,9 @@ public class Pom {
      * @return see above
      * @since 1.2.1
      */
-    public boolean canAddDependency(final Dependency newDependency) {
+    public boolean canAddDependency(final Dependency newDependency, boolean checkVersion) {
         return newDependency != null
-                && !isDependencyRegistered(newDependency, false)
+                && !isDependencyRegistered(newDependency, checkVersion)
                 && !Dependency.isHigherLevel(
                         newDependency.getType().toString(), packaging);
     }

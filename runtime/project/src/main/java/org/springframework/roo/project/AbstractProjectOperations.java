@@ -192,7 +192,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         final List<String> removedDependencies = new ArrayList<String>();
         final List<String> skippedDependencies = new ArrayList<String>();
         for (final Dependency newDependency : newDependencies) {
-            if (pom.canAddDependency(newDependency)) {
+        	// ROO-3465: Prevent version changes adding checkVersion to false
+        	// when check if is possible to add the new dependency
+            if (pom.canAddDependency(newDependency, false)) {
                 // Look for any existing instances of this dependency
                 boolean inserted = false;
                 for (final Element existingDependencyElement : existingDependencyElements) {

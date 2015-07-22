@@ -69,7 +69,7 @@ public class PomTest {
         final Pom pom = getMinimalPom(WAR);
 
         // Invoke and check
-        assertTrue(pom.canAddDependency(mockNewDependency));
+        assertTrue(pom.canAddDependency(mockNewDependency, true));
     }
 
     @Test
@@ -80,7 +80,7 @@ public class PomTest {
         final Pom pom = getMinimalPom("custom");
 
         // Invoke and check
-        assertTrue(pom.canAddDependency(mockNewDependency));
+        assertTrue(pom.canAddDependency(mockNewDependency, true));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class PomTest {
         final Pom pom = getMinimalPom(POM, mockExistingDependency);
 
         // Invoke and check
-        assertFalse(pom.canAddDependency(mockExistingDependency));
+        assertFalse(pom.canAddDependency(mockExistingDependency, true));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class PomTest {
         final Pom pom = getMinimalPom(JAR);
 
         // Invoke and check
-        assertFalse(pom.canAddDependency(mockNewDependency));
+        assertFalse(pom.canAddDependency(mockNewDependency, true));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class PomTest {
         final Pom pom = getMinimalPom(POM);
 
         // Invoke and check
-        assertFalse(pom.canAddDependency(null));
+        assertFalse(pom.canAddDependency(null, false));
     }
 
     @Test
