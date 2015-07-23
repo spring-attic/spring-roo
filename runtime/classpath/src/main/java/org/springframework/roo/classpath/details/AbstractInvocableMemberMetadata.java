@@ -16,6 +16,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * Abstract implementation of {@link InvocableMemberMetadata}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public abstract class AbstractInvocableMemberMetadata extends
@@ -27,6 +28,7 @@ public abstract class AbstractInvocableMemberMetadata extends
     private final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     private final List<JavaType> throwsTypes = new ArrayList<JavaType>();
     private CommentStructure commentStructure;
+    private String genericDefinition;
 
     /**
      * Constructor
@@ -78,5 +80,15 @@ public abstract class AbstractInvocableMemberMetadata extends
     public void setCommentStructure(CommentStructure commentStructure) {
         this.commentStructure = commentStructure;
     }
+
+    @Override
+	public String getGenericDefinition() {
+		return genericDefinition;
+	}
+
+    @Override
+	public void setGenericDefinition(String genericDefinition) {
+		this.genericDefinition = genericDefinition;
+	}
 
 }
