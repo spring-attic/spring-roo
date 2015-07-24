@@ -7,6 +7,7 @@
   <jsp:directive.attribute name="required" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicates if this field is required (default false)" />
   <jsp:directive.attribute name="label" type="java.lang.String" required="false" rtexprvalue="true" description="The label used for this field, will default to a message bundle if not supplied" />
   <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+  <jsp:directive.attribute name="renderLabel" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of the label should be rendered (default 'true')" />
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
 
   <c:if test="${empty render or render}">
@@ -17,8 +18,15 @@
 
     <div id="_${fn:escapeXml(id)}_id">
       <label for="_${fn:escapeXml(field)}_id">
-        <c:out value="${fn:escapeXml(label)}" />
-        :
+        <c:choose>
+          <c:when test="${empty renderLabel or renderLabel}">
+            <c:out value="${fn:escapeXml(label)}" />
+            :
+          </c:when>
+          <c:otherwise>
+            &amp;nbsp;
+          </c:otherwise>
+        </c:choose>
       </label>
       <spring:url value="${path}" var="create_url">
         <spring:param name="form" />
