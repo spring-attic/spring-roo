@@ -21,10 +21,11 @@ in your main Roo installation directory:
 
 You can also find documentation online at:
 
-  http://static.springsource.org/spring-roo/reference/index.html
+  http://docs.spring.io/spring-roo/docs/current/reference/html/
 
 If you use Twitter, you're encouraged to follow @SpringRoo. Also
 please use @SpringRoo in your tweets so everyone can easily see them.
 
 Once again, welcome to the Spring Roo community! We hope that you find
 Roo as much fun to work with as we have had in building it.
+

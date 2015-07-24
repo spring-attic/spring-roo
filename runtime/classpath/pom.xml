@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.roo</groupId>
@@ -66,10 +67,8 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <!-- 
-            Provided scope because src/main/java has classes that depends on
-            junit but we wan't copy junit.jar to runtime
-            -->
+            <!-- Provided scope because src/main/java has classes that depends on 
+                junit but we wan't copy junit.jar to runtime -->
             <scope>provided</scope>
             <!-- Optional resolution at runtime -->
             <optional>true</optional>

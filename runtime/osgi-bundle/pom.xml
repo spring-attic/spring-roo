@@ -8,16 +8,24 @@
         <version>2.0.0.BUILD-SNAPSHOT</version>
         <relativePath>../../runtime</relativePath>
     </parent>
+
+    <!-- MODULE USAGE:
+    This module simply provides POM configuration inheritence for those
+    modules that build OSGi bundles, such as roo addons, runtime bundles, etc. 
+    This module does not contain any reactor build.
+    -->
+
     <artifactId>org.springframework.roo.osgi.bundle</artifactId>
     <packaging>pom</packaging>
     <name>Spring Roo - Runtime - OSGi Bundle Module Parent</name>
     <description>Provides POM configuration inheritence for those modules that build an OSGi bundle.</description>
-    <!-- No modules should be defined below; this module simply provides POM 
-    configuration inheritence - not reactor builds -->
+
+    <!-- No modules should be defined below -->
     <modules />
     <build>
         <plugins>
             <plugin>
+                <!-- Generate ... TBC -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.1.1</version>
@@ -49,14 +57,27 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!--
+                OSGi forces to provide additional metadata in the JAR's 
+                MANIFEST to verify the consistency of your "class path".
+                This plugin create the MANIFEST from the classes and project 
+                properties instead of maintaining it by hand.
+                -->
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.5.3</version>
+                <version>2.5.4</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <!-- 
+                        bnd 2.3 automatically adds a Require-Capability
+                        for Java execution environment version, _noee=true 
+                        disables it.
+                        -->
+                        <_noee>true</_noee>
                         <_include>${project.build.directory}/build-number.mf</_include>
                         <Export-Package>${project.artifactId}.*;version=${project.version}</Export-Package>
+                        <Bundle-Activator>${bundle.activator}</Bundle-Activator>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Vendor>${project.organization.name}</Bundle-Vendor>
                         <Bundle-Copyright>Copyright ${project.organization.name}. All Rights Reserved.</Bundle-Copyright>
@@ -64,67 +85,26 @@
                     </instructions>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <outputDirectory>${project.build.directory}/../../target/all</outputDirectory>
-                    <silent>true</silent>
+                <plugin>
                     <!-- 
-                    Notes about includeScope: 
-                    - Empty string indicates all scopes (default)
-                    - runtime scope gives runtime and compile dependencies 
+                    Copy the OSGi bundles that the modules have built locally and  
+                    that noone else depends on into the ROO_PRJ_HOME/target/all
                     -->
-                    <includeScope>runtime</includeScope>
-                    <excludeTransitive>true</excludeTransitive>
-                </configuration>
-            </plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <!-- copies the JARs we have built locally (eg bootstrap 
-                            JAR) that noone else depends on into the target/all -->
-                        <id>copy-jars-for-roo-dev-or-assembly</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <copy todir="${target.jar.directory}"
-                                    preservelastmodified="true">
-                                    <fileset dir="${project.build.directory}">
-                                        <include name="*.jar" />
-                                        <exclude name="*-tests.jar" />
-                                        <exclude name="*-sources.jar" />
-                                    </fileset>
-                                </copy>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
+                <!-- 
+                OSGi components and services are defined through annotations 
+                and this plugin creates the necessary descriptors for the 
+                OSGi Declarative Services, Config Admin and Metatype services.
+                -->
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>${scr.plugin.version}</version>
+                <version>1.20.0</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
-                        <!-- <phase>compile</phase> -->
                         <goals>
                             <goal>scr</goal>
                         </goals>
@@ -136,19 +116,25 @@
             </plugin>
         </plugins>
         <pluginManagement>
-            <!-- Some Maven plugins are recognized as problematic by Eclipse m2e 
-                and will produce error markers with a text similar to: maven-dependency-plugin (goals 
-                "copy-dependencies","unpack") is not supported by m2e. In version 1.0 there is no 
-                quick fix available for this but it is possible to define a lifecycle mapping for 
-                the plugin which removes the error marker http://wiki.eclipse.org/M2E_plugin_execution_not_covered#Common_problems 
-                To configure your Eclipse to use the lifecycle mapping in this file read http://wiki.eclipse.org/M2E_plugin_execution_not_covered#Eclipse_4.2_add_default_mapping -->
+            <!-- 
+            Some Maven plugins are recognized as problematic by Eclipse m2e 
+            and will produce error markers with a text similar to:
+ 
+            maven-dependency-plugin (goals "copy-dependencies","unpack") is 
+            not supported by m2e. In version 1.0 there is no quick fix 
+            available for this but it is possible to define a lifecycle 
+            mapping for the plugin which removes the error marker 
+            http://wiki.eclipse.org/M2E_plugin_execution_not_covered#Common_problems 
+            
+            To configure your Eclipse to use the lifecycle mapping in this file
+            read http://wiki.eclipse.org/M2E_plugin_execution_not_covered#Eclipse_4.2_add_default_mapping 
+            -->
             <plugins>
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
                     <version>1.0.0</version>
                     <configuration>
-
                         <lifecycleMappingMetadata>
                             <pluginExecutions>
                                 <pluginExecution>
@@ -180,15 +166,12 @@
                                 </pluginExecution>
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
-
                     </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
     <properties>
         <target.jar.directory>${project.build.directory}/../../target/all</target.jar.directory>
     </properties>
-
 </project>

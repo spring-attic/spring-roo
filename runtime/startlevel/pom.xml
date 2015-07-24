@@ -31,22 +31,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-Activator>${project.artifactId}.Activator</Bundle-Activator>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Copyright>Copyright
-                            ${project.organization.name}. All Rights Reserved.</Bundle-Copyright>
-                        <Bundle-DocURL>${project.url}</Bundle-DocURL>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <properties>
+        <bundle.activator>${project.artifactId}.Activator</bundle.activator>
+    </properties>
 </project>

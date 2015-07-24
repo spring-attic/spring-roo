@@ -71,7 +71,7 @@
         <repository>
             <id>spring-roo-repository-release</id>
             <name>Spring Roo Repository</name>
-            <url>http://spring-roo-repository.springsource.org/release</url>
+            <url>http://repo.spring.io/spring-roo/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -79,7 +79,7 @@
         <repository>
             <id>spring-roo-repository-snapshot</id>
             <name>Spring Roo Repository</name>
-            <url>http://spring-roo-repository.springsource.org/snapshot</url>
+            <url>http://repo.spring.io/spring-roo/snapshot</url>
             <snapshots>
                 <updatePolicy>never</updatePolicy>
                 <enabled>true</enabled>
@@ -121,9 +121,11 @@
             <timezone>+1</timezone>
         </developer>
     </developers>
+
     <dependencyManagement>
         <dependencies>
-            <!-- OSGi APIs -->
+
+            <!-- OSGi Core API -->
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
@@ -136,18 +138,8 @@
                 <version>${osgi.version}</version>
                 <scope>provided</scope>
             </dependency>
-            <!-- Apache Felix -->
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.bundlerepository</artifactId>
-                <version>2.0.4</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.easymock</groupId>
-                        <artifactId>easymock</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+
+            <!-- Apache Felix OSGi Core implementation -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
@@ -163,6 +155,8 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <!-- OSGi Log Service -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.log</artifactId>
@@ -182,6 +176,8 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <!-- Apache Felix OSGi Declarative Services implementation -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr</artifactId>
@@ -201,13 +197,16 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
                 <version>1.9.10</version>
-                <scope>provided</scope>
             </dependency>
+
+            <!-- Apache Felix Shell -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.shell</artifactId>
                 <version>1.4.3</version>
             </dependency>
+
+            <!-- Apache Felix OSGi RFC 147 implementation -->
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.runtime</artifactId>
@@ -218,7 +217,8 @@
                 <artifactId>org.apache.felix.gogo.command</artifactId>
                 <version>0.14.0</version>
             </dependency>
-            <!-- External OSGi Bundles (ie not wrapped) -->
+
+            <!-- Third party OSGi Bundles -->
             <dependency>
                 <groupId>net.sourceforge.jline</groupId>
                 <artifactId>jline</artifactId>
@@ -246,6 +246,11 @@
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-nop</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
@@ -254,6 +259,7 @@
                 <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
+
             <!-- Apache Commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -385,6 +391,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
             <!-- Wrapped JARs -->
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
@@ -436,6 +443,12 @@
                 <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
                 <version>1.0.7.0011</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.roo.wrapping</groupId>
+                <artifactId>org.springframework.roo.wrapping.snakeyaml</artifactId>
+                <version>1.15.0001</version>
+            </dependency>
+
             <!-- Roo Addons -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
@@ -762,7 +775,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.7</version>
+                    <version>1.8</version>
                     <dependencies>
                         <dependency>
                             <groupId>ant-contrib</groupId>
@@ -910,14 +923,15 @@
         <spring.version>3.2.8.RELEASE</spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <osgi.version>5.0.0</osgi.version>
-        <scr.plugin.version>1.20.0</scr.plugin.version>
         <slf4j.version>1.7.5</slf4j.version>
     </properties>
-    <!-- Adding Profiles to deactivating GPG on Build process -->
+
     <profiles>
-        <!-- JDK 8 profile to prevent errors if Spring Roo is compiled using Java 
-            8 -->
         <profile>
+            <!-- 
+            Profile to prevent errors if Spring Roo is compiled using Java 8
+            http://stackoverflow.com/questions/15886209/maven-is-not-working-in-java-8-when-javadoc-tags-are-incomplete
+            -->
             <id>jdk8</id>
             <activation>
                 <jdk>1.8</jdk>
@@ -927,14 +941,13 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
+                        <version>2.10.3</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
-                                <!-- To compile ROO using Java 8 uncomment this -->
                                 <configuration>
                                     <additionalparam>-Xdoclint:none</additionalparam>
                                 </configuration>
@@ -944,8 +957,8 @@
                 </plugins>
             </build>
         </profile>
-        <!-- Bamboo profile created to CI -->
         <profile>
+            <!-- Deactivate GPG for CI in Bamboo -->
             <id>bamboo-build</id>
             <build>
                 <plugins>

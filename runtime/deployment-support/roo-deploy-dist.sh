@@ -441,7 +441,7 @@ log "Assembly ASC...: $ASSEMBLY_ASC"
 
 if [[ "$COMMAND" = "assembly" ]]; then
 
-    if [ ! -f $ROO_HOME/target/all/org.springframework.roo.bootstrap-*.jar ]; then
+    if [ ! -f $ROO_HOME/runtime/target/all/org.springframework.roo.bootstrap-*.jar ]; then
         l_error "JARs missing; you must run mvn package before attempting assembly"
         exit 1
     fi
