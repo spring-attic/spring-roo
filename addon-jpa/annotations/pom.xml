@@ -12,7 +12,23 @@
     <name>Spring Roo - Annotations - JPA</name>
     <description>Support for Java Persistence API (JPA) features and domain entities in the target project</description>
     
-    
+    <dependencies>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.configurable.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.javabean.annotations</artifactId>
+        </dependency>
+    </dependencies>
+
    	<properties>
     	<target.jar.directory>${basedir}/../../target/all</target.jar.directory>  
 	</properties>

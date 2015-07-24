@@ -12,7 +12,15 @@
     <name>Spring Roo - Annotations - Service Layer</name>
     <description>Support for common layering options in Java Enterprise Applications</description>
     
-    
+    <dependencies>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
    	<properties>
     	<target.jar.directory>${basedir}/../../target/all</target.jar.directory>  
 	</properties>

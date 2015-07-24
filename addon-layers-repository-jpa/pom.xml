@@ -18,60 +18,6 @@
         <module>annotations</module>
     </modules>
 
-    <dependencies>
-        <!-- OSGi -->
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
-        <!-- Apache Felix -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-        </dependency>
-        <!-- Roo -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.classpath</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.file.monitor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.file.undo</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.metadata</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.process.manager</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.project</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.shell</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.support</artifactId>
-        </dependency>
-    </dependencies>
-
     <properties>
         <target.jar.directory>${basedir}/../target/all</target.jar.directory>
     </properties>

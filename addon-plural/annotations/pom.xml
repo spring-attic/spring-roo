@@ -11,7 +11,14 @@
     <packaging>bundle</packaging>
     <name>Spring Roo - Annotations - Plural Details</name>
     <description>Determines the plural term for a given String literal using Inflector (https://inflector.dev.java.net/).</description>
-    
+    <dependencies>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
    	<properties>
     	<target.jar.directory>${basedir}/../../target/all</target.jar.directory>  
 	</properties>

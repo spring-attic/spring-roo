@@ -12,6 +12,15 @@
     <name>Spring Roo - Annotations - Test Data On Demand</name>
     <description>Support for the automatic creation of sample data used for integration tests.</description>
 
+    <dependencies>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
    	<properties>
     	<target.jar.directory>${basedir}/../../target/all</target.jar.directory>  
 	</properties>
