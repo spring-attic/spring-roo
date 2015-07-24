@@ -88,6 +88,8 @@ public class PomTest {
         // Set up
         final Dependency mockExistingDependency = mock(Dependency.class);
         when(mockExistingDependency.getType()).thenReturn(DependencyType.JAR);
+        when(mockExistingDependency.getGroupId()).thenReturn(DEPENDENCY_ARTIFACT_ID);
+        when(mockExistingDependency.getArtifactId()).thenReturn(DEPENDENCY_GROUP_ID);
         final Pom pom = getMinimalPom(POM, mockExistingDependency);
 
         // Invoke and check
