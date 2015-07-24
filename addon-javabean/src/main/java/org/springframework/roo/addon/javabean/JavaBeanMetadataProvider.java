@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -40,6 +41,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * Provides {@link JavaBeanMetadata}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -51,6 +53,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	private final Set<String> producedMids = new LinkedHashSet<String>();
 
 	private ProjectOperations projectOperations;
+	private MemberDetailsScanner memberDetailsScanner;
 	private Boolean wasGaeEnabled;
 
 	protected void activate(final ComponentContext cContext) {
@@ -179,7 +182,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 
 		return new JavaBeanMetadata(metadataIdentificationString, aspectName,
 				governorPhysicalTypeMetadata, annotationValues, declaredFields,
-				interfaceMethods);
+				interfaceMethods, getMemberDetailsScanner());
 	}
 
 	public String getProvidesType() {
@@ -239,5 +242,32 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 			LOGGER.warning("Cannot load ProjectOperations on JavaBeanMetadataProvider.");
 			return null;
 		}
+    }
+    
+    /**
+     * Method to get MemberDetailScanner interface implementations
+     * 
+     * @return MemberDetailsScanner implementation
+     */
+    public MemberDetailsScanner getMemberDetailsScanner(){
+    	if(memberDetailsScanner == null){
+        	// Get all Services implement MemberDetailsScanner interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				memberDetailsScanner = (MemberDetailsScanner) context.getService(ref);
+    				return memberDetailsScanner;
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load MemberDetailsScanner on JavaBeanMetadataProvider.");
+    			return null;
+    		}
+    	}else{
+    		return memberDetailsScanner;
+    	}
     }
 }
