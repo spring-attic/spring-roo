@@ -13,6 +13,7 @@ import org.springframework.roo.shell.CommandMarker;
  * Commands for the 'selenium' add-on to be used by the ROO shell.
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -20,6 +21,11 @@ import org.springframework.roo.shell.CommandMarker;
 public class SeleniumCommands implements CommandMarker {
 
     @Reference private SeleniumOperations seleniumOperations;
+    
+    @CliAvailabilityIndicator({ "selenium all", "selenium test" })
+    public boolean isJdkFieldManagementAvailable() {
+        return seleniumOperations.isSeleniumInstallationPossible();
+    }
 
     @CliCommand(value = "selenium test", help = "Creates a new Selenium test for a particular controller")
     public void generateTest(
@@ -29,9 +35,14 @@ public class SeleniumCommands implements CommandMarker {
 
         seleniumOperations.generateTest(controller, name, url);
     }
+    
+    @CliCommand(value = "selenium all", help = "Creates a Selenium tests for all controllers")
+    public void generateAll(
+    		@CliOption(key = "serverUrl", mandatory = false, unspecifiedDefaultValue = "http://localhost:8080/", specifiedDefaultValue = "http://localhost:8080/", help = "URL of the server where the web application is available, including protocol, port and hostname") final String url) {
 
-    @CliAvailabilityIndicator({ "selenium test" })
-    public boolean isJdkFieldManagementAvailable() {
-        return seleniumOperations.isSeleniumInstallationPossible();
+        seleniumOperations.generateAll(url);
     }
+
+
+
 }

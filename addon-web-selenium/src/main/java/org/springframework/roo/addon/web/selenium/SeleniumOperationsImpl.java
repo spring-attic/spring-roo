@@ -13,8 +13,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -39,6 +41,7 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -57,6 +60,7 @@ import org.w3c.dom.Node;
  * Implementation of {@link SeleniumOperations}.
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -196,13 +200,35 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
         }
         return initializer;
     }
+    
+    /**
+     * Creates Selenium testcase for all registered controllers
+     * 
+     * @param serverURL the URL of the Selenium server (optional)
+     */
+	@Override
+	public void generateAll(String serverURL) {
+		// Getting all registered controllers
+		Set<JavaType> registeredControllers = 
+				typeLocationService.findTypesWithAnnotation(SpringJavaType.CONTROLLER);
+		Iterator<JavaType> it = registeredControllers.iterator();
+		
+		// Iterate all registered controllers
+		while(it.hasNext()){
+			JavaType controller = it.next();
+			// Delegating on generateTest function
+			generateTest(controller, "", serverURL);
+		}
+	}
 
     /**
      * Creates a new Selenium testcase
      * 
      * @param controller the JavaType of the controller under test (required)
      * @param name the name of the test case (optional)
+     * @param serverURL the URL of the Selenium server (optional)
      */
+	@Override
     public void generateTest(final JavaType controller, String name,
             String serverURL) {
         Validate.notNull(controller, "Controller type required");
@@ -459,4 +485,5 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
         return tr;
     }
+
 }
