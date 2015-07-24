@@ -13,6 +13,7 @@ import org.springframework.roo.support.util.FileUtils;
  * {@link PathResolver}s can convert these paths to and from physical locations.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public enum Path {
@@ -28,6 +29,11 @@ public enum Path {
      * The module's base directory for production Spring-related resource files.
      */
     SPRING_CONFIG_ROOT(false, "src/main/resources/META-INF/spring"),
+    
+    /**
+     * Main path that will contain JAVA and RESOURCES folder
+     */
+    SRC_MAIN(false, "src/main"),
 
     /**
      * The module sub-path containing production Java source code.
@@ -46,6 +52,11 @@ public enum Path {
      * The module sub-path containing production resource files.
      */
     SRC_MAIN_RESOURCES(false, "src/main/resources"),
+    
+    /**
+     * Alternative to SRC_MAIN_RESOURCES
+     */
+    SRC_MAIN_RES(false, "src/main/res"),
 
     /**
      * The module sub-path containing web resource files.
