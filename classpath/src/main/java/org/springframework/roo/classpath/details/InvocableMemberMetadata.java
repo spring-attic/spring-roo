@@ -11,10 +11,11 @@ import org.springframework.roo.model.JavaType;
  * Metadata concerning an invocable member, namely a method or constructor.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public interface InvocableMemberMetadata extends
-        IdentifiableAnnotatedJavaStructure, CommentedJavaStructure {
+        IdentifiableAnnotatedJavaStructure, CommentedJavaStructure, GenericMethodJavaStructure {
 
     /**
      * @return the body of the method, if available (can be null if unavailable)

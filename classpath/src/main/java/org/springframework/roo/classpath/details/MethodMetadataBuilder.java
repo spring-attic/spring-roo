@@ -14,6 +14,7 @@ import org.springframework.roo.model.JavaType;
  * Builder for {@link MethodMetadata}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.1
  */
 public final class MethodMetadataBuilder extends
@@ -22,6 +23,7 @@ public final class MethodMetadataBuilder extends
     private JavaSymbolName methodName;
     private JavaType returnType;
     private CommentStructure commentStructure;
+    private String genericDefinition;
 
     public MethodMetadataBuilder(final MethodMetadata existing) {
         super(existing);
@@ -89,6 +91,8 @@ public final class MethodMetadataBuilder extends
                 getThrowsTypes(), getBodyBuilder().getOutput());
 
         methodMetadata.setCommentStructure(this.commentStructure);
+        // ROO-3648: Add support to generate Generic Methods
+        methodMetadata.setGenericDefinition(this.genericDefinition);
 
         return methodMetadata;
     }
@@ -120,6 +124,31 @@ public final class MethodMetadataBuilder extends
 
     public void setCommentStructure(CommentStructure commentStructure) {
         this.commentStructure = commentStructure;
+    }
+    
+    /**
+     * ROO-3648: Adds generic definition on current method to generate
+     * Generic Method.
+     * 
+     * Learn more about Generic Methods reading 
+     * http://docs.oracle.com/javase/tutorial/extra/generics/methods.html
+     * 
+     * @param definition a String that define Generic. Ex: setGenericDefinition("T");
+     */
+    public void setGenericDefinition(String definition){
+    	this.genericDefinition = definition;
+    }
+    
+    /**
+     * ROO-3648: Returns current method Generic definition
+     * 
+     * Learn more about Generic Methods reading 
+     * http://docs.oracle.com/javase/tutorial/extra/generics/methods.html
+     * 
+     * @return String with generic definition
+     */
+    public String getGenericDefinition(){
+    	return this.genericDefinition;
     }
 
     @Override

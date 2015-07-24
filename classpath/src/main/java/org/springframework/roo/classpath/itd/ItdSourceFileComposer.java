@@ -32,6 +32,7 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class ItdSourceFileComposer {
@@ -682,11 +683,19 @@ public class ItdSourceFileComposer {
                 this.newLine(false);
             }
 
-            // Append "<modifier> <returnType> <methodName>" portion
+            // Append "<modifier> <genericDefinition> <returnType> <methodName>" portion
             appendIndent();
+            // modifier
             if (method.getModifier() != 0) {
                 append(Modifier.toString(method.getModifier()));
                 append(" ");
+            }
+            
+            // ROO-3648: genericDefinition
+            if(method.getGenericDefinition() != null && 
+            		!method.getGenericDefinition().trim().equals("")){
+            	append("<".concat(method.getGenericDefinition()).concat(">"));
+            	append(" ");
             }
 
             // return type

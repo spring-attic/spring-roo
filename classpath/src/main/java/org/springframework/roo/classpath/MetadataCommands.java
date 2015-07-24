@@ -31,6 +31,11 @@ import org.springframework.roo.shell.CommandMarker;
 public class MetadataCommands implements CommandMarker {
 
     private static final String METADATA_FOR_MODULE_COMMAND = "metadata for module";
+    private static final String METADATA_CACHE_COMMAND = "metadata cache";
+    private static final String METADATA_FOR_ID_COMMAND = "metadata for id";
+    private static final String METADATA_FOR_TYPE_COMMAND = "metadata for type";
+    private static final String METADATA_STATUS_COMMAND = "metadata status";
+    private static final String METADATA_TRACE_COMMAND = "metadata trace";
 
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
@@ -39,12 +44,14 @@ public class MetadataCommands implements CommandMarker {
     @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
 
-    @CliAvailabilityIndicator(METADATA_FOR_MODULE_COMMAND)
+    @CliAvailabilityIndicator({ METADATA_FOR_MODULE_COMMAND, METADATA_CACHE_COMMAND, 
+    	METADATA_FOR_ID_COMMAND, METADATA_FOR_TYPE_COMMAND, METADATA_STATUS_COMMAND,
+    	METADATA_TRACE_COMMAND})
     public boolean isModuleMetadataAvailable() {
         return projectOperations.getFocusedModule() != null;
     }
 
-    @CliCommand(value = "metadata cache", help = "Shows detailed metadata for the indicated type")
+    @CliCommand(value = METADATA_CACHE_COMMAND, help = "Shows detailed metadata for the indicated type")
     public String metadataCacheMaximum(
             @CliOption(key = { "maximumCapacity" }, mandatory = true, help = "The maximum number of metadata items to cache") final int maxCapacity) {
         Validate.isTrue(maxCapacity >= 100,
@@ -54,7 +61,7 @@ public class MetadataCommands implements CommandMarker {
         return metadataTimings();
     }
 
-    @CliCommand(value = "metadata for id", help = "Shows detailed information about the metadata item")
+    @CliCommand(value = METADATA_FOR_ID_COMMAND, help = "Shows detailed information about the metadata item")
     public String metadataForId(
             @CliOption(key = { "", "metadataId" }, mandatory = true, help = "The metadata ID (should start with MID:)") final String metadataId) {
         final StringBuilder sb = new StringBuilder();
@@ -120,7 +127,7 @@ public class MetadataCommands implements CommandMarker {
         return metadataService.get(projectMID).toString();
     }
 
-    @CliCommand(value = "metadata for type", help = "Shows detailed metadata for the indicated type")
+    @CliCommand(value = METADATA_FOR_TYPE_COMMAND, help = "Shows detailed metadata for the indicated type")
     public String metadataForType(
             @CliOption(key = { "", "type" }, mandatory = true, help = "The Java type for which to display metadata") final JavaType javaType) {
         final String id = typeLocationService
@@ -151,7 +158,7 @@ public class MetadataCommands implements CommandMarker {
         return sb.toString();
     }
 
-    @CliCommand(value = "metadata status", help = "Shows metadata statistics")
+    @CliCommand(value = METADATA_STATUS_COMMAND, help = "Shows metadata statistics")
     public String metadataTimings() {
         final StringBuilder sb = new StringBuilder();
         for (final MetadataTimingStatistic stat : metadataLogger.getTimings()) {
@@ -161,7 +168,7 @@ public class MetadataCommands implements CommandMarker {
         return sb.toString();
     }
 
-    @CliCommand(value = "metadata trace", help = "Traces metadata event delivery notifications")
+    @CliCommand(value = METADATA_TRACE_COMMAND, help = "Traces metadata event delivery notifications")
     public void metadataTrace(
             @CliOption(key = { "", "level" }, mandatory = true, help = "The verbosity of notifications (0=none, 1=some, 2=all)") final int level) {
         metadataLogger.setTraceLevel(level);

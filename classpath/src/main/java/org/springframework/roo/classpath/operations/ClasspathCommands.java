@@ -86,7 +86,7 @@ public class ClasspathCommands implements CommandMarker {
     }
 
     @CliAvailabilityIndicator({ "class", "constructor", "interface",
-            "enum type", "enum constant" })
+            "enum type", "enum constant", "focus" })
     public boolean isProjectAvailable() {
         return classpathOperations.isProjectAvailable();
     }
