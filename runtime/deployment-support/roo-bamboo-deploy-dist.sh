@@ -80,7 +80,7 @@ quick_zip_gpg_tests() {
         gpg -v --batch --verify $ASSEMBLY_ASC
         EXITED=$?
     else
-        gpg --batch --verify $ASSEMBLY_ASC &>/dev/null
+        gpg --batch --verify $ASSEMBLY_ASC $ASSEMBLY_ZIP &>/dev/null
         EXITED=$?
     fi
     if [[ ! "$EXITED" = "0" ]]; then
@@ -438,7 +438,7 @@ log "Assembly ASC...: $ASSEMBLY_ASC"
 
 if [[ "$COMMAND" = "assembly" ]]; then
 
-    if [ ! -f $ROO_HOME/target/all/org.springframework.roo.bootstrap-*.jar ]; then
+    if [ ! -f $ROO_HOME/runtime/target/all/org.springframework.roo.bootstrap-*.jar ]; then
         l_error "JARs missing; you must run mvn package before attempting assembly"
         exit 1
     fi
@@ -473,7 +473,6 @@ if [[ "$COMMAND" = "assembly" ]]; then
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/index.pdfmarks $WORK_DIR/docs/pdf
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/images $WORK_DIR/docs/html
     cp -r $ROO_HOME/runtime/deployment-support/target/generated-docs/index.html $WORK_DIR/docs/html
-
 
     # Prepare to write the ZIP
     log "Cleaning $DIST_DIR" 
@@ -624,6 +623,6 @@ if [[ "$COMMAND" = "next" ]]; then
     log "Updating project templates"
     sed -i "s/<roo.version>.*<\/roo.version>/<roo.version>$NEXT<\/roo.version>/" `find $ROO_HOME -iname *-template.xml`
     log "Updating documentation"
-    sed -i "s/<releaseinfo>.*<\/releaseinfo>/<releaseinfo>$NEXT<\/releaseinfo>/" $ROO_HOME/runtime/deployment-support/src/site/docbook/reference/index.xml
+    sed -i "s/<releaseinfo>.*<\/releaseinfo>/<releaseinfo>$NEXT<\/releaseinfo>/" $ROO_HOME/runtime/deployment-support/src/main/asciidoc/index.adoc
 fi
 
