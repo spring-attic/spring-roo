@@ -20,8 +20,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.backup.BackupOperations;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.addon.WebMvcOperations;
@@ -49,19 +51,15 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.osgi.BundleFindingUtils;
+import org.springframework.roo.project.Property;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import org.springframework.roo.support.logging.HandlerUtils;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
 /**
  * Implementation of {@link JspOperations}.
@@ -278,6 +276,9 @@ public class JspOperationsImpl extends AbstractOperations implements
         if (!isControllerAvailable()) {
             getWebMvcOperations().installAllWebMvcArtifacts();
         }
+        
+        // Install servers maven plugin
+        installMavenPlugins();
 
         // Install tiles config
         updateConfiguration();
@@ -354,7 +355,30 @@ public class JspOperationsImpl extends AbstractOperations implements
         }
     }
 
-    public void installI18n(final I18n i18n, final LogicalPath webappPath) {
+    private void installMavenPlugins() {
+    	final Element configuration = XmlUtils.getConfiguration(getClass());
+
+    	// Add properties
+		List<Element> properties = XmlUtils.findElements(
+				"/configuration/properties/*", configuration);
+		for (Element property : properties) {
+			projectOperations.addProperty(projectOperations
+					.getFocusedModuleName(), new Property(property));
+		}
+    	
+		// Add Plugins
+		List<Element> elements = XmlUtils.findElements(
+				"/configuration/plugins/plugin",
+				configuration);
+		for (Element element : elements) {
+			Plugin plugin = new Plugin(element);
+			projectOperations.addBuildPlugin(
+					projectOperations.getFocusedModuleName(), plugin);
+		}
+
+	}
+
+	public void installI18n(final I18n i18n, final LogicalPath webappPath) {
         Validate.notNull(i18n, "Language choice required");
 
         if (i18n.getLocale() == null) {
