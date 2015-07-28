@@ -13,6 +13,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,9 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.backup.BackupOperations;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
@@ -48,7 +52,10 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -266,6 +273,9 @@ public class JspOperationsImpl extends AbstractOperations implements
         if (!isControllerAvailable()) {
             webMvcOperations.installAllWebMvcArtifacts();
         }
+        
+        // Install servers maven plugin
+        installMavenPlugins(moduleName);
 
         // Install tiles config
         updateConfiguration();
@@ -342,7 +352,29 @@ public class JspOperationsImpl extends AbstractOperations implements
         }
     }
 
-    public void installI18n(final I18n i18n, final LogicalPath webappPath) {
+    private void installMavenPlugins(String moduleName) {
+    	final Element configuration = XmlUtils.getConfiguration(getClass());
+
+    	// Add properties
+		  List<Element> properties = XmlUtils.findElements(
+				"/configuration/properties/*", configuration);
+		  for (Element property : properties) {
+			  projectOperations.addProperty(moduleName, new Property(property));
+		  }
+    	
+		  // Add Plugins
+		  List<Element> elements = XmlUtils.findElements(
+				"/configuration/plugins/plugin",
+				configuration);
+		  for (Element element : elements) {
+			  Plugin plugin = new Plugin(element);
+			  projectOperations.addBuildPlugin(
+					moduleName, plugin);
+		  }
+
+	}
+
+	public void installI18n(final I18n i18n, final LogicalPath webappPath) {
         Validate.notNull(i18n, "Language choice required");
 
         if (i18n.getLocale() == null) {
