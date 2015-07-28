@@ -1,10 +1,10 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.scaffold;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_SORTED_METHOD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;

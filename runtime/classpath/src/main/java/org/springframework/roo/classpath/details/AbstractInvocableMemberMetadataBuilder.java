@@ -14,6 +14,7 @@ import org.springframework.roo.model.JavaType;
  * {@link AbstractInvocableMemberMetadata}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.1
  */
 public abstract class AbstractInvocableMemberMetadataBuilder<T extends InvocableMemberMetadata>
@@ -24,10 +25,13 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
     private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     private List<JavaType> throwsTypes = new ArrayList<JavaType>();
     private CommentStructure commentStructure;
+    private String genericDefinition;
 
     protected AbstractInvocableMemberMetadataBuilder(
             final InvocableMemberMetadata existing) {
         super(existing);
+        this.commentStructure = existing.getCommentStructure();
+        this.genericDefinition = existing.getGenericDefinition();
         this.parameterNames = new ArrayList<JavaSymbolName>(
                 existing.getParameterNames());
         this.parameterTypes = new ArrayList<AnnotatedJavaType>(
@@ -45,6 +49,8 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
             final String declaredbyMetadataId,
             final InvocableMemberMetadata existing) {
         super(declaredbyMetadataId, existing);
+        this.commentStructure = existing.getCommentStructure();
+        this.genericDefinition = existing.getGenericDefinition();
         this.parameterNames = new ArrayList<JavaSymbolName>(
                 existing.getParameterNames());
         this.parameterTypes = new ArrayList<AnnotatedJavaType>(
@@ -119,5 +125,13 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 
     public void setCommentStructure(CommentStructure commentStructure) {
         this.commentStructure = commentStructure;
+    }
+    
+    public String getGenericDefinition() {
+        return genericDefinition;
+    }
+
+    public void setGenericDefinition(String genericDefinition) {
+        this.genericDefinition = genericDefinition;
     }
 }

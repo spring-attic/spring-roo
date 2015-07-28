@@ -22,8 +22,6 @@ public final class MethodMetadataBuilder extends
 
     private JavaSymbolName methodName;
     private JavaType returnType;
-    private CommentStructure commentStructure;
-    private String genericDefinition;
 
     public MethodMetadataBuilder(final MethodMetadata existing) {
         super(existing);
@@ -89,10 +87,10 @@ public final class MethodMetadataBuilder extends
                 getModifier(), buildAnnotations(), getMethodName(),
                 getReturnType(), getParameterTypes(), getParameterNames(),
                 getThrowsTypes(), getBodyBuilder().getOutput());
-
-        methodMetadata.setCommentStructure(this.commentStructure);
+        
+        methodMetadata.setCommentStructure(this.getCommentStructure());
         // ROO-3648: Add support to generate Generic Methods
-        methodMetadata.setGenericDefinition(this.genericDefinition);
+        methodMetadata.setGenericDefinition(this.getGenericDefinition());
 
         return methodMetadata;
     }
@@ -116,39 +114,6 @@ public final class MethodMetadataBuilder extends
 
     public void setReturnType(final JavaType returnType) {
         this.returnType = returnType;
-    }
-
-    public CommentStructure getCommentStructure() {
-        return commentStructure;
-    }
-
-    public void setCommentStructure(CommentStructure commentStructure) {
-        this.commentStructure = commentStructure;
-    }
-    
-    /**
-     * ROO-3648: Adds generic definition on current method to generate
-     * Generic Method.
-     * 
-     * Learn more about Generic Methods reading 
-     * http://docs.oracle.com/javase/tutorial/extra/generics/methods.html
-     * 
-     * @param definition a String that define Generic. Ex: setGenericDefinition("T");
-     */
-    public void setGenericDefinition(String definition){
-    	this.genericDefinition = definition;
-    }
-    
-    /**
-     * ROO-3648: Returns current method Generic definition
-     * 
-     * Learn more about Generic Methods reading 
-     * http://docs.oracle.com/javase/tutorial/extra/generics/methods.html
-     * 
-     * @return String with generic definition
-     */
-    public String getGenericDefinition(){
-    	return this.genericDefinition;
     }
 
     @Override
