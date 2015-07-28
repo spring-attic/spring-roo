@@ -278,7 +278,7 @@ public class JspOperationsImpl extends AbstractOperations implements
         }
         
         // Install servers maven plugin
-        installMavenPlugins();
+        installMavenPlugins(moduleName);
 
         // Install tiles config
         updateConfiguration();
@@ -355,15 +355,14 @@ public class JspOperationsImpl extends AbstractOperations implements
         }
     }
 
-    private void installMavenPlugins() {
+    private void installMavenPlugins(String moduleName) {
     	final Element configuration = XmlUtils.getConfiguration(getClass());
 
     	// Add properties
 		List<Element> properties = XmlUtils.findElements(
 				"/configuration/properties/*", configuration);
 		for (Element property : properties) {
-			projectOperations.addProperty(projectOperations
-					.getFocusedModuleName(), new Property(property));
+			getProjectOperations().addProperty(moduleName, new Property(property));
 		}
     	
 		// Add Plugins
@@ -372,8 +371,8 @@ public class JspOperationsImpl extends AbstractOperations implements
 				configuration);
 		for (Element element : elements) {
 			Plugin plugin = new Plugin(element);
-			projectOperations.addBuildPlugin(
-					projectOperations.getFocusedModuleName(), plugin);
+			getProjectOperations().addBuildPlugin(
+					moduleName, plugin);
 		}
 
 	}
