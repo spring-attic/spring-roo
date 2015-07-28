@@ -34,6 +34,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class ItdTypeDetailsBuilder extends
@@ -289,7 +290,7 @@ public class ItdTypeDetailsBuilder extends
                         .convertFromAnnotatedJavaTypes(md.getParameterTypes())) == null,
                 "Method '%s' already defined in ITD (ITD target '%s')", md
                         .getMethodName(), aspect.getFullyQualifiedTypeName());
-        if (!Modifier.isAbstract(md.getModifier())) {
+        if (!Modifier.isAbstract(md.getModifier()) && md.getReturnType() != JavaType.VOID_PRIMITIVE) {
             Validate.notBlank(
                     md.getBody(),
                     "Method '%s' failed to provide a body, despite being identified for ITD inclusion",

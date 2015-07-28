@@ -21,6 +21,8 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.comments.AbstractComment;
+import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaSymbolName;
@@ -675,6 +677,23 @@ public class ItdSourceFileComposer {
                             .getParameterNames().size(),
                     "Method %s has mismatched parameter names against parameter types",
                     method.getMethodName().getSymbolName());
+            
+            // ROO-3447: Append comments if exists
+            CommentStructure commentStructure = method.getCommentStructure();
+            if(commentStructure != null){
+            	List<AbstractComment> methodComments = commentStructure.getBeginComments();
+                String comment = "";
+                for(AbstractComment methodComment : methodComments){
+                	comment = comment.concat(methodComment.getComment() + "\n");
+                }
+                
+                String[] commentLines = comment.split("\n");
+                appendFormalLine("/**");
+                for(String commentLine : commentLines){
+                	appendFormalLine(" * ".concat(commentLine));
+                }
+                appendFormalLine(" */");
+            }
 
             // Append annotations
             for (final AnnotationMetadata annotation : method.getAnnotations()) {
