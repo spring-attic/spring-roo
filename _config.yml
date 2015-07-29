@@ -31,3 +31,12 @@ custom_gradle_template: false
 main_site_url: http://spring.io
 projects_site_url: http://projects.spring.io
 questions_url: http://spring.io/questions
+
+# Project Twitter URL
+twitter: SpringRoo
+
+# Project Open Graph
+url: http://projects.spring.io/spring-roo
+title: Spring Roo Project
+description: A next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes.
+default_bg: default_bg.png

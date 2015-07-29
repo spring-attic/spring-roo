@@ -34,7 +34,37 @@
         var siteBaseUrl = "{{ site.baseurl }}";
     </script>
     <script type="text/javascript" src="{{site.baseurl}}/js/copySnippets.js"></script>
+
+    <!-- meta info -->
+    <meta name="description" content="{{ site.description }}">
+    {% if page.tags %}<meta name="keywords" content="{{ page.tags | join: ', ' }}">{% endif %}
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image" content="{{ site.url }}{{ ASSET_PATH }}/img/{{ site.default_bg }}">
+    <meta name="twitter:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+    <meta name="twitter:description" content="{{ site.description }}">
+    <meta name="twitter:creator" content="@{{ site.twitter }}">
+
+    <!-- Open Graph -->
+    <meta property="og:locale" content="{{page.lang}}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+    <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }} {% endif %}">
+    <meta property="og:url" content="{{ site.url }}{{ page.url }}">
+    <meta property="og:site_name" content="{{ site.title }}">
+
+    <meta property="og:image" content="{% if page.image.thumb %}{{ site.url }}/img/{{ page.image.thumb }}{% else %}{{ site.url }}{{ ASSET_PATH }}/img/{{ site..default_bg }}{% endif %}">
+
     <meta name="google-site-verification" content="7qGntFPD9lWAVCtUu5U77v4l68PsTHf6xpzgjQv2j2M" />
+
+    <!-- http://t.co/dKP3o1e -->
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <!-- Enable responsive viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
     <script>
         var _gaq = _gaq || [];
         var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
