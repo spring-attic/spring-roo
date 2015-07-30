@@ -18,8 +18,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -36,17 +38,19 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Shell;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
@@ -54,12 +58,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link JsfOperations}.
@@ -723,6 +721,9 @@ public class JsfOperationsImpl extends AbstractOperations implements
     	}
     	Validate.notNull(pathResolver, "PathResolver is required");
     	
+        // Install servers maven plugin
+        installMavenPlugins(getProjectOperations().getFocusedModuleName());
+    	
         jsfImplementation = updateConfiguration(jsfImplementation, jsfLibrary);
         createOrUpdateWebXml(jsfImplementation, theme);
 
@@ -749,6 +750,28 @@ public class JsfOperationsImpl extends AbstractOperations implements
 
         fileManager.scan();
     }
+    
+    private void installMavenPlugins(String moduleName) {
+    	final Element configuration = XmlUtils.getConfiguration(getClass());
+
+    	// Add properties
+		List<Element> properties = XmlUtils.findElements(
+				"/configuration/properties/*", configuration);
+		for (Element property : properties) {
+			getProjectOperations().addProperty(moduleName, new Property(property));
+		}
+    	
+		// Add Plugins
+		List<Element> elements = XmlUtils.findElements(
+				"/configuration/plugins/plugin",
+				configuration);
+		for (Element element : elements) {
+			Plugin plugin = new Plugin(element);
+			getProjectOperations().addBuildPlugin(
+					moduleName, plugin);
+		}
+
+	}
 
     private JsfImplementation updateConfiguration(
             JsfImplementation jsfImplementation, JsfLibrary jsfLibrary) {
