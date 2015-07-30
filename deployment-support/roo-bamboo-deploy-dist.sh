@@ -117,6 +117,32 @@ load_roo_build_and_test() {
     popd &>/dev/null
 }
 
+load_roo_build_and_test_multimodule() {
+    type -P mvn &>/dev/null || { l_error "mvn not found. Aborting." >&2; exit 1; }
+    log "Beginning test script: $@"
+    rm -rf /tmp/rootest
+    mkdir -p /tmp/rootest
+    pushd /tmp/rootest &>/dev/null
+    if [ "$VERBOSE" = "1" ]; then
+        $ROO_CMD $@
+        EXITED=$?
+    else
+        $ROO_CMD $@ &>/dev/null
+        EXITED=$?
+    fi
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "Test failed: $ROO_CMD $@" >&2; exit 1;
+    fi
+    if [ -f /tmp/rootest/src/main/resources/log4j.properties ]; then
+        sed -i 's/org.apache.log4j.ConsoleAppender/org.apache.log4j.varia.NullAppender/g' /tmp/rootest/src/main/resources/log4j.properties
+    fi
+    $MVN_CMD clean install
+    if [[ ! "$?" = "0" ]]; then
+        l_error "Test failed: $MVN_CMD -e -B clean test" >&2; exit 1;
+    fi
+    popd &>/dev/null
+}
+
 tomcat_stop_start_get_stop() {
     type -P wget &>/dev/null || { l_error "wget not found. Aborting." >&2; exit 1; }
     log "Performing MVC testing; expecting GET success for URL: $@"
@@ -142,6 +168,45 @@ tomcat_stop_start_get_stop() {
     EXITED=$?
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "wget failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+    if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
+    else
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
+    fi
+    if [ ! "$MVN_TOMCAT_PID" = "" ]; then
+        log "Terminating background mvn tomcat7:run process with PID $MVN_TOMCAT_PID"
+        kill $MVN_TOMCAT_PID
+        # no need to sleep, as we'll be at least running Roo between now and the next Tomcat start
+    fi
+    popd &>/dev/null
+}
+
+tomcat_stop_start_get_stop_multimodule() {
+    type -P wget &>/dev/null || { l_error "wget not found. Aborting." >&2; exit 1; }
+    log "Performing MVC testing; expecting GET success for URL: $2"
+    pushd /tmp/rootest/$1 &>/dev/null
+    if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
+    else
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
+    fi
+    if [ ! "$MVN_TOMCAT_PID" = "" ]; then
+        # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
+        log "kill -9 of old mvn tomcat7:run with PID $MVN_TOMCAT_PID"
+        kill -9 $MVN_TOMCAT_PID
+        sleep 5
+    fi
+    log "Invoking mvn tomcat7:run in background"
+    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat7:run &>/dev/null 2>&1 &
+    WGET_OPTS="-q"
+    if [ "$VERBOSE" = "1" ]; then
+        WGET_OPTS="-v"
+    fi
+    wget $WGET_OPTS --retry-connrefused --tries=30 -O /tmp/rootest/wget.html $2
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "wget failed: $2 (returned code $EXITED)" >&2; exit 1;
     fi
     if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
         MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat7:run | cut -b "1-6" | sed "s/ //g"`
@@ -558,8 +623,8 @@ if [[ "$COMMAND" = "assembly" ]]; then
         load_roo_build_and_test script bikeshop.roo
         jetty_stop_start_get_stop http://localhost:8888/bikeshop/pages/main.jsf
 
-        load_roo_build_and_test script multimodule.roo
-        tomcat_stop_start_get_stop http://localhost:8888/mvc
+        load_roo_build_and_test_multimodule script multimodule.roo
+        tomcat_stop_start_get_stop_multimodule ui/mvc http://localhost:8888/mvc
 
         load_roo_build_and_test script embedding.roo
         tomcat_stop_start_get_stop http://localhost:8888/embedding
