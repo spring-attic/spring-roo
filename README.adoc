@@ -1,3 +1,16 @@
+// Build the document
+// ===================
+//
+// HTML5:
+//   asciidoctor -b html5 README.adoc
+//
+// HTML5 Asciidoctor:
+//   # Embed images in XHTML
+//   asciidoctor -b html5 -a data-uri README.adoc
+//
+// PDF Asciidoctor:
+//   asciidoctor-pdf -a pdf-style=asciidoctor README.adoc
+
 = Spring Roo image:https://build.spring.io/plugins/servlet/buildStatusImage/ROO-BUILD["Build Status", link="https://build.spring.io/browse/ROO-BUILD"] image:https://badges.gitter.im/Join Chat.svg["Chat",link="https://gitter.im/spring-projects/spring-roo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 Getting started with Spring Roo development
 :page-layout: base
@@ -119,9 +132,16 @@ NOTE: _if you're new to GPG: don't lose your private key! Backup the secring.gpg
 [[developing-within-eclipse]]
 == Developing within eclipse
 
-Spring Roo itself does not use *AspectJ* and therefore any *standard IDE* can be used for development. No extra plugins are needed and the team use _"mvn clean eclipse:clean eclipse:eclipse"_ to produce https://www.eclipse.org/[Eclipse] project files that can be imported via _File > Import > Existing_ Projects into Workspace. 
+Spring Roo itself does not use *AspectJ*, it is a standard _Maven_ project and
+therefore any *standard IDE* can be used for development. No extra plugins are
+needed.
 
-In theory you could use the https://www.eclipse.org/m2e/[m2eclipse plugin]. The Roo team just tends to use _eclipse:clean eclipse:eclipse_ instead.
+The team use https://www.eclipse.org/[Eclipse] or https://spring.io/tools[STS] 
+to develop Roo, just import the project as standard Maven project 
+via _File > Import > Maven > Existing Maven Projects_ into Workspace. 
+
+In theory you could use the https://www.eclipse.org/m2e/[m2eclipse plugin].
+The Roo team just tends to use the shell command _mvn_ instead.
 
 [[running-the-command-line-tool]]
 == Running the command line tool 
@@ -144,15 +164,18 @@ It's important that you run *roo-dev* from a directory that you'd like to eventu
 
 IMPORTANT: _Don't try to run *roo-dev* from your $ROO_HOME directory._
 
-If this fails, please review the *"OSGi Wrapping JARs"* section above.
+Notice we used _"mvn install"_ rather than _"mvn package"_. This is simply for
+convenience, as it will allow you to _"cd"_ into any Roo module subdirectory and
+_"mvn install"_. This saves considerable build time if changes are only being made in a single module.
 
-Notice we used _"mvn install"_ rather than _"mvn package"_. This is simply for convenience, as it will allow you to "cd" into any Roo module subdirectory and "mvn install". This saves considerable build time if changes are only being made in a single module.
-
-Roo ships with a command line tool called *"roo-dev"*. This is also a Windows
+Roo ships with a command line tool called *roo-dev*. This is also a Windows
 equivalent. It copies all relevant JARs from the Roo directories into
 _$ROO_HOME/runtime/bootstrap/roo-dev/target/osgi_. This directory represents a configured Roo OSGi instance. 
 
-*"roo-dev"* also launches the OSGi container, which is currently http://felix.apache.org/[Apache Felix]. It also activate *"development mode"*, which gives fuller exceptions, more file activity reporting, extra flash messages related to OSGi events etc.
+*roo-dev* also launches the OSGi container, which is currently
+http://felix.apache.org/[Apache Felix]. It also activate the _"development
+mode"_, which gives fuller exceptions, more file activity reporting, extra 
+flash messages related to OSGi events etc.
 
 [[git-polices]]
 == Git Polices
@@ -249,7 +272,7 @@ Our release procedure may seem long, but that's because it includes many steps r
 [source, shell]
 ----
 cd $ROO_HOME
-git pull
+git pull --rebase
 cd $ROO_HOME/runtime/deployment-support
 ./roo-deploy-dist.sh -c next -n 4.5.6.RELEASE (use -v for logging)
 cd $ROO_HOME
