@@ -52,6 +52,7 @@ ROO_AUTO_DEPLOY_DIRECTORY="$ROO_HOME/bootstrap/target/osgi/bundle"
 # echo "ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
 
 ROO_CONFIG_FILE_PROPERTIES="$ROO_HOME/bootstrap/target/osgi/conf/config.properties"
+LOG_CONFIG_FILE_PROPERTIES="$ROO_HOME/bootstrap/target/osgi/conf/logging.properties"
 # echo "ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
 
 
@@ -89,6 +90,7 @@ PAUSE=
 METADATA_TRACE=
 #METADATA_TRACE="-Droo.metadata.trace=true"
 ANSI="-Droo.console.ansi=true"
-java $PAUSE $DEBUG $METADATA_TRACE $ANSI -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
+LOG="-Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.Slf4jLog -Djava.util.logging.config.file=${LOG_CONFIG_FILE_PROPERTIES}"
+java $LOG $PAUSE $DEBUG $METADATA_TRACE $ANSI -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 echo Roo exited with code $EXITED

@@ -63,13 +63,13 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.http.jetty</artifactId>
+                <artifactId>org.apache.felix.http.api</artifactId>
                 <version>2.3.2</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.http.api</artifactId>
-                <version>2.3.2</version>
+                <groupId>org.springframework.roo.wrapping</groupId>
+                <artifactId>org.springframework.roo.wrapping.org.apache.felix.http.jetty</artifactId>
+                <version>2.3.2.001</version>
             </dependency>
 
             <!-- OSGi Event Admin Service --> 

@@ -25,5 +25,5 @@ rem Build a classpath containing our two magical startup JARs
 for %%a in ("%ROO_HOME%\bootstrap\target\osgi\bin\*.jar") do set ROO_CP=!ROO_CP!%%a;
 
 rem Hop, hop, hop...
-java -Djline.nobell=true %ROO_OPTS% -Droo.args="%*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="%ROO_HOME%\bootstrap\target\osgi\cache" -Dfelix.auto.deploy.dir="%ROO_HOME%\bootstrap\target\osgi\bundle" -Dfelix.config.properties="file:%ROO_HOME%\bootstrap\target\osgi\conf\config.properties" -Droo.console.ansi=true -cp "%ROO_CP%" org.springframework.roo.bootstrap.Main
+java -Djline.nobell=true %ROO_OPTS% -Droo.args="%*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="%ROO_HOME%\bootstrap\target\osgi\cache" -Dfelix.auto.deploy.dir="%ROO_HOME%\bootstrap\target\osgi\bundle" -Dfelix.config.properties="file:%ROO_HOME%\bootstrap\target\osgi\conf\config.properties" -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.Slf4jLog -Djava.util.logging.config.file="%ROO_HOME%\bootstrap\target\osgi\conf\logging.properties" -Droo.console.ansi=true -cp "%ROO_CP%" org.springframework.roo.bootstrap.Main
 echo Roo exited with code %errorlevel%

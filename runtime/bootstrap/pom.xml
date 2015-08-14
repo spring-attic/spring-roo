@@ -43,7 +43,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.http.jetty</artifactId>
+            <artifactId>org.apache.felix.http.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.org.apache.felix.http.jetty</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>javax.servlet</artifactId>
@@ -174,8 +178,8 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency>
+            <artifactId>slf4j-jdk14</artifactId>
+         </dependency>
         <!-- Wrapped Third Party libs -->
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
@@ -194,10 +198,6 @@
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
             <artifactId>org.springframework.roo.wrapping.bcprov-jdk15</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo.wrapping</groupId>
-            <artifactId>org.springframework.roo.wrapping.hapax</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>

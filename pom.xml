@@ -55,7 +55,7 @@
         <module>addon-email</module>
         <module>annotations</module>
         <!-- Web UI -->
-        <module>web-ui</module>
+        <!-- <module>web-ui</module> -->
     </modules>
     <distributionManagement>
         <snapshotRepository>
@@ -246,7 +246,7 @@
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
+                <artifactId>slf4j-jdk14</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
@@ -395,58 +395,33 @@
             <!-- Wrapped JARs -->
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.aopalliance</artifactId>
-                <version>1.0.0.0010</version>
+                <artifactId>org.springframework.roo.wrapping.antlr4-runtime</artifactId>
+                <version>4.3.002</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.bcpg-jdk15</artifactId>
-                <version>1.45.0.0010</version>
+                <version>1.45.010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.bcprov-jdk15</artifactId>
-                <version>1.45.0.0010</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.antlr4-runtime</artifactId>
-                <version>4.3.0002</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.hapax</artifactId>
-                <version>2.3.4.0010</version>
+                <version>1.45.010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.inflector</artifactId>
-                <version>0.7.0.0010</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.jsch</artifactId>
-                <version>0.1.42.0010</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.jgit</artifactId>
-                <version>0.12.1.0010</version>
+                <version>0.7.0.010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.json-simple</artifactId>
-                <version>1.1.0.0010</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
-                <version>1.0.7.0011</version>
+                <version>1.1.010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.snakeyaml</artifactId>
-                <version>1.15.0001</version>
+                <version>1.15.001</version>
             </dependency>
 
             <!-- Roo Addons -->

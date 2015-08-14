@@ -41,6 +41,9 @@ ROO_AUTO_DEPLOY_DIRECTORY="$ROO_HOME/bundle"
 ROO_CONFIG_FILE_PROPERTIES="$ROO_HOME/conf/config.properties"
 # echo "ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
 
+LOG_CONFIG_FILE_PROPERTIES="$ROO_HOME/conf/logging.properties"
+# echo "LOG_CONFIG_FILE_PROPERTIES: $LOG_CONFIG_FILE_PROPERTIES"
+
 cygwin=false;
 case "`uname`" in
     CYGWIN*)
@@ -68,7 +71,8 @@ if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
 fi
 
 ANSI="-Droo.console.ansi=true"
+LOG="-Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.Slf4jLog -Djava.util.logging.config.file=${LOG_CONFIG_FILE_PROPERTIES}"
 # Hop, hop, hop...
-java -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS $ANSI -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
+java $LOG -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS $ANSI -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 # echo Roo exited with code $EXITED
