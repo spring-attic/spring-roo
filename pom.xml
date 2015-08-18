@@ -85,6 +85,14 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+	<repository>
+  	    <id>springsource-repository-release</id>
+	    <name>libs-release</name>
+	    <url>http://repo.springsource.org/libs-release</url>
+	    <snapshots>
+    	    	<enabled>false</enabled>
+  	    </snapshots>
+	</repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
