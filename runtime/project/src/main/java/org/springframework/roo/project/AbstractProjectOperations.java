@@ -31,6 +31,8 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Provides common project operations. Should be subclassed by a
@@ -40,6 +42,7 @@ import org.w3c.dom.Element;
  * @author Adrian Colyer
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.0
  */
 //@SuppressWarnings("deprecation")
@@ -228,12 +231,28 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                     // Keep looping in case it's present more than once
                 }
                 if (!inserted) {
-                    // We didn't encounter any existing dependencies with the
-                    // same coordinates; add it now
-                    dependenciesElement.appendChild(newDependency
-                            .getElement(document));
-                    finalDependencies.add(newDependency);
-                    addedDependencies.add(newDependency.getSimpleDescription());
+					// We didn't encounter any existing dependencies with the
+					// same coordinates; add it now
+
+					// Generate dependency xml element
+					Element newDependencyElement = newDependency.getElement(document);
+
+					// ROO-3660: Check if current dependency has version. If
+					// not, remove version attribute
+					NodeList dependencyAttributes = newDependencyElement.getChildNodes();
+					for (int i = 0; i < dependencyAttributes.getLength(); i++) {
+						Element dependencyAttribute = (Element) dependencyAttributes.item(i);
+						if (dependencyAttribute != null && dependencyAttribute.getTagName().equals("version")
+								&& (dependencyAttribute.getTextContent() == null
+										|| "".equals(dependencyAttribute.getTextContent()))) {
+							newDependencyElement.removeChild(dependencyAttributes.item(i));
+							break;
+						}
+					}
+
+					dependenciesElement.appendChild(newDependencyElement);
+					finalDependencies.add(newDependency);
+					addedDependencies.add(newDependency.getSimpleDescription());
                 }
             }
             else {
