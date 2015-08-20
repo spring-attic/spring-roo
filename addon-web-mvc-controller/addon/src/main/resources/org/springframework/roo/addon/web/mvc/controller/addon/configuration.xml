@@ -5,17 +5,14 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
-                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.webflow</groupId>
                 <artifactId>spring-js-resources</artifactId>
-                <version>2.2.1.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>commons-digester</groupId>
                 <artifactId>commons-digester</artifactId>
-                <version>2.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>commons-logging</groupId>
@@ -26,36 +23,32 @@
             <dependency>
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
-                <version>1.2.2</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet.jsp.jstl</groupId>
-                <artifactId>jstl-api</artifactId>
-                <version>1.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.web</groupId>
-                <artifactId>jstl-impl</artifactId>
-                <version>1.2</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.el</groupId>
-                <artifactId>el-api</artifactId>
-                <version>2.2</version>
-                <scope>provided</scope>
-            </dependency>
-            <!-- dependency org="org.apache.el" name="jasper-el" rev="6.0.20" / -->
-            <dependency org="joda-time" name="joda-time" rev="1.6" />
+	          <groupId>javax.servlet</groupId>
+	          <artifactId>jstl</artifactId>
+	        </dependency>
+	        <dependency>
+	            <groupId>javax.servlet.jsp.jstl</groupId>
+	            <artifactId>javax.servlet.jsp.jstl-api</artifactId>
+	        </dependency>
+	        <dependency>
+	            <groupId>javax.el</groupId>
+	            <artifactId>javax.el-api</artifactId>
+	            <scope>provided</scope>
+	        </dependency>
+	         <dependency>
+	            <groupId>joda-time</groupId>
+	            <artifactId>joda-time</artifactId>
+	        </dependency>
             <dependency>
                 <groupId>javax.servlet.jsp</groupId>
-                <artifactId>jsp-api</artifactId>
-                <version>2.1</version>
+                <artifactId>javax.servlet.jsp-api</artifactId>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.5</version>
             </dependency>
         </dependencies>
     </springWebMvc>

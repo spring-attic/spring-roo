@@ -15,7 +15,6 @@
                 <dependency>
                     <groupId>org.hsqldb</groupId>
                     <artifactId>hsqldb</artifactId>
-                    <version>2.2.9</version>
                 </dependency>
             </dependencies>
         </database>
@@ -174,12 +173,10 @@
                 <dependency>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-core</artifactId>
-                    <version>4.3.6.Final</version>
                 </dependency>
                 <dependency>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-entitymanager</artifactId>
-                    <version>4.3.6.Final</version>
                     <exclusions>
                         <exclusion>
                             <groupId>cglib</groupId>
@@ -192,14 +189,17 @@
                     </exclusions>
                 </dependency>
                 <dependency>
-                    <groupId>org.hibernate.javax.persistence</groupId>
-                    <artifactId>hibernate-jpa-2.1-api</artifactId>
-                    <version>1.0.0.Final</version>
+            		<groupId>org.eclipse.persistence</groupId>
+            		<artifactId>javax.persistence</artifactId>
                 </dependency>
+                <dependency>
+		            <groupId>org.hibernate.javax.persistence</groupId>
+		            <artifactId>hibernate-jpa-2.1-api</artifactId>
+		            <version>1.0.0.Final</version>
+		        </dependency>
                 <dependency>
                     <groupId>commons-collections</groupId>
                     <artifactId>commons-collections</artifactId>
-                    <version>3.2.1</version>
                 </dependency>
             </dependencies>
         </provider>
@@ -368,12 +368,10 @@
                 <dependency>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-validator</artifactId>
-                    <version>4.3.2.Final</version>
                 </dependency>
                 <dependency>
                     <groupId>javax.validation</groupId>
                     <artifactId>validation-api</artifactId>
-                    <version>1.0.0.GA</version>
                 </dependency>
             </dependencies>
         </provider>
@@ -388,22 +386,18 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-jdbc</artifactId>
-                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-orm</artifactId>
-                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-pool</groupId>
                 <artifactId>commons-pool</artifactId>
-                <version>1.5.6</version>
             </dependency>
             <dependency>
                 <groupId>commons-dbcp</groupId>
                 <artifactId>commons-dbcp</artifactId>
-                <version>1.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>commons-logging</groupId>
