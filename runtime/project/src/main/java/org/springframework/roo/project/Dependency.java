@@ -232,7 +232,6 @@ public class Dependency implements Comparable<Dependency> {
             final DependencyScope scope, final String classifier) {
         XmlUtils.assertElementLegal(groupId);
         XmlUtils.assertElementLegal(artifactId);
-        Validate.notBlank(version, "Version required");
         Validate.notNull(scope, "Dependency scope required");
         Validate.notNull(type, "Dependency type required");
         this.artifactId = artifactId;
