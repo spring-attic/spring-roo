@@ -609,8 +609,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
         #load_roo_build_and_test script bikeshop.roo
         #jetty_stop_start_get_stop http://localhost:8888/bikeshop/pages/main.jsf
 
-        load_roo_build_and_test_multimodule script multimodule.roo
-        tomcat_stop_start_get_stop_multimodule ui/mvc http://localhost:8888/mvc
+        # Spring Roo multimodule project needs to be refactorized
+        #load_roo_build_and_test_multimodule script multimodule.roo
+        #tomcat_stop_start_get_stop_multimodule ui/mvc http://localhost:8888/mvc
 
         load_roo_build_and_test script embedding.roo
         tomcat_stop_start_get_stop http://localhost:8888/embedding
