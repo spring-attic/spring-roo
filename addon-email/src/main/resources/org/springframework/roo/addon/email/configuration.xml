@@ -2,7 +2,7 @@
 <configuration>
 	<email>
 		<dependencies>
-			<dependency org="org.springframework" name="spring-context-support" />
+			<dependency org="org.springframework" name="spring-context-support" rev="" />
 			<dependency org="javax.mail" name="mail" rev="1.4.1" />
 			<dependency org="javax.activation" name="activation" rev="1.1.1" />
 		</dependencies>
