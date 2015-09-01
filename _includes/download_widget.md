@@ -32,28 +32,16 @@
                                   </div>
                               </div>
                               
-                       <div class="item--body--version">
-                              <div class="item--left-column">
-                                  <p>1.3.2.RC1</p>
-
-                                      <div class="spring-icon spring-icon-pre-release"></div>
-
-                                  </div>
-                                  <div class="item--right-column">
-                                      <a href="http://spring-roo-repository.springsource.org.s3.amazonaws.com/milestone/ROO/spring-roo-1.3.2.RC1.zip" class="docs-link">Download</a>
-                                  </div>
-                              </div>
-
                           <div class="item--body--version">
                               <div class="item--left-column">
-                                  <p>1.3.1</p>
+                                  <p>1.3.2</p>
 
                                       <div class="spring-icon spring-icon-current-version"></div>
 
                                   <div class="spring-icon spring-icon-ga-release"></div>
                                   </div>
                                   <div class="item--right-column">
-                                      <a href="http://spring-roo-repository.springsource.org.s3.amazonaws.com/release/ROO/spring-roo-1.3.1.RELEASE.zip" class="docs-link">Download</a>
+                                      <a href="http://spring-roo-repository.springsource.org.s3.amazonaws.com/release/ROO/spring-roo-1.3.2.RELEASE.zip" class="docs-link">Download</a>
                                   </div>
                               </div>
 
