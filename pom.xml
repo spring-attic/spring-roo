@@ -136,13 +136,13 @@
             <!-- OSGi Core API -->
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
+                <artifactId>osgi.core</artifactId>
                 <version>${osgi.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.compendium</artifactId>
+                <artifactId>osgi.cmpn</artifactId>
                 <version>${osgi.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -151,7 +151,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
-                <version>5.0.1</version>
+                <version>5.2.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -171,11 +171,11 @@
                 <version>1.0.1</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.apache.felix</groupId>
+                        <groupId>org.osgi</groupId>
                         <artifactId>org.osgi.core</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.apache.felix</groupId>
+                        <groupId>org.osgi</groupId>
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                     <exclusion>
@@ -224,6 +224,20 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.command</artifactId>
                 <version>0.14.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.compendium</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.felix</groupId>
+                        <artifactId>org.apache.felix.bundlerepository</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Third party OSGi Bundles -->
@@ -905,7 +919,7 @@
         <powermock.version>1.4.12</powermock.version>
         <spring.version>3.2.8.RELEASE</spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <osgi.version>5.0.0</osgi.version>
+        <osgi.version>6.0.0</osgi.version>
         <slf4j.version>1.7.5</slf4j.version>
     </properties>
 
