@@ -76,23 +76,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>spring-roo-repository-snapshot</id>
-            <name>Spring Roo Repository</name>
-            <url>http://repo.spring.io/spring-roo/snapshot</url>
-            <snapshots>
-                <updatePolicy>never</updatePolicy>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-	<repository>
-  	    <id>springsource-repository-release</id>
-	    <name>libs-release</name>
-	    <url>http://repo.springsource.org/libs-release</url>
-	    <snapshots>
-    	    	<enabled>false</enabled>
-  	    </snapshots>
-	</repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -241,11 +224,6 @@
             </dependency>
 
             <!-- Third party OSGi Bundles -->
-            <dependency>
-                <groupId>net.sourceforge.jline</groupId>
-                <artifactId>jline</artifactId>
-                <version>1.0.S2-B</version>
-            </dependency>
             <dependency>
                 <groupId>org.fusesource.jansi</groupId>
                 <artifactId>jansi</artifactId>
@@ -444,6 +422,11 @@
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.snakeyaml</artifactId>
                 <version>1.15.001</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo.wrapping</groupId>
+                <artifactId>org.springframework.roo.wrapping.jline</artifactId>
+                <version>1.0.S2-B.0013</version>
             </dependency>
 
             <!-- Roo Addons -->

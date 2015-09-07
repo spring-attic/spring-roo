@@ -177,8 +177,8 @@
             <artifactId>jansi</artifactId>
         </dependency>
         <dependency>
-            <groupId>net.sourceforge.jline</groupId>
-            <artifactId>jline</artifactId>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.jline</artifactId>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
