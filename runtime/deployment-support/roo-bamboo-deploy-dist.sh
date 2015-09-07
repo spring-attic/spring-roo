@@ -527,7 +527,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
     cp $ROO_HOME/target/all/*.jar $WORK_DIR/bundle
     cp $ROO_HOME/runtime/target/all/*.jar $WORK_DIR/bundle
     mv $WORK_DIR/bundle/org.springframework.roo.bootstrap-*.jar $WORK_DIR/bin
-    mv $WORK_DIR/bundle/org.apache.felix.framework-*.jar $WORK_DIR/bin
+    mv $WORK_DIR/bundle/*org.apache.felix.framework-*.jar $WORK_DIR/bin
     cp $ROO_HOME/runtime/bootstrap/src/main/bin/* $WORK_DIR/bin
     chmod 775 $WORK_DIR/bin/*.sh
     cp $ROO_HOME/runtime/bootstrap/src/main/conf/* $WORK_DIR/conf

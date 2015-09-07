@@ -19,7 +19,7 @@ copy "%ROO_HOME%\target\all\*.jar" "%ROO_HOME%\bootstrap\target\osgi\bundle" > N
 
 rem Move the startup-related JAR from the "bundle" directory to the "bin" directory
 move "%ROO_HOME%\bootstrap\target\osgi\bundle\org.springframework.roo.bootstrap-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
-move "%ROO_HOME%\bootstrap\target\osgi\bundle\org.apache.felix.framework-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
+move "%ROO_HOME%\bootstrap\target\osgi\bundle\*org.apache.felix.framework-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
 
 rem Build a classpath containing our two magical startup JARs
 for %%a in ("%ROO_HOME%\bootstrap\target\osgi\bin\*.jar") do set ROO_CP=!ROO_CP!%%a;

@@ -12,11 +12,6 @@
     <name>Spring Roo - Runtime - ROO Gogo Commands</name>
     <description>Extends Felix Gogo Shell with new Commands</description>
     <dependencies>
-        <!-- OSGi Subsystem API 1.0 -->
-        <dependency>
-            <groupId>org.apache.aries.subsystem</groupId>
-            <artifactId>org.apache.aries.subsystem.api</artifactId>
-        </dependency>
         <!-- OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>

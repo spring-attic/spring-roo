@@ -131,6 +131,7 @@
             </dependency>
 
             <!-- Apache Felix OSGi Core implementation -->
+<!--
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
@@ -145,6 +146,13 @@
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+-->
+            <!-- Temporary wrapping until FELIX-5015 will be fixed/released -->
+            <dependency>
+                <groupId>org.springframework.roo.wrapping</groupId>
+                <artifactId>org.springframework.roo.wrapping.org.apache.felix.framework</artifactId>
+                <version>5.2.0.001</version>
             </dependency>
 
             <!-- OSGi Log Service -->
@@ -903,7 +911,7 @@
         <spring.version>3.2.8.RELEASE</spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <osgi.version>6.0.0</osgi.version>
-        <slf4j.version>1.7.5</slf4j.version>
+        <slf4j.version>1.7.12</slf4j.version>
     </properties>
 
     <profiles>

@@ -22,9 +22,16 @@
             <artifactId>osgi.cmpn</artifactId>
         </dependency>
         <!-- Apache Felix -->
+        <!--
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
+        </dependency>
+        -->
+        <!-- Temporary wrapping until FELIX-5015 will be fixed/released -->
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.org.apache.felix.framework</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>

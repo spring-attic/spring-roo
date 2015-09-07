@@ -13,11 +13,6 @@
     <name>Spring Roo - Runtime - Roo Addon Suite Support</name>
     <description>Support to manage Roo Addon Suites</description>
     <dependencies>
-        <!-- OSGi Subsystem API 1.0 -->
-        <dependency>
-            <groupId>org.apache.aries.subsystem</groupId>
-            <artifactId>org.apache.aries.subsystem.api</artifactId>
-        </dependency>
         <!-- OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>

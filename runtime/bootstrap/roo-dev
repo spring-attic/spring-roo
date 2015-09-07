@@ -37,7 +37,7 @@ cp "$ROO_HOME"/target/all/*.jar "$ROO_HOME"/bootstrap/target/osgi/bundle
 
 # Move the startup-related JAR from the "bundle" directory to the "bin" directory
 mv "$ROO_HOME"/bootstrap/target/osgi/bundle/org.springframework.roo.bootstrap-*.jar "$ROO_HOME"/bootstrap/target/osgi/bin
-mv "$ROO_HOME"/bootstrap/target/osgi/bundle/org.apache.felix.framework-*.jar "$ROO_HOME"/bootstrap/target/osgi/bin
+mv "$ROO_HOME"/bootstrap/target/osgi/bundle/*org.apache.felix.framework-*.jar "$ROO_HOME"/bootstrap/target/osgi/bin
 
 # Build a classpath containing our two magical startup JARs (we look for " /" as per ROO-905)
 ROO_CP=`echo "$ROO_HOME"/bootstrap/target/osgi/bin/*.jar | sed 's/ \//:\//g'`

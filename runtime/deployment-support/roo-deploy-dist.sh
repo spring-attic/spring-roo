@@ -530,7 +530,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
     cp $ROO_HOME/target/all/*.jar $WORK_DIR/bundle
     cp $ROO_HOME/runtime/target/all/*.jar $WORK_DIR/bundle
     mv $WORK_DIR/bundle/org.springframework.roo.bootstrap-*.jar $WORK_DIR/bin
-    mv $WORK_DIR/bundle/org.apache.felix.framework-*.jar $WORK_DIR/bin
+    mv $WORK_DIR/bundle/*org.apache.felix.framework-*.jar $WORK_DIR/bin
     cp $ROO_HOME/runtime/bootstrap/src/main/bin/* $WORK_DIR/bin
     chmod 775 $WORK_DIR/bin/*.sh
     cp $ROO_HOME/runtime/bootstrap/src/main/conf/* $WORK_DIR/conf
@@ -640,8 +640,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
         #load_roo_build_and_test_multimodule script multimodule.roo
         #tomcat_stop_start_get_stop_multimodule ui/mvc http://localhost:8888/mvc
 
-        load_roo_build_and_test script embedding.roo
-        tomcat_stop_start_get_stop http://localhost:8888/embedding
+        # Spring Roo embedding project needs DS improvement
+        # load_roo_build_and_test script embedding.roo
+        # tomcat_stop_start_get_stop http://localhost:8888/embedding
 
         log "Removing Roo distribution from test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER
