@@ -9,11 +9,12 @@ import org.w3c.dom.Element;
  * The type of a {@link Dependency}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public enum DependencyType {
 
-    JAR, OTHER, WAR, ZIP, APKLIB;
+    JAR, POM, OTHER, WAR, ZIP, APKLIB;
 
     /**
      * Returns the type of the dependency represented by the given XML element
