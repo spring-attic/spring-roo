@@ -6,10 +6,10 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
-
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.activerecord.JpaActiveRecordMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -19,13 +19,11 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -34,6 +32,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.0
  */
 @Component
@@ -46,28 +45,48 @@ public class FinderMetadataProviderImpl extends
 
     private DynamicFinderServices dynamicFinderServices;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
+     * <li>Set ignore trigger annotations. It means that other MD providers 
+     * that want to discover whether a type has finders can do so.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-    	getMetadataDependencyRegistry().addNotificationListener(this);
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+        this.registryTracker = 
+                new MetadataDependencyRegistryTracker(context, this,
+                        PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                        getProvidesType());
+        this.registryTracker.open();
+
         // Ignoring trigger annotations means that other MD providers that want
         // to discover whether a type has finders can do so.
         setIgnoreTriggerAnnotations(true);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.close();
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return FinderMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().removeNotificationListener(this);
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
     }
 
     @Override
@@ -188,7 +207,7 @@ public class FinderMetadataProviderImpl extends
         return FinderMetadata.getMetadataIdentiferType();
     }
     
-    public DynamicFinderServices getDynamicFinderServices(){
+    protected DynamicFinderServices getDynamicFinderServices(){
     	// Get all Services implement DynamicFinderServices interface
 		try {
 			ServiceReference<?>[] references = context.getAllServiceReferences(DynamicFinderServices.class.getName(), null);

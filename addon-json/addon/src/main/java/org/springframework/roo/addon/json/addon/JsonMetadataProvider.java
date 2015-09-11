@@ -11,38 +11,63 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides {@link JsonMetadata}.
  * 
  * @author Stefan Schmidt
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.1
  */
 @Component
 @Service
 public class JsonMetadataProvider extends AbstractItdMetadataProvider {
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Registers {@link RooJavaType#ROO_JSON} and 
+     * {@link RooJavaType#ROO_IDENTIFIER} as additional JavaTypes that will 
+     * trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().registerDependency(
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                null, PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.open();
+        addMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        addMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
+        this.registryTracker.close();
+        removeMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return JsonMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
     }
 
     @Override

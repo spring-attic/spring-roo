@@ -23,8 +23,9 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.addon.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.dod.addon.DataOnDemandMetadata;
@@ -39,28 +40,30 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProviderTracker;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
  * 
  * @author Ben Alex
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.0
  */
 @Component
@@ -82,32 +85,63 @@ public class IntegrationTestMetadataProviderImpl extends
     private final Set<String> producedMids = new LinkedHashSet<String>();
     private Boolean wasGaeEnabled;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+    protected ItdTriggerBasedMetadataProviderTracker configurableMetadataProviderTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Create and open the {@link ItdTriggerBasedMetadataProviderTracker} 
+     * to track for {@link ConfigurableMetadataProvider} service.</li>
+     * <li>Registers {@link RooJavaType#ROO_INTEGRATION_TEST} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().addNotificationListener(this);
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                this, PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
+        this.registryTracker.open();
+
         // Integration test classes are @Configurable because they may need DI
         // of other DOD classes that provide M:1 relationships
-        getConfigurableMetadataProvider().addMetadataTrigger(ROO_INTEGRATION_TEST);
+        this.configurableMetadataProviderTracker = new ItdTriggerBasedMetadataProviderTracker(
+                context, ConfigurableMetadataProvider.class, ROO_INTEGRATION_TEST);
+        this.configurableMetadataProviderTracker.open();
+
         addMetadataTrigger(ROO_INTEGRATION_TEST);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        registry.deregisterDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.close();
+
+        ItdTriggerBasedMetadataProvider metadataProvider = this.configurableMetadataProviderTracker
+                .getService();
+        metadataProvider.removeMetadataTrigger(ROO_INTEGRATION_TEST);
+        this.configurableMetadataProviderTracker.close();
+
+        removeMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return IntegrationTestMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().removeNotificationListener(this);
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        getConfigurableMetadataProvider()
-                .removeMetadataTrigger(ROO_INTEGRATION_TEST);
-        removeMetadataTrigger(ROO_INTEGRATION_TEST);
     }
 
     /**

@@ -4,14 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.Validate;
-
 import org.apache.felix.scr.annotations.Component;
-
-import org.osgi.service.component.ComponentContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**

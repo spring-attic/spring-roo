@@ -11,8 +11,9 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.json.addon.JsonMetadata;
 import org.springframework.roo.addon.plural.addon.PluralMetadata;
@@ -32,17 +33,18 @@ import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadat
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link WebJsonMetadataProvider}.
  * 
  * @author Stefan Schmidt
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.1.3
  */
 @Component
@@ -58,27 +60,47 @@ public class WebJsonMetadataProviderImpl extends
     // Maps entities to the IDs of their WebJsonMetadata
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Registers {@link RooJavaType#ROO_WEB_JSON} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().addNotificationListener(this);
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+    	this.registryTracker = 
+    			new MetadataDependencyRegistryTracker(context, this,
+    					PhysicalTypeIdentifier.getMetadataIdentiferType(),
+    	                getProvidesType());
+    	this.registryTracker.open();
+
+    	addMetadataTrigger(ROO_WEB_JSON);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+    	MetadataDependencyRegistry registry = this.registryTracker.getService();
+    	registry.removeNotificationListener(this);
+    	registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        addMetadataTrigger(ROO_WEB_JSON);
+    	this.registryTracker.close();
+        removeMetadataTrigger(ROO_WEB_JSON);
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return WebJsonMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().removeNotificationListener(this);
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTrigger(ROO_WEB_JSON);
     }
 
     @Override
@@ -270,7 +292,7 @@ public class WebJsonMetadataProviderImpl extends
                 ROO_WEB_SCAFFOLD) == null;
     }
     
-    public WebMetadataService getWebMetadataService(){
+    protected WebMetadataService getWebMetadataService(){
     	if(webMetadataService == null){
     		// Get all Services implement WebMetadataService interface
     		try {

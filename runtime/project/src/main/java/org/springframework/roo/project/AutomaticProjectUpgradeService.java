@@ -9,6 +9,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.project.maven.Pom;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.roo.project.maven.Pom;
  * running, the upgrade service makes no changes.
  * 
  * @author Ben Alex
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.1
  */
 @Component
@@ -64,11 +66,21 @@ public class AutomaticProjectUpgradeService implements
 
     private static final String SPRING_VERSION = "3.1.0.RELEASE";
     private VersionInfo bundleVersionInfo;
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private ProjectOperations projectOperations;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * </ul>
+     */
     protected void activate(final ComponentContext componentContext) {
-        metadataDependencyRegistry.addNotificationListener(this);
+        this.registryTracker = new MetadataDependencyRegistryTracker(
+                componentContext.getBundleContext(), this);
+        this.registryTracker.open();
+
         for (final Bundle b : componentContext.getBundleContext().getBundles()) {
             if (!MY_BUNDLE_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
                 continue;
@@ -82,8 +94,16 @@ public class AutomaticProjectUpgradeService implements
         }
     }
 
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
     protected void deactivate(final ComponentContext componentContext) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        this.registryTracker.close();
     }
 
     /**

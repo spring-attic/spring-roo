@@ -43,6 +43,9 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements
     private final static Logger LOGGER = HandlerUtils
             .getLogger(JdkDelegatingLogListener.class);
 
+    @Reference(policy=ReferencePolicy.DYNAMIC)
+    private volatile LogReaderService logReaderService;
+
     public static String cleanThrowable(final Throwable throwable) {
         final StringBuilder result = new StringBuilder();
         result.append(LINE_SEPARATOR);
@@ -54,8 +57,6 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements
         }
         return result.toString();
     }
-
-    @Reference private LogReaderService logReaderService;
 
     @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext context) {

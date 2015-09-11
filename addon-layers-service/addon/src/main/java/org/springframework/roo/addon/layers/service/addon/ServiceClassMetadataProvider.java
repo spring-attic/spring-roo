@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.addon.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -23,14 +25,13 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * 
  * @author Stefan Schmidt
  * @author Andrew Swan
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.2.0
  */
 @Component
@@ -53,31 +55,49 @@ public class ServiceClassMetadataProvider extends
     ProjectOperations projectOperations;
     FileManager fileManager;
     ServiceLayerTemplateService templateService;
-
     private LayerService layerService;
 
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Set ignore trigger annotations. It means that other MD providers 
+     * that want to discover whether a type has finders can do so.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-    	getMetadataDependencyRegistry().addNotificationListener(this);
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+    	this.registryTracker = 
+    			new MetadataDependencyRegistryTracker(context, this,
+    					PhysicalTypeIdentifier.getMetadataIdentiferType(),
+    	                getProvidesType());
+    	this.registryTracker.open();
         setIgnoreTriggerAnnotations(true);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+    	MetadataDependencyRegistry registry = this.registryTracker.getService();
+    	registry.removeNotificationListener(this);
+    	registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+    	this.registryTracker.close();
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return ServiceClassMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().removeNotificationListener(this);
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
     }
 
     @Override
@@ -166,14 +186,13 @@ public class ServiceClassMetadataProvider extends
             return null;
         }
 
-        /*
-         * For each domain type, collect (1) the plural and (2) the additions to
-         * make to the service class for calling a lower layer when implementing
-         * each service layer method. We use LinkedHashMaps for the latter
-         * nested map to ensure repeatable order of code generation.
-         */
+        // For each domain type, collect (1) the plural and (2) the additions to
+        // make to the service class for calling a lower layer when implementing
+        // each service layer method. We use LinkedHashMaps for the latter
+        // nested map to ensure repeatable order of code generation.
         final Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
         final Map<JavaType, JavaType> domainTypeToIdTypeMap = new HashMap<JavaType, JavaType>();
+
         // Collect the additions for each method for each supported domain type
         final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions = new LinkedHashMap<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>>();
         for (final JavaType domainType : domainTypes) {
@@ -248,14 +267,13 @@ public class ServiceClassMetadataProvider extends
                 serviceAnnotationValues, domainTypeToIdTypeMap,
                 allCrudAdditions, domainTypePlurals, serviceInterface.getName()
                         .getSimpleTypeName());
-
     }
 
     public String getProvidesType() {
         return ServiceClassMetadata.getMetadataIdentiferType();
     }
     
-    public ServiceLayerTemplateService getTemplateService(){
+    protected ServiceLayerTemplateService getTemplateService(){
     	if(templateService == null){
     		// Get all Services implement ServiceLayerTemplateService interface
     		try {
@@ -276,7 +294,7 @@ public class ServiceClassMetadataProvider extends
     	}
     }
     
-    public LayerService getLayerService(){
+    protected LayerService getLayerService(){
     	if(layerService == null){
     		// Get all Services implement LayerService interface
     		try {

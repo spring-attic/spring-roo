@@ -9,6 +9,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -16,8 +18,6 @@ import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
-
-import org.osgi.framework.BundleContext;
 
 /**
  * Abstract base class for operations classes. Contains common methods.
@@ -31,7 +31,8 @@ public abstract class AbstractOperations {
     protected static Logger LOGGER = HandlerUtils
             .getLogger(AbstractOperations.class);
 
-    @Reference protected FileManager fileManager;
+    @Reference(policy=ReferencePolicy.DYNAMIC)
+    protected FileManager fileManager;
 
     protected BundleContext context;
 

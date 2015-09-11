@@ -19,7 +19,10 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.util.CollectionUtils;
 
@@ -27,6 +30,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * Implementation of {@link EqualsMetadataProvider}.
  * 
  * @author Alan Stewart
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.2.0
  */
 @Component
@@ -35,27 +39,46 @@ public class EqualsMetadataProviderImpl extends
         AbstractMemberDiscoveringItdMetadataProvider implements
         EqualsMetadataProvider {
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
+     * <li>Registers {@link RooJavaType#ROO_EQUALS} as additional JavaType 
+     * that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
-    	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().addNotificationListener(this);
-        getMetadataDependencyRegistry().registerDependency(
+        context = cContext.getBundleContext();
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                this, PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.open();
+        addMetadataTrigger(ROO_EQUALS);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        registry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        addMetadataTrigger(ROO_EQUALS);
+        this.registryTracker.close();
+        removeMetadataTrigger(ROO_EQUALS);
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return EqualsMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().removeNotificationListener(this);
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTrigger(ROO_EQUALS);
     }
 
     @Override

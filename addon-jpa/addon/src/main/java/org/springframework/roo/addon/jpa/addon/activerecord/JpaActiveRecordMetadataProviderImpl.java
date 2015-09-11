@@ -11,8 +11,8 @@ import static org.springframework.roo.addon.jpa.annotations.activerecord.RooJpaA
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.CLEAR_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_SORTED_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FLUSH_METHOD;
@@ -28,8 +28,9 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.addon.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityAnnotationValues;
@@ -38,67 +39,115 @@ import org.springframework.roo.addon.plural.addon.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
+import org.springframework.roo.classpath.customdata.taggers.Matcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProviderTracker;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
+import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link JpaActiveRecordMetadataProvider}.
  * 
  * @author Ben Alex
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.0
  */
 @Component
 @Service
 public class JpaActiveRecordMetadataProviderImpl extends
         AbstractItdMetadataProvider implements JpaActiveRecordMetadataProvider {
-	
-	protected final static Logger LOGGER = HandlerUtils.getLogger(JpaActiveRecordMetadataProviderImpl.class);
-	
-    private ConfigurableMetadataProvider configurableMetadataProvider;
-    private CustomDataKeyDecorator customDataKeyDecorator;
-    private PluralMetadataProvider pluralMetadataProvider;
+
+    protected final static Logger LOGGER = HandlerUtils
+            .getLogger(JpaActiveRecordMetadataProviderImpl.class);
+
     private ProjectOperations projectOperations;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+    protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
+    protected ItdTriggerBasedMetadataProviderTracker configurableMetadataProviderTracker = null;
+    protected ItdTriggerBasedMetadataProviderTracker pluralMetadataProviderTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Create and open one {@link ItdTriggerBasedMetadataProviderTracker} 
+     * for each {@link ConfigurableMetadataProvider} and {@link PluralMetadataProvider}.</li>
+     * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
+     * <li>Registers {@link RooJavaType#ROO_JPA_ACTIVE_RECORD} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
-    	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+        context = cContext.getBundleContext();
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                null, PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
+        this.registryTracker.open();
+
         addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        getConfigurableMetadataProvider().addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        getPluralMetadataProvider().addMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        registerMatchers();
+
+        this.configurableMetadataProviderTracker = new ItdTriggerBasedMetadataProviderTracker(
+                context, ConfigurableMetadataProvider.class, ROO_JPA_ACTIVE_RECORD);
+        this.configurableMetadataProviderTracker.open();
+
+        this.pluralMetadataProviderTracker = new ItdTriggerBasedMetadataProviderTracker(
+                context, PluralMetadataProvider.class, ROO_JPA_ACTIVE_RECORD);
+        this.pluralMetadataProviderTracker.open();
+
+        this.keyDecoratorTracker = new CustomDataKeyDecoratorTracker(context,
+                getClass(), getMatchers());
+        this.keyDecoratorTracker.open();
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.close();
+
+        removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
+
+        ItdTriggerBasedMetadataProvider metadataProvider = this.configurableMetadataProviderTracker.getService();
+        metadataProvider.removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
+        this.configurableMetadataProviderTracker.close();
+
+        metadataProvider = this.pluralMetadataProviderTracker.getService();
+        metadataProvider.removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
+        this.pluralMetadataProviderTracker.close();
+
+        CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
+        keyDecorator.unregisterMatchers(getClass());
+        this.keyDecoratorTracker.close();
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return JpaActiveRecordMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        getConfigurableMetadataProvider()
-                .removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        getPluralMetadataProvider().removeMetadataTrigger(ROO_JPA_ACTIVE_RECORD);
-        getCustomDataKeyDecorator().unregisterMatchers(getClass());
     }
 
     public JpaCrudAnnotationValues getAnnotationValues(final JavaType javaType) {
@@ -138,7 +187,7 @@ public class JpaActiveRecordMetadataProviderImpl extends
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalType,
             final String itdFilename) {
-    	
+
         // Get the CRUD-related annotation values
         final JpaCrudAnnotationValues crudAnnotationValues = new JpaCrudAnnotationValues(
                 governorPhysicalType);
@@ -223,135 +272,66 @@ public class JpaActiveRecordMetadataProviderImpl extends
     }
 
     @SuppressWarnings("unchecked")
-    private void registerMatchers() {
-    	
-        getCustomDataKeyDecorator()
-                .registerMatchers(getClass(),
-                        new MethodMatcher(CLEAR_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("clearMethod"),
-                                CLEAR_METHOD_DEFAULT), new MethodMatcher(
-                                COUNT_ALL_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("countMethod"),
-                                COUNT_METHOD_DEFAULT, true, false),
-                        new MethodMatcher(FIND_ALL_METHOD,
-                                ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
-                                        "findAllMethod"),
-                                FIND_ALL_METHOD_DEFAULT, true, false),
-                        new MethodMatcher(FIND_ENTRIES_METHOD,
-                                ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
-                                        "findEntriesMethod"), "find", false,
-                                true, "Entries"), 
-                        new MethodMatcher(FIND_ALL_SORTED_METHOD,
-                                 ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
-                                 "findAllSortedMethod"),
-                                 FIND_ALL_METHOD_DEFAULT, true, false, "Sorted"),
-                        new MethodMatcher(FIND_ENTRIES_SORTED_METHOD,
-                                  ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
-                                  "findEntriesSortedMethod"), "find", false,
-                                  true, "EntriesSorted"),                                 
-                        new MethodMatcher(
-                                FIND_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("findMethod"),
-                                FIND_METHOD_DEFAULT, false, true),
-                        new MethodMatcher(FLUSH_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("flushMethod"),
-                                FLUSH_METHOD_DEFAULT), new MethodMatcher(
-                                MERGE_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("mergeMethod"),
-                                MERGE_METHOD_DEFAULT), new MethodMatcher(
-                                PERSIST_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("persistMethod"),
-                                PERSIST_METHOD_DEFAULT), new MethodMatcher(
-                                REMOVE_METHOD, ROO_JPA_ACTIVE_RECORD,
-                                new JavaSymbolName("removeMethod"),
-                                REMOVE_METHOD_DEFAULT));
+    private Matcher<? extends CustomDataAccessor>[] getMatchers() {
+        Matcher<? extends CustomDataAccessor>[] matchers = new Matcher[] {
+                new MethodMatcher(CLEAR_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("clearMethod"), CLEAR_METHOD_DEFAULT),
+                new MethodMatcher(COUNT_ALL_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("countMethod"),
+                        COUNT_METHOD_DEFAULT, true, false),
+                new MethodMatcher(FIND_ALL_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("findAllMethod"),
+                        FIND_ALL_METHOD_DEFAULT, true, false),
+                new MethodMatcher(FIND_ENTRIES_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("findEntriesMethod"), "find", false,
+                        true, "Entries"),
+                new MethodMatcher(FIND_ALL_SORTED_METHOD,
+                        ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
+                                "findAllSortedMethod"),
+                        FIND_ALL_METHOD_DEFAULT, true, false, "Sorted"),
+                new MethodMatcher(FIND_ENTRIES_SORTED_METHOD,
+                        ROO_JPA_ACTIVE_RECORD, new JavaSymbolName(
+                                "findEntriesSortedMethod"), "find", false,
+                        true, "EntriesSorted"),
+                new MethodMatcher(FIND_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("findMethod"), FIND_METHOD_DEFAULT,
+                        false, true),
+                new MethodMatcher(FLUSH_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("flushMethod"), FLUSH_METHOD_DEFAULT),
+                new MethodMatcher(MERGE_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("mergeMethod"), MERGE_METHOD_DEFAULT),
+                new MethodMatcher(PERSIST_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("persistMethod"),
+                        PERSIST_METHOD_DEFAULT),
+                new MethodMatcher(REMOVE_METHOD, ROO_JPA_ACTIVE_RECORD,
+                        new JavaSymbolName("removeMethod"),
+                        REMOVE_METHOD_DEFAULT) };
+        return matchers;
     }
-    
-    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
-    	if(configurableMetadataProvider == null){
-    		// Get all Services implement ConfigurableMetadataProvider interface
-    		try {
-    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (ConfigurableMetadataProvider) context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on JpaActiveRecordMetadataProviderImpl.");
-    			return null;
-    		}
-    	}else{
-    		return configurableMetadataProvider;
-    	}
-    	
-    }
-    
-    public CustomDataKeyDecorator getCustomDataKeyDecorator(){
-    	if(customDataKeyDecorator == null){
-    		// Get all Services implement CustomDataKeyDecorator interface
-    		try {
-    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (CustomDataKeyDecorator) context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load CustomDataKeyDecorator on JpaActiveRecordMetadataProviderImpl.");
-    			return null;
-    		}
-    	}else{
-    		return customDataKeyDecorator;
-    	}
-    	
-    }
-    
-    public PluralMetadataProvider getPluralMetadataProvider(){
-    	if(pluralMetadataProvider == null){
-    		// Get all Services implement PluralMetadataProvider interface
-    		try {
-    			ServiceReference<?>[] references = context.getAllServiceReferences(PluralMetadataProvider.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (PluralMetadataProvider) context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load PluralMetadataProvider on JpaActiveRecordMetadataProviderImpl.");
-    			return null;
-    		}
-    	}else{
-    		return pluralMetadataProvider;
-    	}
-    	
-    }
-    
-    public ProjectOperations getProjectOperations(){
-    	if(projectOperations == null){
-    		// Get all Services implement ProjectOperations interface
-    		try {
-    			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (ProjectOperations) context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load ProjectOperations on JpaActiveRecordMetadataProviderImpl.");
-    			return null;
-    		}
-    	}else{
-    		return projectOperations;
-    	}
-    	
+
+    protected ProjectOperations getProjectOperations() {
+        if (projectOperations == null) {
+            // Get all Services implement ProjectOperations interface
+            try {
+                ServiceReference<?>[] references = context
+                        .getAllServiceReferences(
+                                ProjectOperations.class.getName(), null);
+
+                for (ServiceReference<?> ref : references) {
+                    return (ProjectOperations) context.getService(ref);
+                }
+
+                return null;
+
+            }
+            catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load ProjectOperations on JpaActiveRecordMetadataProviderImpl.");
+                return null;
+            }
+        }
+        else {
+            return projectOperations;
+        }
+
     }
 }

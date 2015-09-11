@@ -26,9 +26,12 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
@@ -40,6 +43,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * 
  * @author Ben Alex
  * @author Juan Carlos García
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.0
  */
 @Component
@@ -54,28 +58,47 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	private MemberDetailsScanner memberDetailsScanner;
 	private Boolean wasGaeEnabled;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
+     * <li>Registers {@link RooJavaType#ROO_JAVA_BEAN} as additional JavaType 
+     * that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
 	protected void activate(final ComponentContext cContext) {
 		context = cContext.getBundleContext();
-		getMetadataDependencyRegistry().addNotificationListener(this);
-		getMetadataDependencyRegistry().registerDependency(
-				PhysicalTypeIdentifier.getMetadataIdentiferType(),
-				getProvidesType());
+        this.registryTracker = 
+                new MetadataDependencyRegistryTracker(context, this,
+                        PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                        getProvidesType());
+        this.registryTracker.open();
 		addMetadataTrigger(ROO_JAVA_BEAN);
 	}
 
-	@Override
-	protected String createLocalIdentifier(final JavaType javaType,
-			final LogicalPath path) {
-		return JavaBeanMetadata.createIdentifier(javaType, path);
-	}
-
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
 	protected void deactivate(final ComponentContext context) {
-		getMetadataDependencyRegistry().removeNotificationListener(this);
-		getMetadataDependencyRegistry().deregisterDependency(
-				PhysicalTypeIdentifier.getMetadataIdentiferType(),
-				getProvidesType());
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.close();
 		removeMetadataTrigger(ROO_JAVA_BEAN);
 	}
+
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return JavaBeanMetadata.createIdentifier(javaType, path);
+    }
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(

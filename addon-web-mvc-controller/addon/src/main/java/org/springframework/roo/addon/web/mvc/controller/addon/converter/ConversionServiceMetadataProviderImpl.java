@@ -14,8 +14,9 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.json.addon.CustomDataJsonTags;
 import org.springframework.roo.addon.web.mvc.controller.addon.scaffold.WebScaffoldAnnotationValues;
@@ -36,13 +37,14 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependency;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -50,6 +52,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * 
  * @author Rossen Stoyanchev
  * @author Stefan Schmidt
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.1.1
  */
 @Component
@@ -69,15 +72,44 @@ public class ConversionServiceMetadataProviderImpl extends
 
     private LayerService layerService;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Registers {@link RooJavaType#ROO_CONVERSION_SERVICE} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        getMetadataDependencyRegistry().registerDependency(
-                WebScaffoldMetadata.getMetadataIdentiferType(),
-                getProvidesType());
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                null, new MetadataDependency(
+                        PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                        getProvidesType()), 
+                new MetadataDependency(
+                        WebScaffoldMetadata.getMetadataIdentiferType(),
+                        getProvidesType()));
+        this.registryTracker.open();
         addMetadataTrigger(ROO_CONVERSION_SERVICE);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        registry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.close();
+        removeMetadataTrigger(ROO_CONVERSION_SERVICE);
     }
 
     @Override
@@ -85,16 +117,6 @@ public class ConversionServiceMetadataProviderImpl extends
             final LogicalPath path) {
         return PhysicalTypeIdentifierNamingUtils.createIdentifier(
                 ConversionServiceMetadata.class.getName(), javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        getMetadataDependencyRegistry().deregisterDependency(
-                WebScaffoldMetadata.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTrigger(ROO_CONVERSION_SERVICE);
     }
 
     @Override

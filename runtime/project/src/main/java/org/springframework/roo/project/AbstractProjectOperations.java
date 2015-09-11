@@ -56,6 +56,20 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     static final String SKIPPED = "skipped";
     static final String UPDATED = "updated";
 
+    private final Map<String, Feature> features = new HashMap<String, Feature>();
+
+    @Reference(policy=ReferencePolicy.DYNAMIC)
+    protected FileManager fileManager;
+    @Reference(policy=ReferencePolicy.DYNAMIC)
+    protected MetadataService metadataService;
+    @Reference(policy=ReferencePolicy.DYNAMIC)
+    protected PathResolver pathResolver;
+
+    @Reference(policy=ReferencePolicy.DYNAMIC)
+    protected PomManagementService pomManagementService;
+    @Reference(policy=ReferencePolicy.DYNAMIC)
+    protected Shell shell;
+
     /**
      * Generates a message about the addition of the given items to the POM
      * 
@@ -85,15 +99,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     static String highlight(final String text) {
         return decorate(text, FG_CYAN);
     }
-
-    private final Map<String, Feature> features = new HashMap<String, Feature>();
-
-    @Reference FileManager fileManager;
-    @Reference MetadataService metadataService;
-    @Reference PathResolver pathResolver;
-
-    @Reference protected PomManagementService pomManagementService;
-    @Reference protected Shell shell;
 
     public void addBuildPlugin(final String moduleName, final Plugin plugin) {
         Validate.isTrue(isProjectAvailable(moduleName),

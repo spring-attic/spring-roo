@@ -18,6 +18,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.internal.AbstractMetadataCache;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 
 /**
  * Default implementation of {@link MetadataService}.
@@ -27,6 +28,7 @@ import org.springframework.roo.metadata.internal.AbstractMetadataCache;
  * so we avoid the cost of re-synchronization here.
  * 
  * @author Ben Alex
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.0
  */
 @Component
@@ -35,7 +37,6 @@ import org.springframework.roo.metadata.internal.AbstractMetadataCache;
 public class DefaultMetadataService extends AbstractMetadataCache implements
         MetadataService {
 
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private MetadataLogger metadataLogger;
 
     // Request control
@@ -55,8 +56,30 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
     private int recursiveGets = 0;
     private int validGets = 0;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * </ul>
+     */
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
+        this.registryTracker = new MetadataDependencyRegistryTracker(
+                context.getBundleContext(), this);
+        this.registryTracker.open();
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        this.registryTracker.close();
     }
 
     protected void bindMetadataProvider(final MetadataProvider mp) {
@@ -76,10 +99,6 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
         }
     }
 
-    protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
-    }
-
     @Override
     public void evict(final String metadataIdentificationString) {
         synchronized (lock) {
@@ -89,7 +108,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
 
             // Finally, evict downstream dependencies (ie metadata that
             // previously depended on this now-evicted metadata)
-            for (final String downstream : metadataDependencyRegistry
+            MetadataDependencyRegistry registry = this.registryTracker.getService();
+            for (final String downstream : registry
                     .getDownstream(metadataIdentificationString)) {
                 // We only need to evict if it is an instance, as only an
                 // instance will ever go into the cache
@@ -305,6 +325,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
                 "Downstream dependency is an invalid metadata identification string ('%s')",
                 downstreamDependency);
 
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+
         synchronized (lock) {
             // Get the destination
             final String mdClassId = MetadataIdentificationUtils
@@ -336,8 +358,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements
                 }
                 // As per interface contract, we now notify any listeners this
                 // downstream instance has probably now changed
-                metadataDependencyRegistry
-                        .notifyDownstream(downstreamDependency);
+                registry.notifyDownstream(downstreamDependency);
             }
         }
     }

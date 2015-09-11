@@ -21,7 +21,11 @@ import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 
+/**
+ * 
+ */
 @Component
 @Service
 public class ProjectPathMonitoringInitializer implements
@@ -32,17 +36,34 @@ public class ProjectPathMonitoringInitializer implements
             DELETED };
 
     @Reference private NotifiableFileMonitorService fileMonitorService;
-    @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private PathResolver pathResolver;
     private boolean pathsRegistered;
     @Reference private UndoManager undoManager;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * </ul>
+     */
     protected void activate(final ComponentContext context) {
-        metadataDependencyRegistry.addNotificationListener(this);
+        this.registryTracker = new MetadataDependencyRegistryTracker(
+                context.getBundleContext(), this);
+        this.registryTracker.open();
     }
 
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
     protected void deactivate(final ComponentContext context) {
-        metadataDependencyRegistry.removeNotificationListener(this);
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        this.registryTracker.close();
     }
 
     private void monitorPathIfExists(final LogicalPath logicalPath) {

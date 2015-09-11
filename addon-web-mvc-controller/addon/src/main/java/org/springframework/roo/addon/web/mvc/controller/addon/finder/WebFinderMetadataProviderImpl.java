@@ -9,8 +9,9 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.details.DateTimeFormatDetails;
 import org.springframework.roo.addon.web.mvc.controller.addon.details.FinderMetadataDetails;
@@ -24,12 +25,12 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 
@@ -37,6 +38,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * Implementation of {@link WebFinderMetadataProvider}.
  * 
  * @author Stefan Schmidt
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.1.3
  */
 @Component
@@ -48,25 +50,45 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
 	
     private WebMetadataService webMetadataService;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Registers {@link RooJavaType#ROO_WEB_FINDER} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().registerDependency(
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                null, PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.open();
+        addMetadataTrigger(ROO_WEB_FINDER);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        addMetadataTrigger(ROO_WEB_FINDER);
+        this.registryTracker.close();
+        removeMetadataTrigger(ROO_WEB_FINDER);
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return WebFinderMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTrigger(ROO_WEB_FINDER);
     }
 
     @Override
@@ -150,7 +172,7 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider
         return WebFinderMetadata.getMetadataIdentiferType();
     }
     
-    public WebMetadataService getWebMetadataService(){
+    protected WebMetadataService getWebMetadataService(){
     	// Get all Services implement WebMetadataService interface
 		try {
 			ServiceReference<?>[] references = context.getAllServiceReferences(WebMetadataService.class.getName(), null);

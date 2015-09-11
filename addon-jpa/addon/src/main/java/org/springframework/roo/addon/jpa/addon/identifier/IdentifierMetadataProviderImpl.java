@@ -7,29 +7,35 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.addon.ConfigurableMetadataProvider;
-import org.springframework.roo.addon.jpa.addon.AbstractIdentifierServiceAwareMetadataProvider;
 import org.springframework.roo.addon.javabean.addon.SerializableMetadataProvider;
+import org.springframework.roo.addon.jpa.addon.AbstractIdentifierServiceAwareMetadataProvider;
+import org.springframework.roo.addon.plural.addon.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProviderTracker;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link IdentifierMetadataProvider}.
  * 
  * @author Alan Stewart
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.1
  */
 @Component
@@ -40,33 +46,68 @@ public class IdentifierMetadataProviderImpl extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(IdentifierMetadataProviderImpl.class);
 	
-    private ConfigurableMetadataProvider configurableMetadataProvider;
     private ProjectOperations projectOperations;
-    private SerializableMetadataProvider serializableMetadataProvider;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+    protected ItdTriggerBasedMetadataProviderTracker configurableMetadataProviderTracker = null;
+    protected ItdTriggerBasedMetadataProviderTracker serializableMetadataProviderTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Create and open one {@link ItdTriggerBasedMetadataProviderTracker} 
+     * for each {@link ConfigurableMetadataProvider} and {@link SerializableMetadataProvider}.</li>
+     * <li>Registers {@link RooJavaType#ROO_IDENTIFIER} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().registerDependency(
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                null, PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.open();
+        addMetadataTrigger(ROO_IDENTIFIER);
+
+        this.configurableMetadataProviderTracker = new ItdTriggerBasedMetadataProviderTracker(
+                context, ConfigurableMetadataProvider.class, ROO_IDENTIFIER);
+        this.configurableMetadataProviderTracker.open();
+
+        this.serializableMetadataProviderTracker = new ItdTriggerBasedMetadataProviderTracker(
+                context, SerializableMetadataProvider.class, ROO_IDENTIFIER);
+        this.serializableMetadataProviderTracker.open();
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(
                 PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
-        addMetadataTrigger(ROO_IDENTIFIER);
-        getConfigurableMetadataProvider().addMetadataTrigger(ROO_IDENTIFIER);
-        getSerializableMetadataProvider().addMetadataTrigger(ROO_IDENTIFIER);
+        this.registryTracker.close();
+        removeMetadataTrigger(ROO_IDENTIFIER);
+
+        ItdTriggerBasedMetadataProvider metadataProvider = this.configurableMetadataProviderTracker
+                .getService();
+        metadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
+        this.configurableMetadataProviderTracker.close();
+
+        metadataProvider = this.serializableMetadataProviderTracker.getService();
+        metadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
+        this.serializableMetadataProviderTracker.close();
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return IdentifierMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTrigger(ROO_IDENTIFIER);
-        getConfigurableMetadataProvider().removeMetadataTrigger(ROO_IDENTIFIER);
-        getSerializableMetadataProvider().removeMetadataTrigger(ROO_IDENTIFIER);
     }
 
     @Override
@@ -125,29 +166,7 @@ public class IdentifierMetadataProviderImpl extends
         return IdentifierMetadata.getMetadataIdentifierType();
     }
     
-    public ConfigurableMetadataProvider getConfigurableMetadataProvider(){
-    	if(configurableMetadataProvider == null){
-    		// Get all Services implement ConfigurableMetadataProvider interface
-    		try {
-    			ServiceReference<?>[] references = context.getAllServiceReferences(ConfigurableMetadataProvider.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (ConfigurableMetadataProvider) context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load ConfigurableMetadataProvider on IdentifierMetadataProviderImpl.");
-    			return null;
-    		}
-    	}else{
-    		return configurableMetadataProvider;
-    	}
-    	
-    }
-    
-    public ProjectOperations getProjectOperations(){
+    protected ProjectOperations getProjectOperations(){
     	// Get all Services implement ProjectOperations interface
 		try {
 			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
@@ -163,27 +182,4 @@ public class IdentifierMetadataProviderImpl extends
 			return null;
 		}
     }
-    
-    public SerializableMetadataProvider getSerializableMetadataProvider(){
-    	if(serializableMetadataProvider == null){
-    		// Get all Services implement SerializableMetadataProvider interface
-    		try {
-    			ServiceReference<?>[] references = context.getAllServiceReferences(SerializableMetadataProvider.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (SerializableMetadataProvider) context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load SerializableMetadataProvider on IdentifierMetadataProviderImpl.");
-    			return null;
-    		}
-    	}else{
-    		return serializableMetadataProvider;
-    	}
-    	
-    }
-    
 }

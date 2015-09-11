@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -31,13 +32,18 @@ import org.springframework.roo.metadata.MetadataService;
 @Service
 public class DefaultMetadataDependencyRegistry implements
         MetadataDependencyRegistry {
+
     /** key: downstream dependency; value: list<upstream dependencies> */
     private final Map<String, Set<String>> downstreamKeyed = new HashMap<String, Set<String>>();
-    private final Set<MetadataNotificationListener> listeners = new HashSet<MetadataNotificationListener>();
-    @Reference private MetadataLogger metadataLogger;
-    private MetadataService metadataService;
+
     /** key: upstream dependency; value: list<downstream dependencies> */
     private final Map<String, Set<String>> upstreamKeyed = new HashMap<String, Set<String>>();
+
+    private final Set<MetadataNotificationListener> listeners = new HashSet<MetadataNotificationListener>();
+
+    @Reference(policy=ReferencePolicy.DYNAMIC)
+    protected volatile MetadataLogger metadataLogger;
+    protected MetadataService metadataService;
 
     public void addNotificationListener(
             final MetadataNotificationListener listener) {
@@ -185,7 +191,8 @@ public class DefaultMetadataDependencyRegistry implements
                 // First dispatch the fine-grained, instance-specific
                 // dependencies.
                 Set<String> notifiedDownstreams = new HashSet<String>();
-                for (final String downstream : getDownstream(upstreamDependency)) {
+                Set<String> downstreams = getDownstream(upstreamDependency);
+                for (final String downstream : downstreams) {
                     if (metadataLogger.getTraceLevel() > 0) {
                         metadataLogger.log(upstreamDependency + " -> "
                                 + downstream);
@@ -214,7 +221,8 @@ public class DefaultMetadataDependencyRegistry implements
                         .isIdentifyingClass(upstreamDependency)) {
                     final String asClass = MetadataIdentificationUtils
                             .getMetadataClassId(upstreamDependency);
-                    for (final String downstream : getDownstream(asClass)) {
+                    downstreams = getDownstream(asClass);
+                    for (final String downstream : downstreams) {
                         // We don't notify a downstream if it had a direct
                         // instance-specific dependency and was already notified
                         // in previous loop

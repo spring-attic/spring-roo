@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
@@ -17,6 +16,7 @@ import org.springframework.roo.addon.security.addon.PermissionEvaluatorMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -24,19 +24,20 @@ import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadat
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataProvider;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
  * 
  * @author Stefan Schmidt
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.2.0
  */
 @Component
@@ -46,36 +47,65 @@ public class ServiceInterfaceMetadataProvider extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(ServiceInterfaceMetadataProvider.class);
 	
-    private CustomDataKeyDecorator customDataKeyDecorator;
-
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+    protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
+     * <li>Registers {@link RooJavaType#ROO_SERVICE} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * <li>Set ensure the governor type details represent a class.</li>
+     * </ul>
+     */
+    @Override
     @SuppressWarnings("unchecked")
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        super.setDependsOnGovernorBeingAClass(false);
-        getMetadataDependencyRegistry().addNotificationListener(this);
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+        this.registryTracker = 
+                new MetadataDependencyRegistryTracker(context, this,
+                        PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                        getProvidesType());
+        this.registryTracker.open();
+
+        setDependsOnGovernorBeingAClass(false);
         addMetadataTrigger(ROO_SERVICE);
-        getCustomDataKeyDecorator().registerMatchers(getClass(),
+
+        this.keyDecoratorTracker = new CustomDataKeyDecoratorTracker(context, 
+                getClass(),
                 new LayerTypeMatcher(ROO_SERVICE, new JavaSymbolName(
                         RooService.DOMAIN_TYPES_ATTRIBUTE)));
+        this.keyDecoratorTracker.open();
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.close();
+
+        removeMetadataTrigger(ROO_SERVICE);
+
+        CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
+        keyDecorator.unregisterMatchers(getClass());
+        this.keyDecoratorTracker.close();
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return ServiceInterfaceMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().removeNotificationListener(this);
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTrigger(ROO_SERVICE);
     }
 
     @Override
@@ -188,7 +218,6 @@ public class ServiceInterfaceMetadataProvider extends
                                 metadataIdentificationString,
                                 permissionEvaluatorMetadata.getId());
                     }
-
                 }
             }
         }
@@ -201,27 +230,4 @@ public class ServiceInterfaceMetadataProvider extends
     public String getProvidesType() {
         return ServiceInterfaceMetadata.getMetadataIdentiferType();
     }
-    
-    public CustomDataKeyDecorator getCustomDataKeyDecorator(){
-    	if(customDataKeyDecorator == null){
-    		// Get all Services implement CustomDataKeyDecorator interface
-    		try {
-    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (CustomDataKeyDecorator) context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load CustomDataKeyDecorator on ServiceInterfaceMetadataProvider.");
-    			return null;
-    		}
-    	}else{
-    		return customDataKeyDecorator;
-    	}
-    	
-    }
-    
 }

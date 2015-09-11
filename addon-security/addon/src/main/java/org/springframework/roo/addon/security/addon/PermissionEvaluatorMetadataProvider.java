@@ -8,13 +8,11 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.addon.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -25,13 +23,11 @@ import org.springframework.roo.classpath.details.annotations.ClassAttributeValue
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 @Component
@@ -41,24 +37,42 @@ public class PermissionEvaluatorMetadataProvider extends
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(PermissionEvaluatorMetadataProvider.class);
 	
-    private TypeManagementService typeManagementService;
-
     private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Set ignore trigger annotations. It means that other MD providers 
+     * that want to discover whether a type has finders can do so.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().addNotificationListener(this);
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+
+    	this.registryTracker = 
+    			new MetadataDependencyRegistryTracker(context, this,
+    					PhysicalTypeIdentifier.getMetadataIdentiferType(),
+    	                getProvidesType());
+    	this.registryTracker.open();
         setIgnoreTriggerAnnotations(true);
     }
 
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
     protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().removeNotificationListener(this);
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+    	MetadataDependencyRegistry registry = this.registryTracker.getService();
+    	registry.removeNotificationListener(this);
+    	registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 getProvidesType());
+    	this.registryTracker.close();
     }
 
     @Override

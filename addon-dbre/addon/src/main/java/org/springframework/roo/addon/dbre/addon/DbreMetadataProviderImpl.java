@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dbre.addon.model.Database;
 import org.springframework.roo.addon.dbre.addon.model.DbreModelService;
@@ -19,17 +20,18 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link DbreMetadataProvider}.
  * 
  * @author Alan Stewart
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.1
  */
 @Component
@@ -41,26 +43,45 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider
 	
     private DbreModelService dbreModelService;
     private TypeManagementService typeManagementService;
+    protected MetadataDependencyRegistryTracker registryTracker = null;
 
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
+     * <li>Registers {@link RooJavaType#ROO_DB_MANAGED} as additional JavaType 
+     * that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
+        this.registryTracker = 
+                new MetadataDependencyRegistryTracker(context, null,
+                        PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                        getProvidesType());
+        this.registryTracker.open();
         addMetadataTrigger(ROO_DB_MANAGED);
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.close();
+        removeMetadataTrigger(ROO_DB_MANAGED);
     }
 
     @Override
     protected String createLocalIdentifier(final JavaType javaType,
             final LogicalPath path) {
         return DbreMetadata.createIdentifier(javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        removeMetadataTrigger(ROO_DB_MANAGED);
     }
 
     @Override

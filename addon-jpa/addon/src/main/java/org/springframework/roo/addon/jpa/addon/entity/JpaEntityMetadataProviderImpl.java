@@ -39,8 +39,9 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.AbstractIdentifierServiceAwareMetadataProvider;
 import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
@@ -50,29 +51,32 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.AnnotatedTypeMatcher;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
+import org.springframework.roo.classpath.customdata.taggers.Matcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MidTypeMatcher;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
+import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.CollectionUtils;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * The {@link JpaEntityMetadataProvider} implementation.
  * 
  * @author Andrew Swan
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.2.0
  */
 @Component
@@ -133,13 +137,48 @@ public class JpaEntityMetadataProviderImpl extends
     private CustomDataKeyDecorator customDataKeyDecorator;
     private ProjectOperations projectOperations;
 
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+    protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
+
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
+     * <li>Registers {@link RooJavaType#TRIGGER_ANNOTATIONS} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
     protected void activate(final ComponentContext cContext) {
     	context = cContext.getBundleContext();
-        getMetadataDependencyRegistry().registerDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                null, PhysicalTypeIdentifier.getMetadataIdentiferType(),
                 PROVIDES_TYPE);
+        this.registryTracker.open();
         addMetadataTriggers(TRIGGER_ANNOTATIONS);
-        registerMatchers();
+
+        this.keyDecoratorTracker = new CustomDataKeyDecoratorTracker(context,
+                getClass(), getMatchers());
+        this.keyDecoratorTracker.open();
+    }
+
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                PROVIDES_TYPE);
+        this.registryTracker.close();
+        removeMetadataTriggers(TRIGGER_ANNOTATIONS);
+
+        CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
+        keyDecorator.unregisterMatchers(getClass());
+        this.keyDecoratorTracker.close();
     }
 
     @Override
@@ -147,14 +186,6 @@ public class JpaEntityMetadataProviderImpl extends
             final LogicalPath path) {
         return PhysicalTypeIdentifierNamingUtils.createIdentifier(
                 PROVIDES_TYPE_STRING, javaType, path);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        getMetadataDependencyRegistry().deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                PROVIDES_TYPE);
-        removeMetadataTriggers(TRIGGER_ANNOTATIONS);
-        getCustomDataKeyDecorator().unregisterMatchers(getClass());
     }
 
     @Override
@@ -273,11 +304,9 @@ public class JpaEntityMetadataProviderImpl extends
                 PROVIDES_TYPE_STRING, metadataIdentificationString);
     }
 
-    @SuppressWarnings("unchecked")
-    private void registerMatchers() {
-    	
-        getCustomDataKeyDecorator().registerMatchers(
-                getClass(),
+        @SuppressWarnings("unchecked")
+        private Matcher<? extends CustomDataAccessor>[] getMatchers() {
+                Matcher<? extends CustomDataAccessor>[] matchers = new Matcher[] {
                 // Type matchers
                 new MidTypeMatcher(IDENTIFIER_TYPE, IdentifierMetadata.class
                         .getName()),
@@ -304,7 +333,8 @@ public class JpaEntityMetadataProviderImpl extends
                         Arrays.asList(JPA_VERSION_FIELD_MATCHER),
                         VERSION_ACCESSOR_METHOD, true), new MethodMatcher(
                         Arrays.asList(JPA_VERSION_FIELD_MATCHER),
-                        VERSION_MUTATOR_METHOD, false));
+                        VERSION_MUTATOR_METHOD, false)};
+                return matchers;
     }
     
     public CustomDataKeyDecorator getCustomDataKeyDecorator(){

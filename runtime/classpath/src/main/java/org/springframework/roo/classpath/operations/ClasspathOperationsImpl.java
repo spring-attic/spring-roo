@@ -58,6 +58,14 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
     @Reference TypeLocationService typeLocationService;
     @Reference TypeManagementService typeManagementService;
 
+    protected void activate(final ComponentContext context) {
+        staticFieldConverter.add(InheritanceType.class);
+    }
+
+    protected void deactivate(final ComponentContext context) {
+        staticFieldConverter.remove(InheritanceType.class);
+    }
+
     @Override
     public void createClass(final JavaType name, final boolean rooAnnotations,
             final LogicalPath path, final JavaType superclass,
@@ -249,13 +257,5 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
     @Override
     public boolean isProjectAvailable() {
         return projectOperations.isFocusedProjectAvailable();
-    }
-
-    protected void activate(final ComponentContext context) {
-        staticFieldConverter.add(InheritanceType.class);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        staticFieldConverter.remove(InheritanceType.class);
     }
 }
