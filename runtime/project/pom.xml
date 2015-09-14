@@ -21,6 +21,7 @@
             <groupId>org.osgi</groupId>
             <artifactId>osgi.cmpn</artifactId>
         </dependency>
+
         <!-- Apache Felix -->
         <!--
         <dependency>
@@ -28,6 +29,7 @@
             <artifactId>org.apache.felix.framework</artifactId>
         </dependency>
         -->
+
         <!-- Temporary wrapping until FELIX-5015 will be fixed/released -->
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
@@ -37,6 +39,23 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
+
+        <!-- JAX-RS -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-processing</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Roo -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
@@ -67,9 +86,14 @@
             <artifactId>org.springframework.roo.process.manager</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.rest.publisher</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
             <artifactId>org.springframework.roo.wrapping.snakeyaml</artifactId>
         </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>

@@ -10,18 +10,20 @@
 	</parent>
 	<artifactId>org.springframework.roo.web.ui</artifactId>
 	<packaging>bundle</packaging>
-	<name>Spring Roo - Web UI</name>
-	<description>Web Tools</description>
+	<name>Spring Roo - Eastern Grey UI</name>
+	<description>Web user interface ...</description>
+
 	<dependencies>
 		<!-- OSGi -->
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-		</dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>osgi.core</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>osgi.cmpn</artifactId>
+            </dependency>
+
 		<!-- Apache Felix -->
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -30,17 +32,8 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.servlet-api</artifactId>
-			<version>1.0.1</version>
 		</dependency>
-		<!-- Jackson -->
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-asl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-		</dependency>
+
 		<!-- Roo Dependencies -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
@@ -59,4 +52,7 @@
 			<artifactId>org.springframework.roo.addon.dbre.addon</artifactId>
 		</dependency>
 	</dependencies>
+    <properties>
+        <bundle.activator>${project.artifactId}.Activator</bundle.activator>
+    </properties>
 </project>

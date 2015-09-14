@@ -55,7 +55,7 @@
         <module>addon-email</module>
         <module>annotations</module>
         <!-- Web UI -->
-        <!-- <module>web-ui</module> -->
+        <module>web-ui</module>
     </modules>
     <distributionManagement>
         <snapshotRepository>

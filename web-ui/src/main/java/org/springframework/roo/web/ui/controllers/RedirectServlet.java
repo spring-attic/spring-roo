@@ -8,39 +8,54 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Redirect HTTP request to the given URL.
  * 
  * @author Juan Carlos García
+ * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 2.0
- *
  */
 public class RedirectServlet extends HttpServlet {
 
-	public void init() throws ServletException {
+	/**  */
+    private static final long serialVersionUID = 1L;
 
-	}
+    private String redirectToURL;
 
-	// Method to handle GET method request.
+    /**
+     * Configure with the URL to which this servlet must redirect.
+     * 
+     * @param url URL to redirect to.
+     */
+    public RedirectServlet(String url) {
+        this.redirectToURL = url;
+    }
+
+	/**
+	 * Redirect to {@link #redirectToURL}
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
 		// Set response content type
 		response.setContentType("text/html");
 
-		// New location to be redirected
-		String site = "spring-roo/index.html";
-
-		response.setStatus(response.SC_MOVED_TEMPORARILY);
-		response.setHeader("Location", site);
+		response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+		response.setHeader("Location", this.redirectToURL);
 	}
 
-	// Method to handle POST method request.
+	/**
+	 * Delegates on {@link #doGet(HttpServletRequest, HttpServletResponse)}
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		doGet(request, response);
-
 	}
-
-	public void destroy() {
-		// do nothing.
-	}
-
 }

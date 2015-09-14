@@ -55,7 +55,7 @@ angular.module("SpringRooApp").controller("ProjectCtrl", ["$scope", "$http", fun
 	// Checking if project exists
 	$http({
 	  method  : 'GET',
-	  url     : 'project',
+	  url     : '/rs-api/project',
 	  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 	 })
 	  .success(function(data) {
@@ -71,7 +71,7 @@ angular.module("SpringRooApp").controller("ProjectCtrl", ["$scope", "$http", fun
     $scope.processForm = function() {
     	 $http({
 		  method  : 'POST',
-		  url     : 'project',
+		  url     : '/rs-api/project',
 		  data    : $.param($scope.formData), 
 		  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 		 })
@@ -99,7 +99,7 @@ angular.module("SpringRooApp").controller("PersistenceCtrl", ["$scope", "$http",
 	// Checking if persistence configuration is available
 	$http({
 	  method  : 'GET',
-	  url     : 'project',
+	  url     : '/rs-api/project',
 	  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 	 })
 	  .success(function(data) {
@@ -108,7 +108,7 @@ angular.module("SpringRooApp").controller("PersistenceCtrl", ["$scope", "$http",
     		// Getting available ORM Providers
 			$http({
 			  method  : 'GET',
-			  url     : 'persistence/providers',
+			  url     : '/rs-api/persistence/providers',
 			  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 			 })
 			  .success(function(data) {
@@ -117,7 +117,7 @@ angular.module("SpringRooApp").controller("PersistenceCtrl", ["$scope", "$http",
 			      // Getting available Databases
 			      $http({
 			        method  : 'GET',
-			        url     : 'persistence/databases',
+			        url     : '/rs-api/persistence/databases',
 			        headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 			       })
 			        .success(function(data) {
@@ -126,7 +126,7 @@ angular.module("SpringRooApp").controller("PersistenceCtrl", ["$scope", "$http",
 			            // Getting persistence info
 			        	$http({
 			        	  method  : 'GET',
-			        	  url     : 'persistence',
+			        	  url     : '/rs-api/persistence',
 			        	  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 			        	 })
 			        	  .success(function(data) {
@@ -156,7 +156,7 @@ angular.module("SpringRooApp").controller("PersistenceCtrl", ["$scope", "$http",
     	
     	 $http({
 		  method  : 'POST',
-		  url     : 'persistence',
+		  url     : '/rs-api/persistence',
 		  data    : $.param($scope.formData), 
 		  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 		 })
@@ -192,7 +192,7 @@ angular.module("SpringRooApp").controller("EntitiesCtrl", ["$scope", "$http", "n
 	// Checking if persistence configuration is available
 	$http({
 	  method  : 'GET',
-	  url     : 'project',
+	  url     : '/rs-api/project',
 	  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 	 })
 	  .success(function(data) {
@@ -200,7 +200,7 @@ angular.module("SpringRooApp").controller("EntitiesCtrl", ["$scope", "$http", "n
     	 if(data.exists){
     		 $http({
 			  method  : 'GET',
-			  url     : 'persistence',
+			  url     : '/rs-api/persistence',
 			  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 			 })
 			  .success(function(data) {
@@ -223,7 +223,7 @@ angular.module("SpringRooApp").controller("EntitiesCtrl", ["$scope", "$http", "n
 	  $scope.processCreateEntity = function() {
 		  $http({
 			  method  : 'POST',
-			  url     : 'entities',
+			  url     : '/rs-api/entities',
 			  data    : $.param($scope.formData), 
 			  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 			 })
@@ -243,16 +243,17 @@ angular.module("SpringRooApp").controller("EntitiesCtrl", ["$scope", "$http", "n
 	  
 	  // Function to show selected entity fields
 	  $scope.onChangeEntity = function(){
-		  
+
 		// Getting current entities
  		 $http({
 		  method  : 'GET',
-		  url     : 'entities/'+$scope.formData.entityName,
+		  url     : '/rs-api/entities/'+$scope.formData.entityName,
 		  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 		 })
 		  .success(function(data) {
+			  
 			  // Getting entity fields
-			  $scope.entityFields = data[0].fields;
+			  $scope.entityFields = data.fields;
 			  
 			  // Enabling create field form
 			  $scope.createFieldAvailable = true;
@@ -266,7 +267,7 @@ angular.module("SpringRooApp").controller("EntitiesCtrl", ["$scope", "$http", "n
 	  $scope.getCurrentEntities = function(){
  		 $http({
 		  method  : 'GET',
-		  url     : 'entities',
+		  url     : '/rs-api/entities',
 		  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 		 })
 		  .success(function(data) {
@@ -300,7 +301,7 @@ angular.module("SpringRooApp").controller("EntitiesCtrl", ["$scope", "$http", "n
 		  
 		  $http({
 			  method  : 'POST',
-			  url     : 'fields',
+			  url     : '/rs-api/fields',
 			  data    : $.param(newEntityField), 
 			  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 			 })
@@ -352,7 +353,7 @@ angular.module("SpringRooApp").controller("UmlCtrl", ["$scope", "$http", "ngDial
 	// Getting all entities
 	 $http({
 	  method  : 'GET',
-	  url     : 'entities',
+	  url     : '/rs-api/entities',
 	  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 	 })
 	  .success(function(data) {
@@ -459,7 +460,7 @@ angular.module("SpringRooApp").controller("ShellCtrl", ["$scope", "$http", "$int
 	$scope.getShellContent = function(){
 		$http({
 		  method  : 'GET',
-		  url     : 'shell',
+		  url     : '/rs-api/shell',
 		  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 		 })
 		  .success(function(data) {
@@ -487,7 +488,7 @@ angular.module("SpringRooApp").controller("ShellCtrl", ["$scope", "$http", "$int
 			if(commandToExecute !== "" ){
 				$http({
 				  method  : 'POST',
-				  url     : 'shell',
+				  url     : '/rs-api/shell',
 				  data    : $.param($scope.formData), 
 				  headers : { 'Content-Type': 'application/x-www-form-urlencoded' } 
 				 })

@@ -1,108 +1,113 @@
 <div>
-	<a class="pull-right btn btn-primary btn-outline btn-rounded" 
-	ng-show="entitiesAvailable" ui-sref="create-entity">
-		New Entity
-	</a>
-	<a class="pull-right btn btn-primary btn-outline btn-rounded" 
-	ng-show="entitiesAvailable" ui-sref="uml">
-		Show UML
-	</a>
-	<h2>
-		Entity Layer <small>Manage your entities</small>
-	</h2>
-	<span class="fa fa-sitemap bg-fade"></span>
-	<div class=jumbotron>
-		<h3>Entity Layer</h3>
-		
-		<!-- Manage Entity Form -->
-		<form ng-submit="processForm()">
-			 <div class="form-group">
-			 	<div ng-show="success != null" class="{{messageClass}}">{{message}}</div>
-			 	<div ng-show="!projectExists" class="alert alert-danger">You have to create new Spring
-				Roo Project to generate new entities. <a href="index.html#/dashboard/project">Create Project</a></div>
-				<div ng-show="!persistenceExists" class="alert alert-danger">You have to configure persistence
-				 to be able to manage entities. <a href="index.html#/dashboard/persistence">Configure Persistence</a></div>
-			 </div>
-			 <div class="form-group">
-			  <label for="entityName">Entity:</label>
-			  <select
-				class="form-control" ng-model="formData.entityName"
-				ng-options="item.entityName as item.entityName for item in entities" ng-change="onChangeEntity()" ng-disabled="!entitiesAvailable"></select>
-			</div>
-			
-			<!-- Entity Fields Create Form-->
-			<div class="form-group">
-				<label for="entityName">Fields:</label>
-			</div>
-			<div class="form-group">
-				<div class="col-md-4">
-					<input class="form-control" ng-model="formData.fieldName" ng-disabled="!createFieldAvailable">
-				</div>	
-				<div class="col-md-3">
-					<select id="fieldType" class="form-control" ng-model="formData.fieldType" ng-change="onChangeFieldType()" ng-disabled="!createFieldAvailable">
-				        <option>boolean</option>
-				        <option>embedded</option>
-				        <option>enum</option>
-				        <option>file</option>
-				        <option>list</option> 
-				        <option>other</option>
-				        <option>reference</option>
-				        <option>set</option>
-				        <option>string</option>
-				        <optgroup label="Date">
-					        <option>java.util.Calendar</option>
-					        <option>java.util.Date</option>
-					    </optgroup>
-					    <optgroup label="Number">
-					    	 <option>byte</option>
-					        <option>double</option>
-					        <option>float</option>
-					        <option>int</option>
-					        <option>java.lang.Byte</option>
-					        <option>java.lang.Double</option>
-					        <option>java.lang.Float</option>
-					        <option>java.lang.Integer</option>
-					        <option>java.lang.Long</option>
-					        <option>java.lang.Number</option>
-					        <option>java.lang.Short</option>
-					        <option>java.math.BigDecimal</option>
-					        <option>java.math.BigInteger</option>
-					        <option>long</option>
-					        <option>short</option>
-					    </optgroup>
-					</select>
-				</div>
-				<div class="col-md-4">
-					<input class="form-control" ng-model="formData.referencedClass" ng-disabled="!needsTypeParam">
-				</div>	
-				<div class="col-md-1">
-					<input value="Add" type="submit" class="form-control btn-primary" ng-click="addNewField()" ng-disabled="!createFieldAvailable">
-				</div>
-			</div>
-			<!-- End Entity Fields Create Form-->
-			<!-- End Current entity fields -->
-			<div class="form-group">
-				<br/>
-				<br/>
-			</div>
-			<!-- Current entity fields -->
-			<div class="form-group" ng-repeat="field in entityFields">
-				<br/>
-				<div class="col-md-4">
-					<input class="form-control" value="{{field.fieldName}}" ng-disabled="true">
-				</div>	
-				<div class="col-md-3">
-					<input class="form-control" value="{{field.type}}" ng-disabled="true">
-				</div>
-				<div class="col-md-4">
-					<input class="form-control" value="{{field.referencedClass}}" ng-disabled="true">
-				</div>
-				<br/>
-			</div>
-			<!-- End Current entity fields -->
-			<div class="form-group">
-				<br/>
-			</div>
-		</form>
-	</div>
+  <a class="pull-right btn btn-primary btn-outline btn-rounded"
+    ng-show="entitiesAvailable" ui-sref="create-entity"> New Entity </a> <a
+    class="pull-right btn btn-primary btn-outline btn-rounded"
+    ng-show="entitiesAvailable" ui-sref="uml"> Show UML </a>
+  <h2>
+    Entity Layer <small>Manage your entities</small>
+  </h2>
+  <span class="fa fa-sitemap bg-fade"></span>
+  <div class=jumbotron>
+
+    <!-- Manage Entity Form -->
+    <form ng-submit="processForm()">
+      <div class="form-group">
+        <div ng-show="success != null" class="{{messageClass}}">{{message}}</div>
+        <div ng-show="!projectExists" class="alert alert-danger">
+          You have to create new Spring Roo Project to generate new entities. <a
+            href="index.html#/dashboard/project">Create Project</a>
+        </div>
+        <div ng-show="!persistenceExists" class="alert alert-danger">
+          You have to configure persistence to be able to manage entities. <a
+            href="index.html#/dashboard/persistence">Configure Persistence</a>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="entityName">Entity:</label>
+        <select class="form-control" ng-model="formData.entityName"
+          ng-options="item.entityName as item.entityName for item in entities"
+          ng-change="onChangeEntity()" ng-disabled="!entitiesAvailable"></select>
+      </div>
+
+      <!-- Entity Fields Create Form-->
+      <div class="form-group">
+        <label for="entityName">Fields:</label>
+      </div>
+      <div class="form-group">
+        <div class="col-md-4">
+          <input class="form-control" ng-model="formData.fieldName"
+            ng-disabled="!createFieldAvailable">
+        </div>
+        <div class="col-md-3">
+          <select id="fieldType" class="form-control"
+            ng-model="formData.fieldType" ng-change="onChangeFieldType()"
+            ng-disabled="!createFieldAvailable">
+            <option>boolean</option>
+            <option>embedded</option>
+            <option>enum</option>
+            <option>file</option>
+            <option>list</option>
+            <option>other</option>
+            <option>reference</option>
+            <option>set</option>
+            <option>string</option>
+            <optgroup label="Date">
+              <option>java.util.Calendar</option>
+              <option>java.util.Date</option>
+            </optgroup>
+            <optgroup label="Number">
+              <option>byte</option>
+              <option>double</option>
+              <option>float</option>
+              <option>int</option>
+              <option>java.lang.Byte</option>
+              <option>java.lang.Double</option>
+              <option>java.lang.Float</option>
+              <option>java.lang.Integer</option>
+              <option>java.lang.Long</option>
+              <option>java.lang.Number</option>
+              <option>java.lang.Short</option>
+              <option>java.math.BigDecimal</option>
+              <option>java.math.BigInteger</option>
+              <option>long</option>
+              <option>short</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <input class="form-control" ng-model="formData.referencedClass"
+            ng-disabled="!needsTypeParam">
+        </div>
+        <div class="col-md-1">
+          <input value="Add" type="submit" class="form-control btn-primary"
+            ng-click="addNewField()" ng-disabled="!createFieldAvailable">
+        </div>
+      </div>
+      <!-- End Entity Fields Create Form-->
+      <!-- End Current entity fields -->
+      <div class="form-group">
+        <br /> <br />
+      </div>
+      <!-- Current entity fields -->
+      <div class="form-group" ng-repeat="field in entityFields">
+        <br />
+        <div class="col-md-4">
+          <input class="form-control" value="{{field.fieldName}}"
+            ng-disabled="true">
+        </div>
+        <div class="col-md-3">
+          <input class="form-control" value="{{field.type}}" ng-disabled="true">
+        </div>
+        <div class="col-md-4">
+          <input class="form-control" value="{{field.referencedClass}}"
+            ng-disabled="true">
+        </div>
+        <br />
+      </div>
+      <!-- End Current entity fields -->
+      <div class="form-group">
+        <br />
+      </div>
+    </form>
+  </div>
 </div>
