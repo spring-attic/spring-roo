@@ -1,0 +1,23 @@
+
+== The Spring Roo REST Publisher
+
+This module provides a REST API to access various Spring Roo resources such as 
+commands and project information.
+
+The REST API is used internally by the Eastern Grey UI and can support any 
+custom client application that requires interaction with Roo.
+
+The HTTP port is configurable and may be set in $ROO_HOME/conf/config.properties. 
+The default port is 9191.
+
+REST API is exposed under the /rs-api context path.
+
+=== How it works
+
+The `ResourceTracker` `ServiceTracker` tracks OSGi services that are annotated 
+with the JAX-RS annotations `@Path`/`@Provider` or it extends
+`javax.ws.rs.core.Feature`.
+
+Then it hooks these services into Jersey Servlet container and the OSGi 
+HTTP service, that is, it publishes them as RESTful web services.
+

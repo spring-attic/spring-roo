@@ -36,6 +36,7 @@
         <module>url-stream</module>
         <module>obr-manager</module>
         <module>suite-manager</module>
+        <module>rest-publisher</module>
     </modules>
 
     <!-- Runtime dependency management: OSGi Services, Felix, ... -->
@@ -63,7 +64,13 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.http.servlet-api</artifactId>
-                <version>1.0.1</version>
+                <version>1.1.0</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>tomcat-servlet-api</artifactId>
+                        <groupId>org.apache.tomcat</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -83,21 +90,43 @@
                 <version>1.4.4</version>
             </dependency>
 
-            <!-- Jersey -->
-            <!-- 
+            <!-- JAX-RS (JSR 339) -->
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>2.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.hk2.external</groupId>
+                <artifactId>asm-all-repackaged</artifactId>
+                <version>2.1.96</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-server</artifactId>
+                <version>2.6</version>
+            </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.containers</groupId>
-                <!-#- Jersey core Servlet 2.x implementation -#->
+                <!-- Jersey core Servlet 2.x implementation -->
                 <artifactId>jersey-container-servlet-core</artifactId>
                 <version>2.6</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.glassfish.jersey.core</groupId>
-                        <artifactId>jersey-client</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
-            -->
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-common</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.media</groupId>
+                <artifactId>jersey-media-json-processing</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.json</artifactId>
+                <version>1.0.4</version>
+            </dependency>
 
             <!-- OSGi Subsystem Service -->
             <dependency>

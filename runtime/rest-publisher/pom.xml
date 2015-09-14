@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.roo</groupId>
+        <artifactId>org.springframework.roo.osgi.bundle</artifactId>
+        <version>2.0.0.BUILD-SNAPSHOT</version>
+        <relativePath>../../runtime/osgi-bundle</relativePath>
+    </parent>
+    <artifactId>org.springframework.roo.rest.publisher</artifactId>
+    <packaging>bundle</packaging>
+    <name>Spring Roo - Runtime - REST Publisher</name>
+    <description>Tracks OSGi services that are annotated with the JAX-RS annotations @Path/@Provider. Hooks these services into Jersey Servlet container and the OSGi HTTP Service, that is publish them as RESTful web services.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <!-- Jersey core Servlet 2.x implementation -->
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <!-- Until version 2.6, Jersey was compiled with Java SE 6 -->
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-processing</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- OSGi Core API -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
+        </dependency>
+
+        <!-- Apache Felix OSGi Declarative Services Annotations -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+
+        <!-- Roo -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support</artifactId>
+        </dependency>
+    </dependencies>
+    <properties>
+        <bundle.activator>${project.artifactId}.Activator</bundle.activator>
+    </properties>
+</project>
