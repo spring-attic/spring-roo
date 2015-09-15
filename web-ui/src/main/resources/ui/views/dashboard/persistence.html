@@ -17,34 +17,34 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-12">
             <div class="form-group">
-              <label for="providerName" class="col-md-3 control-label">Provider:</label>
-              <div class="col-md-8">
+              <label for="providerName" class="col-md-1 control-label">Provider:</label>
+              <div class="col-md-11">
                 <select class="form-control" ng-model="formData.providerName"
                   ng-options="item.providerName as item.providerName for item in ormProviders"
                   ng-disabled="!persistenceAvailable"></select>
               </div>
             </div>
             <div class="form-group">
-              <label for="database" class="col-md-3 control-label">Database:</label>
-              <div class="col-md-8">
+              <label for="database" class="col-md-1 control-label">Database:</label>
+              <div class="col-md-11">
                 <select class="form-control" ng-model="formData.database"
                   ng-options="item.databaseName as item.databaseName for item in databases"
                   ng-disabled="!persistenceAvailable"></select>
               </div>
             </div>
             <div class="form-group">
-              <label for="username" class="col-md-3 control-label">Username:</label>
-              <div class="col-md-8">
+              <label for="username" class="col-md-1 control-label">Username:</label>
+              <div class="col-md-11">
                 <input type="text" class="form-control"
                   ng-model="formData.username"
                   ng-disabled="!persistenceAvailable">
               </div>
             </div>
             <div class="form-group">
-              <label for="password" class="col-md-3 control-label">Password:</label>
-              <div class="col-md-8">
+              <label for="password" class="col-md-1 control-label">Password:</label>
+              <div class="col-md-11">
                 <input type="password" class="form-control"
                   ng-model="formData.password"
                   ng-disabled="!persistenceAvailable">
@@ -52,21 +52,18 @@
             </div>
           </div>
         </div>
+        
+        <br/>
 
-        <div class="row">
+        <div class="form-group">
           <p class="text-center">
             <button name="setup-persistence" type="submit"
-              class="btn btn-lg btn-primary" role="button"
+              class="form-control btn-primary" role="button"
               ng-disabled="!persistenceAvailable">
-              <span class="glyphicon glyphicon-ok"></span> Setup persistence
+              <span class="glyphicon glyphicon-ok"></span>&nbsp;&nbsp;Setup persistence
             </button>
           </p>
         </div>
-        <!-- 
-				<div class="form-group">
-					<input value="Apply" type="submit" class="form-control btn-primary" ng-disabled="!persistenceAvailable">
-				</div>
- -->
       </form>
     </div>
   </div>

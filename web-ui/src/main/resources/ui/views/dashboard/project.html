@@ -4,22 +4,23 @@
   <div class=jumbotron>
     <div class=container>
       <form class="form-horizontal" ng-submit="processForm()">
+      
         <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-12">
             <div class="form-group">
               <div ng-show="success != null" class="{{messageClass}}">{{message}}</div>
             </div>
             <div class="form-group">
-              <label for="projectName" class="col-md-3 control-label">Name:</label>
-              <div class="col-md-8">
+              <label for="projectName" class="col-md-1 control-label">Name:</label>
+              <div class="col-md-11">
                 <input type="text" class="form-control"
                   ng-model="formData.projectName" ng-disabled="projectExists"
                   required />
               </div>
             </div>
             <div class="form-group">
-              <label for="topLevelPackage" class="col-md-3 control-label">Package:</label>
-              <div class="col-md-8">
+              <label for="topLevelPackage" class="col-md-1 control-label">Package:</label>
+              <div class="col-md-11">
                 <input type="text" class="form-control"
                   ng-model="formData.topLevelPackage"
                   ng-disabled="projectExists" required />
@@ -28,20 +29,17 @@
           </div>
         </div>
 
-        <div class="row">
+		<br/>
+
+        <div class="form-group">
           <p class="text-center">
             <button name="generate-project" type="submit"
-              class="btn btn-lg btn-primary" role="button" ng-disabled="projectExists">
-              <span class="glyphicon glyphicon-ok"></span> Create
+              class="form-control btn-primary" role="button" ng-disabled="projectExists">
+              <span class="glyphicon glyphicon-ok"></span>&nbsp;&nbsp;Create
               Project
             </button>
           </p>
         </div>
-        <!-- 
-				<div class="form-group" >
-					<input value="Apply" type="submit" class="form-control btn-primary" ng-disabled="projectExists">
-				</div>
-        -->
       </form>
     </div>
   </div>

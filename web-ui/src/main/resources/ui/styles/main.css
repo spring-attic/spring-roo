@@ -3286,7 +3286,7 @@ textarea.form-group-lg .form-control,select[multiple].form-group-lg .form-contro
 	{
 		margin-bottom: 0;
 		padding-top: 7px;
-		text-align: right;
+		text-align: left;
 	}
 }
 .form-horizontal .has-feedback .form-control-feedback
@@ -5187,6 +5187,8 @@ a.badge:hover,a.badge:focus
 	{
 		padding-left: 60px;
 		padding-right: 60px;
+		width: 90%;
+		position: absolute;
 	}
 	.jumbotron h1,.jumbotron .h1
 	{

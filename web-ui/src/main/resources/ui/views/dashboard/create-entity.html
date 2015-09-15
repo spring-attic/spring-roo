@@ -18,18 +18,18 @@
     </div>
     <form class="form-horizontal" ng-submit="processCreateEntity()">
       <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-12">
           <div class="form-group">
-            <label for="entityName" class="col-md-3 control-label">Entity
+            <label for="entityName" class="col-md-2 control-label">Entity
               Name:</label>
-            <div class="col-md-8">
+            <div class="col-md-10">
               <input class="form-control" ng-model="formData.entityName"
                 ng-disabled="!entitiesAvailable" required />
             </div>
           </div>
           <div class="form-group">
-            <label for="entityName" class="col-md-3 control-label">Extends:</label>
-            <div class="col-md-8">
+            <label for="entityName" class="col-md-2 control-label">Extends:</label>
+            <div class="col-md-10">
               <select class="form-control"
                 ng-options="item.entityName as item.entityName for item in entities"
                 ng-model="formData.extends" ng-disabled="!entitiesAvailable"
@@ -37,28 +37,26 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="entityName" class="col-md-3 control-label">Abstract:</label>
-            <div class="col-md-8">
+            <label for="entityName" class="col-md-2 control-label">Abstract:</label>
+            <div class="col-md-10">
               <input type="checkbox" ng-model="formData.isAbstract"
                 ng-disabled="!entitiesAvailable" />
             </div>
           </div>
         </div>
       </div>
-      <div class="row">
+      
+      <br/>
+      
+      <div class="form-group">
         <p class="text-center">
           <button name="setup-persistence" type="submit"
-            class="btn btn-lg btn-primary" role="button"
+            class="form-control btn-primary" role="button"
             ng-disabled="!entitiesAvailable">
-            <span class="glyphicon glyphicon-ok"></span> Create entity
+            <span class="glyphicon glyphicon-ok"></span>&nbsp;&nbsp;Create entity
           </button>
         </p>
       </div>
-      <!-- 
-			<div class="form-group" >
-				<input value="Apply" type="submit" class="form-control btn-primary" ng-disabled="!entitiesAvailable">
-			</div>
-      -->
     </form>
   </div>
 </div>
