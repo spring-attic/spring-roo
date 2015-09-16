@@ -11,7 +11,10 @@
     <artifactId>org.springframework.roo.web.ui</artifactId>
     <packaging>bundle</packaging>
     <name>Spring Roo - Eastern Grey UI</name>
-    <description>Web user interface ...</description>
+    <description>
+    The Eastern Grey UI provided by Spring Roo is a browser-based GUI that 
+    lets the developer to call addon operations via the Spring Roo REST API.
+    </description>
 
     <dependencies>
         <!-- OSGi -->

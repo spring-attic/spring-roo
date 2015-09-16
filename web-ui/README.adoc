@@ -1,1 +1,13 @@
-== Web UI
+== Spring Roo Eastern Grey UI
+
+The Eastern Grey UI provided by Spring Roo is a browser-based GUI that lets
+the developer to call addon operations via the Spring Roo REST API.
+
+Upon starting Spring Roo, the Eastern Greu UI is available at:
+http://localhost:9191/eastern-grey-ui/
+
+If you have enabled security, a login form is available at
+http://localhost:9191/eastern-grey-ui/#/login
+
+Note the default port is 9191.
+
