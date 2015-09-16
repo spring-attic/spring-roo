@@ -1,57 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.roo</groupId>
-		<artifactId>org.springframework.roo.osgi.bundle</artifactId>
-		<version>2.0.0.BUILD-SNAPSHOT</version>
-		<relativePath>../runtime/osgi-bundle</relativePath>
-	</parent>
-	<artifactId>org.springframework.roo.web.ui</artifactId>
-	<packaging>bundle</packaging>
-	<name>Spring Roo - Eastern Grey UI</name>
-	<description>Web user interface ...</description>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.roo</groupId>
+        <artifactId>org.springframework.roo.osgi.bundle</artifactId>
+        <version>2.0.0.BUILD-SNAPSHOT</version>
+        <relativePath>../runtime/osgi-bundle</relativePath>
+    </parent>
+    <artifactId>org.springframework.roo.web.ui</artifactId>
+    <packaging>bundle</packaging>
+    <name>Spring Roo - Eastern Grey UI</name>
+    <description>Web user interface ...</description>
 
-	<dependencies>
-		<!-- OSGi -->
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.core</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.cmpn</artifactId>
-            </dependency>
+    <dependencies>
+        <!-- OSGi -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
+        </dependency>
 
-		<!-- Apache Felix -->
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr.annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.http.servlet-api</artifactId>
-		</dependency>
+        <!-- Apache Felix Servlet API -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.servlet-api</artifactId>
+        </dependency>
 
-		<!-- Roo Dependencies -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.shell</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.project</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.jpa.addon</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.dbre.addon</artifactId>
-		</dependency>
-	</dependencies>
+        <!-- Roo Dependencies -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support</artifactId>
+        </dependency>
+    </dependencies>
     <properties>
         <bundle.activator>${project.artifactId}.Activator</bundle.activator>
     </properties>
