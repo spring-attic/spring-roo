@@ -88,9 +88,6 @@ public class PushInOperationsImpl implements PushInOperations {
 				// Getting methodName
 				JavaSymbolName methodName = method.getMethodName();
 
-				// Showing some log information
-				LOGGER.log(Level.INFO, String.format("Push-in %s method...", methodName));
-
 				// If exists, change method name to a new one
 				classDetails = getTypeLocationService().getTypeDetails(klass);
 				MethodMetadata declaredMethod = classDetails.getMethod(methodName);
@@ -105,13 +102,7 @@ public class PushInOperationsImpl implements PushInOperations {
 
 					JavaSymbolName newMethodName = new JavaSymbolName(methodName.getSymbolName()
 							.concat(ROO_PUSH_IN_SUFIX).concat(Integer.toString(declaredTimes)));
-					LOGGER.log(Level.WARNING,
-							String.format(
-									"INFO: Method '%s' already exists on .java file. Method name changed to '%s' to make possible push-in action. "
-											+ "Remember that you should check this changes manually.",
-									methodName, newMethodName));
 					methodName = newMethodName;
-
 					declaredMethodTimes.put(key, declaredTimes++);
 				}
 
