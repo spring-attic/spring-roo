@@ -53,6 +53,7 @@
         <module>addon-cloud</module>
         <module>addon-jms</module>
         <module>addon-email</module>
+	<module>addon-push-in</module>
         <module>annotations</module>
         <!-- Web UI -->
         <module>web-ui</module>
