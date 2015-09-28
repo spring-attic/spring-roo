@@ -29,8 +29,10 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
 import org.springframework.roo.addon.jpa.annotations.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -56,10 +58,13 @@ import org.springframework.roo.model.JavaType;
  * The metadata for a JPA entity's *_Roo_Jpa_Entity.aj ITD.
  * 
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 public class JpaEntityMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
+
+	private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class.getName();
 
     private final JpaEntityAnnotationValues annotationValues;
     private final MemberDetails entityMemberDetails;
@@ -69,6 +74,11 @@ public class JpaEntityMetadata extends
     private final JpaEntityMetadata parent;
     private FieldMetadata identifierField;
     private FieldMetadata versionField;
+	private ClassOrInterfaceTypeDetails entityDetails;
+
+	public static JavaType getJavaType(final String metadataIdentificationString) {
+		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
 
     /**
      * Constructor
@@ -94,7 +104,7 @@ public class JpaEntityMetadata extends
             final MemberDetails entityMemberDetails,
             final Identifier identifier,
             final JpaEntityAnnotationValues annotationValues,
-            final boolean isGaeEnabled, final boolean isDatabaseDotComEnabled) {
+            final boolean isGaeEnabled, final boolean isDatabaseDotComEnabled, final ClassOrInterfaceTypeDetails entityDetails) {
         super(metadataIdentificationString, itdName, entityPhysicalType);
         Validate.notNull(annotationValues, "Annotation values are required");
         Validate.notNull(entityMemberDetails,
@@ -111,6 +121,7 @@ public class JpaEntityMetadata extends
         this.parent = parent;
         this.isGaeEnabled = isGaeEnabled;
         this.isDatabaseDotComEnabled = isDatabaseDotComEnabled;
+        this.entityDetails = entityDetails;
 
         // Add @Entity or @MappedSuperclass annotation
         builder.addAnnotation(annotationValues.isMappedSuperclass() ? getTypeAnnotation(MAPPED_SUPERCLASS)
@@ -131,15 +142,29 @@ public class JpaEntityMetadata extends
         // Add identifier field and accessor
         identifierField = getIdentifierField();
         builder.addField(identifierField);
-        builder.addMethod(getIdentifierAccessor());
-        builder.addMethod(getIdentifierMutator());
 
+        MethodMetadataBuilder identifierAccessor = getIdentifierAccessor();
+		if (identifierAccessor != null) {
+			builder.addMethod(identifierAccessor);
+		}
+
+		MethodMetadataBuilder identifierMutator = getIdentifierMutator();
+		if (identifierMutator != null) {
+			builder.addMethod(identifierMutator);
+		}
         // Add version field and accessor
         versionField = getVersionField();
         builder.addField(versionField);
-        builder.addMethod(getVersionAccessor());
-        builder.addMethod(getVersionMutator());
 
+        MethodMetadataBuilder versionAccessor = getVersionAccessor();
+		if (versionAccessor != null) {
+			builder.addMethod(versionAccessor);
+		}
+
+		MethodMetadataBuilder versionMutator = getVersionMutator();
+		if (versionMutator != null) {
+			builder.addMethod(versionMutator);
+		}
         // Build the ITD based on what we added to the builder above
         itdTypeDetails = builder.build();
     }
@@ -220,10 +245,32 @@ public class JpaEntityMetadata extends
         bodyBuilder.appendFormalLine("return this."
                 + identifierField.getFieldName().getSymbolName() + ";");
 
-        return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-                requiredAccessorName, identifierField.getFieldType(),
-                bodyBuilder);
+        MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName,
+				identifierField.getFieldType(), bodyBuilder);
+
+		// If method exists, return null to prevent method creation
+		if (existsMethod(methodMetadata)) {
+			return null;
+		}
+
+		return methodMetadata;
     }
+    
+    /**
+	 * Method that checks if method exists on Java target
+	 * 
+	 * @param methodMetadata
+	 * @return
+	 */
+	private boolean existsMethod(MethodMetadataBuilder methodMetadata) {
+		MethodMetadata method = entityDetails.getMethod(methodMetadata.getMethodName());
+
+		if (method == null) {
+			return false;
+		}
+
+		return true;
+	}
 
     private String getIdentifierColumn() {
         if (StringUtils.isNotBlank(annotationValues.getIdentifierColumn())) {
@@ -479,11 +526,18 @@ public class JpaEntityMetadata extends
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("this."
                 + identifierField.getFieldName().getSymbolName() + " = id;");
-
-        return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+        
+        MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
                 requiredMutatorName, JavaType.VOID_PRIMITIVE,
                 AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
                 parameterNames, bodyBuilder);
+
+		// If method exists, return null to prevent method creation
+		if (existsMethod(methodMetadata)) {
+			return null;
+		}
+
+		return methodMetadata;
     }
 
     /**
@@ -654,9 +708,16 @@ public class JpaEntityMetadata extends
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("return this."
                 + versionField.getFieldName().getSymbolName() + ";");
-
-        return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+        
+        MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
                 requiredAccessorName, versionField.getFieldType(), bodyBuilder);
+        
+        // If method exists, return null to prevent method creation
+        if(existsMethod(methodMetadata)){
+        	return null;
+        }
+
+        return methodMetadata;
     }
 
     /**
@@ -778,10 +839,18 @@ public class JpaEntityMetadata extends
         final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("this."
                 + versionField.getFieldName().getSymbolName() + " = version;");
-
-        return new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+        
+        
+        MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
                 requiredMutatorName, JavaType.VOID_PRIMITIVE,
                 AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
                 parameterNames, bodyBuilder);
+        
+        // If method exists, return null to prevent method creation
+        if(existsMethod(methodMetadata)){
+        	return null;
+        }
+
+        return methodMetadata;
     }
 }

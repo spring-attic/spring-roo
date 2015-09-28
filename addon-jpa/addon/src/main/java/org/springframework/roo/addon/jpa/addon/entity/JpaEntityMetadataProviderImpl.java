@@ -56,6 +56,7 @@ import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
 import org.springframework.roo.classpath.customdata.taggers.Matcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MidTypeMatcher;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -77,6 +78,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * 
  * @author Andrew Swan
  * @author Enrique Ruiz at DISID Corporation S.L.
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 @Component
@@ -288,11 +290,15 @@ public class JpaEntityMetadataProviderImpl extends
             isDatabaseDotComEnabled = projectOperations
                     .isFeatureInstalledInFocusedModule(FeatureNames.DATABASE_DOT_COM);
         }
+        
+        // Getting entity details
+        JavaType entity = JpaEntityMetadata.getJavaType(metadataIdentificationString);
+        ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
 
         return new JpaEntityMetadata(metadataIdentificationString, aspectName,
                 governorPhysicalType, parent, governorMemberDetails,
                 identifier, jpaEntityAnnotationValues, isGaeEnabled,
-                isDatabaseDotComEnabled);
+                isDatabaseDotComEnabled, entityDetails);
     }
 
     public String getProvidesType() {
