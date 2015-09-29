@@ -1,10 +1,9 @@
 package org.springframework.roo.addon.pushin;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -19,12 +18,16 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -40,8 +43,6 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class PushInOperationsImpl implements PushInOperations {
-
-	private static final String ROO_PUSH_IN_SUFIX = "_ROO_push_in_";
 
 	// ------------ OSGi component attributes ----------------
 	private BundleContext context;
@@ -73,51 +74,66 @@ public class PushInOperationsImpl implements PushInOperations {
 		// Getting all declared methods (including declared on ITDs
 		// and .java files)
 		List<MethodMetadata> allDeclaredMethods = memberDetails.getMethods();
-
+		// Getting all declared fields (including declared on ITDs
+		// and .java files)
+		List<FieldMetadata> allDeclaredFields = memberDetails.getFields();
+		// Getting all declared annotations (including declared on ITDs
+		// and .java files)
+		List<AnnotationMetadata> allDeclaredAnnotations = new ArrayList<AnnotationMetadata>();
+		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			allDeclaredAnnotations.addAll(memberHoldingTypeDetails.getAnnotations());
+		}
+		
+		// TODO: Getting all imports registered on .aj file to move to .java file
+		
 		// Getting current class .java file metadata ID
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(klass,
 				getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 
-		// Declaring Map where save times that one method is declared
-		Map<String, Integer> declaredMethodTimes = new HashMap<String, Integer>();
+		// Getting detailsBuilder
+		ClassOrInterfaceTypeDetailsBuilder detailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classDetails);
 
 		// Checking if is necessary to make push-in for all declared methods
 		for (MethodMetadata method : allDeclaredMethods) {
 			// If method exists on .aj file, add it!
 			if (!method.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
-				// Getting methodName
-				JavaSymbolName methodName = method.getMethodName();
-
-				// If exists, change method name to a new one
-				classDetails = getTypeLocationService().getTypeDetails(klass);
-				MethodMetadata declaredMethod = classDetails.getMethod(methodName);
-
-				if (declaredMethod != null) {
-					int declaredTimes = 1;
-					// Check if was declared more than one time
-					String key = method.getMethodName().getSymbolName().concat(method.getParameterTypes().toString());
-					if (declaredMethodTimes.containsKey(key)) {
-						declaredTimes = declaredMethodTimes.get(key);
-					}
-
-					JavaSymbolName newMethodName = new JavaSymbolName(methodName.getSymbolName()
-							.concat(ROO_PUSH_IN_SUFIX).concat(Integer.toString(declaredTimes)));
-					methodName = newMethodName;
-					declaredMethodTimes.put(key, declaredTimes++);
-				}
-
-				// Getting detailsBuilder
-				ClassOrInterfaceTypeDetailsBuilder detailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-						classDetails);
-
 				// Add method to .java file
-				detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method, methodName));
-
-				// Updating .java file
-				getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
-
+				detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method));
 			}
 		}
+
+		// Checking if is necessary to make push-in for all declared fields
+		for (FieldMetadata field : allDeclaredFields) {
+			// If field exists on .aj file, add it!
+			if (!field.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
+				// Add field to .java file
+				detailsBuilder.addField(getNewField(declaredByMetadataId, field));
+			}
+		}
+
+		// Checking if is necessary to make push-in for all declared annotations
+		for (AnnotationMetadata annotation : allDeclaredAnnotations) {
+			// Check if current annotation exists on .java file
+			classDetails = getTypeLocationService().getTypeDetails(detailsBuilder.build().getType());
+			List<AnnotationMetadata> javaDeclaredAnnotations = classDetails.getAnnotations();
+			boolean annotationExists = false;
+			for (AnnotationMetadata javaAnnotation : javaDeclaredAnnotations) {
+				if (javaAnnotation.getAnnotationType().getFullyQualifiedTypeName()
+						.equals(annotation.getAnnotationType().getFullyQualifiedTypeName())) {
+					annotationExists = true;
+				}
+			}
+
+			// If not exists, add it!
+			if (!annotationExists) {
+				// Add annotation to .java file
+				detailsBuilder.addAnnotation(annotation);
+			}
+
+		}
+		
+		// Updating .java file
+		getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
 
 	}
 
@@ -144,12 +160,10 @@ public class PushInOperationsImpl implements PushInOperations {
 	 * 
 	 * @param declaredByMetadataId
 	 * @param method
-	 * @param newMethodName
 	 * 
 	 * @return
 	 */
-	private MethodMetadata getNewMethod(String declaredByMetadataId, MethodMetadata method,
-			JavaSymbolName newMethodName) {
+	private MethodMetadata getNewMethod(String declaredByMetadataId, MethodMetadata method) {
 
 		// Create bodyBuilder
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -158,10 +172,29 @@ public class PushInOperationsImpl implements PushInOperations {
 		// Use the MethodMetadataBuilder for easy creation of MethodMetadata
 		// based on existing method
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, method.getModifier(),
-				newMethodName, method.getReturnType(), method.getParameterTypes(), method.getParameterNames(),
+				method.getMethodName(), method.getReturnType(), method.getParameterTypes(), method.getParameterNames(),
 				bodyBuilder);
 
 		return methodBuilder.build();
+	}
+
+	/**
+	 * This method generates new field instance using an existing FieldMetadata
+	 * 
+	 * @param declaredByMetadataId
+	 * @param field
+	 * 
+	 * @return
+	 */
+	private FieldMetadata getNewField(String declaredByMetadataId, FieldMetadata field) {
+
+		// Use the FieldMetadataBuilder for easy creation of FieldMetadata
+		// based on existing field
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, field.getModifier(),
+				field.getFieldName(), field.getFieldType(), field.getFieldInitializer());
+		fieldBuilder.setAnnotations(field.getAnnotations());
+
+		return fieldBuilder.build();
 	}
 
 	/**

@@ -42,6 +42,7 @@ import com.github.antlrjavaparser.api.type.Type;
  * Java Parser implementation of {@link MethodMetadata}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> {
@@ -250,13 +251,15 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
             d.setBody(md.getBody());
         }
 
-        // Locate where to add this method; also verify if this method already
+        // ROO-3678: Add-on which include new method should be the responsible to check if method
+        // exists, not JavaParser.
+        /*// Locate where to add this method; also verify if this method already
         // exists
         for (final BodyDeclaration bd : members) {
             if (bd instanceof MethodDeclaration) {
                 // Next method should appear after this current method
                 final MethodDeclaration md = (MethodDeclaration) bd;
-                if (md.getName().equals(d.getName())) {
+                /*if (md.getName().equals(d.getName())) {
                     if ((md.getParameters() == null || md.getParameters()
                             .isEmpty())
                             && (d.getParameters() == null || d.getParameters()
@@ -297,7 +300,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata> 
                     }
                 }
             }
-        }
+        }*/
 
         // Add the method to the end of the compilation unit
         members.add(d);

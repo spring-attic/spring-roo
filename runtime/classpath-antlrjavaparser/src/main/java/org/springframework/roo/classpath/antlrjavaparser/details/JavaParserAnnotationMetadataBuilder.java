@@ -51,6 +51,7 @@ import com.github.antlrjavaparser.api.type.Type;
  * 
  * @author Ben Alex
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class JavaParserAnnotationMetadataBuilder implements
@@ -72,7 +73,9 @@ public class JavaParserAnnotationMetadataBuilder implements
         Validate.notNull(annotations, "Annotations required");
         Validate.notNull(annotation, "Annotation metadata required");
 
-        // Create a holder for the annotation we're going to create
+        // ROO-3678: Add-on which include new annotation should be the responsible to check if annotation
+        // exists, not JavaParser.
+        /*// Create a holder for the annotation we're going to create
         boolean foundExisting = false;
 
         // Search for an existing annotation of this type
@@ -99,7 +102,7 @@ public class JavaParserAnnotationMetadataBuilder implements
         }
         Validate.isTrue(!foundExisting,
                 "Found an existing annotation for type '%s'",
-                annotation.getAnnotationType());
+                annotation.getAnnotationType());*/
 
         // Import the annotation type, if needed
         final NameExpr nameToUse = JavaParserUtils.importTypeIfRequired(

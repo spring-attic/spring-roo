@@ -36,6 +36,7 @@ import com.github.antlrjavaparser.api.type.Type;
  * Java Parser implementation of {@link FieldMetadata}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
@@ -167,7 +168,9 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
                     compilationUnitServices, annotations, annotation);
         }
 
-        // Locate where to add this field; also verify if this field already
+        // ROO-3678: Add-on which include new field should be the responsible to check if field
+        // exists, not JavaParser.
+        /*// Locate where to add this field; also verify if this field already
         // exists
         int nextFieldIndex = 0;
         int i = -1;
@@ -183,6 +186,15 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
                             "A field with name '%s' already exists", field
                                     .getFieldName().getSymbolName());
                 }
+            }
+        }*/
+        int nextFieldIndex = 0;
+        int i = -1;
+        for (final BodyDeclaration bd : members) {
+            i++;
+            if (bd instanceof FieldDeclaration) {
+                // Next field should appear after this current field
+                nextFieldIndex = i + 1;
             }
         }
 
