@@ -93,6 +93,7 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+
     <developers>
         <developer>
             <name>Enrique Ruiz Valenciano</name>
