@@ -112,6 +112,12 @@
             <email>jugade92 at gmail dot com</email>
             <timezone>+1</timezone>
         </developer>
+        <developer>
+            <name>Paula Navarro Alfonso</name>
+            <id>pn4v4rr0</id>
+            <email>ilenca1990 at gmail dot com</email>
+            <timezone>+1</timezone>
+        </developer>
     </developers>
 
     <dependencyManagement>
