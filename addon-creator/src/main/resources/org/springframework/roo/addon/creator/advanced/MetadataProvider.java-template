@@ -14,7 +14,7 @@ import org.springframework.roo.project.LogicalPath;
  * Provides {@link __APP_NAME__Metadata}. This type is called by Roo to retrieve the metadata for this add-on.
  * Use this type to reference external types and services needed by the metadata type. Register metadata triggers and
  * dependencies here. Also define the unique add-on ITD identifier.
- * 
+ *
  * @since 1.1
  */
 @Component
@@ -22,26 +22,29 @@ import org.springframework.roo.project.LogicalPath;
 public final class __APP_NAME__MetadataProvider extends AbstractItdMetadataProvider {
 
     /**
-     * The activate method for this OSGi component, this will be called by the OSGi container upon bundle activation 
-     * (result of the 'addon install' command) 
-     * 
+     * The activate method for this OSGi component, this will be called by the OSGi container upon bundle activation
+     * (result of the 'addon install' command)
+     *
      * @param context the component context can be used to get access to the OSGi container (ie find out if certain bundles are active)
      */
     protected void activate(ComponentContext cContext) {
         context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().registerDependency(
+                PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
         addMetadataTrigger(new JavaType(Roo__APP_NAME__.class.getName()));
     }
-    
+
     /**
-     * The deactivate method for this OSGi component, this will be called by the OSGi container upon bundle deactivation 
-     * (result of the 'addon uninstall' command) 
-     * 
+     * The deactivate method for this OSGi component, this will be called by the OSGi container upon bundle deactivation
+     * (result of the 'addon uninstall' command)
+     *
      * @param context the component context can be used to get access to the OSGi container (ie find out if certain bundles are active)
      */
     protected void deactivate(ComponentContext context) {
-        removeMetadataTrigger(new JavaType(Roo__APP_NAME__.class.getName()));    
+        removeMetadataTrigger(new JavaType(Roo__APP_NAME__.class.getName()));
     }
-    
+
     /**
      * Return an instance of the Metadata offered by this add-on
      */
@@ -49,7 +52,7 @@ public final class __APP_NAME__MetadataProvider extends AbstractItdMetadataProvi
         // Pass dependencies required by the metadata in through its constructor
         return new __APP_NAME__Metadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
     }
-    
+
     /**
      * Define the unique ITD file name extension, here the resulting file name will be **_ROO___APP_NAME__.aj
      */
@@ -62,7 +65,7 @@ public final class __APP_NAME__MetadataProvider extends AbstractItdMetadataProvi
         LogicalPath path = __APP_NAME__Metadata.getPath(metadataIdentificationString);
         return PhysicalTypeIdentifier.createIdentifier(javaType, path);
     }
-    
+
     protected String createLocalIdentifier(JavaType javaType, LogicalPath path) {
         return __APP_NAME__Metadata.createIdentifier(javaType, path);
     }
