@@ -30,7 +30,7 @@ public class PortuguesBRLanguage extends AbstractLanguage {
 
 	@Override
 	public Locale getLocale() {
-		return new Locale("pt", "BR");
+		return new Locale("pt");
 	}
 
 	@Override
