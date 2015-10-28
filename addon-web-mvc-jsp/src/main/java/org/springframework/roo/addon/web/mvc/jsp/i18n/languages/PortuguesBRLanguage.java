@@ -12,7 +12,7 @@ import org.springframework.roo.support.util.FileUtils;
  * Brazilian portuguese language support.
  * 
  * @author Levi Soares
- * @since 1.0
+ * @since 2.0
  */
 @Component
 @Service
