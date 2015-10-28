@@ -17,7 +17,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Utilities related to round-tripping XML documents
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -114,6 +114,27 @@ public final class XmlRoundTripUtils {
                                 // Check if the elements have equal contents
                                 if (!equalElements(originalElement,
                                         proposedElement)) {
+
+                                	// ROO-3683: Updating proposedElement with
+									// originalElement user-managed childs
+									NodeList childs = originalElement.getChildNodes();
+									for (int x = 0; x < childs.getLength(); x++) {
+										Node childNode = childs.item(x);
+										if (childNode != null && childNode.getNodeType() == Node.ELEMENT_NODE) {
+											Element child = (Element) childNode;
+											String zAttribute = child.getAttribute("z");
+											if (zAttribute.equals("user-managed")) {
+												// Getting proposed element and
+												// replace it with user managed
+												Element proposedElementToReplace = XmlUtils.findFirstElement(
+														"//*[@id='" + child.getAttribute("id") + "']", proposed);
+												proposedElementToReplace.getParentNode().replaceChild(
+														proposed.getOwnerDocument().importNode(child, false),
+														proposedElementToReplace);
+											}
+										}
+									}
+
                                     // Replace the original with the proposed
                                     // element
                                     originalElement
@@ -165,7 +186,7 @@ public final class XmlRoundTripUtils {
      * is based on the element name, the attribute names and their values. Child
      * elements are ignored. Attributes named 'z' are not concluded since they
      * contain the hash key itself.
-     * 
+     *
      * @param element The element to create the base 64 encoded hash key for
      * @return the unique key
      */
@@ -192,7 +213,7 @@ public final class XmlRoundTripUtils {
      * Compare necessary namespace declarations between original and proposed
      * document, if namespaces in the original are missing compared to the
      * proposed, we add them to the original.
-     * 
+     *
      * @param original document as read from the file system
      * @param proposed document as determined by the JspViewManager
      * @return true if the document was adjusted, otherwise false
@@ -220,7 +241,7 @@ public final class XmlRoundTripUtils {
      * Adjustments are only made if new elements or attributes are proposed.
      * Changes to the order of attributes or elements in the original document
      * will not result in an adjustment.
-     * 
+     *
      * @param original document as read from the file system
      * @param proposed document as determined by the JspViewManager
      * @return true if the document was adjusted, otherwise false
@@ -300,7 +321,7 @@ public final class XmlRoundTripUtils {
 
     /**
      * Creates a sha-1 hash value for the given data byte array.
-     * 
+     *
      * @param data to hash
      * @return byte[] hash of the input data
      */
