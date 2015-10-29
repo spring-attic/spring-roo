@@ -114,6 +114,25 @@ public final class XmlRoundTripUtils {
                                 // Check if the elements have equal contents
                                 if (!equalElements(originalElement,
                                         proposedElement)) {
+                                    // ROO-3683: Updating proposedElement with
+                                    // originalElement user-managed childs
+                                    NodeList childs = originalElement.getChildNodes();
+                                    for (int x = 0; x < childs.getLength(); x++) {
+                                      Node childNode = childs.item(x);
+                                      if (childNode != null && childNode.getNodeType() == Node.ELEMENT_NODE) {
+                                        Element child = (Element) childNode;
+                                        String zAttribute = child.getAttribute("z");
+                                        if (zAttribute.equals("user-managed")) {
+                                          // Getting proposed element and
+                                          // replace it with user managed
+                                          Element proposedElementToReplace = XmlUtils.findFirstElement(
+                                              "//*[@id='" + child.getAttribute("id") + "']", proposed);
+                                          proposedElementToReplace.getParentNode().replaceChild(
+                                          proposed.getOwnerDocument().importNode(child, false),
+                                              proposedElementToReplace);
+                                        }
+                                      }
+                                    }
                                     // Replace the original with the proposed
                                     // element
                                     originalElement
