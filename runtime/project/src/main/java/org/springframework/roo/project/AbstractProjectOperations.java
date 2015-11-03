@@ -213,8 +213,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                         // version, exclusions, etc.
                         if (!inserted) {
                             // We haven't added the new one yet; do so now
+                        	// ROO-3685: Check if current dependency has version when is added again
+                        	Element newDependencyElement = removeVersionIfBlank(
+                        			newDependency.getElement(document));
                             dependenciesElement.insertBefore(
-                                    newDependency.getElement(document),
+                            		newDependencyElement,
                                     existingDependencyElement);
                             inserted = true;
                             if (!newDependency.getVersion().equals(
@@ -239,22 +242,10 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 					// We didn't encounter any existing dependencies with the
 					// same coordinates; add it now
 
-					// Generate dependency xml element
-					Element newDependencyElement = newDependency.getElement(document);
-
 					// ROO-3660: Check if current dependency has version. If
 					// not, remove version attribute
-					NodeList dependencyAttributes = newDependencyElement.getChildNodes();
-					for (int i = 0; i < dependencyAttributes.getLength(); i++) {
-						Element dependencyAttribute = (Element) dependencyAttributes.item(i);
-						if (dependencyAttribute != null && dependencyAttribute.getTagName().equals("version")
-								&& (dependencyAttribute.getTextContent() == null
-										|| "".equals(dependencyAttribute.getTextContent()))) {
-							newDependencyElement.removeChild(dependencyAttributes.item(i));
-							break;
-						}
-					}
-
+					Element newDependencyElement = removeVersionIfBlank(
+							newDependency.getElement(document));
 					dependenciesElement.appendChild(newDependencyElement);
 					finalDependencies.add(newDependency);
 					addedDependencies.add(newDependency.getSimpleDescription());
@@ -275,7 +266,27 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         return finalDependencies;
     }
 
-    public Dependency addDependency(final String moduleName,
+    /**
+     * Method that removes version from dependency element if blank
+     * 
+     * @param dependency
+     * @return Element that contains dependency without version if blank
+     */
+    private Element removeVersionIfBlank(Element dependency) {
+    	NodeList dependencyAttributes = dependency.getChildNodes();
+    	for (int i = 0; i < dependencyAttributes.getLength(); i++) {
+    		Element dependencyAttribute = (Element) dependencyAttributes.item(i);
+			if (dependencyAttribute != null && dependencyAttribute.getTagName().equals("version")
+					&& (dependencyAttribute.getTextContent() == null
+							|| "".equals(dependencyAttribute.getTextContent()))) {
+				dependency.removeChild(dependencyAttributes.item(i));
+				break;
+			}
+    	}
+    	return dependency;
+	}
+
+	public Dependency addDependency(final String moduleName,
             final Dependency dependency) {
         Validate.isTrue(isProjectAvailable(moduleName),
                 "Dependency modification prohibited at this time");
