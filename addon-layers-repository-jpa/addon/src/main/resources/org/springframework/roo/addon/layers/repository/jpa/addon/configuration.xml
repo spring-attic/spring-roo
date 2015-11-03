@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
-    <spring-data-jpa>
-        <dependencies>
-            <dependency org="org.springframework.data" name="spring-data-jpa" rev="" />
-        </dependencies>
-    </spring-data-jpa>
+	<spring-data-jpa>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-jpa</artifactId>
+			</dependency>
+		</dependencies>
+	</spring-data-jpa>
 </configuration>

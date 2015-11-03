@@ -2,9 +2,18 @@
 <configuration>
 	<email>
 		<dependencies>
-			<dependency org="org.springframework" name="spring-context-support" rev="" />
-			<dependency org="javax.mail" name="mail" rev="1.4.1" />
-			<dependency org="javax.activation" name="activation" rev="1.1.1" />
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>javax.mail-api</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+			</dependency>
 		</dependencies>
 	</email>
 </configuration>
