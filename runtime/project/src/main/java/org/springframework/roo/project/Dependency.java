@@ -17,7 +17,7 @@ import org.w3c.dom.NodeList;
 /**
  * Simplified immutable representation of a dependency.
  * <p>
- * Structured after the model used by Maven and Ivy. This may be replaced in a
+ * Structured after the model used by Maven. This may be replaced in a
  * future release with a more OSGi-centric model.
  * <p>
  * According to the Maven docs, "the minimal set of information for matching a
@@ -30,6 +30,7 @@ import org.w3c.dom.NodeList;
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class Dependency implements Comparable<Dependency> {
@@ -136,19 +137,6 @@ public class Dependency implements Comparable<Dependency> {
                     }
                 }
             }
-        }
-        // Otherwise test for Ivy format
-        else if (dependency.hasAttribute("org")
-                && dependency.hasAttribute("name")
-                && dependency.hasAttribute("rev")) {
-            artifactId = dependency.getAttribute("name");
-            classifier = dependency.getAttribute("classifier");
-            groupId = dependency.getAttribute("org");
-            scope = DependencyScope.COMPILE;
-            systemPath = null;
-            type = DependencyType.JAR;
-            version = dependency.getAttribute("rev");
-            // TODO: Implement exclusions parser for IVY format
         }
         else {
             throw new IllegalStateException(
