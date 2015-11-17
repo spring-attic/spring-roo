@@ -46,7 +46,6 @@ public class ProjectCommands implements CommandMarker {
     private ProcessManager processManager;
     private Shell shell;
     private ProjectService projectService;
-    private MavenOperations mavenOperations;
 
     protected void activate(final ComponentContext context) {
     	this.context = context.getBundleContext();
@@ -60,11 +59,11 @@ public class ProjectCommands implements CommandMarker {
     @CliCommand(value = PROJECT_SETUP_COMMAND, help = "Creates a new Maven project")
     public void createProject(
             @CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the groupId and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+            @CliOption(key = "provider", mandatory = true, help = "Provider to use on project generation") ProjectManagerProviderId provider,
             @CliOption(key = "projectName", help = "The name of the project (last segment of package name used as default)") final String projectName,
             @CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
             @CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
-            @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging,
-            @CliOption(key = "provider", mandatory = true, help = "Provider to use on project generation") ProjectManagerProviderId provider) {
+            @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
         getProjectService().createProject(topLevelPackage, projectName,
                 majorJavaVersion, packaging, provider);
@@ -218,27 +217,5 @@ public class ProjectCommands implements CommandMarker {
         else {
             return projectService;
         }
-    }
-    
-    public MavenOperations getMavenOperations(){
-    	if(mavenOperations == null){
-    		// Get all Services implement MavenOperations interface
-    		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MavenOperations.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (MavenOperations) this.context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load MavenOperations on MavenCommands.");
-    			return null;
-    		}
-    	}else{
-    		return mavenOperations;
-    	}
-    	
     }
 }

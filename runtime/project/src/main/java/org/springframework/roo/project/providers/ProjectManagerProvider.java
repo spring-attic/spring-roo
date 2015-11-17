@@ -2,6 +2,8 @@ package org.springframework.roo.project.providers;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.project.packaging.PackagingProvider;
 
 /**
  * Interface for Project Manager providers
@@ -37,9 +39,20 @@ public interface ProjectManagerProvider {
      */
     String getDescription();
     
+    
     /**
-     * Performs the requiered operation to create new project using this provider
+     * Creates new project using a ProjectManager provider
+     * 
+     * @param topLevelPackage the top-level Java package (required)
+     * @param projectName the name of the project (can be blank to generate it
+     *            from the top-level package)
+     * @param majorJavaVersion the major Java version to which this project is
+     *            targetted (can be <code>null</code> to autodetect)
+     * @param packagingType the packaging of the project (can be
+     *            <code>null</code> to use the default)
      */
-    void createProject();
+    void createProject(JavaPackage topLevelPackage, String projectName,
+            Integer majorJavaVersion,
+            PackagingProvider packagingType);
 
 }

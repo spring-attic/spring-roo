@@ -21,6 +21,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
@@ -50,6 +51,7 @@ import org.w3c.dom.NodeList;
  */
 //@SuppressWarnings("deprecation")
 @Component
+@Service
 @References(value = {
 		@Reference(name = "feature", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Feature.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
 		@Reference(name = "provider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = ProjectManagerProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
@@ -149,7 +151,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
         
         // Execute createProject operation using selected provider 
-        currentProvider.createProject();
+        currentProvider.createProject(topLevelPackage, projectName, majorJavaVersion, packagingType);
 	}
 
     /**

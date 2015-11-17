@@ -18,7 +18,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.project.MavenOperations;
 import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.rest.publisher.ResourceMarker;
 import org.springframework.roo.shell.Shell;
@@ -42,7 +41,6 @@ public class ProjectResource implements ResourceMarker {
 
     private Shell shell;
     private ProjectService projectService;
-    private MavenOperations mavenOperations;
 
     protected void activate(final ComponentContext cContext) {
         this.context = cContext.getBundleContext();
@@ -53,10 +51,9 @@ public class ProjectResource implements ResourceMarker {
     public JsonObject getProject() {
         JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
         ProjectService prjOperations = getProjectService();
-        MavenOperations mvnOperations = getMavenOperations();
 
         // Checking if project exists
-        if (!mvnOperations.isCreateProjectAvailable()) {
+        /*if (!mvnOperations.isCreateProjectAvailable()) {
 
             // Getting project info
             jsonBuilder
@@ -70,7 +67,7 @@ public class ProjectResource implements ResourceMarker {
 
             // Returning JSON
             jsonBuilder.add("success", true).add("message", message);
-        }
+        }*/
 
         // Returning JSON
         JsonObject jsonObject = jsonBuilder.build();
@@ -103,36 +100,6 @@ public class ProjectResource implements ResourceMarker {
         return jsonObject;
     }
 
-    /**
-     * Method to get MavenOperations Service implementation
-     * 
-     * @return
-     */
-    public MavenOperations getMavenOperations() {
-        if (mavenOperations == null) {
-            // Get all Services implement MavenOperations interface
-            try {
-                ServiceReference<?>[] references = this.context
-                        .getAllServiceReferences(
-                                MavenOperations.class.getName(), null);
-
-                for (ServiceReference<?> ref : references) {
-                    return (MavenOperations) this.context.getService(ref);
-                }
-
-                return null;
-
-            }
-            catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load MavenOperations on ProjectConfigurationController.");
-                return null;
-            }
-        }
-        else {
-            return mavenOperations;
-        }
-
-    }
 
     /**
      * Method to get projectService Service implementation
