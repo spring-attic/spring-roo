@@ -13,6 +13,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.packaging.JarPackaging;
 import org.springframework.roo.project.packaging.PackagingProvider;
+import org.springframework.roo.project.providers.ProjectManagerProviderId;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -53,20 +54,20 @@ public class ProjectCommands implements CommandMarker {
     
     @CliAvailabilityIndicator(PROJECT_SETUP_COMMAND)
     public boolean isCreateProjectAvailable() {
-    	
-        return getMavenOperations().isCreateProjectAvailable();
+        return getProjectService().isCreateProjectAvailable();
     }
     
     @CliCommand(value = PROJECT_SETUP_COMMAND, help = "Creates a new Maven project")
     public void createProject(
-            @CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+            @CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the groupId and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
             @CliOption(key = "projectName", help = "The name of the project (last segment of package name used as default)") final String projectName,
             @CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
             @CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
-            @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
+            @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging,
+            @CliOption(key = "provider", mandatory = true, help = "Provider to use on project generation") ProjectManagerProviderId provider) {
 
-        getMavenOperations().createProject(topLevelPackage, projectName,
-                majorJavaVersion, parentPom, packaging);
+        getProjectService().createProject(topLevelPackage, projectName,
+                majorJavaVersion, packaging, provider);
     }
     
     @CliAvailabilityIndicator({PROJECT_SCAN_SPEED_COMMAND, PROJECT_SCAN_STATUS_COMMAND,

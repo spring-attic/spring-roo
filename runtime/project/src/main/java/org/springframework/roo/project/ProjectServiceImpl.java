@@ -20,10 +20,14 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
+import org.apache.felix.scr.annotations.References;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.packaging.PackagingProvider;
+import org.springframework.roo.project.providers.ProjectManagerProvider;
+import org.springframework.roo.project.providers.ProjectManagerProviderId;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.DomUtils;
@@ -46,7 +50,11 @@ import org.w3c.dom.NodeList;
  */
 //@SuppressWarnings("deprecation")
 @Component
-@Reference(name = "feature", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Feature.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+@References(value = {
+		@Reference(name = "feature", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Feature.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+		@Reference(name = "provider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = ProjectManagerProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+		}
+)
 public class ProjectServiceImpl implements ProjectService {
 
     static final String ADDED = "added";
@@ -56,6 +64,17 @@ public class ProjectServiceImpl implements ProjectService {
     static final String UPDATED = "updated";
 
     private final Map<String, Feature> features = new HashMap<String, Feature>();
+    
+    /**
+	 * Registered ProjectManager providers
+	 */
+	private List<ProjectManagerProvider> providers = new ArrayList<ProjectManagerProvider>();
+	
+	 /**
+     * Current active provider
+     */
+    private ProjectManagerProvider currentProvider = null;
+
 
     @Reference
     protected FileManager fileManager;
@@ -68,6 +87,70 @@ public class ProjectServiceImpl implements ProjectService {
     protected PomManagementService pomManagementService;
     @Reference
     protected Shell shell;
+    
+    /**
+	 * Bind providers list
+	 * 
+	 * @param provider
+	 */
+	protected void bindProvider(final ProjectManagerProvider provider) {
+		providers.add(provider);
+	}
+	
+    /**
+     * Unbind providers list
+     * 
+     * @param provider
+     */
+    protected void unbindProvider(final ProjectManagerProvider provider) {
+        providers.remove(provider);
+        // Reset current provider
+        currentProvider = null;
+    }
+    
+	@Override
+	public boolean isCreateProjectAvailable() {
+		
+		// Show error message if providers is empty
+		if (providers.isEmpty()) {
+			throw new RuntimeException("ERROR: Doesn't exists any ProjectManager provider."
+					+ " You should implement a new one to be able to generate a new Spring Roo project.");
+		}
+		
+		// Getting selected provider from all available providers.
+        for (ProjectManagerProvider projectManagerProvider : providers) {
+            if (projectManagerProvider.isActive()) {
+            	currentProvider = projectManagerProvider;
+                break;
+            }
+        }
+        
+        return currentProvider == null;
+	}
+
+    
+    /**{@inheritDoc}*/
+	@Override
+	public void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion,
+			PackagingProvider packagingType, ProjectManagerProviderId provider) {
+		 Validate.isTrue(isCreateProjectAvailable(),
+	                "Project creation is unavailable at this time");
+		
+		// Getting selected provider from all available providers.
+        for (ProjectManagerProvider projectManagerProvider : providers) {
+            if (provider.is(projectManagerProvider)) {
+            	currentProvider = projectManagerProvider;
+                break;
+            }
+        }
+        
+        if(currentProvider == null){
+        	throw new RuntimeException(String.format("ERROR: Selected ProjectManager provider '%s' is not available", provider.getId()));
+        }
+        
+        // Execute createProject operation using selected provider 
+        currentProvider.createProject();
+	}
 
     /**
      * Generates a message about the addition of the given items to the POM
@@ -1207,4 +1290,40 @@ public class ProjectServiceImpl implements ProjectService {
         fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
                 XmlUtils.nodeToString(document), descriptionOfChange, false);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ProjectManagerProviderId getProviderIdByName(String value) {
+        if (providers.isEmpty()) {
+            return null;
+        }
+
+        for (ProjectManagerProvider provider : providers) {
+            if (provider.isAvailable()
+                    && StringUtils.equals(value, provider.getName())) {
+                return new ProjectManagerProviderId(provider);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ProjectManagerProviderId> getProvidersId() {
+        List<ProjectManagerProviderId> availables = new ArrayList<ProjectManagerProviderId>(
+                providers.size());
+        if (!providers.isEmpty()) {
+            for (ProjectManagerProvider provider : providers) {
+                if (provider.isAvailable()) {
+                    availables.add(new ProjectManagerProviderId(provider));
+                }
+            }
+        }
+        return Collections.unmodifiableList(availables);
+    }
+
 }
