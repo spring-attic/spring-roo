@@ -65,7 +65,7 @@ public class MavenOperationsImplTest {
     @Mock private ProjectMetadata mockProjectMetadata;
 
     // Fixture
-    private MavenOperationsImpl projectOperations;
+    private MavenOperationsImpl projectService;
 
     private void assertModuleFocusAllowed(final boolean expectedResult,
             final String... moduleNames) {
@@ -74,7 +74,7 @@ public class MavenOperationsImplTest {
                 Arrays.asList(moduleNames));
 
         // Invoke and check
-        assertEquals(expectedResult, projectOperations.isModuleFocusAllowed());
+        assertEquals(expectedResult, projectService.isModuleFocusAllowed());
     }
 
     @Before
@@ -88,11 +88,11 @@ public class MavenOperationsImplTest {
                 .thenReturn(POM_PATH);
 
         // Object under test
-        projectOperations = new MavenOperationsImpl();
-        projectOperations.fileManager = mockFileManager;
-        projectOperations.metadataService = mockMetadataService;
-        projectOperations.pathResolver = mockPathResolver;
-        projectOperations.pomManagementService = mockPomManagementService;
+        projectService = new MavenOperationsImpl();
+        projectService.fileManager = mockFileManager;
+        projectService.metadataService = mockMetadataService;
+        projectService.pathResolver = mockPathResolver;
+        projectService.pomManagementService = mockPomManagementService;
     }
 
     @Test
@@ -119,7 +119,7 @@ public class MavenOperationsImplTest {
                 mockChildMetadata);
 
         // Invoke and check
-        assertEquals(mockChildPom, projectOperations.getFocusedModule());
+        assertEquals(mockChildPom, projectService.getFocusedModule());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class MavenOperationsImplTest {
                 .thenReturn(null);
 
         // Invoke and check
-        assertNull(projectOperations.getFocusedModule());
+        assertNull(projectService.getFocusedModule());
     }
 
     @Test
@@ -162,7 +162,7 @@ public class MavenOperationsImplTest {
         when(pom.isDependencyRegistered(mockDependency, false)).thenReturn(true);
 
         // Invoke
-        projectOperations.removeDependencies("", dependencies);
+        projectService.removeDependencies("", dependencies);
 
         // Check
         final String expectedPom = POM_AFTER_DEPENDENCY_REMOVED.replace("\n",

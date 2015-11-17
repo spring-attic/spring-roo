@@ -32,12 +32,12 @@ public class WarPackaging extends AbstractCorePackagingProvider {
 
     @Override
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectService projectOperations) {
-        super.createOtherArtifacts(topLevelPackage, module, projectOperations);
+            final String module, final ProjectService projectService) {
+        super.createOtherArtifacts(topLevelPackage, module, projectService);
         if (StringUtils.isBlank(module)) {
             // This is a single-module web project
             final String fullyQualifiedModuleName = getFullyQualifiedModuleName(
-                    module, projectOperations);
+                    module, projectService);
             getApplicationContextOperations().createMiddleTierApplicationContext(
                     topLevelPackage, fullyQualifiedModuleName);
         }

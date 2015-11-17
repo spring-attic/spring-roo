@@ -41,7 +41,7 @@ public class ProjectResource implements ResourceMarker {
             .getLogger(ProjectResource.class);
 
     private Shell shell;
-    private ProjectService projectOperations;
+    private ProjectService projectService;
     private MavenOperations mavenOperations;
 
     protected void activate(final ComponentContext cContext) {
@@ -52,7 +52,7 @@ public class ProjectResource implements ResourceMarker {
     @Produces("application/json")
     public JsonObject getProject() {
         JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-        ProjectService prjOperations = getProjectOperations();
+        ProjectService prjOperations = getProjectService();
         MavenOperations mvnOperations = getMavenOperations();
 
         // Checking if project exists
@@ -62,7 +62,7 @@ public class ProjectResource implements ResourceMarker {
             jsonBuilder
                     .add("projectName", prjOperations.getFocusedProjectName())
                     .add("topLevelPackage",
-                            getProjectOperations().getFocusedTopLevelPackage()
+                            getProjectService().getFocusedTopLevelPackage()
                                     .toString()).add("exists", true);
         }
         else {
@@ -135,13 +135,13 @@ public class ProjectResource implements ResourceMarker {
     }
 
     /**
-     * Method to get ProjectOperations Service implementation
+     * Method to get projectService Service implementation
      * 
      * @return
      */
-    public ProjectService getProjectOperations() {
-        if (projectOperations == null) {
-            // Get all Services implement ProjectOperations interface
+    public ProjectService getProjectService() {
+        if (projectService == null) {
+            // Get all Services implement projectService interface
             try {
                 ServiceReference<?>[] references = this.context
                         .getAllServiceReferences(
@@ -155,12 +155,12 @@ public class ProjectResource implements ResourceMarker {
 
             }
             catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load ProjectOperations on ProjectConfigurationController.");
+                LOGGER.warning("Cannot load projectService on ProjectConfigurationController.");
                 return null;
             }
         }
         else {
-            return projectOperations;
+            return projectService;
         }
     }
 

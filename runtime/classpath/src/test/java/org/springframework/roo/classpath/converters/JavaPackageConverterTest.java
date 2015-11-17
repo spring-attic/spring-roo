@@ -37,7 +37,7 @@ public class JavaPackageConverterTest {
     // Fixture
     private JavaPackageConverter converter;
     private @Mock LastUsed mockLastUsed;
-    private @Mock ProjectService mockProjectOperations;
+    private @Mock ProjectService mockprojectService;
     private @Mock TypeLocationService mockTypeLocationService;
 
     /**
@@ -51,10 +51,10 @@ public class JavaPackageConverterTest {
     private void assertConvertFromValidText(final String text,
             final String optionContext, final String expectedPackage) {
         // Set up
-        when(mockProjectOperations.isFocusedProjectAvailable())
+        when(mockprojectService.isFocusedProjectAvailable())
                 .thenReturn(true);
         final Pom mockPom = mock(Pom.class);
-        when(mockProjectOperations.getFocusedModule()).thenReturn(mockPom);
+        when(mockprojectService.getFocusedModule()).thenReturn(mockPom);
         when(mockTypeLocationService.getTopLevelPackageForModule(mockPom))
                 .thenReturn(TOP_LEVEL_PACKAGE);
         assertEquals(
@@ -74,7 +74,7 @@ public class JavaPackageConverterTest {
     private void assertGetAllPossibleValues(final boolean projectAvailable,
             final Completion... expectedCompletions) {
         // Set up
-        when(mockProjectOperations.isFocusedProjectAvailable()).thenReturn(
+        when(mockprojectService.isFocusedProjectAvailable()).thenReturn(
                 projectAvailable);
         final List<Completion> completions = new ArrayList<Completion>();
 
@@ -92,7 +92,7 @@ public class JavaPackageConverterTest {
         MockitoAnnotations.initMocks(this);
         converter = new JavaPackageConverter();
         converter.lastUsed = mockLastUsed;
-        converter.projectOperations = mockProjectOperations;
+        converter.projectService = mockprojectService;
         converter.typeLocationService = mockTypeLocationService;
     }
 
@@ -177,7 +177,7 @@ public class JavaPackageConverterTest {
         final Pom mockPom2 = setUpMockPom("/path/to/pom/2", new JavaType(
                 "com.example.web.ChoiceController"), new JavaType(
                 "com.example.web.VoteController"));
-        when(mockProjectOperations.getPoms()).thenReturn(
+        when(mockprojectService.getPoms()).thenReturn(
                 Arrays.asList(mockPom1, mockPom2));
 
         // Invoke and check

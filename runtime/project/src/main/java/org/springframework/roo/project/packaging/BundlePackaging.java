@@ -27,9 +27,9 @@ public class BundlePackaging implements CorePackagingProvider {
     public String createArtifacts(final JavaPackage topLevelPackage,
             final String nullableProjectName, final String javaVersion,
             final GAV parentPom, final String module,
-            final ProjectService projectOperations) {
+            final ProjectService projectService) {
         // Already created by the creator addon
-        return projectOperations.getPathResolver().getIdentifier(
+        return projectService.getPathResolver().getIdentifier(
                 LogicalPath.getInstance(Path.ROOT, ""), "pom.xml");
     }
 

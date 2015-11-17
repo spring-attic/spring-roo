@@ -59,7 +59,7 @@ public class LastUsedImpl implements LastUsed, CommandListener {
     
     private boolean isVerified;
     
-    @Reference private ProjectService projectOperations;
+    @Reference private ProjectService projectService;
     @Reference private Shell shell;
     @Reference private TypeLocationService typeLocationService;
 
@@ -116,7 +116,7 @@ public class LastUsedImpl implements LastUsed, CommandListener {
 
         topLevelPackage = new JavaPackage(
                 typeLocationService
-                        .getTopLevelPackageForModule(projectOperations
+                        .getTopLevelPackageForModule(projectService
                                 .getFocusedModule()));
         final String path = moduleName
                 + fullyQualifiedName.replace(

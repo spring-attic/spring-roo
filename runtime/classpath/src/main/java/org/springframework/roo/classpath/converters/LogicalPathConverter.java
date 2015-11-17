@@ -17,14 +17,14 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class LogicalPathConverter implements Converter<LogicalPath> {
 
-    @Reference ProjectService projectOperations;
+    @Reference ProjectService projectService;
 
     public LogicalPath convertFromText(final String value,
             final Class<?> targetType, final String optionContext) {
         LogicalPath logicalPath = LogicalPath.getInstance(value);
         if (logicalPath.getModule().equals("FOCUSED")) {
             logicalPath = LogicalPath.getInstance(logicalPath.getPath(),
-                    projectOperations.getFocusedModuleName());
+                    projectService.getFocusedModuleName());
         }
         return logicalPath;
     }
@@ -32,7 +32,7 @@ public class LogicalPathConverter implements Converter<LogicalPath> {
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> targetType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        for (final Pom pom : projectOperations.getPoms()) {
+        for (final Pom pom : projectService.getPoms()) {
             for (final PhysicalPath physicalPath : pom.getPhysicalPaths()) {
                 completions.add(new Completion(physicalPath.getLogicalPath()
                         .getName()));

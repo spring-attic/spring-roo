@@ -63,7 +63,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
     @Reference FileManager fileManager;
     @Reference LastUsed lastUsed;
-    @Reference ProjectService projectOperations;
+    @Reference ProjectService projectService;
     @Reference TypeLocationService typeLocationService;
 
     public JavaType convertFromText(String value, final Class<?> requiredType,
@@ -87,23 +87,23 @@ public class JavaTypeConverter implements Converter<JavaType> {
         }
 
         String topLevelPath;
-        Pom module = projectOperations.getFocusedModule();
+        Pom module = projectService.getFocusedModule();
 
         if (value.contains(MODULE_PATH_SEPARATOR)) {
             final String moduleName = value.substring(0,
                     value.indexOf(MODULE_PATH_SEPARATOR));
-            module = projectOperations.getPomFromModuleName(moduleName);
+            module = projectService.getPomFromModuleName(moduleName);
             topLevelPath = typeLocationService
                     .getTopLevelPackageForModule(module);
             value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1,
                     value.length()).trim();
             if (StringUtils.contains(optionContext, UPDATE)) {
-                projectOperations.setModule(module);
+                projectService.setModule(module);
             }
         }
         else {
             topLevelPath = typeLocationService
-                    .getTopLevelPackageForModule(projectOperations
+                    .getTopLevelPackageForModule(projectService
                             .getFocusedModule());
         }
 
@@ -120,7 +120,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
             final String physicalTypeIdentifier = typeLocationService
                     .getPhysicalTypeIdentifier(new JavaType(newValue));
             if (StringUtils.isNotBlank(physicalTypeIdentifier)) {
-                module = projectOperations
+                module = projectService
                         .getPomFromModuleName(PhysicalTypeIdentifier.getPath(
                                 physicalTypeIdentifier).getModule());
             }
@@ -182,7 +182,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
     private void addCompletionsForOtherModuleNames(
             final List<Completion> completions, final Pom targetModule) {
-        for (final String moduleName : projectOperations.getModuleNames()) {
+        for (final String moduleName : projectService.getModuleNames()) {
             if (StringUtils.isNotBlank(moduleName)
                     && !moduleName.equals(targetModule.getModuleName())) {
                 completions.add(new Completion(moduleName
@@ -318,7 +318,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
     private void completeProjectSpecificPaths(
             final List<Completion> completions, final String existingData,
             final String optionContext) {
-        if (!projectOperations.isFocusedProjectAvailable()) {
+        if (!projectService.isFocusedProjectAvailable()) {
             return;
         }
         final Pom targetModule;
@@ -330,7 +330,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
             // Looking for a type in another module
             final String targetModuleName = existingData.substring(0,
                     existingData.indexOf(MODULE_PATH_SEPARATOR));
-            targetModule = projectOperations
+            targetModule = projectService
                     .getPomFromModuleName(targetModuleName);
             heading = "";
             prefix = targetModuleName + MODULE_PATH_SEPARATOR;
@@ -341,7 +341,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
         }
         else {
             // Looking for a type in the currently focused module
-            targetModule = projectOperations.getFocusedModule();
+            targetModule = projectService.getFocusedModule();
             heading = targetModule.getModuleName();
             prefix = "";
             formattedPrefix = "";
@@ -401,7 +401,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
                         .getPhysicalTypeIdentifier(new JavaType(newValue));
                 if (physicalTypeIdentifier != null) {
                     topLevelPath = typeLocationService
-                            .getTopLevelPackageForModule(projectOperations
+                            .getTopLevelPackageForModule(projectService
                                     .getPomFromModuleName(PhysicalTypeIdentifier
                                             .getPath(physicalTypeIdentifier)
                                             .getModule()));

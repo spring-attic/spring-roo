@@ -73,7 +73,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
     private FileManager fileManager;
     private MetadataDependencyRegistry metadataDependencyRegistry;
     private MetadataService metadataService;
-    private ProjectService projectOperations;
+    private ProjectService projectService;
     private TypeLocationService typeLocationService;
     private TypeParsingService typeParsingService;
 
@@ -101,11 +101,11 @@ public class DefaultPhysicalTypeMetadataProvider implements
     	
     	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
     	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
+    	if(projectService == null){
+    		projectService = getProjectService();
     	}
     	
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	Validate.notNull(projectService, "projectService is required");
     	
     	if(typeLocationService == null){
     		typeLocationService = getTypeLocationService();
@@ -171,7 +171,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 // available
                 // We're left with no choice but to register for every physical
                 // type change, in the hope we discover our parent someday
-                for (final LogicalPath sourcePath : projectOperations
+                for (final LogicalPath sourcePath : projectService
                         .getPathResolver().getSourcePaths()) {
                     final String possibleSuperclass = PhysicalTypeIdentifier
                             .createIdentifier(details.getExtendsTypes().get(0),
@@ -312,8 +312,8 @@ public class DefaultPhysicalTypeMetadataProvider implements
 		}
     }
     
-    public ProjectService getProjectOperations(){
-    	// Get all Services implement ProjectOperations interface
+    public ProjectService getProjectService(){
+    	// Get all Services implement projectService interface
 		try {
 			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectService.class.getName(), null);
 			
@@ -321,11 +321,11 @@ public class DefaultPhysicalTypeMetadataProvider implements
 				return (ProjectService) this.context.getService(ref);
 			}
 			
-			LOGGER.warning("Cannot load ProjectOperations on DefaultPhysicalTypeMetadataProvider.");
+			LOGGER.warning("Cannot load projectService on DefaultPhysicalTypeMetadataProvider.");
 			return null;
 			
 		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ProjectOperations on DefaultPhysicalTypeMetadataProvider.");
+			LOGGER.warning("Cannot load projectService on DefaultPhysicalTypeMetadataProvider.");
 			return null;
 		}
     }

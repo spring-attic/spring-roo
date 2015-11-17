@@ -29,12 +29,12 @@ public interface PackagingProvider {
      *            <code>null</code> for none)
      * @param moduleName the name of the module being created (blank for the
      *            root or only module)
-     * @param projectOperations in case it's required (never <code>null</code>)
+     * @param projectService in case it's required (never <code>null</code>)
      * @return the path of the newly created POM
      */
     String createArtifacts(JavaPackage topLevelPackage, String projectName,
             String javaVersion, GAV parentPom, String moduleName,
-            ProjectService projectOperations);
+            ProjectService projectService);
 
     /**
      * Returns the unique identifier of this {@link PackagingProvider}, for use

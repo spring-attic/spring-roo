@@ -43,10 +43,10 @@ public class HintOperationsImpl implements HintOperations {
 
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
-    @Reference private ProjectService projectOperations;
+    @Reference private ProjectService projectService;
 
     private String determineTopic() {
-        if (!projectOperations.isFocusedProjectAvailable()) {
+        if (!projectService.isFocusedProjectAvailable()) {
             return "start";
         }
 

@@ -27,7 +27,7 @@ public class PomPackaging extends AbstractCorePackagingProvider {
 
     @Override
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectService projectOperations) {
+            final String module, final ProjectService projectService) {
         // No artifacts are applicable for POM modules
     }
 

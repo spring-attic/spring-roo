@@ -73,7 +73,7 @@ public class FieldCommands implements CommandMarker {
 
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private MetadataService metadataService;
-    @Reference private ProjectService projectOperations;
+    @Reference private ProjectService projectService;
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
@@ -770,13 +770,13 @@ public class FieldCommands implements CommandMarker {
             "field date", "field boolean", "field enum", "field embedded",
             "field file" })
     public boolean isJdkFieldManagementAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
+        return projectService.isFocusedProjectAvailable();
     }
 
     @CliAvailabilityIndicator({ "field reference", "field set", "field list" })
     public boolean isJpaFieldManagementAvailable() {
         // In a separate method in case we decide to check for JPA registration
         // in the future
-        return projectOperations.isFocusedProjectAvailable();
+        return projectService.isFocusedProjectAvailable();
     }
 }

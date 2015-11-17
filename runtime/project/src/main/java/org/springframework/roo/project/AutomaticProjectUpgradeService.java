@@ -66,7 +66,7 @@ public class AutomaticProjectUpgradeService implements
 
     private static final String SPRING_VERSION = "3.1.0.RELEASE";
     private VersionInfo bundleVersionInfo;
-    @Reference private ProjectService projectOperations;
+    @Reference private ProjectService projectService;
 
     protected MetadataDependencyRegistryTracker registryTracker = null;
 
@@ -142,11 +142,11 @@ public class AutomaticProjectUpgradeService implements
             final String moduleName = ProjectMetadata
                     .getModuleName(upstreamDependency);
             // Project Metadata available.
-            if (!projectOperations.isProjectAvailable(moduleName)) {
+            if (!projectService.isProjectAvailable(moduleName)) {
                 return;
             }
 
-            for (final Pom pom : projectOperations.getPoms()) {
+            for (final Pom pom : projectService.getPoms()) {
                 final Set<Property> rooVersionResults = pom
                         .getPropertiesExcludingValue(new Property("roo.version"));
                 for (final Property existingProperty : rooVersionResults) {
@@ -157,7 +157,7 @@ public class AutomaticProjectUpgradeService implements
                             final Property newProperty = new Property(
                                     existingProperty.getName(),
                                     bundleVersionInfo.toString());
-                            projectOperations.addProperty(moduleName,
+                            projectService.addProperty(moduleName,
                                     newProperty);
                             break;
                         }
@@ -176,7 +176,7 @@ public class AutomaticProjectUpgradeService implements
                             final Property newProperty = new Property(
                                     existingProperty.getName(),
                                     latestSpringVersion.toString());
-                            projectOperations.addProperty(moduleName,
+                            projectService.addProperty(moduleName,
                                     newProperty);
                             break;
                         }

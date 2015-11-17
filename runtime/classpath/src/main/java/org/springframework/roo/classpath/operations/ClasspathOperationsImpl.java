@@ -53,7 +53,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 
     @Reference MetadataService metadataService;
     @Reference PathResolver pathResolver;
-    @Reference ProjectService projectOperations;
+    @Reference ProjectService projectService;
     @Reference StaticFieldConverter staticFieldConverter;
     @Reference TypeLocationService typeLocationService;
     @Reference TypeManagementService typeManagementService;
@@ -256,6 +256,6 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 
     @Override
     public boolean isProjectAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
+        return projectService.isFocusedProjectAvailable();
     }
 }

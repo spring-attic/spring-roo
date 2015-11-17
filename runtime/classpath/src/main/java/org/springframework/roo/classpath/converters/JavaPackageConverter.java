@@ -39,7 +39,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 
     @Reference FileManager fileManager;
     @Reference LastUsed lastUsed;
-    @Reference ProjectService projectOperations;
+    @Reference ProjectService projectService;
     @Reference TypeLocationService typeLocationService;
 
     public JavaPackage convertFromText(final String value,
@@ -67,7 +67,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> requiredType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        if (projectOperations.isFocusedProjectAvailable()) {
+        if (projectService.isFocusedProjectAvailable()) {
             completions.addAll(getCompletionsForAllKnownPackages());
         }
         return false;
@@ -75,7 +75,7 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 
     private Collection<Completion> getCompletionsForAllKnownPackages() {
         final Collection<Completion> completions = new LinkedHashSet<Completion>();
-        for (final Pom pom : projectOperations.getPoms()) {
+        for (final Pom pom : projectService.getPoms()) {
             for (final JavaType javaType : typeLocationService
                     .getTypesForModule(pom)) {
                 final String type = javaType.getFullyQualifiedTypeName();
@@ -87,9 +87,9 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
     }
 
     private String getTopLevelPackage() {
-        if (projectOperations.isFocusedProjectAvailable()) {
+        if (projectService.isFocusedProjectAvailable()) {
             return typeLocationService
-                    .getTopLevelPackageForModule(projectOperations
+                    .getTopLevelPackageForModule(projectService
                             .getFocusedModule());
         }
         // Shouldn't happen if there's a project, i.e. most of the time

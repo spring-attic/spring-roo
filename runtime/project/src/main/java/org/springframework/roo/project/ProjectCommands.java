@@ -44,7 +44,7 @@ public class ProjectCommands implements CommandMarker {
 
     private ProcessManager processManager;
     private Shell shell;
-    private ProjectService projectOperations;
+    private ProjectService projectService;
     private MavenOperations mavenOperations;
 
     protected void activate(final ComponentContext context) {
@@ -72,7 +72,7 @@ public class ProjectCommands implements CommandMarker {
     @CliAvailabilityIndicator({PROJECT_SCAN_SPEED_COMMAND, PROJECT_SCAN_STATUS_COMMAND,
     	PROJECT_SCAN_NOW_COMMAND})
     public boolean isProjecScanAvailable() {
-        return getProjectOperations().isFocusedProjectAvailable();
+        return getProjectService().isFocusedProjectAvailable();
     }
 
     @CliCommand(value = DEVELOPMENT_MODE_COMMAND, help = "Switches the system into development mode (greater diagnostic information)")
@@ -194,9 +194,9 @@ public class ProjectCommands implements CommandMarker {
 		}
     }
     
-    public ProjectService getProjectOperations() {
-        if (projectOperations == null) {
-            // Get all Services implement ProjectOperations interface
+    public ProjectService getProjectService() {
+        if (projectService == null) {
+            // Get all Services implement projectService interface
             try {
                 ServiceReference<?>[] references = this.context
                         .getAllServiceReferences(
@@ -210,12 +210,12 @@ public class ProjectCommands implements CommandMarker {
 
             }
             catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load ProjectOperations on ProcessManagerCommands.");
+                LOGGER.warning("Cannot load projectService on ProcessManagerCommands.");
                 return null;
             }
         }
         else {
-            return projectOperations;
+            return projectService;
         }
     }
     

@@ -36,16 +36,16 @@ public class PomConverterTest {
 
     // Fixture
     private PomConverter converter;
-    @Mock private ProjectService mockProjectOperations;
+    @Mock private ProjectService mockprojectService;
 
     private void assertCompletions(final String optionContext,
             final String focusedModuleName,
             final Collection<String> moduleNames,
             final String... expectedCompletions) {
         // Set up
-        when(mockProjectOperations.getFocusedModuleName()).thenReturn(
+        when(mockprojectService.getFocusedModuleName()).thenReturn(
                 focusedModuleName);
-        when(mockProjectOperations.getModuleNames()).thenReturn(moduleNames);
+        when(mockprojectService.getModuleNames()).thenReturn(moduleNames);
         final List<Completion> completions = new ArrayList<Completion>();
 
         // Invoke
@@ -66,14 +66,14 @@ public class PomConverterTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         converter = new PomConverter();
-        converter.projectOperations = mockProjectOperations;
+        converter.projectService = mockprojectService;
     }
 
     @Test
     public void testConvertOtherModuleName() {
         final Pom mockPom = mock(Pom.class);
         final String moduleName = "foo" + File.separator + "bar";
-        when(mockProjectOperations.getPomFromModuleName(moduleName))
+        when(mockprojectService.getPomFromModuleName(moduleName))
                 .thenReturn(mockPom);
         assertEquals(mockPom, converter.convertFromText(moduleName, null, null));
     }
@@ -81,7 +81,7 @@ public class PomConverterTest {
     @Test
     public void testConvertRootModuleSymbol() {
         final Pom mockRootPom = mock(Pom.class);
-        when(mockProjectOperations.getPomFromModuleName("")).thenReturn(
+        when(mockprojectService.getPomFromModuleName("")).thenReturn(
                 mockRootPom);
         assertEquals(mockRootPom,
                 converter.convertFromText(ROOT_MODULE_SYMBOL, null, null));

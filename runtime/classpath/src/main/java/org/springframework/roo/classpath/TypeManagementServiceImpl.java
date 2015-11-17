@@ -28,7 +28,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 
     @Reference private FileManager fileManager;
     @Reference private MetadataService metadataService;
-    @Reference private ProjectService projectOperations;
+    @Reference private ProjectService projectService;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeParsingService typeParsingService;
 
@@ -94,7 +94,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
         if (jsr303Required) {
             // It's more likely the version below represents a later version
             // than any specified in the user's own dependency list
-            projectOperations.addDependency(path.getModule(),
+            projectService.addDependency(path.getModule(),
                     "javax.validation", "validation-api", "1.0.0.GA");
         }
         cidBuilder.addField(field);

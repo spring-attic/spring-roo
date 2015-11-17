@@ -24,7 +24,7 @@ public class PomConverter implements Converter<Pom> {
 
     static final String ROOT_MODULE_SYMBOL = "~";
 
-    @Reference ProjectService projectOperations;
+    @Reference ProjectService projectService;
 
     private void addCompletion(final String moduleName,
             final List<Completion> completions) {
@@ -42,15 +42,15 @@ public class PomConverter implements Converter<Pom> {
         else {
             moduleName = value;
         }
-        return projectOperations.getPomFromModuleName(moduleName);
+        return projectService.getPomFromModuleName(moduleName);
     }
 
     public boolean getAllPossibleValues(final List<Completion> completions,
             final Class<?> targetType, final String existingData,
             final String optionContext, final MethodTarget target) {
-        final String focusedModuleName = projectOperations
+        final String focusedModuleName = projectService
                 .getFocusedModuleName();
-        for (final String moduleName : projectOperations.getModuleNames()) {
+        for (final String moduleName : projectService.getModuleNames()) {
             if (isModuleRelevant(moduleName, focusedModuleName, optionContext)) {
                 addCompletion(moduleName, completions);
             }
