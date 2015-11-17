@@ -44,7 +44,7 @@ public class ProjectCommands implements CommandMarker {
 
     private ProcessManager processManager;
     private Shell shell;
-    private ProjectOperations projectOperations;
+    private ProjectService projectOperations;
     private MavenOperations mavenOperations;
 
     protected void activate(final ComponentContext context) {
@@ -194,16 +194,16 @@ public class ProjectCommands implements CommandMarker {
 		}
     }
     
-    public ProjectOperations getProjectOperations() {
+    public ProjectService getProjectOperations() {
         if (projectOperations == null) {
             // Get all Services implement ProjectOperations interface
             try {
                 ServiceReference<?>[] references = this.context
                         .getAllServiceReferences(
-                        		ProjectOperations.class.getName(), null);
+                        		ProjectService.class.getName(), null);
 
                 for (ServiceReference<?> ref : references) {
-                    return (ProjectOperations) this.context.getService(ref);
+                    return (ProjectService) this.context.getService(ref);
                 }
 
                 return null;

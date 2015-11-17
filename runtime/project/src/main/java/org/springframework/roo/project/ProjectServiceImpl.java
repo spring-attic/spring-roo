@@ -31,7 +31,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -46,9 +45,9 @@ import org.w3c.dom.NodeList;
  * @since 1.0
  */
 //@SuppressWarnings("deprecation")
-@Component(componentAbstract = true)
+@Component
 @Reference(name = "feature", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Feature.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
-public abstract class AbstractProjectOperations implements ProjectOperations {
+public class ProjectServiceImpl implements ProjectService {
 
     static final String ADDED = "added";
     static final String CHANGED = "changed";
@@ -58,16 +57,16 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
     private final Map<String, Feature> features = new HashMap<String, Feature>();
 
-    @Reference(policy=ReferencePolicy.DYNAMIC)
+    @Reference
     protected FileManager fileManager;
-    @Reference(policy=ReferencePolicy.DYNAMIC)
+    @Reference
     protected MetadataService metadataService;
-    @Reference(policy=ReferencePolicy.DYNAMIC)
+    @Reference
     protected PathResolver pathResolver;
 
-    @Reference(policy=ReferencePolicy.DYNAMIC)
+    @Reference
     protected PomManagementService pomManagementService;
-    @Reference(policy=ReferencePolicy.DYNAMIC)
+    @Reference
     protected Shell shell;
 
     /**

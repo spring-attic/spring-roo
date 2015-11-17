@@ -15,6 +15,10 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -29,11 +33,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.ProjectOperations;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -73,7 +73,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
     private FileManager fileManager;
     private MetadataDependencyRegistry metadataDependencyRegistry;
     private MetadataService metadataService;
-    private ProjectOperations projectOperations;
+    private ProjectService projectOperations;
     private TypeLocationService typeLocationService;
     private TypeParsingService typeParsingService;
 
@@ -312,13 +312,13 @@ public class DefaultPhysicalTypeMetadataProvider implements
 		}
     }
     
-    public ProjectOperations getProjectOperations(){
+    public ProjectService getProjectOperations(){
     	// Get all Services implement ProjectOperations interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectService.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
+				return (ProjectService) this.context.getService(ref);
 			}
 			
 			LOGGER.warning("Cannot load ProjectOperations on DefaultPhysicalTypeMetadataProvider.");

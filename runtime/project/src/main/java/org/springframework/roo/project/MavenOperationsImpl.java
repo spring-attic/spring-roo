@@ -37,7 +37,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Component
 @Service
-public class MavenOperationsImpl extends AbstractProjectOperations implements
+public class MavenOperationsImpl extends ProjectServiceImpl implements
         MavenOperations {
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(MavenOperationsImpl.class);

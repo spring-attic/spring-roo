@@ -20,7 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 
@@ -37,7 +37,7 @@ public class JavaPackageConverterTest {
     // Fixture
     private JavaPackageConverter converter;
     private @Mock LastUsed mockLastUsed;
-    private @Mock ProjectOperations mockProjectOperations;
+    private @Mock ProjectService mockProjectOperations;
     private @Mock TypeLocationService mockTypeLocationService;
 
     /**

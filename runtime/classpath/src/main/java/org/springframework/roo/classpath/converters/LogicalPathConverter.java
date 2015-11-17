@@ -7,7 +7,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.PhysicalPath;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
@@ -17,7 +17,7 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class LogicalPathConverter implements Converter<LogicalPath> {
 
-    @Reference ProjectOperations projectOperations;
+    @Reference ProjectService projectOperations;
 
     public LogicalPath convertFromText(final String value,
             final Class<?> targetType, final String optionContext) {

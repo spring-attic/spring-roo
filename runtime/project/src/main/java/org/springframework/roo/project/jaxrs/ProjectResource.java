@@ -19,7 +19,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.project.MavenOperations;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.rest.publisher.ResourceMarker;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -41,7 +41,7 @@ public class ProjectResource implements ResourceMarker {
             .getLogger(ProjectResource.class);
 
     private Shell shell;
-    private ProjectOperations projectOperations;
+    private ProjectService projectOperations;
     private MavenOperations mavenOperations;
 
     protected void activate(final ComponentContext cContext) {
@@ -52,7 +52,7 @@ public class ProjectResource implements ResourceMarker {
     @Produces("application/json")
     public JsonObject getProject() {
         JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-        ProjectOperations prjOperations = getProjectOperations();
+        ProjectService prjOperations = getProjectOperations();
         MavenOperations mvnOperations = getMavenOperations();
 
         // Checking if project exists
@@ -139,16 +139,16 @@ public class ProjectResource implements ResourceMarker {
      * 
      * @return
      */
-    public ProjectOperations getProjectOperations() {
+    public ProjectService getProjectOperations() {
         if (projectOperations == null) {
             // Get all Services implement ProjectOperations interface
             try {
                 ServiceReference<?>[] references = this.context
                         .getAllServiceReferences(
-                                ProjectOperations.class.getName(), null);
+                                ProjectService.class.getName(), null);
 
                 for (ServiceReference<?> ref : references) {
-                    return (ProjectOperations) this.context.getService(ref);
+                    return (ProjectService) this.context.getService(ref);
                 }
 
                 return null;

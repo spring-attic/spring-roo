@@ -21,7 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.OptionContexts;
@@ -39,7 +39,7 @@ public class JavaTypeConverterTest {
     private JavaTypeConverter converter;
     @Mock FileManager mockFileManager;
     @Mock LastUsed mockLastUsed;
-    @Mock ProjectOperations mockProjectOperations;
+    @Mock ProjectService mockProjectOperations;
     @Mock TypeLocationService mockTypeLocationService;
 
     @Before

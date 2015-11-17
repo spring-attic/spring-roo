@@ -18,7 +18,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.project.converter.PomConverter;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -41,7 +41,7 @@ public class MetadataCommands implements CommandMarker {
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private MetadataLogger metadataLogger;
     @Reference private MetadataService metadataService;
-    @Reference private ProjectOperations projectOperations;
+    @Reference private ProjectService projectOperations;
     @Reference private TypeLocationService typeLocationService;
 
     @CliAvailabilityIndicator({ METADATA_FOR_MODULE_COMMAND, METADATA_CACHE_COMMAND, 

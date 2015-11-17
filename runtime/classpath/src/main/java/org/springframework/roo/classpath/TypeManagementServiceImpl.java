@@ -14,7 +14,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 
 /**
  * Implementation of {@link TypeManagementService}.
@@ -28,7 +28,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 
     @Reference private FileManager fileManager;
     @Reference private MetadataService metadataService;
-    @Reference private ProjectOperations projectOperations;
+    @Reference private ProjectService projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeParsingService typeParsingService;
 

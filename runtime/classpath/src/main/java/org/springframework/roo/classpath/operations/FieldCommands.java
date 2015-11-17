@@ -53,7 +53,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -73,7 +73,7 @@ public class FieldCommands implements CommandMarker {
 
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private MetadataService metadataService;
-    @Reference private ProjectOperations projectOperations;
+    @Reference private ProjectService projectOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;

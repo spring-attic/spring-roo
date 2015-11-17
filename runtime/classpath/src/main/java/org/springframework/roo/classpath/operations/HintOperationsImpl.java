@@ -17,7 +17,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.shell.AbstractShell;
 
 /**
@@ -43,7 +43,7 @@ public class HintOperationsImpl implements HintOperations {
 
     @Reference private FileManager fileManager;
     @Reference private PathResolver pathResolver;
-    @Reference private ProjectOperations projectOperations;
+    @Reference private ProjectService projectOperations;
 
     private String determineTopic() {
         if (!projectOperations.isFocusedProjectAvailable()) {

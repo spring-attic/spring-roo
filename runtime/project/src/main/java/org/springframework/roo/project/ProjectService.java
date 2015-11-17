@@ -12,7 +12,7 @@ import org.springframework.roo.project.maven.Pom;
  * @author Ben Alex
  * @since 1.0
  */
-public interface ProjectOperations {
+public interface ProjectService {
 
     /**
      * Attempts to add the specified build plugin. If the plugin already exists

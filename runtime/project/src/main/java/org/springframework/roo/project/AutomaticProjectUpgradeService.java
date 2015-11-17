@@ -66,7 +66,7 @@ public class AutomaticProjectUpgradeService implements
 
     private static final String SPRING_VERSION = "3.1.0.RELEASE";
     private VersionInfo bundleVersionInfo;
-    @Reference private ProjectOperations projectOperations;
+    @Reference private ProjectService projectOperations;
 
     protected MetadataDependencyRegistryTracker registryTracker = null;
 

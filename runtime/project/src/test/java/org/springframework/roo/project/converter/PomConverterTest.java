@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 
@@ -36,7 +36,7 @@ public class PomConverterTest {
 
     // Fixture
     private PomConverter converter;
-    @Mock private ProjectOperations mockProjectOperations;
+    @Mock private ProjectService mockProjectOperations;
 
     private void assertCompletions(final String optionContext,
             final String focusedModuleName,

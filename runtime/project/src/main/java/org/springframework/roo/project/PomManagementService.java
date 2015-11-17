@@ -6,7 +6,7 @@ import org.springframework.roo.project.maven.Pom;
 
 /**
  * Provides {@link Pom}-related methods to the "project" package. Code outside
- * this package should use {@link ProjectOperations}.
+ * this package should use {@link ProjectService}.
  * 
  * @author James Tyrrell
  * @since 1.2.0

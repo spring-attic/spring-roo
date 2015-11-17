@@ -18,7 +18,7 @@ import org.springframework.roo.project.ApplicationContextOperations;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
@@ -94,7 +94,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     public String createArtifacts(final JavaPackage topLevelPackage,
             final String nullableProjectName, final String javaVersion,
             final GAV parentPom, final String module,
-            final ProjectOperations projectOperations) {
+            final ProjectService projectOperations) {
         final String pomPath = createPom(topLevelPackage, nullableProjectName,
                 javaVersion, parentPom, module, projectOperations);
         createOtherArtifacts(topLevelPackage, module, projectOperations);
@@ -116,7 +116,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
      *            dependency
      */
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectOperations projectOperations) {
+            final String module, final ProjectService projectOperations) {
         if (StringUtils.isBlank(module)) {
             setUpLog4jConfiguration();
         }
@@ -153,7 +153,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     protected String createPom(final JavaPackage topLevelPackage,
             final String projectName, final String javaVersion,
             final GAV parentPom, final String module,
-            final ProjectOperations projectOperations) {
+            final ProjectService projectOperations) {
         Validate.notBlank(javaVersion, "Java version required");
         Validate.notNull(topLevelPackage, "Top level package required");
 
@@ -241,7 +241,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
      * @return
      */
     protected final String getFullyQualifiedModuleName(final String moduleName,
-            final ProjectOperations projectOperations) {
+            final ProjectService projectOperations) {
         if (StringUtils.isBlank(moduleName)) {
             return "";
         }

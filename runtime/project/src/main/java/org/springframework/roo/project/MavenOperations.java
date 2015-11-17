@@ -11,7 +11,7 @@ import org.springframework.roo.project.packaging.PackagingProvider;
  * @author Ben Alex
  * @since 1.1
  */
-public interface MavenOperations extends ProjectOperations {
+public interface MavenOperations extends ProjectService {
 
     /**
      * Creates a module within an existing Maven project

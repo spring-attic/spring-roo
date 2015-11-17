@@ -35,7 +35,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
@@ -63,7 +63,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
     @Reference FileManager fileManager;
     @Reference LastUsed lastUsed;
-    @Reference ProjectOperations projectOperations;
+    @Reference ProjectService projectOperations;
     @Reference TypeLocationService typeLocationService;
 
     public JavaType convertFromText(String value, final Class<?> requiredType,
