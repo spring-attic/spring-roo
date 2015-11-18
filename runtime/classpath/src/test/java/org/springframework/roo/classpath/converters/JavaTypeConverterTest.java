@@ -22,7 +22,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ProjectService;
-import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.providers.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.OptionContexts;
 import org.springframework.roo.support.util.AnsiEscapeCode;

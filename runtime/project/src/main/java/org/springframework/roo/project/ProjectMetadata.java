@@ -7,7 +7,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.providers.maven.Pom;
 
 /**
  * The metadata for a module within the user's project. A simple project will

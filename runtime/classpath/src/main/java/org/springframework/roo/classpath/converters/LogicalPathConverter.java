@@ -8,7 +8,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.PhysicalPath;
 import org.springframework.roo.project.ProjectService;
-import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.providers.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;

@@ -2,7 +2,7 @@ package org.springframework.roo.project;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.providers.maven.Pom;
 
 /**
  * A given {@link Path} within the context of a specific project module.

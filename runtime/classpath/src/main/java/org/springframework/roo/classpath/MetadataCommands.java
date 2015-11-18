@@ -20,7 +20,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.project.converter.PomConverter;
-import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.providers.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;

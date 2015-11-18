@@ -17,10 +17,10 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.providers.ProjectManagerProvider;
 import org.springframework.roo.project.providers.ProjectManagerProviderId;
+import org.springframework.roo.project.providers.maven.Pom;
 
 /**
  * Provides common project operations. Should be subclassed by a

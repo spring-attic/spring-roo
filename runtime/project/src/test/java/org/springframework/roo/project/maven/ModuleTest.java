@@ -3,6 +3,7 @@ package org.springframework.roo.project.maven;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.springframework.roo.project.providers.maven.Module;
 
 /**
  * Unit test of the {@link Module} class.

@@ -46,8 +46,6 @@ import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
-import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.project.maven.PomFactory;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.providers.ProjectManagerProvider;
 import org.springframework.roo.shell.Shell;
@@ -103,6 +101,7 @@ public class MavenProjectManagerProvider implements ProjectManagerProvider {
     private PomFactory pomFactory;
     private MetadataDependencyRegistry metadataDependencyRegistry;
     
+    private String focusedModulePath;
     private final Map<String, Pom> pomMap = new HashMap<String, Pom>();
     private final Set<String> toBeParsed = new HashSet<String>();
     private String projectRootDirectory;
@@ -393,11 +392,11 @@ public class MavenProjectManagerProvider implements ProjectManagerProvider {
 	
 	@Override
     public Pom getFocusedModule() {
-        final ProjectMetadata focusedProjectMetadata = getFocusedProjectMetadata();
-        if (focusedProjectMetadata == null) {
-            return null;
+		updatePomCache();
+        if (focusedModulePath == null && getRootPom() != null) {
+            focusedModulePath = getRootPom().getPath();
         }
-        return focusedProjectMetadata.getPom();
+        return getPomFromPath(focusedModulePath);
     }
 	
     @Override
@@ -1660,12 +1659,7 @@ public class MavenProjectManagerProvider implements ProjectManagerProvider {
 
 	@Override
 	public boolean isActive() {
-		// Checking if pom.xml file exists
-		if(getFileManager().exists(DEFAULT_RELATIVE_PATH)){
-			return true;
-		}
-
-		return false;
+		return getRootPom() != null;
 	}
 
 	@Override

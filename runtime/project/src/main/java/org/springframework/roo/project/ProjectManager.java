@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.providers.ProjectManagerProviderId;
+import org.springframework.roo.project.providers.maven.Pom;
 
 /**
  * Methods for various project-related operations.
