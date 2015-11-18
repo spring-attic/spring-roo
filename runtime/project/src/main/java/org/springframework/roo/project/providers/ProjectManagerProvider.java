@@ -1,8 +1,13 @@
 package org.springframework.roo.project.providers;
 
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.project.Feature;
+import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.ProjectManager;
 import org.springframework.roo.project.packaging.PackagingProvider;
 
 /**
@@ -16,7 +21,7 @@ import org.springframework.roo.project.packaging.PackagingProvider;
  * @author Juan Carlos García
  * @since 2.0
  */
-public interface ProjectManagerProvider {
+public interface ProjectManagerProvider extends ProjectManager{
 
     /**
      * @return if this provider can be configured on current project
@@ -39,7 +44,6 @@ public interface ProjectManagerProvider {
      */
     String getDescription();
     
-    
     /**
      * Creates new project using a ProjectManager provider
      * 
@@ -54,5 +58,45 @@ public interface ProjectManagerProvider {
     void createProject(JavaPackage topLevelPackage, String projectName,
             Integer majorJavaVersion,
             PackagingProvider packagingType);
-
+    
+    /**
+     * Indicates whether the supplied feature is installed in any module of a
+     * project.
+     * 
+     * @param featureName the name of the feature (see {@link FeatureNames} for
+     *            available features)
+     * @param features 
+     * 			map where featureName should be defined
+     * @return true 
+     * 			if the feature is installed in any module, otherwise false
+     */
+    boolean isFeatureInstalled(String featureName, Map<String, Feature> features);
+    
+    /**
+     * Indicates whether the supplied feature is installed in the module with
+     * the supplied name.
+     * 
+     * @param featureName the name of the feature (see {@link FeatureNames} for
+     *            available features)
+     * @param moduleName the name of the module to be checked
+     * @param features 
+     * 			map where featureName should be defined
+     * @return true if the feature is installed the module, otherwise false
+     */
+    boolean isFeatureInstalledInModule(String featureName, String moduleName, Map<String, Feature> features);
+    
+    
+    /**
+     * Indicates whether any of the supplied features are installed in the
+     * focused module.
+     * 
+     * @param features 
+     * 			map where featureName should be defined
+     * @param featureNames the names of the features (see {@link FeatureNames}
+     *            for available features)
+     * @return true if any of the supplied features are installed in the focused
+     *         module, otherwise false
+     */
+    boolean isFeatureInstalledInFocusedModule(Map<String, Feature> features, String... featureNames);
+    
 }

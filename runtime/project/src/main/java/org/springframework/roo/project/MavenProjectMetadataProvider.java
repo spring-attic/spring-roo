@@ -1,7 +1,5 @@
 package org.springframework.roo.project;
 
-import java.util.Set;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -12,7 +10,6 @@ import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.maven.Pom;
 
@@ -39,7 +36,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
                     .getMetadataClass(ProjectMetadata.getProjectIdentifier("")));
 
     @Reference FileManager fileManager;
-    @Reference private PomManagementService pomManagementService;
+    @Reference private ProjectService projectService;
 
     public MetadataItem get(final String metadataId) {
         Validate.isTrue(ProjectMetadata.isValid(metadataId),
@@ -48,7 +45,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
         // Just rebuild on demand. We always do this as we expect
         // MetadataService to cache on our behalf
 
-        final Pom pom = pomManagementService
+        final Pom pom = projectService
                 .getPomFromModuleName(ProjectMetadata.getModuleName(metadataId));
         // Read the file, if it is available
         if (pom == null || !fileManager.exists(pom.getPath())) {
@@ -75,7 +72,7 @@ public class MavenProjectMetadataProvider implements MetadataProvider,
             }
 
             // Retrieval will cause an eviction and notification
-            pomManagementService.getPomFromPath(fileEvent.getFileDetails()
+            projectService.getPomFromPath(fileEvent.getFileDetails()
                     .getCanonicalPath());
         }
     }

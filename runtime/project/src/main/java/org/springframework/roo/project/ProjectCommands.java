@@ -2,7 +2,6 @@ package org.springframework.roo.project;
 
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -56,6 +55,12 @@ public class ProjectCommands implements CommandMarker {
         return getProjectService().isCreateProjectAvailable();
     }
     
+    @CliAvailabilityIndicator({PROJECT_SCAN_SPEED_COMMAND, PROJECT_SCAN_STATUS_COMMAND,
+    	PROJECT_SCAN_NOW_COMMAND})
+    public boolean isProjecScanAvailable() {
+        return getProjectService().isFocusedProjectAvailable();
+    }
+    
     @CliCommand(value = PROJECT_SETUP_COMMAND, help = "Creates a new Maven project")
     public void createProject(
             @CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the groupId and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
@@ -69,71 +74,41 @@ public class ProjectCommands implements CommandMarker {
                 majorJavaVersion, packaging, provider);
     }
     
-    @CliAvailabilityIndicator({PROJECT_SCAN_SPEED_COMMAND, PROJECT_SCAN_STATUS_COMMAND,
-    	PROJECT_SCAN_NOW_COMMAND})
-    public boolean isProjecScanAvailable() {
-        return getProjectService().isFocusedProjectAvailable();
-    }
-
     @CliCommand(value = DEVELOPMENT_MODE_COMMAND, help = "Switches the system into development mode (greater diagnostic information)")
     public String developmentMode(
             @CliOption(key = { "", "enabled" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Activates development mode") final boolean enabled) {
-        
-    	if(processManager == null){
-    		processManager = getProcessManager();
-    	}
-    	
-    	Validate.notNull(processManager, "ProcessManager is required");
-    	
-    	if(shell == null){
-    		shell = getShell();
-    	}
-    	
-    	Validate.notNull(shell, "Shell is required");
-    	
-    	processManager.setDevelopmentMode(enabled);
-        shell.setDevelopmentMode(enabled);
+    	getProcessManager().setDevelopmentMode(enabled);
+        getShell().setDevelopmentMode(enabled);
         return "Development mode set to " + enabled;
     }
 
     @CliCommand(value = PROJECT_SCAN_NOW_COMMAND, help = "Perform a manual file system scan")
     public String scan() {
-    	if(processManager == null){
-    		processManager = getProcessManager();
-    	}
-    	
-    	Validate.notNull(processManager, "ProcessManager is required");
-    	
-        final long originalSetting = processManager
+        final long originalSetting = getProcessManager()
                 .getMinimumDelayBetweenScan();
         try {
-            processManager.setMinimumDelayBetweenScan(1);
-            processManager.timerBasedScan();
+            getProcessManager().setMinimumDelayBetweenScan(1);
+            getProcessManager().timerBasedScan();
         }
         finally {
             // Switch on manual scan again
-            processManager.setMinimumDelayBetweenScan(originalSetting);
+        	getProcessManager().setMinimumDelayBetweenScan(originalSetting);
         }
         return "Manual scan completed";
     }
 
     @CliCommand(value = PROJECT_SCAN_STATUS_COMMAND, help = "Display file system scanning information")
     public String scanningInfo() {
-    	if(processManager == null){
-    		processManager = getProcessManager();
-    	}
-    	
-    	Validate.notNull(processManager, "ProcessManager is required");
     	
         final StringBuilder sb = new StringBuilder("File system scanning ");
-        final long duration = processManager.getLastScanDuration();
+        final long duration = getProcessManager().getLastScanDuration();
         if (duration == 0) {
             sb.append("never executed; ");
         }
         else {
             sb.append("last took ").append(duration).append(" ms; ");
         }
-        final long minimum = processManager.getMinimumDelayBetweenScan();
+        final long minimum = getProcessManager().getMinimumDelayBetweenScan();
         if (minimum == 0) {
             sb.append("automatic scanning is disabled");
         }
@@ -150,53 +125,58 @@ public class ProjectCommands implements CommandMarker {
     @CliCommand(value = PROJECT_SCAN_SPEED_COMMAND, help = "Changes the file system scanning speed")
     public String scanningSpeed(
             @CliOption(key = { "", "ms" }, mandatory = true, help = "The number of milliseconds between each scan") final long minimumDelayBetweenScan) {
-    	if(processManager == null){
-    		processManager = getProcessManager();
-    	}
-    	
-    	Validate.notNull(processManager, "ProcessManager is required");
-    	
-    	processManager.setMinimumDelayBetweenScan(minimumDelayBetweenScan);
+    	getProcessManager().setMinimumDelayBetweenScan(minimumDelayBetweenScan);
         return scanningInfo();
     }
     
     public ProcessManager getProcessManager(){
-    	// Get all components implement ProcessManager interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProcessManager.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ProcessManager) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ProcessManager on ProcessManagerCommands.");
-			return null;
-		}
+    	if(processManager == null){
+    		// Get all components implement ProcessManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProcessManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				processManager = (ProcessManager) this.context.getService(ref);
+    				return processManager;
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProcessManager on ProjectCommands.");
+    			return null;
+    		}
+    	}else{
+    		return processManager;
+    	}
     }
     
     public Shell getShell(){
-    	// Get all Shell implement Shell interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(Shell.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (Shell) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load Shell on ProcessManagerCommands.");
-			return null;
-		}
+    	if(shell == null){
+    		// Get all Shell implement Shell interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(Shell.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				shell = (Shell) this.context.getService(ref);
+    				return shell;
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load Shell on ProjectCommands.");
+    			return null;
+    		}
+    		
+    	}else{
+    		return shell;
+    	}
     }
     
     public ProjectService getProjectService() {
         if (projectService == null) {
-            // Get all Services implement projectService interface
+            // Get all Services implement ProjectService interface
             try {
                 ServiceReference<?>[] references = this.context
                         .getAllServiceReferences(
@@ -210,7 +190,7 @@ public class ProjectCommands implements CommandMarker {
 
             }
             catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load projectService on ProcessManagerCommands.");
+                LOGGER.warning("Cannot load ProjectService on ProjectCommands.");
                 return null;
             }
         }
