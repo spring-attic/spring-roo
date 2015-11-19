@@ -317,13 +317,10 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
                 "parent", root, pom);
         final Element projectGroupIdElement = DomUtils.createChildIfNotExists(
                 "groupId", root, pom);
-        if (parentPom == null) {
-            // No parent POM was specified; remove the parent element
-            root.removeChild(parentPomElement);
-            DomUtils.removeTextNodes(root);
-            projectGroupIdElement.setTextContent(projectGroupId);
-        }
-        else {
+        
+        // ROO-3687: By default, Spring IO Platform will be the parent pom.
+        // If developer specify new parent pom, update parent with the new one.
+        if (parentPom != null) {
             // Parent's groupId, artifactId, and version
             DomUtils.createChildIfNotExists("groupId", parentPomElement, pom)
                     .setTextContent(parentPom.getGroupId());
