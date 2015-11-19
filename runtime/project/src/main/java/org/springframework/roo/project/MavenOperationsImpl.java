@@ -10,23 +10,23 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link MavenOperations}.
@@ -144,9 +144,59 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
         final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
         packagingProvider.createArtifacts(topLevelPackage, projectName,
                 getJavaVersion(majorJavaVersion), parentPom, "", this);
+        
+    	// ROO-3687: Generates @SpringBootApplication Java class
+        createSpringBootApplicationClass(topLevelPackage, projectName);
     }
 
-    public void executeMvnCommand(final String extra) throws IOException {
+    /**
+     * Method that creates Java class annotated with @SpringBootApplication
+     * 
+     * @param topLevelPackage
+     * @param projectName
+     */
+    private void createSpringBootApplicationClass(JavaPackage topLevelPackage, String projectName) {
+        // Set projectName if null
+        if (projectName == null) {
+            projectName = topLevelPackage.getLastElement();
+        }
+        // Uppercase projectName
+        projectName = projectName.substring(0, 1).toUpperCase()
+                .concat(projectName.substring(1, projectName.length()));
+        String bootClass = projectName.concat("Application");
+
+        final JavaType javaType = new JavaType(topLevelPackage
+                .getFullyQualifiedPackageName().concat(".").concat(bootClass));
+        final String physicalPath = pathResolver
+                .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, javaType);
+        if (fileManager.exists(physicalPath)) {
+            throw new RuntimeException(
+                    "ERROR: You are trying to create two Java classes annotated with @SpringBootApplication");
+        }
+
+        InputStream inputStream = null;
+        try {
+            inputStream = FileUtils.getInputStream(getClass(),
+                    "SpringBootApplication-template._java");
+            String input = IOUtils.toString(inputStream);
+            // Replacing package
+            input = input.replace("__PACKAGE__",
+                    topLevelPackage.getFullyQualifiedPackageName());
+            input = input.replace("__PROJECT_NAME__", projectName);
+            fileManager.createOrUpdateTextFileIfRequired(physicalPath, input,
+                    false);
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(
+                    "Unable to create '" + physicalPath + "'", e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+
+	}
+
+	public void executeMvnCommand(final String extra) throws IOException {
     	
     	if(processManager == null){
     		processManager = getProcessManager();

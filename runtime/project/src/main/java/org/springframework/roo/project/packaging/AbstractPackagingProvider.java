@@ -97,7 +97,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
             final ProjectOperations projectOperations) {
         final String pomPath = createPom(topLevelPackage, nullableProjectName,
                 javaVersion, parentPom, module, projectOperations);
-        createOtherArtifacts(topLevelPackage, module, projectOperations);
+    	// ROO-3687: Log4J is not necessary to install on this new version
+    	// of Spring Roo.
+        // createOtherArtifacts(topLevelPackage, module, projectOperations);
         return pomPath;
     }
 
