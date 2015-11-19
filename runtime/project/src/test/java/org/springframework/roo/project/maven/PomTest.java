@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.roo.project.DependencyScope.COMPILE;
 import static org.springframework.roo.project.Path.ROOT;
-import static org.springframework.roo.project.providers.maven.Pom.DEFAULT_PACKAGING;
+import static org.springframework.roo.project.maven.Pom.DEFAULT_PACKAGING;
 
 import java.io.File;
 import java.util.Arrays;
@@ -19,7 +19,6 @@ import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PhysicalPath;
-import org.springframework.roo.project.providers.maven.Pom;
 import org.springframework.roo.support.util.FileUtils;
 
 /**

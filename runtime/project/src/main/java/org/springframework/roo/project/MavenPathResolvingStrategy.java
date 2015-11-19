@@ -11,15 +11,14 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.util.FileUtils;
 
 @Component
 @Service
 public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
-    @Reference 
-    protected ProjectService projectService;
+    @Reference protected PomManagementService pomManagementService;
 
     /**
      * Locates the first {@link PhysicalPath} which can be construed as a parent
@@ -33,7 +32,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
         Validate.notNull(identifier, "Identifier required");
         PhysicalPath physicalPath = null;
         int longest = 0;
-        for (final Pom pom : projectService.getPoms()) {
+        for (final Pom pom : pomManagementService.getPoms()) {
             if (removeTrailingSeparator(identifier).startsWith(
                     removeTrailingSeparator(pom.getRoot()))
                     && removeTrailingSeparator(pom.getRoot()).length() > longest) {
@@ -63,7 +62,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
 
     public String getFocusedCanonicalPath(final Path path,
             final JavaType javaType) {
-        return getCanonicalPath(path.getModulePathId(projectService
+        return getCanonicalPath(path.getModulePathId(pomManagementService
                 .getFocusedModuleName()), javaType);
     }
 
@@ -71,12 +70,12 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
             final String relativePath) {
         return getIdentifier(
                 LogicalPath.getInstance(path,
-                		projectService.getFocusedModuleName()),
+                        pomManagementService.getFocusedModuleName()),
                 relativePath);
     }
 
     public LogicalPath getFocusedPath(final Path path) {
-        final PhysicalPath physicalPath = projectService
+        final PhysicalPath physicalPath = pomManagementService
                 .getFocusedModule().getPhysicalPath(path);
         Validate.notNull(physicalPath, "Physical path for '%s' not found",
                 path.name());
@@ -84,7 +83,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     }
 
     public String getFocusedRoot(final Path path) {
-        return projectService.getFocusedModule().getPathLocation(path);
+        return pomManagementService.getFocusedModule().getPathLocation(path);
     }
 
     public String getIdentifier(final LogicalPath logicalPath,
@@ -101,7 +100,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     private File getModuleRoot(final String module, final Pom pom) {
         if (pom == null) {
             // No POM exists for this module; we must be creating it
-            return new File(projectService.getFocusedModule().getRoot(),
+            return new File(pomManagementService.getFocusedModule().getRoot(),
                     module);
         }
         // This is a known module; use its known root path
@@ -109,7 +108,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     }
 
     private File getPath(final LogicalPath logicalPath) {
-        final Pom pom = projectService.getPomFromModuleName(logicalPath
+        final Pom pom = pomManagementService.getPomFromModuleName(logicalPath
                 .getModule());
         final File moduleRoot = getModuleRoot(logicalPath.getModule(), pom);
         final String pathRelativeToPom = logicalPath.getPathRelativeToPom(pom);
@@ -119,7 +118,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     @Override
     protected Collection<LogicalPath> getPaths(final boolean sourceOnly) {
         final Collection<LogicalPath> pathIds = new ArrayList<LogicalPath>();
-        for (final Pom pom : projectService.getPoms()) {
+        for (final Pom pom : pomManagementService.getPoms()) {
             for (final PhysicalPath modulePath : pom.getPhysicalPaths()) {
                 if (!sourceOnly || modulePath.isSource()) {
                     pathIds.add(modulePath.getLogicalPath());
@@ -130,13 +129,13 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     }
 
     public String getRoot(final LogicalPath modulePathId) {
-        final Pom pom = projectService.getPomFromModuleName(modulePathId
+        final Pom pom = pomManagementService.getPomFromModuleName(modulePathId
                 .getModule());
         return pom.getPhysicalPath(modulePathId.getPath()).getLocationPath();
     }
 
     public boolean isActive() {
-        return projectService.getRootPom() != null;
+        return pomManagementService.getRootPom() != null;
     }
 
     private String removeTrailingSeparator(final String pomPath) {

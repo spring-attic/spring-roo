@@ -15,10 +15,6 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -33,7 +29,11 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.ProjectService;
+import org.springframework.roo.project.ProjectOperations;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -73,7 +73,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
     private FileManager fileManager;
     private MetadataDependencyRegistry metadataDependencyRegistry;
     private MetadataService metadataService;
-    private ProjectService projectService;
+    private ProjectOperations projectOperations;
     private TypeLocationService typeLocationService;
     private TypeParsingService typeParsingService;
 
@@ -101,11 +101,11 @@ public class DefaultPhysicalTypeMetadataProvider implements
     	
     	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
     	
-    	if(projectService == null){
-    		projectService = getProjectService();
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
     	}
     	
-    	Validate.notNull(projectService, "projectService is required");
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
     	
     	if(typeLocationService == null){
     		typeLocationService = getTypeLocationService();
@@ -171,7 +171,7 @@ public class DefaultPhysicalTypeMetadataProvider implements
                 // available
                 // We're left with no choice but to register for every physical
                 // type change, in the hope we discover our parent someday
-                for (final LogicalPath sourcePath : projectService
+                for (final LogicalPath sourcePath : projectOperations
                         .getPathResolver().getSourcePaths()) {
                     final String possibleSuperclass = PhysicalTypeIdentifier
                             .createIdentifier(details.getExtendsTypes().get(0),
@@ -312,20 +312,20 @@ public class DefaultPhysicalTypeMetadataProvider implements
 		}
     }
     
-    public ProjectService getProjectService(){
-    	// Get all Services implement projectService interface
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
 		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectService.class.getName(), null);
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 			
 			for(ServiceReference<?> ref : references){
-				return (ProjectService) this.context.getService(ref);
+				return (ProjectOperations) this.context.getService(ref);
 			}
 			
-			LOGGER.warning("Cannot load projectService on DefaultPhysicalTypeMetadataProvider.");
+			LOGGER.warning("Cannot load ProjectOperations on DefaultPhysicalTypeMetadataProvider.");
 			return null;
 			
 		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load projectService on DefaultPhysicalTypeMetadataProvider.");
+			LOGGER.warning("Cannot load ProjectOperations on DefaultPhysicalTypeMetadataProvider.");
 			return null;
 		}
     }

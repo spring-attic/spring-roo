@@ -10,7 +10,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.maven.Pom;
 
 @Component
 @Service

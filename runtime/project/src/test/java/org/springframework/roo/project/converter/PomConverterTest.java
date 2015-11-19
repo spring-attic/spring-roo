@@ -19,8 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.roo.project.ProjectService;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 
 /**
@@ -36,16 +36,16 @@ public class PomConverterTest {
 
     // Fixture
     private PomConverter converter;
-    @Mock private ProjectService mockprojectService;
+    @Mock private ProjectOperations mockProjectOperations;
 
     private void assertCompletions(final String optionContext,
             final String focusedModuleName,
             final Collection<String> moduleNames,
             final String... expectedCompletions) {
         // Set up
-        when(mockprojectService.getFocusedModuleName()).thenReturn(
+        when(mockProjectOperations.getFocusedModuleName()).thenReturn(
                 focusedModuleName);
-        when(mockprojectService.getModuleNames()).thenReturn(moduleNames);
+        when(mockProjectOperations.getModuleNames()).thenReturn(moduleNames);
         final List<Completion> completions = new ArrayList<Completion>();
 
         // Invoke
@@ -66,14 +66,14 @@ public class PomConverterTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         converter = new PomConverter();
-        converter.projectService = mockprojectService;
+        converter.projectOperations = mockProjectOperations;
     }
 
     @Test
     public void testConvertOtherModuleName() {
         final Pom mockPom = mock(Pom.class);
         final String moduleName = "foo" + File.separator + "bar";
-        when(mockprojectService.getPomFromModuleName(moduleName))
+        when(mockProjectOperations.getPomFromModuleName(moduleName))
                 .thenReturn(mockPom);
         assertEquals(mockPom, converter.convertFromText(moduleName, null, null));
     }
@@ -81,7 +81,7 @@ public class PomConverterTest {
     @Test
     public void testConvertRootModuleSymbol() {
         final Pom mockRootPom = mock(Pom.class);
-        when(mockprojectService.getPomFromModuleName("")).thenReturn(
+        when(mockProjectOperations.getPomFromModuleName("")).thenReturn(
                 mockRootPom);
         assertEquals(mockRootPom,
                 converter.convertFromText(ROOT_MODULE_SYMBOL, null, null));

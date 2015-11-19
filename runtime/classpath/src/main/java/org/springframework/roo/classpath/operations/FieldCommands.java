@@ -53,7 +53,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.project.ProjectService;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -73,7 +73,7 @@ public class FieldCommands implements CommandMarker {
 
     @Reference private MemberDetailsScanner memberDetailsScanner;
     @Reference private MetadataService metadataService;
-    @Reference private ProjectService projectService;
+    @Reference private ProjectOperations projectOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
@@ -770,13 +770,13 @@ public class FieldCommands implements CommandMarker {
             "field date", "field boolean", "field enum", "field embedded",
             "field file" })
     public boolean isJdkFieldManagementAvailable() {
-        return projectService.isFocusedProjectAvailable();
+        return projectOperations.isFocusedProjectAvailable();
     }
 
     @CliAvailabilityIndicator({ "field reference", "field set", "field list" })
     public boolean isJpaFieldManagementAvailable() {
         // In a separate method in case we decide to check for JPA registration
         // in the future
-        return projectService.isFocusedProjectAvailable();
+        return projectOperations.isFocusedProjectAvailable();
     }
 }

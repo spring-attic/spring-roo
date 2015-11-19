@@ -14,7 +14,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.ProjectService;
+import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Implementation of {@link TypeManagementService}.
@@ -28,7 +28,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 
     @Reference private FileManager fileManager;
     @Reference private MetadataService metadataService;
-    @Reference private ProjectService projectService;
+    @Reference private ProjectOperations projectOperations;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeParsingService typeParsingService;
 
@@ -94,7 +94,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
         if (jsr303Required) {
             // It's more likely the version below represents a later version
             // than any specified in the user's own dependency list
-            projectService.addDependency(path.getModule(),
+            projectOperations.addDependency(path.getModule(),
                     "javax.validation", "validation-api", "1.0.0.GA");
         }
         cidBuilder.addField(field);

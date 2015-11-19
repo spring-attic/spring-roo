@@ -1,6 +1,6 @@
-package org.springframework.roo.project.providers.maven;
+package org.springframework.roo.project.maven;
 
-import static org.springframework.roo.project.providers.maven.Pom.DEFAULT_PACKAGING;
+import static org.springframework.roo.project.maven.Pom.DEFAULT_PACKAGING;
 
 import java.io.File;
 import java.util.ArrayList;

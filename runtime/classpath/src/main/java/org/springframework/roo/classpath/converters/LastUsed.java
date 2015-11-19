@@ -2,7 +2,7 @@ package org.springframework.roo.classpath.converters;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Interface for {@link LastUsedImpl}.

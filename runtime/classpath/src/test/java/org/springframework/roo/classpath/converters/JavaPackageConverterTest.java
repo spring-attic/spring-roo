@@ -20,8 +20,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectService;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 
 /**
@@ -37,7 +37,7 @@ public class JavaPackageConverterTest {
     // Fixture
     private JavaPackageConverter converter;
     private @Mock LastUsed mockLastUsed;
-    private @Mock ProjectService mockprojectService;
+    private @Mock ProjectOperations mockProjectOperations;
     private @Mock TypeLocationService mockTypeLocationService;
 
     /**
@@ -51,10 +51,10 @@ public class JavaPackageConverterTest {
     private void assertConvertFromValidText(final String text,
             final String optionContext, final String expectedPackage) {
         // Set up
-        when(mockprojectService.isFocusedProjectAvailable())
+        when(mockProjectOperations.isFocusedProjectAvailable())
                 .thenReturn(true);
         final Pom mockPom = mock(Pom.class);
-        when(mockprojectService.getFocusedModule()).thenReturn(mockPom);
+        when(mockProjectOperations.getFocusedModule()).thenReturn(mockPom);
         when(mockTypeLocationService.getTopLevelPackageForModule(mockPom))
                 .thenReturn(TOP_LEVEL_PACKAGE);
         assertEquals(
@@ -74,7 +74,7 @@ public class JavaPackageConverterTest {
     private void assertGetAllPossibleValues(final boolean projectAvailable,
             final Completion... expectedCompletions) {
         // Set up
-        when(mockprojectService.isFocusedProjectAvailable()).thenReturn(
+        when(mockProjectOperations.isFocusedProjectAvailable()).thenReturn(
                 projectAvailable);
         final List<Completion> completions = new ArrayList<Completion>();
 
@@ -92,7 +92,7 @@ public class JavaPackageConverterTest {
         MockitoAnnotations.initMocks(this);
         converter = new JavaPackageConverter();
         converter.lastUsed = mockLastUsed;
-        converter.projectService = mockprojectService;
+        converter.projectOperations = mockProjectOperations;
         converter.typeLocationService = mockTypeLocationService;
     }
 
@@ -177,7 +177,7 @@ public class JavaPackageConverterTest {
         final Pom mockPom2 = setUpMockPom("/path/to/pom/2", new JavaType(
                 "com.example.web.ChoiceController"), new JavaType(
                 "com.example.web.VoteController"));
-        when(mockprojectService.getPoms()).thenReturn(
+        when(mockProjectOperations.getPoms()).thenReturn(
                 Arrays.asList(mockPom1, mockPom2));
 
         // Invoke and check

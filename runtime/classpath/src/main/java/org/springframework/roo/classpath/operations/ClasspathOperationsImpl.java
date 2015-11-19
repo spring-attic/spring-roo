@@ -38,7 +38,7 @@ import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectService;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 
 /**
@@ -53,7 +53,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 
     @Reference MetadataService metadataService;
     @Reference PathResolver pathResolver;
-    @Reference ProjectService projectService;
+    @Reference ProjectOperations projectOperations;
     @Reference StaticFieldConverter staticFieldConverter;
     @Reference TypeLocationService typeLocationService;
     @Reference TypeManagementService typeManagementService;
@@ -256,6 +256,6 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 
     @Override
     public boolean isProjectAvailable() {
-        return projectService.isFocusedProjectAvailable();
+        return projectOperations.isFocusedProjectAvailable();
     }
 }

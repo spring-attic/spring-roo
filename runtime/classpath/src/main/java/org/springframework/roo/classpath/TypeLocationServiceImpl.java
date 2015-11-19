@@ -19,11 +19,8 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -37,11 +34,16 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.PhysicalPath;
-import org.springframework.roo.project.ProjectService;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.NaturalOrderComparator;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
+
+import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link TypeLocationService}.
@@ -151,7 +153,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     private FileManager fileManager;
     private FileMonitorService fileMonitorService;
     private MetadataService metadataService;
-    private ProjectService projectService;
+    private ProjectOperations projectOperations;
     private TypeCache typeCache;
     private TypeResolutionService typeResolutionService;
 
@@ -284,7 +286,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         if (parentPath == null) {
             return null;
         }
-        for (final Pom pom : getProjectService().getPoms()) {
+        for (final Pom pom : getProjectOperations().getPoms()) {
             for (final PhysicalPath physicalPath : pom.getPhysicalPaths()) {
                 if (physicalPath.isSource()) {
                     final String pathLocation = FileUtils
@@ -311,7 +313,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
                 .getPath(physicalTypeId);
         final JavaType javaType = PhysicalTypeIdentifier
                 .getJavaType(physicalTypeId);
-        final Pom pom = getProjectService().getPomFromModuleName(logicalPath
+        final Pom pom = getProjectOperations().getPomFromModuleName(logicalPath
                 .getModule());
         final String canonicalFilePath = pom.getPathLocation(logicalPath
                 .getPath()) + javaType.getRelativeFileName();
@@ -354,7 +356,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         final JavaType javaType = new JavaType(
                 javaPackage.getFullyQualifiedPackageName() + "."
                         + simpleTypeName);
-        final Pom module = getProjectService()
+        final Pom module = getProjectOperations()
                 .getModuleForFileIdentifier(fileCanonicalPath);
         Validate.notNull(module, "The module for the file '"
                 + fileCanonicalPath + "' could not be located");
@@ -427,7 +429,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
         Validate.notBlank(fileCanonicalPath, "File canonical path required");
         // Determine the JavaType for this file
         String relativePath = "";
-        final Pom moduleForFileIdentifier = getProjectService()
+        final Pom moduleForFileIdentifier = getProjectOperations()
                 .getModuleForFileIdentifier(fileCanonicalPath);
         if (moduleForFileIdentifier == null) {
             return relativePath;
@@ -574,7 +576,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
 
     private void initTypeMap() {
-        for (final Pom pom : getProjectService().getPoms()) {
+        for (final Pom pom : getProjectOperations().getPoms()) {
             for (final PhysicalPath path : pom.getPhysicalPaths()) {
                 if (path.isSource()) {
                     final String allJavaFiles = FileUtils
@@ -793,24 +795,24 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     	}
     }
     
-    public ProjectService getProjectService(){
-    	if(projectService == null){
-        	// Get all Services implement projectService interface
+    public ProjectOperations getProjectOperations(){
+    	if(projectOperations == null){
+        	// Get all Services implement ProjectOperations interface
     		try {
-    			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectService.class.getName(), null);
+    			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
     			
     			for(ServiceReference<?> ref : references){
-    				return (ProjectService) context.getService(ref);
+    				return (ProjectOperations) context.getService(ref);
     			}
     			
     			return null;
     			
     		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load projectService on TypeLocationServiceImpl.");
+    			LOGGER.warning("Cannot load ProjectOperations on TypeLocationServiceImpl.");
     			return null;
     		}
     	}else{
-    		return projectService;
+    		return projectOperations;
     	}
     }
     

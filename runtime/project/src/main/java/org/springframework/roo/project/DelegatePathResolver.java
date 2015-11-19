@@ -29,8 +29,6 @@ public class DelegatePathResolver implements PathResolver {
     private final Object lock = new Object();
 
     private final Set<PathResolvingStrategy> pathResolvingStrategies = new HashSet<PathResolvingStrategy>();
-    
-    private PathResolvingStrategy chosenStrategy;
 
     protected void bindPathResolvingStrategy(
             final PathResolvingStrategy strategy) {
@@ -96,24 +94,19 @@ public class DelegatePathResolver implements PathResolver {
     }
 
     private PathResolvingStrategy getStrategy() {
-    	if(chosenStrategy == null){
-    		for (final PathResolvingStrategy pathResolvingStrategy : pathResolvingStrategies) {
-    			if (pathResolvingStrategy.isActive()) {
-    				if (chosenStrategy != null) {
-    					throw new IllegalArgumentException(
-    							"Multiple path resolving strategies are active :<");
-    				}
-    				else {
-    					chosenStrategy = pathResolvingStrategy;
-    				}
-    			}
-    		}
-    		
-    		return chosenStrategy;
-    		
-    	}else{
-    		return chosenStrategy;
-    	}
+        PathResolvingStrategy chosenStrategy = null;
+        for (final PathResolvingStrategy pathResolvingStrategy : pathResolvingStrategies) {
+            if (pathResolvingStrategy.isActive()) {
+                if (chosenStrategy != null) {
+                    throw new IllegalArgumentException(
+                            "Multiple path resolving strategies are active :<");
+                }
+                else {
+                    chosenStrategy = pathResolvingStrategy;
+                }
+            }
+        }
+        return chosenStrategy;
     }
 
     protected void unbindPathResolvingStrategy(

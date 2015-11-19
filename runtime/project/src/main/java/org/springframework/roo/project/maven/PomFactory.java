@@ -1,4 +1,4 @@
-package org.springframework.roo.project.providers.maven;
+package org.springframework.roo.project.maven;
 
 import org.w3c.dom.Element;
 

@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.maven.Pom;
 
 public interface TypeCache {
 

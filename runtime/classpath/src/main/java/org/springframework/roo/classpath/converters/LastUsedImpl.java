@@ -15,8 +15,8 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectService;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CommandListener;
 import org.springframework.roo.shell.ParseResult;
 import org.springframework.roo.shell.Shell;
@@ -59,7 +59,7 @@ public class LastUsedImpl implements LastUsed, CommandListener {
     
     private boolean isVerified;
     
-    @Reference private ProjectService projectService;
+    @Reference private ProjectOperations projectOperations;
     @Reference private Shell shell;
     @Reference private TypeLocationService typeLocationService;
 
@@ -116,7 +116,7 @@ public class LastUsedImpl implements LastUsed, CommandListener {
 
         topLevelPackage = new JavaPackage(
                 typeLocationService
-                        .getTopLevelPackageForModule(projectService
+                        .getTopLevelPackageForModule(projectOperations
                                 .getFocusedModule()));
         final String path = moduleName
                 + fullyQualifiedName.replace(

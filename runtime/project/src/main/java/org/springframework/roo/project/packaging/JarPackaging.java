@@ -14,7 +14,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectService;
+import org.springframework.roo.project.ProjectOperations;
 
 /**
  * The {@link PackagingProvider} that creates a JAR file.
@@ -37,11 +37,11 @@ public class JarPackaging extends AbstractCorePackagingProvider {
 
     @Override
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectService projectService) {
+            final String module, final ProjectOperations projectOperations) {
 
-        super.createOtherArtifacts(topLevelPackage, module, projectService);
+        super.createOtherArtifacts(topLevelPackage, module, projectOperations);
         final String fullyQualifiedModuleName = getFullyQualifiedModuleName(
-                module, projectService);
+                module, projectOperations);
         getApplicationContextOperations().createMiddleTierApplicationContext(
                 topLevelPackage, fullyQualifiedModuleName);
     }
@@ -50,11 +50,11 @@ public class JarPackaging extends AbstractCorePackagingProvider {
     protected String createPom(final JavaPackage topLevelPackage,
             final String nullableProjectName, final String javaVersion,
             final GAV parentPom, final String moduleName,
-            final ProjectService projectService) {
+            final ProjectOperations projectOperations) {
 
         final String pomPath = super.createPom(topLevelPackage,
                 nullableProjectName, javaVersion, parentPom, moduleName,
-                projectService);
+                projectOperations);
         return pomPath;
     }
 

@@ -1,4 +1,4 @@
-package org.springframework.roo.project.providers.maven;
+package org.springframework.roo.project.maven;
 
 import org.apache.commons.lang3.Validate;
 

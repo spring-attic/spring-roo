@@ -9,7 +9,7 @@ import static org.springframework.roo.project.ProjectMetadata.MODULE_SEPARATOR;
 import static org.springframework.roo.project.ProjectMetadata.PROJECT_MID_PREFIX;
 
 import org.junit.Test;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Unit test of {@link ProjectMetadata}

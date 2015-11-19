@@ -1,4 +1,4 @@
-package org.springframework.roo.project.providers.maven;
+package org.springframework.roo.project.maven;
 
 import static org.springframework.roo.project.Path.ROOT;
 
@@ -37,7 +37,7 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class Pom {
 
-    public static final String DEFAULT_PACKAGING = "jar"; // Maven behaviour
+    static final String DEFAULT_PACKAGING = "jar"; // Maven behaviour
 
     private final Set<Plugin> buildPlugins = new LinkedHashSet<Plugin>();
     private final Set<Dependency> dependencies = new LinkedHashSet<Dependency>();

@@ -4,18 +4,15 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.packaging.PackagingProvider;
-import org.springframework.roo.project.providers.ProjectManagerProviderId;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Methods for various project-related operations.
  * 
- * @author Juan Carlos García
- * @since 2.0
+ * @author Ben Alex
+ * @since 1.0
  */
-public interface ProjectManager {
-	
+public interface ProjectOperations {
 
     /**
      * Attempts to add the specified build plugin. If the plugin already exists
@@ -246,6 +243,21 @@ public interface ProjectManager {
     void addResource(final String moduleName, Resource resource);
 
     /**
+     * Verifies if the specified build plugin is present. If it is present,
+     * silently returns. If it is not present, removes any build plugin which
+     * matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
+     * Always adds the presented plugin.
+     * <p>
+     * This method is deprecated - use {@link #updateBuildPlugin(Plugin)}
+     * instead.
+     * 
+     * @param moduleName the name of the module to act upon (required)
+     * @param plugin the build plugin to update (required)
+     */
+    @Deprecated
+    void buildPluginUpdate(final String moduleName, Plugin plugin);
+
+    /**
      * Returns the {@link Pom} of the currently focussed module, or if no module
      * has the focus, the root {@link Pom}.
      * 
@@ -337,6 +349,37 @@ public interface ProjectManager {
      */
     JavaPackage getTopLevelPackage(String moduleName);
 
+    /**
+     * Indicates whether the supplied feature is installed in any module of a
+     * project.
+     * 
+     * @param featureName the name of the feature (see {@link FeatureNames} for
+     *            available features)
+     * @return true if the feature is installed in any module, otherwise false
+     */
+    boolean isFeatureInstalled(String featureName);
+
+    /**
+     * Indicates whether the supplied feature is installed in the module with
+     * the supplied name.
+     * 
+     * @param featureName the name of the feature (see {@link FeatureNames} for
+     *            available features)
+     * @param moduleName the name of the module to be checked
+     * @return true if the feature is installed the module, otherwise false
+     */
+    boolean isFeatureInstalledInModule(String featureName, String moduleName);
+
+    /**
+     * Indicates whether any of the supplied features are installed in the
+     * focused module.
+     * 
+     * @param featureNames the names of the features (see {@link FeatureNames}
+     *            for available features)
+     * @return true if any of the supplied features are installed in the focused
+     *         module, otherwise false
+     */
+    boolean isFeatureInstalledInFocusedModule(String... featureNames);
 
     /**
      * Indicates whether the module whose name has the focus, if any, is
@@ -592,18 +635,4 @@ public interface ProjectManager {
      * @param projectType the project type to update (required)
      */
     void updateProjectType(final String moduleName, ProjectType projectType);
-    
-    /**
-     * Method that returns Pom object from specified Path
-     * 
-     * @param pomPath
-     * @return
-     */
-    Pom getPomFromPath(final String pomPath);
-    
-    /**
-     * Method that returns Root Pom object
-     * @return
-     */
-    Pom getRootPom();
 }

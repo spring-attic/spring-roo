@@ -10,7 +10,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
-import org.springframework.roo.project.providers.maven.Pom;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Automatically upgrades a Spring Roo annotation JAR to the current version of
@@ -66,7 +66,7 @@ public class AutomaticProjectUpgradeService implements
 
     private static final String SPRING_VERSION = "3.1.0.RELEASE";
     private VersionInfo bundleVersionInfo;
-    @Reference private ProjectService projectService;
+    @Reference private ProjectOperations projectOperations;
 
     protected MetadataDependencyRegistryTracker registryTracker = null;
 
@@ -142,11 +142,11 @@ public class AutomaticProjectUpgradeService implements
             final String moduleName = ProjectMetadata
                     .getModuleName(upstreamDependency);
             // Project Metadata available.
-            if (!projectService.isProjectAvailable(moduleName)) {
+            if (!projectOperations.isProjectAvailable(moduleName)) {
                 return;
             }
 
-            for (final Pom pom : projectService.getPoms()) {
+            for (final Pom pom : projectOperations.getPoms()) {
                 final Set<Property> rooVersionResults = pom
                         .getPropertiesExcludingValue(new Property("roo.version"));
                 for (final Property existingProperty : rooVersionResults) {
@@ -157,7 +157,7 @@ public class AutomaticProjectUpgradeService implements
                             final Property newProperty = new Property(
                                     existingProperty.getName(),
                                     bundleVersionInfo.toString());
-                            projectService.addProperty(moduleName,
+                            projectOperations.addProperty(moduleName,
                                     newProperty);
                             break;
                         }
@@ -176,7 +176,7 @@ public class AutomaticProjectUpgradeService implements
                             final Property newProperty = new Property(
                                     existingProperty.getName(),
                                     latestSpringVersion.toString());
-                            projectService.addProperty(moduleName,
+                            projectOperations.addProperty(moduleName,
                                     newProperty);
                             break;
                         }

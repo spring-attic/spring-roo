@@ -1,4 +1,4 @@
-package org.springframework.roo.project.providers.maven;
+package org.springframework.roo.project.maven;
 
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.support.util.XmlUtils;

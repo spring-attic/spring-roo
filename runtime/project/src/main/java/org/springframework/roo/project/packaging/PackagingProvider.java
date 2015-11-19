@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectService;
+import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Creates the initial set of artifacts for a given Maven packaging type.
@@ -29,12 +29,12 @@ public interface PackagingProvider {
      *            <code>null</code> for none)
      * @param moduleName the name of the module being created (blank for the
      *            root or only module)
-     * @param projectService in case it's required (never <code>null</code>)
+     * @param projectOperations in case it's required (never <code>null</code>)
      * @return the path of the newly created POM
      */
     String createArtifacts(JavaPackage topLevelPackage, String projectName,
             String javaVersion, GAV parentPom, String moduleName,
-            ProjectService projectService);
+            ProjectOperations projectOperations);
 
     /**
      * Returns the unique identifier of this {@link PackagingProvider}, for use
