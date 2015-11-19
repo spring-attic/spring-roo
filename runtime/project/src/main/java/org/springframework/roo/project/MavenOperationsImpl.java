@@ -147,6 +147,76 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
         
     	// ROO-3687: Generates @SpringBootApplication Java class
         createSpringBootApplicationClass(topLevelPackage, projectName);
+        
+        // ROO-3687: Generates application.properties file that will be used by Spring Boot
+        createApplicationPropertiesFile();
+        
+        // ROO-3687: Generates @SpringApplicationConfiguration file that will be
+        // used by JUnit Tests
+        createApplicationTestsClass(topLevelPackage, projectName);
+    }
+
+    /**
+     * Method that creates Java class annotated with @SpringApplicationConfiguration 
+     * that will be used by JUnit Tests
+     * 
+     * @param topLevelPackage
+     * @param projectName
+     */
+    private void createApplicationTestsClass(JavaPackage topLevelPackage,
+            String projectName) {
+     // Set projectName if null
+        if (projectName == null) {
+            projectName = topLevelPackage.getLastElement();
+        }
+        // Uppercase projectName
+        projectName = projectName.substring(0, 1).toUpperCase()
+                .concat(projectName.substring(1, projectName.length()));
+        String testClass = projectName.concat("ApplicationTests");
+
+        final JavaType javaType = new JavaType(topLevelPackage
+                .getFullyQualifiedPackageName().concat(".").concat(testClass));
+        final String physicalPath = pathResolver
+                .getFocusedCanonicalPath(Path.SRC_TEST_JAVA, javaType);
+        if (fileManager.exists(physicalPath)) {
+            throw new RuntimeException(
+                    "ERROR: You are trying to create two Java classes annotated with @SpringApplicationConfiguration that will be used to execute JUnit tests");
+        }
+
+        InputStream inputStream = null;
+        try {
+            inputStream = FileUtils.getInputStream(getClass(),
+                    "SpringApplicationTests-template._java");
+            String input = IOUtils.toString(inputStream);
+            // Replacing package
+            input = input.replace("__PACKAGE__",
+                    topLevelPackage.getFullyQualifiedPackageName());
+            input = input.replace("__PROJECT_NAME__", projectName);
+            fileManager.createOrUpdateTextFileIfRequired(physicalPath, input,
+                    false);
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(
+                    "Unable to create '" + physicalPath + "'", e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    /**
+     * Method that creates application.properties file that will be used by Spring Boot
+     * 
+     */
+    private void createApplicationPropertiesFile() {
+        LogicalPath resourcesPath = Path.SRC_MAIN_RESOURCES
+                .getModulePathId("");
+        
+        if(!fileManager.exists(getPathResolver().getIdentifier(resourcesPath,
+                "application.properties"))){
+            fileManager.createFile(getPathResolver().getIdentifier(resourcesPath,
+                    "application.properties"));
+        }
     }
 
     /**
