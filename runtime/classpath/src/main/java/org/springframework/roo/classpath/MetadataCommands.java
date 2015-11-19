@@ -18,9 +18,9 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.project.converter.PomConverter;
-import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.providers.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -41,14 +41,14 @@ public class MetadataCommands implements CommandMarker {
     @Reference private MetadataDependencyRegistry metadataDependencyRegistry;
     @Reference private MetadataLogger metadataLogger;
     @Reference private MetadataService metadataService;
-    @Reference private ProjectOperations projectOperations;
+    @Reference private ProjectService projectService;
     @Reference private TypeLocationService typeLocationService;
 
     @CliAvailabilityIndicator({ METADATA_FOR_MODULE_COMMAND, METADATA_CACHE_COMMAND, 
     	METADATA_FOR_ID_COMMAND, METADATA_FOR_TYPE_COMMAND, METADATA_STATUS_COMMAND,
     	METADATA_TRACE_COMMAND})
     public boolean isModuleMetadataAvailable() {
-        return projectOperations.getFocusedModule() != null;
+        return projectService.getFocusedModule() != null;
     }
 
     @CliCommand(value = METADATA_CACHE_COMMAND, help = "Shows detailed metadata for the indicated type")
@@ -118,7 +118,7 @@ public class MetadataCommands implements CommandMarker {
     public String metadataForModule(
             @CliOption(key = { "", "module" }, mandatory = false, optionContext = PomConverter.INCLUDE_CURRENT_MODULE, help = "The module for which to retrieve the metadata (defaults to the focused module)") final Pom pom) {
         final Pom targetPom = ObjectUtils.defaultIfNull(pom,
-                projectOperations.getFocusedModule());
+                projectService.getFocusedModule());
         if (targetPom == null) {
             return "This project has no modules";
         }

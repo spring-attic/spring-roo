@@ -14,7 +14,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 
 /**
  * The core {@link PackagingProvider} for web modules.
@@ -32,12 +32,12 @@ public class WarPackaging extends AbstractCorePackagingProvider {
 
     @Override
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectOperations projectOperations) {
-        super.createOtherArtifacts(topLevelPackage, module, projectOperations);
+            final String module, final ProjectService projectService) {
+        super.createOtherArtifacts(topLevelPackage, module, projectService);
         if (StringUtils.isBlank(module)) {
             // This is a single-module web project
             final String fullyQualifiedModuleName = getFullyQualifiedModuleName(
-                    module, projectOperations);
+                    module, projectService);
             getApplicationContextOperations().createMiddleTierApplicationContext(
                     topLevelPackage, fullyQualifiedModuleName);
         }

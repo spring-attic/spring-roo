@@ -18,8 +18,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.project.MavenOperations;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.rest.publisher.ResourceMarker;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -41,8 +40,7 @@ public class ProjectResource implements ResourceMarker {
             .getLogger(ProjectResource.class);
 
     private Shell shell;
-    private ProjectOperations projectOperations;
-    private MavenOperations mavenOperations;
+    private ProjectService projectService;
 
     protected void activate(final ComponentContext cContext) {
         this.context = cContext.getBundleContext();
@@ -52,17 +50,16 @@ public class ProjectResource implements ResourceMarker {
     @Produces("application/json")
     public JsonObject getProject() {
         JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-        ProjectOperations prjOperations = getProjectOperations();
-        MavenOperations mvnOperations = getMavenOperations();
+        ProjectService prjOperations = getProjectService();
 
         // Checking if project exists
-        if (!mvnOperations.isCreateProjectAvailable()) {
+        /*if (!mvnOperations.isCreateProjectAvailable()) {
 
             // Getting project info
             jsonBuilder
                     .add("projectName", prjOperations.getFocusedProjectName())
                     .add("topLevelPackage",
-                            getProjectOperations().getFocusedTopLevelPackage()
+                            getProjectService().getFocusedTopLevelPackage()
                                     .toString()).add("exists", true);
         }
         else {
@@ -70,7 +67,7 @@ public class ProjectResource implements ResourceMarker {
 
             // Returning JSON
             jsonBuilder.add("success", true).add("message", message);
-        }
+        }*/
 
         // Returning JSON
         JsonObject jsonObject = jsonBuilder.build();
@@ -103,64 +100,34 @@ public class ProjectResource implements ResourceMarker {
         return jsonObject;
     }
 
+
     /**
-     * Method to get MavenOperations Service implementation
+     * Method to get projectService Service implementation
      * 
      * @return
      */
-    public MavenOperations getMavenOperations() {
-        if (mavenOperations == null) {
-            // Get all Services implement MavenOperations interface
+    public ProjectService getProjectService() {
+        if (projectService == null) {
+            // Get all Services implement projectService interface
             try {
                 ServiceReference<?>[] references = this.context
                         .getAllServiceReferences(
-                                MavenOperations.class.getName(), null);
+                                ProjectService.class.getName(), null);
 
                 for (ServiceReference<?> ref : references) {
-                    return (MavenOperations) this.context.getService(ref);
+                    return (ProjectService) this.context.getService(ref);
                 }
 
                 return null;
 
             }
             catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load MavenOperations on ProjectConfigurationController.");
+                LOGGER.warning("Cannot load projectService on ProjectConfigurationController.");
                 return null;
             }
         }
         else {
-            return mavenOperations;
-        }
-
-    }
-
-    /**
-     * Method to get ProjectOperations Service implementation
-     * 
-     * @return
-     */
-    public ProjectOperations getProjectOperations() {
-        if (projectOperations == null) {
-            // Get all Services implement ProjectOperations interface
-            try {
-                ServiceReference<?>[] references = this.context
-                        .getAllServiceReferences(
-                                ProjectOperations.class.getName(), null);
-
-                for (ServiceReference<?> ref : references) {
-                    return (ProjectOperations) this.context.getService(ref);
-                }
-
-                return null;
-
-            }
-            catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load ProjectOperations on ProjectConfigurationController.");
-                return null;
-            }
-        }
-        else {
-            return projectOperations;
+            return projectService;
         }
     }
 

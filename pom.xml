@@ -24,11 +24,10 @@
     <modules>
         <!-- NB: Update the <dependencyManagement> section in this pom.xml if you 
             add/remove/rename any module below! -->
-
         <!-- ROO Core -->
         <module>runtime</module>
         <!-- ROO Addons -->
-        <module>addon-javabean</module>
+        <!-- <module>addon-javabean</module>
         <module>addon-plural</module>
         <module>addon-propfiles</module>
         <module>addon-configurable</module>
@@ -54,10 +53,10 @@
         <module>addon-cloud</module>
         <module>addon-jms</module>
         <module>addon-email</module>
-	<module>addon-push-in</module>
-        <module>annotations</module>
+	    <module>addon-push-in</module>
+        <module>annotations</module>-->
         <!-- Web UI -->
-        <module>web-ui</module>
+        <!-- <module>web-ui</module>-->
     </modules>
     <distributionManagement>
         <snapshotRepository>

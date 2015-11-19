@@ -12,7 +12,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 
 /**
  * The {@link PackagingProvider} that creates an OSGi bundle.
@@ -27,9 +27,9 @@ public class BundlePackaging implements CorePackagingProvider {
     public String createArtifacts(final JavaPackage topLevelPackage,
             final String nullableProjectName, final String javaVersion,
             final GAV parentPom, final String module,
-            final ProjectOperations projectOperations) {
+            final ProjectService projectService) {
         // Already created by the creator addon
-        return projectOperations.getPathResolver().getIdentifier(
+        return projectService.getPathResolver().getIdentifier(
                 LogicalPath.getInstance(Path.ROOT, ""), "pom.xml");
     }
 

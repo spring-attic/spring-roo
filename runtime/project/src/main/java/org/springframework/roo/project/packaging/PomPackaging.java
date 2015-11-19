@@ -6,7 +6,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 
 /**
  * The Maven "pom" {@link PackagingProvider}
@@ -27,7 +27,7 @@ public class PomPackaging extends AbstractCorePackagingProvider {
 
     @Override
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectOperations projectOperations) {
+            final String module, final ProjectService projectService) {
         // No artifacts are applicable for POM modules
     }
 

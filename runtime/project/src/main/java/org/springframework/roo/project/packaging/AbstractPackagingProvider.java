@@ -18,7 +18,7 @@ import org.springframework.roo.project.ApplicationContextOperations;
 import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
@@ -94,10 +94,10 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     public String createArtifacts(final JavaPackage topLevelPackage,
             final String nullableProjectName, final String javaVersion,
             final GAV parentPom, final String module,
-            final ProjectOperations projectOperations) {
+            final ProjectService projectService) {
         final String pomPath = createPom(topLevelPackage, nullableProjectName,
-                javaVersion, parentPom, module, projectOperations);
-        createOtherArtifacts(topLevelPackage, module, projectOperations);
+                javaVersion, parentPom, module, projectService);
+        createOtherArtifacts(topLevelPackage, module, projectService);
         return pomPath;
     }
 
@@ -112,11 +112,11 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
      * @param topLevelPackage
      * @param module the unqualified name of the module being created (empty
      *            means the root or only module)
-     * @param projectOperations can't be injected as it would create a circular
+     * @param projectService can't be injected as it would create a circular
      *            dependency
      */
     protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectOperations projectOperations) {
+            final String module, final ProjectService projectService) {
         if (StringUtils.isBlank(module)) {
             setUpLog4jConfiguration();
         }
@@ -146,14 +146,14 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
      *            <code>null</code>)
      * @param module the unqualified name of the Maven module to which the new
      *            POM belongs
-     * @param projectOperations cannot be injected otherwise it's a circular
+     * @param projectService cannot be injected otherwise it's a circular
      *            dependency
      * @return the path of the newly created POM
      */
     protected String createPom(final JavaPackage topLevelPackage,
             final String projectName, final String javaVersion,
             final GAV parentPom, final String module,
-            final ProjectOperations projectOperations) {
+            final ProjectService projectService) {
         Validate.notBlank(javaVersion, "Java version required");
         Validate.notNull(topLevelPackage, "Top level package required");
 
@@ -237,15 +237,15 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
      * currently focused module.
      * 
      * @param moduleName can be blank for the root or only module
-     * @param projectOperations
+     * @param projectService
      * @return
      */
     protected final String getFullyQualifiedModuleName(final String moduleName,
-            final ProjectOperations projectOperations) {
+            final ProjectService projectService) {
         if (StringUtils.isBlank(moduleName)) {
             return "";
         }
-        final String focusedModuleName = projectOperations
+        final String focusedModuleName = projectService
                 .getFocusedModuleName();
         if (StringUtils.isBlank(focusedModuleName)) {
             return moduleName;

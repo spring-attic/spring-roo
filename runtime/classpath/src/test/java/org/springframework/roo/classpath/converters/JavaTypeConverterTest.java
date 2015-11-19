@@ -21,8 +21,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.ProjectService;
+import org.springframework.roo.project.providers.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.OptionContexts;
 import org.springframework.roo.support.util.AnsiEscapeCode;
@@ -39,7 +39,7 @@ public class JavaTypeConverterTest {
     private JavaTypeConverter converter;
     @Mock FileManager mockFileManager;
     @Mock LastUsed mockLastUsed;
-    @Mock ProjectOperations mockProjectOperations;
+    @Mock ProjectService mockprojectService;
     @Mock TypeLocationService mockTypeLocationService;
 
     @Before
@@ -48,7 +48,7 @@ public class JavaTypeConverterTest {
         converter = new JavaTypeConverter();
         converter.fileManager = mockFileManager;
         converter.lastUsed = mockLastUsed;
-        converter.projectOperations = mockProjectOperations;
+        converter.projectService = mockprojectService;
         converter.typeLocationService = mockTypeLocationService;
     }
 
@@ -79,7 +79,7 @@ public class JavaTypeConverterTest {
         // Set up
         final String moduleName = "web";
         final Pom mockWebPom = mock(Pom.class);
-        when(mockProjectOperations.getPomFromModuleName(moduleName))
+        when(mockprojectService.getPomFromModuleName(moduleName))
                 .thenReturn(mockWebPom);
         final String topLevelPackage = "com.example.app.mvc";
         when(mockTypeLocationService.getTopLevelPackageForModule(mockWebPom))
@@ -105,7 +105,7 @@ public class JavaTypeConverterTest {
         // Set up
         final String moduleName = "web";
         final Pom mockWebPom = mock(Pom.class);
-        when(mockProjectOperations.getPomFromModuleName(moduleName))
+        when(mockprojectService.getPomFromModuleName(moduleName))
                 .thenReturn(mockWebPom);
         final String topLevelPackage = "com.example.app.mvc";
         when(mockTypeLocationService.getTopLevelPackageForModule(mockWebPom))
@@ -165,12 +165,12 @@ public class JavaTypeConverterTest {
         // Set up
         @SuppressWarnings("unchecked")
         final List<Completion> mockCompletions = mock(List.class);
-        when(mockProjectOperations.isFocusedProjectAvailable())
+        when(mockprojectService.isFocusedProjectAvailable())
                 .thenReturn(true);
         final String otherModuleName = "core";
         final Pom mockOtherModule = mock(Pom.class);
         when(mockOtherModule.getModuleName()).thenReturn(otherModuleName);
-        when(mockProjectOperations.getPomFromModuleName(otherModuleName))
+        when(mockprojectService.getPomFromModuleName(otherModuleName))
                 .thenReturn(mockOtherModule);
         final String topLevelPackage = "com.example";
         when(
@@ -178,7 +178,7 @@ public class JavaTypeConverterTest {
                         .getTopLevelPackageForModule(mockOtherModule))
                 .thenReturn(topLevelPackage);
         final String focusedModuleName = "web";
-        when(mockProjectOperations.getModuleNames()).thenReturn(
+        when(mockprojectService.getModuleNames()).thenReturn(
                 Arrays.asList(focusedModuleName, otherModuleName));
         final String modulePath = "/path/to/it";
         when(mockOtherModule.getPath()).thenReturn(modulePath);
@@ -231,10 +231,10 @@ public class JavaTypeConverterTest {
         // Set up
         @SuppressWarnings("unchecked")
         final List<Completion> mockCompletions = mock(List.class);
-        when(mockProjectOperations.isFocusedProjectAvailable())
+        when(mockprojectService.isFocusedProjectAvailable())
                 .thenReturn(true);
         final Pom mockFocusedModule = mock(Pom.class);
-        when(mockProjectOperations.getFocusedModule()).thenReturn(
+        when(mockprojectService.getFocusedModule()).thenReturn(
                 mockFocusedModule);
         final String topLevelPackage = "com.example";
         when(
@@ -246,7 +246,7 @@ public class JavaTypeConverterTest {
         final String modulePath = "/path/to/it";
         when(mockFocusedModule.getPath()).thenReturn(modulePath);
         final String otherModuleName = "core";
-        when(mockProjectOperations.getModuleNames()).thenReturn(
+        when(mockprojectService.getModuleNames()).thenReturn(
                 Arrays.asList(focusedModuleName, otherModuleName));
         final JavaType type1 = new JavaType("com.example.Foo");
         final JavaType type2 = new JavaType("com.example.sub.Bar");

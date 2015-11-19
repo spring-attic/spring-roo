@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.providers.maven.Pom;
 import org.springframework.roo.support.util.FileUtils;
 
 /**

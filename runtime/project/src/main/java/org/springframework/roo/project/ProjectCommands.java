@@ -2,7 +2,6 @@ package org.springframework.roo.project;
 
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -13,6 +12,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.packaging.JarPackaging;
 import org.springframework.roo.project.packaging.PackagingProvider;
+import org.springframework.roo.project.providers.ProjectManagerProviderId;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -44,8 +44,7 @@ public class ProjectCommands implements CommandMarker {
 
     private ProcessManager processManager;
     private Shell shell;
-    private ProjectOperations projectOperations;
-    private MavenOperations mavenOperations;
+    private ProjectService projectService;
 
     protected void activate(final ComponentContext context) {
     	this.context = context.getBundleContext();
@@ -53,87 +52,63 @@ public class ProjectCommands implements CommandMarker {
     
     @CliAvailabilityIndicator(PROJECT_SETUP_COMMAND)
     public boolean isCreateProjectAvailable() {
-    	
-        return getMavenOperations().isCreateProjectAvailable();
-    }
-    
-    @CliCommand(value = PROJECT_SETUP_COMMAND, help = "Creates a new Maven project")
-    public void createProject(
-            @CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
-            @CliOption(key = "projectName", help = "The name of the project (last segment of package name used as default)") final String projectName,
-            @CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
-            @CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
-            @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
-
-        getMavenOperations().createProject(topLevelPackage, projectName,
-                majorJavaVersion, parentPom, packaging);
+        return getProjectService().isCreateProjectAvailable();
     }
     
     @CliAvailabilityIndicator({PROJECT_SCAN_SPEED_COMMAND, PROJECT_SCAN_STATUS_COMMAND,
     	PROJECT_SCAN_NOW_COMMAND})
     public boolean isProjecScanAvailable() {
-        return getProjectOperations().isFocusedProjectAvailable();
+        return getProjectService().isFocusedProjectAvailable();
     }
+    
+    @CliCommand(value = PROJECT_SETUP_COMMAND, help = "Creates a new Maven project")
+    public void createProject(
+            @CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the groupId and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+            @CliOption(key = "provider", mandatory = true, help = "Provider to use on project generation") ProjectManagerProviderId provider,
+            @CliOption(key = "projectName", help = "The name of the project (last segment of package name used as default)") final String projectName,
+            @CliOption(key = "java", help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
+            @CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
+            @CliOption(key = "packaging", help = "The Maven packaging of this project", unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
+        getProjectService().createProject(topLevelPackage, projectName,
+                majorJavaVersion, packaging, provider);
+    }
+    
     @CliCommand(value = DEVELOPMENT_MODE_COMMAND, help = "Switches the system into development mode (greater diagnostic information)")
     public String developmentMode(
             @CliOption(key = { "", "enabled" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Activates development mode") final boolean enabled) {
-        
-    	if(processManager == null){
-    		processManager = getProcessManager();
-    	}
-    	
-    	Validate.notNull(processManager, "ProcessManager is required");
-    	
-    	if(shell == null){
-    		shell = getShell();
-    	}
-    	
-    	Validate.notNull(shell, "Shell is required");
-    	
-    	processManager.setDevelopmentMode(enabled);
-        shell.setDevelopmentMode(enabled);
+    	getProcessManager().setDevelopmentMode(enabled);
+        getShell().setDevelopmentMode(enabled);
         return "Development mode set to " + enabled;
     }
 
     @CliCommand(value = PROJECT_SCAN_NOW_COMMAND, help = "Perform a manual file system scan")
     public String scan() {
-    	if(processManager == null){
-    		processManager = getProcessManager();
-    	}
-    	
-    	Validate.notNull(processManager, "ProcessManager is required");
-    	
-        final long originalSetting = processManager
+        final long originalSetting = getProcessManager()
                 .getMinimumDelayBetweenScan();
         try {
-            processManager.setMinimumDelayBetweenScan(1);
-            processManager.timerBasedScan();
+            getProcessManager().setMinimumDelayBetweenScan(1);
+            getProcessManager().timerBasedScan();
         }
         finally {
             // Switch on manual scan again
-            processManager.setMinimumDelayBetweenScan(originalSetting);
+        	getProcessManager().setMinimumDelayBetweenScan(originalSetting);
         }
         return "Manual scan completed";
     }
 
     @CliCommand(value = PROJECT_SCAN_STATUS_COMMAND, help = "Display file system scanning information")
     public String scanningInfo() {
-    	if(processManager == null){
-    		processManager = getProcessManager();
-    	}
-    	
-    	Validate.notNull(processManager, "ProcessManager is required");
     	
         final StringBuilder sb = new StringBuilder("File system scanning ");
-        final long duration = processManager.getLastScanDuration();
+        final long duration = getProcessManager().getLastScanDuration();
         if (duration == 0) {
             sb.append("never executed; ");
         }
         else {
             sb.append("last took ").append(duration).append(" ms; ");
         }
-        final long minimum = processManager.getMinimumDelayBetweenScan();
+        final long minimum = getProcessManager().getMinimumDelayBetweenScan();
         if (minimum == 0) {
             sb.append("automatic scanning is disabled");
         }
@@ -150,94 +125,77 @@ public class ProjectCommands implements CommandMarker {
     @CliCommand(value = PROJECT_SCAN_SPEED_COMMAND, help = "Changes the file system scanning speed")
     public String scanningSpeed(
             @CliOption(key = { "", "ms" }, mandatory = true, help = "The number of milliseconds between each scan") final long minimumDelayBetweenScan) {
-    	if(processManager == null){
-    		processManager = getProcessManager();
-    	}
-    	
-    	Validate.notNull(processManager, "ProcessManager is required");
-    	
-    	processManager.setMinimumDelayBetweenScan(minimumDelayBetweenScan);
+    	getProcessManager().setMinimumDelayBetweenScan(minimumDelayBetweenScan);
         return scanningInfo();
     }
     
     public ProcessManager getProcessManager(){
-    	// Get all components implement ProcessManager interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProcessManager.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ProcessManager) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ProcessManager on ProcessManagerCommands.");
-			return null;
-		}
+    	if(processManager == null){
+    		// Get all components implement ProcessManager interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProcessManager.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				processManager = (ProcessManager) this.context.getService(ref);
+    				return processManager;
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load ProcessManager on ProjectCommands.");
+    			return null;
+    		}
+    	}else{
+    		return processManager;
+    	}
     }
     
     public Shell getShell(){
-    	// Get all Shell implement Shell interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(Shell.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (Shell) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load Shell on ProcessManagerCommands.");
-			return null;
-		}
+    	if(shell == null){
+    		// Get all Shell implement Shell interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(Shell.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				shell = (Shell) this.context.getService(ref);
+    				return shell;
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load Shell on ProjectCommands.");
+    			return null;
+    		}
+    		
+    	}else{
+    		return shell;
+    	}
     }
     
-    public ProjectOperations getProjectOperations() {
-        if (projectOperations == null) {
-            // Get all Services implement ProjectOperations interface
+    public ProjectService getProjectService() {
+        if (projectService == null) {
+            // Get all Services implement ProjectService interface
             try {
                 ServiceReference<?>[] references = this.context
                         .getAllServiceReferences(
-                        		ProjectOperations.class.getName(), null);
+                        		ProjectService.class.getName(), null);
 
                 for (ServiceReference<?> ref : references) {
-                    return (ProjectOperations) this.context.getService(ref);
+                    return (ProjectService) this.context.getService(ref);
                 }
 
                 return null;
 
             }
             catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load ProjectOperations on ProcessManagerCommands.");
+                LOGGER.warning("Cannot load ProjectService on ProjectCommands.");
                 return null;
             }
         }
         else {
-            return projectOperations;
+            return projectService;
         }
-    }
-    
-    public MavenOperations getMavenOperations(){
-    	if(mavenOperations == null){
-    		// Get all Services implement MavenOperations interface
-    		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(MavenOperations.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				return (MavenOperations) this.context.getService(ref);
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load MavenOperations on MavenCommands.");
-    			return null;
-    		}
-    	}else{
-    		return mavenOperations;
-    	}
-    	
     }
 }

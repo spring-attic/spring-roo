@@ -4,29 +4,30 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
+import org.springframework.roo.project.providers.ProjectManagerProviderId;
+import org.springframework.roo.project.providers.maven.MavenProjectManagerProvider;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link MavenOperations}.
@@ -37,7 +38,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Component
 @Service
-public class MavenOperationsImpl extends AbstractProjectOperations implements
+public class MavenOperationsImpl extends MavenProjectManagerProvider implements
         MavenOperations {
 	
 	protected final static Logger LOGGER = HandlerUtils.getLogger(MavenOperationsImpl.class);
@@ -119,7 +120,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
                 topLevelPackage, artifactId, getJavaVersion(majorJavaVersion),
                 parentPom, moduleName, this);
         updateParentModulePom(moduleName);
-        setModule(pomManagementService.getPomFromPath(pathToNewPom));
+        setModule(getPomFromPath(pathToNewPom));
     }
 
     private Element createModulesElementIfNecessary(final Document pomDocument,
@@ -213,8 +214,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
     }
 
     public String getProjectRoot() {
-        return pathResolver.getRoot(Path.ROOT
-                .getModulePathId(pomManagementService.getFocusedModuleName()));
+        return getPathResolver().getRoot(Path.ROOT
+                .getModulePathId(getFocusedModuleName()));
     }
 
     public boolean isCreateModuleAvailable() {
@@ -237,7 +238,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
     }
 
     private void updateParentModulePom(final String moduleName) {
-        final String parentPomPath = pomManagementService.getFocusedModule()
+        final String parentPomPath = getFocusedModule()
                 .getPath();
         final Document parentPomDocument = XmlUtils.readXml(fileManager
                 .getInputStream(parentPomPath));
@@ -285,5 +286,44 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
 			return null;
 		}
     }
+    
+    // TOREMOVE
+
+	@Override
+	public void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion,
+			PackagingProvider packagingType, ProjectManagerProviderId provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ProjectManagerProviderId getProviderIdByName(String value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ProjectManagerProviderId> getProvidersId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isFeatureInstalled(String featureName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isFeatureInstalledInModule(String featureName, String moduleName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isFeatureInstalledInFocusedModule(String... featureNames) {
+		// TODO Auto-generated method stub
+		return false;
+	}
     
 }

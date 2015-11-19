@@ -6,7 +6,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectService;
 
 /**
  * The Maven "pom" {@link PackagingProvider}
