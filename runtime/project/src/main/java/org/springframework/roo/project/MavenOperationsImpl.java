@@ -18,6 +18,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.ActiveProcessManager;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
@@ -33,6 +34,7 @@ import org.w3c.dom.Element;
  * 
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -44,7 +46,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
 	
 	private PackagingProviderRegistry packagingProviderRegistry;
     private ProcessManager processManager;
-    private SpringBootManager springBootManager;
 	
 	// ------------ OSGi component attributes ----------------
    	private BundleContext context;
@@ -147,9 +148,105 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
                 getJavaVersion(majorJavaVersion), parentPom, "", this);
         
     	// ROO-3687: Generates necessary Spring Boot artifacts
-        getSpringBootManager().createSpringBootApplicationClass(topLevelPackage, projectName);
-        getSpringBootManager().createSpringBootApplicationPropertiesFile();
-        getSpringBootManager().createApplicationTestsClass(topLevelPackage, projectName);
+        createSpringBootApplicationClass(topLevelPackage, projectName);
+        createSpringBootApplicationPropertiesFile();
+        createApplicationTestsClass(topLevelPackage, projectName);
+    }
+    
+    public void createSpringBootApplicationClass(JavaPackage topLevelPackage,
+            String projectName) {
+        // Set projectName if null
+        if (projectName == null) {
+            projectName = topLevelPackage.getLastElement();
+        }
+        // Uppercase projectName
+        projectName = projectName.substring(0, 1).toUpperCase()
+                .concat(projectName.substring(1, projectName.length()));
+        String bootClass = projectName.concat("Application");
+
+        final JavaType javaType = new JavaType(topLevelPackage
+                .getFullyQualifiedPackageName().concat(".").concat(bootClass));
+        final String physicalPath = getPathResolver()
+                .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, javaType);
+        if (getFileManager().exists(physicalPath)) {
+            throw new RuntimeException(
+                    "ERROR: You are trying to create two Java classes annotated with @SpringBootApplication");
+        }
+
+        InputStream inputStream = null;
+        try {
+            inputStream = FileUtils.getInputStream(getClass(),
+                    "SpringBootApplication-template._java");
+            String input = IOUtils.toString(inputStream);
+            // Replacing package
+            input = input.replace("__PACKAGE__",
+                    topLevelPackage.getFullyQualifiedPackageName());
+            input = input.replace("__PROJECT_NAME__", projectName);
+            getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input,
+                    false);
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(
+                    "Unable to create '" + physicalPath + "'", e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        
+    }
+
+    public void createSpringBootApplicationPropertiesFile() {
+        LogicalPath resourcesPath = Path.SRC_MAIN_RESOURCES
+                .getModulePathId("");
+        
+        if(!getFileManager().exists(getPathResolver().getIdentifier(resourcesPath,
+                "application.properties"))){
+            getFileManager().createFile(getPathResolver().getIdentifier(resourcesPath,
+                    "application.properties"));
+        }
+        
+    }
+    
+    public void createApplicationTestsClass(JavaPackage topLevelPackage,
+            String projectName) {
+        // Set projectName if null
+        if (projectName == null) {
+            projectName = topLevelPackage.getLastElement();
+        }
+        // Uppercase projectName
+        projectName = projectName.substring(0, 1).toUpperCase()
+                .concat(projectName.substring(1, projectName.length()));
+        String testClass = projectName.concat("ApplicationTests");
+
+        final JavaType javaType = new JavaType(topLevelPackage
+                .getFullyQualifiedPackageName().concat(".").concat(testClass));
+        final String physicalPath = getPathResolver()
+                .getFocusedCanonicalPath(Path.SRC_TEST_JAVA, javaType);
+        if (getFileManager().exists(physicalPath)) {
+            throw new RuntimeException(
+                    "ERROR: You are trying to create two Java classes annotated with @SpringApplicationConfiguration that will be used to execute JUnit tests");
+        }
+
+        InputStream inputStream = null;
+        try {
+            inputStream = FileUtils.getInputStream(getClass(),
+                    "SpringApplicationTests-template._java");
+            String input = IOUtils.toString(inputStream);
+            // Replacing package
+            input = input.replace("__PACKAGE__",
+                    topLevelPackage.getFullyQualifiedPackageName());
+            input = input.replace("__PROJECT_NAME__", projectName);
+            getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input,
+                    false);
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(
+                    "Unable to create '" + physicalPath + "'", e);
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        
     }
 
 	public void executeMvnCommand(final String extra) throws IOException {
@@ -292,25 +389,25 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
 		}
     }
     
-    public SpringBootManager getSpringBootManager(){
-        if(springBootManager == null){
-            // Get all Services implement SpringBootManager interface
+    public FileManager getFileManager(){
+        if(fileManager == null){
+            // Get all Services implement FileManager interface
             try {
-                ServiceReference<?>[] references = this.context.getAllServiceReferences(SpringBootManager.class.getName(), null);
+                ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(), null);
                 
                 for(ServiceReference<?> ref : references){
-                    springBootManager = (SpringBootManager) this.context.getService(ref);
-                    return springBootManager;
+                    fileManager = (FileManager) this.context.getService(ref);
+                    return fileManager;
                 }
                 
                 return null;
                 
             } catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load SpringBootManager on MavenOperationsImpl.");
+                LOGGER.warning("Cannot load FileManager on SpringBootManagerImpl.");
                 return null;
             }
         }else{
-            return springBootManager;
+            return fileManager;
         }
     }
     
