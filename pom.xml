@@ -24,6 +24,7 @@
     <modules>
         <!-- NB: Update the <dependencyManagement> section in this pom.xml if you 
             add/remove/rename any module below! -->
+
         <!-- ROO Core -->
         <module>runtime</module>
         <!-- ROO Addons -->
