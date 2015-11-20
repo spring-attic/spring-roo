@@ -156,9 +156,9 @@ public class JpaOperationsImpl implements JpaOperations {
         final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
         final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
 
-        updateEclipsePlugin(false);
-        updateDataNucleusPlugin(false);
-        projectOperations.updateDependencyScope(moduleName,
+        //updateEclipsePlugin(false);
+        // updateDataNucleusPlugin(false);
+        /*projectOperations.updateDependencyScope(moduleName,
                 JSTL_IMPL_DEPENDENCY, null);
 
         updateApplicationContext(ormProvider, jdbcDatabase, jndi,
@@ -178,7 +178,7 @@ public class JpaOperationsImpl implements JpaOperations {
             updateJndiProperties();
         }
 
-        updateLog4j(ormProvider);
+        updateLog4j(ormProvider);*/
         updatePomProperties(configuration, ormProvider, jdbcDatabase,
                 moduleName);
         updateDependencies(configuration, ormProvider, jdbcDatabase,
