@@ -341,6 +341,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
                 // Project has its own groupId => needs to be explicit
                 projectGroupIdElement.setTextContent(projectGroupId);
             }
+        }else {
+            // Project has its own groupId => needs to be explicit
+            projectGroupIdElement.setTextContent(projectGroupId);
         }
     }
 
