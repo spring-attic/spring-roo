@@ -109,21 +109,12 @@ public class JpaOperationsImpl implements JpaOperations {
         }
     }
 
-    static final String APPLICATION_CONTEXT_XML = "applicationContext.xml";
-    private static final String DATABASE_DRIVER = "database.driverClassName";
-    private static final String DATABASE_PASSWORD = "database.password";
-    private static final String DATABASE_PROPERTIES_FILE = "database.properties";
-    private static final String DATABASE_URL = "database.url";
-    private static final String DATABASE_USERNAME = "database.username";
-    private static final String DEFAULT_PERSISTENCE_UNIT = "persistenceUnit";
-    private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
-    static final String JPA_DIALECTS_FILE = "jpa-dialects.properties";
-
-    private static final Dependency JSTL_IMPL_DEPENDENCY = new Dependency(
-            "org.glassfish.web", "jstl-impl", "1.2");
-    private static final String PERSISTENCE_UNIT = "persistence-unit";
-    static final String PERSISTENCE_XML = "META-INF/persistence.xml";
-
+    private static final String APPLICATION_PROPERTIES_FILE = "application.properties";
+    private static final String DATABASE_DRIVER = "spring.datasource.driver-class-name";
+    private static final String DATABASE_PASSWORD = "spring.datasource.password";
+    private static final String DATABASE_URL = "spring.datasource.url";
+    private static final String DATABASE_USERNAME = "spring.datasource.username";
+    private static final String JNDI_NAME = "spring.datasource.jndi-name";
     static final String POM_XML = "pom.xml";
 
     FileManager fileManager;
@@ -148,37 +139,18 @@ public class JpaOperationsImpl implements JpaOperations {
         Validate.notNull(ormProvider, "ORM provider required");
         Validate.notNull(jdbcDatabase, "JDBC database required");
 
-        // Parse the configuration.xml file
-        final Element configuration = XmlUtils.getConfiguration(getClass());
-
+        updateApplicationProperties(ormProvider, jdbcDatabase, hostName,
+                databaseName, userName, password, moduleName, jndi);
+        
+       // Parse the configuration.xml file
+       final Element configuration = XmlUtils.getConfiguration(getClass());
+        
         // Get the first part of the XPath expressions for unwanted databases
         // and ORM providers
         final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
         final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
-
-        //updateEclipsePlugin(false);
-        // updateDataNucleusPlugin(false);
-        /*projectOperations.updateDependencyScope(moduleName,
-                JSTL_IMPL_DEPENDENCY, null);
-
-        updateApplicationContext(ormProvider, jdbcDatabase, jndi,
-                transactionManager, persistenceUnit);
-        updatePersistenceXml(ormProvider, jdbcDatabase, hostName, databaseName,
-                userName, password, persistenceUnit, moduleName);
-        manageGaeXml(ormProvider, jdbcDatabase, applicationId, moduleName);
-        updateDatabaseDotComConfigProperties(ormProvider, jdbcDatabase,
-                hostName, userName, password, StringUtils.defaultIfEmpty(
-                        persistenceUnit, DEFAULT_PERSISTENCE_UNIT), moduleName);
-
-        if (StringUtils.isBlank(jndi)) {
-            updateDatabaseProperties(ormProvider, jdbcDatabase, hostName,
-                    databaseName, userName, password, moduleName);
-        }
-        else {
-            updateJndiProperties();
-        }
-
-        updateLog4j(ormProvider);*/
+        
+        
         updatePomProperties(configuration, ormProvider, jdbcDatabase,
                 moduleName);
         updateDependencies(configuration, ormProvider, jdbcDatabase,
@@ -254,13 +226,13 @@ public class JpaOperationsImpl implements JpaOperations {
         if (hasDatabaseProperties()) {
             return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT
                     .getModulePathId(projectOperations.getFocusedModuleName()),
-                    DATABASE_PROPERTIES_FILE, true);
+                    APPLICATION_PROPERTIES_FILE, true);
         }
         return getPropertiesFromDataNucleusConfiguration();
     }
 
-    private String getDatabasePropertiesPath() {
-        return getPropertiesPath(DATABASE_PROPERTIES_FILE);
+    private String getApplicationPropertiesPath() {
+        return getPropertiesPath(APPLICATION_PROPERTIES_FILE);
     }
 
     private String getDbXPath(final List<JdbcDatabase> databases) {
@@ -312,23 +284,8 @@ public class JpaOperationsImpl implements JpaOperations {
         return filters;
     }
 
-    private String getJndiPropertiesPath() {
-        return getPropertiesPath("jndi.properties");
-    }
-
     public String getName() {
         return FeatureNames.JPA;
-    }
-
-    private String getPersistencePathOfFocussedModule() {
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-        return pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
-                PERSISTENCE_XML);
     }
 
     private List<Plugin> getPlugins(final String xPathExpression,
@@ -363,8 +320,10 @@ public class JpaOperationsImpl implements JpaOperations {
     	}
     	Validate.notNull(pathResolver, "PathResolver is required");
     	
-        final String persistenceXmlPath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);
+        /*final String persistenceXmlPath = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);*/
+    	final String persistenceXmlPath = pathResolver.getFocusedIdentifier(
+                Path.SRC_MAIN_RESOURCES, "");
         if (!fileManager.exists(persistenceXmlPath)) {
             throw new IllegalStateException("Failed to find "
                     + persistenceXmlPath);
@@ -413,7 +372,7 @@ public class JpaOperationsImpl implements JpaOperations {
     	Validate.notNull(pathResolver, "PathResolver is required");
     	
         String path = pathResolver.getFocusedIdentifier(
-                Path.SPRING_CONFIG_ROOT, propertiesFile);
+                Path.SRC_MAIN_RESOURCES, propertiesFile);
         if (StringUtils.isBlank(path)) {
             final String tmpDir = System.getProperty("java.io.tmpdir");
             // For unit testing, as path will be null otherwise
@@ -477,7 +436,7 @@ public class JpaOperationsImpl implements JpaOperations {
     	}
     	Validate.notNull(fileManager, "FileManager is required");
     	
-        return fileManager.exists(getDatabasePropertiesPath());
+        return fileManager.exists(getApplicationPropertiesPath());
     }
 
     public boolean isInstalledInModule(final String moduleName) {
@@ -499,9 +458,7 @@ public class JpaOperationsImpl implements JpaOperations {
     	
         final LogicalPath resourcesPath = LogicalPath.getInstance(
                 Path.SRC_MAIN_RESOURCES, moduleName);
-        return isJpaInstallationPossible()
-                && fileManager.exists(projectOperations.getPathResolver()
-                        .getIdentifier(resourcesPath, PERSISTENCE_XML));
+        return isJpaInstallationPossible();
     }
 
     public boolean isJpaInstallationPossible() {
@@ -773,169 +730,6 @@ public class JpaOperationsImpl implements JpaOperations {
         return props;
     }
 
-    private void updateApplicationContext(final OrmProvider ormProvider,
-            final JdbcDatabase jdbcDatabase, final String jndi,
-            String transactionManager, final String persistenceUnit) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final String contextPath = projectOperations.getPathResolver()
-                .getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
-                        APPLICATION_CONTEXT_XML);
-        final Document appCtx = XmlUtils.readXml(fileManager
-                .getInputStream(contextPath));
-        final Element root = appCtx.getDocumentElement();
-
-        // Checking for existence of configurations, if found abort
-        Element dataSource = XmlUtils.findFirstElement(
-                "/beans/bean[@id = 'dataSource']", root);
-        Element dataSourceJndi = XmlUtils.findFirstElement(
-                "/beans/jndi-lookup[@id = 'dataSource']", root);
-
-        if (ormProvider == OrmProvider.DATANUCLEUS) {
-            if (dataSource != null) {
-                root.removeChild(dataSource);
-            }
-            if (dataSourceJndi != null) {
-                root.removeChild(dataSourceJndi);
-            }
-        }
-        else if (StringUtils.isBlank(jndi) && dataSource == null) {
-            dataSource = appCtx.createElement("bean");
-            dataSource.setAttribute("class",
-                    "org.apache.commons.dbcp.BasicDataSource");
-            dataSource.setAttribute("destroy-method", "close");
-            dataSource.setAttribute("id", "dataSource");
-            dataSource.appendChild(createPropertyElement("driverClassName",
-                    "${database.driverClassName}", appCtx));
-            dataSource.appendChild(createPropertyElement("url",
-                    "${database.url}", appCtx));
-            dataSource.appendChild(createPropertyElement("username",
-                    "${database.username}", appCtx));
-            dataSource.appendChild(createPropertyElement("password",
-                    "${database.password}", appCtx));
-            dataSource.appendChild(createPropertyElement("testOnBorrow",
-                    "true", appCtx));
-            dataSource.appendChild(createPropertyElement("testOnReturn",
-                    "true", appCtx));
-            dataSource.appendChild(createPropertyElement("testWhileIdle",
-                    "true", appCtx));
-            dataSource.appendChild(createPropertyElement(
-                    "timeBetweenEvictionRunsMillis", "1800000", appCtx));
-            dataSource.appendChild(createPropertyElement(
-                    "numTestsPerEvictionRun", "3", appCtx));
-            dataSource.appendChild(createPropertyElement(
-                    "minEvictableIdleTimeMillis", "1800000", appCtx));
-            root.appendChild(dataSource);
-            if (dataSourceJndi != null) {
-                dataSourceJndi.getParentNode().removeChild(dataSourceJndi);
-            }
-        }
-        else if (StringUtils.isNotBlank(jndi)) {
-            if (dataSourceJndi == null) {
-                dataSourceJndi = appCtx.createElement("jee:jndi-lookup");
-                dataSourceJndi.setAttribute("id", "dataSource");
-                root.appendChild(dataSourceJndi);
-            }
-            dataSourceJndi.setAttribute("jndi-name", jndi);
-            if (dataSource != null) {
-                dataSource.getParentNode().removeChild(dataSource);
-            }
-        }
-
-        if (dataSource != null) {
-            final Element validationQueryElement = XmlUtils.findFirstElement(
-                    "property[@name = 'validationQuery']", dataSource);
-            if (validationQueryElement != null) {
-                dataSource.removeChild(validationQueryElement);
-            }
-            String validationQuery = "";
-            switch (jdbcDatabase) {
-            case ORACLE:
-                validationQuery = "SELECT 1 FROM DUAL";
-                break;
-            case POSTGRES:
-                validationQuery = "SELECT version();";
-                break;
-            case MYSQL:
-                validationQuery = "SELECT 1";
-                break;
-            }
-            if (StringUtils.isNotBlank(validationQuery)) {
-                dataSource.appendChild(createPropertyElement("validationQuery",
-                        validationQuery, appCtx));
-            }
-        }
-
-        transactionManager = StringUtils.defaultIfEmpty(transactionManager,
-                "transactionManager");
-        Element transactionManagerElement = XmlUtils.findFirstElement(
-                "/beans/bean[@id = '" + transactionManager + "']", root);
-        if (transactionManagerElement == null) {
-            transactionManagerElement = appCtx.createElement("bean");
-            transactionManagerElement.setAttribute("id", transactionManager);
-            transactionManagerElement.setAttribute("class",
-                    JPA_TRANSACTION_MANAGER.getFullyQualifiedTypeName());
-            transactionManagerElement.appendChild(createRefElement(
-                    "entityManagerFactory", "entityManagerFactory", appCtx));
-            root.appendChild(transactionManagerElement);
-        }
-
-        Element aspectJTxManager = XmlUtils.findFirstElement(
-                "/beans/annotation-driven", root);
-        if (aspectJTxManager == null) {
-            aspectJTxManager = appCtx.createElement("tx:annotation-driven");
-            aspectJTxManager.setAttribute("mode", "aspectj");
-            aspectJTxManager.setAttribute("transaction-manager",
-                    transactionManager);
-            root.appendChild(aspectJTxManager);
-        }
-        else {
-            aspectJTxManager.setAttribute("transaction-manager",
-                    transactionManager);
-        }
-
-        Element entityManagerFactory = XmlUtils.findFirstElement(
-                "/beans/bean[@id = 'entityManagerFactory']", root);
-        if (entityManagerFactory != null) {
-            root.removeChild(entityManagerFactory);
-        }
-
-        entityManagerFactory = appCtx.createElement("bean");
-        entityManagerFactory.setAttribute("id", "entityManagerFactory");
-
-        entityManagerFactory.setAttribute("class",
-                LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN
-                        .getFullyQualifiedTypeName());
-        entityManagerFactory
-                .appendChild(createPropertyElement("persistenceUnitName",
-                        StringUtils.defaultIfEmpty(persistenceUnit,
-                                DEFAULT_PERSISTENCE_UNIT), appCtx));
-        if (ormProvider != OrmProvider.DATANUCLEUS) {
-            entityManagerFactory.appendChild(createRefElement("dataSource",
-                    "dataSource", appCtx));
-        }
-
-        root.appendChild(entityManagerFactory);
-
-        DomUtils.removeTextNodes(root);
-
-        fileManager.createOrUpdateTextFileIfRequired(contextPath,
-                XmlUtils.nodeToString(appCtx), false);
-    }
 
     private void updateBuildPlugins(final Element configuration,
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
@@ -1003,67 +797,86 @@ public class JpaOperationsImpl implements JpaOperations {
         }
     }
 
-    private void updateDatabaseProperties(final OrmProvider ormProvider,
+    private void updateApplicationProperties(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String hostName,
             final String databaseName, String userName, final String password,
-            final String moduleName) {
+            final String moduleName, String jndi) {
     	
     	if(fileManager == null){
     		fileManager = getFileManager();
     	}
     	Validate.notNull(fileManager, "FileManager is required");
     	
-        final String databasePath = getDatabasePropertiesPath();
-        final boolean databaseExists = fileManager.exists(databasePath);
-
-        if (ormProvider == OrmProvider.DATANUCLEUS) {
-            if (databaseExists) {
-                fileManager.delete(databasePath, "ORM provider is "
-                        + ormProvider.name());
+        final String applicationPropertiesPath = getApplicationPropertiesPath();
+        final boolean applicationPropertiesExists = fileManager.exists(applicationPropertiesPath);
+        
+        // Check if jndi is blank. If is blank, include database properties on 
+        // application.properties file
+        if(StringUtils.isBlank(jndi)){
+            final Properties props = readProperties(applicationPropertiesPath, applicationPropertiesExists,
+                    "database-template.properties");
+            
+            final String connectionString = getConnectionString(jdbcDatabase,
+                    hostName, databaseName, moduleName);
+            if (jdbcDatabase.getKey().equals("HYPERSONIC")
+                    || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY
+                    || jdbcDatabase == JdbcDatabase.SYBASE) {
+                userName = StringUtils.defaultIfEmpty(userName, "sa");
             }
-            return;
+
+            final String driver = props.getProperty(DATABASE_DRIVER);
+            final String url = props.getProperty(DATABASE_URL);
+            final String uname = props.getProperty(DATABASE_USERNAME);
+            final String pwd = props.getProperty(DATABASE_PASSWORD);
+
+            boolean hasChanged = driver == null
+                    || !driver.equals(jdbcDatabase.getDriverClassName());
+            hasChanged |= url == null || !url.equals(connectionString);
+            hasChanged |= uname == null
+                    || !uname.equals(StringUtils.stripToEmpty(userName));
+            hasChanged |= pwd == null
+                    || !pwd.equals(StringUtils.stripToEmpty(password));
+            if (!hasChanged) {
+                // No changes from existing database configuration so exit now
+                return;
+            }
+            
+
+            // Write changes to application.properties file
+            props.put(DATABASE_URL, connectionString);
+            props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
+            props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
+            props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
+
+            writeProperties(applicationPropertiesPath, applicationPropertiesExists, props);
+
+            // Remove jndi property
+            removeProperty(JNDI_NAME, applicationPropertiesPath, applicationPropertiesExists);
+            
+        }else{
+            final Properties props = readProperties(applicationPropertiesPath, applicationPropertiesExists,
+                    "jndi-template.properties");
+            
+            final String jndiProperty = props.getProperty(JNDI_NAME);
+            
+            boolean hasChanged = jndiProperty == null || 
+                    !jndiProperty.equals(StringUtils.stripToEmpty(jndi));
+            if (!hasChanged) {
+                // No changes from existing database configuration so exit now
+                return;
+            }
+            
+            // Write changes to application.properties file
+            props.put(JNDI_NAME, jndi);
+            writeProperties(applicationPropertiesPath, applicationPropertiesExists, props);
+            
+            // Remove old properties
+            removeProperty(DATABASE_URL, applicationPropertiesPath, applicationPropertiesExists);
+            removeProperty(DATABASE_DRIVER, applicationPropertiesPath, applicationPropertiesExists);
+            removeProperty(DATABASE_USERNAME, applicationPropertiesPath, applicationPropertiesExists);
+            removeProperty(DATABASE_PASSWORD, applicationPropertiesPath, applicationPropertiesExists);
+            
         }
-
-        final String jndiPath = getJndiPropertiesPath();
-        if (fileManager.exists(jndiPath)) {
-            fileManager.delete(jndiPath, "JNDI is not used");
-        }
-
-        final Properties props = readProperties(databasePath, databaseExists,
-                "database-template.properties");
-
-        final String connectionString = getConnectionString(jdbcDatabase,
-                hostName, databaseName, moduleName);
-        if (jdbcDatabase.getKey().equals("HYPERSONIC")
-                || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY
-                || jdbcDatabase == JdbcDatabase.SYBASE) {
-            userName = StringUtils.defaultIfEmpty(userName, "sa");
-        }
-
-        final String driver = props.getProperty(DATABASE_DRIVER);
-        final String url = props.getProperty(DATABASE_URL);
-        final String uname = props.getProperty(DATABASE_USERNAME);
-        final String pwd = props.getProperty(DATABASE_PASSWORD);
-
-        boolean hasChanged = driver == null
-                || !driver.equals(jdbcDatabase.getDriverClassName());
-        hasChanged |= url == null || !url.equals(connectionString);
-        hasChanged |= uname == null
-                || !uname.equals(StringUtils.stripToEmpty(userName));
-        hasChanged |= pwd == null
-                || !pwd.equals(StringUtils.stripToEmpty(password));
-        if (!hasChanged) {
-            // No changes from existing database configuration so exit now
-            return;
-        }
-
-        // Write changes to database.properties file
-        props.put(DATABASE_URL, connectionString);
-        props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
-        props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
-        props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
-
-        writeProperties(databasePath, databaseExists, props);
 
         // Log message to console
         switch (jdbcDatabase) {
@@ -1080,9 +893,41 @@ public class JpaOperationsImpl implements JpaOperations {
         case MSSQL:
         case SYBASE:
         case MYSQL:
-            LOGGER.warning("Please update your database details in src/main/resources/META-INF/spring/database.properties.");
+            LOGGER.warning("Please update your database details in src/main/resources/application.properties.");
             break;
         }
+    }
+
+    /**
+     * Method to remove Property from properties file 
+     */
+    private void removeProperty(String propName, String path, boolean exists) {
+        if(fileManager == null){
+            fileManager = getFileManager();
+        }
+        Validate.notNull(fileManager, "FileManager is required");
+        
+        OutputStream outputStream = null;
+        try {
+            final MutableFile mutableFile = exists ? fileManager
+                    .updateFile(path) : fileManager.createFile(path);
+            final Properties props = new Properties();
+            props.load(mutableFile.getInputStream());
+                    
+            outputStream = mutableFile == null ? new FileOutputStream(path)
+                    : mutableFile.getOutputStream();
+            
+            props.remove(propName);
+            props.store(outputStream, "Updated at " + new Date());
+            
+        }
+        catch (final IOException e) {
+            throw new IllegalStateException(e);
+        }
+        finally {
+            IOUtils.closeQuietly(outputStream);
+        }
+        
     }
 
     private void updateDataNucleusPlugin(final boolean addToPlugin) {
@@ -1198,34 +1043,6 @@ public class JpaOperationsImpl implements JpaOperations {
         projectOperations.removeDependencies(moduleName, redundantDependencies);
     }
 
-    private void updateEclipsePlugin(final boolean addGaeSettingsToPlugin) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-        final String pom = pathResolver
-                .getFocusedIdentifier(Path.ROOT, POM_XML);
-        final Document document = XmlUtils.readXml(fileManager
-                .getInputStream(pom));
-        final Collection<String> changes = new ArrayList<String>();
-
-        manageGaeBuildCommand(addGaeSettingsToPlugin, document, changes);
-        manageGaeProjectNature(addGaeSettingsToPlugin, document, changes);
-
-        if (!changes.isEmpty()) {
-            final String changesMessage = StringUtils.join(changes, "; ");
-            fileManager.createOrUpdateTextFileIfRequired(pom,
-                    XmlUtils.nodeToString(document), changesMessage, false);
-        }
-    }
-
     private void updateFilters(final Element configuration,
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String databaseXPath, final String providersXPath,
@@ -1264,29 +1081,6 @@ public class JpaOperationsImpl implements JpaOperations {
         for (final Filter filter : filters) {
             projectOperations.addFilter(moduleName, filter);
         }
-    }
-
-    private void updateJndiProperties() {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-        final String databasePath = getDatabasePropertiesPath();
-        if (fileManager.exists(databasePath)) {
-            fileManager.delete(databasePath, "JNDI is used");
-        }
-
-        final String jndiPath = getJndiPropertiesPath();
-        if (fileManager.exists(jndiPath)) {
-            return;
-        }
-
-        final Properties props = readProperties(jndiPath, false,
-                "jndi-template.properties");
-        writeProperties(jndiPath, false, props);
-        LOGGER.warning("Please update your JNDI details in src/main/resources/META-INF/spring/jndi.properties.");
     }
 
     private void updateLog4j(final OrmProvider ormProvider) {
@@ -1331,218 +1125,6 @@ public class JpaOperationsImpl implements JpaOperations {
         }
         finally {
             IOUtils.closeQuietly(outputStream);
-        }
-    }
-
-    private void updatePersistenceXml(final OrmProvider ormProvider,
-            final JdbcDatabase jdbcDatabase, final String hostName,
-            final String databaseName, String userName, final String password,
-            final String persistenceUnit, final String moduleName) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-    	if(propFileOperations == null){
-    		propFileOperations = getPropFileOperations();
-    	}
-    	Validate.notNull(propFileOperations, "PropFileOperations is required");
-    	
-        final String persistencePath = getPersistencePathOfFocussedModule();
-        final InputStream inputStream;
-        if (fileManager.exists(persistencePath)) {
-            // There's an existing persistence config file; read it
-            inputStream = fileManager.getInputStream(persistencePath);
-        }
-        else {
-            // Use the addon's template file
-            inputStream = FileUtils.getInputStream(getClass(),
-                    "persistence-template.xml");
-        }
-
-        final Document persistence = XmlUtils.readXml(inputStream);
-        final Element root = persistence.getDocumentElement();
-        final Element persistenceElement = XmlUtils.findFirstElement(
-                "/persistence", root);
-        Validate.notNull(persistenceElement, "No persistence element found");
-
-        Element persistenceUnitElement;
-        if (StringUtils.isNotBlank(persistenceUnit)) {
-            persistenceUnitElement = XmlUtils
-                    .findFirstElement(PERSISTENCE_UNIT + "[@name = '"
-                            + persistenceUnit + "']", persistenceElement);
-        }
-        else {
-            persistenceUnitElement = XmlUtils
-                    .findFirstElement(
-                            PERSISTENCE_UNIT
-                                    + "[@name = '"
-                                    + DEFAULT_PERSISTENCE_UNIT + "']",
-                            persistenceElement);
-        }
-
-        if (persistenceUnitElement != null) {
-            while (persistenceUnitElement.getFirstChild() != null) {
-                persistenceUnitElement.removeChild(persistenceUnitElement
-                        .getFirstChild());
-            }
-        }
-        else {
-            persistenceUnitElement = persistence
-                    .createElement(PERSISTENCE_UNIT);
-            persistenceElement.appendChild(persistenceUnitElement);
-        }
-
-        // Add provider element
-        final Element provider = persistence.createElement("provider");
-        persistenceUnitElement.setAttribute("name", StringUtils
-                .defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT));
-        persistenceUnitElement.setAttribute("transaction-type",
-                "RESOURCE_LOCAL");
-        provider.setTextContent(ormProvider.getAdapter());
-        persistenceUnitElement.appendChild(provider);
-
-        // Add properties
-        final Properties dialects = propFileOperations.loadProperties(
-                JPA_DIALECTS_FILE, getClass());
-        final Element properties = persistence.createElement("properties");
-        final boolean isDbreProject = fileManager.exists(pathResolver
-                .getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml"));
-        final boolean isDbreProjectOrDB2400 = isDbreProject
-                || jdbcDatabase == JdbcDatabase.DB2_400;
-
-        switch (ormProvider) {
-        case HIBERNATE:
-            final String dialectKey = ormProvider.name() + "."
-                    + jdbcDatabase.name();
-            properties.appendChild(createPropertyElement("hibernate.dialect",
-                    dialects.getProperty(dialectKey), persistence));
-            properties
-                    .appendChild(persistence
-                            .createComment(" value=\"create\" to build a new database on each run; value=\"update\" to modify an existing database; value=\"create-drop\" means the same as \"create\" but also drops tables when Hibernate closes; value=\"validate\" makes no changes to the database ")); // ROO-627
-            properties
-                    .appendChild(createPropertyElement(
-                            "hibernate.hbm2ddl.auto",
-                            isDbreProjectOrDB2400 ? "validate" : "create",
-                            persistence));
-            properties.appendChild(createPropertyElement(
-                    "hibernate.ejb.naming_strategy",
-                    "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
-            properties.appendChild(createPropertyElement(
-                    "hibernate.connection.charSet", "UTF-8", persistence));
-            properties
-                    .appendChild(persistence
-                            .createComment(" Uncomment the following two properties for JBoss only "));
-            properties
-                    .appendChild(persistence
-                            .createComment(" property name=\"hibernate.validator.apply_to_ddl\" value=\"false\" /"));
-            properties
-                    .appendChild(persistence
-                            .createComment(" property name=\"hibernate.validator.autoregister_listeners\" value=\"false\" /"));
-            break;
-        case OPENJPA:
-            properties.appendChild(createPropertyElement(
-                    "openjpa.jdbc.DBDictionary",
-                    dialects.getProperty(ormProvider.name() + "."
-                            + jdbcDatabase.name()), persistence));
-            properties
-                    .appendChild(persistence
-                            .createComment(" value=\"buildSchema\" to runtime forward map the DDL SQL; value=\"validate\" makes no changes to the database ")); // ROO-627
-            properties.appendChild(createPropertyElement(
-                    "openjpa.jdbc.SynchronizeMappings",
-                    isDbreProjectOrDB2400 ? "validate" : "buildSchema",
-                    persistence));
-            properties.appendChild(createPropertyElement(
-                    "openjpa.RuntimeUnenhancedClasses", "supported",
-                    persistence));
-            break;
-        case ECLIPSELINK:
-            properties.appendChild(createPropertyElement(
-                    "eclipselink.target-database",
-                    dialects.getProperty(ormProvider.name() + "."
-                            + jdbcDatabase.name()), persistence));
-            properties
-                    .appendChild(persistence
-                            .createComment(" value=\"drop-and-create-tables\" to build a new database on each run; value=\"create-tables\" creates new tables if needed; value=\"none\" makes no changes to the database ")); // ROO-627
-            properties.appendChild(createPropertyElement(
-                    "eclipselink.ddl-generation",
-                    isDbreProjectOrDB2400 ? "none" : "drop-and-create-tables",
-                    persistence));
-            properties.appendChild(createPropertyElement(
-                    "eclipselink.ddl-generation.output-mode", "database",
-                    persistence));
-            properties.appendChild(createPropertyElement("eclipselink.weaving",
-                    "static", persistence));
-            break;
-        case DATANUCLEUS:
-            String connectionString = getConnectionString(jdbcDatabase,
-                    hostName, databaseName, moduleName);
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.ConnectionDriverName",
-                    jdbcDatabase.getDriverClassName(), persistence));
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.autoCreateSchema",
-                    Boolean.toString(!isDbreProject), persistence));
-            connectionString = connectionString.replace(
-                    "TO_BE_CHANGED_BY_ADDON",
-                    projectOperations.getProjectName(moduleName));
-            if (jdbcDatabase.getKey().equals("HYPERSONIC")
-                    || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY
-                    || jdbcDatabase == JdbcDatabase.SYBASE) {
-                userName = StringUtils.defaultIfEmpty(userName, "sa");
-            }
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.storeManagerType", "rdbms", persistence));
-
-            // These are specified in the connection properties file
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.ConnectionURL", connectionString,
-                    persistence));
-            properties
-                    .appendChild(createPropertyElement(
-                            "datanucleus.ConnectionUserName", userName,
-                            persistence));
-            properties
-                    .appendChild(createPropertyElement(
-                            "datanucleus.ConnectionPassword", password,
-                            persistence));
-
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.autoCreateTables",
-                    Boolean.toString(!isDbreProject), persistence));
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.autoCreateColumns", "false", persistence));
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.autoCreateConstraints", "false", persistence));
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.validateTables", "false", persistence));
-            properties.appendChild(createPropertyElement(
-                    "datanucleus.validateConstraints", "false", persistence));
-            properties
-                    .appendChild(createPropertyElement(
-                            "datanucleus.jpa.addClassTransformer", "false",
-                            persistence));
-            break;
-        }
-
-        persistenceUnitElement.appendChild(properties);
-
-        fileManager.createOrUpdateTextFileIfRequired(persistencePath,
-                XmlUtils.nodeToString(persistence), false);
-
-        if (ormProvider == OrmProvider.DATANUCLEUS) {
-            LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
         }
     }
 

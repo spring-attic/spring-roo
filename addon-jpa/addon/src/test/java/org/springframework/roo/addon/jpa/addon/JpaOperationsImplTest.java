@@ -5,8 +5,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.roo.addon.jpa.addon.JdbcDatabase.H2_IN_MEMORY;
-import static org.springframework.roo.addon.jpa.addon.JpaOperationsImpl.JPA_DIALECTS_FILE;
-import static org.springframework.roo.addon.jpa.addon.JpaOperationsImpl.PERSISTENCE_XML;
 import static org.springframework.roo.addon.jpa.addon.OrmProvider.HIBERNATE;
 
 import java.io.ByteArrayInputStream;
@@ -19,9 +17,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.roo.addon.jpa.addon.JdbcDatabase;
-import org.springframework.roo.addon.jpa.addon.JpaOperationsImpl;
-import org.springframework.roo.addon.jpa.addon.OrmProvider;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
@@ -157,10 +152,6 @@ public class JpaOperationsImplTest {
         when(
                 mockPathResolver.getFocusedIdentifier(Path.ROOT,
                         JpaOperationsImpl.POM_XML)).thenReturn(POM_PATH);
-        when(
-                mockPathResolver.getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
-                        JpaOperationsImpl.APPLICATION_CONTEXT_XML)).thenReturn(
-                APPLICATION_CONTEXT_PATH);
 
         // Object under test
         jpaOperations = new JpaOperationsImpl();
@@ -180,14 +171,8 @@ public class JpaOperationsImplTest {
                 getPomInputStream(POM), getPomInputStream(POM));
         when(mockFileManager.getInputStream(APPLICATION_CONTEXT_PATH))
                 .thenReturn(getAppContextInputStream(APP_CONTEXT));
-        when(
-                mockPathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
-                        PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
         // i.e. no existing persistence.xml
         when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false);
-        when(
-                mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE,
-                        JpaOperationsImpl.class)).thenReturn(dialects);
 
         final OrmProvider ormProvider = HIBERNATE;
         final JdbcDatabase jdbcDatabase = H2_IN_MEMORY;
@@ -213,14 +198,8 @@ public class JpaOperationsImplTest {
                 getPomInputStream(POM), getPomInputStream(POM));
         when(mockFileManager.getInputStream(APPLICATION_CONTEXT_PATH))
                 .thenReturn(getAppContextInputStream(APP_CONTEXT));
-        when(
-                mockPathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
-                        PERSISTENCE_XML)).thenReturn(PERSISTENCE_PATH);
         // i.e. no existing persistence.xml
         when(mockFileManager.exists(PERSISTENCE_PATH)).thenReturn(false);
-        when(
-                mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE,
-                        JpaOperationsImpl.class)).thenReturn(dialects);
 
         final OrmProvider ormProvider = HIBERNATE;
         final JdbcDatabase jdbcDatabase = H2_IN_MEMORY;
