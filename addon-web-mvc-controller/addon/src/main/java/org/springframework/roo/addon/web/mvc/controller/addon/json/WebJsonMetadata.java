@@ -194,7 +194,7 @@ public class WebJsonMetadata extends
         bodyBuilder.appendFormalLine("} catch (Exception e) {");
         bodyBuilder.indent();
         bodyBuilder.appendFormalLine("return new " + responseEntityShortName
-                + "<String>(\"{\\\"ERROR\\\":\"+e.getMessage()+\"\\\"}\", headers, "
+                + "<String>(\"{\\\"ERROR\\\":\\\"\"+e.getMessage()+\"\\\"}\", headers, "
                 + httpStatusShortName + ".INTERNAL_SERVER_ERROR);");
         bodyBuilder.indentRemove();
         bodyBuilder.appendFormalLine("}");
