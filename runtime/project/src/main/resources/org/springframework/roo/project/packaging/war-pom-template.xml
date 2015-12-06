@@ -32,6 +32,15 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        <!-- Spring Roo annotations -->
+        <dependency>
+		    <groupId>org.springframework.roo</groupId>
+		    <artifactId>org.springframework.roo.annotations</artifactId>
+		    <version>${roo.version}</version>
+		    <type>pom</type>
+		</dependency>
+		
     </dependencies>
     
     <build>
