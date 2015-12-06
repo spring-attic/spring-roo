@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.email;
+package org.springframework.roo.addon.email.addon;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;

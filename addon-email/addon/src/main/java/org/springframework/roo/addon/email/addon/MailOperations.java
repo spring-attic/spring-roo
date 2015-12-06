@@ -1,14 +1,17 @@
-package org.springframework.roo.addon.email;
+package org.springframework.roo.addon.email.addon;
 
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Feature;
 
 /**
  * Provides email configuration operations.
  * 
  * @author Ben Alex
  */
-public interface MailOperations {
+public interface MailOperations extends Feature{
+	
+	static final String FEATURE_NAME = "email";
 
     void configureTemplateMessage(String from, String subject);
 

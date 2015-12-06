@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.email;
+package org.springframework.roo.addon.email.addon;
 
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
@@ -18,6 +18,7 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
  * Commands for the 'email' add-on to be used by the Roo shell.
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -30,28 +31,27 @@ public class MailCommands implements CommandMarker {
     protected void activate(final ComponentContext context) {
         staticFieldConverter.add(MailProtocol.class);
     }
-
-    @CliCommand(value = "email template setup", help = "Configures a template for a SimpleMailMessage")
-    public void configureEmailTemplate(
-            @CliOption(key = { "from" }, mandatory = false, help = "The 'from' email (optional)") final String from,
-            @CliOption(key = { "subject" }, mandatory = false, help = "The message subject (obtional)") final String subject) {
-
-        mailOperations.configureTemplateMessage(from, subject);
-    }
-
+    
     protected void deactivate(final ComponentContext context) {
         staticFieldConverter.remove(MailProtocol.class);
     }
-
-    @CliCommand(value = "field email template", help = "Inserts a MailTemplate field into an existing type")
-    public void injectEmailTemplate(
-            @CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "mailTemplate", unspecifiedDefaultValue = "mailTemplate", help = "The name of the field to add") final JavaSymbolName fieldName,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
-            @CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates if the injected method should be executed asynchronously") final boolean async) {
-
-        mailOperations.injectEmailTemplate(typeName, fieldName, async);
+    
+    @CliAvailabilityIndicator("email sender setup")
+    public boolean isInstallEmailAvailable() {
+        return mailOperations.isEmailInstallationPossible();
     }
-
+    
+    /**
+     * Indicates whether the mail template commands are available
+     * 
+     * @return see above
+     * @since 1.2.0
+     */
+    @CliAvailabilityIndicator({ "field email template", "email template setup" })
+    public boolean isMailTemplateAvailable() {
+        return mailOperations.isManageEmailAvailable();
+    }
+    
     @CliCommand(value = "email sender setup", help = "Install a Spring JavaMailSender in your project")
     public void installEmail(
             @CliOption(key = { "hostServer" }, mandatory = true, help = "The host server") final String hostServer,
@@ -65,30 +65,21 @@ public class MailCommands implements CommandMarker {
                 username, password);
     }
 
-    /**
-     * Indicates whether the mail template commands are available
-     * 
-     * @return see above
-     * @deprecated call {@link #isMailTemplateAvailable()} instead
-     */
-    @Deprecated
-    public boolean isInsertJmsAvailable() {
-        return isMailTemplateAvailable();
+    @CliCommand(value = "email template setup", help = "Configures a template for a SimpleMailMessage")
+    public void configureEmailTemplate(
+            @CliOption(key = { "from" }, mandatory = false, help = "The 'from' email (optional)") final String from,
+            @CliOption(key = { "subject" }, mandatory = false, help = "The message subject (obtional)") final String subject) {
+
+        mailOperations.configureTemplateMessage(from, subject);
     }
 
-    @CliAvailabilityIndicator("email sender setup")
-    public boolean isInstallEmailAvailable() {
-        return mailOperations.isEmailInstallationPossible();
+    @CliCommand(value = "field email template", help = "Inserts a MailTemplate field into an existing type")
+    public void injectEmailTemplate(
+            @CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "mailTemplate", unspecifiedDefaultValue = "mailTemplate", help = "The name of the field to add") final JavaSymbolName fieldName,
+            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
+            @CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates if the injected method should be executed asynchronously") final boolean async) {
+
+        mailOperations.injectEmailTemplate(typeName, fieldName, async);
     }
 
-    /**
-     * Indicates whether the mail template commands are available
-     * 
-     * @return see above
-     * @since 1.2.0
-     */
-    @CliAvailabilityIndicator({ "field email template", "email template setup" })
-    public boolean isMailTemplateAvailable() {
-        return mailOperations.isManageEmailAvailable();
-    }
 }
