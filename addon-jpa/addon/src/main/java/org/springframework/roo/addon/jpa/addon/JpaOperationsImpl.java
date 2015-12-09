@@ -139,9 +139,6 @@ public class JpaOperationsImpl implements JpaOperations {
         Validate.notNull(ormProvider, "ORM provider required");
         Validate.notNull(jdbcDatabase, "JDBC database required");
 
-        updateApplicationProperties(ormProvider, jdbcDatabase, hostName,
-                databaseName, userName, password, moduleName, jndi);
-        
        // Parse the configuration.xml file
        final Element configuration = XmlUtils.getConfiguration(getClass());
         
@@ -150,7 +147,7 @@ public class JpaOperationsImpl implements JpaOperations {
         final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
         final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
         
-        
+        // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
         updatePomProperties(configuration, ormProvider, jdbcDatabase,
                 moduleName);
         updateDependencies(configuration, ormProvider, jdbcDatabase,
@@ -164,7 +161,13 @@ public class JpaOperationsImpl implements JpaOperations {
                 databaseXPath, providersXPath, moduleName);
         updateBuildPlugins(configuration, ormProvider, jdbcDatabase,
                 databaseXPath, providersXPath, moduleName);
+        
+        // Update application.properties with spring.datasource.* domain properties
+        updateApplicationProperties(ormProvider, jdbcDatabase, hostName,
+                databaseName, userName, password, moduleName, jndi);
+        
     }
+    
 
     private Element createPropertyElement(final String name,
             final String value, final Document document) {
