@@ -191,8 +191,7 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
-            @CliOption(key = "sequenceName", mandatory = false, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
-            @CliOption(key = "activeRecord", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Generate CRUD active record methods for this entity") final boolean activeRecord) {
+            @CliOption(key = "sequenceName", mandatory = false, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName) {
         Validate.isTrue(!identifierType.isPrimitive(),
                 "Identifier type cannot be a primitive");
         
@@ -239,7 +238,7 @@ public class JpaCommands implements CommandMarker {
                 catalog, identifierField, identifierColumn, identifierType,
                 versionField, versionColumn, versionType, inheritanceType,
                 mappedSuperclass, persistenceUnit, transactionManager,
-                entityName, sequenceName, activeRecord));
+                entityName, sequenceName, false));
         if (equals) {
             annotationBuilder.add(ROO_EQUALS_BUILDER);
         }
