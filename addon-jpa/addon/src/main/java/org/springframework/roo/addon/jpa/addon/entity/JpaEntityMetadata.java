@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
-import org.springframework.roo.addon.jpa.annotations.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -94,8 +93,7 @@ public class JpaEntityMetadata extends
      *            event that the annotation doesn't provide such information;
      *            can be <code>null</code>
      * @param annotationValues the effective annotation values taking into
-     *            account the presence of a {@link RooJpaActiveRecord} and/or
-     *            {@link RooJpaEntity} annotation (required)
+     *            account the presence of a {@link RooJpaEntity} annotation (required)
      */
     public JpaEntityMetadata(final String metadataIdentificationString,
             final JavaType itdName,
@@ -293,8 +291,7 @@ public class JpaEntityMetadata extends
      * {@link javax.persistence.EmbeddedId @EmbeddedId} annotation will be taken
      * as the identifier and returned. If no such field is located, a private
      * field will be created as per the details contained in the
-     * {@link RooJpaActiveRecord} or {@link RooJpaEntity} annotation, as
-     * applicable.
+     * {@link RooJpaEntity} annotation, as applicable.
      * 
      * @param parent (can be <code>null</code>)
      * @param project the user's project (required)
@@ -729,8 +726,7 @@ public class JpaEntityMetadata extends
      * inherited field which is annotated with javax.persistence.Version will be
      * taken as the version and returned. If no such field is located, a private
      * field may be created as per the details contained in
-     * {@link RooJpaActiveRecord} or {@link RooJpaEntity} annotation, as
-     * applicable.
+     * {@link RooJpaEntity} annotation, as applicable.
      * 
      * @return the version field (may be null)
      */

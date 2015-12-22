@@ -5,7 +5,6 @@ import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
@@ -64,6 +63,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * Implementation of {@link DbreDatabaseListener}.
  * 
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.1
  */
 @Component
@@ -121,13 +121,10 @@ public class DbreDatabaseListenerImpl extends
      * 
      * @param javaType the name of the entity to be created (required)
      * @param table the table from which to create the entity (required)
-     * @param activeRecord whether to create "active record" CRUD methods in the
-     *            new entity
      * @return the newly created entity
      */
     private ClassOrInterfaceTypeDetails createNewManagedEntityFromTable(
-            final JavaType javaType, final Table table,
-            final boolean activeRecord) {
+            final JavaType javaType, final Table table) {
         // Create type annotations for new entity
         final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
@@ -136,7 +133,7 @@ public class DbreDatabaseListenerImpl extends
         // Find primary key from db metadata and add identifier attributes to
         // @RooJpaEntity
         final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(
-                activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY);
+                ROO_JPA_ENTITY);
         manageIdentifier(javaType, jpaAnnotationBuilder,
                 new HashSet<JavaSymbolName>(), table);
 
@@ -349,10 +346,8 @@ public class DbreDatabaseListenerImpl extends
         // The @RooJpaEntity annotation takes precedence if present
         final AnnotationMetadata rooJpaEntity = managedEntity
                 .getAnnotation(ROO_JPA_ENTITY);
-        if (rooJpaEntity != null) {
-            return rooJpaEntity;
-        }
-        return managedEntity.getAnnotation(ROO_JPA_ACTIVE_RECORD);
+        
+        return rooJpaEntity;
     }
 
     private Set<ClassOrInterfaceTypeDetails> getManagedIdentifiers() {
@@ -408,9 +403,7 @@ public class DbreDatabaseListenerImpl extends
         // There are exactly four - check for any non-standard ones
         for (final AnnotationMetadata annotation : typeAnnotations) {
             final JavaType annotationType = annotation.getAnnotationType();
-            final boolean entityAnnotation = ROO_JPA_ACTIVE_RECORD
-                    .equals(annotationType)
-                    || ROO_JPA_ENTITY.equals(annotationType);
+            final boolean entityAnnotation = ROO_JPA_ENTITY.equals(annotationType);
             if (!entityAnnotation && !ROO_DB_MANAGED.equals(annotationType)
                     && !ROO_JAVA_BEAN.equals(annotationType)
                     && !ROO_TO_STRING.equals(annotationType)) {
@@ -429,31 +422,6 @@ public class DbreDatabaseListenerImpl extends
             }
         }
         return false;
-    }
-
-    /**
-     * Indicates whether active record CRUD methods should be generated for the
-     * given entities (this being an all or nothing decision)
-     * 
-     * @param database the database being reverse-engineered (required)
-     * @param managedEntities any existing DB-managed entities in the user
-     *            project (can be <code>null</code> or empty)
-     * @return see above
-     */
-    private boolean isActiveRecord(final Database database,
-            final Collection<ClassOrInterfaceTypeDetails> managedEntities) {
-        if (CollectionUtils.isEmpty(managedEntities)) {
-            // There are no existing entities; use the given setting
-            return database.isActiveRecord();
-        }
-        /*
-         * There are one or more existing entities; preserve the existing
-         * decision, based on the first such entity. This saves the user from
-         * having to enter the same value for the "activeRecord" option each
-         * time they run the database reverse engineer command.
-         */
-        return managedEntities.iterator().next()
-                .getAnnotation(ROO_JPA_ACTIVE_RECORD) != null;
     }
 
     private boolean isEntityDeletable(
@@ -512,9 +480,7 @@ public class DbreDatabaseListenerImpl extends
             attributesToDeleteIfPresent
                     .add(new JavaSymbolName(IDENTIFIER_TYPE));
 
-            // We don't need a PK class, so we just tell the
-            // JpaActiveRecordProvider via IdentifierService the column name,
-            // field type and field name to use
+            // We don't need a PK class
             final List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table);
             identifierResults.put(javaType, identifiers);
         }
@@ -576,9 +542,6 @@ public class DbreDatabaseListenerImpl extends
     private void reverseEngineer(final Database database) {
         final Set<ClassOrInterfaceTypeDetails> managedEntities = getTypeLocationService()
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
-        // Determine whether to create "active record" CRUD methods
-        database.setActiveRecord(isActiveRecord(database, managedEntities));
-
         // Lookup the relevant destination package if not explicitly given
         final JavaPackage destinationPackage = getDestinationPackage(database,
                 managedEntities);
@@ -617,8 +580,6 @@ public class DbreDatabaseListenerImpl extends
                 final JavaType javaType = DbreTypeUtils
                         .suggestTypeNameForNewTable(table.getName(),
                                 schemaPackage);
-                final boolean activeRecord = database.isActiveRecord()
-                        && !database.isRepository();
                 if (getTypeLocationService().getTypeDetails(javaType) == null) {
                     table.setIncludeNonPortableAttributes(database
                             .isIncludeNonPortableAttributes());
@@ -627,7 +588,7 @@ public class DbreDatabaseListenerImpl extends
                     table.setDisableGeneratedIdentifiers(database
                             .isDisableGeneratedIdentifiers());
                     newEntities.add(createNewManagedEntityFromTable(javaType,
-                            table, activeRecord));
+                            table));
                 }
             }
         }
@@ -673,9 +634,8 @@ public class DbreDatabaseListenerImpl extends
         // Update the attributes of the existing JPA-related annotation
         final AnnotationMetadata jpaAnnotation = getJpaAnnotation(managedEntity);
         Validate.validState(jpaAnnotation != null,
-                "Neither @%s nor @%s found on existing DBRE-managed entity %s",
-                ROO_JPA_ACTIVE_RECORD.getSimpleTypeName(), ROO_JPA_ENTITY
-                        .getSimpleTypeName(), managedEntity.getName()
+                "@%s not found on existing DBRE-managed entity %s",
+                ROO_JPA_ENTITY.getSimpleTypeName(), managedEntity.getName()
                         .getFullyQualifiedTypeName());
 
         // Find table in database using 'table' and 'schema' attributes from the
@@ -709,7 +669,7 @@ public class DbreDatabaseListenerImpl extends
         table.setDisableGeneratedIdentifiers(database
                 .isDisableGeneratedIdentifiers());
 
-        // Update the @RooJpaEntity/@RooJpaActiveRecord attributes
+        // Update the @RooJpaEntity attributes
         final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(
                 jpaAnnotation);
         final Set<JavaSymbolName> attributesToDeleteIfPresent = new LinkedHashSet<JavaSymbolName>();

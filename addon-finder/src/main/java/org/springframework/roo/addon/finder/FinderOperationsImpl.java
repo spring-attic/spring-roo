@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.finder;
 
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +12,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.jpa.addon.activerecord.JpaActiveRecordMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -73,13 +70,14 @@ public class FinderOperationsImpl implements FinderOperations {
     private TypeManagementService typeManagementService;
 
     private String getErrorMsg() {
-        return "Annotation " + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName()
-                + " attribute 'finders' must be an array of strings";
+       /* return "Annotation " + ROO_JPA_ACTIVE_RECORD.getSimpleTypeName()
+                + " attribute 'finders' must be an array of strings";*/
+        return "";
     }
 
     public void installFinder(final JavaType typeName,
             final JavaSymbolName finderName) {
-        Validate.notNull(typeName, "Java type required");
+        /*Validate.notNull(typeName, "Java type required");
         Validate.notNull(finderName, "Finer name required");
 
         final String id = getTypeLocationService()
@@ -118,8 +116,7 @@ public class FinderOperationsImpl implements FinderOperations {
         // We know there should be an existing RooEntity annotation
         final List<? extends AnnotationMetadata> annotations = cid
                 .getAnnotations();
-        final AnnotationMetadata jpaActiveRecordAnnotation = MemberFindingUtils
-                .getAnnotationOfType(annotations, ROO_JPA_ACTIVE_RECORD);
+        
         if (jpaActiveRecordAnnotation == null) {
             LOGGER.warning("Unable to find the entity annotation on '"
                     + typeName.getFullyQualifiedTypeName() + "'");
@@ -181,7 +178,7 @@ public class FinderOperationsImpl implements FinderOperations {
                 ROO_JPA_ACTIVE_RECORD, attributes);
         cidBuilder.updateTypeAnnotation(annotation.build(),
                 new HashSet<JavaSymbolName>());
-        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+        getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());*/
     }
 
     public boolean isFinderInstallationPossible() {
@@ -192,7 +189,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
     public SortedSet<String> listFindersFor(final JavaType typeName,
             final Integer depth) {
-        Validate.notNull(typeName, "Java type required");
+        /*Validate.notNull(typeName, "Java type required");
 
         final String id = getTypeLocationService()
                 .getPhysicalTypeIdentifier(typeName);
@@ -278,20 +275,14 @@ public class FinderOperationsImpl implements FinderOperations {
                     signature.append(param.getSimpleTypeName()).append(" ")
                             .append(parameterNames.get(x).getSymbolName());
                 }
-                result.add(finder.getSymbolName() + "(" + signature + ")" /*
-                                                                           * query:
-                                                                           * '"
-                                                                           * +
-                                                                           * query
-                                                                           * +
-                                                                           * "'"
-                                                                           */);
+                result.add(finder.getSymbolName() + "(" + signature + ")");
             }
             catch (final RuntimeException e) {
                 result.add(finder.getSymbolName() + " - failure");
             }
         }
-        return result;
+        return result;*/
+        return null;
     }
     
     public DynamicFinderServices getDynamicFinderServices(){

@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.dbre.addon;
 
 import static org.springframework.roo.model.JpaJavaType.TABLE;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.LinkedHashMap;
@@ -26,6 +25,7 @@ import org.springframework.roo.model.ReservedWords;
  * field names from table and column names respectively.
  * 
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.1
  */
 public abstract class DbreTypeUtils {
@@ -47,12 +47,10 @@ public abstract class DbreTypeUtils {
     static {
         TABLE_ATTRIBUTES.put(TABLE, NAME_ATTRIBUTE);
         TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY, TABLE_ATTRIBUTE);
-        TABLE_ATTRIBUTES.put(ROO_JPA_ACTIVE_RECORD, TABLE_ATTRIBUTE);
     }
     static {
         SCHEMA_ATTRIBUTES.put(TABLE, SCHEMA_ATTRIBUTE);
         SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY, SCHEMA_ATTRIBUTE);
-        SCHEMA_ATTRIBUTES.put(ROO_JPA_ACTIVE_RECORD, SCHEMA_ATTRIBUTE);
     }
 
     /**

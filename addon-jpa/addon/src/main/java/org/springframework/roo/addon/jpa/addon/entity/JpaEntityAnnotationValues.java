@@ -2,7 +2,6 @@ package org.springframework.roo.addon.jpa.addon.entity;
 
 import static org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity.VERSION_FIELD_DEFAULT;
 
-import org.springframework.roo.addon.jpa.annotations.activerecord.RooJpaActiveRecord;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -11,10 +10,10 @@ import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataIte
 import org.springframework.roo.model.JavaType;
 
 /**
- * The purely JPA-related values of a single {@link RooJpaEntity} or
- * {@link RooJpaActiveRecord} annotation.
+ * The purely JPA-related values of a single {@link RooJpaEntity} annotation.
  * 
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 public class JpaEntityAnnotationValues extends AbstractAnnotationValues {

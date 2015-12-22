@@ -13,7 +13,6 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -64,6 +63,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * 
  * @author Ben Alex
  * @author Enrique Ruiz at DISID Corporation S.L.
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -326,15 +326,6 @@ public class IntegrationTestMetadataProviderImpl extends
         }
 
         String transactionManager = null;
-        final AnnotationMetadata jpaActiveRecordAnnotation = memberDetails
-                .getAnnotation(ROO_JPA_ACTIVE_RECORD);
-        if (jpaActiveRecordAnnotation != null) {
-            final StringAttributeValue transactionManagerAttr = (StringAttributeValue) jpaActiveRecordAnnotation
-                    .getAttribute(TRANSACTION_MANAGER_ATTRIBUTE);
-            if (transactionManagerAttr != null) {
-                transactionManager = transactionManagerAttr.getValue();
-            }
-        }
 
         final boolean hasEmbeddedIdentifier = dataOnDemandMetadata
                 .hasEmbeddedIdentifier();

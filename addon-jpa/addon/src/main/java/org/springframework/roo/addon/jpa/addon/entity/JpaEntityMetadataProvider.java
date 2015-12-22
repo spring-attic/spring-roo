@@ -1,16 +1,12 @@
 package org.springframework.roo.addon.jpa.addon.entity;
 
-import org.springframework.roo.addon.jpa.addon.activerecord.JpaActiveRecordMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
- * Provides metadata relating to JPA entities. Has taken over from
- * {@link JpaActiveRecordMetadataProvider} the management of core JPA concerns
- * such as the id and version fields and applying the JPA @Entity and @Table
- * annotations. The {@link JpaActiveRecordMetadataProvider} remains responsible
- * for CRUD methods such as merge(), persist(), finders, etc.
+ * Provides metadata relating to JPA entities.
  * 
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 public interface JpaEntityMetadataProvider extends

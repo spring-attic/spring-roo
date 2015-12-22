@@ -991,7 +991,6 @@ Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTe
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Configurable.aj
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString.aj
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Jpa_Entity.aj
-Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Jpa_ActiveRecord.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_Configurable.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_Configurable.aj
@@ -1630,7 +1629,6 @@ roo> *jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE*
 roo> *entity jpa --class ~.Hello*
 Created SRC_MAIN_JAVA/com/aspectj/rocks
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello.java
-Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_JpaActiveRecord.aj
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_JpaEntity.aj
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_ToString.aj
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_Configurable.aj
@@ -1654,11 +1652,9 @@ package com.aspectj.rocks;
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
-import org.springframework.roo.addon.entity.RooJpaActiveRecord;
 
 @RooJavaBean
 @RooToString
-@RooJpaActiveRecord
 public class Hello {
 
     private String comment;
@@ -1868,13 +1864,11 @@ package com.springsource.vote.domain;
 
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
-import org.springframework.roo.addon.entity.RooJpaActiveRecord;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @RooJavaBean
 @RooToString
-@RooJpaActiveRecord
 public class Choice {
 
     @NotNull

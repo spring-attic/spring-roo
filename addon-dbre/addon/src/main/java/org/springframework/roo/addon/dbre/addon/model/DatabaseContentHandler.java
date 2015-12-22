@@ -19,11 +19,10 @@ import org.xml.sax.helpers.DefaultHandler;
  * {@link Database} object.
  * 
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.1
  */
 public class DatabaseContentHandler extends DefaultHandler {
-
-    private boolean activeRecord;
 
     private Database database;
     private JavaPackage destinationPackage;
@@ -75,9 +74,6 @@ public class DatabaseContentHandler extends DefaultHandler {
                 disableGeneratedIdentifiers = Boolean.parseBoolean(option
                         .getValue());
             }
-            if (option.getKey().equals("activeRecord")) {
-                activeRecord = Boolean.parseBoolean(option.getValue());
-            }
             if (option.getKey().equals("repository")) {
                 repository = Boolean.parseBoolean(option.getValue());
             }
@@ -120,7 +116,6 @@ public class DatabaseContentHandler extends DefaultHandler {
             database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
             database.setDisableVersionFields(disableVersionFields);
             database.setDisableGeneratedIdentifiers(disableGeneratedIdentifiers);
-            database.setActiveRecord(activeRecord);
             database.setRepository(repository);
             database.setService(service);
             database.setTestAutomatically(testAutomatically);

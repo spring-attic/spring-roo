@@ -3,7 +3,6 @@ package org.springframework.roo.addon.layers.service.addon;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.classpath.PhysicalTypeCategory.CLASS;
 import static org.springframework.roo.classpath.PhysicalTypeCategory.INTERFACE;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_PERMISSION_EVALUATOR;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
@@ -37,6 +36,7 @@ import org.springframework.roo.project.ProjectOperations;
  * The {@link ServiceOperations} implementation.
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 @Component
@@ -174,8 +174,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
             String role, boolean usePermissionEvaluator,
             boolean useXmlConfiguration) {
         for (final ClassOrInterfaceTypeDetails domainType : typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY,
-                        ROO_JPA_ACTIVE_RECORD)) {
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY)) {
             JavaType interfaceType = new JavaType(
                     interfacePackage.getFullyQualifiedPackageName() + "."
                             + domainType.getName().getSimpleTypeName()

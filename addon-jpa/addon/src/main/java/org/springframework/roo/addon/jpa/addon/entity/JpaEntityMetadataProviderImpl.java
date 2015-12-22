@@ -30,7 +30,6 @@ import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 import static org.springframework.roo.model.JpaJavaType.VERSION;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.Arrays;
@@ -129,12 +128,8 @@ public class JpaEntityMetadataProviderImpl extends
     // The order of this array is the order in which we look for annotations. We
     // use the values of the first one found.
     private static final JavaType[] TRIGGER_ANNOTATIONS = {
-            // We trigger off RooJpaEntity in case the user doesn't want Active
-            // Record methods
-            ROO_JPA_ENTITY,
-            // We trigger off RooJpaActiveRecord so that existing projects don't
-            // need to add RooJpaEntity
-            ROO_JPA_ACTIVE_RECORD, };
+            // We trigger off RooJpaEntity
+            ROO_JPA_ENTITY};
 
     private CustomDataKeyDecorator customDataKeyDecorator;
     private ProjectOperations projectOperations;
@@ -316,8 +311,7 @@ public class JpaEntityMetadataProviderImpl extends
                 // Type matchers
                 new MidTypeMatcher(IDENTIFIER_TYPE, IdentifierMetadata.class
                         .getName()),
-                new AnnotatedTypeMatcher(PERSISTENT_TYPE,
-                        RooJavaType.ROO_JPA_ACTIVE_RECORD, ROO_JPA_ENTITY),
+                new AnnotatedTypeMatcher(PERSISTENT_TYPE, ROO_JPA_ENTITY),
                 // Field matchers
                 JPA_COLUMN_FIELD_MATCHER, JPA_EMBEDDED_FIELD_MATCHER,
                 JPA_EMBEDDED_ID_FIELD_MATCHER,

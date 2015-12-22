@@ -6,13 +6,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.roo.addon.jpa.annotations.activerecord.RooJpaActiveRecord;
-
 /**
- * Indicates a type that is a JPA entity. Created to reduce the number of
- * concerns managed by {@link RooJpaActiveRecord}.
+ * Indicates a type that is a JPA entity.
  * 
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 @Retention(RetentionPolicy.SOURCE)
@@ -53,8 +51,7 @@ public @interface RooJpaEntity {
     /**
      * Creates an identifier, unless there is already a JPA @Id field annotation
      * in a superclass (either written in normal Java source ,or introduced by a
-     * superclass that is annotated with either {@link RooJpaActiveRecord} or
-     * {@link RooJpaEntity}.
+     * superclass that is annotated with {@link RooJpaEntity}.
      * <p>
      * If you annotate a field with JPA's @Id annotation, it is required that
      * you provide a public accessor for that field.
@@ -120,7 +117,7 @@ public @interface RooJpaEntity {
      * Creates an optimistic locking version field, unless there is already a
      * JPA @Version field annotation in a superclass (either written in normal
      * Java source, or introduced by a superclass annotated with
-     * {@link RooJpaActiveRecord} or {@link RooJpaEntity}. The produced field
+     * {@link RooJpaEntity}. The produced field
      * will be of the type specified by {@link #versionType()}.
      * <p>
      * If you annotate a field with JPA's @Version annotation, it is required

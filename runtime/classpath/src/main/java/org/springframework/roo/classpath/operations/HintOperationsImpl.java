@@ -30,6 +30,7 @@ import org.springframework.roo.shell.AbstractShell;
  * 
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.1
  */
 @Service
@@ -58,8 +59,7 @@ public class HintOperationsImpl implements HintOperations {
             return "persistence";
         }
 
-        if (new BigDecimal(NumberUtils.max(getItdCount("Jpa_ActiveRecord"),
-                getItdCount("Jpa_Entity"), getItdCount("Mongo_Entity")))
+        if (new BigDecimal(getItdCount("Jpa_Entity"))
                 .compareTo(BigDecimal.ZERO) == 0) {
             return "entities";
         }

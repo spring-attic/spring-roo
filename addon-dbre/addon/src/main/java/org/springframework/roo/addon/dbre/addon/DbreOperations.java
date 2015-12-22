@@ -10,6 +10,7 @@ import org.springframework.roo.model.JavaPackage;
  * Provides database reverse engineering operations.
  * 
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.1
  */
 public interface DbreOperations {
@@ -51,8 +52,6 @@ public interface DbreOperations {
      *            column
      * @param disableGeneratedIdentifiers whether or not to disable the
      *            identifier auto generation value
-     * @param activeRecord whether to generate CRUD active record methods for
-     *            each entity
      * @param repository whether to generate a service layer for each entity
      * @param service whether to generate a repository layer for each entity
      */
@@ -60,6 +59,6 @@ public interface DbreOperations {
             JavaPackage destinationPackage, boolean testAutomatically,
             boolean view, Set<String> includeTables, Set<String> excludeTables,
             boolean includeNonPortableAttributes, boolean disableVersionFields,
-            boolean disableGeneratedIdentifiers, boolean activeRecord,
+            boolean disableGeneratedIdentifiers,
             boolean repository, boolean service);
 }

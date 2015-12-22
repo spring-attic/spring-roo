@@ -27,9 +27,6 @@
 		
 		<config command="entity jpa">
 			<action type="focus" module="domain" />
-			<action type="defaultvalue" argument="--activeRecord" value="false" />
-			<!-- Define default for permitReservedWords explicitly, so that it can 
-				be forwarded to all later commands -->
 			<action type="defaultvalue" argument="--permitReservedWords"
 				value="false" />
 			<!-- Set testAutomatically to "false", because tests should never be created 
@@ -81,7 +78,6 @@
 		</config>
 		<config command="entity jpa">
 			<action type="focus" module="domain" />
-			<action type="defaultvalue" argument="--activeRecord" value="false" />
 			<action type="execute" />
 		</config>
 		<config command="jpa setup">

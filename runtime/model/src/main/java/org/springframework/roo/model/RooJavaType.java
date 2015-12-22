@@ -5,6 +5,7 @@ package org.springframework.roo.model;
  * creating new instances of these types.
  * 
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 public final class RooJavaType {
@@ -36,8 +37,6 @@ public final class RooJavaType {
             "org.springframework.roo.addon.test.annotations.RooIntegrationTest");
     public static final JavaType ROO_JAVA_BEAN = new JavaType(
             "org.springframework.roo.addon.javabean.annotations.RooJavaBean");
-    public static final JavaType ROO_JPA_ACTIVE_RECORD = new JavaType(
-            "org.springframework.roo.addon.jpa.annotations.activerecord.RooJpaActiveRecord");
     public static final JavaType ROO_JPA_ENTITY = new JavaType(
             "org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity");
     public static final JavaType ROO_JSF_APPLICATION_BEAN = new JavaType(

@@ -17,6 +17,7 @@ import org.springframework.roo.shell.CommandMarker;
  * Shell commands for {@link DbreOperations}.
  * 
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.1
  */
 @Component
@@ -51,13 +52,12 @@ public class DbreCommands implements CommandMarker {
             @CliOption(key = "includeNonPortableAttributes", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Include non-portable JPA @Column attributes such as 'columnDefinition'") final boolean includeNonPortableAttributes,
             @CliOption(key = "disableVersionFields", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Disable 'version' field") final boolean disableVersionFields,
             @CliOption(key = "disableGeneratedIdentifiers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Disable identifier auto generation") final boolean disableGeneratedIdentifiers,
-            @CliOption(key = "activeRecord", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Generate CRUD active record methods for each entity") final boolean activeRecord,
             @CliOption(key = "repository", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate a repository for each entity") final boolean repository,
             @CliOption(key = "service", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Generate a service for each entity") final boolean service) {
 
         dbreOperations.reverseEngineerDatabase(schemas, destinationPackage,
                 testAutomatically, view, includeTables, excludeTables,
                 includeNonPortableAttributes, disableVersionFields,
-                disableGeneratedIdentifiers, activeRecord, repository, service);
+                disableGeneratedIdentifiers, repository, service);
     }
 }

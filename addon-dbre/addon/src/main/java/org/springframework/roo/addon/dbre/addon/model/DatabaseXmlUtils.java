@@ -20,6 +20,7 @@ import org.w3c.dom.Element;
  * Assists converting a {@link Database} to and from XML using DOM or SAX.
  * 
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.1
  */
 public abstract class DatabaseXmlUtils {
@@ -131,8 +132,6 @@ public abstract class DatabaseXmlUtils {
 
         databaseElement.appendChild(createOptionElement("moduleName",
                 database.getModuleName(), document));
-        addBooleanOptionElement(document, databaseElement, "activeRecord",
-                database.isActiveRecord());
         addBooleanOptionElement(document, databaseElement, "repository",
                 database.isRepository());
         addBooleanOptionElement(document, databaseElement, "service",
@@ -339,9 +338,6 @@ public abstract class DatabaseXmlUtils {
             final String value = optionElement.getAttribute("value");
             if (key.equals("moduleName")) {
                 database.setModuleName(value);
-            }
-            if (key.equals("activeRecord")) {
-                database.setActiveRecord(Boolean.parseBoolean(value));
             }
             if (key.equals("repository")) {
                 database.setRepository(Boolean.parseBoolean(value));

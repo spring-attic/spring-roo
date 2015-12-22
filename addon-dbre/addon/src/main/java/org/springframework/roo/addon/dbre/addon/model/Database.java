@@ -16,12 +16,10 @@ import org.springframework.roo.model.JavaPackage;
  * Represents the database model, ie. the tables in the database.
  * 
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.1
  */
 public class Database {
-
-    /** Whether or not to generate active record CRUD methods for each entity */
-    private boolean activeRecord;
 
     /** The JavaPackage where entities are created */
     private JavaPackage destinationPackage;
@@ -132,17 +130,6 @@ public class Database {
         return !tables.isEmpty();
     }
 
-    /**
-     * Indicates whether active record CRUD methods should be generated for each
-     * entity
-     * 
-     * @return see above
-     * @since 1.2.0
-     */
-    public boolean isActiveRecord() {
-        return activeRecord;
-    }
-
     public boolean isDisableGeneratedIdentifiers() {
         return disableGeneratedIdentifiers;
     }
@@ -165,17 +152,6 @@ public class Database {
 
     public boolean isTestAutomatically() {
         return testAutomatically;
-    }
-
-    /**
-     * Sets whether active record CRUD methods should be generated for each
-     * entity
-     * 
-     * @param activeRecord
-     * @since 1.2.0
-     */
-    public void setActiveRecord(final boolean activeRecord) {
-        this.activeRecord = activeRecord;
     }
 
     public void setDestinationPackage(final JavaPackage destinationPackage) {
@@ -215,8 +191,8 @@ public class Database {
     @Override
     public String toString() {
         return String
-                .format("Database [activeRecord=%s, destinationPackage=%s, disableGeneratedIdentifiers=%s, disableVersionFields=%s, includeNonPortableAttributes=%s, moduleName=%s, multipleSchemas=%s, repository=%s, service=%s, tables=%s, testAutomatically=%s]",
-                        activeRecord, destinationPackage,
+                .format("Database [destinationPackage=%s, disableGeneratedIdentifiers=%s, disableVersionFields=%s, includeNonPortableAttributes=%s, moduleName=%s, multipleSchemas=%s, repository=%s, service=%s, tables=%s, testAutomatically=%s]",
+                        destinationPackage,
                         disableGeneratedIdentifiers, disableVersionFields,
                         includeNonPortableAttributes, moduleName,
                         multipleSchemas, repository, service, tables,

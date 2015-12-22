@@ -4,7 +4,6 @@ import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ACTIVE_RECORD;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
@@ -48,6 +47,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -238,7 +238,7 @@ public class JpaCommands implements CommandMarker {
                 catalog, identifierField, identifierColumn, identifierType,
                 versionField, versionColumn, versionType, inheritanceType,
                 mappedSuperclass, persistenceUnit, transactionManager,
-                entityName, sequenceName, false));
+                entityName, sequenceName));
         if (equals) {
             annotationBuilder.add(ROO_EQUALS_BUILDER);
         }
@@ -292,8 +292,6 @@ public class JpaCommands implements CommandMarker {
      * @param transactionManager
      * @param entityName
      * @param sequenceName
-     * @param activeRecord whether to generate active record CRUD methods for
-     *            the entity
      * @return a non-<code>null</code> builder
      */
     private AnnotationMetadataBuilder getEntityAnnotationBuilder(
@@ -304,9 +302,9 @@ public class JpaCommands implements CommandMarker {
             final InheritanceType inheritanceType,
             final boolean mappedSuperclass, final String persistenceUnit,
             final String transactionManager, final String entityName,
-            final String sequenceName, final boolean activeRecord) {
+            final String sequenceName) {
         final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(
-                getEntityAnnotationType(activeRecord));
+                ROO_JPA_ENTITY);
 
         // Attributes that apply to all JPA entities (active record or not)
         if (catalog != null) {
@@ -361,31 +359,7 @@ public class JpaCommands implements CommandMarker {
                     versionType);
         }
 
-        // Attributes that only apply to entities with CRUD active record
-        // methods
-        if (activeRecord) {
-            if (persistenceUnit != null) {
-                entityAnnotationBuilder.addStringAttribute("persistenceUnit",
-                        persistenceUnit);
-            }
-            if (transactionManager != null) {
-                entityAnnotationBuilder.addStringAttribute(
-                        "transactionManager", transactionManager);
-            }
-        }
-
         return entityAnnotationBuilder;
-    }
-
-    /**
-     * Returns the type of annotation to put on the entity
-     * 
-     * @param activeRecord whether the entity is to have CRUD active record
-     *            methods generated
-     * @return a non-<code>null</code> type
-     */
-    private JavaType getEntityAnnotationType(final boolean activeRecord) {
-        return activeRecord ? ROO_JPA_ACTIVE_RECORD : ROO_JPA_ENTITY;
     }
 
     private boolean isJdk6OrHigher() {

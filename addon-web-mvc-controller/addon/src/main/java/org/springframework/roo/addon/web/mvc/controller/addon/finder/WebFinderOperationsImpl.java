@@ -26,6 +26,7 @@ import org.springframework.roo.model.RooJavaType;
  * Implementation of {@link WebFinderOperations}
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 @Component
@@ -40,13 +41,6 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     public void annotateAll() {
         // First, find all entities with finders.
         final Set<JavaType> finderEntities = new HashSet<JavaType>();
-        for (final ClassOrInterfaceTypeDetails cod : typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ACTIVE_RECORD)) {
-            if (MemberFindingUtils.getAnnotationOfType(cod.getAnnotations(),
-                    RooJavaType.ROO_JPA_ACTIVE_RECORD).getAttribute("finders") != null) {
-                finderEntities.add(cod.getName());
-            }
-        }
 
         // Second, find controllers for those entities.
         for (final ClassOrInterfaceTypeDetails cod : typeLocationService
