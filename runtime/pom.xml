@@ -30,6 +30,7 @@
         <module>file-undo</module>
         <module>file-monitor</module>
         <module>project</module>
+        <module>propfiles-manager</module>
         <module>process-manager</module>
         <module>classpath</module>
         <module>classpath-antlrjavaparser</module>

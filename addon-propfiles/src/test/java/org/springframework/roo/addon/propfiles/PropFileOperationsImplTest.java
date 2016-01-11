@@ -6,7 +6,9 @@ import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.powermock.api.support.membermodification.MemberModifier;
 import org.springframework.roo.addon.propfiles.caller.PropertiesTestClient;
+import org.springframework.roo.propfiles.manager.PropFilesManagerServiceImpl;
 
 /**
  * Unit test of {@link PropFileOperationsImpl} N.B. for this test to pass, the
@@ -26,8 +28,12 @@ public class PropFileOperationsImplTest {
     private PropFileOperationsImpl propFileOperations;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IllegalArgumentException, IllegalAccessException {
         propFileOperations = new PropFileOperationsImpl();
+
+        // Setting propFilesManager
+        MemberModifier.field(PropFileOperationsImpl.class, "propFilesManager").set(
+                propFileOperations, new PropFilesManagerServiceImpl());
     }
 
     @Test
