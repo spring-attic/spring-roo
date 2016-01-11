@@ -38,6 +38,7 @@
         <module>obr-manager</module>
         <module>suite-manager</module>
         <module>rest-publisher</module>
+        <module>application-config</module>
     </modules>
 
     <!-- Runtime dependency management: OSGi Services, Felix, ... -->
