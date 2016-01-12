@@ -253,7 +253,7 @@ public interface PropFilesManagerService {
             String prefix, String key);
 
     /**
-     * Retrieves all property keys from the specified property, throwing an
+     * Retrieves all property keys from the specified property file, throwing an
      * exception if the file does not exist.
      * 
      * @param propertyFilePath the location of the property file (required)
@@ -265,6 +265,21 @@ public interface PropFilesManagerService {
      */
     SortedSet<String> getPropertyKeys(LogicalPath propertyFilePath,
             String propertyFilename, boolean includeValues);
+    
+    /**
+     * Retrieves all property keys that starts with the given prefix from the specified 
+     * property file, throwing an exception if the file does not exist.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix if defined, only properties that starts with it will be returned.
+     * @param includeValues if true, appends (" = theValue") to each returned
+     *            string
+     * @return the keys (may return null if the property file does not exist)
+     */
+    SortedSet<String> getPropertyKeys(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, boolean includeValues);
 
     /**
      * Loads the properties from the given stream, closing it on completion

@@ -223,6 +223,13 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
     @Override
     public SortedSet<String> getPropertyKeys(final LogicalPath propertyFilePath,
             final String propertyFilename, final boolean includeValues) {
+        return getPropertyKeys(propertyFilePath, propertyFilename, "", includeValues);
+    }
+    
+    @Override
+    public SortedSet<String> getPropertyKeys(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, boolean includeValues) {
+        Validate.notNull(prefix, "Prefix could be blank but not null");
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
 
@@ -246,10 +253,18 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         final SortedSet<String> result = new TreeSet<String>();
         for (final Object key : props.keySet()) {
             String info = key.toString();
-            if (includeValues) {
-                info += " = " + props.getProperty(key.toString());
+            if(StringUtils.isNotBlank(prefix)){
+                if(info.startsWith(prefix)){
+                    result.add(includeValues
+                            ? info.concat(" = ").concat(props.getProperty(key.toString()))
+                            : info);
+                }
+            }else{
+                if (includeValues) {
+                    info += " = " + props.getProperty(key.toString());
+                }
+                result.add(info);
             }
-            result.add(info);
         }
         return result;
     }
