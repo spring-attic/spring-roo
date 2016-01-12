@@ -10,7 +10,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -63,7 +62,6 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -107,11 +105,12 @@ public class JpaOperationsImpl implements JpaOperations {
         }
     }
 
-    private static final String DATABASE_DRIVER = "spring.datasource.driver-class-name";
-    private static final String DATABASE_PASSWORD = "spring.datasource.password";
-    private static final String DATABASE_URL = "spring.datasource.url";
-    private static final String DATABASE_USERNAME = "spring.datasource.username";
-    private static final String JNDI_NAME = "spring.datasource.jndi-name";
+    private static final String DATASOURCE_PREFIX = "spring.datasource";
+    private static final String DATABASE_DRIVER = "driver-class-name";
+    private static final String DATABASE_PASSWORD = "password";
+    private static final String DATABASE_URL = "url";
+    private static final String DATABASE_USERNAME = "username";
+    private static final String JNDI_NAME = "jndi-name";
     static final String POM_XML = "pom.xml";
 
     private FileManager fileManager;
@@ -219,7 +218,7 @@ public class JpaOperationsImpl implements JpaOperations {
     	Validate.notNull(projectOperations, "ProjectOperations is required");
     	
         if (hasDatabaseProperties()) {
-            return getApplicationConfigService().getPropertyKeys("spring.datasource", true);
+            return getApplicationConfigService().getPropertyKeys(DATASOURCE_PREFIX, true);
         }
         return getPropertiesFromDataNucleusConfiguration();
     }
@@ -401,7 +400,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
     public boolean hasDatabaseProperties() {
         SortedSet<String> databaseProperties = getApplicationConfigService()
-                .getPropertyKeys("spring.datasource", false);
+                .getPropertyKeys(DATASOURCE_PREFIX, false);
     	
         return !databaseProperties.isEmpty();
     }
@@ -667,43 +666,6 @@ public class JpaOperationsImpl implements JpaOperations {
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
-    private Map<String, String> readProperties(final String path, final boolean exists,
-            final String templateFilename) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	
-        final Properties props = new LinkedProperties();
-        InputStream inputStream = null;
-        try {
-            if (exists) {
-                inputStream = fileManager.getInputStream(path);
-            }
-            else {
-                inputStream = FileUtils.getInputStream(getClass(),
-                        templateFilename);
-            }
-            props.load(inputStream);
-        }
-        catch (final IOException e) {
-            throw new IllegalStateException(e);
-        }
-        finally {
-            IOUtils.closeQuietly(inputStream);
-        }
-        
-        // Changing properties object to map
-        Map<String, String> properties = new HashMap<String, String>();
-        for (final String name: props.stringPropertyNames()){
-            properties.put(name, props.getProperty(name));
-        }
-        return properties;
-    }
-
-
     private void updateBuildPlugins(final Element configuration,
             final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
             final String databaseXPath, final String providersXPath,
@@ -778,10 +740,6 @@ public class JpaOperationsImpl implements JpaOperations {
         // Check if jndi is blank. If is blank, include database properties on 
         // application.properties file
         if(StringUtils.isBlank(jndi)){
-            final Map<String, String> props = readProperties(
-                    getApplicationConfigService().getSpringConfigLocation(),
-                    getApplicationConfigService().existsSpringConfigFile(),
-                    "database-template.properties");
             
             final String connectionString = getConnectionString(jdbcDatabase,
                     hostName, databaseName, moduleName);
@@ -791,10 +749,11 @@ public class JpaOperationsImpl implements JpaOperations {
                 userName = StringUtils.defaultIfEmpty(userName, "sa");
             }
 
-            final String driver = props.get(DATABASE_DRIVER);
-            final String url = props.get(DATABASE_URL);
-            final String uname = props.get(DATABASE_USERNAME);
-            final String pwd = props.get(DATABASE_PASSWORD);
+            // Getting current properties
+            final String driver = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, DATABASE_DRIVER);
+            final String url = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, DATABASE_URL);
+            final String uname = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, DATABASE_USERNAME);
+            final String pwd = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD);
 
             boolean hasChanged = driver == null
                     || !driver.equals(jdbcDatabase.getDriverClassName());
@@ -809,23 +768,20 @@ public class JpaOperationsImpl implements JpaOperations {
             }
             
             // Write changes to Spring Config file
+            Map<String, String> props = new HashMap<String, String>();
             props.put(DATABASE_URL, connectionString);
             props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
             props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
             props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
             
-            getApplicationConfigService().addProperties(props);
+            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props);
 
             // Remove jndi property
-            getApplicationConfigService().removeProperty(JNDI_NAME);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, JNDI_NAME);
             
         }else{
-            final Map<String, String> props = readProperties(
-                    getApplicationConfigService().getSpringConfigLocation(),
-                    getApplicationConfigService().existsSpringConfigFile(),
-                    "jndi-template.properties");
             
-            final String jndiProperty = props.get(JNDI_NAME);
+            final String jndiProperty = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, JNDI_NAME);
             
             boolean hasChanged = jndiProperty == null || 
                     !jndiProperty.equals(StringUtils.stripToEmpty(jndi));
@@ -834,16 +790,17 @@ public class JpaOperationsImpl implements JpaOperations {
                 return;
             }
             
-            // Write changes to application.properties file
+            // Write changes to Spring Config file
+            Map<String, String> props = new HashMap<String, String>();
             props.put(JNDI_NAME, jndi);
             
-            applicationConfigService.addProperties(props);
+            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props);
             
             // Remove old properties
-            getApplicationConfigService().removeProperty(DATABASE_URL);
-            getApplicationConfigService().removeProperty(DATABASE_DRIVER);
-            getApplicationConfigService().removeProperty(DATABASE_USERNAME);
-            getApplicationConfigService().removeProperty(DATABASE_PASSWORD);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_URL);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_DRIVER);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD);
             
         }
 
