@@ -2,6 +2,9 @@ package org.springframework.roo.application.config;
 
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * Provides an interface to {@link ApplicationConfigServiceImpl}.
@@ -86,6 +89,28 @@ public interface ApplicationConfigService {
      *         not exist)
      */
     Map<String, String> getProperties();
+    
+    /**
+     * Retrieves all property keys from the specified property, throwing an
+     * exception if the file does not exist.
+     * 
+     * @param includeValues if true, appends (" = theValue") to each returned
+     *            string
+     * @return the keys (may return null if the property file does not exist)
+     */
+    SortedSet<String> getPropertyKeys(boolean includeValues);
+    
+    /**
+     * Retrieves all property keys from the specified property, throwing an
+     * exception if the file does not exist.
+     * 
+     * @param prefix string that identifies property prefix. (if defined, only 
+     *        properties that starts with it will be returned)
+     * @param includeValues if true, appends (" = theValue") to each returned
+     *            string
+     * @return the keys (may return null if the property file does not exist)
+     */
+    SortedSet<String> getPropertyKeys(String prefix, boolean includeValues);
 
     /**
      * Retrieves the specified property, returning null if the property or file
@@ -136,4 +161,20 @@ public interface ApplicationConfigService {
      * @param prefix that identifies property to be removed
      */
     void removePropertiesByPrefix(String prefix);
+    
+    /**
+     * Method that returns current location of Spring Config file 
+     * (if user has not modified it should return src/main/resources/application.properties)
+     * 
+     * @return string with current location of Spring Config file
+     */
+    String getSpringConfigLocation(); 
+    
+    /**
+     * Method that checks if Spring config file exists. Uses getSpringConfigLocation method to
+     * obtain location.
+     * 
+     * @return boolean true if exists
+     */
+    boolean existsSpringConfigFile();
 }
