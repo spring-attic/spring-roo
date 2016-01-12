@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.roo.addon.jpa.addon.JdbcDatabase.H2_IN_MEMORY;
-import static org.springframework.roo.addon.jpa.addon.OrmProvider.HIBERNATE;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -17,6 +15,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.powermock.api.support.membermodification.MemberModifier;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
@@ -143,7 +142,7 @@ public class JpaOperationsImplTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws IllegalArgumentException, IllegalAccessException {
         MockitoAnnotations.initMocks(this);
 
         // Mocks
@@ -155,11 +154,19 @@ public class JpaOperationsImplTest {
 
         // Object under test
         jpaOperations = new JpaOperationsImpl();
-        jpaOperations.pathResolver = mockPathResolver;
-        jpaOperations.fileManager = mockFileManager;
-        jpaOperations.projectOperations = mockProjectOperations;
-        jpaOperations.propFileOperations = mockPropFileOperations;
-
+        
+        // Setting pathResolver
+        MemberModifier.field(JpaOperationsImpl.class, "pathResolver").set(
+                jpaOperations, mockPathResolver);
+        
+        // Setting fileManager
+        MemberModifier.field(JpaOperationsImpl.class, "fileManager").set(
+                jpaOperations, mockFileManager);
+        
+        // Setting projectOperations
+        MemberModifier.field(JpaOperationsImpl.class, "projectOperations").set(
+                jpaOperations, mockProjectOperations);
+        
         // Things that are too hard or ugly to mock
         dialects = new Properties();
     }

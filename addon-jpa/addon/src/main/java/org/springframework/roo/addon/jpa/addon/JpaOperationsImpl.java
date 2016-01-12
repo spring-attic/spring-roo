@@ -7,10 +7,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
-import static org.springframework.roo.model.SpringJavaType.JPA_TRANSACTION_MANAGER;
-import static org.springframework.roo.model.SpringJavaType.LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,9 +19,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -40,7 +39,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.propfiles.PropFileOperations;
+import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -64,7 +63,6 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -109,7 +107,6 @@ public class JpaOperationsImpl implements JpaOperations {
         }
     }
 
-    private static final String APPLICATION_PROPERTIES_FILE = "application.properties";
     private static final String DATABASE_DRIVER = "spring.datasource.driver-class-name";
     private static final String DATABASE_PASSWORD = "spring.datasource.password";
     private static final String DATABASE_URL = "spring.datasource.url";
@@ -117,12 +114,12 @@ public class JpaOperationsImpl implements JpaOperations {
     private static final String JNDI_NAME = "spring.datasource.jndi-name";
     static final String POM_XML = "pom.xml";
 
-    FileManager fileManager;
-    PathResolver pathResolver;
-    ProjectOperations projectOperations;
-    PropFileOperations propFileOperations;
-    TypeLocationService typeLocationService;
-    TypeManagementService typeManagementService;
+    private FileManager fileManager;
+    private PathResolver pathResolver;
+    private ProjectOperations projectOperations;
+    private TypeLocationService typeLocationService;
+    private TypeManagementService typeManagementService;
+    private ApplicationConfigService applicationConfigService;
 
     public void configureJpa(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String jndi,
@@ -162,7 +159,7 @@ public class JpaOperationsImpl implements JpaOperations {
         updateBuildPlugins(configuration, ormProvider, jdbcDatabase,
                 databaseXPath, providersXPath, moduleName);
         
-        // Update application.properties with spring.datasource.* domain properties
+        // Update Spring Config File with spring.datasource.* domain properties
         updateApplicationProperties(ormProvider, jdbcDatabase, hostName,
                 databaseName, userName, password, moduleName, jndi);
         
@@ -221,21 +218,10 @@ public class JpaOperationsImpl implements JpaOperations {
     	}
     	Validate.notNull(projectOperations, "ProjectOperations is required");
     	
-    	if(propFileOperations == null){
-    		propFileOperations = getPropFileOperations();
-    	}
-    	Validate.notNull(propFileOperations, "PropFileOperations is required");
-    	
         if (hasDatabaseProperties()) {
-            return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT
-                    .getModulePathId(projectOperations.getFocusedModuleName()),
-                    APPLICATION_PROPERTIES_FILE, true);
+            return getApplicationConfigService().getPropertyKeys("spring.datasource", true);
         }
         return getPropertiesFromDataNucleusConfiguration();
-    }
-
-    private String getApplicationPropertiesPath() {
-        return getPropertiesPath(APPLICATION_PROPERTIES_FILE);
     }
 
     private String getDbXPath(final List<JdbcDatabase> databases) {
@@ -367,25 +353,6 @@ public class JpaOperationsImpl implements JpaOperations {
         return properties;
     }
 
-    private String getPropertiesPath(final String propertiesFile) {
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-        String path = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_RESOURCES, propertiesFile);
-        if (StringUtils.isBlank(path)) {
-            final String tmpDir = System.getProperty("java.io.tmpdir");
-            // For unit testing, as path will be null otherwise
-            path = tmpDir
-                    + (!tmpDir.endsWith(File.separator) ? File.separator : "")
-                    + propertiesFile;
-        }
-        return path;
-    }
-
     private String getProviderXPath(final List<OrmProvider> ormProviders) {
         final StringBuilder builder = new StringBuilder(
                 "/configuration/ormProviders/provider[");
@@ -433,13 +400,10 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     public boolean hasDatabaseProperties() {
+        SortedSet<String> databaseProperties = getApplicationConfigService()
+                .getPropertyKeys("spring.datasource", false);
     	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-        return fileManager.exists(getApplicationPropertiesPath());
+        return !databaseProperties.isEmpty();
     }
 
     public boolean isInstalledInModule(final String moduleName) {
@@ -703,7 +667,7 @@ public class JpaOperationsImpl implements JpaOperations {
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
-    private Properties readProperties(final String path, final boolean exists,
+    private Map<String, String> readProperties(final String path, final boolean exists,
             final String templateFilename) {
     	
     	if(fileManager == null){
@@ -730,7 +694,13 @@ public class JpaOperationsImpl implements JpaOperations {
         finally {
             IOUtils.closeQuietly(inputStream);
         }
-        return props;
+        
+        // Changing properties object to map
+        Map<String, String> properties = new HashMap<String, String>();
+        for (final String name: props.stringPropertyNames()){
+            properties.put(name, props.getProperty(name));
+        }
+        return properties;
     }
 
 
@@ -805,18 +775,12 @@ public class JpaOperationsImpl implements JpaOperations {
             final String databaseName, String userName, final String password,
             final String moduleName, String jndi) {
     	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-        final String applicationPropertiesPath = getApplicationPropertiesPath();
-        final boolean applicationPropertiesExists = fileManager.exists(applicationPropertiesPath);
-        
         // Check if jndi is blank. If is blank, include database properties on 
         // application.properties file
         if(StringUtils.isBlank(jndi)){
-            final Properties props = readProperties(applicationPropertiesPath, applicationPropertiesExists,
+            final Map<String, String> props = readProperties(
+                    getApplicationConfigService().getSpringConfigLocation(),
+                    getApplicationConfigService().existsSpringConfigFile(),
                     "database-template.properties");
             
             final String connectionString = getConnectionString(jdbcDatabase,
@@ -827,10 +791,10 @@ public class JpaOperationsImpl implements JpaOperations {
                 userName = StringUtils.defaultIfEmpty(userName, "sa");
             }
 
-            final String driver = props.getProperty(DATABASE_DRIVER);
-            final String url = props.getProperty(DATABASE_URL);
-            final String uname = props.getProperty(DATABASE_USERNAME);
-            final String pwd = props.getProperty(DATABASE_PASSWORD);
+            final String driver = props.get(DATABASE_DRIVER);
+            final String url = props.get(DATABASE_URL);
+            final String uname = props.get(DATABASE_USERNAME);
+            final String pwd = props.get(DATABASE_PASSWORD);
 
             boolean hasChanged = driver == null
                     || !driver.equals(jdbcDatabase.getDriverClassName());
@@ -844,23 +808,24 @@ public class JpaOperationsImpl implements JpaOperations {
                 return;
             }
             
-
-            // Write changes to application.properties file
+            // Write changes to Spring Config file
             props.put(DATABASE_URL, connectionString);
             props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
             props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
             props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
-
-            writeProperties(applicationPropertiesPath, applicationPropertiesExists, props);
+            
+            getApplicationConfigService().addProperties(props);
 
             // Remove jndi property
-            removeProperty(JNDI_NAME, applicationPropertiesPath, applicationPropertiesExists);
+            getApplicationConfigService().removeProperty(JNDI_NAME);
             
         }else{
-            final Properties props = readProperties(applicationPropertiesPath, applicationPropertiesExists,
+            final Map<String, String> props = readProperties(
+                    getApplicationConfigService().getSpringConfigLocation(),
+                    getApplicationConfigService().existsSpringConfigFile(),
                     "jndi-template.properties");
             
-            final String jndiProperty = props.getProperty(JNDI_NAME);
+            final String jndiProperty = props.get(JNDI_NAME);
             
             boolean hasChanged = jndiProperty == null || 
                     !jndiProperty.equals(StringUtils.stripToEmpty(jndi));
@@ -871,13 +836,14 @@ public class JpaOperationsImpl implements JpaOperations {
             
             // Write changes to application.properties file
             props.put(JNDI_NAME, jndi);
-            writeProperties(applicationPropertiesPath, applicationPropertiesExists, props);
+            
+            applicationConfigService.addProperties(props);
             
             // Remove old properties
-            removeProperty(DATABASE_URL, applicationPropertiesPath, applicationPropertiesExists);
-            removeProperty(DATABASE_DRIVER, applicationPropertiesPath, applicationPropertiesExists);
-            removeProperty(DATABASE_USERNAME, applicationPropertiesPath, applicationPropertiesExists);
-            removeProperty(DATABASE_PASSWORD, applicationPropertiesPath, applicationPropertiesExists);
+            getApplicationConfigService().removeProperty(DATABASE_URL);
+            getApplicationConfigService().removeProperty(DATABASE_DRIVER);
+            getApplicationConfigService().removeProperty(DATABASE_USERNAME);
+            getApplicationConfigService().removeProperty(DATABASE_PASSWORD);
             
         }
 
@@ -896,41 +862,9 @@ public class JpaOperationsImpl implements JpaOperations {
         case MSSQL:
         case SYBASE:
         case MYSQL:
-            LOGGER.warning("Please update your database details in src/main/resources/application.properties.");
+            LOGGER.warning("Please update your database details in ".concat(getApplicationConfigService().getSpringConfigLocation()));
             break;
         }
-    }
-
-    /**
-     * Method to remove Property from properties file 
-     */
-    private void removeProperty(String propName, String path, boolean exists) {
-        if(fileManager == null){
-            fileManager = getFileManager();
-        }
-        Validate.notNull(fileManager, "FileManager is required");
-        
-        OutputStream outputStream = null;
-        try {
-            final MutableFile mutableFile = exists ? fileManager
-                    .updateFile(path) : fileManager.createFile(path);
-            final Properties props = new Properties();
-            props.load(mutableFile.getInputStream());
-                    
-            outputStream = mutableFile == null ? new FileOutputStream(path)
-                    : mutableFile.getOutputStream();
-            
-            props.remove(propName);
-            props.store(outputStream, "Updated at " + new Date());
-            
-        }
-        catch (final IOException e) {
-            throw new IllegalStateException(e);
-        }
-        finally {
-            IOUtils.closeQuietly(outputStream);
-        }
-        
     }
 
     private void updateDataNucleusPlugin(final boolean addToPlugin) {
@@ -1336,21 +1270,26 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
     }
     
-    public PropFileOperations getPropFileOperations(){
-    	// Get all Services implement PropFileOperations interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(PropFileOperations.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (PropFileOperations) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load PropFileOperations on JpaOperationsImpl.");
-			return null;
-		}
+    public ApplicationConfigService getApplicationConfigService(){
+        if(applicationConfigService == null){
+            // Get all Services implement ApplicationConfigService interface
+            try {
+                ServiceReference<?>[] references = this.context.getAllServiceReferences(ApplicationConfigService.class.getName(), null);
+                
+                for(ServiceReference<?> ref : references){
+                    applicationConfigService = (ApplicationConfigService) this.context.getService(ref);
+                }
+                
+                return null;
+                
+            } catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load ApplicationConfigService on JpaOperationsImpl.");
+                return null;
+            }
+        }else{
+            return applicationConfigService;
+        }
+
     }
     
     public TypeLocationService getTypeLocationService(){
