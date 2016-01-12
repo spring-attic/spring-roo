@@ -14,9 +14,11 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Handler;
@@ -28,11 +30,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import jline.ANSIBuffer;
-import jline.ANSIBuffer.ANSICodes;
-import jline.ConsoleReader;
-import jline.WindowsTerminal;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -52,6 +49,11 @@ import org.springframework.roo.support.util.AnsiEscapeCode;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import jline.ANSIBuffer;
+import jline.ANSIBuffer.ANSICodes;
+import jline.ConsoleReader;
+import jline.WindowsTerminal;
 
 /**
  * Uses the feature-rich <a
@@ -434,34 +436,6 @@ public abstract class JLineShell extends AbstractShell implements
 		setShellStatus(Status.SHUTTING_DOWN);
 	}
 
-	public void promptConfirmLoop() {
-		setShellStatus(Status.USER_WAITING_CONFIRMATION);
-		String line;
-
-		// Changing default prompt with confirmation message (y/n)
-		setRooPrompt("Do you want to continue opening Spring Roo Shell (y/n)? ");
-
-		try {
-			while (exitShellRequest == null
-					&& (line = reader.readLine()) != null) {
-				JLineLogHandler.resetMessageTracking();
-				setShellStatus(Status.USER_WAITING_CONFIRMATION);
-
-				if ("y".equals(line.toLowerCase())) {
-					showGoodLuckMessage();
-					updateRooVersion(versionInfoWithoutGit());
-					break;
-				}
-
-				if ("n".equals(line.toLowerCase())) {
-					System.exit(0);
-				}
-			}
-		} catch (final IOException ioe) {
-			throw new IllegalStateException("Shell line reading failure", ioe);
-		}
-	}
-
 	private void removeHandlers(final Logger l) {
 		final Handler[] handlers = l.getHandlers();
 		if (handlers != null && handlers.length > 0) {
@@ -572,7 +546,20 @@ public abstract class JLineShell extends AbstractShell implements
 						+ getRooProjectVersion() + ".");
 				logger.warning("If you continue with the execution "
 						+ "your project might suffer some changes.");
-				promptConfirmLoop();
+				
+				// Ask a question about if Spring Roo should apply its prepared changes
+				List<String> options = new ArrayList<String>();
+				options.add("Yes");
+				options.add("No");
+				
+				String answer = askAQuestion("Do you want to continue opening Spring Roo Shell?", options, "Yes");
+				if ("yes".equals(answer.toLowerCase())) {
+					showGoodLuckMessage();
+					updateRooVersion(versionInfoWithoutGit());
+				}else if("no".equals(answer.toLowerCase())) {
+					System.exit(0);
+				}
+				
 				promptLoop();
 			} else {
 				// Normal RPEL processing
@@ -686,6 +673,74 @@ public abstract class JLineShell extends AbstractShell implements
 		// The shellPrompt is now correct; let's ensure it now gets used
 		reader.setDefaultPrompt(AbstractShell.shellPrompt);
 	}
+	
+	@Override
+	public String askAQuestion(String question, List<String> options, String defaultOption){
+	    Validate.notBlank(question, "ERROR: 'question' param when uses askAQuestion operation is required.");
+	    
+	    // Preparing options if empty
+	    if(options == null || options.isEmpty()){
+	        options = new ArrayList<String>();
+	        options.add("y");
+	        options.add("n");
+	    }
+	    
+	    // Preparing question
+	    question = question.concat( "(");
+	    for(String option : options){
+	        if(option.toLowerCase().equals(defaultOption.toLowerCase())){
+	            option = option.toUpperCase();
+	        }
+	        question = question.concat(option).concat("/");
+	    }
+	    question = question.substring(0, question.length()-1).concat(")");
+	    
+	    
+	    setShellStatus(Status.USER_WAITING_CONFIRMATION);
+        String line;
+
+        // Changing default prompt with question
+        setRooPrompt(question);
+        
+        String answer = "";
+
+        try {
+            while (exitShellRequest == null
+                    && (line = reader.readLine()) != null) {
+                JLineLogHandler.resetMessageTracking();
+                setShellStatus(Status.USER_WAITING_CONFIRMATION);
+
+                // If blank, use default option
+                if(StringUtils.isBlank(line) && StringUtils.isNotBlank(defaultOption)){
+                    answer = defaultOption;
+                    break;
+                }else{
+                    for(String option : options){
+                        if(option.toLowerCase().equals(line.toLowerCase())){
+                            answer = line;
+                            break;
+                        }
+                    }
+                    
+                    if(StringUtils.isNotBlank(answer)){
+                        break;
+                    }else{
+                        LOGGER.log(Level.SEVERE, String.format("'%s' is not a valid answer.", line));
+                    }
+                }
+            }
+
+            // Reset prompt with default value
+            setRooPrompt("");
+            
+            // Return answer
+            return answer;
+            
+        } catch (final IOException ioe) {
+            throw new IllegalStateException("Shell line reading failure", ioe);
+        }
+	    
+	}
 
 	@Override
 	public void setRooPrompt(final String prompt) {
@@ -695,7 +750,7 @@ public abstract class JLineShell extends AbstractShell implements
 						AnsiEscapeCode.FG_YELLOW);
 			} else {
 				final String decoratedPath = AnsiEscapeCode.decorate(prompt,
-						AnsiEscapeCode.FG_YELLOW);
+						AnsiEscapeCode.FG_CYAN);
 				shellPrompt = decoratedPath;
 			}
 		} else {

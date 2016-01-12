@@ -1,6 +1,7 @@
 package org.springframework.roo.shell;
 
 import java.io.File;
+import java.util.List;
 import java.util.logging.Level;
 
 import org.springframework.roo.shell.event.ShellStatusProvider;
@@ -104,7 +105,7 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
     void setPromptPath(String path);
 
     void setPromptPath(String path, boolean overrideStyle);
-
+    
     /**
      * To support API compatibility with STS shell, tailor implementation should
      * be injected explicitly when activated.
@@ -126,4 +127,16 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
      * @param listener
      */
     void removeListener(CommandListener listener);
+    
+    /**
+     * To ask a question on Spring Roo Shell that should be answered by
+     * developer. All processes wait for user answer.
+     * 
+     * @param question string with the question to show
+     * @param options list with different options to use as answer
+     * @param defaultOption default answer to use when user press enter without
+     *            select any option.
+     * @return string with the answer.
+     */
+    String askAQuestion(String question, List<String> options, String defaultOption);
 }
