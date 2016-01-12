@@ -17,6 +17,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -46,46 +47,117 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
 
     @Override
     public void addProperties(final LogicalPath propertyFilePath,
-            final String propertyFilename,
-            final Map<String, String> properties, final boolean sorted,
-            final boolean changeExisting) {
-        manageProperty(propertyFilePath, propertyFilename, properties, sorted,
-                changeExisting);
+            final String propertyFilename, final Map<String, String> properties,
+            final boolean sorted, final boolean changeExisting) {
+        manageProperty(propertyFilePath, propertyFilename, "", properties,
+                sorted, changeExisting);
     }
 
     @Override
-    public void addPropertyIfNotExists(final LogicalPath propertyFilePath,
-            final String propertyFilename, final String key, final String value) {
-        manageProperty(propertyFilePath, propertyFilename, asMap(key, value),
-                !SORTED, !CHANGE_EXISTING);
+    public void addProperties(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix,
+            Map<String, String> properties, boolean sorted,
+            boolean changeExisting) {
+        manageProperty(propertyFilePath, propertyFilename, prefix, properties,
+                sorted, changeExisting);
     }
 
     @Override
     public void addPropertyIfNotExists(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key,
-            final String value, final boolean sorted) {
-        manageProperty(propertyFilePath, propertyFilename, asMap(key, value),
-                sorted, !CHANGE_EXISTING);
+            final String value) {
+        manageProperty(propertyFilePath, propertyFilename, "",
+                asMap(key, value), !SORTED, !CHANGE_EXISTING);
+    }
+
+    @Override
+    public void addPropertyIfNotExists(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, String key, String value) {
+        manageProperty(propertyFilePath, propertyFilename, prefix,
+                asMap(key, value), !SORTED, !CHANGE_EXISTING);
+    }
+
+    @Override
+    public void addPropertyIfNotExists(final LogicalPath propertyFilePath,
+            final String propertyFilename, final String key, final String value,
+            final boolean sorted) {
+        manageProperty(propertyFilePath, propertyFilename, "",
+                asMap(key, value), sorted, !CHANGE_EXISTING);
+    }
+
+    @Override
+    public void addPropertyIfNotExists(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, String key, String value,
+            boolean sorted) {
+        manageProperty(propertyFilePath, propertyFilename, prefix,
+                asMap(key, value), sorted, !CHANGE_EXISTING);
     }
 
     @Override
     public void changeProperty(final LogicalPath propertyFilePath,
-            final String propertyFilename, final String key, final String value) {
-        manageProperty(propertyFilePath, propertyFilename, asMap(key, value),
+            final String propertyFilename, final String key,
+            final String value) {
+        manageProperty(propertyFilePath, propertyFilename, "",
+                asMap(key, value), !SORTED, CHANGE_EXISTING);
+    }
+
+    @Override
+    public void changeProperty(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, String key, String value) {
+        manageProperty(propertyFilePath, propertyFilename, prefix,
+                asMap(key, value), !SORTED, CHANGE_EXISTING);
+    }
+
+    @Override
+    public void changeProperty(final LogicalPath propertyFilePath,
+            final String propertyFilename, final String key, final String value,
+            final boolean sorted) {
+        manageProperty(propertyFilePath, propertyFilename, "",
+                asMap(key, value), sorted, CHANGE_EXISTING);
+    }
+
+    @Override
+    public void changeProperty(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, String key, String value,
+            boolean sorted) {
+        manageProperty(propertyFilePath, propertyFilename, prefix,
+                asMap(key, value), sorted, CHANGE_EXISTING);
+    }
+
+    @Override
+    public void changeProperties(LogicalPath propertyFilePath,
+            String propertyFilename, Map<String, String> properties) {
+        manageProperty(propertyFilePath, propertyFilename, "", properties,
                 !SORTED, CHANGE_EXISTING);
     }
 
     @Override
-    public void changeProperty(final LogicalPath propertyFilePath,
-            final String propertyFilename, final String key,
-            final String value, final boolean sorted) {
-        manageProperty(propertyFilePath, propertyFilename, asMap(key, value),
+    public void changeProperties(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix,
+            Map<String, String> properties) {
+        manageProperty(propertyFilePath, propertyFilename, prefix, properties,
+                !SORTED, CHANGE_EXISTING);
+    }
+
+    @Override
+    public void changeProperties(LogicalPath propertyFilePath,
+            String propertyFilename, Map<String, String> properties,
+            boolean sorted) {
+        manageProperty(propertyFilePath, propertyFilename, "", properties,
                 sorted, CHANGE_EXISTING);
     }
 
     @Override
-    public Map<String, String> getProperties(
-            final LogicalPath propertyFilePath, final String propertyFilename) {
+    public void changeProperties(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix,
+            Map<String, String> properties, boolean sorted) {
+        manageProperty(propertyFilePath, propertyFilename, prefix, properties,
+                sorted, CHANGE_EXISTING);
+    }
+
+    @Override
+    public Map<String, String> getProperties(final LogicalPath propertyFilePath,
+            final String propertyFilename) {
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
 
@@ -95,8 +167,8 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
 
         try {
             if (fileManager.exists(filePath)) {
-                loadProperties(props, new BufferedInputStream(
-                        new FileInputStream(filePath)));
+                loadProperties(props,
+                        new BufferedInputStream(new FileInputStream(filePath)));
             }
             else {
                 throw new IllegalStateException("Properties file not found");
@@ -116,6 +188,13 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
     @Override
     public String getProperty(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key) {
+        return getProperty(propertyFilePath, propertyFilename, "", key);
+    }
+
+    @Override
+    public String getProperty(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, String key) {
+        Validate.notNull(prefix, "Prefix could be blank but not null");
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
         Validate.notBlank(key, "Key required");
@@ -133,13 +212,17 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
             return null;
         }
 
+        // Including prefix if needed
+        if (StringUtils.isNotBlank(prefix)) {
+            key = prefix.concat(".").concat(key);
+        }
+
         return props.getProperty(key);
     }
 
     @Override
-    public SortedSet<String> getPropertyKeys(
-            final LogicalPath propertyFilePath, final String propertyFilename,
-            final boolean includeValues) {
+    public SortedSet<String> getPropertyKeys(final LogicalPath propertyFilePath,
+            final String propertyFilename, final boolean includeValues) {
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
 
@@ -149,8 +232,8 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
 
         try {
             if (fileManager.exists(filePath)) {
-                loadProperties(props, new BufferedInputStream(
-                        new FileInputStream(filePath)));
+                loadProperties(props,
+                        new BufferedInputStream(new FileInputStream(filePath)));
             }
             else {
                 throw new IllegalStateException("Properties file not found");
@@ -170,7 +253,7 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         }
         return result;
     }
-    
+
     @Override
     public Properties loadProperties(final InputStream inputStream) {
         final Properties properties = new Properties();
@@ -179,16 +262,23 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         }
         return properties;
     }
-    
+
     @Override
     public Properties loadProperties(final String filename,
             final Class<?> loadingClass) {
         return loadProperties(FileUtils.getInputStream(loadingClass, filename));
     }
-    
+
     @Override
     public void removeProperty(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key) {
+        removeProperty(propertyFilePath, propertyFilename, "", key);
+    }
+
+    @Override
+    public void removeProperty(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, String key) {
+        Validate.notNull(prefix, "Prefix could be blank but not null");
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
         Validate.notBlank(key, "Key required");
@@ -206,22 +296,58 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
             throw new IllegalStateException("Properties file not found");
         }
 
+        // Including prefix if needed
+        if (StringUtils.isNotBlank(prefix)) {
+            key = prefix.concat(".").concat(key);
+        }
+
         props.remove(key);
 
-        storeProps(props, mutableFile.getOutputStream(), "Updated at "
-                + new Date());
+        storeProps(props, mutableFile.getOutputStream(),
+                "Updated at " + new Date());
+
     }
-    
-    
+
+    @Override
+    public void removePropertiesByPrefix(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix) {
+        Validate.notBlank(prefix, "Prefix required");
+        Validate.notNull(propertyFilePath, "Property file path required");
+        Validate.notBlank(propertyFilename, "Property filename required");
+
+        final String filePath = projectOperations.getPathResolver()
+                .getIdentifier(propertyFilePath, propertyFilename);
+        MutableFile mutableFile = null;
+        final Properties props = new Properties();
+
+        if (fileManager.exists(filePath)) {
+            mutableFile = fileManager.updateFile(filePath);
+            loadProperties(props, mutableFile.getInputStream());
+        }
+        else {
+            throw new IllegalStateException("Properties file not found");
+        }
+
+        for (Entry property : props.entrySet()) {
+            String key = (String) property.getKey();
+            if (key != null && key.startsWith(prefix)) {
+                props.remove(key);
+            }
+        }
+
+        storeProps(props, mutableFile.getOutputStream(),
+                "Updated at " + new Date());
+
+    }
+
     // Util methods
-    
+
     private Map<String, String> asMap(final String key, final String value) {
         final Map<String, String> properties = new HashMap<String, String>();
         properties.put(key, value);
         return properties;
     }
 
-    
     private void loadProperties(final Properties props,
             final InputStream inputStream) {
         try {
@@ -235,12 +361,11 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         }
     }
 
-
-
     private void manageProperty(final LogicalPath propertyFilePath,
-            final String propertyFilename,
+            final String propertyFilename, final String prefix,
             final Map<String, String> properties, final boolean sorted,
             final boolean changeExisting) {
+        Validate.notNull(prefix, "Prefix could be blank but not null");
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
         Validate.notNull(properties, "Property map required");
@@ -288,22 +413,27 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
 
         boolean saveNeeded = false;
         for (final Entry<String, String> entry : properties.entrySet()) {
-            final String key = entry.getKey();
+            String key = entry.getKey();
+
+            // Adding prefix if needed
+            if (StringUtils.isNotBlank(prefix)) {
+                key = prefix.concat(".").concat(key);
+            }
+
             final String newValue = entry.getValue();
             final String existingValue = props.getProperty(key);
-            if (existingValue == null || !existingValue.equals(newValue)
-                    && changeExisting) {
+            if (existingValue == null
+                    || !existingValue.equals(newValue) && changeExisting) {
                 props.setProperty(key, newValue);
                 saveNeeded = true;
             }
         }
 
         if (saveNeeded) {
-            storeProps(props, mutableFile.getOutputStream(), "Updated at "
-                    + new Date());
+            storeProps(props, mutableFile.getOutputStream(),
+                    "Updated at " + new Date());
         }
     }
-
 
     private void storeProps(final Properties props,
             final OutputStream outputStream, final String comment) {

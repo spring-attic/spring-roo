@@ -30,6 +30,23 @@ public interface PropFilesManagerService {
     void addProperties(LogicalPath propertyFilePath, String propertyFilename,
             Map<String, String> properties, boolean sorted,
             boolean changeExisting);
+    
+    /**
+     * Adds the contents of the properties map to the given properties file.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the string to be used as prefix of every property
+     * @param properties the map of properties to add
+     * @param sorted indicates if the resulting properties should be sorted
+     *            alphabetically
+     * @param changeExisting indicates if an existing value for a given key
+     *            should be replaced or not
+     */
+    void addProperties(LogicalPath propertyFilePath, String propertyFilename,
+            String prefix, Map<String, String> properties, boolean sorted,
+            boolean changeExisting);
 
     /**
      * Adds a property only if the given key (and value) does not exist already.
@@ -42,6 +59,19 @@ public interface PropFilesManagerService {
      */
     void addPropertyIfNotExists(LogicalPath propertyFilePath,
             String propertyFilename, String key, String value);
+    
+    /**
+     * Adds a property only if the given key (and value) does not exist already.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the property prefix to use          
+     * @param key the property key to update (required)
+     * @param value the property value to set into the property key (required)
+     */
+    void addPropertyIfNotExists(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, String key, String value);
 
     /**
      * Adds a property only if the given key (and value) does not exist already.
@@ -56,6 +86,21 @@ public interface PropFilesManagerService {
      */
     void addPropertyIfNotExists(LogicalPath propertyFilePath,
             String propertyFilename, String key, String value, boolean sorted);
+    
+    /**
+     * Adds a property only if the given key (and value) does not exist already.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the property prefix to use
+     * @param key the property key to update (required)
+     * @param value the property value to set into the property key (required)
+     * @param sorted indicates if the resulting properties should be sorted
+     *            alphabetically
+     */
+    void addPropertyIfNotExists(LogicalPath propertyFilePath,
+            String propertyFilename, String prefix, String key, String value, boolean sorted);
 
     /**
      * Changes the specified property, throwing an exception if the file does
@@ -69,6 +114,20 @@ public interface PropFilesManagerService {
      */
     void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
             String key, String value);
+    
+    /**
+     * Changes the specified property, throwing an exception if the file does
+     * not exist.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the string that match with property start
+     * @param key the property key to update (required)
+     * @param value the property value to set into the property key (required)
+     */
+    void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
+            String prefix, String key, String value);
 
     /**
      * Changes the specified property, throwing an exception if the file does
@@ -84,6 +143,72 @@ public interface PropFilesManagerService {
      */
     void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
             String key, String value, boolean sorted);
+    
+    /**
+     * Changes the specified property, throwing an exception if the file does
+     * not exist.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the string that match with the property starts
+     * @param key the property key to update (required)
+     * @param sorted indicates if the resulting properties should be sorted
+     *            alphabetically
+     * @param value the property value to set into the property key (required)
+     */
+    void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
+            String prefix, String key, String value, boolean sorted);
+    
+    /**
+     * Use the contents of the properties map to update the given properties file.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param properties the map of properties to update
+     */
+    void changeProperties(LogicalPath propertyFilePath, String propertyFilename,
+            Map<String, String> properties);
+    
+    /**
+     * Use the contents of the properties map to update the given properties file.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the string that match with start of every property           
+     * @param properties the map of properties to update
+     */
+    void changeProperties(LogicalPath propertyFilePath, String propertyFilename,
+            String prefix, Map<String, String> properties);
+    
+    /**
+     * Use the contents of the properties map to update the given properties file.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param properties the map of properties to update
+     * @param sorted indicates if the resulting properties should be sorted
+     *            alphabetically
+     */
+    void changeProperties(LogicalPath propertyFilePath, String propertyFilename,
+            Map<String, String> properties, boolean sorted);
+    
+    /**
+     * Use the contents of the properties map to update the given properties file.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the string that match with start of every property           
+     * @param properties the map of properties to update
+     * @param sorted indicates if the resulting properties should be sorted
+     *            alphabetically
+     */
+    void changeProperties(LogicalPath propertyFilePath, String propertyFilename,
+            String prefix, Map<String, String> properties, boolean sorted);
 
     /**
      * Retrieves all property key/value pairs from the specified property,
@@ -111,6 +236,21 @@ public interface PropFilesManagerService {
      */
     String getProperty(LogicalPath propertyFilePath, String propertyFilename,
             String key);
+    
+    /**
+     * Retrieves the specified property, returning null if the property or file
+     * does not exist.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the string that match with property starts
+     * @param key the property key to retrieve (required)
+     * @return the property value (may return null if the property file or
+     *         requested property does not exist)
+     */
+    String getProperty(LogicalPath propertyFilePath, String propertyFilename,
+            String prefix, String key);
 
     /**
      * Retrieves all property keys from the specified property, throwing an
@@ -157,4 +297,28 @@ public interface PropFilesManagerService {
      */
     void removeProperty(LogicalPath propertyFilePath, String propertyFilename,
             String key);
+    
+    /**
+     * Removes the specified property, throwing an exception if the file does
+     * not exist.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the string that match with property starts
+     * @param key the property key to remove (required)
+     */
+    void removeProperty(LogicalPath propertyFilePath, String propertyFilename,
+            String prefix, String key);
+    
+    /**
+     * Removes all properties that starts with the given prefix
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the
+     *            specified path (required)
+     * @param prefix the string that match with property starts
+     */
+    void removePropertiesByPrefix(LogicalPath propertyFilePath, String propertyFilename,
+            String prefix);
 }

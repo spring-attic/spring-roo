@@ -30,7 +30,7 @@
         <!-- Roo Bundles -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.project</artifactId>
+            <artifactId>org.springframework.roo.propfiles.manager</artifactId>
         </dependency>
         
          <!-- Test -->
