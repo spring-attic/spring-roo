@@ -674,7 +674,6 @@ public abstract class JLineShell extends AbstractShell implements
 		reader.setDefaultPrompt(AbstractShell.shellPrompt);
 	}
 	
-	@Override
 	public String askAQuestion(String question, List<String> options, String defaultOption){
 	    Validate.notBlank(question, "ERROR: 'question' param when uses askAQuestion operation is required.");
 	    

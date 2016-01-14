@@ -128,15 +128,4 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
      */
     void removeListener(CommandListener listener);
     
-    /**
-     * To ask a question on Spring Roo Shell that should be answered by
-     * developer. All processes wait for user answer.
-     * 
-     * @param question string with the question to show
-     * @param options list with different options to use as answer
-     * @param defaultOption default answer to use when user press enter without
-     *            select any option.
-     * @return string with the answer.
-     */
-    String askAQuestion(String question, List<String> options, String defaultOption);
 }
