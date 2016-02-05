@@ -152,6 +152,7 @@ public class SimpleParser implements Parser {
     }
 
     private final Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
+    private final Map<String, MethodTarget> dynamicMandatoryIndicators = new HashMap<String, MethodTarget>();
     private final Set<CommandMarker> commands = new HashSet<CommandMarker>();
     private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
 
@@ -161,6 +162,8 @@ public class SimpleParser implements Parser {
         synchronized (mutex) {
             commands.add(command);
             for (final Method method : command.getClass().getMethods()) {
+                
+                // Getting method availability indicators
                 final CliAvailabilityIndicator availability = method
                         .getAnnotation(CliAvailabilityIndicator.class);
                 if (availability != null) {
@@ -180,6 +183,26 @@ public class SimpleParser implements Parser {
                         availabilityIndicators.put(cmd, new MethodTarget(
                                 method, command));
                     }
+                }
+                
+                // Getting method dynamicMandatory indicators
+                final CliDynamicMandatoryIndicator dynamicMandatoryIndicator = method
+                        .getAnnotation(CliDynamicMandatoryIndicator.class);
+                if(dynamicMandatoryIndicator != null){
+                    Validate.isTrue(
+                            method.getParameterTypes().length == 0,
+                            "CliDynamicMandatoryIndicator is only legal for 0 parameter methods ('%s')",
+                            method.toGenericString());
+                    Validate.isTrue(
+                            method.getReturnType().equals(Boolean.TYPE),
+                            "CliDynamicMandatoryIndicator is only legal for primitive boolean return types (%s)",
+                            method.toGenericString());
+                    
+                    dynamicMandatoryIndicators.put(
+                            dynamicMandatoryIndicator.command().concat("|")
+                                    .concat(dynamicMandatoryIndicator.param()),
+                            new MethodTarget(method, command));
+                    
                 }
             }
         }
@@ -393,7 +416,7 @@ public class SimpleParser implements Parser {
             if (methodTarget.getRemainingBuffer().endsWith("--")) {
                 boolean showAllRemaining = true;
                 for (final CliOption include : unspecified) {
-                    if (include.mandatory()) {
+                    if (isMandatoryParam(methodTarget.getKey(), include)) {
                         showAllRemaining = false;
                         break;
                     }
@@ -427,7 +450,7 @@ public class SimpleParser implements Parser {
                         // Manually determine if this non-mandatory but
                         // unspecifiedDefaultValue=* requiring option is able to
                         // be bound
-                        if (!include.mandatory()
+                        if (!isMandatoryParam(methodTarget.getKey(),include)
                                 && "*".equals(include.unspecifiedDefaultValue())
                                 && !"".equals(value)) {
                             try {
@@ -481,7 +504,7 @@ public class SimpleParser implements Parser {
                         }
 
                         // Handle normal mandatory options
-                        if (!"".equals(value) && include.mandatory()) {
+                        if (!"".equals(value) && isMandatoryParam(methodTarget.getKey(), include)) {
                             if (translated.endsWith(" ")) {
                                 results.add(new Completion(translated + "--"
                                         + value + " "));
@@ -640,7 +663,7 @@ public class SimpleParser implements Parser {
                             // the user
                             final StringBuilder help = new StringBuilder();
                             help.append(LINE_SEPARATOR);
-                            help.append(option.mandatory() ? "required --"
+                            help.append(isMandatoryParam(methodTarget.getKey(), option) ? "required --"
                                     : "optional --");
                             if ("".equals(option.help())) {
                                 help.append(lastOptionKey).append(": ")
@@ -978,7 +1001,7 @@ public class SimpleParser implements Parser {
                 }
 
                 // Ensure the user specified a value if the value is mandatory
-                if (StringUtils.isBlank(value) && cliOption.mandatory()) {
+                if (StringUtils.isBlank(value) && isMandatoryParam(methodTarget.getKey(), cliOption)) {
                     if ("".equals(cliOption.key()[0])) {
                         final StringBuilder message = new StringBuilder(
                                 "You must specify a default option ");
@@ -1060,7 +1083,7 @@ public class SimpleParser implements Parser {
                     
                     // If the option has been specified to be mandatory then the
                     // result should never be null
-                    if (result == null && cliOption.mandatory()) {
+                    if (result == null && isMandatoryParam(methodTarget.getKey(), cliOption)) {
                         throw new IllegalStateException();
                     }
                     arguments.add(result);
@@ -1108,6 +1131,39 @@ public class SimpleParser implements Parser {
         }
     }
     
+    /**
+     * Method that checks if given method attribute is mandatory. Takes in count if this option
+     * could be dynamicMandatory.
+     *
+     * @param command 
+     * @param cliOption 
+     * @return
+     */
+    private boolean isMandatoryParam(String command, CliOption cliOption) {
+        if (cliOption.dynamicMandatory()) {
+            String[] option = cliOption.key();
+            try {
+                MethodTarget dynamicMandatoryIndicator = dynamicMandatoryIndicators
+                        .get(command.concat("|").concat(option[0]));
+                if (dynamicMandatoryIndicator == null) {
+                    return cliOption.mandatory();
+                }
+                else {
+                    return (Boolean) dynamicMandatoryIndicator.getMethod()
+                            .invoke(dynamicMandatoryIndicator.getTarget());
+                }
+            }
+            catch (Exception e) {
+                throw new RuntimeException(String.format(
+                        "ERROR: Error trying to get mandatory value for '%s' option on '%s' command.",
+                        option[0], command));
+            }
+        }
+        else {
+            return cliOption.mandatory();
+        }
+    }
+
     private String collectionToDelimitedString(final Collection<?> coll,
             final String delim, final String prefix, final String suffix) {
         if (CollectionUtils.isEmpty(coll)) {

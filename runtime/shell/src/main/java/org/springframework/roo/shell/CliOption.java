@@ -32,6 +32,20 @@ public @interface CliOption {
      *         user (defaults to false)
      */
     boolean mandatory() default false;
+    
+    /**
+     * This attribute indicates if this option could be dynamicMandatory. If
+     * true, user must implement a new method annotated
+     * with @CliDynamicMandatoryIndicator. If that method returns true, this
+     * option will be mandatory. If return false, this option will not be
+     * mandatory. 
+     * 
+     * (If dynamicMandatory is specified, mandatory param will be
+     * ignored)
+     * 
+     * @return
+     */
+    boolean dynamicMandatory() default false;
 
     /**
      * Returns a string providing context-specific information (e.g. a
