@@ -23,11 +23,13 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 
@@ -47,6 +49,7 @@ import org.w3c.dom.Element;
  * Default implementation of {@link Parser}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class SimpleParser implements Parser {
@@ -374,10 +377,13 @@ public class SimpleParser implements Parser {
                         cliOption = (CliOption) a;
                     }
                 }
-                Validate.notNull(cliOption,
-                        "CliOption not found for parameter '%s'",
-                        Arrays.toString(annotations));
-                cliOptions.add(cliOption);
+                
+                // ROO-3697: Since Spring Roo 2.0, you could define a parameter
+                // in methods without @CliOption annotation. This parameter will not be
+                // included on cliOptions list
+                if(cliOption != null){
+                    cliOptions.add(cliOption);
+                }
             }
             
             // Make a list of all CliOptions they've already included or are
@@ -440,8 +446,9 @@ public class SimpleParser implements Parser {
                 }
                 
                 // ROO-3697: Including global parameters in all Spring Roo commands
-                // if all mandatory params have been defined.
-                if (showAllRemaining){
+                // if all mandatory parameters have been defined and exists a ShellContext
+                // parameter defined on last position of current method.
+                if (showAllRemaining && hasShellContextParameter(methodTarget.getMethod())){
                     for(String parameter : globalParameters){
                        // Check if this global parameter is already defined
                        if (!options.containsKey(parameter)) {
@@ -568,19 +575,21 @@ public class SimpleParser implements Parser {
                 }
                 
                 // ROO-3697: check if current key completion is a globalParameter
-                for (final String parameter : globalParameters) {
-                    if (parameter != null
-                            && lastOptionKey != null
-                            && parameter.regionMatches(true, 0, lastOptionKey,
-                                    0, lastOptionKey.length())) {
-                        final String completionValue = translated
-                                .substring(0, translated.length()
-                                        - lastOptionKey.length())
-                                + parameter + " ";
-                        results.add(new Completion(completionValue));
+                if(hasShellContextParameter(methodTarget.getMethod())){
+                    for (final String parameter : globalParameters) {
+                        if (parameter != null
+                                && lastOptionKey != null
+                                && parameter.regionMatches(true, 0, lastOptionKey,
+                                        0, lastOptionKey.length())) {
+                            final String completionValue = translated
+                                    .substring(0, translated.length()
+                                            - lastOptionKey.length())
+                                    + parameter + " ";
+                            results.add(new Completion(completionValue));
+                        }
                     }
                 }
-                
+
                 candidates.addAll(results);
                 return 0;
             }
@@ -594,8 +603,15 @@ public class SimpleParser implements Parser {
                 final Class<?>[] parameterTypes = methodTarget.getMethod()
                         .getParameterTypes();
                 for (int i = 0; i < parameterTypes.length; i++) {
-                    final CliOption option = cliOptions.get(i);
                     final Class<?> parameterType = parameterTypes[i];
+                    
+                    // ROO-3697: Check if parameter type is ShellContext
+                    if(parameterType.isAssignableFrom(ShellContext.class)){
+                        break;
+                    }
+                    
+                    final CliOption option = cliOptions.get(i);
+                    
 
                     for (final String key : option.key()) {
                         if (key.equals(lastOptionKey)) {
@@ -941,13 +957,13 @@ public class SimpleParser implements Parser {
 
     public ParseResult parse(final String rawInput) {
         synchronized (mutex) {
-        	
+            
         	// Load converters if needed
         	loadConverters();
         	
             Validate.notNull(rawInput, "Raw input required");
             final String input = normalise(rawInput);
-
+            
             // Locate the applicable targets which match this buffer
             final Collection<MethodTarget> matchingTargets = locateTargets(
                     input, true, true);
@@ -1164,10 +1180,68 @@ public class SimpleParser implements Parser {
                 LOGGER.warning(message.toString());
                 return null;
             }
-
+            
+            // ROO-3697: Use shellContext to save current shell parameters if
+            // method contains ShellContext parameter
+            if(hasShellContextParameter(methodTarget.getMethod())){
+                ShellContextImpl shellContext = new ShellContextImpl();
+                
+                // Save executed command
+                shellContext.setExecutedCommand(input);
+                
+                // Save typed parameters
+                for(Entry<String, String> option : options.entrySet()){
+                    String parameter = option.getKey();
+                    String value = option.getValue();
+                    
+                    // Check --force global parameter
+                    if("force".equals(parameter)){
+                        if(("".equals(value) || "true".equals(value))){
+                            shellContext.setForce(true);
+                            shellContext.setParameter(parameter, "true");
+                            continue;
+                        }else{
+                            shellContext.setForce(false);
+                            shellContext.setParameter(parameter, "false");
+                            continue;
+                        }
+                    }
+                    
+                    shellContext.setParameter(parameter, value);
+                }
+                
+                // Adding shellContext to command arguments
+                arguments.add(shellContext);
+                
+            }
+            
             return new ParseResult(methodTarget.getMethod(),
                     methodTarget.getTarget(), arguments.toArray());
         }
+    }
+    
+    /**
+     * Checks if some method has the ShellContext parameter
+     * 
+     * @param method
+     * @return
+     */
+    private boolean hasShellContextParameter(Method method) {
+        int paramNumbers = method.getParameterTypes().length;
+        int shellContextPosition = 1;
+        for (Class<?> methodParameters : method.getParameterTypes()) {
+            if (methodParameters.isAssignableFrom(ShellContext.class)) {
+                if (shellContextPosition != paramNumbers) {
+                    String msg = String.format(
+                            "ShellContext parameter is on position '%s' but should be defined after all '@CliOption' parameters.",
+                            shellContextPosition);
+                    throw new RuntimeException(msg);
+                }
+                return true;
+            }
+            shellContextPosition++;
+        }
+        return false;
     }
     
     /**
