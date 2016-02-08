@@ -155,6 +155,9 @@ public class SimpleParser implements Parser {
     private final Map<String, MethodTarget> dynamicMandatoryIndicators = new HashMap<String, MethodTarget>();
     private final Set<CommandMarker> commands = new HashSet<CommandMarker>();
     private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
+    
+    // ROO-3697: Include global parameters in all Spring Roo commands. 
+    private final List<String> globalParameters = new ArrayList<String>();
 
     private final Object mutex = new Object();
 
@@ -204,6 +207,9 @@ public class SimpleParser implements Parser {
                             new MethodTarget(method, command));
                     
                 }
+                
+                // ROO-3697: Including global parameters.
+                globalParameters.add("force");
             }
         }
     }
@@ -235,13 +241,13 @@ public class SimpleParser implements Parser {
             final List<Completion> candidates) {
         synchronized (mutex) {
         	
-        	// ROO-3622: Validate if version change
-			if (isDifferentVersion()) {
-				return 0;
-			}
-        	
-        	// Loading converters if needed
-        	loadConverters();
+            // ROO-3622: Validate if version change
+            if (isDifferentVersion()) {
+                return 0;
+            }
+
+            // Loading converters if needed
+            loadConverters();
         	
             Validate.notNull(buffer, "Buffer required");
             Validate.notNull(candidates, "Candidates list required");
@@ -373,7 +379,7 @@ public class SimpleParser implements Parser {
                         Arrays.toString(annotations));
                 cliOptions.add(cliOption);
             }
-
+            
             // Make a list of all CliOptions they've already included or are
             // system-provided
             final List<CliOption> alreadySpecified = new ArrayList<CliOption>();
@@ -393,7 +399,7 @@ public class SimpleParser implements Parser {
             final List<CliOption> unspecified = new ArrayList<CliOption>(
                     cliOptions);
             unspecified.removeAll(alreadySpecified);
-
+            
             // Determine whether they're presently editing an option key or an
             // option value
             // (and if possible, the full or partial name of the said option key
@@ -431,6 +437,20 @@ public class SimpleParser implements Parser {
                     if (!showAllRemaining) {
                         break;
                     }
+                }
+                
+                // ROO-3697: Including global parameters in all Spring Roo commands
+                // if all mandatory params have been defined.
+                if (showAllRemaining){
+                    for(String parameter : globalParameters){
+                       // Check if this global parameter is already defined
+                       if (!options.containsKey(parameter)) {
+                           if (!"".equals(parameter)) {
+                               results.add(new Completion(
+                                       translated + parameter + " "));
+                           }
+                       }
+                   }
                 }
                 candidates.addAll(results);
                 return 0;
@@ -546,6 +566,21 @@ public class SimpleParser implements Parser {
                         }
                     }
                 }
+                
+                // ROO-3697: check if current key completion is a globalParameter
+                for (final String parameter : globalParameters) {
+                    if (parameter != null
+                            && lastOptionKey != null
+                            && parameter.regionMatches(true, 0, lastOptionKey,
+                                    0, lastOptionKey.length())) {
+                        final String completionValue = translated
+                                .substring(0, translated.length()
+                                        - lastOptionKey.length())
+                                + parameter + " ";
+                        results.add(new Completion(completionValue));
+                    }
+                }
+                
                 candidates.addAll(results);
                 return 0;
             }
@@ -802,9 +837,13 @@ public class SimpleParser implements Parser {
                 cliOptionKeySet.add(key.toLowerCase());
             }
         }
+        
         final Set<String> unavailableOptions = new LinkedHashSet<String>();
         for (final String suppliedOption : options.keySet()) {
-            if (!cliOptionKeySet.contains(suppliedOption.toLowerCase())) {
+            // ROO-3697: Check if current parameter is a global parameter.
+            boolean isGlobalParameter = globalParameters.contains(suppliedOption.toLowerCase());
+            
+            if (!cliOptionKeySet.contains(suppliedOption.toLowerCase()) && !isGlobalParameter) {
                 unavailableOptions.add(suppliedOption);
             }
         }
