@@ -213,6 +213,7 @@ public class SimpleParser implements Parser {
                 
                 // ROO-3697: Including global parameters.
                 globalParameters.add("force");
+                globalParameters.add("profile");
             }
         }
     }
@@ -1205,6 +1206,11 @@ public class SimpleParser implements Parser {
                             shellContext.setParameter(parameter, "false");
                             continue;
                         }
+                    }
+                    
+                    // Check --profile global parameter
+                    if("profile".equals(parameter)){
+                        shellContext.setProfile(value);
                     }
                     
                     shellContext.setParameter(parameter, value);

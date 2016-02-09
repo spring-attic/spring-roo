@@ -19,6 +19,13 @@ public interface ShellContext {
      *         value
      */
     boolean isForce();
+    
+    /**
+     * Returns value of --profile global parameter
+     * 
+     * @return String with profile name
+     */
+    String getProfile();
 
     /**
      * Returns last executed command
