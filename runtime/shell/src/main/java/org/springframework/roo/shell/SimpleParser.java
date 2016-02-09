@@ -429,14 +429,40 @@ public class SimpleParser implements Parser {
             if ((translated.endsWith(" ") || methodTarget.getRemainingBuffer().endsWith("--")) && !"".equals(lastOptionValue)){
                 boolean showAllRemaining = true;
                 
+                // Check if there are still dynamic mandatory options
                 for (final CliOption include : unspecified) {
                     if (isMandatoryParam(methodTarget.getKey(), include)) {
                         showAllRemaining = false;
                         break;
                     }
-                }
-
-                for (final CliOption include : unspecified) {
+                }   
+                
+                // Exists some mandatory param, so we need to show it first
+                if(!showAllRemaining){
+                  for (final CliOption include : unspecified) {
+                    if (isMandatoryParam(methodTarget.getKey(), include)) {
+                      
+                      // Auto complete with that mandatory key
+                      for (final String value : include.key()) {
+                        if (!"".equals(value)) {
+                          
+                            // Check if should complete with "--" prefix
+                            if (methodTarget.getRemainingBuffer().endsWith("--")){
+                                results.add(new Completion(translated.concat(value).concat(" ")));
+                            }else{
+                                results.add(new Completion(translated.concat("--").concat(value).concat(" ")));
+                            }
+                        }
+                    }
+                      break;
+                    }
+                  }
+                }else{
+                  
+                  // No more mandatory options remaining
+                  for (final CliOption include : unspecified) {
+                    
+                    // Auto complete with that key
                     for (final String value : include.key()) {
                         if (!"".equals(value)) {
                           
@@ -448,15 +474,13 @@ public class SimpleParser implements Parser {
                             }
                         }
                     }
-                    if (!showAllRemaining) {
-                        break;
-                    }
                 }
+              
                 
                 // ROO-3697: Including global parameters in all Spring Roo commands
                 // if all mandatory parameters have been defined and exists a ShellContext
                 // parameter defined on last position of current method.
-                if (showAllRemaining && hasShellContextParameter(methodTarget.getMethod())){
+                if (hasShellContextParameter(methodTarget.getMethod())){
                     for(String parameter : globalParameters){
                        // Check if this global parameter is already defined
                        if (!options.containsKey(parameter)) {
@@ -471,7 +495,9 @@ public class SimpleParser implements Parser {
                            }
                        }
                    }
+                  }
                 }
+                
                 candidates.addAll(results);
                 return 0;
             }
