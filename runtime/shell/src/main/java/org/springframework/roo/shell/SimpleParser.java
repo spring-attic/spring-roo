@@ -426,8 +426,9 @@ public class SimpleParser implements Parser {
             // always present option keys in order
             // of their declaration on the method signature, thus we can stop
             // when mandatory options are filled in
-            if (methodTarget.getRemainingBuffer().endsWith("--")) {
+            if ((translated.endsWith(" ") || methodTarget.getRemainingBuffer().endsWith("--")) && !"".equals(lastOptionValue)){
                 boolean showAllRemaining = true;
+                
                 for (final CliOption include : unspecified) {
                     if (isMandatoryParam(methodTarget.getKey(), include)) {
                         showAllRemaining = false;
@@ -438,7 +439,13 @@ public class SimpleParser implements Parser {
                 for (final CliOption include : unspecified) {
                     for (final String value : include.key()) {
                         if (!"".equals(value)) {
-                            results.add(new Completion(translated + value + " "));
+                          
+                            // Check if should complete with "--" prefix
+                            if (methodTarget.getRemainingBuffer().endsWith("--")){
+                                results.add(new Completion(translated.concat(value).concat(" ")));
+                            }else{
+                                results.add(new Completion(translated.concat("--").concat(value).concat(" ")));
+                            }
                         }
                     }
                     if (!showAllRemaining) {
@@ -454,8 +461,13 @@ public class SimpleParser implements Parser {
                        // Check if this global parameter is already defined
                        if (!options.containsKey(parameter)) {
                            if (!"".equals(parameter)) {
-                               results.add(new Completion(
-                                       translated + parameter + " "));
+                               
+                               // Check if should complete with "--" prefix
+                               if (methodTarget.getRemainingBuffer().endsWith("--")){
+                                   results.add(new Completion(translated.concat(parameter).concat(" ")));
+                               }else{
+                                   results.add(new Completion(translated.concat("--").concat(parameter).concat(" ")));
+                               }
                            }
                        }
                    }
