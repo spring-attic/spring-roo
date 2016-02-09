@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -25,145 +26,176 @@ import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
     private static final Path APPLICATION_CONFIG_FILE_LOCATION = Path.SRC_MAIN_RESOURCES;
-    private static final String APPLICATION_CONFIG_FILE_NAME = "application.properties";
+    private static final String APPLICATION_CONFIG_FILE_NAME = "application";
+    private static final String APPLICATION_CONFIG_FILE_EXTENSION = ".properties";
 
     @Reference private PropFilesManagerService propFilesManager;
     @Reference private PathResolver pathResolver;
     @Reference private FileManager fileManager;
 
     @Override
-    public void addProperty(final String key, final String value) {
+    public void addProperty(final String key, final String value, String profile) {
+
         propFilesManager.addPropertyIfNotExists(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, key, value, true);
+                getAppliCationConfigFileName(profile), key, value, true);
     }
 
     @Override
     public void addProperty(final String prefix, final String key,
-            final String value) {
+            final String value, String profile) {
         propFilesManager.addPropertyIfNotExists(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, prefix, key, value, true);
+                getAppliCationConfigFileName(profile), prefix, key, value, true);
     }
 
     @Override
-    public void addProperties(final Map<String, String> properties) {
+    public void addProperties(final Map<String, String> properties, String profile) {
         propFilesManager.addProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, properties, true, true);
+                getAppliCationConfigFileName(profile), properties, true, true);
     }
 
     @Override
     public void addProperties(final String prefix,
-            final Map<String, String> properties) {
+            final Map<String, String> properties, String profile) {
         propFilesManager.addProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, prefix, properties, true, true);
+                getAppliCationConfigFileName(profile), prefix, properties, true, true);
     }
 
     @Override
-    public void updateProperty(final String key, final String value) {
+    public void updateProperty(final String key, final String value, String profile) {
         propFilesManager.changeProperty(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, key, value, true);
+                getAppliCationConfigFileName(profile), key, value, true);
     }
 
     @Override
     public void updateProperty(final String prefix, final String key,
-            final String value) {
+            final String value, String profile) {
         propFilesManager.changeProperty(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, prefix, key, value, true);
+                getAppliCationConfigFileName(profile), prefix, key, value, true);
     }
 
     @Override
-    public void updateProperties(final Map<String, String> properties) {
+    public void updateProperties(final Map<String, String> properties, String profile) {
         propFilesManager.changeProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, properties, true);
+                getAppliCationConfigFileName(profile), properties, true);
     }
 
     @Override
     public void updateProperties(final String prefix,
-            final Map<String, String> properties) {
+            final Map<String, String> properties, String profile) {
         propFilesManager.changeProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, prefix, properties, true);
+                getAppliCationConfigFileName(profile), prefix, properties, true);
     }
 
     @Override
-    public Map<String, String> getProperties() {
+    public Map<String, String> getProperties(String profile) {
         return propFilesManager.getProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME);
+                getAppliCationConfigFileName(profile));
     }
 
     @Override
-    public SortedSet<String> getPropertyKeys(boolean includeValues) {
+    public SortedSet<String> getPropertyKeys(boolean includeValues, String profile) {
         return propFilesManager.getPropertyKeys(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, includeValues);
+                getAppliCationConfigFileName(profile), includeValues);
     }
 
     @Override
     public SortedSet<String> getPropertyKeys(String prefix,
-            boolean includeValues) {
+            boolean includeValues, String profile) {
         return propFilesManager.getPropertyKeys(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, prefix, includeValues);
+                getAppliCationConfigFileName(profile), prefix, includeValues);
     }
 
     @Override
-    public String getProperty(final String key) {
+    public String getProperty(final String key, String profile) {
         return propFilesManager.getProperty(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, key);
+                getAppliCationConfigFileName(profile), key);
     }
 
     @Override
-    public String getProperty(final String prefix, final String key) {
+    public String getProperty(final String prefix, final String key, String profile) {
         return propFilesManager.getProperty(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, prefix, key);
+                getAppliCationConfigFileName(profile), prefix, key);
     }
 
     @Override
-    public void removeProperty(final String key) {
+    public void removeProperty(final String key, String profile) {
         propFilesManager.removeProperty(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, key);
+                getAppliCationConfigFileName(profile), key);
     }
 
     @Override
-    public void removeProperty(final String prefix, String key) {
+    public void removeProperty(final String prefix, String key, String profile) {
         propFilesManager.removeProperty(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, prefix, key);
+                getAppliCationConfigFileName(profile), prefix, key);
     }
 
     @Override
-    public void removeProperties(List<String> keys) {
+    public void removeProperties(List<String> keys, String profile) {
         for (String key : keys) {
-            removeProperty(key);
+            removeProperty(key, profile);
         }
     }
 
     @Override
-    public void removePropertiesByPrefix(String prefix) {
+    public void removePropertiesByPrefix(String prefix, String profile) {
         propFilesManager.removePropertiesByPrefix(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                APPLICATION_CONFIG_FILE_NAME, prefix);
+                getAppliCationConfigFileName(profile), prefix);
     }
 
     @Override
     public String getSpringConfigLocation() {
         return pathResolver
                 .getFocusedIdentifier(APPLICATION_CONFIG_FILE_LOCATION,
-                        APPLICATION_CONFIG_FILE_NAME);
+                        getAppliCationConfigFileName(null));
+    }
+    
+    @Override
+    public String getSpringConfigLocation(String profile) {
+        return pathResolver
+                .getFocusedIdentifier(APPLICATION_CONFIG_FILE_LOCATION,
+                        getAppliCationConfigFileName(profile));
     }
 
     @Override
     public boolean existsSpringConfigFile() {
         return fileManager.exists(getSpringConfigLocation());
+    }
+    
+    @Override
+    public boolean existsSpringConfigFile(String profile) {
+        return fileManager.exists(getSpringConfigLocation(profile));
+    }
+    
+    /**
+     * Method that generates application config file name using application config file name
+     * profile parameter if exists, and config file extension.
+     * 
+     * @param profile
+     * @return
+     */
+    private String getAppliCationConfigFileName(String profile) {
+        String fileName = APPLICATION_CONFIG_FILE_NAME;
+        if (profile != null && StringUtils.isNotBlank(profile)) {
+            fileName = fileName.concat("-").concat(profile);
+        }
+        fileName = fileName.concat(APPLICATION_CONFIG_FILE_EXTENSION);
+
+        return fileName;
     }
 }
