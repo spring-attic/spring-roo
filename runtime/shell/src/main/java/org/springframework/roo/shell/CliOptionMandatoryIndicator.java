@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface CliDynamicMandatoryIndicator {
+public @interface CliOptionMandatoryIndicator {
 
     /**
      * @return the name of the command that contains the option to set mandatory
