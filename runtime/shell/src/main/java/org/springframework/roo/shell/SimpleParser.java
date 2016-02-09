@@ -192,8 +192,8 @@ public class SimpleParser implements Parser {
                 }
                 
                 // Getting method dynamicMandatory indicators
-                final CliDynamicMandatoryIndicator dynamicMandatoryIndicator = method
-                        .getAnnotation(CliDynamicMandatoryIndicator.class);
+                final CliOptionMandatoryIndicator dynamicMandatoryIndicator = method
+                        .getAnnotation(CliOptionMandatoryIndicator.class);
                 if(dynamicMandatoryIndicator != null){
                     Validate.isTrue(
                             method.getParameterTypes().length == 0,
@@ -1259,7 +1259,7 @@ public class SimpleParser implements Parser {
      * @return
      */
     private boolean isMandatoryParam(String command, CliOption cliOption) {
-        if (cliOption.dynamicMandatory()) {
+        if (cliOption.mandatory()) {
             String[] option = cliOption.key();
             try {
                 MethodTarget dynamicMandatoryIndicator = dynamicMandatoryIndicators
