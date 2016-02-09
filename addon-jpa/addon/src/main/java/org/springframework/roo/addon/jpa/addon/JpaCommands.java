@@ -38,6 +38,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -85,8 +86,8 @@ public class JpaCommands implements CommandMarker {
     }
 
     @CliCommand(value = "database properties list", help = "Shows database configuration details")
-    public SortedSet<String> databaseProperties() {
-        return jpaOperations.getDatabaseProperties();
+    public SortedSet<String> databaseProperties(ShellContext shellContext) {
+        return jpaOperations.getDatabaseProperties(shellContext.getProfile());
     }
 
     @CliCommand(value = "database properties remove", help = "Removes a particular database property")
@@ -125,7 +126,8 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "userName", mandatory = false, help = "The username to use") final String userName,
             @CliOption(key = "password", mandatory = false, help = "The password to use") final String password,
             @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
-            @CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit) {
+            @CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit,
+            ShellContext shellContext) {
 
         if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
             LOGGER.warning("JDK must be 1.6 or higher to use Firebird");
@@ -135,7 +137,8 @@ public class JpaCommands implements CommandMarker {
         jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi,
                 applicationId, hostName, databaseName, userName, password,
                 transactionManager, persistenceUnit,
-                projectOperations.getFocusedModuleName());
+                projectOperations.getFocusedModuleName(), 
+                shellContext.getProfile(), shellContext.isForce());
     }
 
     @Deprecated
@@ -154,7 +157,7 @@ public class JpaCommands implements CommandMarker {
 
         installJpa(ormProvider, jdbcDatabase, applicationId, jndi, hostName,
                 databaseName, userName, password, transactionManager,
-                persistenceUnit);
+                persistenceUnit, null);
     }
 
     @CliAvailabilityIndicator({ "jpa setup", "persistence setup" })

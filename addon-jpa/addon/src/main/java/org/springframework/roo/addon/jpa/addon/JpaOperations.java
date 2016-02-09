@@ -36,13 +36,16 @@ public interface JpaOperations extends Feature {
      * @param persistenceUnit the name of the persistence unit defined in the
      *            persistence.xml file
      * @param moduleName
+     * @param profile string with profile where current jpa persistence will be applied.
+     * @param force boolean that forces configuration if exists some previous configuration
      */
     void configureJpa(OrmProvider ormProvider, JdbcDatabase database,
             String jndi, String applicationId, String hostName,
             String databaseName, String userName, String password,
-            String transactionManager, String persistenceUnit, String moduleName);
+            String transactionManager, String persistenceUnit, String moduleName,
+            String profile, boolean force);
 
-    SortedSet<String> getDatabaseProperties();
+    SortedSet<String> getDatabaseProperties(String profile);
 
     boolean hasDatabaseProperties();
 

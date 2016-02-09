@@ -125,7 +125,8 @@ public class JpaOperationsImpl implements JpaOperations {
             final String applicationId, final String hostName,
             final String databaseName, final String userName,
             final String password, final String transactionManager,
-            final String persistenceUnit, final String moduleName) {
+            final String persistenceUnit, final String moduleName,
+            final String profile, final boolean force) {
     	
     	if(projectOperations == null){
     		projectOperations = getProjectOperations();
@@ -160,7 +161,7 @@ public class JpaOperationsImpl implements JpaOperations {
         
         // Update Spring Config File with spring.datasource.* domain properties
         updateApplicationProperties(ormProvider, jdbcDatabase, hostName,
-                databaseName, userName, password, moduleName, jndi);
+                databaseName, userName, password, moduleName, jndi, profile);
         
     }
     
@@ -210,7 +211,7 @@ public class JpaOperationsImpl implements JpaOperations {
         return connectionString.replace("HOST_NAME", hostName);
     }
 
-    public SortedSet<String> getDatabaseProperties() {
+    public SortedSet<String> getDatabaseProperties(String profile) {
     	
     	if(projectOperations == null){
     		projectOperations = getProjectOperations();
@@ -218,7 +219,7 @@ public class JpaOperationsImpl implements JpaOperations {
     	Validate.notNull(projectOperations, "ProjectOperations is required");
     	
         if (hasDatabaseProperties()) {
-            return getApplicationConfigService().getPropertyKeys(DATASOURCE_PREFIX, true);
+            return getApplicationConfigService().getPropertyKeys(DATASOURCE_PREFIX, true, profile);
         }
         return getPropertiesFromDataNucleusConfiguration();
     }
@@ -400,7 +401,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
     public boolean hasDatabaseProperties() {
         SortedSet<String> databaseProperties = getApplicationConfigService()
-                .getPropertyKeys(DATASOURCE_PREFIX, false);
+                .getPropertyKeys(DATASOURCE_PREFIX, false, null);
     	
         return !databaseProperties.isEmpty();
     }
@@ -735,7 +736,7 @@ public class JpaOperationsImpl implements JpaOperations {
     private void updateApplicationProperties(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String hostName,
             final String databaseName, String userName, final String password,
-            final String moduleName, String jndi) {
+            final String moduleName, String jndi, String profile) {
     	
         // Check if jndi is blank. If is blank, include database properties on 
         // application.properties file
@@ -774,10 +775,10 @@ public class JpaOperationsImpl implements JpaOperations {
             props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
             props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
             
-            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props);
+            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props, profile);
 
             // Remove jndi property
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, JNDI_NAME);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, JNDI_NAME, profile);
             
         }else{
             
@@ -794,13 +795,13 @@ public class JpaOperationsImpl implements JpaOperations {
             Map<String, String> props = new HashMap<String, String>();
             props.put(JNDI_NAME, jndi);
             
-            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props);
+            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props, profile);
             
             // Remove old properties
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_URL);
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_DRIVER);
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME);
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_URL, profile);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_DRIVER, profile);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
+            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
             
         }
 

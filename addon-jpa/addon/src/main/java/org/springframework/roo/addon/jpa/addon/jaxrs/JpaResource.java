@@ -192,7 +192,7 @@ public class JpaResource implements ResourceMarker {
             if (!persistenceProvider.equals("DATANUCLEUS")) {
                 // Getting database properties
                 SortedSet<String> databaseProperties = getJpaOperations()
-                        .getDatabaseProperties();
+                        .getDatabaseProperties(null);
 
                 // Getting database URL
                 for (String databaseProperty : databaseProperties) {
