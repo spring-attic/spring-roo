@@ -18,8 +18,9 @@ public interface ApplicationConfigService {
      * @param key string that identifies the property
      * @param value string with the value assigned to the property
      * @param profile string with profile where configuration will be located.
+     * @param force boolean that indicates if is necessary to force operation
      */
-    void addProperty(String key, String value, String profile);
+    void addProperty(String key, String value, String profile, boolean force);
     
     /**
      * Adds some property to application config file including given prefix
@@ -28,16 +29,18 @@ public interface ApplicationConfigService {
      * @param key string that identifies the property
      * @param value string with the value assigned to the property
      * @param profile string with profile where configuration will be located.
+     * @param force boolean that indicates if is necessary to force operation
      */
-    void addProperty(String prefix, String key, String value, String profile);
+    void addProperty(String prefix, String key, String value, String profile, boolean force);
 
     /**
      * Adds the contents of the properties map to application config file.
      * 
      * @param properties the map of properties to add
      * @param profile string with profile where configuration will be located.
+     * @param force boolean that indicates if is necessary to force operation
      */
-    void addProperties(Map<String, String> properties, String profile);
+    void addProperties(Map<String, String> properties, String profile, boolean force);
     
     /**
      * Adds the contents of the properties map to application config file using
@@ -46,8 +49,9 @@ public interface ApplicationConfigService {
      * @param prefix string that will be included as property prefix
      * @param properties the map of properties to add
      * @param profile string with profile where configuration will be located.
+     * @param force boolean that indicates if is necessary to force operation
      */
-    void addProperties(String prefix, Map<String, String> properties, String profile);
+    void addProperties(String prefix, Map<String, String> properties, String profile, boolean force);
 
     /**
      * Changes the specified property.
@@ -55,8 +59,9 @@ public interface ApplicationConfigService {
      * @param key the property key to update (required)
      * @param value the property value to set into the property key (required)
      * @param profile string with profile where configuration will be located.
+     * @param force boolean that indicates if is necessary to force operation
      */
-    void updateProperty(String key, String value, String profile);
+    void updateProperty(String key, String value, String profile, boolean force);
     
     /**
      * Changes the specified property including prefix.
@@ -65,16 +70,18 @@ public interface ApplicationConfigService {
      * @param key the property key to update (required)
      * @param value the property value to set into the property key (required)
      * @param profile string with profile where configuration will be located.
+     * @param force boolean that indicates if is necessary to force operation
      */
-    void updateProperty(String prefix, String key, String value, String profile);
+    void updateProperty(String prefix, String key, String value, String profile, boolean force);
     
     /**
      * Update the contents of the properties map to application config file.
      * 
      * @param properties the map of properties to update
      * @param profile string with profile where configuration will be located.
+     * @param force boolean that indicates if is necessary to force operation
      */
-    void updateProperties(Map<String, String> properties, String profile);
+    void updateProperties(Map<String, String> properties, String profile, boolean force);
     
     /**
      * Adds the contents of the properties map to application config file using
@@ -83,8 +90,9 @@ public interface ApplicationConfigService {
      * @param prefix included for every properties
      * @param properties the map of properties to update
      * @param profile string with profile where configuration will be located.
+     * @param force boolean that indicates if is necessary to force operation
      */
-    void updateProperties(String prefix, Map<String, String> properties, String profile);
+    void updateProperties(String prefix, Map<String, String> properties, String profile, boolean force);
 
 
     /**

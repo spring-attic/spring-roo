@@ -97,12 +97,12 @@ public class JpaCommands implements CommandMarker {
     @CliCommand(value = "database properties set", help = "Changes a particular database property")
     public void databaseSet(
             @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
-            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
+            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value,
+            ShellContext shellContext) {
 
-        propFileOperations.changeProperty(
-                Path.SPRING_CONFIG_ROOT.getModulePathId(
-                        projectOperations.getFocusedModuleName()),
-                "database.properties", key, value);
+        propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT
+                .getModulePathId(projectOperations.getFocusedModuleName()),
+                "database.properties", key, value, shellContext.isForce());
     }
 
     @CliAvailabilityIndicator({ "database properties list",
@@ -112,26 +112,40 @@ public class JpaCommands implements CommandMarker {
     }
 
     @CliOptionVisibilityIndicator(command = "jpa setup", params = {
-            "jndiDataSource"}, help = "jndiDataSource parameter is not available if any of databaseName, hostName, password or userName are selected")
+            "jndiDataSource"}, help = "jndiDataSource parameter is not available if any of databaseName, hostName, password or userName are selected or you are using an HYPERSONIC database.")
     public boolean isJndiVisible(ShellContext shellContext) {
 
         Map<String, String> params = shellContext.getParameters();
 
+        String databaseName = params.get("database");
+
         if (params.containsKey("databaseName") || params.containsKey("hostName") || params.containsKey("password") || params.containsKey("userName")) {
             return false;
         }
+        
+        if(databaseName.startsWith("HYPERSONIC")){
+            return false;
+        }
+        
         return true;
     }
     
     @CliOptionVisibilityIndicator(command = "jpa setup", params = {
-    "databaseName", "hostName", "password", "userName"}, help = "jndiDataSource parameter is not available if any of databaseName, hostName, password or userName are selected")
+    "databaseName", "hostName", "password", "userName"}, help = "Connection parameters are not available if jndiDatasource is specified or you are using an HYPERSONIC database.")
     public boolean areConnectionParamsVisible(ShellContext shellContext) {
 
         Map<String, String> params = shellContext.getParameters();
 
+        String databaseName = params.get("database");
+        
         if (params.containsKey("jndiDataSource")) {
             return false;
         }
+        
+        if(databaseName.startsWith("HYPERSONIC")){
+            return false;
+        }
+        
         return true;
     }
 
@@ -139,14 +153,11 @@ public class JpaCommands implements CommandMarker {
     public void installJpa(
             @CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") final OrmProvider ormProvider,
             @CliOption(key = "database", mandatory = true, help = "The database to support") final JdbcDatabase jdbcDatabase,
-            @CliOption(key = "applicationId", mandatory = false, unspecifiedDefaultValue = "the project's name", help = "The Google App Engine application identifier to use") final String applicationId,
             @CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use") final String jndi,
             @CliOption(key = "hostName", mandatory = false, help = "The host name to use") final String hostName,
             @CliOption(key = "databaseName", mandatory = false, help = "The database name to use") final String databaseName,
             @CliOption(key = "userName", mandatory = false, help = "The username to use") final String userName,
             @CliOption(key = "password", mandatory = false, help = "The password to use") final String password,
-            @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
-            @CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit,
             ShellContext shellContext) {
 
         if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
@@ -155,29 +166,9 @@ public class JpaCommands implements CommandMarker {
         }
 
         jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi,
-                applicationId, hostName, databaseName, userName, password,
-                transactionManager, persistenceUnit,
-                projectOperations.getFocusedModuleName(),
+                hostName, databaseName, userName, password,
+                projectOperations.getFocusedModuleName(), 
                 shellContext.getProfile(), shellContext.isForce());
-    }
-
-    @Deprecated
-    @CliCommand(value = "persistence setup", help = "Install or updates a JPA persistence provider in your project - deprecated, use 'jpa setup' instead")
-    public void installPersistence(
-            @CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") final OrmProvider ormProvider,
-            @CliOption(key = "database", mandatory = true, help = "The database to support") final JdbcDatabase jdbcDatabase,
-            @CliOption(key = "applicationId", mandatory = false, unspecifiedDefaultValue = "the project's name", help = "The Google App Engine application identifier to use") final String applicationId,
-            @CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use") final String jndi,
-            @CliOption(key = "hostName", mandatory = false, help = "The host name to use") final String hostName,
-            @CliOption(key = "databaseName", mandatory = false, help = "The database name to use") final String databaseName,
-            @CliOption(key = "userName", mandatory = false, help = "The username to use") final String userName,
-            @CliOption(key = "password", mandatory = false, help = "The password to use") final String password,
-            @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
-            @CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit) {
-
-        installJpa(ormProvider, jdbcDatabase, applicationId, jndi, hostName,
-                databaseName, userName, password, transactionManager,
-                persistenceUnit, null);
     }
 
     @CliAvailabilityIndicator({ "jpa setup", "persistence setup" })

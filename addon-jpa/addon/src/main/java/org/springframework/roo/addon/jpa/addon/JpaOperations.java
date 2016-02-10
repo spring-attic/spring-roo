@@ -25,25 +25,17 @@ public interface JpaOperations extends Feature {
      *            EclipseLink)
      * @param database the database (HSQL, H2, MySql, etc)
      * @param jndi the JNDI datasource
-     * @param applicationId the Google App Engine application identifier.
-     *            Defaults to the project's name if not specified.
      * @param hostName the host name where the database is
      * @param databaseName the name of the database
      * @param userName the username to connect to the database
      * @param password the password to connect to the database
-     * @param transactionManager the transaction manager name defined in the
-     *            applicationContext.xml file
-     * @param persistenceUnit the name of the persistence unit defined in the
-     *            persistence.xml file
      * @param moduleName
      * @param profile string with profile where current jpa persistence will be applied.
      * @param force boolean that forces configuration if exists some previous configuration
      */
     void configureJpa(OrmProvider ormProvider, JdbcDatabase database,
-            String jndi, String applicationId, String hostName,
-            String databaseName, String userName, String password,
-            String transactionManager, String persistenceUnit, String moduleName,
-            String profile, boolean force);
+            String jndi, String hostName, String databaseName, String userName,
+            String password, String moduleName, String profile, boolean force);
 
     SortedSet<String> getDatabaseProperties(String profile);
 

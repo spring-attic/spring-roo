@@ -24,12 +24,10 @@ public interface PropFilesManagerService {
      * @param properties the map of properties to add
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
-     * @param changeExisting indicates if an existing value for a given key
-     *            should be replaced or not
+     * @param force boolean that indicates if is necessary to force operation
      */
     void addProperties(LogicalPath propertyFilePath, String propertyFilename,
-            Map<String, String> properties, boolean sorted,
-            boolean changeExisting);
+            Map<String, String> properties, boolean sorted, boolean force);
     
     /**
      * Adds the contents of the properties map to the given properties file.
@@ -41,12 +39,10 @@ public interface PropFilesManagerService {
      * @param properties the map of properties to add
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
-     * @param changeExisting indicates if an existing value for a given key
-     *            should be replaced or not
+     * @param force boolean that indicates if is necessary to force operation
      */
     void addProperties(LogicalPath propertyFilePath, String propertyFilename,
-            String prefix, Map<String, String> properties, boolean sorted,
-            boolean changeExisting);
+            String prefix, Map<String, String> properties, boolean sorted, boolean force);
 
     /**
      * Adds a property only if the given key (and value) does not exist already.
@@ -56,9 +52,10 @@ public interface PropFilesManagerService {
      *            specified path (required)
      * @param key the property key to update (required)
      * @param value the property value to set into the property key (required)
+     * @param force boolean that indicates if is necessary to force operation
      */
     void addPropertyIfNotExists(LogicalPath propertyFilePath,
-            String propertyFilename, String key, String value);
+            String propertyFilename, String key, String value, boolean force);
     
     /**
      * Adds a property only if the given key (and value) does not exist already.
@@ -69,9 +66,10 @@ public interface PropFilesManagerService {
      * @param prefix the property prefix to use          
      * @param key the property key to update (required)
      * @param value the property value to set into the property key (required)
+     * @param force boolean that indicates if is necessary to force operation
      */
     void addPropertyIfNotExists(LogicalPath propertyFilePath,
-            String propertyFilename, String prefix, String key, String value);
+            String propertyFilename, String prefix, String key, String value, boolean force);
 
     /**
      * Adds a property only if the given key (and value) does not exist already.
@@ -83,9 +81,10 @@ public interface PropFilesManagerService {
      * @param value the property value to set into the property key (required)
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
+     * @param force boolean that indicates if is necessary to force operation
      */
     void addPropertyIfNotExists(LogicalPath propertyFilePath,
-            String propertyFilename, String key, String value, boolean sorted);
+            String propertyFilename, String key, String value, boolean sorted, boolean force);
     
     /**
      * Adds a property only if the given key (and value) does not exist already.
@@ -98,9 +97,10 @@ public interface PropFilesManagerService {
      * @param value the property value to set into the property key (required)
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
+     * @param force boolean that indicates if is necessary to force operation
      */
     void addPropertyIfNotExists(LogicalPath propertyFilePath,
-            String propertyFilename, String prefix, String key, String value, boolean sorted);
+            String propertyFilename, String prefix, String key, String value, boolean sorted, boolean force);
 
     /**
      * Changes the specified property, throwing an exception if the file does
@@ -111,9 +111,10 @@ public interface PropFilesManagerService {
      *            specified path (required)
      * @param key the property key to update (required)
      * @param value the property value to set into the property key (required)
+     * @param force boolean that indicates if is necessary to force operation
      */
     void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
-            String key, String value);
+            String key, String value, boolean force);
     
     /**
      * Changes the specified property, throwing an exception if the file does
@@ -125,9 +126,10 @@ public interface PropFilesManagerService {
      * @param prefix the string that match with property start
      * @param key the property key to update (required)
      * @param value the property value to set into the property key (required)
+     * @param force boolean that indicates if is necessary to force operation
      */
     void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
-            String prefix, String key, String value);
+            String prefix, String key, String value, boolean force);
 
     /**
      * Changes the specified property, throwing an exception if the file does
@@ -140,9 +142,10 @@ public interface PropFilesManagerService {
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
      * @param value the property value to set into the property key (required)
+     * @param force boolean that indicates if is necessary to force operation
      */
     void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
-            String key, String value, boolean sorted);
+            String key, String value, boolean sorted, boolean force);
     
     /**
      * Changes the specified property, throwing an exception if the file does
@@ -156,9 +159,10 @@ public interface PropFilesManagerService {
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
      * @param value the property value to set into the property key (required)
+     * @param force boolean that indicates if is necessary to force operation
      */
     void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
-            String prefix, String key, String value, boolean sorted);
+            String prefix, String key, String value, boolean sorted, boolean force);
     
     /**
      * Use the contents of the properties map to update the given properties file.
@@ -167,9 +171,10 @@ public interface PropFilesManagerService {
      * @param propertyFilename the name of the property file within the
      *            specified path (required)
      * @param properties the map of properties to update
+     * @param force boolean that indicates if is necessary to force operation
      */
     void changeProperties(LogicalPath propertyFilePath, String propertyFilename,
-            Map<String, String> properties);
+            Map<String, String> properties, boolean force);
     
     /**
      * Use the contents of the properties map to update the given properties file.
@@ -179,9 +184,10 @@ public interface PropFilesManagerService {
      *            specified path (required)
      * @param prefix the string that match with start of every property           
      * @param properties the map of properties to update
+     * @param force boolean that indicates if is necessary to force operation
      */
     void changeProperties(LogicalPath propertyFilePath, String propertyFilename,
-            String prefix, Map<String, String> properties);
+            String prefix, Map<String, String> properties, boolean force);
     
     /**
      * Use the contents of the properties map to update the given properties file.
@@ -192,9 +198,10 @@ public interface PropFilesManagerService {
      * @param properties the map of properties to update
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
+     * @param force boolean that indicates if is necessary to force operation
      */
     void changeProperties(LogicalPath propertyFilePath, String propertyFilename,
-            Map<String, String> properties, boolean sorted);
+            Map<String, String> properties, boolean sorted, boolean force);
     
     /**
      * Use the contents of the properties map to update the given properties file.
@@ -206,9 +213,10 @@ public interface PropFilesManagerService {
      * @param properties the map of properties to update
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
+     * @param force boolean that indicates if is necessary to force operation
      */
     void changeProperties(LogicalPath propertyFilePath, String propertyFilename,
-            String prefix, Map<String, String> properties, boolean sorted);
+            String prefix, Map<String, String> properties, boolean sorted, boolean force);
 
     /**
      * Retrieves all property key/value pairs from the specified property,

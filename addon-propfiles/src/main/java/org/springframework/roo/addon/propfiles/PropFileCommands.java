@@ -10,6 +10,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.ShellContext;
 
 /**
  * Commands for the 'propfile' add-on to be used by the ROO shell.
@@ -37,9 +38,10 @@ public class PropFileCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
             @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path,
             @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
-            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
+            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value,
+            ShellContext shellContext) {
 
-        propFileOperations.changeProperty(path, name, key, value);
+        propFileOperations.changeProperty(path, name, key, value, shellContext.isForce());
     }
 
     @CliAvailabilityIndicator({ "properties list", "properties set",

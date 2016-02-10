@@ -25,12 +25,12 @@ public interface PropFileOperations {
      * @param properties the map of properties to add
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
-     * @param changeExisting indicates if an existing value for a given key
+     * @param force indicates if an existing value for a given key
      *            should be replaced or not
      */
     void addProperties(LogicalPath propertyFilePath, String propertyFilename,
             Map<String, String> properties, boolean sorted,
-            boolean changeExisting);
+            boolean force);
 
     /**
      * Adds a property only if the given key (and value) does not exist already.
@@ -40,9 +40,11 @@ public interface PropFileOperations {
      *            specified path (required)
      * @param key the property key to update (required)
      * @param value the property value to set into the property key (required)
+     *      * @param force indicates if an existing value for a given key
+     *            should be replaced or not
      */
     void addPropertyIfNotExists(LogicalPath propertyFilePath,
-            String propertyFilename, String key, String value);
+            String propertyFilename, String key, String value, boolean force);
 
     /**
      * Adds a property only if the given key (and value) does not exist already.
@@ -54,9 +56,11 @@ public interface PropFileOperations {
      * @param value the property value to set into the property key (required)
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
+     * @param force indicates if an existing value for a given key
+     *            should be replaced or not
      */
     void addPropertyIfNotExists(LogicalPath propertyFilePath,
-            String propertyFilename, String key, String value, boolean sorted);
+            String propertyFilename, String key, String value, boolean sorted, boolean force);
 
     /**
      * Changes the specified property, throwing an exception if the file does
@@ -67,9 +71,11 @@ public interface PropFileOperations {
      *            specified path (required)
      * @param key the property key to update (required)
      * @param value the property value to set into the property key (required)
+     * @param force indicates if an existing value for a given key
+     *            should be replaced or not
      */
     void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
-            String key, String value);
+            String key, String value, boolean force);
 
     /**
      * Changes the specified property, throwing an exception if the file does
@@ -82,9 +88,11 @@ public interface PropFileOperations {
      * @param sorted indicates if the resulting properties should be sorted
      *            alphabetically
      * @param value the property value to set into the property key (required)
+     * @param force indicates if an existing value for a given key
+     *            should be replaced or not
      */
     void changeProperty(LogicalPath propertyFilePath, String propertyFilename,
-            String key, String value, boolean sorted);
+            String key, String value, boolean sorted, boolean force);
 
     /**
      * Retrieves all property key/value pairs from the specified property,

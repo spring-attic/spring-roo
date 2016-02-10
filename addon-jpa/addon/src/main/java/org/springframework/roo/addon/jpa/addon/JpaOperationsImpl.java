@@ -122,11 +122,10 @@ public class JpaOperationsImpl implements JpaOperations {
 
     public void configureJpa(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String jndi,
-            final String applicationId, final String hostName,
-            final String databaseName, final String userName,
-            final String password, final String transactionManager,
-            final String persistenceUnit, final String moduleName,
-            final String profile, final boolean force) {
+            final String hostName, final String databaseName,
+            final String userName, final String password,
+            final String moduleName, final String profile,
+            final boolean force) {
     	
     	if(projectOperations == null){
     		projectOperations = getProjectOperations();
@@ -161,7 +160,7 @@ public class JpaOperationsImpl implements JpaOperations {
         
         // Update Spring Config File with spring.datasource.* domain properties
         updateApplicationProperties(ormProvider, jdbcDatabase, hostName,
-                databaseName, userName, password, moduleName, jndi, profile);
+                databaseName, userName, password, moduleName, jndi, profile, force);
         
     }
     
@@ -736,7 +735,7 @@ public class JpaOperationsImpl implements JpaOperations {
     private void updateApplicationProperties(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String hostName,
             final String databaseName, String userName, final String password,
-            final String moduleName, String jndi, String profile) {
+            final String moduleName, String jndi, String profile, boolean force) {
     	
         // Check if jndi is blank. If is blank, include database properties on 
         // application.properties file
@@ -772,10 +771,14 @@ public class JpaOperationsImpl implements JpaOperations {
             Map<String, String> props = new HashMap<String, String>();
             props.put(DATABASE_URL, connectionString);
             props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
-            props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
-            props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
+            if(userName != null){
+                props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
+            }
+            if(password != null){
+                props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
+            }
             
-            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props, profile);
+            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props, profile, force);
 
             // Remove jndi property
             getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, JNDI_NAME, profile);
@@ -795,7 +798,7 @@ public class JpaOperationsImpl implements JpaOperations {
             Map<String, String> props = new HashMap<String, String>();
             props.put(JNDI_NAME, jndi);
             
-            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props, profile);
+            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props, profile, force);
             
             // Remove old properties
             getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_URL, profile);
@@ -803,25 +806,6 @@ public class JpaOperationsImpl implements JpaOperations {
             getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
             getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
             
-        }
-
-        // Log message to console
-        switch (jdbcDatabase) {
-        case ORACLE:
-        case DB2_EXPRESS_C:
-        case DB2_400:
-            LOGGER.warning("The "
-                    + jdbcDatabase.name()
-                    + " JDBC driver is not available in public Maven repositories. Please adjust the pom.xml dependency to suit your needs");
-            break;
-        case POSTGRES:
-        case DERBY_EMBEDDED:
-        case DERBY_CLIENT:
-        case MSSQL:
-        case SYBASE:
-        case MYSQL:
-            LOGGER.warning("Please update your database details in ".concat(getApplicationConfigService().getSpringConfigLocation()));
-            break;
         }
     }
 

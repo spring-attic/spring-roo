@@ -42,33 +42,33 @@ public class PropFileOperationsImpl implements PropFileOperations {
     @Override
     public void addPropertyIfNotExists(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key,
-            final String value) {
+            final String value, boolean force) {
         propFilesManager.addPropertyIfNotExists(propertyFilePath,
-                propertyFilename, key, value);
+                propertyFilename, key, value, force);
     }
 
     @Override
     public void addPropertyIfNotExists(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key, final String value,
-            final boolean sorted) {
+            final boolean sorted, boolean force) {
         propFilesManager.addPropertyIfNotExists(propertyFilePath,
-                propertyFilename, key, value, sorted);
+                propertyFilename, key, value, sorted, force);
     }
 
     @Override
     public void changeProperty(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key,
-            final String value) {
+            final String value, boolean force) {
         propFilesManager.changeProperty(propertyFilePath, propertyFilename, key,
-                value);
+                value, force);
     }
 
     @Override
     public void changeProperty(final LogicalPath propertyFilePath,
             final String propertyFilename, final String key, final String value,
-            final boolean sorted) {
+            final boolean sorted, boolean force) {
         propFilesManager.changeProperty(propertyFilePath, propertyFilename, key,
-                value, sorted);
+                value, sorted, force);
     }
 
     @Override

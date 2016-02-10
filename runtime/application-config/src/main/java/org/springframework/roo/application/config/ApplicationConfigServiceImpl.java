@@ -34,64 +34,64 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
     @Reference private FileManager fileManager;
 
     @Override
-    public void addProperty(final String key, final String value, String profile) {
+    public void addProperty(final String key, final String value, String profile, boolean force) {
 
         propFilesManager.addPropertyIfNotExists(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                getAppliCationConfigFileName(profile), key, value, true);
+                getAppliCationConfigFileName(profile), key, value, true, force);
     }
 
     @Override
     public void addProperty(final String prefix, final String key,
-            final String value, String profile) {
+            final String value, String profile, boolean force) {
         propFilesManager.addPropertyIfNotExists(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                getAppliCationConfigFileName(profile), prefix, key, value, true);
+                getAppliCationConfigFileName(profile), prefix, key, value, true, force);
     }
 
     @Override
-    public void addProperties(final Map<String, String> properties, String profile) {
+    public void addProperties(final Map<String, String> properties, String profile, boolean force) {
         propFilesManager.addProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                getAppliCationConfigFileName(profile), properties, true, true);
+                getAppliCationConfigFileName(profile), properties, true, force);
     }
 
     @Override
     public void addProperties(final String prefix,
-            final Map<String, String> properties, String profile) {
+            final Map<String, String> properties, String profile, boolean force) {
         propFilesManager.addProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                getAppliCationConfigFileName(profile), prefix, properties, true, true);
+                getAppliCationConfigFileName(profile), prefix, properties, true, force);
     }
 
     @Override
-    public void updateProperty(final String key, final String value, String profile) {
+    public void updateProperty(final String key, final String value, String profile, boolean force) {
         propFilesManager.changeProperty(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                getAppliCationConfigFileName(profile), key, value, true);
+                getAppliCationConfigFileName(profile), key, value, true, force);
     }
 
     @Override
     public void updateProperty(final String prefix, final String key,
-            final String value, String profile) {
+            final String value, String profile, boolean force) {
         propFilesManager.changeProperty(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                getAppliCationConfigFileName(profile), prefix, key, value, true);
+                getAppliCationConfigFileName(profile), prefix, key, value, true, force);
     }
 
     @Override
-    public void updateProperties(final Map<String, String> properties, String profile) {
+    public void updateProperties(final Map<String, String> properties, String profile, boolean force) {
         propFilesManager.changeProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                getAppliCationConfigFileName(profile), properties, true);
+                getAppliCationConfigFileName(profile), properties, true, force);
     }
 
     @Override
     public void updateProperties(final String prefix,
-            final Map<String, String> properties, String profile) {
+            final Map<String, String> properties, String profile, boolean force) {
         propFilesManager.changeProperties(
                 LogicalPath.getInstance(APPLICATION_CONFIG_FILE_LOCATION, ""),
-                getAppliCationConfigFileName(profile), prefix, properties, true);
+                getAppliCationConfigFileName(profile), prefix, properties, true, force);
     }
 
     @Override
