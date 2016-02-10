@@ -2,6 +2,7 @@ package org.springframework.roo.shell;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Provides an implementation for {@link ShellContext}
@@ -41,26 +42,7 @@ public class ShellContextImpl implements ShellContext {
     @Override
     public Map<String, String> getParameters() {
         return this.parameters;
-    }
-
-    /**
-     * Set current value of --force parameter defined on Spring Roo Shell
-     * 
-     * @param force
-     */
-    public void setForce(boolean force) {
-        this.force = force;
-    }
-    
-    /**
-     * Set current value of --profile parameter defined on Spring Roo Shell
-     * 
-     * @param profile
-     */
-    public void setProfile(String profile) {
-        this.profile = profile;
-    }
-    
+    }  
     
     /**
      * Set value of current executed command
@@ -77,7 +59,9 @@ public class ShellContextImpl implements ShellContext {
      * @param parameters
      */
     public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
+        for(Entry<String, String> param : parameters.entrySet()){
+            setParameter(param.getKey(), param.getValue());
+        }
     }
 
     /**
@@ -87,6 +71,27 @@ public class ShellContextImpl implements ShellContext {
      * @param value
      */
     public void setParameter(String key, String value) {
+        // Check --force global parameter
+        if ("force".equals(key)) {
+            if (("".equals(value) || "true".equals(value))) {
+                this.force = true;
+                this.parameters.put(key, "true");
+                return;
+            }
+            else {
+                this.force = false;
+                this.parameters.put(key, "false");
+                return;
+            }
+        }
+
+        // Check --profile global parameter
+        if ("profile".equals(key)) {
+            this.profile = value;
+        }
+        
         this.parameters.put(key, value);
+
+        
     }
 }

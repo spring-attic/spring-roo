@@ -11,10 +11,8 @@ import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -34,11 +32,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.shell.CliAvailabilityIndicator;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CliOption;
-import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.ShellContext;
+import org.springframework.roo.shell.*;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -71,7 +65,7 @@ public class JpaCommands implements CommandMarker {
     @Reference private PropFileOperations propFileOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private TypeLocationService typeLocationService;
-    
+
     @CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
     public void createEmbeddableClass(
             @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true, help = "The name of the class to create") final JavaType name,
@@ -91,11 +85,12 @@ public class JpaCommands implements CommandMarker {
     }
 
     @CliCommand(value = "database properties remove", help = "Removes a particular database property")
-    public void databaseRemove(
-            @CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
+    public void databaseRemove(@CliOption(key = { "",
+            "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
 
-        propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT
-                .getModulePathId(projectOperations.getFocusedModuleName()),
+        propFileOperations.removeProperty(
+                Path.SPRING_CONFIG_ROOT.getModulePathId(
+                        projectOperations.getFocusedModuleName()),
                 "database.properties", key);
     }
 
@@ -104,8 +99,9 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
             @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value) {
 
-        propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT
-                .getModulePathId(projectOperations.getFocusedModuleName()),
+        propFileOperations.changeProperty(
+                Path.SPRING_CONFIG_ROOT.getModulePathId(
+                        projectOperations.getFocusedModuleName()),
                 "database.properties", key, value);
     }
 
@@ -113,6 +109,35 @@ public class JpaCommands implements CommandMarker {
             "database properties remove", "database properties set" })
     public boolean hasDatabaseProperties() {
         return isJpaSetupAvailable() && jpaOperations.hasDatabaseProperties();
+    }
+
+    @CliOptionVisibilityIndicator(command = "jpa setup", params = {
+            "jndiDataSource"}, help = "jndiDataSource parameter is not available if any of databaseName, hostName, password or userName are selected")
+    public boolean isJndiVisible(ShellContext shellContext) {
+
+        Map<String, String> params = shellContext.getParameters();
+
+        if (params.containsKey("databaseName") || params.containsKey("hostName") || params.containsKey("password") || params.containsKey("userName")) {
+            return false;
+        }
+        return true;
+    }
+    
+    @CliOptionVisibilityIndicator(command = "jpa setup", params = {
+    "databaseName", "hostName", "password", "userName"}, help = "jndiDataSource parameter is not available if any of databaseName, hostName, password or userName are selected")
+    public boolean areConnectionParamsVisible(ShellContext shellContext) {
+
+        Map<String, String> params = shellContext.getParameters();
+
+        if (params.containsKey("jndiDataSource")) {
+            return false;
+        }
+        return true;
+    }
+
+    @CliOptionMandatoryIndicator(command = "jpa setup", param = "hostName")
+    public boolean isHostNameMandatory() {
+        return true;
     }
 
     @CliCommand(value = "jpa setup", help = "Install or updates a JPA persistence provider in your project")
@@ -137,7 +162,7 @@ public class JpaCommands implements CommandMarker {
         jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi,
                 applicationId, hostName, databaseName, userName, password,
                 transactionManager, persistenceUnit,
-                projectOperations.getFocusedModuleName(), 
+                projectOperations.getFocusedModuleName(),
                 shellContext.getProfile(), shellContext.isForce());
     }
 
@@ -197,18 +222,20 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "sequenceName", mandatory = false, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName) {
         Validate.isTrue(!identifierType.isPrimitive(),
                 "Identifier type cannot be a primitive");
-        
-        // Check if exists other entity with the same name
-        Set<ClassOrInterfaceTypeDetails> currentEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JAVA_BEAN);
 
-        for(ClassOrInterfaceTypeDetails entity : currentEntities){
-        	// If exists, we can't create a duplicate entity
-        	if(name.equals(entity.getName())){
-        		throw new IllegalArgumentException(
-                        String.format("Entity '%s' already exists and cannot be created. Try to use other entity name on --class parameter.", name));
-        	}
+        // Check if exists other entity with the same name
+        Set<ClassOrInterfaceTypeDetails> currentEntities = typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_JAVA_BEAN);
+
+        for (ClassOrInterfaceTypeDetails entity : currentEntities) {
+            // If exists, we can't create a duplicate entity
+            if (name.equals(entity.getName())) {
+                throw new IllegalArgumentException(String.format(
+                        "Entity '%s' already exists and cannot be created. Try to use other entity name on --class parameter.",
+                        name));
+            }
         }
-        
+
         if (!permitReservedWords) {
             ReservedWords.verifyReservedWordsNotPresent(name);
         }
@@ -237,11 +264,10 @@ public class JpaCommands implements CommandMarker {
         final List<AnnotationMetadataBuilder> annotationBuilder = new ArrayList<AnnotationMetadataBuilder>();
         annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
         annotationBuilder.add(ROO_TO_STRING_BUILDER);
-        annotationBuilder.add(getEntityAnnotationBuilder(table, schema,
-                catalog, identifierField, identifierColumn, identifierType,
-                versionField, versionColumn, versionType, inheritanceType,
-                mappedSuperclass, persistenceUnit, transactionManager,
-                entityName, sequenceName));
+        annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog,
+                identifierField, identifierColumn, identifierType, versionField,
+                versionColumn, versionType, inheritanceType, mappedSuperclass,
+                persistenceUnit, transactionManager, entityName, sequenceName));
         if (equals) {
             annotationBuilder.add(ROO_EQUALS_BUILDER);
         }
@@ -255,8 +281,8 @@ public class JpaCommands implements CommandMarker {
 
         // Create entity identifier class if required
         if (!(identifierType.getPackage().getFullyQualifiedPackageName()
-                .startsWith("java.") || identifierType
-                .equals(GAE_DATASTORE_KEY))) {
+                .startsWith("java.")
+                || identifierType.equals(GAE_DATASTORE_KEY))) {
             jpaOperations.newIdentifier(identifierType, identifierField,
                     identifierColumn);
         }
@@ -314,8 +340,8 @@ public class JpaCommands implements CommandMarker {
             entityAnnotationBuilder.addStringAttribute("catalog", catalog);
         }
         if (entityName != null) {
-            entityAnnotationBuilder
-                    .addStringAttribute("entityName", entityName);
+            entityAnnotationBuilder.addStringAttribute("entityName",
+                    entityName);
         }
         if (sequenceName != null) {
             entityAnnotationBuilder.addStringAttribute("sequenceName",
