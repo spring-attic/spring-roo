@@ -135,11 +135,6 @@ public class JpaCommands implements CommandMarker {
         return true;
     }
 
-    @CliOptionMandatoryIndicator(command = "jpa setup", param = "hostName")
-    public boolean isHostNameMandatory() {
-        return true;
-    }
-
     @CliCommand(value = "jpa setup", help = "Install or updates a JPA persistence provider in your project")
     public void installJpa(
             @CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") final OrmProvider ormProvider,
