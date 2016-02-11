@@ -48,14 +48,7 @@ public class ProjectSettingsOperationsImpl implements ProjectSettingsOperations 
 		}
 
 		// Adds a setting
-		if (getProjectSettingsService().getProperty(name) == null) {
-			getProjectSettingsService().addProperty(name, value);
-		} else if (force) {
-			getProjectSettingsService().updateProperty(name, value);
-		} else {
-			LOGGER.log(Level.INFO, "WARNING: " + name
-					+ " setting is already defined in the project configuration file. Use '--force' option to update this setting");
-		}
+		getProjectSettingsService().addProperty(name, value, force);
 	}
 
 	@Override

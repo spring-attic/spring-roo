@@ -18,18 +18,10 @@ public interface ProjectSettingsService {
 	 *            string that identifies the property
 	 * @param value
 	 *            string with the value assigned to the property
+	 * @param force
+	 *            boolean that indicates if is necessary to force operation
 	 */
-	void addProperty(String key, String value);
-
-	/**
-	 * Changes the specified property.
-	 *
-	 * @param key
-	 *            the property key to update (required)
-	 * @param value
-	 *            the property value to set into the property key (required)
-	 */
-	void updateProperty(String key, String value);
+	void addProperty(String key, String value, boolean force);
 
 	/**
 	 * Retrieves all property key/value pairs, throwing an exception if the file
