@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -15,6 +16,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
@@ -38,7 +40,8 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 
 	protected final static Logger LOGGER = HandlerUtils.getLogger(ProjectSettingsServiceImpl.class);
 
-	private String projectRootDirectory;
+	@Reference
+	private PathResolver pathResolver;
 
 	private PropFilesManagerService propFilesManager;
 	private FileManager fileManager;
@@ -48,10 +51,6 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 
 	protected void activate(final ComponentContext context) {
 		this.context = context.getBundleContext();
-		final File projectDirectory = new File(
-				StringUtils.defaultIfEmpty(OSGiUtils.getRooWorkingDirectory(context), FileUtils.CURRENT_DIRECTORY),
-				PROJECT_CONFIG_FOLDER_LOCATION.getDefaultLocation());
-		projectRootDirectory = FileUtils.getCanonicalPath(projectDirectory);
 	}
 
 	@Override
@@ -87,7 +86,8 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 
 	@Override
 	public String getProjectSettingsLocation() {
-		return projectRootDirectory.concat("/").concat(getProjectSettingsFileName());
+
+		return pathResolver.getFocusedIdentifier(PROJECT_CONFIG_FOLDER_LOCATION, getProjectSettingsFileName());
 	}
 
 	@Override
@@ -96,8 +96,8 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 	}
 
 	/**
-	 * Method that generates application configuration file name using project setting
-	 * folder, file name and file extension.
+	 * Method that generates application configuration file name using project
+	 * setting folder, file name and file extension.
 	 *
 	 * @return
 	 */
