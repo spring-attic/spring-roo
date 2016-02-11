@@ -29,7 +29,13 @@ public enum Path {
      * The module's base directory for production Spring-related resource files.
      */
     SPRING_CONFIG_ROOT(false, "src/main/resources/META-INF/spring"),
-    
+
+    /**
+     * The module's base directory for production Roo project
+     * configuration-related resource files.
+     */
+    ROOT_ROO_CONFIG(false, ".roo"),
+
     /**
      * Main path that will contain JAVA and RESOURCES folder
      */
