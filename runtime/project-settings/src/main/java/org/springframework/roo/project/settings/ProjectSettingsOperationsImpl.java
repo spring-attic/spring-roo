@@ -1,6 +1,7 @@
 package org.springframework.roo.project.settings;
 
-import java.util.SortedSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +18,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * Implementation of {@link ProjectSettingsOperations}.
  *
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 2.0
  */
 @Component
@@ -53,23 +55,48 @@ public class ProjectSettingsOperationsImpl implements ProjectSettingsOperations 
 
 	@Override
 	public void listSettings() {
-
 		// Checks if project settings file exists
 		if (getProjectSettingsService().existsProjectSettingsFile()) {
-
-			SortedSet<String> properties = getProjectSettingsService().getPropertyKeys(true);
-
-			// Print results
-			for (String property : properties) {
-				LOGGER.log(Level.INFO, property);
+		    
+			Map<String, String> properties = getProjectSettingsService().getProperties();
+			if(properties.size() > 0){
+			    
+			    printHeader();
+			    // Print results
+			    for (Entry<String, String> property : properties.entrySet()) {
+			        LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
+			    }
+			    printFooter();
 			}
+
 		} else {
 			LOGGER.log(Level.INFO,
 					"WARNING: Project settings file not found. Use 'project settings add' command to configure your project.");
 		}
 
 	}
-
+	
+    /**
+     * Method that prints header of Spring Roo Configuration
+     */
+    public void printHeader() {
+        String header = "#===============================================#\n"
+                + "#      SPRING ROO CONFIGURATION PROPERTIES      #\n"
+                + "#===============================================#\n";
+        LOGGER.log(Level.INFO, header);
+    }
+    
+    /**
+     * Method that prints footer of Spring Roo Configuration
+     */
+    public void printFooter() {
+        LOGGER.log(Level.INFO, "");
+        String footer = "These properties will be taken in mind during project generation.\n"
+                + "Use 'project settings add' command to define some Spring Roo Configuration "
+                + "properties.";
+        LOGGER.log(Level.INFO, footer);
+    }
+    
 	public ProjectSettingsService getProjectSettingsService() {
 		if (projectSettingsService == null) {
 			// Get all Services implement ProjectSettingsServic interface
