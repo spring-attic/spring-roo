@@ -452,10 +452,9 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
             }else if(!existingValue.equals(newValue) && !force){
                 // ROO-3702: Show error when tries to update some property that
                 // already exists and --force global param is false. 
-                LOGGER.log(Level.INFO, String.format("WARNING: Property '%s' already exists. "
-                        + "Use --force param to overwrite it.", key));
-                saveNeeded = false;
-                break;
+                String msg = String.format("WARNING: Property '%s' already exists. "
+                        + "Use --force param to overwrite it.", key);
+                throw new RuntimeException(msg);
             }
         }
 

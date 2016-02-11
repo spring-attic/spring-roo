@@ -8,14 +8,13 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * 
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.0
  */
 public enum OrmProvider {
 
-    DATANUCLEUS("org.datanucleus.api.jpa.PersistenceProviderImpl"), ECLIPSELINK(
-            "org.eclipse.persistence.jpa.PersistenceProvider"), HIBERNATE(
-            "org.hibernate.jpa.HibernatePersistenceProvider"), OPENJPA(
-            "org.apache.openjpa.persistence.PersistenceProviderImpl");
+    ECLIPSELINK("org.eclipse.persistence.jpa.PersistenceProvider"), HIBERNATE(
+            "org.hibernate.jpa.HibernatePersistenceProvider");
 
     private final String adapter;
 
