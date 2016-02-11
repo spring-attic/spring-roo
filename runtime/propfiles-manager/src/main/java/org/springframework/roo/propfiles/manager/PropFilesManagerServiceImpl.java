@@ -179,7 +179,9 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
                         new BufferedInputStream(new FileInputStream(filePath)));
             }
             else {
-                throw new IllegalStateException("Properties file not found");
+                throw new IllegalStateException(String.format(
+                        "ERROR: '%s' properties file doesn't exists.",
+                        filePath));
             }
         }
         catch (final IOException ioe) {
@@ -251,7 +253,9 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
                         new BufferedInputStream(new FileInputStream(filePath)));
             }
             else {
-                throw new IllegalStateException("Properties file not found");
+                throw new IllegalStateException(String.format(
+                        "ERROR: '%s' properties file doesn't exists.",
+                        filePath));
             }
         }
         catch (final IOException ioe) {
@@ -316,7 +320,8 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
             loadProperties(props, mutableFile.getInputStream());
         }
         else {
-            throw new IllegalStateException("Properties file not found");
+            throw new IllegalStateException(String.format(
+                    "ERROR: '%s' properties file doesn't exists.", filePath));
         }
 
         // Including prefix if needed
@@ -349,7 +354,8 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
             loadProperties(props, mutableFile.getInputStream());
         }
         else {
-            throw new IllegalStateException("Properties file not found");
+            throw new IllegalStateException(String.format(
+                    "ERROR: '%s' properties file doesn't exists.", filePath));
         }
 
         for (Entry property : props.entrySet()) {

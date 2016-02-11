@@ -38,20 +38,32 @@ public class ProjectSettingsOperationsImpl implements ProjectSettingsOperations 
 
 	@Override
 	public void addSetting(String name, String value, boolean force) {
-
 		Validate.notNull(name, "Name required");
 		Validate.notNull(value, "Value required");
-
+		
 		// Checks if project settings file exists
 		if (!getProjectSettingsService().existsProjectSettingsFile()) {
-
 			// Creates project settings file
 			getProjectSettingsService().createProjectSettingsFile();
 		}
-
+		
 		// Adds a setting
 		getProjectSettingsService().addProperty(name, value, force);
 	}
+	
+    @Override
+    public void removeSetting(String name) {
+        Validate.notNull(name, "Name required");
+        
+        // Checks if project settings file exists
+        if (getProjectSettingsService().existsProjectSettingsFile()) {
+            // Remove setting
+            getProjectSettingsService().removeProperty(name);
+        }else{
+            LOGGER.log(Level.INFO,
+                    "WARNING: Project settings file not found. Use 'project settings add' command to configure your project.");
+        }
+    }
 
 	@Override
 	public void listSettings() {

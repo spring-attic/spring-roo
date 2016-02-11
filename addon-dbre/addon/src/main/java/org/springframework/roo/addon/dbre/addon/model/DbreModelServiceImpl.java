@@ -72,7 +72,7 @@ public class DbreModelServiceImpl implements DbreModelService {
     }
 
     private Connection getConnection(final boolean displayAddOns) {
-        final String dbProps = "database.properties";
+        /*final String dbProps = "database.properties";
         final String jndiDataSource = getJndiDataSourceName();
         if (StringUtils.isNotBlank(jndiDataSource)) {
             final Map<String, String> props = getPropFileOperations().getProperties(
@@ -91,11 +91,12 @@ public class DbreModelServiceImpl implements DbreModelService {
 
         final Properties connectionProperties = getConnectionPropertiesFromDataNucleusConfiguration();
         return getConnectionProvider().getConnection(connectionProperties,
-                displayAddOns);
+                displayAddOns);*/
+        return null;
     }
 
     private Properties getConnectionPropertiesFromDataNucleusConfiguration() {
-        final String persistenceXmlPath = getProjectOperations().getPathResolver()
+        /*final String persistenceXmlPath = getProjectOperations().getPathResolver()
                 .getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
                         "META-INF/persistence.xml");
         if (!getFileManager().exists(persistenceXmlPath)) {
@@ -146,7 +147,8 @@ public class DbreModelServiceImpl implements DbreModelService {
                 break;
             }
         }
-        return properties;
+        return properties;*/
+        return null;
     }
 
     public Database getDatabase(final boolean evictCache) {

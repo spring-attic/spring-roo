@@ -135,10 +135,10 @@ public class MenuOperationsImpl implements MenuOperations {
             properties.put("menu_item_" + lcMenuCategoryName + "_"
                     + menuItemId.getSymbolName().toLowerCase() + "_label",
                     menuItemLabel);
-            getPropFileOperations().addProperties(getProjectOperations()
+            /*getPropFileOperations().addProperties(getProjectOperations()
                     .getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP),
                     "WEB-INF/i18n/application.properties", properties, true,
-                    false);
+                    false);*/
         }
         getXmlRoundTripFileManager().writeToDiskIfNecessary(
                 getMenuFileName(logicalPath), document);

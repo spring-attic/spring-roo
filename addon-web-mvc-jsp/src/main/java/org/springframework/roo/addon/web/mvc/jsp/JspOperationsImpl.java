@@ -340,12 +340,12 @@ public class JspOperationsImpl extends AbstractOperations implements
                                 .getFocusedModuleName());
                 fileManager.createFile(getPathResolver().getIdentifier(webappPath,
                         "WEB-INF/i18n/application.properties"));
-                getPropFileOperations()
+                /*getPropFileOperations()
                         .addPropertyIfNotExists(webappPath,
                                 "WEB-INF/i18n/application.properties",
                                 "application_name",
                                 projectName.substring(0, 1).toUpperCase()
-                                        + projectName.substring(1), true);
+                                        + projectName.substring(1), true);*/
             }
             catch (final Exception e) {
                 throw new IllegalStateException(
@@ -487,11 +487,11 @@ public class JspOperationsImpl extends AbstractOperations implements
         // translation)
         final String messageCode = "label"
                 + folderName.replace("/", "_").toLowerCase() + "_" + lcViewName;
-        getPropFileOperations()
+        /*getPropFileOperations()
                 .addPropertyIfNotExists(
                         getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP),
                         "WEB-INF/i18n/application.properties", messageCode,
-                        title, true);
+                        title, true);*/
 
         // Add the menu item
         final String relativeUrl = folderName + "/" + lcViewName;

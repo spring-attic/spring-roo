@@ -22,6 +22,14 @@ public interface ProjectSettingsService {
 	 *            boolean that indicates if is necessary to force operation
 	 */
 	void addProperty(String key, String value, boolean force);
+	
+	/**
+     * Remove property from Spring Roo shell config properties file
+     *
+     * @param key
+     *            string that identifies the property
+     */
+    void removeProperty(String key);
 
 	/**
 	 * Retrieves all property key/value pairs, throwing an exception if the file

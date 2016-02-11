@@ -122,9 +122,9 @@ public class MailOperationsImpl implements MailOperations {
 			props.put("spring.mail.password", password);
 		}
 
-        getPropFileOperations().addProperties(Path.SRC_MAIN_RESOURCES
+/*        getPropFileOperations().addProperties(Path.SRC_MAIN_RESOURCES
                 .getModulePathId(getProjectOperations().getFocusedModuleName()),
-                "application.properties", props, true, true);
+                "application.properties", props, true, true);*/
     }
     
     
@@ -163,9 +163,9 @@ public class MailOperationsImpl implements MailOperations {
 			props.put("email.subject", subject);
 		}
 		
-        getPropFileOperations().addProperties(Path.SRC_MAIN_RESOURCES
+/*        getPropFileOperations().addProperties(Path.SRC_MAIN_RESOURCES
                 .getModulePathId(getProjectOperations().getFocusedModuleName()),
-                "application.properties", props, true, true);
+                "application.properties", props, true, true);*/
 		
 	}
 	

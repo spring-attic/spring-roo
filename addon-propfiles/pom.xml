@@ -66,7 +66,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.propfiles.manager</artifactId>
+            <artifactId>org.springframework.roo.application.config</artifactId>
         </dependency>
         <!-- Test -->
         <dependency>

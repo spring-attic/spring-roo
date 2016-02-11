@@ -1,11 +1,8 @@
 package org.springframework.roo.project.settings;
 
-import java.util.SortedSet;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
@@ -15,6 +12,7 @@ import org.springframework.roo.shell.ShellContext;
  * Commands related to roo project settings
  *
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 2.0
  */
 @Component
@@ -36,6 +34,13 @@ public class ProjectSettingsCommands implements CommandMarker {
             ShellContext shellContext) {
 
         projectSettingsOperations.addSetting(name, value, shellContext.isForce());
+    }
+    
+    @CliCommand(value = "project settings remove", help = "Removes an specific property from Spring Roo configuration file")
+    public void removeSetting(
+            @CliOption(key = "name", mandatory = true, help = "Setting name") final String name) {
+
+        projectSettingsOperations.removeSetting(name);
     }
 
 }

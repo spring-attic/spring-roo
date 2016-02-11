@@ -59,6 +59,13 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 		getPropFilesManager().addPropertyIfNotExists(LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
 				getProjectSettingsFileName(), key, value, force);
 	}
+	
+    @Override
+    public void removeProperty(final String key) {
+        getPropFilesManager().removeProperty(
+                LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
+                getProjectSettingsFileName(), key);
+    }
 
 	@Override
 	public Map<String, String> getProperties() {

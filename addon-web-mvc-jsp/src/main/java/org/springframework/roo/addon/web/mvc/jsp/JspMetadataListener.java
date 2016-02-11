@@ -516,8 +516,8 @@ public class JspMetadataListener implements MetadataProvider,
         getMenuOperations().cleanUpFinderMenuItems(categoryName,
                 allowedMenuItems, webappPath);
 
-        getPropFileOperations().addProperties(webappPath,
-                "WEB-INF/i18n/application.properties", properties, true, false);
+        /*getPropFileOperations().addProperties(webappPath,
+                "WEB-INF/i18n/application.properties", properties, true, false);*/
 
         return new JspMetadata(jspMetadataId, webScaffoldMetadata);
     }

@@ -1,11 +1,8 @@
 package org.springframework.roo.addon.propfiles;
 
-import java.util.SortedSet;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -13,10 +10,11 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
 
 /**
- * Commands for the 'propfile' add-on to be used by the ROO shell.
+ * Provides commands to include properties on application config properties
+ * file.
  * 
- * @author Ben Alex
- * @since 1.0
+ * @author Juan Carlos García
+ * @since 2.0
  */
 @Component
 @Service
@@ -24,37 +22,33 @@ public class PropFileCommands implements CommandMarker {
 
     @Reference private PropFileOperations propFileOperations;
 
-    @CliCommand(value = "properties remove", help = "Removes a particular properties file property")
-    public void databaseRemove(
-            @CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
-            @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path,
-            @CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
-
-        propFileOperations.removeProperty(path, name, key);
+    @CliAvailabilityIndicator({ "property add", "property remove",
+            "property list" })
+    public boolean arePropertiesCommandAvailable() {
+        return propFileOperations.arePropertiesCommandAvailable();
     }
 
-    @CliCommand(value = "properties set", help = "Changes a particular properties file property")
-    public void databaseSet(
-            @CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
-            @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path,
+    @CliCommand(value = "property add", help = "Adds or updates a particular property from application config properties file.")
+    public void setProperty(
             @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
             @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value,
             ShellContext shellContext) {
 
-        propFileOperations.changeProperty(path, name, key, value, shellContext.isForce());
+        propFileOperations.addProperty(key, value, shellContext.getProfile(),
+                shellContext.isForce());
     }
 
-    @CliAvailabilityIndicator({ "properties list", "properties set",
-            "properties remove" })
-    public boolean isInstallWebFlowAvailable() {
-        return propFileOperations.isPropertiesCommandAvailable();
+    @CliCommand(value = "property remove", help = "Removes a particular property from application config properties file.")
+    public void removeProperty(
+            @CliOption(key = { "key" }, mandatory = true, help = "The property key that should be removed") final String key,
+            ShellContext shellContext) {
+
+        propFileOperations.removeProperty(key, shellContext.getProfile());
     }
 
-    @CliCommand(value = "properties list", help = "Shows the details of a particular properties file")
-    public SortedSet<String> propertyFileKeys(
-            @CliOption(key = "name", mandatory = true, help = "Property file name (including .properties suffix)") final String name,
-            @CliOption(key = "path", mandatory = true, help = "Source path to property file") final LogicalPath path) {
-
-        return propFileOperations.getPropertyKeys(path, name, true);
+    @CliCommand(value = "property list", help = "List all properties from application config properties file.")
+    public void listProperties(ShellContext shellContext) {
+        
+        propFileOperations.listProperties(shellContext.getProfile());
     }
 }
