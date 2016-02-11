@@ -12,6 +12,7 @@ import org.springframework.roo.project.Feature;
  * 
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Juan Carlos García
  * @since 1.0
  */
 public interface JpaOperations extends Feature {
@@ -37,23 +38,12 @@ public interface JpaOperations extends Feature {
             String jndi, String hostName, String databaseName, String userName,
             String password, String moduleName, String profile, boolean force);
 
-    SortedSet<String> getDatabaseProperties(String profile);
-
-    boolean hasDatabaseProperties();
-
     /**
      * Indicates whether JPA can be installed in the currently focused module.
      * 
      * @return <code>false</code> if no module has the focus
      */
     boolean isJpaInstallationPossible();
-
-    /**
-     * Checks for the existence the META-INF/persistence.xml
-     * 
-     * @return true if the META-INF/persistence.xml exists, otherwise false
-     */
-    boolean isPersistentClassAvailable();
 
     /**
      * Creates a new JPA embeddable class.
@@ -86,4 +76,13 @@ public interface JpaOperations extends Feature {
      */
     void newIdentifier(JavaType identifierType, String identifierField,
             String identifierColumn);
+    
+    /**
+     * Check if project has Spring Data dependency installed
+     * 
+     * @return
+     */
+    boolean hasSpringDataDependency();
+    
+    SortedSet<String> getDatabaseProperties(String profile);
 }

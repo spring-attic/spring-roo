@@ -8,28 +8,18 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -49,22 +39,15 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.Property;
-import org.springframework.roo.project.Repository;
-import org.springframework.roo.project.Resource;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -84,27 +67,6 @@ public class JpaOperationsImpl implements JpaOperations {
 	// ------------ OSGi component attributes ----------------
    	private BundleContext context;
    	
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
-    }
-
-
-    static class LinkedProperties extends Properties {
-        private static final long serialVersionUID = -8828266911075836165L;
-        private final Set<Object> keys = new LinkedHashSet<Object>();
-
-        @Override
-        public Enumeration<Object> keys() {
-            return Collections.<Object> enumeration(keys);
-        }
-
-        @Override
-        public Object put(final Object key, final Object value) {
-            keys.add(key);
-            return super.put(key, value);
-        }
-    }
-
     private static final String DATASOURCE_PREFIX = "spring.datasource";
     private static final String DATABASE_DRIVER = "driver-class-name";
     private static final String DATABASE_PASSWORD = "password";
@@ -119,7 +81,12 @@ public class JpaOperationsImpl implements JpaOperations {
     private TypeLocationService typeLocationService;
     private TypeManagementService typeManagementService;
     private ApplicationConfigService applicationConfigService;
+    
+    protected void activate(final ComponentContext context) {
+        this.context = context.getBundleContext();
+    }
 
+    @Override
     public void configureJpa(final OrmProvider ormProvider,
             final JdbcDatabase jdbcDatabase, final String jndi,
             final String hostName, final String databaseName,
@@ -144,18 +111,7 @@ public class JpaOperationsImpl implements JpaOperations {
         final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
         
         // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
-        updatePomProperties(configuration, ormProvider, jdbcDatabase,
-                moduleName);
         updateDependencies(configuration, ormProvider, jdbcDatabase,
-                databaseXPath, providersXPath, moduleName);
-        updateRepositories(configuration, ormProvider, jdbcDatabase, moduleName);
-        updatePluginRepositories(configuration, ormProvider, jdbcDatabase,
-                moduleName);
-        updateFilters(configuration, ormProvider, jdbcDatabase, databaseXPath,
-                providersXPath, moduleName);
-        updateResources(configuration, ormProvider, jdbcDatabase,
-                databaseXPath, providersXPath, moduleName);
-        updateBuildPlugins(configuration, ormProvider, jdbcDatabase,
                 databaseXPath, providersXPath, moduleName);
         
         // Update Spring Config File with spring.datasource.* domain properties
@@ -164,389 +120,31 @@ public class JpaOperationsImpl implements JpaOperations {
         
     }
     
-
-    private Element createPropertyElement(final String name,
-            final String value, final Document document) {
-        final Element property = document.createElement("property");
-        property.setAttribute("name", name);
-        property.setAttribute("value", value);
-        return property;
-    }
-
-    private Element createRefElement(final String name, final String value,
-            final Document document) {
-        final Element property = document.createElement("property");
-        property.setAttribute("name", name);
-        property.setAttribute("ref", value);
-        return property;
-    }
-
-    private String getConnectionString(final JdbcDatabase jdbcDatabase,
-            String hostName, final String databaseName, final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        String connectionString = jdbcDatabase.getConnectionString();
-        if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
-            connectionString = connectionString.replace(
-                    "TO_BE_CHANGED_BY_ADDON", StringUtils
-                            .isNotBlank(databaseName) ? databaseName
-                            : projectOperations.getProjectName(moduleName));
-        }
-        else {
-            if (StringUtils.isNotBlank(databaseName)) {
-                // Oracle uses a different connection URL - see ROO-1203
-                final String dbDelimiter = jdbcDatabase == JdbcDatabase.ORACLE ? ":"
-                        : "/";
-                connectionString += dbDelimiter + databaseName;
-            }
-        }
-        if (StringUtils.isBlank(hostName)) {
-            hostName = "localhost";
-        }
-        return connectionString.replace("HOST_NAME", hostName);
-    }
-
-    public SortedSet<String> getDatabaseProperties(String profile) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        if (hasDatabaseProperties()) {
-            return getApplicationConfigService().getPropertyKeys(DATASOURCE_PREFIX, true, profile);
-        }
-        return getPropertiesFromDataNucleusConfiguration();
-    }
-
-    private String getDbXPath(final List<JdbcDatabase> databases) {
-        final StringBuilder builder = new StringBuilder(
-                "/configuration/databases/database[");
-        for (int i = 0; i < databases.size(); i++) {
-            if (i > 0) {
-                builder.append(" or ");
-            }
-            builder.append("@id = '");
-            builder.append(databases.get(i).getKey());
-            builder.append("'");
-        }
-        builder.append("]");
-        return builder.toString();
-    }
-
-    private List<Dependency> getDependencies(final String xPathExpression,
-            final Element configuration, final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final List<Dependency> dependencies = new ArrayList<Dependency>();
-        for (final Element dependencyElement : XmlUtils.findElements(
-                xPathExpression + "/dependencies/dependency", configuration)) {
-            final Dependency dependency = new Dependency(dependencyElement);
-            if (dependency.getGroupId().equals("com.google.appengine")
-                    && dependency.getArtifactId().equals(
-                            "appengine-api-1.0-sdk")
-                    && projectOperations
-                            .isFeatureInstalledInFocusedModule(FeatureNames.GWT)) {
-                continue;
-            }
-            dependencies.add(dependency);
-        }
-        return dependencies;
-    }
-
-    private List<Filter> getFilters(final String xPathExpression,
-            final Element configuration) {
-        final List<Filter> filters = new ArrayList<Filter>();
-        for (final Element filterElement : XmlUtils.findElements(
-                xPathExpression + "/filters/filter", configuration)) {
-            filters.add(new Filter(filterElement));
-        }
-        return filters;
-    }
-
-    public String getName() {
-        return FeatureNames.JPA;
-    }
-
-    private List<Plugin> getPlugins(final String xPathExpression,
-            final Element configuration) {
-        final List<Plugin> buildPlugins = new ArrayList<Plugin>();
-        for (final Element pluginElement : XmlUtils.findElements(
-                xPathExpression + "/plugins/plugin", configuration)) {
-            buildPlugins.add(new Plugin(pluginElement));
-        }
-        return buildPlugins;
-    }
-
-    private String getProjectName(final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        return projectOperations.getProjectName(moduleName);
-    }
-
-    private SortedSet<String> getPropertiesFromDataNucleusConfiguration() {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-        /*final String persistenceXmlPath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);*/
-    	final String persistenceXmlPath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_RESOURCES, "");
-        if (!fileManager.exists(persistenceXmlPath)) {
-            throw new IllegalStateException("Failed to find "
-                    + persistenceXmlPath);
-        }
-
-        final Document document = XmlUtils.readXml(fileManager
-                .getInputStream(persistenceXmlPath));
-        final Element root = document.getDocumentElement();
-
-        final List<Element> propertyElements = XmlUtils.findElements(
-                "/persistence/persistence-unit/properties/property", root);
-        Validate.notEmpty(propertyElements,
-                "Failed to find property elements in %s", persistenceXmlPath);
-        final SortedSet<String> properties = new TreeSet<String>();
-
-        for (final Element propertyElement : propertyElements) {
-            final String key = propertyElement.getAttribute("name");
-            final String value = propertyElement.getAttribute("value");
-            if ("datanucleus.ConnectionDriverName".equals(key)) {
-                properties.add("datanucleus.ConnectionDriverName = " + value);
-            }
-            if ("datanucleus.ConnectionURL".equals(key)) {
-                properties.add("datanucleus.ConnectionURL = " + value);
-            }
-            if ("datanucleus.ConnectionUserName".equals(key)) {
-                properties.add("datanucleus.ConnectionUserName = " + value);
-            }
-            if ("datanucleus.ConnectionPassword".equals(key)) {
-                properties.add("datanucleus.ConnectionPassword = " + value);
-            }
-
-            if (properties.size() == 4) {
-                // All required properties have been found so ignore rest of
-                // elements
-                break;
-            }
-        }
-        return properties;
-    }
-
-    private String getProviderXPath(final List<OrmProvider> ormProviders) {
-        final StringBuilder builder = new StringBuilder(
-                "/configuration/ormProviders/provider[");
-        for (int i = 0; i < ormProviders.size(); i++) {
-            if (i > 0) {
-                builder.append(" or ");
-            }
-            builder.append("@id = '");
-            builder.append(ormProviders.get(i).name());
-            builder.append("'");
-        }
-        builder.append("]");
-        return builder.toString();
-    }
-
-    private List<Resource> getResources(final String xPathExpression,
-            final Element configuration) {
-        final List<Resource> resources = new ArrayList<Resource>();
-        for (final Element resourceElement : XmlUtils.findElements(
-                xPathExpression + "/resources/resource", configuration)) {
-            resources.add(new Resource(resourceElement));
-        }
-        return resources;
-    }
-
-    private List<JdbcDatabase> getUnwantedDatabases(
-            final JdbcDatabase jdbcDatabase) {
-        final List<JdbcDatabase> unwantedDatabases = new ArrayList<JdbcDatabase>();
-        for (final JdbcDatabase database : JdbcDatabase.values()) {
-            if (!database.getKey().equals(jdbcDatabase.getKey())
-                    && !database.getDriverClassName().equals(
-                            jdbcDatabase.getDriverClassName())) {
-                unwantedDatabases.add(database);
-            }
-        }
-        return unwantedDatabases;
-    }
-
-    private List<OrmProvider> getUnwantedOrmProviders(
-            final OrmProvider ormProvider) {
-        final List<OrmProvider> unwantedOrmProviders = new LinkedList<OrmProvider>(
-                Arrays.asList(OrmProvider.values()));
-        unwantedOrmProviders.remove(ormProvider);
-        return unwantedOrmProviders;
-    }
-
-    public boolean hasDatabaseProperties() {
-        SortedSet<String> databaseProperties = getApplicationConfigService()
-                .getPropertyKeys(DATASOURCE_PREFIX, false, null);
-    	
-        return !databaseProperties.isEmpty();
-    }
-
-    public boolean isInstalledInModule(final String moduleName) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final LogicalPath resourcesPath = LogicalPath.getInstance(
-                Path.SRC_MAIN_RESOURCES, moduleName);
-        return isJpaInstallationPossible();
-    }
-
+    @Override
     public boolean isJpaInstallationPossible() {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
+        
+        if(projectOperations == null){
+            projectOperations = getProjectOperations();
+        }
+        Validate.notNull(projectOperations, "ProjectOperations is required");
+        
         return projectOperations.isFocusedProjectAvailable();
     }
-
-    public boolean isPersistentClassAvailable() {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        return isInstalledInModule(projectOperations.getFocusedModuleName());
-    }
-
-    private void manageGaeBuildCommand(final boolean addGaeSettingsToPlugin,
-            final Document document, final Collection<String> changes) {
-        final Element root = document.getDocumentElement();
-        final Element additionalBuildcommandsElement = XmlUtils
-                .findFirstElement(
-                        "/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands",
-                        root);
-        Validate.notNull(additionalBuildcommandsElement,
-                "additionalBuildCommands element of the maven-eclipse-plugin required");
-        final String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
-        Element gaeBuildCommandElement = XmlUtils.findFirstElement(
-                "buildCommand[name = '" + gaeBuildCommandName + "']",
-                additionalBuildcommandsElement);
-        if (addGaeSettingsToPlugin && gaeBuildCommandElement == null) {
-            final Element nameElement = document.createElement("name");
-            nameElement.setTextContent(gaeBuildCommandName);
-            gaeBuildCommandElement = document.createElement("buildCommand");
-            gaeBuildCommandElement.appendChild(nameElement);
-            additionalBuildcommandsElement.appendChild(gaeBuildCommandElement);
-            changes.add("added GAE buildCommand to maven-eclipse-plugin");
-        }
-        else if (!addGaeSettingsToPlugin && gaeBuildCommandElement != null) {
-            additionalBuildcommandsElement.removeChild(gaeBuildCommandElement);
-            changes.add("removed GAE buildCommand from maven-eclipse-plugin");
-        }
-    }
-
-    private void manageGaeProjectNature(final boolean addGaeSettingsToPlugin,
-            final Document document, final Collection<String> changes) {
-        final Element root = document.getDocumentElement();
-        final Element additionalProjectnaturesElement = XmlUtils
-                .findFirstElement(
-                        "/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalProjectnatures",
-                        root);
-        Validate.notNull(additionalProjectnaturesElement,
-                "additionalProjectnatures element of the maven-eclipse-plugin required");
-        final String gaeProjectnatureName = "com.google.appengine.eclipse.core.gaeNature";
-        Element gaeProjectnatureElement = XmlUtils.findFirstElement(
-                "projectnature[text() = '" + gaeProjectnatureName + "']",
-                additionalProjectnaturesElement);
-        if (addGaeSettingsToPlugin && gaeProjectnatureElement == null) {
-            gaeProjectnatureElement = new XmlElementBuilder("projectnature",
-                    document).setText(gaeProjectnatureName).build();
-            additionalProjectnaturesElement
-                    .appendChild(gaeProjectnatureElement);
-            changes.add("added GAE projectnature to maven-eclipse-plugin");
-        }
-        else if (!addGaeSettingsToPlugin && gaeProjectnatureElement != null) {
-            additionalProjectnaturesElement
-                    .removeChild(gaeProjectnatureElement);
-            changes.add("removed GAE projectnature from maven-eclipse-plugin");
-        }
-    }
-
-    private void manageGaeXml(final OrmProvider ormProvider,
-            final JdbcDatabase jdbcDatabase, final String applicationId,
-            final String moduleName) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-        final String appenginePath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
-        final boolean appenginePathExists = fileManager.exists(appenginePath);
-
-        final String loggingPropertiesPath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_WEBAPP, "WEB-INF/logging.properties");
-        final boolean loggingPropertiesPathExists = fileManager
-                .exists(loggingPropertiesPath);
-
-        if (appenginePathExists) {
-            fileManager.delete(appenginePath,
-                    "database is " + jdbcDatabase.name());
-        }
-        if (loggingPropertiesPathExists) {
-            fileManager.delete(loggingPropertiesPath, "database is "
-                    + jdbcDatabase.name());
-        }
-    }
-
+    
+    @Override
     public void newEmbeddableClass(final JavaType name,
             final boolean serializable) {
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-    	if(typeManagementService == null){
-    		typeManagementService = getTypeManagementService();
-    	}
-    	Validate.notNull(typeManagementService, "TypeManagementService is required");
-    	
+        
+        if(pathResolver == null){
+            pathResolver = getPathResolver();
+        }
+        Validate.notNull(pathResolver, "PathResolver is required");
+        
+        if(typeManagementService == null){
+            typeManagementService = getTypeManagementService();
+        }
+        Validate.notNull(typeManagementService, "TypeManagementService is required");
+        
         Validate.notNull(name, "Embeddable name required");
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
@@ -570,26 +168,27 @@ public class JpaOperationsImpl implements JpaOperations {
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
-
+    
+    @Override
     public void newEntity(final JavaType name, final boolean createAbstract,
             final JavaType superclass, final JavaType implementsType,
             final List<AnnotationMetadataBuilder> annotations) {
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-    	if(typeLocationService == null){
-    		typeLocationService = getTypeLocationService();
-    	}
-    	Validate.notNull(typeLocationService, "TypeLocationService is required");
-    	
-    	if(typeManagementService == null){
-    		typeManagementService = getTypeManagementService();
-    	}
-    	Validate.notNull(typeManagementService, "TypeManagementService is required");
-    	
+        
+        if(pathResolver == null){
+            pathResolver = getPathResolver();
+        }
+        Validate.notNull(pathResolver, "PathResolver is required");
+        
+        if(typeLocationService == null){
+            typeLocationService = getTypeLocationService();
+        }
+        Validate.notNull(typeLocationService, "TypeLocationService is required");
+        
+        if(typeManagementService == null){
+            typeManagementService = getTypeManagementService();
+        }
+        Validate.notNull(typeManagementService, "TypeManagementService is required");
+        
         Validate.notNull(name, "Entity name required");
         Validate.isTrue(
                 !JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
@@ -636,19 +235,20 @@ public class JpaOperationsImpl implements JpaOperations {
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
 
+    @Override
     public void newIdentifier(final JavaType identifierType,
             final String identifierField, final String identifierColumn) {
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-    	if(typeManagementService == null){
-    		typeManagementService = getTypeManagementService();
-    	}
-    	Validate.notNull(typeManagementService, "TypeManagementService is required");
-    	
+        
+        if(pathResolver == null){
+            pathResolver = getPathResolver();
+        }
+        Validate.notNull(pathResolver, "PathResolver is required");
+        
+        if(typeManagementService == null){
+            typeManagementService = getTypeManagementService();
+        }
+        Validate.notNull(typeManagementService, "TypeManagementService is required");
+        
         Validate.notNull(identifierType, "Identifier type required");
 
         final String declaredByMetadataId = PhysicalTypeIdentifier
@@ -665,71 +265,118 @@ public class JpaOperationsImpl implements JpaOperations {
 
         typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
+    
 
-    private void updateBuildPlugins(final Element configuration,
-            final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
-            final String databaseXPath, final String providersXPath,
-            final String moduleName) {
+    @Override
+    public SortedSet<String> getDatabaseProperties(String profile) {
+        
+        if(projectOperations == null){
+            projectOperations = getProjectOperations();
+        }
+        Validate.notNull(projectOperations, "ProjectOperations is required");
+        
+        return getApplicationConfigService().getPropertyKeys(DATASOURCE_PREFIX, true, profile);
+    }
+    
+    @Override
+    public boolean hasSpringDataDependency() {
+        Pom pom = projectOperations.getFocusedModule();
+        Dependency springDataDependency = new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", "");
+        for(Dependency dependency : pom.getDependencies()){
+            if(dependency.equals(springDataDependency)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+
+    private String getConnectionString(final JdbcDatabase jdbcDatabase,
+            String hostName, final String databaseName, final String moduleName) {
     	
     	if(projectOperations == null){
     		projectOperations = getProjectOperations();
     	}
     	Validate.notNull(projectOperations, "ProjectOperations is required");
     	
-        // Identify the required plugins
-        final List<Plugin> requiredPlugins = new ArrayList<Plugin>();
-
-        final List<Element> databasePlugins = XmlUtils.findElements(
-                jdbcDatabase.getConfigPrefix() + "/plugins/plugin",
-                configuration);
-        for (final Element pluginElement : databasePlugins) {
-            requiredPlugins.add(new Plugin(pluginElement));
+        String connectionString = jdbcDatabase.getConnectionString();
+        if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
+            connectionString = connectionString.replace(
+                    "TO_BE_CHANGED_BY_ADDON", StringUtils
+                            .isNotBlank(databaseName) ? databaseName
+                            : projectOperations.getProjectName(moduleName));
         }
-
-        final List<Element> ormPlugins = XmlUtils.findElements(
-                ormProvider.getConfigPrefix() + "/plugins/plugin",
-                configuration);
-        for (final Element pluginElement : ormPlugins) {
-            requiredPlugins.add(new Plugin(pluginElement));
+        else {
+            if (StringUtils.isNotBlank(databaseName)) {
+                // Oracle uses a different connection URL - see ROO-1203
+                final String dbDelimiter = jdbcDatabase == JdbcDatabase.ORACLE ? ":"
+                        : "/";
+                connectionString += dbDelimiter + databaseName;
+            }
         }
-
-        // Identify any redundant plugins
-        final List<Plugin> redundantPlugins = new ArrayList<Plugin>();
-        redundantPlugins.addAll(getPlugins(databaseXPath, configuration));
-        redundantPlugins.addAll(getPlugins(providersXPath, configuration));
-        // Don't remove any that are still required
-        redundantPlugins.removeAll(requiredPlugins);
-
-        // Update the POM
-        projectOperations.addBuildPlugins(moduleName, requiredPlugins);
-        projectOperations.removeBuildPlugins(moduleName, redundantPlugins);
-
+        if (StringUtils.isBlank(hostName)) {
+            hostName = "localhost";
+        }
+        return connectionString.replace("HOST_NAME", hostName);
     }
 
-    private void updateDatabaseDotComConfigProperties(
-            final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
-            final String hostName, final String userName,
-            final String password, final String persistenceUnit,
-            final String moduleName) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-        final String configPath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_RESOURCES, persistenceUnit + ".properties");
-        final boolean configExists = fileManager.exists(configPath);
-
-        if (configExists) {
-            fileManager.delete(configPath,
-                    "database is " + jdbcDatabase.name());
+    private String getDbXPath(final List<JdbcDatabase> databases) {
+        final StringBuilder builder = new StringBuilder(
+                "/configuration/databases/database[");
+        for (int i = 0; i < databases.size(); i++) {
+            if (i > 0) {
+                builder.append(" or ");
+            }
+            builder.append("@id = '");
+            builder.append(databases.get(i).getKey());
+            builder.append("'");
         }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    private String getProviderXPath(final List<OrmProvider> ormProviders) {
+        final StringBuilder builder = new StringBuilder(
+                "/configuration/ormProviders/provider[");
+        for (int i = 0; i < ormProviders.size(); i++) {
+            if (i > 0) {
+                builder.append(" or ");
+            }
+            builder.append("@id = '");
+            builder.append(ormProviders.get(i).name());
+            builder.append("'");
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+
+    private List<JdbcDatabase> getUnwantedDatabases(
+            final JdbcDatabase jdbcDatabase) {
+        final List<JdbcDatabase> unwantedDatabases = new ArrayList<JdbcDatabase>();
+        for (final JdbcDatabase database : JdbcDatabase.values()) {
+            if (!database.getKey().equals(jdbcDatabase.getKey())
+                    && !database.getDriverClassName().equals(
+                            jdbcDatabase.getDriverClassName())) {
+                unwantedDatabases.add(database);
+            }
+        }
+        return unwantedDatabases;
+    }
+
+    private List<OrmProvider> getUnwantedOrmProviders(
+            final OrmProvider ormProvider) {
+        final List<OrmProvider> unwantedOrmProviders = new LinkedList<OrmProvider>(
+                Arrays.asList(OrmProvider.values()));
+        unwantedOrmProviders.remove(ormProvider);
+        return unwantedOrmProviders;
+    }
+
+    public boolean hasDatabaseProperties() {
+        SortedSet<String> databaseProperties = getApplicationConfigService()
+                .getPropertyKeys(DATASOURCE_PREFIX, false, null);
+    	
+        return !databaseProperties.isEmpty();
     }
 
     private void updateApplicationProperties(final OrmProvider ormProvider,
@@ -809,54 +456,6 @@ public class JpaOperationsImpl implements JpaOperations {
         }
     }
 
-    private void updateDataNucleusPlugin(final boolean addToPlugin) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-    	if(pathResolver == null){
-    		pathResolver = getPathResolver();
-    	}
-    	Validate.notNull(pathResolver, "PathResolver is required");
-    	
-        final String pom = pathResolver
-                .getFocusedIdentifier(Path.ROOT, POM_XML);
-        final Document document = XmlUtils.readXml(fileManager
-                .getInputStream(pom));
-        final Element root = document.getDocumentElement();
-
-        // Manage mappingExcludes
-        final Element configurationElement = XmlUtils
-                .findFirstElement(
-                        "/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration",
-                        root);
-        if (configurationElement == null) {
-            return;
-        }
-
-        String descriptionOfChange = "";
-        Element mappingExcludesElement = XmlUtils.findFirstElement(
-                "mappingExcludes", configurationElement);
-        if (addToPlugin && mappingExcludesElement == null) {
-            mappingExcludesElement = new XmlElementBuilder("mappingExcludes",
-                    document)
-                    .setText(
-                            "**/CustomRequestFactoryServlet.class, **/GaeAuthFilter.class")
-                    .build();
-            configurationElement.appendChild(mappingExcludesElement);
-            descriptionOfChange = "added GAEAuthFilter mappingExcludes to maven-datanuclueus-plugin";
-        }
-        else if (!addToPlugin && mappingExcludesElement != null) {
-            configurationElement.removeChild(mappingExcludesElement);
-            descriptionOfChange = "removed GAEAuthFilter mappingExcludes from maven-datanuclueus-plugin";
-        }
-
-        fileManager.createOrUpdateTextFileIfRequired(pom,
-                XmlUtils.nodeToString(document), descriptionOfChange, false);
-    }
-
     /**
      * Updates the POM with the dependencies required for the given database and
      * ORM provider, removing any other persistence-related dependencies
@@ -921,200 +520,30 @@ public class JpaOperationsImpl implements JpaOperations {
         projectOperations.addDependencies(moduleName, requiredDependencies);
         projectOperations.removeDependencies(moduleName, redundantDependencies);
     }
-
-    private void updateFilters(final Element configuration,
-            final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
-            final String databaseXPath, final String providersXPath,
-            final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        // Remove redundant filters
-        final List<Filter> redundantFilters = new ArrayList<Filter>();
-        redundantFilters.addAll(getFilters(databaseXPath, configuration));
-        redundantFilters.addAll(getFilters(providersXPath, configuration));
-        for (final Filter filter : redundantFilters) {
-            projectOperations.removeFilter(moduleName, filter);
-        }
-
-        // Add required filters
-        final List<Filter> filters = new ArrayList<Filter>();
-
-        final List<Element> databaseFilters = XmlUtils.findElements(
-                jdbcDatabase.getConfigPrefix() + "/filters/filter",
-                configuration);
-        for (final Element filterElement : databaseFilters) {
-            filters.add(new Filter(filterElement));
-        }
-
-        final List<Element> ormFilters = XmlUtils.findElements(
-                ormProvider.getConfigPrefix() + "/filters/filter",
-                configuration);
-        for (final Element filterElement : ormFilters) {
-            filters.add(new Filter(filterElement));
-        }
-
-        for (final Filter filter : filters) {
-            projectOperations.addFilter(moduleName, filter);
-        }
-    }
-
-    private void updatePluginRepositories(final Element configuration,
-            final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
-            final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final List<Repository> pluginRepositories = new ArrayList<Repository>();
-
-        final List<Element> databasePluginRepositories = XmlUtils
-                .findElements(jdbcDatabase.getConfigPrefix()
-                        + "/pluginRepositories/pluginRepository", configuration);
-        for (final Element pluginRepositoryElement : databasePluginRepositories) {
-            pluginRepositories.add(new Repository(pluginRepositoryElement));
-        }
-
-        final List<Element> ormPluginRepositories = XmlUtils
-                .findElements(ormProvider.getConfigPrefix()
-                        + "/pluginRepositories/pluginRepository", configuration);
-        for (final Element pluginRepositoryElement : ormPluginRepositories) {
-            pluginRepositories.add(new Repository(pluginRepositoryElement));
-        }
-
-        // Add all new plugin repositories to pom.xml
-        projectOperations.addPluginRepositories(moduleName, pluginRepositories);
-    }
-
-    private void updatePomProperties(final Element configuration,
-            final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
-            final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final List<Element> databaseProperties = XmlUtils
-                .findElements(jdbcDatabase.getConfigPrefix() + "/properties/*",
-                        configuration);
-        for (final Element property : databaseProperties) {
-            projectOperations.addProperty(moduleName, new Property(property));
-        }
-
-        final List<Element> providerProperties = XmlUtils.findElements(
-                ormProvider.getConfigPrefix() + "/properties/*", configuration);
-        for (final Element property : providerProperties) {
-            projectOperations.addProperty(moduleName, new Property(property));
-        }
-    }
-
-    private void updateRepositories(final Element configuration,
-            final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
-            final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final List<Repository> repositories = new ArrayList<Repository>();
-
-        final List<Element> databaseRepositories = XmlUtils.findElements(
-                jdbcDatabase.getConfigPrefix() + "/repositories/repository",
-                configuration);
-        for (final Element repositoryElement : databaseRepositories) {
-            repositories.add(new Repository(repositoryElement));
-        }
-
-        final List<Element> ormRepositories = XmlUtils.findElements(
-                ormProvider.getConfigPrefix() + "/repositories/repository",
-                configuration);
-        for (final Element repositoryElement : ormRepositories) {
-            repositories.add(new Repository(repositoryElement));
-        }
-
-        final List<Element> jpaRepositories = XmlUtils
-                .findElements(
-                        "/configuration/persistence/provider[@id='JPA']/repositories/repository",
-                        configuration);
-        for (final Element repositoryElement : jpaRepositories) {
-            repositories.add(new Repository(repositoryElement));
-        }
-
-        // Add all new repositories to pom.xml
-        projectOperations.addRepositories(moduleName, repositories);
-    }
-
-    private void updateResources(final Element configuration,
-            final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
-            final String databaseXPath, final String providersXPath,
-            final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        // Remove redundant resources
-        final List<Resource> redundantResources = new ArrayList<Resource>();
-        redundantResources.addAll(getResources(databaseXPath, configuration));
-        redundantResources.addAll(getResources(providersXPath, configuration));
-        for (final Resource resource : redundantResources) {
-            projectOperations.removeResource(moduleName, resource);
-        }
-
-        // Add required resources
-        final List<Resource> resources = new ArrayList<Resource>();
-
-        final List<Element> databaseResources = XmlUtils.findElements(
-                jdbcDatabase.getConfigPrefix() + "/resources/resource",
-                configuration);
-        for (final Element resourceElement : databaseResources) {
-            resources.add(new Resource(resourceElement));
-        }
-
-        final List<Element> ormResources = XmlUtils.findElements(
-                ormProvider.getConfigPrefix() + "/resources/resource",
-                configuration);
-        for (final Element resourceElement : ormResources) {
-            resources.add(new Resource(resourceElement));
-        }
-
-        for (final Resource resource : resources) {
-            projectOperations.addResource(moduleName, resource);
-        }
-    }
-
-    private void writeProperties(final String path, final boolean exists,
-            final Properties props) {
-    	
-    	if(fileManager == null){
-    		fileManager = getFileManager();
-    	}
-    	Validate.notNull(fileManager, "FileManager is required");
-    	
-        OutputStream outputStream = null;
-        try {
-            final MutableFile mutableFile = exists ? fileManager
-                    .updateFile(path) : fileManager.createFile(path);
-            outputStream = mutableFile == null ? new FileOutputStream(path)
-                    : mutableFile.getOutputStream();
-            props.store(outputStream, "Updated at " + new Date());
-        }
-        catch (final IOException e) {
-            throw new IllegalStateException(e);
-        }
-        finally {
-            IOUtils.closeQuietly(outputStream);
-        }
-    }
     
+    private List<Dependency> getDependencies(final String xPathExpression,
+            final Element configuration, final String moduleName) {
+        
+        if(projectOperations == null){
+            projectOperations = getProjectOperations();
+        }
+        Validate.notNull(projectOperations, "ProjectOperations is required");
+        
+        final List<Dependency> dependencies = new ArrayList<Dependency>();
+        for (final Element dependencyElement : XmlUtils.findElements(
+                xPathExpression + "/dependencies/dependency", configuration)) {
+            final Dependency dependency = new Dependency(dependencyElement);
+            if (dependency.getGroupId().equals("com.google.appengine")
+                    && dependency.getArtifactId().equals(
+                            "appengine-api-1.0-sdk")
+                    && projectOperations
+                            .isFeatureInstalledInFocusedModule(FeatureNames.GWT)) {
+                continue;
+            }
+            dependencies.add(dependency);
+        }
+        return dependencies;
+    }
     
     public FileManager getFileManager(){
     	// Get all Services implement FileManager interface
@@ -1222,4 +651,36 @@ public class JpaOperationsImpl implements JpaOperations {
 			return null;
 		}
     }
+    
+    /**
+     * FEATURE Methods
+     */
+    
+    public boolean isInstalledInModule(final String moduleName) {
+        
+        if(fileManager == null){
+            fileManager = getFileManager();
+        }
+        Validate.notNull(fileManager, "FileManager is required");
+        
+        if(pathResolver == null){
+            pathResolver = getPathResolver();
+        }
+        Validate.notNull(pathResolver, "PathResolver is required");
+        
+        if(projectOperations == null){
+            projectOperations = getProjectOperations();
+        }
+        Validate.notNull(projectOperations, "ProjectOperations is required");
+        
+        final LogicalPath resourcesPath = LogicalPath.getInstance(
+                Path.SRC_MAIN_RESOURCES, moduleName);
+        return isJpaInstallationPossible();
+    }
+
+    
+    public String getName() {
+        return FeatureNames.JPA;
+    }
+
 }

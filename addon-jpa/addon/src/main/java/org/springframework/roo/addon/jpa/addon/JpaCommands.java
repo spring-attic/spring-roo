@@ -65,6 +65,16 @@ public class JpaCommands implements CommandMarker {
     @Reference private PropFileOperations propFileOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private TypeLocationService typeLocationService;
+    
+    protected void activate(final ComponentContext context) {
+        staticFieldConverter.add(JdbcDatabase.class);
+        staticFieldConverter.add(OrmProvider.class);
+    }
+
+    protected void deactivate(final ComponentContext context) {
+        staticFieldConverter.remove(JdbcDatabase.class);
+        staticFieldConverter.remove(OrmProvider.class);
+    }
 
     @CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
     public void createEmbeddableClass(
@@ -77,38 +87,6 @@ public class JpaCommands implements CommandMarker {
         }
 
         jpaOperations.newEmbeddableClass(name, serializable);
-    }
-
-    @CliCommand(value = "database properties list", help = "Shows database configuration details")
-    public SortedSet<String> databaseProperties(ShellContext shellContext) {
-        return jpaOperations.getDatabaseProperties(shellContext.getProfile());
-    }
-
-    @CliCommand(value = "database properties remove", help = "Removes a particular database property")
-    public void databaseRemove(@CliOption(key = { "",
-            "key" }, mandatory = true, help = "The property key that should be removed") final String key) {
-
-        propFileOperations.removeProperty(
-                Path.SPRING_CONFIG_ROOT.getModulePathId(
-                        projectOperations.getFocusedModuleName()),
-                "database.properties", key);
-    }
-
-    @CliCommand(value = "database properties set", help = "Changes a particular database property")
-    public void databaseSet(
-            @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
-            @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value,
-            ShellContext shellContext) {
-
-        propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT
-                .getModulePathId(projectOperations.getFocusedModuleName()),
-                "database.properties", key, value, shellContext.isForce());
-    }
-
-    @CliAvailabilityIndicator({ "database properties list",
-            "database properties remove", "database properties set" })
-    public boolean hasDatabaseProperties() {
-        return isJpaSetupAvailable() && jpaOperations.hasDatabaseProperties();
     }
 
     @CliOptionVisibilityIndicator(command = "jpa setup", params = {
@@ -171,14 +149,14 @@ public class JpaCommands implements CommandMarker {
                 shellContext.getProfile(), shellContext.isForce());
     }
 
-    @CliAvailabilityIndicator({ "jpa setup", "persistence setup" })
+    @CliAvailabilityIndicator({ "jpa setup" })
     public boolean isJpaSetupAvailable() {
         return jpaOperations.isJpaInstallationPossible();
     }
 
     @CliAvailabilityIndicator({ "entity jpa", "embeddable" })
-    public boolean isPersistentClassAvailable() {
-        return jpaOperations.isPersistentClassAvailable();
+    public boolean isClassGenerationAvailable() {
+        return jpaOperations.hasSpringDataDependency();
     }
 
     @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
@@ -276,16 +254,6 @@ public class JpaCommands implements CommandMarker {
         if (testAutomatically) {
             integrationTestOperations.newIntegrationTest(name);
         }
-    }
-
-    protected void activate(final ComponentContext context) {
-        staticFieldConverter.add(JdbcDatabase.class);
-        staticFieldConverter.add(OrmProvider.class);
-    }
-
-    protected void deactivate(final ComponentContext context) {
-        staticFieldConverter.remove(JdbcDatabase.class);
-        staticFieldConverter.remove(OrmProvider.class);
     }
 
     /**
