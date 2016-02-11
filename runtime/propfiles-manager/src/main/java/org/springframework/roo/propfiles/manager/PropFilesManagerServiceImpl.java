@@ -5,17 +5,18 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -435,6 +436,9 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         }
 
         boolean saveNeeded = false;
+        boolean needForce = false;
+        List<String> overwriteProperties = new ArrayList<String>();
+        
         for (final Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
 
@@ -450,12 +454,32 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
                 props.setProperty(key, newValue);
                 saveNeeded = true;
             }else if(!existingValue.equals(newValue) && !force){
-                // ROO-3702: Show error when tries to update some property that
+                // ROO-3702: Show error when tries to update some properties that
                 // already exists and --force global param is false. 
-                String msg = String.format("WARNING: Property '%s' already exists. "
-                        + "Use --force param to overwrite it.", key);
-                throw new RuntimeException(msg);
+                needForce = true;
+                overwriteProperties.add(key);
             }
+        }
+        
+        // ROO-3702: Show error when tries to update some properties that
+        // already exists and --force global param is false. 
+        if (needForce) {
+            String propertyCount = overwriteProperties.size() > 1 ? "Properties"
+                    : "Property";
+
+            String propertyLists = "";
+            for (String property : overwriteProperties) {
+                propertyLists = propertyLists.concat("'").concat(property)
+                        .concat("', ");
+            }
+
+            String msg = String.format(
+                    "WARNING: %s %s already exists on '%s'. "
+                            + "Use --force parameter to overwrite it.",
+                    propertyCount,
+                    propertyLists.substring(0, propertyLists.length() - 2),
+                    propertyFilename);
+            throw new RuntimeException(msg);
         }
 
         if (saveNeeded) {
