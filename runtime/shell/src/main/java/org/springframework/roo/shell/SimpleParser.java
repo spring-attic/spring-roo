@@ -1104,7 +1104,7 @@ public class SimpleParser implements Parser {
         final Set<String> cliOptionKeySet = new LinkedHashSet<String>();
         for (final CliOption cliOption : cliOptions) {
             for (final String key : cliOption.key()) {
-                cliOptionKeySet.add(key.toLowerCase());
+                cliOptionKeySet.add(key);
             }
         }
 
@@ -1112,9 +1112,9 @@ public class SimpleParser implements Parser {
         for (final String suppliedOption : options.keySet()) {
             // ROO-3697: Check if current parameter is a global parameter.
             boolean isGlobalParameter = globalParameters
-                    .contains(suppliedOption.toLowerCase());
+                    .contains(suppliedOption);
 
-            if (!cliOptionKeySet.contains(suppliedOption.toLowerCase())
+            if (!cliOptionKeySet.contains(suppliedOption)
                     && !isGlobalParameter) {
                 unavailableOptions.add(suppliedOption);
             }
