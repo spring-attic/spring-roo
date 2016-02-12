@@ -1,0 +1,23 @@
+
+#============================================================================
+#  TEST 16:  Execute previous tests in a existent project
+#----------------------------------------------------------------------------
+# Goal: Project settings file works if it is created in an existent project
+#
+project setup --topLevelPackage org.example
+script --file projectSettingsTest1.roo
+# 
+# Output:   Created ROOT/pom.xml
+#           Created SRC_MAIN_RESOURCES
+#           Created SRC_MAIN_JAVA/org/example
+#           Created SRC_MAIN_JAVA/org/example/ExampleApplication.java
+#           Created SRC_TEST_JAVA/org/example
+#           Created SRC_TEST_JAVA/org/example/ExampleApplicationTests.java
+#           OUTPUT OF EVERY TEST
+#           .....
+#
+# Result:   check result section for every test
+#============================================================================
+
+
+
