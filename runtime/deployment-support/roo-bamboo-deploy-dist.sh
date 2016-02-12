@@ -620,9 +620,10 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
         # Project Settings tests
         load_roo_build script projectsettingstest1.roo
-	      load_roo_build script projectsettingstest2.roo
+	    load_roo_build script projectsettingstest2.roo
 
-	# Temporally disabled
+	    # Temporally disabled
+	    
         #load_roo_build_and_test script vote.roo
         #tomcat_stop_start_get_stop http://localhost:8888/vote
 
@@ -632,9 +633,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
         #load_roo_build_and_test script wedding.roo
         #tomcat_stop_start_get_stop http://localhost:8888/wedding
 
-	#	load_roo_build_and_test script pizzashop.roo
+	    #load_roo_build_and_test script pizzashop.roo
         #tomcat_stop_start_get_stop http://localhost:8888/pizzashop
-	#	pizzashop_tests
+	    #pizzashop_tests
 
         # JSF was removed on Spring Roo 2.0
         #load_roo_build_and_test script bikeshop.roo
@@ -644,8 +645,8 @@ if [[ "$COMMAND" = "assembly" ]]; then
         #load_roo_build_and_test_multimodule script multimodule.roo
         #tomcat_stop_start_get_stop_multimodule ui/mvc http://localhost:8888/mvc
 
-        load_roo_build_and_test script embedding.roo
-        tomcat_stop_start_get_stop http://localhost:8888/embedding
+        #load_roo_build_and_test script embedding.roo
+        #tomcat_stop_start_get_stop http://localhost:8888/embedding
 
         log "Removing Roo distribution from test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER
