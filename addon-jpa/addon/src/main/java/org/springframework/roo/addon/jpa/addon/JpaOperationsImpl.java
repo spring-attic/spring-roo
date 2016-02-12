@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -393,11 +394,6 @@ public class JpaOperationsImpl implements JpaOperations {
             
             final String connectionString = getConnectionString(jdbcDatabase,
                     hostName, databaseName, moduleName);
-            if (jdbcDatabase.getKey().equals("HYPERSONIC")
-                    || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY
-                    || jdbcDatabase == JdbcDatabase.SYBASE) {
-                userName = StringUtils.defaultIfEmpty(userName, "sa");
-            }
 
             // Getting current properties
             final String driver = applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_DRIVER, profile);
@@ -405,15 +401,12 @@ public class JpaOperationsImpl implements JpaOperations {
             final String uname = applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
             final String pwd = applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
 
-            boolean hasChanged = driver == null
-                    || !driver.equals(jdbcDatabase.getDriverClassName());
-            hasChanged |= url == null || !url.equals(connectionString);
-            hasChanged |= uname == null
-                    || !uname.equals(StringUtils.stripToEmpty(userName));
-            hasChanged |= pwd == null
-                    || !pwd.equals(StringUtils.stripToEmpty(password));
+            boolean hasChanged = !jdbcDatabase.getDriverClassName().equals(driver);
+            hasChanged |= !connectionString.equals(url);
+            hasChanged |= !StringUtils.stripToEmpty(userName).equals(uname);
+            hasChanged |= !StringUtils.stripToEmpty(password).equals(pwd);
             if (!hasChanged) {
-                // No changes from existing database configuration so exit now
+                LOGGER.log(Level.INFO, "INFO: No changes are needed.");
                 return;
             }
             
@@ -423,9 +416,13 @@ public class JpaOperationsImpl implements JpaOperations {
             props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
             if(userName != null){
                 props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
+            }else if(applicationConfigService.existsSpringConfigFile()){
+                applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
             }
             if(password != null){
                 props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
+            }else if(applicationConfigService.existsSpringConfigFile()){
+                applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
             }
             
             applicationConfigService.addProperties(DATASOURCE_PREFIX, props, profile, force);
