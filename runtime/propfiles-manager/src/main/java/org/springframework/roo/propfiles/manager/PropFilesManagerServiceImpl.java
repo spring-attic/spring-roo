@@ -516,6 +516,9 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
                 propertyLists = propertyLists.concat("'").concat(key)
                         .concat(" = ").concat(value).concat("', ");
             }
+            
+        }else{
+            LOGGER.log(Level.INFO, "INFO: No changes are needed.");
         }
     }
 
