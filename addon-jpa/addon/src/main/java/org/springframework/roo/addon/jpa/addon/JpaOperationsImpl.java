@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -80,6 +81,8 @@ public class JpaOperationsImpl implements JpaOperations {
     private ProjectOperations projectOperations;
     private TypeLocationService typeLocationService;
     private TypeManagementService typeManagementService;
+    
+    @Reference
     private ApplicationConfigService applicationConfigService;
     
     protected void activate(final ComponentContext context) {
@@ -275,7 +278,7 @@ public class JpaOperationsImpl implements JpaOperations {
         }
         Validate.notNull(projectOperations, "ProjectOperations is required");
         
-        return getApplicationConfigService().getPropertyKeys(DATASOURCE_PREFIX, true, profile);
+        return applicationConfigService.getPropertyKeys(DATASOURCE_PREFIX, true, profile);
     }
     
     @Override
@@ -373,7 +376,7 @@ public class JpaOperationsImpl implements JpaOperations {
     }
 
     public boolean hasDatabaseProperties() {
-        SortedSet<String> databaseProperties = getApplicationConfigService()
+        SortedSet<String> databaseProperties = applicationConfigService
                 .getPropertyKeys(DATASOURCE_PREFIX, false, null);
     	
         return !databaseProperties.isEmpty();
@@ -397,10 +400,10 @@ public class JpaOperationsImpl implements JpaOperations {
             }
 
             // Getting current properties
-            final String driver = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, DATABASE_DRIVER);
-            final String url = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, DATABASE_URL);
-            final String uname = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, DATABASE_USERNAME);
-            final String pwd = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD);
+            final String driver = applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_DRIVER, profile);
+            final String url = applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_URL, profile);
+            final String uname = applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
+            final String pwd = applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
 
             boolean hasChanged = driver == null
                     || !driver.equals(jdbcDatabase.getDriverClassName());
@@ -425,14 +428,14 @@ public class JpaOperationsImpl implements JpaOperations {
                 props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
             }
             
-            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props, profile, force);
+            applicationConfigService.addProperties(DATASOURCE_PREFIX, props, profile, force);
 
             // Remove jndi property
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, JNDI_NAME, profile);
+            applicationConfigService.removeProperty(DATASOURCE_PREFIX, JNDI_NAME, profile);
             
         }else{
             
-            final String jndiProperty = getApplicationConfigService().getProperty(DATASOURCE_PREFIX, JNDI_NAME);
+            final String jndiProperty = applicationConfigService.getProperty(DATASOURCE_PREFIX, JNDI_NAME);
             
             boolean hasChanged = jndiProperty == null || 
                     !jndiProperty.equals(StringUtils.stripToEmpty(jndi));
@@ -445,13 +448,13 @@ public class JpaOperationsImpl implements JpaOperations {
             Map<String, String> props = new HashMap<String, String>();
             props.put(JNDI_NAME, jndi);
             
-            getApplicationConfigService().addProperties(DATASOURCE_PREFIX, props, profile, force);
+            applicationConfigService.addProperties(DATASOURCE_PREFIX, props, profile, force);
             
             // Remove old properties
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_URL, profile);
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_DRIVER, profile);
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
-            getApplicationConfigService().removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
+            applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_URL, profile);
+            applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_DRIVER, profile);
+            applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
+            applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
             
         }
     }
@@ -594,28 +597,6 @@ public class JpaOperationsImpl implements JpaOperations {
 			LOGGER.warning("Cannot load ProjectOperations on JpaOperationsImpl.");
 			return null;
 		}
-    }
-    
-    public ApplicationConfigService getApplicationConfigService(){
-        if(applicationConfigService == null){
-            // Get all Services implement ApplicationConfigService interface
-            try {
-                ServiceReference<?>[] references = this.context.getAllServiceReferences(ApplicationConfigService.class.getName(), null);
-                
-                for(ServiceReference<?> ref : references){
-                    applicationConfigService = (ApplicationConfigService) this.context.getService(ref);
-                }
-                
-                return null;
-                
-            } catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load ApplicationConfigService on JpaOperationsImpl.");
-                return null;
-            }
-        }else{
-            return applicationConfigService;
-        }
-
     }
     
     public TypeLocationService getTypeLocationService(){

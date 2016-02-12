@@ -28,7 +28,6 @@ import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 /**
  * Implementation of {@link MavenOperations}.
  * 
@@ -149,7 +148,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
         
     	// ROO-3687: Generates necessary Spring Boot artifacts
         createSpringBootApplicationClass(topLevelPackage, projectName);
-        createSpringBootApplicationPropertiesFile();
         createApplicationTestsClass(topLevelPackage, projectName);
     }
     
@@ -195,18 +193,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
         
     }
 
-    public void createSpringBootApplicationPropertiesFile() {
-        LogicalPath resourcesPath = Path.SRC_MAIN_RESOURCES
-                .getModulePathId("");
-        
-        if(!getFileManager().exists(getPathResolver().getIdentifier(resourcesPath,
-                "application.properties"))){
-            getFileManager().createFile(getPathResolver().getIdentifier(resourcesPath,
-                    "application.properties"));
-        }
-        
-    }
-    
     public void createApplicationTestsClass(JavaPackage topLevelPackage,
             String projectName) {
         // Set projectName if null
@@ -403,12 +389,11 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements
                 return null;
                 
             } catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load FileManager on SpringBootManagerImpl.");
+                LOGGER.warning("Cannot load FileManager on MavenOperationsImpl.");
                 return null;
             }
         }else{
             return fileManager;
         }
     }
-    
 }

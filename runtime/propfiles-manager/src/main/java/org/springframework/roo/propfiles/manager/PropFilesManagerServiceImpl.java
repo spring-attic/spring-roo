@@ -23,8 +23,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.LogicalPath;
@@ -47,8 +50,15 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
 
     private static final boolean SORTED = true;
 
-    @Reference private FileManager fileManager;
-    @Reference private ProjectOperations projectOperations;
+    private FileManager fileManager;
+    private ProjectOperations projectOperations;
+    
+    // ------------ OSGi component attributes ----------------
+    private BundleContext context;
+
+    protected void activate(final ComponentContext context) {
+        this.context = context.getBundleContext();
+    }
 
     @Override
     public void addProperties(final LogicalPath propertyFilePath,
@@ -169,12 +179,12 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
 
-        final String filePath = projectOperations.getPathResolver()
+        final String filePath = getProjectOperations().getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
         final Properties props = new Properties();
 
         try {
-            if (fileManager.exists(filePath)) {
+            if (getFileManager().exists(filePath)) {
                 loadProperties(props,
                         new BufferedInputStream(new FileInputStream(filePath)));
             }
@@ -209,13 +219,13 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         Validate.notBlank(propertyFilename, "Property filename required");
         Validate.notBlank(key, "Key required");
 
-        final String filePath = projectOperations.getPathResolver()
+        final String filePath = getProjectOperations().getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
         MutableFile mutableFile = null;
         final Properties props = new Properties();
 
-        if (fileManager.exists(filePath)) {
-            mutableFile = fileManager.updateFile(filePath);
+        if (getFileManager().exists(filePath)) {
+            mutableFile = getFileManager().updateFile(filePath);
             loadProperties(props, mutableFile.getInputStream());
         }
         else {
@@ -243,12 +253,12 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
 
-        final String filePath = projectOperations.getPathResolver()
+        final String filePath = getProjectOperations().getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
         final Properties props = new Properties();
 
         try {
-            if (fileManager.exists(filePath)) {
+            if (getFileManager().exists(filePath)) {
                 loadProperties(props,
                         new BufferedInputStream(new FileInputStream(filePath)));
             }
@@ -310,13 +320,13 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         Validate.notBlank(propertyFilename, "Property filename required");
         Validate.notBlank(key, "Key required");
 
-        final String filePath = projectOperations.getPathResolver()
+        final String filePath = getProjectOperations().getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
         MutableFile mutableFile = null;
         final Properties props = new Properties();
 
-        if (fileManager.exists(filePath)) {
-            mutableFile = fileManager.updateFile(filePath);
+        if (getFileManager().exists(filePath)) {
+            mutableFile = getFileManager().updateFile(filePath);
             loadProperties(props, mutableFile.getInputStream());
         }
         else {
@@ -344,13 +354,13 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         Validate.notNull(propertyFilePath, "Property file path required");
         Validate.notBlank(propertyFilename, "Property filename required");
 
-        final String filePath = projectOperations.getPathResolver()
+        final String filePath = getProjectOperations().getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
         MutableFile mutableFile = null;
         final Properties props = new Properties();
 
-        if (fileManager.exists(filePath)) {
-            mutableFile = fileManager.updateFile(filePath);
+        if (getFileManager().exists(filePath)) {
+            mutableFile = getFileManager().updateFile(filePath);
             loadProperties(props, mutableFile.getInputStream());
         }
         else {
@@ -369,7 +379,7 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
                 "Updated at " + new Date());
 
     }
-
+    
     // Util methods
 
     private Map<String, String> asMap(final String key, final String value) {
@@ -400,7 +410,7 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         Validate.notBlank(propertyFilename, "Property filename required");
         Validate.notNull(properties, "Property map required");
 
-        final String filePath = projectOperations.getPathResolver()
+        final String filePath = getProjectOperations().getPathResolver()
                 .getIdentifier(propertyFilePath, propertyFilename);
         MutableFile mutableFile = null;
 
@@ -432,13 +442,13 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
             props = new Properties();
         }
 
-        if (fileManager.exists(filePath)) {
-            mutableFile = fileManager.updateFile(filePath);
+        if (getFileManager().exists(filePath)) {
+            mutableFile = getFileManager().updateFile(filePath);
             loadProperties(props, mutableFile.getInputStream());
         }
         else {
             // Unable to find the file, so let's create it
-            mutableFile = fileManager.createFile(filePath);
+            mutableFile = getFileManager().createFile(filePath);
         }
 
         boolean saveNeeded = false;
@@ -506,5 +516,53 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
         finally {
             IOUtils.closeQuietly(outputStream);
         }
+    }
+    
+    public FileManager getFileManager() {
+        if (fileManager == null) {
+            // Get all Services implement FileManager interface
+            try {
+                ServiceReference<?>[] references = this.context
+                        .getAllServiceReferences(FileManager.class.getName(), null);
+
+                for (ServiceReference<?> ref : references) {
+                    fileManager = (FileManager) this.context.getService(ref);
+                    return fileManager;
+                }
+
+                return null;
+
+            } catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load FileManager on PropFilesManagerServiceImpl.");
+                return null;
+            }
+        } else {
+            return fileManager;
+        }
+
+    }
+    
+    public ProjectOperations getProjectOperations() {
+        if (projectOperations == null) {
+            // Get all Services implement ProjectOperations interface
+            try {
+                ServiceReference<?>[] references = this.context
+                        .getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+                for (ServiceReference<?> ref : references) {
+                    projectOperations = (ProjectOperations) this.context.getService(ref);
+                    return projectOperations;
+                }
+
+                return null;
+
+            } catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load ProjectOperations on PropFilesManagerServiceImpl.");
+                return null;
+            }
+        } else {
+            return projectOperations;
+        }
+
     }
 }
