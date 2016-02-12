@@ -31,5 +31,5 @@ public @interface CliOptionMandatoryIndicator {
      * (IMPORTANT: If option has more than one key, this attribute must be setted with
      * the first value)
      */
-    String param();
+    String[] params();
 }

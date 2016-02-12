@@ -160,6 +160,7 @@ public class SimpleParser implements Parser {
     private final Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
     private final Map<String, MethodTarget> dynamicMandatoryIndicators = new HashMap<String, MethodTarget>();
     private final Map<String, MethodTarget> optionVisibilityIndicators = new HashMap<String, MethodTarget>();
+    private final Map<String, MethodTarget> optionAutocompleteIndicators = new HashMap<String, MethodTarget>();
     private final Set<CommandMarker> commands = new HashSet<CommandMarker>();
     private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
     
@@ -197,17 +198,26 @@ public class SimpleParser implements Parser {
                 final CliOptionMandatoryIndicator dynamicMandatoryIndicator = method
                         .getAnnotation(CliOptionMandatoryIndicator.class);
                 if (dynamicMandatoryIndicator != null) {
-                    Validate.isTrue(method.getParameterTypes().length == 0,
-                            "CliDynamicMandatoryIndicator is only legal for 0 parameter methods ('%s')",
+                    Validate.isTrue(method.getParameterTypes().length < 2,
+                            "CliDynamicMandatoryIndicator is only legal for 0 or 1 parameter methods ('%s')",
                             method.toGenericString());
+                    if (method.getParameterTypes().length == 1) {
+                        Validate.isTrue(
+                                method.getParameterTypes()[0]
+                                        .equals(ShellContext.class),
+                                "CliDynamicMandatoryIndicator could only receive a ShellContext parameter ('%s')",
+                                method.toGenericString());
+                    }
                     Validate.isTrue(method.getReturnType().equals(Boolean.TYPE),
                             "CliDynamicMandatoryIndicator is only legal for primitive boolean return types (%s)",
                             method.toGenericString());
-
-                    dynamicMandatoryIndicators.put(
-                            dynamicMandatoryIndicator.command().concat("|")
-                                    .concat(dynamicMandatoryIndicator.param()),
-                            new MethodTarget(method, command));
+                    
+                    for (String param : dynamicMandatoryIndicator.params()) {
+                        dynamicMandatoryIndicators.put(
+                                dynamicMandatoryIndicator.command().concat("|")
+                                        .concat(param),
+                                new MethodTarget(method, command));
+                    }
 
                 }
 
@@ -233,6 +243,39 @@ public class SimpleParser implements Parser {
                                         .concat(param),
                                 new MethodTarget(method, command));
                     }
+                }
+                
+                // Getting method option autocomplete indicators
+                final CliOptionAutocompleteIndicator optionAutocompleteIndicator = method
+                        .getAnnotation(CliOptionAutocompleteIndicator.class);
+                if (optionAutocompleteIndicator != null) {
+                    Validate.isTrue((method.getParameterTypes().length == 0 || method.getParameterTypes().length == 2),
+                            "CliOptionAutocompleteIndicator must receive 0 or 2 parameters ('%s')",
+                            method.toGenericString());
+                    
+                    if (method.getParameterTypes().length == 2) {
+                        
+                        // Validate first parameter is ShellContext if any
+                        Validate.isTrue(method.getParameterTypes()[0].equals(ShellContext.class),
+                                "CliOptionAutocompleteIndicator must receive a ShellContext as first parameter ('%s')",
+                                method.toGenericString());
+                        
+                        // Validate first parameter is String if any
+                        Validate.isTrue(method.getParameterTypes()[1].equals(String.class),
+                                "CliOptionAutocompleteIndicator must receive a String as second parameter ('%s')",
+                                method.toGenericString());
+                    }
+                    
+                    // Checking the return type is a List<String>
+                    Validate.isTrue(method.getReturnType().isAssignableFrom(List.class),
+                            "CliOptionAutocompleteIndicator must return a List<String>",
+                            method.toGenericString());
+                    
+                    // Add method to option autocomplete indicators
+                    optionAutocompleteIndicators.put(
+                            optionAutocompleteIndicator.command().concat("|")
+                                    .concat(optionAutocompleteIndicator.param()),
+                            new MethodTarget(method, command));
                     
                 }
 
@@ -465,101 +508,9 @@ public class SimpleParser implements Parser {
             if ((translated.endsWith(" ")
                     || methodTarget.getRemainingBuffer().endsWith("--"))
                     && !"".equals(lastOptionValue)) {
-                boolean showAllRemaining = true;
-
-                // Check if there are still dynamic mandatory options
-                for (final CliOption include : unspecified) {
-                    if (isMandatoryParam(methodTarget.getKey(), include)) {
-                        showAllRemaining = false;
-                        break;
-                    }
-                }
-
-                // Exists some mandatory param, so we need to show it first if
-                // it is visible
-                if (!showAllRemaining) {
-                    for (final CliOption include : unspecified) {
-                        if (isMandatoryParam(methodTarget.getKey(), include)
-                                && isVisibleParam(methodTarget.getKey(),
-                                        include, shellContext)) {
-
-                            // Auto complete with that mandatory key
-                            for (final String value : include.key()) {
-                                if (!"".equals(value)) {
-
-                                    // Check if should complete with "--" prefix
-                                    if (methodTarget.getRemainingBuffer()
-                                            .endsWith("--")) {
-                                        results.add(new Completion(translated
-                                                .concat(value).concat(" ")));
-                                    }
-                                    else {
-                                        results.add(new Completion(translated
-                                                .concat("--").concat(value)
-                                                .concat(" ")));
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
-                else {
-
-                    // No more mandatory options remaining
-                    for (final CliOption include : unspecified) {
-
-                        if (isVisibleParam(methodTarget.getKey(), include, shellContext)) {
-
-                            // Auto complete with that key
-                            for (final String value : include.key()) {
-                                if (!"".equals(value)) {
-
-                                    // Check if should complete with "--" prefix
-                                    if (methodTarget.getRemainingBuffer()
-                                            .endsWith("--")) {
-                                        results.add(new Completion(translated
-                                                .concat(value).concat(" ")));
-                                    }
-                                    else {
-                                        results.add(new Completion(translated
-                                                .concat("--").concat(value)
-                                                .concat(" ")));
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // ROO-3697: Including global parameters in all Spring Roo
-                    // commands
-                    // if all mandatory parameters have been defined and exists
-                    // a ShellContext
-                    // parameter defined on last position of current method.
-                    if (hasShellContextParameter(methodTarget.getMethod())) {
-                        for (String parameter : globalParameters) {
-
-                            // Check if this global parameter is already defined
-                            if (!options.containsKey(parameter)) {
-                                if (!"".equals(parameter)) {
-
-                                    // Check if should complete with "--" prefix
-                                    if (methodTarget.getRemainingBuffer()
-                                            .endsWith("--")) {
-                                        results.add(new Completion(
-                                                translated.concat(parameter)
-                                                        .concat(" ")));
-                                    }
-                                    else {
-                                        results.add(new Completion(translated
-                                                .concat("--").concat(parameter)
-                                                .concat(" ")));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                
+                suggestOptionKey(shellContext, translated, results,
+                        methodTarget, options, unspecified);
 
                 candidates.addAll(results);
                 return 0;
@@ -586,7 +537,7 @@ public class SimpleParser implements Parser {
                             // able to
                             // be bound
                             if (!isMandatoryParam(methodTarget.getKey(),
-                                    include)
+                                    include, shellContext)
                                     && "*".equals(
                                             include.unspecifiedDefaultValue())
                                     && !"".equals(value)) {
@@ -647,7 +598,7 @@ public class SimpleParser implements Parser {
 
                             // Handle normal mandatory options
                             if (!"".equals(value) && isMandatoryParam(
-                                    methodTarget.getKey(), include)) {
+                                    methodTarget.getKey(), include, shellContext)) {
                                 if (translated.endsWith(" ")) {
                                     results.add(new Completion(
                                             translated + "--" + value + " "));
@@ -669,55 +620,107 @@ public class SimpleParser implements Parser {
                     return 0;
                 }
             }
+            
+            // Handle completing the option key supposing the last value was wanted as null ("")
+            if (methodTarget.getRemainingBuffer().endsWith("--") && "".equals(lastOptionValue)) {
+                suggestOptionKey(shellContext, translated, results, methodTarget, options, unspecified);
+                
+                candidates.addAll(results);
+                return 0;
+            }
 
             // Handle completing the option key they're presently typing
             if ((lastOptionValue == null || "".equals(lastOptionValue))
-                    && !translated.endsWith(" ")) {
+                    && (!translated.endsWith(" "))) {
 
                 // Given we haven't got an option value of any form, and there's
                 // no space at the buffer end, we must still be typing an option
                 // key
-
-                for (final CliOption option : unspecified) {
-
-                    // Check option's visibility
-                    if (isVisibleParam(methodTarget.getKey(), option, shellContext)) {
-
-                        for (final String value : option.key()) {
-                            if (value != null && lastOptionKey != null
-                                    && value.regionMatches(true, 0,
+                
+                // Check if there are still dynamic mandatory options
+                List<CliOption> remainingMandatories = new ArrayList<CliOption>();
+                for (final CliOption include : unspecified) {
+                    if (isMandatoryParam(methodTarget.getKey(), include, shellContext)) {
+                        remainingMandatories.add(include);
+                    }
+                }
+                
+                // Check if user is still writing the last mandatory key
+                // which will already be in the last position of "alreadySpecified"
+                List<String> paramsKeys = Arrays.asList(alreadySpecified.get(alreadySpecified.size() -1).key());
+                if (paramsKeys.contains(lastOptionKey)) {
+                    
+                    // User is still writing mandatory
+                    remainingMandatories.add(alreadySpecified.get(alreadySpecified.size() -1));
+                }
+                
+                if (remainingMandatories.size() != 0){
+                    
+                    // Complete with remaining mandatory keys
+                    for (final CliOption option : remainingMandatories) {
+                        
+                        // Check option's visibility
+                        if (isVisibleParam(methodTarget.getKey(), option, shellContext)) {
+                            
+                            for (final String value : option.key()) {
+                                if (value != null && lastOptionKey != null
+                                        && value.regionMatches(true, 0,
+                                                lastOptionKey, 0,
+                                                lastOptionKey.length())) {
+                                    final String completionValue = translated
+                                            .substring(0, translated.length()
+                                                    - lastOptionKey.length())
+                                            + value + " ";
+                                    results.add(new Completion(completionValue));
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    
+                    // Complete with optional keys or global parameters
+                    for (final CliOption option : unspecified) {
+                        
+                        // Check option's visibility
+                        if (isVisibleParam(methodTarget.getKey(), option, shellContext)) {
+                            
+                            for (final String value : option.key()) {
+                                if (value != null && lastOptionKey != null
+                                        && value.regionMatches(true, 0,
+                                                lastOptionKey, 0,
+                                                lastOptionKey.length())) {
+                                    final String completionValue = translated
+                                            .substring(0, translated.length()
+                                                    - lastOptionKey.length())
+                                            + value + " ";
+                                    results.add(new Completion(completionValue));
+                                }
+                            }
+                        }
+                    }
+                    
+                    // ROO-3697: check if current key completion is a
+                    // globalParameter
+                    if (hasShellContextParameter(methodTarget.getMethod())) {
+                        for (final String parameter : globalParameters) {
+                            if (parameter != null && lastOptionKey != null
+                                    && parameter.regionMatches(true, 0,
                                             lastOptionKey, 0,
                                             lastOptionKey.length())) {
-                                final String completionValue = translated
-                                        .substring(0, translated.length()
-                                                - lastOptionKey.length())
-                                        + value + " ";
+                                final String completionValue = translated.substring(
+                                        0,
+                                        translated.length()
+                                        - lastOptionKey.length())
+                                        + parameter + " ";
                                 results.add(new Completion(completionValue));
                             }
                         }
                     }
                 }
-
-                // ROO-3697: check if current key completion is a
-                // globalParameter
-                if (hasShellContextParameter(methodTarget.getMethod())) {
-                    for (final String parameter : globalParameters) {
-                        if (parameter != null && lastOptionKey != null
-                                && parameter.regionMatches(true, 0,
-                                        lastOptionKey, 0,
-                                        lastOptionKey.length())) {
-                            final String completionValue = translated.substring(
-                                    0,
-                                    translated.length()
-                                            - lastOptionKey.length())
-                                    + parameter + " ";
-                            results.add(new Completion(completionValue));
-                        }
-                    }
-                }
-
+                
                 candidates.addAll(results);
-                return 0;
+                return 0;  
+                    
             }
 
             // To be here, we are NOT typing an option key (or we might be, and
@@ -743,22 +746,34 @@ public class SimpleParser implements Parser {
                         if (key.equals(lastOptionKey)) {
                             final List<Completion> allValues = new ArrayList<Completion>();
                             String suffix = " ";
-
-                            // Let's use a Converter if one is available
-                            for (final Converter<?> candidate : converters) {
-                                if (candidate.supports(parameterType,
-                                        option.optionContext())) {
-                                    // Found a usable converter
-                                    final boolean addSpace = candidate
-                                            .getAllPossibleValues(allValues,
-                                                    parameterType,
-                                                    lastOptionValue,
-                                                    option.optionContext(),
-                                                    methodTarget);
-                                    if (!addSpace) {
-                                        suffix = "";
+                            
+                            // First, use an autocomplete indicator if any
+                            List<String> values = getPossibleValuesByIndicator(methodTarget.getKey(), option, shellContext, lastOptionValue);
+                            if (values != null) {
+                                for (String value : values) {
+                                    allValues.add(new Completion(value));
+                                }
+                            }
+                            
+                            // If still no values, try with a converter
+                            if (allValues.isEmpty()) {
+                                
+                                // Use a Converter if one is available
+                                for (final Converter<?> candidate : converters) {
+                                    if (candidate.supports(parameterType,
+                                            option.optionContext())) {
+                                        // Found a usable converter
+                                        final boolean addSpace = candidate
+                                                .getAllPossibleValues(allValues,
+                                                        parameterType,
+                                                        lastOptionValue,
+                                                        option.optionContext(),
+                                                        methodTarget);
+                                        if (!addSpace) {
+                                            suffix = "";
+                                        }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
 
@@ -846,7 +861,7 @@ public class SimpleParser implements Parser {
                             final StringBuilder help = new StringBuilder();
                             help.append(LINE_SEPARATOR);
                             help.append(isMandatoryParam(methodTarget.getKey(),
-                                    option) ? "required --" : "optional --");
+                                    option, shellContext) ? "required --" : "optional --");
                             if ("".equals(option.help())) {
                                 help.append(lastOptionKey).append(": ")
                                         .append("No help available");
@@ -916,6 +931,107 @@ public class SimpleParser implements Parser {
             }
 
             return 0;
+        }
+    }
+
+    private void suggestOptionKey(ShellContextImpl shellContext,
+            final String translated, final SortedSet<Completion> results,
+            final MethodTarget methodTarget, Map<String, String> options,
+            final List<CliOption> unspecified) {
+        
+        // Check if there are still dynamic mandatory options
+        boolean showAllRemaining = true;
+        for (final CliOption include : unspecified) {
+            if (isMandatoryParam(methodTarget.getKey(), include, shellContext)) {
+                showAllRemaining = false;
+                break;
+            }
+        }
+
+        // Exists some mandatory param, so we need to show it first if
+        // it is visible
+        if (!showAllRemaining) {
+            for (final CliOption include : unspecified) {
+                if (isMandatoryParam(methodTarget.getKey(), include, shellContext)
+                        && isVisibleParam(methodTarget.getKey(),
+                                include, shellContext)) {
+
+                    // Auto complete with that mandatory key
+                    for (final String value : include.key()) {
+                        if (!"".equals(value)) {
+
+                            // Check if should complete with "--" prefix
+                            if (methodTarget.getRemainingBuffer()
+                                    .endsWith("--")) {
+                                results.add(new Completion(translated
+                                        .concat(value).concat(" ")));
+                            }
+                            else {
+                                results.add(new Completion(translated
+                                        .concat("--").concat(value)
+                                        .concat(" ")));
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        else {
+
+            // No more mandatory options remaining
+            for (final CliOption include : unspecified) {
+
+                if (isVisibleParam(methodTarget.getKey(), include, shellContext)) {
+
+                    // Auto complete with that key
+                    for (final String value : include.key()) {
+                        if (!"".equals(value)) {
+
+                            // Check if should complete with "--" prefix
+                            if (methodTarget.getRemainingBuffer()
+                                    .endsWith("--")) {
+                                results.add(new Completion(translated
+                                        .concat(value).concat(" ")));
+                            }
+                            else {
+                                results.add(new Completion(translated
+                                        .concat("--").concat(value)
+                                        .concat(" ")));
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ROO-3697: Including global parameters in all Spring Roo
+            // commands
+            // if all mandatory parameters have been defined and exists
+            // a ShellContext
+            // parameter defined on last position of current method.
+            if (hasShellContextParameter(methodTarget.getMethod())) {
+                for (String parameter : globalParameters) {
+
+                    // Check if this global parameter is already defined
+                    if (!options.containsKey(parameter)) {
+                        if (!"".equals(parameter)) {
+
+                            // Check if should complete with "--" prefix
+                            if (methodTarget.getRemainingBuffer()
+                                    .endsWith("--")) {
+                                results.add(new Completion(
+                                        translated.concat(parameter)
+                                                .concat(" ")));
+                            }
+                            else {
+                                results.add(new Completion(translated
+                                        .concat("--").concat(parameter)
+                                        .concat(" ")));
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1226,7 +1342,7 @@ public class SimpleParser implements Parser {
 
                 // Ensure the user specified a value if the value is mandatory
                 if (StringUtils.isBlank(value)
-                        && isMandatoryParam(methodTarget.getKey(), cliOption)) {
+                        && isMandatoryParam(methodTarget.getKey(), cliOption, shellContext)) {
                     if ("".equals(cliOption.key()[0])) {
                         final StringBuilder message = new StringBuilder(
                                 "You must specify a default option ");
@@ -1311,7 +1427,7 @@ public class SimpleParser implements Parser {
                     // If the option has been specified to be mandatory then the
                     // result should never be null
                     if (result == null && isMandatoryParam(
-                            methodTarget.getKey(), cliOption)) {
+                            methodTarget.getKey(), cliOption, shellContext)) {
                         throw new IllegalStateException();
                     }
                     arguments.add(result);
@@ -1402,9 +1518,10 @@ public class SimpleParser implements Parser {
      *
      * @param command
      * @param cliOption
+     * @param shellContext
      * @return
      */
-    private boolean isMandatoryParam(String command, CliOption cliOption) {
+    private boolean isMandatoryParam(String command, CliOption cliOption, ShellContext shellContext) {
         if (cliOption.mandatory()) {
             String[] option = cliOption.key();
             try {
@@ -1414,6 +1531,10 @@ public class SimpleParser implements Parser {
                     return cliOption.mandatory();
                 }
                 else {
+                    if (dynamicMandatoryIndicator.getMethod().getParameterTypes().length == 1) {
+                        return (Boolean) dynamicMandatoryIndicator.getMethod()
+                                .invoke(dynamicMandatoryIndicator.getTarget(), shellContext);
+                    } 
                     return (Boolean) dynamicMandatoryIndicator.getMethod()
                             .invoke(dynamicMandatoryIndicator.getTarget());
                 }
@@ -1435,6 +1556,7 @@ public class SimpleParser implements Parser {
      *
      * @param command
      * @param cliOption
+     * @param shellContext
      * @return
      */
     private boolean isVisibleParam(String command, CliOption cliOption, ShellContextImpl shellContext) {
@@ -1453,6 +1575,41 @@ public class SimpleParser implements Parser {
         catch (Exception e) {
             throw new RuntimeException(String.format(
                     "ERROR: Error trying to get option visibility value for '%s' option on '%s' command.",
+                    option[0], command));
+        }
+    }
+    
+    /**
+     * Method that returns the autocompletion list of values for a command's 
+     * param, if any
+     * 
+     * @param command
+     * @param cliOption
+     * @param shellContext
+     * @return List<String> with the possible values, or null if that parameter 
+     * hasn't an autocompletion indicator
+     */
+    private List<String> getPossibleValuesByIndicator(String command, CliOption cliOption, ShellContextImpl shellContext, String currentText) {
+        String[] option = cliOption.key();
+        try {
+            MethodTarget optionAutocompleteIndicator = optionAutocompleteIndicators
+                    .get(command.concat("|").concat(option[0]));
+            if (optionAutocompleteIndicator == null) {
+                return null;
+            }
+            else {
+                if (optionAutocompleteIndicator.getMethod().getParameterTypes().length == 0) {
+                    return (List<String>) optionAutocompleteIndicator.getMethod()
+                            .invoke(optionAutocompleteIndicator.getTarget());
+                }else{
+                    return (List<String>) optionAutocompleteIndicator.getMethod()
+                            .invoke(optionAutocompleteIndicator.getTarget(), shellContext, currentText);
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "ERROR: Error trying to get autocomplete values for '%s' option on '%s' command. Be sure return type is a List<String>",
                     option[0], command));
         }
     }
