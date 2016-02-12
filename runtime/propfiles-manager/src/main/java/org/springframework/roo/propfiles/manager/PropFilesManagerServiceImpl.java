@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -453,7 +454,7 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
 
         boolean saveNeeded = false;
         boolean needForce = false;
-        List<String> overwriteProperties = new ArrayList<String>();
+        Map<String, String> overwriteProperties = new HashMap<String, String>();
         
         for (final Entry<String, String> entry : properties.entrySet()) {
             String key = entry.getKey();
@@ -473,7 +474,7 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
                 // ROO-3702: Show error when tries to update some properties that
                 // already exists and --force global param is false. 
                 needForce = true;
-                overwriteProperties.add(key);
+                overwriteProperties.put(key, existingValue);
             }
         }
         
@@ -484,23 +485,42 @@ public class PropFilesManagerServiceImpl implements PropFilesManagerService {
                     : "Property";
 
             String propertyLists = "";
-            for (String property : overwriteProperties) {
-                propertyLists = propertyLists.concat("'").concat(property)
-                        .concat("', ");
+            for (Entry<String, String> property : overwriteProperties.entrySet()) {
+                String key = property.getKey();
+                String value = property.getValue();
+                propertyLists = propertyLists.concat("'").concat(key)
+                        .concat(" = ").concat(value).concat("', ");
             }
 
             String msg = String.format(
-                    "WARNING: %s %s already exists on '%s'. "
+                    "WARNING: %s %s already exists. "
                             + "Use --force parameter to overwrite it.",
                     propertyCount,
-                    propertyLists.substring(0, propertyLists.length() - 2),
-                    propertyFilename);
+                    propertyLists.substring(0, propertyLists.length() - 2));
             throw new RuntimeException(msg);
         }
 
         if (saveNeeded) {
             storeProps(props, mutableFile.getOutputStream(),
                     "Updated at " + new Date());
+            
+            String propertyCount = props.size() > 1 ? "Properties"
+                    : "Property";
+            String haveCount = props.size() > 1 ? "have"
+                    : "has";
+            String propertyLists = "";
+            for (Entry<Object, Object> property : props.entrySet()) {
+                String key = (String) property.getKey();
+                String value = (String) property.getValue();
+                
+                propertyLists = propertyLists.concat("'").concat(key)
+                        .concat(" = ").concat(value).concat("', ");
+            }
+            
+            LOGGER.log(Level.INFO, String.format("INFO: %s %s %s been added.",
+                    propertyCount, propertyLists.substring(0, propertyLists.length() - 2), haveCount));
+        }else{
+            LOGGER.log(Level.INFO, "INFO: No changes are needed.");
         }
     }
 

@@ -94,17 +94,24 @@ public class JpaCommands implements CommandMarker {
     public boolean isJndiVisible(ShellContext shellContext) {
 
         Map<String, String> params = shellContext.getParameters();
+        
+        // If mandatory parameter database is not defined, all parameters are not visible
+        String database = params.get("database");
+        if(database == null){
+            return false;
+        }
+        
+        // If uses some HYPERSONIC database, jndiDataSource should not be visible.
+        if(database.startsWith("HYPERSONIC")){
+            return false;
+        }
 
-        String databaseName = params.get("database");
-
+        // If user define databaseName, hostName, password or username parameters, jndiDataSource
+        // should not be visible.
         if (params.containsKey("databaseName") || params.containsKey("hostName") || params.containsKey("password") || params.containsKey("userName")) {
             return false;
         }
-        
-        if(databaseName.startsWith("HYPERSONIC")){
-            return false;
-        }
-        
+
         return true;
     }
     
@@ -114,13 +121,19 @@ public class JpaCommands implements CommandMarker {
 
         Map<String, String> params = shellContext.getParameters();
 
-        String databaseName = params.get("database");
-        
-        if (params.containsKey("jndiDataSource")) {
+        // If mandatory parameter database is not defined, all parameters are not visible
+        String database= params.get("database");
+        if(database == null){
             return false;
         }
         
-        if(databaseName.startsWith("HYPERSONIC")){
+        // If uses some HYPERSONIC database, jndiDataSource parameter should not be visible.
+        if(database.startsWith("HYPERSONIC")){
+            return false;
+        }
+        
+        // If user define jndiDatasource parameter, connection parameters should not be visible
+        if (params.containsKey("jndiDataSource")) {
             return false;
         }
         

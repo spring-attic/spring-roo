@@ -647,11 +647,13 @@ public class SimpleParser implements Parser {
                 
                 // Check if user is still writing the last mandatory key
                 // which will already be in the last position of "alreadySpecified"
-                List<String> paramsKeys = Arrays.asList(alreadySpecified.get(alreadySpecified.size() -1).key());
-                if (paramsKeys.contains(lastOptionKey)) {
-                    
-                    // User is still writing mandatory
-                    remainingMandatories.add(alreadySpecified.get(alreadySpecified.size() -1));
+                if(alreadySpecified.size() > 0){
+                    List<String> paramsKeys = Arrays.asList(alreadySpecified.get(alreadySpecified.size() -1).key());
+                    if (paramsKeys.contains(lastOptionKey)) {
+                        
+                        // User is still writing mandatory
+                        remainingMandatories.add(alreadySpecified.get(alreadySpecified.size() -1));
+                    }
                 }
                 
                 if (remainingMandatories.size() != 0){
