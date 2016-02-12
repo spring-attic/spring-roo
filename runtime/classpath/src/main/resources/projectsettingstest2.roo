@@ -5,7 +5,7 @@
 # Goal: Project settings file works if it is created in an existent project
 #
 project setup --topLevelPackage org.example
-script --file projectSettingsTest1.roo
+script --file projectsettingstest1.roo
 # 
 # Output:   Created ROOT/pom.xml
 #           Created SRC_MAIN_RESOURCES

@@ -91,6 +91,29 @@ quick_zip_gpg_tests() {
     popd &>/dev/null
 }
 
+
+load_roo_build() {
+    log "Beginning test script: $@"
+    rm -rf /tmp/rootest
+    mkdir -p /tmp/rootest
+    pushd /tmp/rootest &>/dev/null
+    if [ "$VERBOSE" = "1" ]; then
+        $ROO_CMD $@
+        EXITED=$?
+    else
+        $ROO_CMD $@ &>/dev/null
+        EXITED=$?
+    fi
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "Test failed: $ROO_CMD $@" >&2; exit 1;
+    fi
+    if [ -f /tmp/rootest/src/main/resources/log4j.properties ]; then
+        sed -i 's/org.apache.log4j.ConsoleAppender/org.apache.log4j.varia.NullAppender/g' /tmp/rootest/src/main/resources/log4j.properties
+    fi
+    popd &>/dev/null
+}
+
+
 load_roo_build_and_test() {
     type -P mvn &>/dev/null || { l_error "mvn not found. Aborting." >&2; exit 1; }
     log "Beginning test script: $@"
@@ -592,18 +615,26 @@ if [[ "$COMMAND" = "assembly" ]]; then
             MVN_CMD="$MVN_CMD -q"
         fi
 
-        load_roo_build_and_test script vote.roo
-        tomcat_stop_start_get_stop http://localhost:8888/vote
 
-        load_roo_build_and_test script clinic.roo
-        tomcat_stop_start_get_stop http://localhost:8888/petclinic
+        # Executing tests
 
-        load_roo_build_and_test script wedding.roo
-        tomcat_stop_start_get_stop http://localhost:8888/wedding
+        # Project Settings tests
+        load_roo_build script projectsettingstest1.roo
+	      load_roo_build script projectsettingstest2.roo
 
-		load_roo_build_and_test script pizzashop.roo
-        tomcat_stop_start_get_stop http://localhost:8888/pizzashop
-		pizzashop_tests
+	# Temporally disabled
+        #load_roo_build_and_test script vote.roo
+        #tomcat_stop_start_get_stop http://localhost:8888/vote
+
+        #load_roo_build_and_test script clinic.roo
+        #tomcat_stop_start_get_stop http://localhost:8888/petclinic
+
+        #load_roo_build_and_test script wedding.roo
+        #tomcat_stop_start_get_stop http://localhost:8888/wedding
+
+	#	load_roo_build_and_test script pizzashop.roo
+        #tomcat_stop_start_get_stop http://localhost:8888/pizzashop
+	#	pizzashop_tests
 
         # JSF was removed on Spring Roo 2.0
         #load_roo_build_and_test script bikeshop.roo
