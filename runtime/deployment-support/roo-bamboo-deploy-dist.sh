@@ -92,7 +92,7 @@ quick_zip_gpg_tests() {
 }
 
 
-load_roo_build() {
+load_roo() {
     log "Beginning test script: $@"
     rm -rf /tmp/rootest
     mkdir -p /tmp/rootest
@@ -619,16 +619,17 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # Executing tests
 
         # Project Settings tests
-        load_roo_build script project-settings-1.roo
-	    load_roo_build script project-settings-2.roo
+        load_roo script project-settings-1.roo
+	load_roo script project-settings-2.roo
+	load_roo script project-settings-3.roo
 
         # Global parameter tests
-        load_roo_build script global-parameters.roo
+        load_roo script global-parameters.roo
 
         # Application Configuration Service tests
-        load_roo_build script application-config-service.roo
+        load_roo script application-config-service.roo
 
-	    # Temporally disabled
+	# Temporarily disabled
 	    
         #load_roo_build_and_test script vote.roo
         #tomcat_stop_start_get_stop http://localhost:8888/vote

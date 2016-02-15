@@ -1,0 +1,272 @@
+######################################################################
+####   					PERSISTENCE PROPERTIES                    ####
+######################################################################
+
+
+#====================================================================
+# TEST 1:   Define application config file name                       
+#--------------------------------------------------------------------
+# Goal:  Test if application settings file is created using a 
+#        specified name 
+#
+project settings add --name spring.roo.configuration.name --value application_test1 
+project settings list
+project setup --topLevelPackage org.example
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#      
+# Output:  Created ROOT/.roo/config
+#          Updated ROOT/.roo/config/project.properties
+#          spring.roo.configuration.name=application_test1
+#          Created ROOT/pom.xml
+#          Created SRC_MAIN_JAVA/org/example
+#          ...
+#          Created SRC_MAIN_RESOURCES
+#          Created SRC_MAIN_RESOURCES/application_test1.properties
+#          Updated ROOT/pom.xml
+#
+# Result:  New setting is added. Application config folder is 
+#          generated using its default location, and application file 
+#          is created using the name specified in
+#          spring.roo.configuration.name                                                              
+#====================================================================
+
+
+
+
+#====================================================================
+# TEST 2:   Define application config folder                       
+#--------------------------------------------------------------------
+# Goal:  Test if application config folder is created using the location 
+#        specified and application config file is created inside it.
+#
+project settings add --name spring.roo.configuration.location --value src/main/configuration 
+project settings list
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#      
+# Output:  Updated ROOT/.roo/config/project.properties
+#          spring.roo.configuration.location=src/main/configuration
+#          spring.roo.configuration.name=application_test1
+#          Created ROOT/src/main/configuration
+#          Created ROOT/src/main/configuration/application_test1.properties
+#
+# Result:  New setting is added. Application config folder is 
+#          generated using the location specified, and application 
+#          config file is created using the name defined in
+#          spring.roo.configuration.name                                                                  
+#====================================================================
+
+
+
+#====================================================================
+# TEST 3:  Update application config folder property
+#--------------------------------------------------------------------
+# Goal:  Create a new application config folder and a new application 
+#        config file inside it with the name specified in project 
+#        settings file                  
+# 
+project settings add --name spring.roo.configuration.location --value src/main/config --force
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#                                                              
+# Output:  Updated ROOT/.roo/config/project.properties
+#          Created ROOT/src/main/config
+#          Created ROOT/src/main/config/application_test1.properties  
+#
+# Result:  Creates a new folder defined in 
+#          spring.roo.configuration.location value and creates a 
+#          application config file which name is defined in 
+#          spring.roo.configuration.name setting                                                     
+#====================================================================
+
+
+
+
+#====================================================================
+# TEST 4:  Update application config filename property  
+#--------------------------------------------------------------------
+# Goal:  Create a application file with a new name inside
+#        the same folder  
+#
+project settings add --name spring.roo.configuration.name --value application_test2 --force
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#
+# Output: Updated ROOT/.roo/config/project.properties
+#         Created ROOT/src/main/config/application_test2.properties
+#
+# Result: Creates a new application config file inside 
+#         spring.roo.configuration.location folder with the new name 
+#         specified in spring.roo.configuration.name 
+#====================================================================
+
+
+
+
+#=====================================================================
+# TEST 5:   Remove application config filename property ?
+#---------------------------------------------------------------------
+# Goal:   Create application config file using its default name
+#
+project settings remove --name spring.roo.configuration.name 
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#
+# Output: Updated ROOT/.roo/config/project.properties
+#         Created ROOT/src/main/config/application.properties
+#
+# Result: A new application config file is created inside 
+#         spring.roo.configuration.location folder using its default 
+#         name                         
+#=====================================================================
+
+
+
+
+
+#=====================================================================
+# TEST 6:   Remove  application config location property
+#---------------------------------------------------------------------
+# Goal:  Create application folder in its default location (in case
+#        it does not exists) and generate a default application 
+#        config file inside it           
+#
+project settings remove --name spring.roo.configuration.location
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#
+# Output: Updated ROOT/.roo/config/project.properties
+#         Created SRC_MAIN_RESOURCES/application.properties
+#                         
+# Result: Default application config folder is not created because 
+#          it already exists, and application config file is created 
+#          inside it using its default name                                  
+#=====================================================================
+
+#=====================================================================
+# TEST 7:  Define the same database using the same application 
+#          config values
+#---------------------------------------------------------------------
+# Goal:  Test nothing changes if jpa setup is executed several times 
+#        using the same application config settings           
+#
+project settings add --name spring.roo.configuration.name --value application_test2 --force
+project settings add --name spring.roo.configuration.location --value src/main/config --force
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#
+# Output: Updated ROOT/.roo/config/project.properties
+#         Updated ROOT/.roo/config/project.properties
+# 		  INFO: No changes are needed.
+#                         
+# Result: Since application config folder and file name already 
+#         exists, nothing happens                                  
+#=====================================================================
+
+#=====================================================================
+# TEST 8:  Define a different database using the same application 
+#          config values
+#---------------------------------------------------------------------
+# Goal:  Update application config when database is changed           
+#
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY --force
+#
+# Output: Updated ROOT/src/main/config/application_test2.properties
+#                         
+# Result: Updates the application config file values defined inside it                                  
+#=====================================================================
+
+
+
+######################################################################
+######                     MANUAL TEST                        ########
+######################################################################
+
+
+#====================================================================
+# TEST 9:  Update application config filename property manually
+#--------------------------------------------------------------------
+# Goal:   Create a application file with a new name inside
+#         the same folder                  
+# 
+# Open .roo/config/project.properties
+# Change entry spring.roo.configuration.name=application_test2  to spring.roo.configuration.name=application_test3
+# jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#                                                              
+# Output:  Created ROOT/src/main/config/application_test3.properties  
+#
+# Result:  Creates a new application config file inside 
+#          spring.roo.configuration.location folder with the new name 
+#          specified in spring.roo.configuration.name                                                    
+#====================================================================
+
+
+
+
+#====================================================================
+# TEST 10:  Update application config location property manually
+#--------------------------------------------------------------------
+# Goal:  Create a new application config folder and a new application 
+#        config file inside it with the name specified in project 
+#        settings file  
+#
+# Open .roo/config/project.properties
+# Change entry spring.roo.configuration.location=src/main/config  to spring.roo.configuration.location=src/main/config_manual
+# jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#
+# Output: Created ROOT/src/main/config_manual
+#         Created ROOT/src/main/config_manual/application_test3.properties
+#
+# Result: Creates a new folder defined in 
+#          spring.roo.configuration.location value and creates a 
+#          application config file which name is defined in 
+#          spring.roo.configuration.name setting   
+#====================================================================
+
+
+
+
+#=====================================================================
+# TEST 11:   Remove application config filename property manually
+#---------------------------------------------------------------------
+# Goal:   Create application config file using its default name
+#
+# Open .roo/config/project.properties
+# Remove spring.roo.configuration.name entry
+# jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#
+# Output: Created ROOT/src/main/config_manual/application.properties
+#
+# Result: Created default application config file                       
+#=====================================================================
+
+
+#=====================================================================
+# TEST 12:   Remove application config file manually
+#---------------------------------------------------------------------
+# Goal:   Create application config file using its default name
+#
+# Remove src/main/recources/application.properties
+# jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#
+# Output: Created ROOT/src/main/config_manual/application.properties
+#
+# Result: Since application config file has been removed,
+#         it is created again                       
+#=====================================================================
+
+
+
+#=====================================================================
+# TEST 13:   Remove application config location manually
+#---------------------------------------------------------------------
+# Goal:  Create application folder in its default location (in case
+#        it does not exists) and generate a default application 
+#        config file inside it           
+#
+# Open .roo/config/project.properties
+# Remove spring.roo.configuration.location entry
+# Remove src/main/resources folder
+# jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#
+# Output: Created SRC_MAIN_RESOURCES
+#         Created SRC_MAIN_RESOURCES/application.properties
+#                         
+# Result: Default application config folder is created because it had  
+#          been deleted, and application config file is created 
+#          inside it using its default name                                  
+#=====================================================================

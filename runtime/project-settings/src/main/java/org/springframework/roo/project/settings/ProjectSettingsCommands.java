@@ -9,7 +9,7 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
 
 /**
- * Commands related to roo project settings
+ * Commands to manage the project configuration properties to be used by the Roo shell.
  *
  * @author Paula Navarro
  * @author Juan Carlos García

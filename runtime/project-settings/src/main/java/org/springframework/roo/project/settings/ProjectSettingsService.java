@@ -4,7 +4,19 @@ import java.util.Map;
 import java.util.SortedSet;
 
 /**
- * Provides an interface to {@link ProjectSettingsServiceImpl}.
+ *
+ * API that must implement those services implementations that manage the
+ * project configuration.
+ *
+ * The project configuration is a system that allows to configurate how Spring
+ * Roo shell works for every project, by setting the value of roo configuration
+ * properties.
+ *
+ * 
+ * Due to the project configuration can be stored in several formats and stores
+ * it is recommended that each implementation of this interface would be
+ * specialized in each of the stores and formats provided by Roo: properties,
+ * xml, yaml, ...
  *
  * @author Paula Navarro
  * @since 2.0
@@ -12,8 +24,10 @@ import java.util.SortedSet;
 public interface ProjectSettingsService {
 
 	/**
-	 * Adds some property to project settings file.
-	 *
+	 * Sets a new project configuration property. If the property exists,
+	 * parameter force indicates if this property is updated or keeps its value.
+	 * Otherwise the new property is added into project settings.
+	 * 
 	 * @param key
 	 *            string that identifies the property
 	 * @param value
@@ -22,14 +36,14 @@ public interface ProjectSettingsService {
 	 *            boolean that indicates if is necessary to force operation
 	 */
 	void addProperty(String key, String value, boolean force);
-	
+
 	/**
-     * Remove property from Spring Roo shell config properties file
-     *
-     * @param key
-     *            string that identifies the property
-     */
-    void removeProperty(String key);
+	 * Removes a property and its value from project configuration.
+	 *
+	 * @param key
+	 *            string that identifies the property
+	 */
+	void removeProperty(String key);
 
 	/**
 	 * Retrieves all property key/value pairs, throwing an exception if the file

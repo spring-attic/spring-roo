@@ -23,8 +23,9 @@ import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
- * Provides a service to manage all necessary properties located on project
- * configuration files.
+ * 
+ * Project configuration manager implementation to manage the project
+ * configuration stored in the properties file ".roo/config/project.properties"
  *
  * @author Paula Navarro
  * @since 2.0
@@ -58,13 +59,12 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 		getPropFilesManager().addPropertyIfNotExists(LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
 				getProjectSettingsFileName(), key, value, force);
 	}
-	
-    @Override
-    public void removeProperty(final String key) {
-        getPropFilesManager().removeProperty(
-                LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
-                getProjectSettingsFileName(), key);
-    }
+
+	@Override
+	public void removeProperty(final String key) {
+		getPropFilesManager().removeProperty(LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
+				getProjectSettingsFileName(), key);
+	}
 
 	@Override
 	public Map<String, String> getProperties() {
