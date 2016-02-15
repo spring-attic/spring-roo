@@ -1,0 +1,148 @@
+# Create project to be able to use "jpa setup" command.
+project setup --topLevelPackage org.springsource.petclinic
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following changes must be done manually because there aren't still #
+# any operations with dynamic mandatory options.                         #
+#                                                                        #
+# Henceforth the acronym for dynamic mandatory option will be DMO, and   #
+# for dynamic mandatory indicator will be DMI                            #
+#                                                                        #
+# TODO: This script should be updated when some Spring Roo command       #
+# implements dynamic mandatory parameters feature.                       #
+#                                                                        #
+##########################################################################
+
+#=================================================================================================================
+# TEST 1: Execute command without DMO when its DMI is false                     
+#-----------------------------------------------------------------------------------------------------------------
+# Preparations:
+#
+# * Add to JpaCommands.java the following method:
+#
+# @CliOptionMandatoryIndicator(command = "jpa setup", params = {"databaseName"})
+# public boolean isHostNameMandatory(ShellContext shellContext) {
+#   return false;
+# }
+#
+# * Replace @CliOption "databaseName" in "jpa setup" command with this:
+# 
+# @CliOption(key = "databaseName", mandatory = true, help = "The database name to use") final String databaseName,
+#
+# * Reinstall addon-jpa
+#
+# Goal:   Test if command execution is NOT interrupted if dynamic mandatory option (false) is not provided.
+#
+#jpa setup --provider ECLIPSELINK --database ORACLE
+#      
+# Output: Created SRC_MAIN_RESOURCES
+#         Created SRC_MAIN_RESOURCES/application.properties
+#         Updated ROOT/pom.xml [added dependency com.oracle:ojdbc14:10.2.0.5]
+#
+# Result: Install JPA persistence in the project without errors.                                                                   
+#=================================================================================================================
+
+#=================================================================================================================
+# TEST 2: Execute command with two DMO's using same DMI
+#-----------------------------------------------------------------------------------------------------------------
+# Preparations:
+#
+# * Replace @CliOption "userName" in "jpa setup" command with this:
+#
+# @CliOption(key = "userName", mandatory = true, help = "The username to use") final String userName,
+#
+# * Add a second param to mandatory indicator created in TEST 1, like so:
+#
+# @CliOptionMandatoryIndicator(command = "jpa setup", params = {"databaseName", "userName"})
+#
+# * Reinstall addon-jpa
+#
+# Goal:   Test if command execution is NOT interrupted if two DMO's, using same DMI (false), 
+#         are not provided.
+#
+#jpa setup --provider ECLIPSELINK --database ORACLE
+#      
+# Output: Created SRC_MAIN_RESOURCES
+#         Created SRC_MAIN_RESOURCES/application.properties
+#         Updated ROOT/pom.xml [added dependency com.oracle:ojdbc14:10.2.0.5]
+#
+# Result: Install JPA persistence in the project without errors.                                                                   
+#=================================================================================================================
+
+#=================================================================================================================
+# TEST 3: Execute command without two DMO's when their DMI is true
+#-----------------------------------------------------------------------------------------------------------------
+# Preparations:
+#
+# * Change indicator method's return to true:
+#
+# public boolean isHostNameMandatory(ShellContext shellContext) {
+#   return true;
+# }
+#
+# * Reinstall addon-jpa
+# 
+# Goal:   Test if command execution IS interrupted if two DMO's, using same DMI (true), are not provided.
+#
+#jpa setup --provider ECLIPSELINK --database ORACLE
+#
+# Output: You must specify option 'databaseName' for this command
+#
+# Result: Command execution is interrupted showing a message for the first parameter in the 
+#         indicator.                                           
+#=================================================================================================================
+
+#=================================================================================================================
+# TEST 4: Execute command with a DMO with its DMI (true) depending of other command option
+#-----------------------------------------------------------------------------------------------------------------
+# Preparations:
+#
+# * Change indicator method's content to set dependency with other option:
+#
+# if (shellContext.getParameters().containsKey("hostName")){
+#   return true;
+# }
+# return false;
+#
+# * Reinstall addon-jpa
+# 
+# Goal:   Test if command execution is interrupted if a DMO is not provided with its upstream dependency option.
+#
+#jpa setup --provider ECLIPSELINK --database ORACLE --hostName aa
+#
+# Output: You must specify option 'databaseName' for this command
+#
+# Result: Command execution is interrupted showing a message for the first parameter in the 
+#         indicator.                                           
+#=================================================================================================================
+
+#=================================================================================================================
+# TEST 5: Execute command with a DMO with its DMI (false) depending of other command option
+#----------------------------------------------------------------------------------------------------------------- 
+# Goal:   Test if command execution is interrupted if a DMO is not provided without its upstream dependency 
+#         option.
+#
+#jpa setup --provider ECLIPSELINK --database ORACLE
+#
+# Output: Created SRC_MAIN_RESOURCES
+#         Created SRC_MAIN_RESOURCES/application.properties
+#         Updated ROOT/pom.xml [added dependency com.oracle:ojdbc14:10.2.0.5]
+#
+#         Or
+#
+#         INFO: No changes are needed.
+#
+# Result: Install JPA persistence in the project without errors.                                           
+#=================================================================================================================
+
+#=================================================================================================================
+# TEST 6: Test autocompletions in the above situations.
+#----------------------------------------------------------------------------------------------------------------- 
+# Goal:   Test if autocomplete works well with DMO and DMI.
+#
+# Result: Autocomplete should provide the DMO before optional parameters when its DMI returns true or it is
+#         autocompleted with the optionals when its DMI returns false.                                    
+#=================================================================================================================
