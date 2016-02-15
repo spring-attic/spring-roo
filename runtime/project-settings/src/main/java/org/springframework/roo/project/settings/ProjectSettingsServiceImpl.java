@@ -36,8 +36,7 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 
 	private static final Path PROJECT_CONFIG_FOLDER_LOCATION = Path.ROOT_ROO_CONFIG;
 	private static final String PROJECT_CONFIG_FILE_FOLDER = "config/";
-	private static final String PROJECT_CONFIG_FILE_NAME = "project";
-	private static final String PROJECT_CONFIG_FILE_EXTENSION = ".properties";
+	private static final String PROJECT_CONFIG_FILE_NAME = "project.properties";
 
 	protected final static Logger LOGGER = HandlerUtils.getLogger(ProjectSettingsServiceImpl.class);
 
@@ -96,15 +95,16 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 	}
 
 	/**
-	 * Method that generates application configuration file name using project
-	 * setting folder, file name and file extension.
+	 * Method that generates application configuration filename path using
+	 * project setting folder and filename. This filename has a ".project"
+	 * extension.
 	 *
 	 * @return
 	 */
 	private String getProjectSettingsFileName() {
 		String fileName = PROJECT_CONFIG_FILE_FOLDER;
-		fileName = fileName.concat(PROJECT_CONFIG_FILE_NAME).concat(PROJECT_CONFIG_FILE_EXTENSION);
-			
+		fileName = fileName.concat(PROJECT_CONFIG_FILE_NAME);
+
 		return fileName;
 	}
 
