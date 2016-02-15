@@ -1,0 +1,212 @@
+# Create project to be able to test ApplicationConfigService
+project setup --topLevelPackage org.springsource.petclinic
+
+#=============================================================================================
+# TEST 1:   Add property to application config file without global parameters                              
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if a new property can be added to application config file
+#          without specify any global parameter.  
+#
+property add --key property1 --value bbb
+#      
+# Output:  Created SRC_MAIN_RESOURCES
+#          Created SRC_MAIN_RESOURCES/application.properties
+#
+# Result:  Creates "application.properties" file on "src/main/resources" if not exists and
+#          includes the specified property.
+#           
+#               property1=bbb
+#                                                                       
+#=============================================================================================
+
+#=============================================================================================
+# TEST 2:   Add property to a profile application config file.                      
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if a new property can be added to application config file
+#          for an specific profile.
+#
+property add --key property1 --value bbb --profile dev
+#      
+# Output:  Created SRC_MAIN_RESOURCES/application-dev.properties
+#
+# Result:  Creates "application-dev.properties" file on "src/main/resources" if not exists and
+#          includes the specified property.
+#           
+#               property1=bbb
+#                                                                       
+#=============================================================================================
+
+#=============================================================================================
+# TEST 3:   Add the same property with the same value to application config file                             
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if an existing property can be added to application config file
+#          with the same value.
+#
+property add --key property1 --value bbb
+#      
+# Output:  INFO: No changes are needed.
+#
+# Result: Prints info message "INFO: No changes are needed."
+#                                                                       
+#=============================================================================================
+
+#=============================================================================================
+# TEST 4:   Add the same property with the same value to an specific profile 
+#           application config file                             
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if an existing property of an existing profile can be added to 
+#          application config file with the same value.
+#
+property add --key property1 --value bbb --profile dev
+#      
+# Output:  INFO: No changes are needed.
+#
+# Result: Prints info message "INFO: No changes are needed."
+#                                                                       
+#=============================================================================================
+
+
+#=============================================================================================
+# TEST 5:   Update existing property to application config file with different value                              
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if an existing property could be updated with different value
+#          using --force global parameter
+#
+property add --key property1 --value ccc --force
+#      
+# Output:  Updated SRC_MAIN_RESOURCES/application.properties
+#
+# Result:  Updates "application.properties" file with the new property value
+#           
+#               property1=ccc
+#                                                                       
+#=============================================================================================
+
+#=============================================================================================
+# TEST 6:   Update existing property to an specific profile application config file 
+#           with different value                              
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if an existing property from an existing profile could be updated with different
+#          value using --force global parameter
+#
+property add --key property1 --value ccc --profile dev --force
+#      
+# Output:  Updated SRC_MAIN_RESOURCES/application-dev.properties
+#
+# Result:  Updates "application-dev.properties" file with the new property value
+#           
+#               property1=ccc
+#                                                                       
+#=============================================================================================
+
+#=============================================================================================
+# TEST 7:   List current properties                           
+#---------------------------------------------------------------------------------------------
+# Goal:    List all defined properties on application config file
+#
+property list
+#      
+# Output:
+#           #===============================================#
+#           #      APPLICATION CONFIGURATION PROPERTIES     #
+#           #===============================================#
+#
+#           property1=ccc
+#
+#
+# Result:  Shows a list of current properties on application config file
+#                                                                       
+#=============================================================================================
+
+#=============================================================================================
+# TEST 7:   List current properties for an specific profile                      
+#---------------------------------------------------------------------------------------------
+# Goal:    List all defined properties on application config file for an specific profile
+#
+property list --profile dev
+#      
+# Output:
+#           #===============================================#
+#           #      APPLICATION CONFIGURATION PROPERTIES     #
+#           #===============================================#
+#
+#           property1=ccc
+#
+#
+# Result:  Shows a list of current properties on application config file
+#                                                                       
+#=============================================================================================
+
+#=============================================================================================
+# TEST 8:   Remove an existing property                     
+#---------------------------------------------------------------------------------------------
+# Goal:    Try to remove an existing property from application config file. 
+#
+property add --key toremove --value aaa
+property remove --key toremove
+#      
+# Output: Updated SRC_MAIN_RESOURCES/application.properties
+#         Updated SRC_MAIN_RESOURCES/application.properties
+#
+#
+# Result:  Creates new property with key "toremove" on application config file.
+#          Remove new property created before from application config file.
+#                                                                       
+#=============================================================================================
+
+#=============================================================================================
+# TEST 9:   Remove an existing property from specific profile                  
+#---------------------------------------------------------------------------------------------
+# Goal:    Try to remove an existing property from specific profile application config file  
+#
+property add --key toremove --value aaa --profile dev
+property remove --key toremove --profile dev
+#      
+# Output: Updated SRC_MAIN_RESOURCES/application-dev.properties
+#         Updated SRC_MAIN_RESOURCES/application-dev.properties
+#
+#
+# Result:  Creates new property with key "toremove" on application config file 
+#          for an specific profile.
+#          Remove new property created before from application config file for 
+#          an specific profile.
+#                                                                       
+#=============================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because on a script   #
+# all operations will be aborted.                                        #
+#                                                                        #
+##########################################################################
+
+#=============================================================================================
+# TEST 10:   Try to update existing property values without use --force                     
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if existing property can be updated with 
+#          different value without use --force global parameter.
+#
+#property add --key property1 --value ddd
+#      
+# Output:  Undo manage SRC_MAIN_RESOURCES/application.properties
+#          WARNING: Property 'property1 = ccc' already exists. Use --force parameter to overwrite it.
+#
+# Result:  Prints an exception showing to developer how to overwrite existing property.                                                               
+#=============================================================================================
+
+#=============================================================================================
+# TEST 11:   Try to update existing property value for an specific profile without use --force                     
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if existing property for an specific profile can be updated with 
+#          different value without use --force global parameter.
+#
+#property add --key property1 --value ddd --profile dev
+#      
+# Output:  Undo manage SRC_MAIN_RESOURCES/application-dev.properties
+#          WARNING: Property 'property1 = ccc' already exists. Use --force parameter to overwrite it.
+#
+# Result:  Prints an exception showing to developer how to overwrite existing property.                                                               
+#=============================================================================================

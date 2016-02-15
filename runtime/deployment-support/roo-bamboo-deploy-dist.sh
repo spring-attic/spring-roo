@@ -625,6 +625,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # Global parameter tests
         load_roo_build script global-parameters.roo
 
+        # Application Configuration Service tests
+        load_roo_build script application-config-service.roo
+
 	    # Temporally disabled
 	    
         #load_roo_build_and_test script vote.roo
