@@ -645,11 +645,14 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # Executing tests
 
         # Project Settings tests
-        load_roo_build script projectsettingstest1.roo
-	    load_roo_build script projectsettingstest2.roo
+        load_roo_build script project-settings-1.roo
+	    load_roo_build script project-settings-2.roo
 
-    	# Temporally disabled
+        # Global parameter tests
+        load_roo_build script global-parameters.roo
 
+	    # Temporally disabled
+	    
         #load_roo_build_and_test script vote.roo
         #tomcat_stop_start_get_stop http://localhost:8888/vote
 

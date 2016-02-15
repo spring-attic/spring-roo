@@ -619,8 +619,11 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # Executing tests
 
         # Project Settings tests
-        load_roo_build script projectsettingstest1.roo
-	    load_roo_build script projectsettingstest2.roo
+        load_roo_build script project-settings-1.roo
+	    load_roo_build script project-settings-2.roo
+
+        # Global parameter tests
+        load_roo_build script global-parameters.roo
 
 	    # Temporally disabled
 	    
@@ -645,8 +648,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
         #load_roo_build_and_test_multimodule script multimodule.roo
         #tomcat_stop_start_get_stop_multimodule ui/mvc http://localhost:8888/mvc
 
-        #load_roo_build_and_test script embedding.roo
-        #tomcat_stop_start_get_stop http://localhost:8888/embedding
+        # Spring Roo embedding project needs DS improvement
+        # load_roo_build_and_test script embedding.roo
+        # tomcat_stop_start_get_stop http://localhost:8888/embedding
 
         log "Removing Roo distribution from test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER

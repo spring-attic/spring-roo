@@ -1,0 +1,142 @@
+# Create project to be able to use global parameters
+project setup --topLevelPackage org.springsource.petclinic
+
+#=============================================================================================
+# TEST 1:   Install persistence without global parameters                              
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if persistence can be installed without use global
+#          parameters
+#
+jpa setup --provider HIBERNATE --database POSTGRES --userName aaa --password bbb
+#      
+# Output:  Created SRC_MAIN_RESOURCES
+#          Created SRC_MAIN_RESOURCES/application.properties
+#          Updated ROOT/pom.xml [added dependencies org.postgresql:postgresql:, 
+#          org.springframework.boot:spring-boot-starter-data-jpa:]
+#
+# Result:  Includes database drive and spring-boot-starter-data-jpa. 
+#          Generates "application.properties" file on "src/main/resources" folder
+#          Includes the following properties on application.properties file
+#
+#               spring.datasource.driver-class-name=org.postgresql.Driver
+#               spring.datasource.password=bbb
+#               spring.datasource.url=jdbc\:postgresql\://localhost\:5432
+#               spring.datasource.username=aaa                                                                 
+#=============================================================================================
+
+#=============================================================================================
+# TEST 2:   Install persistence on an specific profile                           
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if persistence can be installed for an specific profile 
+#          using --profile global parameter.
+#
+jpa setup --provider HIBERNATE --database POSTGRES --userName aaa --password bbb --profile dev
+#      
+# Output:  Created SRC_MAIN_RESOURCES/application-dev.properties
+#
+# Result:  Generates "application-dev.properties" file on "src/main/resources" folder
+#          Includes the following properties on application-dev.properties file
+#
+#               spring.datasource.driver-class-name=org.postgresql.Driver
+#               spring.datasource.password=bbb
+#               spring.datasource.url=jdbc\:postgresql\://localhost\:5432
+#               spring.datasource.username=aaa                                                                 
+#=============================================================================================
+
+#=============================================================================================
+# TEST 3:   Install persistence again with same parameters                              
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if persistence can be installed again without change parameters
+#
+jpa setup --provider HIBERNATE --database POSTGRES --userName aaa --password bbb
+#      
+# Output:  INFO: No changes are needed.
+#
+# Result:  Shows log info with "INFO: No changes are needed." message.                                                         
+#=============================================================================================
+
+#=============================================================================================
+# TEST 4:   Install persistence again fir an specific profile with same parameters                              
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if persistence for an specific profile can be installed
+#          again without change parameters.
+#
+jpa setup --provider HIBERNATE --database POSTGRES --userName aaa --password bbb --profile dev
+#      
+# Output:  INFO: No changes are needed.
+#
+# Result:  Shows log info with "INFO: No changes are needed." message.                                                         
+#=============================================================================================
+
+#=============================================================================================
+# TEST 5:   Update existing persistence values using --force                           
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if an existing persistence can be updated with different connection values
+#          using --force global parameter.
+#
+jpa setup --provider HIBERNATE --database POSTGRES --userName aaa --password ccc --force
+#      
+# Output:  Updated SRC_MAIN_RESOURCES/application.properties
+#
+# Result:  Updates application.properties file with the following values
+#
+#               spring.datasource.driver-class-name=org.postgresql.Driver
+#               spring.datasource.password=ccc
+#               spring.datasource.url=jdbc\:postgresql\://localhost\:5432
+#               spring.datasource.username=aaa                                                                 
+#=============================================================================================
+
+#=============================================================================================
+# TEST 6:   Update existing persistence values for an specific profile using --force                         
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if persistence for an specific profile can be updated with 
+#          different connection values using --force global parameter.
+#
+jpa setup --provider HIBERNATE --database POSTGRES --userName aaa --password ccc --profile dev --force
+#      
+# Output:  Updated SRC_MAIN_RESOURCES/application-dev.properties
+#
+# Result:  Updates application-dev.properties file with the following values
+#
+#               spring.datasource.driver-class-name=org.postgresql.Driver
+#               spring.datasource.password=ccc
+#               spring.datasource.url=jdbc\:postgresql\://localhost\:5432
+#               spring.datasource.username=aaa                                                                 
+#=============================================================================================
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because on a script   #
+# all operations will be aborted.                                        #
+#                                                                        #
+##########################################################################
+
+#=============================================================================================
+# TEST 7:   Try to update existing persistence values without use --force                     
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if existing persistence can be updated with 
+#          different connection values without use --force global parameter.
+#
+#jpa setup --provider HIBERNATE --database POSTGRES --userName aaa --password ddd
+#      
+# Output:  Undo manage SRC_MAIN_RESOURCES/application.properties
+#          WARNING: Property 'spring.datasource.password = ccc' already exists. Use --force parameter to overwrite it.
+#
+# Result:  Prints an exception showing to developer how to overwrite existing property.                                                               
+#=============================================================================================
+
+#=============================================================================================
+# TEST 8:   Try to update existing persistence values for an specific profile without use --force                     
+#---------------------------------------------------------------------------------------------
+# Goal:    Test if existing persistence for an specific profile can be updated with 
+#          different connection values without use --force global parameter.
+#
+#jpa setup --provider HIBERNATE --database POSTGRES --userName aaa --password ddd --profile dev
+#      
+# Output:  Undo manage SRC_MAIN_RESOURCES/application-dev.properties
+#          WARNING: Property 'spring.datasource.password = ccc' already exists. Use --force parameter to overwrite it.
+#
+# Result:  Prints an exception showing to developer how to overwrite existing property.                                                               
+#=============================================================================================
