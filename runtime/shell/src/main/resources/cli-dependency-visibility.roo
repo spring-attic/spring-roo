@@ -1,0 +1,69 @@
+# Create project to be able to use global parameters
+project setup --topLevelPackage org.springsource.petclinic
+
+
+#=========================================================================================================
+# TEST 1:   Test the same visibility indicator with the opposite case                            
+#---------------------------------------------------------------------------------------------------------
+# Goal:     Test if a command can be executed with an option whose visibility indicator returns true.
+#
+jpa setup --provider HIBERNATE --database ORACLE --jndiDataSource aa
+#      
+# Output:   Created SRC_MAIN_RESOURCES
+#           Created SRC_MAIN_RESOURCES/application.properties
+#           Updated ROOT/pom.xml [added dependencies com.oracle:ojdbc14:10.2.0.5, 
+#           org.springframework.boot:spring-boot-starter-data-jpa:]
+#
+# Result:   Install JPA persistence in the project without errors.                                                        
+#=========================================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they require  #
+# changes in the code of a *Command class.                               #
+#                                                                        #
+##########################################################################
+
+
+#=========================================================================================================
+# TEST 2:   Test command execution with a not visible param                            
+#---------------------------------------------------------------------------------------------------------
+# Goal:     Test if a command can be executed with not a not visible (incompatible) option.
+#
+#jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT --jndiDataSource aa
+#      
+# Output:   jndiDataSource parameter is not available if any of databaseName, hostName, password or 
+#           userName are selected or you are using an HYPERSONIC database.
+#
+# Result:   Command execution is interrupted and shows a message with the content of the help property in
+#           the visibility indicator.                                                         
+#=========================================================================================================
+
+
+#=========================================================================================================
+# TEST 3:   Test a visibility indicator with more than one param                            
+#---------------------------------------------------------------------------------------------------------
+# Goal:     Test if a command can be executed with some options sharing the same visibility indicator.
+#
+#jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT --databaseName a --hostName a --userName a
+#      
+# Output:   Connection parameters are not available if jndiDatasource is specified or you are using an 
+#           HYPERSONIC database.
+#
+# Result:   Command execution is interrupted and shows a message with the content of the help property in
+#           the visibility indicator.                                                        
+#=========================================================================================================
+
+
+#=========================================================================================================
+# TEST 4: Test visibility when autocompleting
+#---------------------------------------------------------------------------------------------------------
+# 
+# Goal:   Test if autocomplete works well with visibility indicators.
+#
+# Result: Autocomplete must provide only visible option keys, that is, when an option indicator returns
+#         true.
+#=========================================================================================================

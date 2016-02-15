@@ -620,8 +620,8 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
         # Project Settings tests
         load_roo script project-settings-1.roo
-	load_roo script project-settings-2.roo
-	load_roo script project-settings-3.roo
+	      load_roo script project-settings-2.roo
+	      load_roo script project-settings-3.roo
 
         # Global parameter tests
         load_roo script global-parameters.roo
@@ -629,7 +629,11 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # Application Configuration Service tests
         load_roo script application-config-service.roo
 
-	# Temporarily disabled
+        # CliOptions dependency visibility
+        load_roo script cli-dependency-visibility.roo
+
+        
+	      # Temporally disabled
 	    
         #load_roo_build_and_test script vote.roo
         #tomcat_stop_start_get_stop http://localhost:8888/vote
