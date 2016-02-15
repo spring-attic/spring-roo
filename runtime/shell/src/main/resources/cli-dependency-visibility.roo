@@ -1,4 +1,4 @@
-# Create project to be able to use global parameters
+# Create project to be able to use "jpa setup" command
 project setup --topLevelPackage org.springsource.petclinic
 
 

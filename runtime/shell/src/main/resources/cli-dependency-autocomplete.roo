@@ -1,0 +1,130 @@
+# Create project to be able to use "jpa setup" command
+project setup --topLevelPackage org.springsource.petclinic
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following changes must be done manually because there aren't still #
+# any options which use autocomplete from autocomplete indicators.       #
+#                                                                        #
+# TODO: This script should be updated when some Spring Roo command       #
+# implements autocomplete with autocomplete indicators.                  #
+#                                                                        #
+##########################################################################
+
+
+#=================================================================================================================
+# TEST 1: Execute command with incorrect option value                   
+#-----------------------------------------------------------------------------------------------------------------
+# Preparations:
+#
+# * Add to JpaCommands.java these two autocomplete indicators:
+#
+# @CliOptionAutocompleteIndicator(command = "jpa setup", param = "userName", help = "The option 'userName' depends
+#   of 'dabaseName'. Please,write a right value for 'userName'")
+# public List<String> returnUserNameValues(ShellContext shellContext) {
+#   List<String> results = new ArrayList <String> ();
+#   Map<String, String> contextParameters = shellContext.getParameters();
+#   String databaseName = contextParameters.get("databaseName");
+#   if (databaseName == null) {
+#     return results;
+#   }
+#        
+#   if (databaseName.equals("FirstDatabase")) {
+#     results.add("Juan Carlos");
+#     results.add("Sergio");
+#     results.add("Fran");
+#     results.add("Lluís");
+#   }
+#        
+#   if (databaseName.equals("SecondDatabase")) {
+#     results.add("María");
+#     results.add("Marta");
+#     results.add("Pepe");
+#     results.add("Mario");
+#   }   
+#     return results;
+# }
+#    
+# @CliOptionAutocompleteIndicator(command = "jpa setup", param = "databaseName", help = "The option 'databaseName'
+#   must be 'FirstDatabase' or 'SecondDatabase'")
+# public List<String> returnDatabaseNameValues() {
+#   List<String> results = new ArrayList <String> ();
+#
+#   results.add("FirstDatabase");
+#   results.add("SecondDatabase");
+#
+#   return results;
+# }
+#
+# * Reinstall addon-jpa
+#
+# Goal:   Test if command execution is interrupted if any option value doesn't match with its autocomplete 
+#         indicator values.
+#
+#jpa setup --provider ECLIPSELINK --database ORACLE --databaseName ThirdDatabase
+#      
+# Output: The option 'databaseName' must be 'FirstDatabase' or 'SecondDatabase'
+#
+# Result: Abort command execution and shows the message in the indicator's "help"
+#         property.                                                                   
+#=================================================================================================================
+
+
+#=================================================================================================================
+# TEST 2: Execute command with correct option values                  
+#-----------------------------------------------------------------------------------------------------------------
+# Goal:   Test if command executes successfully when correct option values are introduced
+#
+#jpa setup --provider ECLIPSELINK --database ORACLE --databaseName FirstDatabase
+#      
+# Output: Created SRC_MAIN_RESOURCES
+#         Created SRC_MAIN_RESOURCES/application.properties
+#         Updated ROOT/pom.xml [added dependency com.oracle:ojdbc14:10.2.0.5]
+#
+# Result: Install JPA persistence in the project without errors.                                                                  
+#=================================================================================================================
+
+
+#=================================================================================================================
+# TEST 3: Execute command with incorrect dependent autocomplete option values                  
+#-----------------------------------------------------------------------------------------------------------------
+# Goal:   Test if command execution is interrupted when incorrect dependent option values are introduced (generate
+#         a new project if necessary).
+#
+#jpa setup --provider HIBERNATE --database ORACLE --databaseName FirstDatabase --userName Pepe
+#      
+# Output: The option 'userName' depends of 'dabaseName'. Please, write a right value for 'userName'
+#
+# Result: Command execution is interrupted showing the message of 'userName'
+#         indicator                                                          
+#=================================================================================================================
+
+
+#=================================================================================================================
+# TEST 4: Execute command with correct dependent autocomplete option values                  
+#-----------------------------------------------------------------------------------------------------------------
+# Goal:   Test if command executes successfully when correct dependent option values are introduced.
+#
+#jpa setup --provider HIBERNATE --database ORACLE --databaseName FirstDatabase --userName Sergio
+#      
+# Output: Created SRC_MAIN_RESOURCES
+#         Created SRC_MAIN_RESOURCES/application.properties
+#         Updated ROOT/pom.xml [added dependencies com.oracle:ojdbc14:10.2.0.5, 
+#         org.springframework.boot:spring-boot-starter-data-jpa:]
+#
+# Result: Install JPA persistence in the project without errors.                                                       
+#=================================================================================================================
+
+
+#=================================================================================================================
+# TEST 5: Test indicator possible values when autocompleting
+#-----------------------------------------------------------------------------------------------------------------
+# 
+# Goal:   Test if autocomplete works well with the values returned by indicators.
+#
+# Result: Autocomplete must provide only the right values of 'userName' for each 'databaseName'. Also, some user 
+#         names of database 'SecondDatabase' are very similar, so autocomplete must show 'María', 'Marta' and 
+#         'Mario' if current written text is 'Mar', for example.
+#=================================================================================================================
