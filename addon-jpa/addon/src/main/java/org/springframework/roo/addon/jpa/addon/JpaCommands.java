@@ -62,6 +62,7 @@ public class JpaCommands implements CommandMarker {
     // Project Settings 
     private static final String SPRING_ROO_JPA_REQUIRE_TABLE_NAME = "spring.roo.jpa.require.table-name";
     private static final String SPRING_ROO_JPA_REQUIRE_COLUMN_NAME = "spring.roo.jpa.require.column-name";
+    private static final String SPRING_ROO_JPA_REQUIRE_SEQUENCE_NAME = "spring.roo.jpa.require.sequence-name";
     
     // Annotations
     private static final AnnotationMetadataBuilder ROO_EQUALS_BUILDER = new AnnotationMetadataBuilder(
@@ -234,6 +235,30 @@ public class JpaCommands implements CommandMarker {
 
         return false;
     }
+    
+    /**
+     * ROO-3709: Indicator that checks if exists some project setting that makes
+     * sequenceName parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_SEQUENCE_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(params = { "sequenceName" }, command = "entity jpa")
+    public boolean isSequenceNameMandatory(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.sequence-name' is defined on
+        // project settings
+        String requiredSequenceName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_SEQUENCE_NAME);
+
+        if (requiredSequenceName != null && requiredSequenceName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
 
     @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
     public void newPersistenceClassJpa(
@@ -257,7 +282,7 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
-            @CliOption(key = "sequenceName", mandatory = false, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
+            @CliOption(key = "sequenceName", mandatory = true, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
             @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated entity should be used for read operations only.") final boolean readOnly,
             ShellContext shellContext) {
         Validate.isTrue(!identifierType.isPrimitive(),
