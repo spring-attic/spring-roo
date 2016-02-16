@@ -4,6 +4,7 @@ import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
@@ -54,10 +55,8 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.shell.CliAvailabilityIndicator;
-import org.springframework.roo.shell.CliCommand;
-import org.springframework.roo.shell.CliOption;
-import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.project.settings.ProjectSettingsService;
+import org.springframework.roo.shell.*;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 
 /**
@@ -77,6 +76,10 @@ public class FieldCommands implements CommandMarker {
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private TypeLocationService typeLocationService;
     @Reference private TypeManagementService typeManagementService;
+    @Reference private ProjectSettingsService projectSettings;
+    
+    // Project Settings 
+    private static final String SPRING_ROO_JPA_REQUIRE_COLUMN_NAME = "spring.roo.jpa.require.column-name";
 
     private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
@@ -92,6 +95,37 @@ public class FieldCommands implements CommandMarker {
         staticFieldConverter.add(EnumType.class);
         staticFieldConverter.add(DateTime.class);
     }
+    
+    protected void deactivate(final ComponentContext context) {
+        staticFieldConverter.remove(Cardinality.class);
+        staticFieldConverter.remove(Fetch.class);
+        staticFieldConverter.remove(EnumType.class);
+        staticFieldConverter.remove(DateTime.class);
+    }
+    
+    /**
+     * ROO-3710: Indicator that checks if exists some project setting that makes
+     * table column parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(command = "field boolean", params = { "column" })
+    public boolean isColumnMandatoryForFieldBoolean(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
 
     @CliCommand(value = "field boolean", help = "Adds a private boolean field to an existing Java source file")
     public void addFieldBoolean(
@@ -101,13 +135,13 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "assertFalse", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must assert false") final boolean assertFalse,
             @CliOption(key = "assertTrue", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must assert true") final boolean assertTrue,
-            @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") final String value,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type") final boolean primitive,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
-
+        
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails,
@@ -135,6 +169,30 @@ public class FieldCommands implements CommandMarker {
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
 
+    /**
+     * ROO-3710: Indicator that checks if exists some project setting that makes
+     * table column parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(command = "field date", params = { "column" })
+    public boolean isColumnMandatoryForFieldDate(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
+    
     @CliCommand(value = "field date", help = "Adds a private date field to an existing Java source file")
     public void addFieldDateJpa(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
@@ -145,7 +203,7 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "future", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be in the future") final boolean future,
             @CliOption(key = "past", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be in the past") final boolean past,
-            @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") final String value,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
@@ -193,7 +251,7 @@ public class FieldCommands implements CommandMarker {
 
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
-
+    
     @CliCommand(value = "field embedded", help = "Adds a private @Embedded field to an existing Java source file ")
     public void addFieldEmbeddedJpa(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
@@ -240,13 +298,37 @@ public class FieldCommands implements CommandMarker {
 
         insertField(fieldDetails, permitReservedWords, false);
     }
+    
+    /**
+     * ROO-3710: Indicator that checks if exists some project setting that makes
+     * table column parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(command = "field enum", params = { "column" })
+    public boolean isColumnMandatoryForFieldEnum(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
 
     @CliCommand(value = "field enum", help = "Adds a private enum field to an existing Java source file")
     public void addFieldEnum(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
             @CliOption(key = "type", mandatory = true, help = "The enum type of this field") final JavaType fieldType,
             @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
-            @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "enumType", mandatory = false, help = "The fetch semantics at a JPA level") final EnumType enumType,
@@ -277,6 +359,30 @@ public class FieldCommands implements CommandMarker {
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
 
+    /**
+     * ROO-3710: Indicator that checks if exists some project setting that makes
+     * table column parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(command = "field number", params = { "column" })
+    public boolean isColumnMandatoryForFieldNumber(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
+    
     @CliCommand(value = "field number", help = "Adds a private numeric field to an existing Java source file")
     public void addFieldNumber(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
@@ -290,7 +396,7 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "digitsFraction", mandatory = false, help = "Maximum number of fractional digits accepted for this number") final Integer digitsFraction,
             @CliOption(key = "min", mandatory = false, help = "The minimum value") final Long min,
             @CliOption(key = "max", mandatory = false, help = "The maximum value") final Long max,
-            @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") final String value,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
@@ -352,6 +458,30 @@ public class FieldCommands implements CommandMarker {
 
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
+    
+    /**
+     * ROO-3710: Indicator that checks if exists some project setting that makes
+     * table column parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(command = "field reference", params = { "joinColumnName" })
+    public boolean isColumnMandatoryForFieldReference(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
 
     @CliCommand(value = "field reference", help = "Adds a private reference field to an existing Java source file (eg the 'many' side of a many-to-one)")
     public void addFieldReferenceJpa(
@@ -360,7 +490,7 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
-            @CliOption(key = "joinColumnName", mandatory = false, help = "The JPA @JoinColumn name") final String joinColumnName,
+            @CliOption(key = "joinColumnName", mandatory = true, help = "The JPA @JoinColumn name") final String joinColumnName,
             @CliOption(key = "referencedColumnName", mandatory = false, help = "The JPA @JoinColumn referencedColumnName") final String referencedColumnName,
             @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "MANY_TO_ONE", specifiedDefaultValue = "MANY_TO_ONE", help = "The relationship cardinality at a JPA level") final Cardinality cardinality,
             @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
@@ -574,6 +704,30 @@ public class FieldCommands implements CommandMarker {
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
 
+    /**
+     * ROO-3710: Indicator that checks if exists some project setting that makes
+     * table column parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(command = "field string", params = { "column" })
+    public boolean isColumnMandatoryForFieldString(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
+    
     @CliCommand(value = "field string", help = "Adds a private string field to an existing Java source file")
     public void addFieldString(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
@@ -585,7 +739,7 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "sizeMin", mandatory = false, help = "The minimum string length") final Integer sizeMin,
             @CliOption(key = "sizeMax", mandatory = false, help = "The maximum string length") final Integer sizeMax,
             @CliOption(key = "regexp", mandatory = false, help = "The required regular expression pattern") final String regexp,
-            @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") final String value,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
@@ -638,13 +792,37 @@ public class FieldCommands implements CommandMarker {
         insertField(fieldDetails, permitReservedWords, transientModifier);
     }
 
+    /**
+     * ROO-3710: Indicator that checks if exists some project setting that makes
+     * table column parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(command = "field file", params = { "column" })
+    public boolean isColumnMandatoryForFieldFile(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
+    
     @CliCommand(value = "field file", help = "Adds a byte array field for storing uploaded file contents (JSF-scaffolded UIs only)")
     public void addFileUploadField(
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the file upload field to add") final JavaSymbolName fieldName,
             @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
             @CliOption(key = "contentType", mandatory = true, help = "The content type of the file") final UploadedFileContentType contentType,
             @CliOption(key = "autoUpload", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the file is uploaded automatically when selected") final boolean autoUpload,
-            @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
@@ -665,12 +843,6 @@ public class FieldCommands implements CommandMarker {
         insertField(fieldDetails, permitReservedWords, false);
     }
 
-    protected void deactivate(final ComponentContext context) {
-        staticFieldConverter.remove(Cardinality.class);
-        staticFieldConverter.remove(Fetch.class);
-        staticFieldConverter.remove(EnumType.class);
-        staticFieldConverter.remove(DateTime.class);
-    }
 
     private void insertField(final FieldDetails fieldDetails,
             final boolean permitReservedWords, final boolean transientModifier) {
@@ -732,6 +904,30 @@ public class FieldCommands implements CommandMarker {
             fieldDetails.setComment(commentFormatter.format(javadocComment, 1));
         }
     }
+    
+    /**
+     * ROO-3710: Indicator that checks if exists some project setting that makes
+     * table column parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(command = "field other", params = { "column" })
+    public boolean isColumnMandatoryForFieldOther(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
 
     @CliCommand(value = "field other", help = "Inserts a private field into the specified file")
     public void insertField(
@@ -741,7 +937,7 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
             @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
-            @CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
+            @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") final String value,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
