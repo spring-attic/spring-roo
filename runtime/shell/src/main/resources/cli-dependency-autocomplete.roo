@@ -32,17 +32,17 @@ project setup --topLevelPackage org.springsource.petclinic
 #   }
 #        
 #   if (databaseName.equals("FirstDatabase")) {
-#     results.add("Juan Carlos");
-#     results.add("Sergio");
-#     results.add("Fran");
-#     results.add("Lluís");
+#     results.add("John");
+#     results.add("Christine");
+#     results.add("Carol");
+#     results.add("Peter");
 #   }
 #        
 #   if (databaseName.equals("SecondDatabase")) {
-#     results.add("María");
-#     results.add("Marta");
-#     results.add("Pepe");
-#     results.add("Mario");
+#     results.add("Michael");
+#     results.add("Mike");
+#     results.add("Megan");
+#     results.add("Kat");
 #   }   
 #     return results;
 # }
@@ -125,6 +125,6 @@ project setup --topLevelPackage org.springsource.petclinic
 # Goal:   Test if autocomplete works well with the values returned by indicators.
 #
 # Result: Autocomplete must provide only the right values of 'userName' for each 'databaseName'. Also, some user 
-#         names of database 'SecondDatabase' are very similar, so autocomplete must show 'María', 'Marta' and 
-#         'Mario' if current written text is 'Mar', for example.
+#         names are very similar, so autocomplete must show 'Michael' and 'Mike' if current written text is 'Mi' 
+#         for 'SecondDatabase', for example.
 #=================================================================================================================
