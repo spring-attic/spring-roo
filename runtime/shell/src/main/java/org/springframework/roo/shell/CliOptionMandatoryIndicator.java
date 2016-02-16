@@ -28,8 +28,11 @@ public @interface CliOptionMandatoryIndicator {
     /**
      * @return the name of the option to set mandatory dynamically.
      * 
-     * (IMPORTANT: If option has more than one key, this attribute must be setted with
-     * the first value)
+     * <b>IMPORTANT</b>: 
+     * - Parameters should be setted as mandatory on @CliOption to use them on params 
+     *   attribute.
+     * - On the other hand, if @CliOption has more than one key, this attribute must be
+     *   setted with the first value
      */
     String[] params();
 }

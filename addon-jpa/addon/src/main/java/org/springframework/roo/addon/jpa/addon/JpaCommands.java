@@ -11,8 +11,10 @@ import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -30,9 +32,15 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.shell.*;
+import org.springframework.roo.project.settings.ProjectSettingsService;
+import org.springframework.roo.shell.CliAvailabilityIndicator;
+import org.springframework.roo.shell.CliCommand;
+import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
+import org.springframework.roo.shell.CliOptionVisibilityIndicator;
+import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -50,6 +58,12 @@ import org.springframework.roo.support.logging.HandlerUtils;
 public class JpaCommands implements CommandMarker {
 
     private static Logger LOGGER = HandlerUtils.getLogger(JpaCommands.class);
+
+    // Project Settings 
+    private static final String SPRING_ROO_JPA_REQUIRE_TABLE_NAME = "spring.roo.jpa.require.table-name";
+    private static final String SPRING_ROO_JPA_REQUIRE_COLUMN_NAME = "spring.roo.jpa.require.column-name";
+    
+    // Annotations
     private static final AnnotationMetadataBuilder ROO_EQUALS_BUILDER = new AnnotationMetadataBuilder(
             ROO_EQUALS);
     private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(
@@ -65,6 +79,7 @@ public class JpaCommands implements CommandMarker {
     @Reference private PropFileOperations propFileOperations;
     @Reference private StaticFieldConverter staticFieldConverter;
     @Reference private TypeLocationService typeLocationService;
+    @Reference private ProjectSettingsService projectSettings;
     
     protected void activate(final ComponentContext context) {
         staticFieldConverter.add(JdbcDatabase.class);
@@ -149,7 +164,7 @@ public class JpaCommands implements CommandMarker {
         
         return true;
     }
-
+    
     @CliCommand(value = "jpa setup", help = "Install or updates a JPA persistence provider in your project")
     public void installJpa(
             @CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") final OrmProvider ormProvider,
@@ -171,6 +186,54 @@ public class JpaCommands implements CommandMarker {
                 projectOperations.getFocusedModuleName(), 
                 shellContext.getProfile(), shellContext.isForce());
     }
+    
+    /**
+     * ROO-3709: Indicator that checks if exists some project setting that makes
+     * table parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_TABLE_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(params = { "table" }, command = "entity jpa")
+    public boolean isTableMandatory(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.table-name' is defined on
+        // project settings
+        String requiredTableName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_TABLE_NAME);
+
+        if (requiredTableName != null && requiredTableName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
+    
+    /**
+     * ROO-3709: Indicator that checks if exists some project setting that makes
+     * identifierColumn parameter mandatory.
+     * 
+     * @param shellContext
+     * @return true if exists property
+     *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+     *         and its value is "true". If not, return false.
+     */
+    @CliOptionMandatoryIndicator(params = { "identifierColumn" }, command = "entity jpa")
+    public boolean isColumnMandatory(ShellContext shellContext) {
+
+        // Check if property 'spring.roo.jpa.require.column-name' is defined on
+        // project settings
+        String requiredColumnName = projectSettings
+                .getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+
+        if (requiredColumnName != null && requiredColumnName.equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
 
     @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
     public void newPersistenceClassJpa(
@@ -179,11 +242,11 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "implements", mandatory = false, optionContext = INTERFACE, help = "The interface to implement") final JavaType implementsType,
             @CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") final boolean createAbstract,
             @CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") final boolean testAutomatically,
-            @CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") final String table,
+            @CliOption(key = "table", mandatory = true, help = "The JPA table name to use for this entity") final String table,
             @CliOption(key = "schema", mandatory = false, help = "The JPA table schema name to use for this entity") final String schema,
             @CliOption(key = "catalog", mandatory = false, help = "The JPA table catalog name to use for this entity") final String catalog,
             @CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") final String identifierField,
-            @CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") final String identifierColumn,
+            @CliOption(key = "identifierColumn", mandatory = true, help = "The JPA identifier field column to use for this entity") final String identifierColumn,
             @CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType,
             @CliOption(key = "versionField", mandatory = false, help = "The JPA version field name to use for this entity") final String versionField,
             @CliOption(key = "versionColumn", mandatory = false, help = "The JPA version field column to use for this entity") final String versionColumn,
