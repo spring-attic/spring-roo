@@ -342,6 +342,12 @@ public class SimpleParser implements Parser {
                 buffer = StringUtils.replace(buffer, "  ", " ", 1);
                 cursor--;
             }
+            
+            // Replace extra "-" by only "--"
+            while (buffer.contains("---")) {
+                buffer = StringUtils.replace(buffer, "---", "--", 1);
+                cursor--;
+            }
 
             // Begin by only including the portion of the buffer represented to
             // the present cursor position
@@ -507,11 +513,11 @@ public class SimpleParser implements Parser {
             // of their declaration on the method signature, thus we can stop
             // when mandatory options are filled in
             if ((translated.endsWith(" ")
-                    || methodTarget.getRemainingBuffer().endsWith("--"))
-                    && !"".equals(lastOptionValue)) {
+                    || methodTarget.getRemainingBuffer().endsWith("-"))
+                    && (!"".equals(lastOptionValue) || lastOptionKey == null)) {
 
                 suggestOptionKey(shellContext, translated, results,
-                        methodTarget, options, unspecified);
+                        methodTarget, options, unspecified, lastOptionValue, alreadySpecified);
 
                 candidates.addAll(results);
                 return 0;
@@ -626,10 +632,10 @@ public class SimpleParser implements Parser {
 
             // Handle completing the option key supposing the last value was
             // wanted as null ("")
-            if (methodTarget.getRemainingBuffer().endsWith("--")
+            if ((methodTarget.getRemainingBuffer().endsWith("--") || methodTarget.getRemainingBuffer().endsWith(" -"))
                     && "".equals(lastOptionValue)) {
                 suggestOptionKey(shellContext, translated, results,
-                        methodTarget, options, unspecified);
+                        methodTarget, options, unspecified, lastOptionValue, alreadySpecified);
 
                 candidates.addAll(results);
                 return 0;
@@ -966,15 +972,31 @@ public class SimpleParser implements Parser {
     private void suggestOptionKey(ShellContextImpl shellContext,
             final String translated, final SortedSet<Completion> results,
             final MethodTarget methodTarget, Map<String, String> options,
-            final List<CliOption> unspecified) {
-
-        // Check if there are still dynamic mandatory options
+            final List<CliOption> unspecified, String lastOptionValue, List<CliOption> alreadySpecified) {
+        
         boolean showAllRemaining = true;
+        
+        // Check if there are still dynamic mandatory options
         for (final CliOption include : unspecified) {
             if (isMandatoryParam(methodTarget.getKey(), include,
                     shellContext)) {
                 showAllRemaining = false;
                 break;
+            }
+        }
+        
+        // If there is a CliOption with void key and user only write a "-", last
+        // value will be "-" so is needed to complete with the secondary value of the key
+        if (lastOptionValue != null && lastOptionValue.equals("-") && showAllRemaining == true) {
+            for (CliOption option : alreadySpecified) {
+                if (option.key().length > 1) {
+                    for (String key : option.key()) {
+                        if (!("").equals(key)){
+                            results.add(new Completion(translated.concat("-").concat(key).concat(" ")));
+                            showAllRemaining = false;
+                        }
+                    }
+                }
             }
         }
 
@@ -989,13 +1011,16 @@ public class SimpleParser implements Parser {
 
                     // Auto complete with that mandatory key
                     for (final String value : include.key()) {
-                        if (!"".equals(value)) {
+                        if (!"".equals(value)) {           
 
                             // Check if should complete with "--" prefix
                             if (methodTarget.getRemainingBuffer()
                                     .endsWith("--")) {
-                                results.add(new Completion(
-                                        translated.concat(value).concat(" ")));
+                                results.add(new Completion(StringUtils.stripEnd(translated, null).concat(value).concat(" ")));
+                            }
+                            else if (methodTarget.getRemainingBuffer()
+                                    .endsWith(" -")) {
+                                results.add(new Completion(StringUtils.stripEnd(translated, null).concat("-").concat(value).concat(" ")));
                             }
                             else {
                                 results.add(
@@ -1023,8 +1048,11 @@ public class SimpleParser implements Parser {
                             // Check if should complete with "--" prefix
                             if (methodTarget.getRemainingBuffer()
                                     .endsWith("--")) {
-                                results.add(new Completion(
-                                        translated.concat(value).concat(" ")));
+                                results.add(new Completion(StringUtils.stripEnd(translated, null).concat(value).concat(" ")));
+                            }
+                            else if (methodTarget.getRemainingBuffer()
+                                    .endsWith(" -")) {
+                                results.add(new Completion(StringUtils.stripEnd(translated, null).concat("-").concat(value).concat(" ")));
                             }
                             else {
                                 results.add(
@@ -1051,8 +1079,11 @@ public class SimpleParser implements Parser {
                             // Check if should complete with "--" prefix
                             if (methodTarget.getRemainingBuffer()
                                     .endsWith("--")) {
-                                results.add(new Completion(translated
-                                        .concat(parameter).concat(" ")));
+                                results.add(new Completion(StringUtils.stripEnd(translated, null).concat(parameter).concat(" ")));
+                            }
+                            else if (methodTarget.getRemainingBuffer()
+                                    .endsWith(" -")) {
+                                results.add(new Completion(StringUtils.stripEnd(translated, null).concat("-").concat(parameter).concat(" ")));
                             }
                             else {
                                 results.add(new Completion(translated
