@@ -1019,7 +1019,7 @@ public class SimpleParser implements Parser {
                                 results.add(new Completion(StringUtils.stripEnd(translated, null).concat(value).concat(" ")));
                             }
                             else if (methodTarget.getRemainingBuffer()
-                                    .endsWith(" -")) {
+                                    .endsWith(" -") || methodTarget.getRemainingBuffer().length() == 1) {
                                 results.add(new Completion(StringUtils.stripEnd(translated, null).concat("-").concat(value).concat(" ")));
                             }
                             else {
@@ -1051,7 +1051,7 @@ public class SimpleParser implements Parser {
                                 results.add(new Completion(StringUtils.stripEnd(translated, null).concat(value).concat(" ")));
                             }
                             else if (methodTarget.getRemainingBuffer()
-                                    .endsWith(" -")) {
+                                    .endsWith(" -") || methodTarget.getRemainingBuffer().length() == 1) {
                                 results.add(new Completion(StringUtils.stripEnd(translated, null).concat("-").concat(value).concat(" ")));
                             }
                             else {
@@ -1082,7 +1082,7 @@ public class SimpleParser implements Parser {
                                 results.add(new Completion(StringUtils.stripEnd(translated, null).concat(parameter).concat(" ")));
                             }
                             else if (methodTarget.getRemainingBuffer()
-                                    .endsWith(" -")) {
+                                    .endsWith(" -") || methodTarget.getRemainingBuffer().length() == 1) {
                                 results.add(new Completion(StringUtils.stripEnd(translated, null).concat("-").concat(parameter).concat(" ")));
                             }
                             else {
