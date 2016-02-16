@@ -75,6 +75,16 @@ public class JpaCommands implements CommandMarker {
         staticFieldConverter.remove(JdbcDatabase.class);
         staticFieldConverter.remove(OrmProvider.class);
     }
+    
+    @CliAvailabilityIndicator({ "jpa setup" })
+    public boolean isJpaSetupAvailable() {
+        return jpaOperations.isJpaInstallationPossible();
+    }
+
+    @CliAvailabilityIndicator({ "entity jpa", "embeddable" })
+    public boolean isClassGenerationAvailable() {
+        return jpaOperations.hasSpringDataDependency();
+    }
 
     @CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
     public void createEmbeddableClass(
@@ -162,16 +172,6 @@ public class JpaCommands implements CommandMarker {
                 shellContext.getProfile(), shellContext.isForce());
     }
 
-    @CliAvailabilityIndicator({ "jpa setup" })
-    public boolean isJpaSetupAvailable() {
-        return jpaOperations.isJpaInstallationPossible();
-    }
-
-    @CliAvailabilityIndicator({ "entity jpa", "embeddable" })
-    public boolean isClassGenerationAvailable() {
-        return jpaOperations.hasSpringDataDependency();
-    }
-
     @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
     public void newPersistenceClassJpa(
             @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true, help = "Name of the entity to create") final JavaType name,
@@ -192,11 +192,11 @@ public class JpaCommands implements CommandMarker {
             @CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass,
             @CliOption(key = "equals", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement equals and hashCode methods") final boolean equals,
             @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
-            @CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit,
-            @CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
             @CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
-            @CliOption(key = "sequenceName", mandatory = false, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName) {
+            @CliOption(key = "sequenceName", mandatory = false, help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
+            @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated entity should be used for read operations only.") final boolean readOnly,
+            ShellContext shellContext) {
         Validate.isTrue(!identifierType.isPrimitive(),
                 "Identifier type cannot be a primitive");
 
@@ -205,10 +205,11 @@ public class JpaCommands implements CommandMarker {
                 .findClassesOrInterfaceDetailsWithAnnotation(ROO_JAVA_BEAN);
 
         for (ClassOrInterfaceTypeDetails entity : currentEntities) {
-            // If exists, we can't create a duplicate entity
-            if (name.equals(entity.getName())) {
+            // If exists and developer doesn't use --force global parameter,
+            // we can't create a duplicate entity
+            if (name.equals(entity.getName()) && !shellContext.isForce()) {
                 throw new IllegalArgumentException(String.format(
-                        "Entity '%s' already exists and cannot be created. Try to use other entity name on --class parameter.",
+                        "Entity '%s' already exists and cannot be created. Try to use a different entity name on --class parameter or use --force parameter to overwrite it.",
                         name));
             }
         }
@@ -216,6 +217,7 @@ public class JpaCommands implements CommandMarker {
         if (!permitReservedWords) {
             ReservedWords.verifyReservedWordsNotPresent(name);
         }
+        
         if (testAutomatically && createAbstract) {
             // We can't test an abstract class
             throw new IllegalArgumentException(
@@ -244,7 +246,7 @@ public class JpaCommands implements CommandMarker {
         annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog,
                 identifierField, identifierColumn, identifierType, versionField,
                 versionColumn, versionType, inheritanceType, mappedSuperclass,
-                persistenceUnit, transactionManager, entityName, sequenceName));
+                entityName, sequenceName, readOnly));
         if (equals) {
             annotationBuilder.add(ROO_EQUALS_BUILDER);
         }
@@ -284,10 +286,9 @@ public class JpaCommands implements CommandMarker {
      * @param versionType
      * @param inheritanceType
      * @param mappedSuperclass
-     * @param persistenceUnit
-     * @param transactionManager
      * @param entityName
      * @param sequenceName
+     * @param readOnly
      * @return a non-<code>null</code> builder
      */
     private AnnotationMetadataBuilder getEntityAnnotationBuilder(
@@ -296,9 +297,8 @@ public class JpaCommands implements CommandMarker {
             final JavaType identifierType, final String versionField,
             final String versionColumn, final JavaType versionType,
             final InheritanceType inheritanceType,
-            final boolean mappedSuperclass, final String persistenceUnit,
-            final String transactionManager, final String entityName,
-            final String sequenceName) {
+            final boolean mappedSuperclass, final String entityName,
+            final String sequenceName, final boolean readOnly) {
         final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(
                 ROO_JPA_ENTITY);
 
@@ -353,6 +353,11 @@ public class JpaCommands implements CommandMarker {
         if (!JavaType.INT_OBJECT.equals(versionType)) {
             entityAnnotationBuilder.addClassAttribute("versionType",
                     versionType);
+        }
+        
+        // ROO-3708: Generate readOnly entities
+        if(readOnly){
+            entityAnnotationBuilder.addBooleanAttribute("readOnly", true);
         }
 
         return entityAnnotationBuilder;

@@ -31,6 +31,7 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
     @AutoPopulate private String versionColumn = "";
     @AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;
     @AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
+    @AutoPopulate private boolean readOnly;
 
     /**
      * Constructor for reading the values of the given annotation
@@ -98,5 +99,9 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 
     public boolean isMappedSuperclass() {
         return mappedSuperclass;
+    }
+    
+    public boolean isReadOnly() {
+        return readOnly;
     }
 }

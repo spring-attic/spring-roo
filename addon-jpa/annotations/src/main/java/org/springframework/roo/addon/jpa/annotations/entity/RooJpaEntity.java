@@ -133,4 +133,14 @@ public @interface RooJpaEntity {
      *         {@link Integer}; must be provided)
      */
     Class<? extends Serializable> versionType() default Integer.class;
+    
+    /**
+     * Specifies if current entity should be used for read only operations. This
+     * param will be taken in mind to generate readOnly repositories and
+     * services.
+     * 
+     * @return true if entity should be used for read only operations and false
+     *         if this entity should be used for CRUD operations.
+     */
+    boolean readOnly() default false;
 }
