@@ -154,7 +154,9 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
             if (constructorFields.isEmpty()) {
                 // User supplied a set of fields that do not exist in the
                 // class, so return without creating any constructor
-                return;
+                throw new IllegalArgumentException(String.format(
+                        "The set of fields provided for the constructor does not exist in the class '%s'",
+                        name));
             }
         }
 
@@ -167,8 +169,12 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
         final ConstructorMetadata result = javaTypeDetails
                 .getDeclaredConstructor(parameterTypes);
         if (result != null) {
+            
             // Found an existing constructor on this class
-            return;
+            throw new IllegalArgumentException(String.format(
+                    "The class '%s' already has a constructor method with the same arguments and it cannot "
+                    + "be created. Use '--force' parameter to overrite it.",
+                    name));
         }
 
         final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();

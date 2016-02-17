@@ -1011,8 +1011,7 @@ public class FieldCommands implements CommandMarker {
     }
     
     /**
-     * Checks if entity has already a field with the same name and throws an exception
-     * in that case.
+     * Checks if entity has already a field with the same name and throws an exception in that case.
      * 
      * @param fieldName
      * @param shellContext
