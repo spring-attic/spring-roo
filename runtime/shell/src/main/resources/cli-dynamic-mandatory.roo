@@ -16,7 +16,7 @@ field boolean --fieldName boolean_field --column boolean_column --class ~.domain
 # Output: Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1.java
 #         Created SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1_Roo_JavaBean.aj
 #
-# Result: Add boolean field without errors.                                                                   
+# Result: Add boolean field without errors.                                         
 #=================================================================================================================
 
 
@@ -50,7 +50,7 @@ field boolean --fieldName boolean_field --column boolean_column --class ~.domain
 # Goal:   Test if command execution is interrupted if a DMO with a DMI (false) which depends of a project setting
 #         is not provided.
 #
-field boolean --fieldName boolean_field
+#field boolean --fieldName boolean_field
 #
 # Output: You must specify option 'column' for this command
 #
