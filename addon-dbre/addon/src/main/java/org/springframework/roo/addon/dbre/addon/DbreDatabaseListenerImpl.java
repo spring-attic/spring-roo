@@ -597,7 +597,7 @@ public class DbreDatabaseListenerImpl extends
         if (database.isRepository()) {
             for (final ClassOrInterfaceTypeDetails entity : newEntities) {
                 final JavaType type = entity.getType();
-                getRepositoryJpaOperations().setupRepository(
+                getRepositoryJpaOperations().addRepository(
                         new JavaType(type.getFullyQualifiedTypeName()
                                 + "Repository"), type);
             }
