@@ -49,8 +49,8 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
                             typeLocationService
                                     .getPhysicalTypeCanonicalPath(cid
                                             .getDeclaredByMetadataId()), cid));
-            if (annotationValues.getDomainType() != null
-                    && annotationValues.getDomainType().equals(domainType)) {
+            if (annotationValues.getEntity() != null
+                    && annotationValues.getEntity().equals(domainType)) {
                 toReturn.put(cid.getDeclaredByMetadataId(), cid);
             }
         }

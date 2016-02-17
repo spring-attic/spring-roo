@@ -74,7 +74,7 @@ public class RepositoryJpaMetadataProviderImpl extends
 
         this.keyDecoratorTracker = new CustomDataKeyDecoratorTracker(context, getClass(),
                 new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(
-                        RooJpaRepository.DOMAIN_TYPE_ATTRIBUTE)));
+                        RooJpaRepository.ENTITY_ATTRIBUTE)));
         this.keyDecoratorTracker.open();
     }
 
@@ -151,7 +151,7 @@ public class RepositoryJpaMetadataProviderImpl extends
             final String itdFilename) {
         final RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(
                 governorPhysicalTypeMetadata);
-        final JavaType domainType = annotationValues.getDomainType();
+        final JavaType domainType = annotationValues.getEntity();
         final JavaType identifierType = getPersistenceMemberLocator()
                 .getIdentifierType(domainType);
         if (identifierType == null) {

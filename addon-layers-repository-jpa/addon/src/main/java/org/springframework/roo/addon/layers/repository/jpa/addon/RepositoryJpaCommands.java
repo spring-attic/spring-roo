@@ -32,7 +32,7 @@ public class RepositoryJpaCommands implements CommandMarker {
     @CliCommand(value = "repository jpa", help = "Generates new Spring Data repository for specified entity.")
     public void repository(
             @CliOption(key = "class", mandatory = true, help = "The java Spring Data repository to generate (Will be an interface.)") final JavaType interfaceType,
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
+            @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*", optionContext = PROJECT, help = "The domain entity this repository should expose") final JavaType domainType) {
 
         repositoryJpaOperations.addRepository(interfaceType, domainType);
     }

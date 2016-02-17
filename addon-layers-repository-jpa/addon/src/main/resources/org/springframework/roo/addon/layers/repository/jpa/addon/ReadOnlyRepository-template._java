@@ -1,0 +1,98 @@
+package __PACKAGE__;
+
+import java.io.Serializable;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.Repository;
+import org.springframework.roo.addon.layers.repository.jpa.annotations.RooReadOnlyRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * = ReadOnlyRepository Interface
+ *
+ * It provides default query methods for read-only entities, for example for mapping
+ * database views. All JpaRepository methods are duplicated, but it doesn't include
+ * methods that perform any data modification (save * delete *).
+ *
+ * @see JpaRepository
+ * @param <T> type managed by repository
+ * @param <ID> identifier type of managed entity
+ */
+@NoRepositoryBean
+@Transactional(readOnly = true)
+@RooReadOnlyRepository
+public interface ReadOnlyRepository<T, ID extends Serializable>
+    extends Repository<T, ID> {
+
+  /**
+   * Retrieves an entity by its id.
+   *
+   * @param id - must not be null.
+   * @return the entity with the given id or null if none found
+   * @throws IllegalArgumentException - if id is null
+   */
+  T findOne(ID id);
+
+  /**
+   * Returns whether an entity with the given id exists.
+   *
+   * @param id - must not be null.
+   * @return true if an entity with the given id exists, false otherwise
+   * @throws IllegalArgumentException - if id is null
+   */
+  boolean exists(ID id);
+
+  /**
+   * Returns all instances of the type.
+   *
+   * @return all entities.
+   */
+  List<T> findAll();
+
+  /**
+   * Returns all instances of the type with the given IDs.
+   *
+   * @param ids
+   * @return all instances of the type with the given IDs.
+   */
+  List<T> findAll(Iterable<ID> ids);
+
+  /**
+   * Returns the number of entities available.
+   *
+   * @return the number of entities.
+   */
+  long count();
+
+  /**
+   * Returns all entities sorted by given sort options.
+   *
+   * @param sort
+   * @return all entities sorted by given sort options.
+   */
+  List<T> findAll(Sort sort);
+
+  /**
+   * Returns a single page of entities by given pagination options.
+   *
+   * @param pageable
+   * @return a single page of entities by given pagination options.
+   */
+  Page<T> findAll(Pageable pageable);
+
+  /**
+   * Returns a reference to an entity with the given id.
+   *
+   * @see EntityManager#getReference(Class, Object)
+   * @param id must not be null.
+   * @return a reference to an entity with the given id.
+   */
+  T getOne(ID id);
+
+}

@@ -82,13 +82,13 @@ public class RepositoryJpaMetadata extends
         // JpaRepository interface if it doesn't already
         ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0,
                 DataType.TYPE, null, Arrays.asList(
-                        annotationValues.getDomainType(), identifierType)));
+                        annotationValues.getEntity(), identifierType)));
 
         // ... and likewise extend JpaSpecificationExecutor<Foo>, to allow query
         // by specification
         ensureGovernorExtends(new JavaType(SPRING_JPA_SPECIFICATION_EXECUTOR,
                 0, DataType.TYPE, null, Arrays.asList(annotationValues
-                        .getDomainType())));
+                        .getEntity())));
 
         builder.addAnnotation(new AnnotationMetadataBuilder(
                 SpringJavaType.REPOSITORY));
