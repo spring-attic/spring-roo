@@ -1,5 +1,24 @@
-# Create project to be able to use "jpa setup" command.
-project setup --topLevelPackage org.springsource.petclinic
+# Create project, entities and project settings to be able to test subsequent commands.
+project setup --topLevelPackage aaa.aaa.aa
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+entity jpa --class ~.domain.Entity1
+project settings add --name spring.roo.jpa.require.column-name --value true
+
+
+#=================================================================================================================
+# TEST 1: Execute command with a dynamic mandatory option
+#-----------------------------------------------------------------------------------------------------------------
+# Goal:   Test if command execution is not interrupted if used a dynamic mandatory option depending of a project 
+#         setting.
+#
+field boolean --fieldName boolean_field --column boolean_column --class ~.domain.Entity1
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1.java
+#         Created SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Add boolean field without errors.                                                                   
+#=================================================================================================================
+
 
 ##########################################################################
 #######                      MANUAL TESTS                        #########
@@ -16,8 +35,30 @@ project setup --topLevelPackage org.springsource.petclinic
 #                                                                        #
 ##########################################################################
 
+
+
 #=================================================================================================================
-# TEST 1: Execute command without DMO when its DMI is false                     
+# TEST 2: Execute command without a DMO which depends of a project setting
+#-----------------------------------------------------------------------------------------------------------------
+# Preparations:
+#
+#project setup --topLevelPackage aaa.aaa.aa
+#jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+#entity jpa --class ~.domain.Entity1
+#project settings add --name spring.roo.jpa.require.column-name --value true
+#
+# Goal:   Test if command execution is interrupted if a DMO with a DMI (false) which depends of a project setting
+#         is not provided.
+#
+field boolean --fieldName boolean_field
+#
+# Output: You must specify option 'column' for this command
+#
+# Result: Command execution stops, with a message requiring DMO 'column'.                                   
+#=================================================================================================================
+
+#=================================================================================================================
+# TEST 3: Execute command without DMO when its DMI is false                     
 #-----------------------------------------------------------------------------------------------------------------
 # Preparations:
 #
@@ -45,8 +86,9 @@ project setup --topLevelPackage org.springsource.petclinic
 # Result: Install JPA persistence in the project without errors.                                                                   
 #=================================================================================================================
 
+
 #=================================================================================================================
-# TEST 2: Execute command with two DMO's using same DMI
+# TEST 4: Execute command with two DMO's using same DMI
 #-----------------------------------------------------------------------------------------------------------------
 # Preparations:
 #
@@ -72,8 +114,9 @@ project setup --topLevelPackage org.springsource.petclinic
 # Result: Install JPA persistence in the project without errors.                                                                   
 #=================================================================================================================
 
+
 #=================================================================================================================
-# TEST 3: Execute command without two DMO's when their DMI is true
+# TEST 5: Execute command without two DMO's when their DMI is true
 #-----------------------------------------------------------------------------------------------------------------
 # Preparations:
 #
@@ -95,8 +138,9 @@ project setup --topLevelPackage org.springsource.petclinic
 #         indicator.                                           
 #=================================================================================================================
 
+
 #=================================================================================================================
-# TEST 4: Execute command with a DMO with its DMI (true) depending of other command option
+# TEST 6: Execute command with a DMO with its DMI (true) depending of other command option
 #-----------------------------------------------------------------------------------------------------------------
 # Preparations:
 #
@@ -119,8 +163,9 @@ project setup --topLevelPackage org.springsource.petclinic
 #         indicator.                                           
 #=================================================================================================================
 
+
 #=================================================================================================================
-# TEST 5: Execute command with a DMO with its DMI (false) depending of other command option
+# TEST 7: Execute command with a DMO with its DMI (false) depending of other command option
 #----------------------------------------------------------------------------------------------------------------- 
 # Goal:   Test if command execution is interrupted if a DMO is not provided without its upstream dependency 
 #         option.
@@ -138,8 +183,9 @@ project setup --topLevelPackage org.springsource.petclinic
 # Result: Install JPA persistence in the project without errors.                                           
 #=================================================================================================================
 
+
 #=================================================================================================================
-# TEST 6: Test autocompletions in the above situations.
+# TEST 8: Test autocompletions in the above situations.
 #----------------------------------------------------------------------------------------------------------------- 
 # Goal:   Test if autocomplete works well with DMO and DMI.
 #
