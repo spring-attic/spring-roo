@@ -632,6 +632,12 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # CliOptions dependency visibility
         load_roo script cli-dependency-visibility.roo
 
+        # CliOptions dynamic mandatory
+        load_roo script cli-dynamic-mandatory.roo
+
+        # Entity commands with project settings
+        load_roo script entities-with-project-settings.roo 
+
         
 	      # Temporally disabled
 	    

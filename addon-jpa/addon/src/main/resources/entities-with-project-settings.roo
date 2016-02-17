@@ -1,0 +1,201 @@
+# Create project, entities and project settings to be able to test subsequent commands.
+project setup --topLevelPackage aaa.bbb.cc
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+project settings add --name spring.roo.jpa.require.table-name --value true
+project settings add --name spring.roo.jpa.require.column-name --value true
+project settings add --name spring.roo.jpa.require.sequence-name --value true
+enum type --class ~.enumerated.Enumerated
+
+#====================================================================================================================
+# TEST 1: Create entity with required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test entity creation command with required dynamic mandatory options based on project settings.
+#
+entity jpa --class ~.domain.Entity1 --table entity1_table --identifierColumn identifier --sequenceName sequence
+#      
+# Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_Jpa_Entity.aj
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_ToString.aj
+#
+# Result: Create Entity1 without errors.                                         
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 2: Create boolean field with required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test boolean field creation command with required dynamic mandatory options based on project settings.
+#
+field boolean --fieldName boolean_field --column boolean_column
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create boolean_field without errors.                                        
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 3: Create date field with required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test date field creation command with required dynamic mandatory options based on project settings.
+#
+field date --fieldName date_field --type java.util.Date --column date_column
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create date_field without errors.                                        
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 4: Create enum field with required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test enum field creation command with required dynamic mandatory options based on project settings.
+#
+field enum --fieldName enum_field --type ~.enumerated.Enumerated --column enum_column --class ~.domain.Entity1
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create enum_field without errors.                                      
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 5: Create file field with required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test file field creation command with required dynamic mandatory options based on project settings.
+#
+field file --fieldName file_field --contentType JPG --column file_column
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create file_field without errors.                                        
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 6: Create number field with required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test number field creation command with required dynamic mandatory options based on project settings.
+#
+field number --fieldName number_field --type java.lang.Integer --column number_field
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create number_field without errors.                                        
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 7: Create other field with required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test other field creation command with required dynamic mandatory options based on project settings.
+#
+field other --fieldName other_field --type ~.enumerated.Enumerated --column other_field
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create other_field without errors.                                        
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 8: Create string field with required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test string field creation command with required dynamic mandatory options based on project settings.
+#
+field string --fieldName string_field --column string_column
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create string_field without errors.                                        
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 9: Create read-only entity
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test creation of a read-only entity with --readOnly command option.
+#
+entity jpa --class ~.domain.ReadOnlyEntity --table readonly_table --identifierColumn id --sequenceName seq --readOnly
+#      
+# Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity_Roo_Jpa_Entity.aj
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity_Roo_ToString.aj
+#
+# Result: Create read-only entity without errors.                                 
+#====================================================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they are      #
+# supposed to interrupt script execution.                                #
+#                                                                        #
+##########################################################################
+
+
+#====================================================================================================================
+# TEST 10: Create entity without required dynamic mandatory option "table", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "table", based on 
+#         project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --identifierColumn identifier --sequenceName sequence
+#      
+# Output: You must specify option 'table' for this command
+#
+# Result: Stop command execution with a message requiring "table" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 11: Create entity without required dynamic mandatory option "identifierColumn", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option 
+#         "identifierColumn", based on project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --sequenceName sequence
+#      
+# Output: You must specify option 'identifierColumn' for this command
+#
+# Result: Stop command execution with a message requiring "identifierColumn" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 12: Create entity without required dynamic mandatory option "sequenceName", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "sequenceName", 
+#         based on project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier
+#      
+# Output: You must specify option 'sequenceName' for this command
+#
+# Result: Stop command execution with a message requiring "sequenceName" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 13: Create string field without required dynamic mandatory options, based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "field string" command execution is aborted when required dynamic mandatory option "column", based 
+#         on project settings, is not provided.
+#
+#field string --fieldName other_string_field
+#      
+# Output: You must specify option 'column' for this command
+#
+# Result: Stop command execution with a message requiring "column" option.                                 
+#====================================================================================================================
