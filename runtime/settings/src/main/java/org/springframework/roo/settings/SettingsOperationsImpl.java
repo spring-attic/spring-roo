@@ -63,7 +63,7 @@ public class SettingsOperationsImpl implements SettingsOperations {
 			getProjectSettingsService().removeProperty(name);
 		} else {
 			LOGGER.log(Level.INFO,
-					"WARNING: Project settings file not found. Use 'project settings add' command to configure your project.");
+					"WARNING: Project settings file not found. Use 'settings add' command to configure your project.");
 		}
 	}
 
@@ -73,15 +73,16 @@ public class SettingsOperationsImpl implements SettingsOperations {
 		if (getProjectSettingsService().existsProjectSettingsFile()) {
 
 			Map<String, String> properties = getProjectSettingsService().getProperties();
+			printHeader();
 			if (properties.size() > 0) {
-
-				printHeader();
 				// Print results
 				for (Entry<String, String> property : properties.entrySet()) {
 					LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
-				}
-				printFooter();
+				}	
+			} else{
+				LOGGER.log(Level.INFO, "No property found");
 			}
+			printFooter();
 
 		} else {
 			LOGGER.log(Level.INFO,

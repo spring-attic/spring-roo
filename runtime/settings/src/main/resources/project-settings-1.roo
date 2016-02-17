@@ -120,7 +120,8 @@ settings list
 #          property2=value2 
 #          property1=newValue1
 #      
-# Result:  New property is added as force option was not included    
+# Result:  New property is added. Force option is ignored since 
+#          property not exists 
 #=====================================================================
 
 #=====================================================================
