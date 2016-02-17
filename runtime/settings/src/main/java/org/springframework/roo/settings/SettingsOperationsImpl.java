@@ -17,7 +17,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link SettingsOperations}, which defines all
- * operations available to manage project settings
+ * operations available to manage configuration properties
  *
  * @author Paula Navarro
  * @author Juan Carlos García

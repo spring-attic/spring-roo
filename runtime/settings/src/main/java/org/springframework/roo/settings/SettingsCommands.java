@@ -9,7 +9,7 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
 
 /**
- * Commands to manage Spring Roo configuration properties to be used by the Roo
+ * Commands to manage configuration properties to be used by the Roo
  * shell.
  *
  * @author Paula Navarro
@@ -23,12 +23,12 @@ public class SettingsCommands implements CommandMarker {
 	@Reference
 	private SettingsOperations settingsOperations;
 
-	@CliCommand(value = "settings list", help = "List all settings from Spring Roo configuration file")
+	@CliCommand(value = "settings list", help = "Lists all settings added into configuration")
 	public void listSettings() {
 		settingsOperations.listSettings();
 	}
 
-	@CliCommand(value = "settings add", help = "Adds or updates a particular setting from Spring Roo configuration file")
+	@CliCommand(value = "settings add", help = "Adds or updates a particular setting")
 	public void addSetting(
 			@CliOption(key = "name", mandatory = true, help = "The setting name that should be changed") final String name,
 			@CliOption(key = "value", mandatory = true, help = "The new vale for this settings name") final String value,
@@ -37,7 +37,7 @@ public class SettingsCommands implements CommandMarker {
 		settingsOperations.addSetting(name, value, shellContext.isForce());
 	}
 
-	@CliCommand(value = "settings remove", help = "Removes an specific property from Spring Roo configuration file")
+	@CliCommand(value = "settings remove", help = "Removes an specific setting from configuration")
 	public void removeSetting(
 			@CliOption(key = "name", mandatory = true, help = "The settings name that should be removed") final String name) {
 

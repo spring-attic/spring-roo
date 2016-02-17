@@ -1,7 +1,7 @@
 package org.springframework.roo.settings;
 
 /**
- * Interface of operations to manage the project configuration, such as create,
+ * Interface of operations to manage the configuration, such as create,
  * remove and list properties. Typically used by a command type or an external
  * add-on.
  *
@@ -12,9 +12,9 @@ package org.springframework.roo.settings;
 public interface SettingsOperations {
 
 	/**
-	 * Sets a new Spring Roo configuration property. If the property exists,
+	 * Sets a new configuration property. If the property exists,
 	 * parameter force indicates if this property is updated or keeps its value.
-	 * Otherwise the new property is added into project settings.
+	 * Otherwise the new property is added into configuration.
 	 * 
 	 * @param key
 	 *            string that identifies the property
@@ -26,7 +26,7 @@ public interface SettingsOperations {
 	void addSetting(String name, String value, boolean force);
 
 	/**
-	 * Removes a property and its value from Spring Roo configuration.
+	 * Removes a property and its value from configuration.
 	 *
 	 * @param name
 	 *            string that identifies the property
@@ -34,7 +34,7 @@ public interface SettingsOperations {
 	void removeSetting(String value);
 
 	/**
-	 * Shows all settings name/value pairs stored into Spring Roo configuration
+	 * Shows all settings name/value pairs stored into configuration
 	 */
 	void listSettings();
 
