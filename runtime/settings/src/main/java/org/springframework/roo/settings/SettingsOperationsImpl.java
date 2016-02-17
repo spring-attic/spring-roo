@@ -16,8 +16,8 @@ import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * Implementation of {@link SettingsOperations}, which defines all
- * operations available to manage configuration properties
+ * Implementation of {@link SettingsOperations}, which defines all operations
+ * available to manage configuration properties
  *
  * @author Paula Navarro
  * @author Juan Carlos García
@@ -59,8 +59,16 @@ public class SettingsOperationsImpl implements SettingsOperations {
 
 		// Checks if project settings file exists
 		if (getProjectSettingsService().existsProjectSettingsFile()) {
-			// Remove setting
-			getProjectSettingsService().removeProperty(name);
+
+			// Checks if property exists
+			if (getProjectSettingsService().getProperty(name) != null) {
+				
+				// Remove setting
+				getProjectSettingsService().removeProperty(name);
+				
+			} else {
+				LOGGER.log(Level.INFO, "WARNING: Property {0} is not defined on current settings", name);
+			}
 		} else {
 			LOGGER.log(Level.INFO,
 					"WARNING: Project settings file not found. Use 'settings add' command to configure your project.");
@@ -78,9 +86,9 @@ public class SettingsOperationsImpl implements SettingsOperations {
 				// Print results
 				for (Entry<String, String> property : properties.entrySet()) {
 					LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
-				}	
-			} else{
-				LOGGER.log(Level.INFO, "No property found");
+				}
+			} else {
+				LOGGER.log(Level.INFO, "No properties found");
 			}
 			printFooter();
 
