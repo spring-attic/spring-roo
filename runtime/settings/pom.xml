@@ -8,9 +8,9 @@
         <version>2.0.0.BUILD-SNAPSHOT</version>
         <relativePath>../../runtime/osgi-bundle</relativePath>
     </parent>
-    <artifactId>org.springframework.roo.project.settings</artifactId>
+    <artifactId>org.springframework.roo.settings</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Runtime - Project Settings</name>
+    <name>Spring Roo - Runtime - Settings</name>
     <dependencies>
         <!-- OSGi -->
         <dependency>

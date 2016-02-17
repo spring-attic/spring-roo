@@ -1,4 +1,4 @@
-package org.springframework.roo.project.settings;
+package org.springframework.roo.settings;
 
 /**
  * Interface of operations to manage the project configuration, such as create,
@@ -9,23 +9,24 @@ package org.springframework.roo.project.settings;
  * @author Juan Carlos García
  * @since 2.0
  */
-public interface ProjectSettingsOperations {
+public interface SettingsOperations {
 
 	/**
-	 * Adds some setting to project settings file.
-	 *
-	 * @param name
+	 * Sets a new Spring Roo configuration property. If the property exists,
+	 * parameter force indicates if this property is updated or keeps its value.
+	 * Otherwise the new property is added into project settings.
+	 * 
+	 * @param key
 	 *            string that identifies the property
 	 * @param value
 	 *            string with the value assigned to the property
 	 * @param force
-	 *            boolean true forces to update setting value if it already
-	 *            exists
+	 *            boolean that indicates if is necessary to force operation
 	 */
 	void addSetting(String name, String value, boolean force);
 
 	/**
-	 * Removes a property and its value from project configuration.
+	 * Removes a property and its value from Spring Roo configuration.
 	 *
 	 * @param name
 	 *            string that identifies the property
@@ -33,7 +34,7 @@ public interface ProjectSettingsOperations {
 	void removeSetting(String value);
 
 	/**
-	 * Shows all settings name/value pairs
+	 * Shows all settings name/value pairs stored into Spring Roo configuration
 	 */
 	void listSettings();
 

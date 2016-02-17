@@ -1,4 +1,4 @@
-package org.springframework.roo.project.settings;
+package org.springframework.roo.settings.project;
 
 import java.util.Map;
 import java.util.SortedSet;
@@ -93,7 +93,8 @@ public interface ProjectSettingsService {
 	boolean existsProjectSettingsFile();
 
 	/**
-	 * Method that creates project settings folder and its configuration files
+	 * Method that creates project settings folder and project configuration
+	 * file (project.properties)
 	 */
 	void createProjectSettingsFile();
 

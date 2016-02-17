@@ -2,7 +2,7 @@
 project setup --topLevelPackage aaa.aaa.aa
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 entity jpa --class ~.domain.Entity1
-project settings add --name spring.roo.jpa.require.column-name --value true
+settings add --name spring.roo.jpa.require.column-name --value true
 
 
 #=================================================================================================================
@@ -45,7 +45,7 @@ field boolean --fieldName boolean_field --column boolean_column --class ~.domain
 #project setup --topLevelPackage aaa.aaa.aa
 #jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 #entity jpa --class ~.domain.Entity1
-#project settings add --name spring.roo.jpa.require.column-name --value true
+#settings add --name spring.roo.jpa.require.column-name --value true
 #
 # Goal:   Test if command execution is interrupted if a DMO with a DMI (false) which depends of a project setting
 #         is not provided.

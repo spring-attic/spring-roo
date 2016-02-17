@@ -1,4 +1,4 @@
-package org.springframework.roo.project.settings;
+package org.springframework.roo.settings.project;
 
 import java.io.File;
 import java.util.Map;
@@ -24,7 +24,7 @@ import org.springframework.roo.support.util.FileUtils;
 
 /**
  * 
- * Project configuration manager implementation to manage the project
+ * Project configuration manager implementation to manage the Spring Roo
  * configuration stored in the properties file ".roo/config/project.properties"
  *
  * @author Paula Navarro
@@ -113,6 +113,12 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 		getFileManager().createFile(getProjectSettingsLocation());
 	}
 
+	/**
+	 * Method that finds the propFilesManagerService.
+	 * 
+	 * @return the propFilesManagerService. Null is returned if service is not
+	 *         found
+	 */
 	public PropFilesManagerService getPropFilesManager() {
 		if (propFilesManager == null) {
 			// Get all Services implement PropFilesManagerService interface
@@ -137,6 +143,11 @@ public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 
 	}
 
+	/**
+	 * Method that finds the filesManager.
+	 * 
+	 * @return the filesManager. Null is returned if service is not found
+	 */
 	public FileManager getFileManager() {
 		if (fileManager == null) {
 			// Get all Services implement FileManager interface

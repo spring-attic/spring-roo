@@ -4,10 +4,10 @@
 # Goal:    Test if something is shown when project settings file does 
 #          not exist
 #
-project settings list
+settings list
 #      
 # Output:  WARNING: Project settings file not found. Use               
-#          'project settings add' command to configure your project. 
+#          'settings add' command to configure your project. 
 #
 # Result:  Informs us that project settings file does not exist                                                                   
 #====================================================================
@@ -20,10 +20,10 @@ project settings list
 # Goal:  Test what happens if a property is deleted when project 
 #         settings file does not exist
 #
-project settings remove --name  property1
+settings remove --name  property1
 #       
 # Output:  WARNING: Project settings file not found. Use               
-#          'project settings add' command to configure your project. 
+#          'settings add' command to configure your project. 
 #
 # Result:  Informs us that project settings file does not exist                                                                  
 #====================================================================
@@ -36,8 +36,8 @@ project settings remove --name  property1
 #--------------------------------------------------------------------
 # Goal:  Test if properties are added                     
 # 
-project settings add --name property1 --value value1
-project settings add --name property2 --value value2
+settings add --name property1 --value value1
+settings add --name property2 --value value2
 #                                                              
 # Output:  Created ROOT/.roo/config
 #          Updated ROOT/.roo/config/project.properties    
@@ -56,7 +56,7 @@ project settings add --name property2 --value value2
 # Goal: If a property, which already exists into settings file, 
 #       is added with the same value, nothing happens 
 #
-project settings add --name property1 --value value1
+settings add --name property1 --value value1
 #
 # Output: INFO: No changes are needed.
 #
@@ -71,7 +71,7 @@ project settings add --name property1 --value value1
 #---------------------------------------------------------------------
 # Goal: Show previous added properties   
 #
-project settings list
+settings list
 #
 # Output:  
 #    #===============================================#
@@ -81,7 +81,7 @@ project settings list
 #    property1=value1
 #
 #    These properties will be taken in mind during project generation.
-#    Use 'project settings add' command to define some Spring Roo 
+#    Use 'settings add' command to define some Spring Roo 
 #    Configuration properties.                             
 #=====================================================================
 
@@ -94,8 +94,8 @@ project settings list
 #---------------------------------------------------------------------
 # Goal:  Test if using force option updates the value of a property             
 #
-project settings add --name property1 --value newValue1 --force
-project settings list
+settings add --name property1 --value newValue1 --force
+settings list
 #
 # Output:  Updated ROOT/.roo/config/project.properties
 #          property2=value2
@@ -112,8 +112,8 @@ project settings list
 # Goal:   Test if a non-defined property is added into settings file
 #         using force option
 #
-project settings add --name property3 --value value3 --force
-project settings list
+settings add --name property3 --value value3 --force
+settings list
 #
 # Output:  Updated ROOT/.roo/config/project.properties
 #          property3=value3
@@ -129,7 +129,7 @@ project settings list
 # Goal: Nothing happens when a property not included into project 
 #       settings file is deleted
 #
-project settings remove --name prop 
+settings remove --name prop 
 #=====================================================================
 
 
@@ -139,8 +139,8 @@ project settings remove --name prop
 # Goal:     Test if a property included into project settings file 
 #           is deleted
 #
-project settings remove --name property3
-project settings list
+settings remove --name property3
+settings list
 #
 # Output:   Updated ROOT/.roo/config/project.properties
 #           property2=value2 
@@ -155,8 +155,8 @@ project settings list
 #---------------------------------------------------------------------
 # Goal: A property, that previously has been deleted, is created again
 #
-project settings add --name property3 --value value3
-project settings list
+settings add --name property3 --value value3
+settings list
 #
 # Output:   Updated ROOT/.roo/config/project.properties
 #           property3=value3
@@ -172,14 +172,29 @@ project settings list
 
 
 #=====================================================================
-#  TEST 11:  Add properties manually
+#  TEST 11:  Update a property without using force option
+#---------------------------------------------------------------------
+# Goal: Test if a property is not updated with a new value 
+#
+#settings add --name property3 --value value4
+#       
+# Output: Undo manage ROOT\.roo\config\project.properties
+#         WARNING: Property 'property3 = value3' already exists. 
+#         Use --force parameter to overwrite it.
+#                                                   
+# Result: Informs that property can not be updated without using 
+#         force option. Execution is aborted.
+#=====================================================================
+
+#=====================================================================
+#  TEST 12:  Add properties manually
 #---------------------------------------------------------------------
 # Goal: Properties added manually are listed correctly
 #
 # Delete and create .roo/config/project.properties file manually
-# project settings list
+# settings list
 # Add "pro1 = val1" entry manually into project setting file 
-# project settings list
+# settings list
 #       
 # Output: 
 #         pro1 = val1 
@@ -188,12 +203,12 @@ project settings list
 #=====================================================================
 
 #=====================================================================
-#  TEST 12:  Update properties manually
+#  TEST 13:  Update properties manually
 #---------------------------------------------------------------------
 # Goal:     Properties updated manually are listed crrectly
 #
 # Update the value of a property manually (pro1 = value1)
-# project settings list
+# settings list
 #           
 # Output:   pro1 = value1       
 #                                         
@@ -202,14 +217,14 @@ project settings list
 
 
 #=====================================================================
-#  TEST 13:  Manually add two properties with the same name
+#  TEST 14:  Manually add two properties with the same name
 #---------------------------------------------------------------------
 # Goal: Having two properties added manually not throws any exception
 #
 # Add properties:
 #     pro1 = val1
 #     pro1 = value1  (already defined)
-# project settings list
+# settings list
 #           
 # Output: pro1 = value1       
 #                                         
@@ -217,25 +232,25 @@ project settings list
 #=====================================================================
 
 #============================================================================
-#  TEST 14:  Delete a duplicated property
+#  TEST 15:  Delete a duplicated property
 #----------------------------------------------------------------------------
 # Goal:   If a duplicated property is deleted, all its entries are removed
 #
-# project settings remove --name pro1
-# project settings list      
+# settings remove --name pro1
+# settings list      
 #                                         
 # Result: Anything is shown because all entrios of pro1 were deleted
 #=========================================================================
 
 
 #============================================================================
-#  TEST 15:  Delete a property manually
+#  TEST 16:  Delete a property manually
 #----------------------------------------------------------------------------
 # Goal: Test if a property is deleted manually, it disappears
 #
-# project settings add --name pro1 --value val1
+# settings add --name pro1 --value val1
 # Delete entry "pro1=val1" manually
-# project settings list      
+# settings list      
 #                                         
 # Result: Nothing is shown because property has been deleted
 #=========================================================================
@@ -244,7 +259,7 @@ project settings list
 
 
 #============================================================================
-#  TEST 16:  Execute previous tests in a existent project
+#  TEST 17:  Execute previous tests in a existent project
 #----------------------------------------------------------------------------
 # Goal: Project settings file works if it is created in an existent project
 #

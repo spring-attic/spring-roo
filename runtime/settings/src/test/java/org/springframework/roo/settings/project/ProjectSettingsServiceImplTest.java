@@ -1,9 +1,9 @@
-package org.springframework.roo.project.settings;
+package org.springframework.roo.settings.project;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.roo.project.settings.ProjectSettingsService;
-import org.springframework.roo.project.settings.ProjectSettingsServiceImpl;
+import org.springframework.roo.settings.project.ProjectSettingsService;
+import org.springframework.roo.settings.project.ProjectSettingsServiceImpl;
 
 /**
  * Unit test of {@link ProjectSettingsServiceImpl} N.B. for this test to pass,

@@ -53,7 +53,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.settings.ProjectSettingsService;
+import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.*;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 

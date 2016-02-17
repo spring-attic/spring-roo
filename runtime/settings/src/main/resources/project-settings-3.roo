@@ -1,5 +1,5 @@
 ######################################################################
-####   					PERSISTENCE PROPERTIES                    ####
+####   		     APPLICATION CONFIG PROPERTIES                    ####
 ######################################################################
 
 
@@ -9,8 +9,8 @@
 # Goal:  Test if application settings file is created using a 
 #        specified name 
 #
-project settings add --name spring.roo.configuration.name --value application_test1 
-project settings list
+settings add --name spring.roo.configuration.name --value application_test1 
+settings list
 project setup --topLevelPackage org.example
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #      
@@ -39,8 +39,8 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 # Goal:  Test if application config folder is created using the location 
 #        specified and application config file is created inside it.
 #
-project settings add --name spring.roo.configuration.location --value src/main/configuration 
-project settings list
+settings add --name spring.roo.configuration.location --value src/main/configuration 
+settings list
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #      
 # Output:  Updated ROOT/.roo/config/project.properties
@@ -64,7 +64,7 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #        config file inside it with the name specified in project 
 #        settings file                  
 # 
-project settings add --name spring.roo.configuration.location --value src/main/config --force
+settings add --name spring.roo.configuration.location --value src/main/config --force
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #                                                              
 # Output:  Updated ROOT/.roo/config/project.properties
@@ -86,7 +86,7 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 # Goal:  Create a application file with a new name inside
 #        the same folder  
 #
-project settings add --name spring.roo.configuration.name --value application_test2 --force
+settings add --name spring.roo.configuration.name --value application_test2 --force
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #
 # Output: Updated ROOT/.roo/config/project.properties
@@ -105,7 +105,7 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #---------------------------------------------------------------------
 # Goal:   Create application config file using its default name
 #
-project settings remove --name spring.roo.configuration.name 
+settings remove --name spring.roo.configuration.name 
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #
 # Output: Updated ROOT/.roo/config/project.properties
@@ -127,7 +127,7 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #        it does not exists) and generate a default application 
 #        config file inside it           
 #
-project settings remove --name spring.roo.configuration.location
+settings remove --name spring.roo.configuration.location
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #
 # Output: Updated ROOT/.roo/config/project.properties
@@ -145,8 +145,8 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 # Goal:  Test nothing changes if jpa setup is executed several times 
 #        using the same application config settings           
 #
-project settings add --name spring.roo.configuration.name --value application_test2 --force
-project settings add --name spring.roo.configuration.location --value src/main/config --force
+settings add --name spring.roo.configuration.name --value application_test2 --force
+settings add --name spring.roo.configuration.location --value src/main/config --force
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 #
 # Output: Updated ROOT/.roo/config/project.properties

@@ -39,7 +39,7 @@
         <module>suite-manager</module>
         <module>rest-publisher</module>
         <module>application-config</module>
-        <module>project-settings</module>
+        <module>settings</module>
     </modules>
 
     <!-- Runtime dependency management: OSGi Services, Felix, ... -->

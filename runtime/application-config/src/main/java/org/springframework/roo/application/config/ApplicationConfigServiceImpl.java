@@ -12,8 +12,8 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.settings.ProjectSettingsService;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
+import org.springframework.roo.settings.project.ProjectSettingsService;
 
 /**
  * Provides a service to manage all necessary properties located on application

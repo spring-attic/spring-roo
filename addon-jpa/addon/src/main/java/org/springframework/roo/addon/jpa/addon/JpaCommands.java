@@ -33,7 +33,7 @@ import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.settings.ProjectSettingsService;
+import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
