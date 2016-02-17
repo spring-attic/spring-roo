@@ -15,6 +15,7 @@ import org.springframework.roo.shell.CommandMarker;
  * Commands for the JPA repository add-on.
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 @Component
@@ -28,11 +29,11 @@ public class RepositoryJpaCommands implements CommandMarker {
         return repositoryJpaOperations.isRepositoryInstallationPossible();
     }
 
-    @CliCommand(value = "repository jpa", help = "Adds @RooJpaRepository annotation to target type")
+    @CliCommand(value = "repository jpa", help = "Generates new Spring Data repository for specified entity.")
     public void repository(
-            @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
+            @CliOption(key = "class", mandatory = true, help = "The java Spring Data repository to generate (Will be an interface.)") final JavaType interfaceType,
             @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
 
-        repositoryJpaOperations.setupRepository(interfaceType, domainType);
+        repositoryJpaOperations.addRepository(interfaceType, domainType);
     }
 }

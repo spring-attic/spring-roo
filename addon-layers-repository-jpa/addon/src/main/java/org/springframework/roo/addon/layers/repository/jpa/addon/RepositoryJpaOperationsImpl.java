@@ -45,6 +45,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * The {@link RepositoryJpaOperations} implementation.
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 @Component
@@ -64,31 +65,16 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     protected void activate(final ComponentContext context) {
     	this.context = context.getBundleContext();
     }
-
-    public String getName() {
-        return FeatureNames.JPA;
-    }
-
-    public boolean isInstalledInModule(final String moduleName) {
-        // Check if spring-boot-starter-data-jpa has been included
-        Set<Dependency> dependencies = getProjectOperations()
-                .getFocusedProjectMetadata().getPom().getDependencies();
-
-        Dependency starter = new Dependency("org.springframework.boot",
-                "spring-boot-starter-data-jpa", "");
-
-        boolean hasStarter = dependencies.contains(starter);
-
-        return getProjectOperations().isFocusedProjectAvailable() && hasStarter;
-    }
-
+    
+    @Override
     public boolean isRepositoryInstallationPossible() {
         return isInstalledInModule(getProjectOperations().getFocusedModuleName())
                 && !getProjectOperations()
                         .isFeatureInstalledInFocusedModule(FeatureNames.MONGO);
     }
 
-    public void setupRepository(final JavaType interfaceType,
+    @Override
+    public void addRepository(final JavaType interfaceType,
             final JavaType domainType) {
         Validate.notNull(interfaceType, "Interface type required");
         Validate.notNull(domainType, "Domain type required");
@@ -197,5 +183,24 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     	}else{
     		return typeManagementService;
     	}
+    }
+    
+    // Feature methods
+    
+    public String getName() {
+        return FeatureNames.JPA;
+    }
+
+    public boolean isInstalledInModule(final String moduleName) {
+        // Check if spring-boot-starter-data-jpa has been included
+        Set<Dependency> dependencies = getProjectOperations()
+                .getFocusedProjectMetadata().getPom().getDependencies();
+
+        Dependency starter = new Dependency("org.springframework.boot",
+                "spring-boot-starter-data-jpa", "");
+
+        boolean hasStarter = dependencies.contains(starter);
+
+        return getProjectOperations().isFocusedProjectAvailable() && hasStarter;
     }
 }
