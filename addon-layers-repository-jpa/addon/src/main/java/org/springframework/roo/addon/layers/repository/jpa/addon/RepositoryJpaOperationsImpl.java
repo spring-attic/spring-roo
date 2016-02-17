@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -64,65 +65,21 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     	this.context = context.getBundleContext();
     }
 
-    private void configureProject() {
-        final Element configuration = XmlUtils.getConfiguration(getClass());
-
-        final List<Dependency> dependencies = new ArrayList<Dependency>();
-        final List<Element> springDependencies = XmlUtils.findElements(
-                "/configuration/spring-data-jpa/dependencies/dependency",
-                configuration);
-        for (final Element dependencyElement : springDependencies) {
-            dependencies.add(new Dependency(dependencyElement));
-        }
-
-        getProjectOperations().addDependencies(
-                getProjectOperations().getFocusedModuleName(), dependencies);
-
-        final String appCtxId = getPathResolver().getFocusedIdentifier(
-                Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
-        if (getFileManager().exists(appCtxId)) {
-            return;
-        }
-        else {
-            InputStream templateInputStream = null;
-            OutputStream outputStream = null;
-            try {
-                templateInputStream = getClass().getResourceAsStream(
-                        "applicationContext-jpa.xml");
-                Validate.notNull(templateInputStream,
-                        "Could not acquire 'applicationContext-jpa.xml' template");
-
-                String input = IOUtils.toString(templateInputStream);
-                input = input.replace("TO_BE_CHANGED_BY_ADDON",
-                        getProjectOperations().getFocusedTopLevelPackage()
-                                .getFullyQualifiedPackageName());
-                final MutableFile mutableFile = getFileManager()
-                        .createFile(appCtxId);
-                outputStream = mutableFile.getOutputStream();
-                IOUtils.write(input, outputStream);
-            }
-            catch (final IOException e) {
-                throw new IllegalStateException("Unable to create '" + appCtxId
-                        + "'", e);
-            }
-            finally {
-                IOUtils.closeQuietly(templateInputStream);
-                IOUtils.closeQuietly(outputStream);
-            }
-        }
-    }
-
     public String getName() {
         return FeatureNames.JPA;
     }
 
     public boolean isInstalledInModule(final String moduleName) {
-        final LogicalPath resourcesPath = LogicalPath.getInstance(
-                Path.SRC_MAIN_RESOURCES, moduleName);
-        return getProjectOperations().isFocusedProjectAvailable()
-                && getFileManager().exists(getProjectOperations().getPathResolver()
-                        .getIdentifier(resourcesPath,
-                                "META-INF/persistence.xml"));
+        // Check if spring-boot-starter-data-jpa has been included
+        Set<Dependency> dependencies = getProjectOperations()
+                .getFocusedProjectMetadata().getPom().getDependencies();
+
+        Dependency starter = new Dependency("org.springframework.boot",
+                "spring-boot-starter-data-jpa", "");
+
+        boolean hasStarter = dependencies.contains(starter);
+
+        return getProjectOperations().isFocusedProjectAvailable() && hasStarter;
     }
 
     public boolean isRepositoryInstallationPossible() {
@@ -156,8 +113,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         cidBuilder.addAnnotation(interfaceAnnotationMetadata.build());
         getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
-        // Take care of project configuration
-        configureProject();
     }
     
     public FileManager getFileManager(){
