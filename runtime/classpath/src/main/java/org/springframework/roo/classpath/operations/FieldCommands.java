@@ -26,9 +26,7 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.comments.CommentFormatter;
@@ -140,12 +138,15 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type") final boolean primitive,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
         
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails,
                 "The type specified, '%s', doesn't exist", typeName);
+        
+        checkFieldExists(fieldName, shellContext, javaTypeDetails);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -210,12 +211,15 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
             @CliOption(key = "dateFormat", mandatory = false, unspecifiedDefaultValue = "MEDIUM", specifiedDefaultValue = "MEDIUM", help = "Indicates the style of the date format (ignored if dateTimeFormatPattern is specified)") final DateTime dateFormat,
             @CliOption(key = "timeFormat", mandatory = false, unspecifiedDefaultValue = "NONE", specifiedDefaultValue = "NONE", help = "Indicates the style of the time format (ignored if dateTimeFormatPattern is specified)") final DateTime timeFormat,
-            @CliOption(key = "dateTimeFormatPattern", mandatory = false, help = "Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a") final String pattern) {
+            @CliOption(key = "dateTimeFormatPattern", mandatory = false, help = "Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a") final String pattern,
+            ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails,
                 "The type specified, '%s', doesn't exist", typeName);
+        
+        checkFieldExists(fieldName, shellContext, javaTypeDetails);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -257,7 +261,8 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
             @CliOption(key = "type", mandatory = true, optionContext = PROJECT, help = "The Java type of the @Embeddable class") final JavaType fieldType,
             @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the @Entity class to receive this field") final JavaType typeName,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
 
         // Check if the field type is a JPA @Embeddable class
         final ClassOrInterfaceTypeDetails cid = typeLocationService
@@ -267,6 +272,8 @@ public class FieldCommands implements CommandMarker {
                 "The specified target '--type' does not exist or can not be found. Please create this type first.");
         Validate.notNull(cid.getAnnotation(EMBEDDABLE),
                 "The field embedded command is only applicable to JPA @Embeddable field types.");
+        
+        checkFieldExists(fieldName, shellContext, cid);
 
         // Check if the requested entity is a JPA @Entity
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
@@ -334,12 +341,15 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "enumType", mandatory = false, help = "The fetch semantics at a JPA level") final EnumType enumType,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
         Validate.notNull(cid, "The type specified, '%s', doesn't exist",
                 typeName);
+        
+        checkFieldExists(fieldName, shellContext, cid);
 
         final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
         final EnumField fieldDetails = new EnumField(physicalTypeIdentifier,
@@ -402,12 +412,15 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
             @CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type if possible") final boolean primitive,
             @CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") final boolean unique,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
                 .getTypeDetails(typeName);
         Validate.notNull(javaTypeDetails,
                 "The type specified, '%s', doesn't exist", typeName);
+        
+        checkFieldExists(fieldName, shellContext, javaTypeDetails);
 
         final String physicalTypeIdentifier = javaTypeDetails
                 .getDeclaredByMetadataId();
@@ -496,13 +509,17 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(fieldType);
         Validate.notNull(
                 cid,
                 "The specified target '--type' does not exist or can not be found. Please create this type first.");
+        
+        final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
+        checkFieldExists(fieldName, shellContext, selfCid);
 
         // Check if the requested entity is a JPA @Entity
         final MemberDetails memberDetails = memberDetailsScanner
@@ -562,13 +579,17 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(fieldType);
         Validate.notNull(
                 cid,
                 "The specified target '--type' does not exist or can not be found. Please create this type first.");
+        
+        final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
+        checkFieldExists(fieldName, shellContext, selfCid);
 
         // Check if the requested entity is a JPA @Entity
         final MemberDetails memberDetails = memberDetailsScanner
@@ -640,13 +661,17 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
             @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(fieldType);
         Validate.notNull(
                 cid,
                 "The specified target '--type' does not exist or can not be found. Please create this type first.");
+        
+        final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
+        checkFieldExists(fieldName, shellContext, selfCid);
 
         // Check if the requested entity is a JPA @Entity
         final MemberDetails memberDetails = memberDetailsScanner
@@ -745,12 +770,15 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
             @CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") final boolean unique,
             @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords, 
-    	    @CliOption(key = "lob", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates that this field is a Large Object") final boolean lob) {
+    	    @CliOption(key = "lob", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates that this field is a Large Object") final boolean lob,
+    	    ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
         Validate.notNull(cid, "The type specified, '%s', doesn't exist",
                 typeName);
+        
+        checkFieldExists(fieldName, shellContext, cid);
 
         final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
         final StringField fieldDetails = new StringField(
@@ -824,13 +852,16 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "autoUpload", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the file is uploaded automatically when selected") final boolean autoUpload,
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
         Validate.notNull(cid, "The type specified, '%s', doesn't exist",
                 typeName);
 
+        checkFieldExists(fieldName, shellContext, cid);
+        
         final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
         final UploadedFileField fieldDetails = new UploadedFileField(
                 physicalTypeIdentifier, fieldName, contentType);
@@ -940,12 +971,15 @@ public class FieldCommands implements CommandMarker {
             @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
             @CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") final String value,
             @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+            ShellContext shellContext) {
 
         final ClassOrInterfaceTypeDetails cid = typeLocationService
                 .getTypeDetails(typeName);
         Validate.notNull(cid, "The type specified, '%s', doesn't exist",
                 typeName);
+        
+        checkFieldExists(fieldName, shellContext, cid);
 
         final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
         final FieldDetails fieldDetails = new FieldDetails(
@@ -974,5 +1008,27 @@ public class FieldCommands implements CommandMarker {
         // In a separate method in case we decide to check for JPA registration
         // in the future
         return projectOperations.isFocusedProjectAvailable();
+    }
+    
+    /**
+     * Checks if entity has already a field with the same name and throws an exception
+     * in that case.
+     * 
+     * @param fieldName
+     * @param shellContext
+     * @param javaTypeDetails
+     */
+    private void checkFieldExists(final JavaSymbolName fieldName,
+            ShellContext shellContext,
+            final ClassOrInterfaceTypeDetails javaTypeDetails) {
+        MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), javaTypeDetails);
+        List<FieldMetadata> fields = memberDetails.getFields();
+        for (FieldMetadata field : fields) {
+            if (field.getFieldName().equals(fieldName) && !shellContext.isForce()) {
+                throw new IllegalArgumentException(String.format(
+                        "Field '%s' already exists and cannot be created. Try to use a different field name on --fieldName parameter or use --force parameter to overwrite it.",
+                        fieldName));
+            }
+        }
     }
 }
