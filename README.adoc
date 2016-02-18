@@ -26,6 +26,10 @@ If you are looking for *Reference Documentation* you can get it http://docs.spri
 
 image:https://lh4.googleusercontent.com/-_DpgkWvc3bQ/UUwmwkLNdlI/AAAAAAAAAhU/kG3QSpLOhtw/s301/Logo_SpringRoo.png["Spring Roo Logo"]
 
+== Code of Conduct
+
+This project adheres to the Contributor Covenant ./CODE_OF_CONDUCT.adoc[code of conduct]. By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
 == Developer Instructions
 
 These instructions detail how to get started with your freshly checked-out source tree. Follow next steps to develop Spring Roo yourself.
