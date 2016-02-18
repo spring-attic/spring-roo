@@ -30,7 +30,7 @@ public class RepositoryJpaCustomImplAnnotationValues extends AbstractAnnotationV
     }
 
     /**
-     * Returns the entity type managed by the annotated repository
+     * Returns the repository type implemented by the annotated class
      * 
      * @return a non-<code>null</code> type
      */
