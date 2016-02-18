@@ -78,18 +78,7 @@ public class RepositoryJpaMetadata extends
         Validate.notNull(annotationValues, "Annotation values required");
         Validate.notNull(identifierType, "Id type required");
 
-        // Make the user's Repository interface extend Spring Data's
-        // JpaRepository interface if it doesn't already
-        ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0,
-                DataType.TYPE, null, Arrays.asList(
-                        annotationValues.getEntity(), identifierType)));
-
-        // ... and likewise extend JpaSpecificationExecutor<Foo>, to allow query
-        // by specification
-        ensureGovernorExtends(new JavaType(SPRING_JPA_SPECIFICATION_EXECUTOR,
-                0, DataType.TYPE, null, Arrays.asList(annotationValues
-                        .getEntity())));
-
+        // Add @Repository annotation
         builder.addAnnotation(new AnnotationMetadataBuilder(
                 SpringJavaType.REPOSITORY));
 

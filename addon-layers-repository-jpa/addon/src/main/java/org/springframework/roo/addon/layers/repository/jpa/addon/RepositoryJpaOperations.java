@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 
@@ -25,4 +26,11 @@ public interface RepositoryJpaOperations extends Feature {
      * @param domainType The domain entity this repository should expose
      */
     void addRepository(JavaType interfaceType, JavaType domainType);
+
+    /**
+     * Add new repository for all existing entities.
+     * 
+     * @param repositoriesPackage package where repositories will be generated
+     */
+    void generateAllRepositories(JavaPackage repositoriesPackage);
 }

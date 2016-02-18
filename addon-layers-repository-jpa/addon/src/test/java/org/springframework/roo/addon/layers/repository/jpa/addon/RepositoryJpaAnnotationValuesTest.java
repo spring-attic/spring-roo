@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
-import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaAnnotationValues;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
 import org.springframework.roo.classpath.details.annotations.populator.AnnotationValuesTestCase;
 

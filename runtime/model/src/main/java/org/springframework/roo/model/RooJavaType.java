@@ -59,6 +59,8 @@ public final class RooJavaType {
             "org.springframework.roo.addon.plural.annotations.RooPlural");
     public static final JavaType ROO_READ_ONLY_REPOSITORY = new JavaType(
             "org.springframework.roo.addon.layers.repository.jpa.annotations.RooReadOnlyRepository");
+    public static final JavaType ROO_REPOSITORY_JPA_CUSTOM = new JavaType(
+            "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom");
     public static final JavaType ROO_REPOSITORY_JPA = new JavaType(
             "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository");
     public static final JavaType ROO_REPOSITORY_MONGO = new JavaType(
