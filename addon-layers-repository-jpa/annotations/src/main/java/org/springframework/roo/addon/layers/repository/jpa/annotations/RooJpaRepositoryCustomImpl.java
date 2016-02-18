@@ -6,26 +6,27 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks the annotated type as a Custom Spring Data JPA repository interface.
+ * Marks the annotated type as a Custom Spring Data JPA repository
+ * implementation.
  * 
  * @author Juan Carlos García
  * @since 2.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooJpaRepositoryCustom {
+public @interface RooJpaRepositoryCustomImpl {
 
     /**
-     * The name of this annotation's attribute that specifies the managed
-     * entity.
+     * The name of this annotation's attribute that specifies The interface
+     * implemented by the annotated type
      */
-    String ENTITY_ATTRIBUTE = "entity";
+    String REPOSITORY_ATTRIBUTE = "repository";
 
     /**
-     * The entity managed by the annotated repository
+     * The interface implemented by the annotated type
      * 
      * @return a non-<code>null</code> entity type
      */
-    Class<?> entity(); // No default => mandatory
+    Class<?> repository(); // No default => mandatory
     
 }

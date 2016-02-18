@@ -25,11 +25,12 @@ public @interface RooJpaRepository {
      * entity.
      */
     String ENTITY_ATTRIBUTE = "entity";
-
+    
     /**
      * The entity managed by the annotated repository
      * 
      * @return a non-<code>null</code> entity type
      */
     Class<?> entity(); // No default => mandatory
+    
 }

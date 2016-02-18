@@ -1,37 +1,38 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
+import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Metadata for {@link RooJpaRepository}.
+ * Metadata for {@link RooJpaRepositoryCustomImpl}.
  * 
- * @author Stefan Schmidt
- * @author Andrew Swan
- * @since 1.2.0
+ * @author Juan Carlos García
+ * @since 2.0
  */
-public class RepositoryJpaMetadata extends
+public class RepositoryJpaCustomImplMetadata extends
         AbstractItdTypeDetailsProvidingMetadataItem {
 
-    private static final String PROVIDES_TYPE_STRING = RepositoryJpaMetadata.class
+    private static final String PROVIDES_TYPE_STRING = RepositoryJpaCustomImplMetadata.class
             .getName();
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
-    private static final String SPRING_JPA_REPOSITORY = "org.springframework.data.jpa.repository.JpaRepository";
+    
+    private static final JavaType QUERY_DSL_REPOSITORY_SUPPORT = new JavaType(
+            "org.springframework.data.jpa.repository.support.QueryDslRepositorySupport");
+    
+    private ImportRegistrationResolver importResolver;
 
     public static String createIdentifier(final JavaType javaType,
             final LogicalPath path) {
@@ -68,46 +69,49 @@ public class RepositoryJpaMetadata extends
      * @param annotationValues (required)
      * @param identifierType the type of the entity's identifier field
      *            (required)
+     * @param domainType entity referenced on interface
      */
-    public RepositoryJpaMetadata(final String identifier,
+    public RepositoryJpaCustomImplMetadata(final String identifier,
             final JavaType aspectName,
             final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-            final RepositoryJpaAnnotationValues annotationValues,
-            final JavaType identifierType, final boolean readOnly,
-            final JavaType readOnlyRepository,
-            final List<JavaType> customRepositories) {
+            final RepositoryJpaCustomImplAnnotationValues annotationValues,
+            final JavaType domainType) {
         super(identifier, aspectName, governorPhysicalTypeMetadata);
         Validate.notNull(annotationValues, "Annotation values required");
-        Validate.notNull(identifierType, "Id type required");
         
-        if(readOnly){
-            // If readOnly, extends ReadOnlyRepository
-            ensureGovernorExtends(
-                    new JavaType(readOnlyRepository.getFullyQualifiedTypeName(),
-                            0, DataType.TYPE, null,
-                            Arrays.asList(annotationValues.getEntity(),
-                                    identifierType)));
-        }else{
-            // Extends JpaRepository
-            ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0,
-                    DataType.TYPE, null,
-                    Arrays.asList(annotationValues.getEntity(), identifierType)));
-        }
+        this.importResolver = builder.getImportRegistrationResolver();
         
-        // If has some RepositoryCustom associated, add extends
-        if(!customRepositories.isEmpty()){
-            // Extends RepositoryCustom
-            for(JavaType repositoryCustom : customRepositories){
-                ensureGovernorExtends(repositoryCustom);
-            }
-        }
-
-        // Always add @Repository annotation
-        builder.addAnnotation(new AnnotationMetadataBuilder(
-                SpringJavaType.REPOSITORY));
+        // RepositoryCustom implementation always extends QueryDslRepositorySupport
+        ensureGovernorExtends(QUERY_DSL_REPOSITORY_SUPPORT);
+        
+        // Get repository that needs to be implemented
+        ensureGovernorImplements(annotationValues.getRepository());
+        
+        // Add constructor
+        builder.addConstructor(getRepositoryCustomImplConstructor(domainType));
 
         // Build the ITD
         itdTypeDetails = builder.build();
+    }
+    
+    /**
+     * Returns constructor for RepositoryCustom implementation
+     * 
+     * @param domainType referenced entity
+     * @return ConstructorMetadata that contains necessary body
+     */
+    private ConstructorMetadata getRepositoryCustomImplConstructor(JavaType domainType) {
+        // Generating constructor builder
+        ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
+
+        // Generating body
+        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine(String.format("super(%s.class);",
+                domainType.getNameIncludingTypeParameters(false,
+                        importResolver)));
+        constructorBuilder.setBodyBuilder(bodyBuilder);
+
+        return constructorBuilder.build();
     }
 
     @Override
