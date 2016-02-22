@@ -105,6 +105,12 @@ public class RepositoryJpaMetadata extends
         // Always add @Repository annotation
         builder.addAnnotation(new AnnotationMetadataBuilder(
                 SpringJavaType.REPOSITORY));
+        
+        // All repositories are generated with @Transactional(readOnly = true)
+        AnnotationMetadataBuilder transactionalAnnotation = new AnnotationMetadataBuilder(
+                SpringJavaType.TRANSACTIONAL);
+        transactionalAnnotation.addBooleanAttribute("readOnly", true);
+        builder.addAnnotation(transactionalAnnotation);
 
         // Build the ITD
         itdTypeDetails = builder.build();
