@@ -54,4 +54,11 @@ public interface ClassOrInterfaceTypeDetails extends MemberHoldingTypeDetails {
      * @return see above
      */
     boolean isAbstract();
+    
+    /**
+     * Indicates whether this element is an interface
+     * 
+     * @return see above
+     */
+    boolean isInterface();
 }

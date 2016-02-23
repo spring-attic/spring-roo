@@ -211,6 +211,10 @@ public class DefaultClassOrInterfaceTypeDetails extends
                 || physicalTypeCategory == CLASS
                 && Modifier.isAbstract(getModifier());
     }
+    
+    public boolean isInterface() {
+        return physicalTypeCategory.equals(INTERFACE);
+    }
 
     @Override
     public String toString() {

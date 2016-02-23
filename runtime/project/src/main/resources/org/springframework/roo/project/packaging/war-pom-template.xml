@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.spring.platform</groupId>
         <artifactId>platform-bom</artifactId>
-        <version>2.0.0.RELEASE</version>
+        <version>2.0.2.RELEASE</version>
         <relativePath/>
     </parent>
     <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
@@ -35,12 +35,24 @@
         
         <!-- Spring Roo annotations -->
         <dependency>
-		    <groupId>org.springframework.roo</groupId>
-		    <artifactId>org.springframework.roo.annotations</artifactId>
-		    <version>${roo.version}</version>
-		    <type>pom</type>
-		</dependency>
-		
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.annotations</artifactId>
+            <version>${roo.version}</version>
+            <type>pom</type>
+        </dependency>
+        
+        <!-- AspectJ dependencies -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+
+        <!-- Dependencies added by Spring Roo -->
+
     </dependencies>
     
     <build>
@@ -49,6 +61,28 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            
+            <!-- AspectJ plugins -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outxml>true</outxml>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <weaveWithAspectsInMainSourceFolder>false</weaveWithAspectsInMainSourceFolder>
+                </configuration>
             </plugin>
         </plugins>
     </build>
