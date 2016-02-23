@@ -608,9 +608,8 @@ public class DbreDatabaseListenerImpl extends
             for (final ClassOrInterfaceTypeDetails entity : newEntities) {
                 final JavaType type = entity.getType();
                 final String typeName = type.getFullyQualifiedTypeName();
-                getServiceOperations().setupService(new JavaType(typeName
-                        + "Service"), new JavaType(typeName + "ServiceImpl"),
-                        type, false, "", false, false);
+                getServiceOperations().addService(type, new JavaType(typeName
+                        + "Service"), null);
             }
         }
 

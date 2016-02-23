@@ -4,23 +4,38 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
 /**
+ * API that defines all available operations for service layer management.
+ * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 public interface ServiceOperations {
 
-    boolean isServiceInstallationPossible();
+    /**
+     * Check if developer is able to use 'service' commands
+     * 
+     * @return true if service commands are available
+     */
+    boolean areServiceCommandsAvailable();
 
-    boolean isSecureServiceInstallationPossible();
+    /**
+     * Generates new service interface and its implementation for some specific
+     * domain entity.
+     * 
+     * @param domainType entity related with service
+     * @param interfaceType service interface to generate
+     * @param implType service implementation to generate. 
+     */
+    void addService(JavaType domainType, JavaType interfaceType, JavaType implType);
 
-    void setupService(JavaType interfaceType, JavaType classType,
-            JavaType domainType, boolean requireAuthentication,
-            String authorizedRole, boolean usePermissionEvalutor,
-            boolean useXmlConfiguration);
-
-    void setupAllServices(JavaPackage interfacePackage,
-            JavaPackage classPackage, boolean requireAuthentication,
-            String authorizedRole, boolean usePermissionEvalutor,
-            boolean useXmlConfiguration);
+    /**
+     * Generates new services interface and its implementations for every domain
+     * entity of generated project
+     * 
+     * @param apiPackage
+     * @param implPackage
+     */
+    void addAllServices(JavaPackage apiPackage, JavaPackage implPackage);
 
 }

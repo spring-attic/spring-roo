@@ -73,6 +73,8 @@ public final class RooJavaType {
             "org.springframework.roo.addon.javabean.annotations.RooSerializable");
     public static final JavaType ROO_SERVICE = new JavaType(
             "org.springframework.roo.addon.layers.service.annotations.RooService");
+    public static final JavaType ROO_SERVICE_IMPL = new JavaType(
+            "org.springframework.roo.addon.layers.service.annotations.RooServiceImpl");
     public static final JavaType ROO_SOLR_SEARCHABLE = new JavaType(
             "org.springframework.roo.addon.solr.RooSolrSearchable");
     public static final JavaType ROO_SOLR_WEB_SEARCHABLE = new JavaType(

@@ -2,6 +2,9 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -11,12 +14,18 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.ShellContext;
 
 /**
- * Shell commands that create domain services.
+ * This class defines available commands to manage service layer. Allows to
+ * create new service related with some specific entity or generate services for
+ * every entity defined on generated project. Always generates interface and its
+ * implementation
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 @Component
@@ -26,51 +35,50 @@ public class ServiceCommands implements CommandMarker {
     @Reference private ServiceOperations serviceOperations;
     @Reference private ProjectOperations projectOperations;
 
-    @CliAvailabilityIndicator({ "service type", "service all" })
+    @CliAvailabilityIndicator({ "service add", "service all" })
     public boolean isServiceCommandAvailable() {
-        return serviceOperations.isServiceInstallationPossible();
+        return serviceOperations.areServiceCommandsAvailable();
     }
-
-    @CliAvailabilityIndicator({ "service secure type", "service secure all" })
+    
+    // ROO-3717: Service secure methods will be updated on future commits
+    /*@CliAvailabilityIndicator({ "service secure type", "service secure all" })
     public boolean isSecureServiceCommandAvailable() {
         return serviceOperations.isSecureServiceInstallationPossible();
+    }*/
+    
+    @CliOptionVisibilityIndicator(command = "service add", params="interface", help="--interface parameter is not availbale if you don't specify --entity parameter")
+    public boolean isIterfaceVisible(ShellContext shellContext) {
+
+        // Get all defined parameters
+        Map<String, String> parameters = shellContext.getParameters();
+
+        // If --entity has been defined, show --class parameter
+        if (parameters.containsKey("entity")
+                && StringUtils.isNotBlank(parameters.get("entity"))) {
+            return true;
+        }
+        return false;
     }
 
-    @CliCommand(value = "service type", help = "Adds @RooService annotation to target type")
+    @CliCommand(value = "service add", help = "Creates new service interface and its implementation.")
     public void service(
-            @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-            @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this service should expose") final JavaType domainType,
-            @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
+            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = true, help = "The domain entity this service should expose") final JavaType domainType,
+            @CliOption(key = "interface", mandatory = true, help = "The service interface to be generated") final JavaType interfaceType,
+            @CliOption(key = "class", mandatory = false, help = "The service implementation to be generated") final JavaType implType) {
 
-        if (classType == null) {
-            classType = new JavaType(interfaceType.getFullyQualifiedTypeName()
-                    + "Impl");
-        }
-        if (useXmlConfiguration == null) {
-            useXmlConfiguration = Boolean.FALSE;
-        }
-        serviceOperations.setupService(interfaceType, classType, domainType,
-                false, "", false, useXmlConfiguration);
+        serviceOperations.addService(domainType, interfaceType, implType);
     }
 
-    @CliCommand(value = "service all", help = "Adds @RooService annotation to all entities")
+    @CliCommand(value = "service all", help = "Creates new service interface and its implementation for every entity of generated project.")
     public void service(
-            @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
-            @CliOption(key = "classPackage", mandatory = false, help = "The java package of the implementation classes for the interfaces") JavaPackage classPackage,
-            @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.  This is the default behavior for services using GAE") Boolean useXmlConfiguration) {
+            @CliOption(key = "apiPackage", mandatory = true, help = "The java interface package") final JavaPackage apiPackage,
+            @CliOption(key = "implPackage", mandatory = true, help = "The java package of the implementation classes for the interfaces") JavaPackage implPackage) {
 
-        if (classPackage == null) {
-            classPackage = interfacePackage;
-        }
-        if (useXmlConfiguration == null) {
-            useXmlConfiguration = Boolean.FALSE;
-        }
-        serviceOperations.setupAllServices(interfacePackage, classPackage,
-                false, "", false, useXmlConfiguration);
+        serviceOperations.addAllServices(apiPackage, implPackage);
     }
-
-    @CliCommand(value = "service secure type", help = "Adds @RooService annotation to target type with options for authentication, authorization, and a permission evaluator")
+    
+    // ROO-3717: Service secure methods will be updated on future commits
+    /*@CliCommand(value = "service secure type", help = "Adds @RooService annotation to target type with options for authentication, authorization, and a permission evaluator")
     public void secureService(
             @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
             @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
@@ -110,5 +118,5 @@ public class ServiceCommands implements CommandMarker {
         serviceOperations.setupAllServices(interfacePackage, classPackage,
                 requireAuthentication, role, usePermissionEvaluator,
                 useXmlConfiguration);
-    }
+    }*/
 }
