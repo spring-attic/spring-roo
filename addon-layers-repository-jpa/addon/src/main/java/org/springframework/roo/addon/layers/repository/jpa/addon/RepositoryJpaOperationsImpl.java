@@ -27,9 +27,12 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -308,6 +311,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
                 new JavaSymbolName("repository"), interfaceType));
         
         implBuilder.addAnnotation(repositoryCustomImplAnnotationMetadata);
+        
+        // Adding default constructor
+        implBuilder.addConstructor(getRepositoryCustomImplConstructor(implType, domainType));
 
         // Save RepositoryCustom interface and its implementation on disk
         getTypeManagementService()
@@ -317,6 +323,30 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         
         return interfaceType;
 
+    }
+    
+    /**
+     * Returns constructor for RepositoryCustom implementation
+     * 
+     * @param implTaype new repositoryCustom implementation javatype
+     * @param domainType referenced entity
+     * @return ConstructorMetadata that contains necessary body
+     */
+    private ConstructorMetadata getRepositoryCustomImplConstructor(
+            JavaType implType, JavaType domainType) {
+        // Generating constructor builder
+        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(implType,
+                pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+        ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(
+                declaredByMetadataId);
+
+        // Generating body
+        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+        bodyBuilder.appendFormalLine(String.format("super(%s.class);",
+                domainType.getSimpleTypeName()));
+        constructorBuilder.setBodyBuilder(bodyBuilder);
+
+        return constructorBuilder.build();
     }
 
     public FileManager getFileManager(){

@@ -6,10 +6,7 @@ import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRep
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaType;
@@ -87,33 +84,10 @@ public class RepositoryJpaCustomImplMetadata extends
         // Get repository that needs to be implemented
         ensureGovernorImplements(annotationValues.getRepository());
         
-        // Add constructor
-        builder.addConstructor(getRepositoryCustomImplConstructor(domainType));
-
         // Build the ITD
         itdTypeDetails = builder.build();
     }
     
-    /**
-     * Returns constructor for RepositoryCustom implementation
-     * 
-     * @param domainType referenced entity
-     * @return ConstructorMetadata that contains necessary body
-     */
-    private ConstructorMetadata getRepositoryCustomImplConstructor(JavaType domainType) {
-        // Generating constructor builder
-        ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
-
-        // Generating body
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine(String.format("super(%s.class);",
-                domainType.getNameIncludingTypeParameters(false,
-                        importResolver)));
-        constructorBuilder.setBodyBuilder(bodyBuilder);
-
-        return constructorBuilder.build();
-    }
-
     @Override
     public String toString() {
         final ToStringBuilder builder = new ToStringBuilder(this);
