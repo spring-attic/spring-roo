@@ -19,54 +19,48 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 public class CreateDirectory implements UndoableOperation {
 
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(CreateDirectory.class);
+  private static final Logger LOGGER = HandlerUtils.getLogger(CreateDirectory.class);
 
-    private final File actual;
-    private File deleteFrom;
-    private final FilenameResolver filenameResolver;
+  private final File actual;
+  private File deleteFrom;
+  private final FilenameResolver filenameResolver;
 
-    public CreateDirectory(final UndoManager undoManager,
-            final FilenameResolver filenameResolver, final File actual) {
-        Validate.notNull(undoManager, "Undo manager required");
-        Validate.notNull(actual, "Actual file required");
-        Validate.notNull(filenameResolver, "Filename resolver required");
-        Validate.isTrue(!actual.exists(), "Actual file '%s' cannot exist",
-                actual);
-        this.filenameResolver = filenameResolver;
-        this.actual = actual;
+  public CreateDirectory(final UndoManager undoManager, final FilenameResolver filenameResolver,
+      final File actual) {
+    Validate.notNull(undoManager, "Undo manager required");
+    Validate.notNull(actual, "Actual file required");
+    Validate.notNull(filenameResolver, "Filename resolver required");
+    Validate.isTrue(!actual.exists(), "Actual file '%s' cannot exist", actual);
+    this.filenameResolver = filenameResolver;
+    this.actual = actual;
 
-        // Figure out the first directory we should delete from
-        deleteFrom = actual;
-        while (true) {
-            final File parent = deleteFrom.getParentFile();
-            if (!parent.exists()) {
-                deleteFrom = parent;
-            }
-            else {
-                break;
-            }
-        }
-
-        Validate.validState(this.actual.mkdirs(),
-                "Could not create directory '%s'", actual);
-        undoManager.add(this);
-        LOGGER.fine("Created " + filenameResolver.getMeaningfulName(actual));
+    // Figure out the first directory we should delete from
+    deleteFrom = actual;
+    while (true) {
+      final File parent = deleteFrom.getParentFile();
+      if (!parent.exists()) {
+        deleteFrom = parent;
+      } else {
+        break;
+      }
     }
 
-    public void reset() {
-    }
+    Validate.validState(this.actual.mkdirs(), "Could not create directory '%s'", actual);
+    undoManager.add(this);
+    LOGGER.fine("Created " + filenameResolver.getMeaningfulName(actual));
+  }
 
-    public boolean undo() {
-        boolean success = true;
-        try {
-            FileUtils.deleteDirectory(deleteFrom);
-        }
-        catch (IOException e) {
-            success = false;
-        }
-        LOGGER.fine((success ? "Undo create " : "Undo failed ")
-                + filenameResolver.getMeaningfulName(actual));
-        return success;
+  public void reset() {}
+
+  public boolean undo() {
+    boolean success = true;
+    try {
+      FileUtils.deleteDirectory(deleteFrom);
+    } catch (IOException e) {
+      success = false;
     }
+    LOGGER.fine((success ? "Undo create " : "Undo failed ")
+        + filenameResolver.getMeaningfulName(actual));
+    return success;
+  }
 }

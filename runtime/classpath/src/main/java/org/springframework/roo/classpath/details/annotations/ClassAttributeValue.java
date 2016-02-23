@@ -14,29 +14,28 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @since 1.0
  */
-public class ClassAttributeValue extends
-        AbstractAnnotationAttributeValue<JavaType> {
+public class ClassAttributeValue extends AbstractAnnotationAttributeValue<JavaType> {
 
-    private final JavaType value;
+  private final JavaType value;
 
-    /**
-     * Constructor
-     * 
-     * @param name the attribute name (required)
-     * @param value the value (required)
-     */
-    public ClassAttributeValue(final JavaSymbolName name, final JavaType value) {
-        super(name);
-        Validate.notNull(value, "Value required");
-        this.value = value;
-    }
+  /**
+   * Constructor
+   * 
+   * @param name the attribute name (required)
+   * @param value the value (required)
+   */
+  public ClassAttributeValue(final JavaSymbolName name, final JavaType value) {
+    super(name);
+    Validate.notNull(value, "Value required");
+    this.value = value;
+  }
 
-    public JavaType getValue() {
-        return value;
-    }
+  public JavaType getValue() {
+    return value;
+  }
 
-    @Override
-    public String toString() {
-        return getName() + " -> " + value.getNameIncludingTypeParameters();
-    }
+  @Override
+  public String toString() {
+    return getName() + " -> " + value.getNameIncludingTypeParameters();
+  }
 }

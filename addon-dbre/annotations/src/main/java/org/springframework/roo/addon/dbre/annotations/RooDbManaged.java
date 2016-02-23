@@ -16,8 +16,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooDbManaged {
 
-    /**
-     * @return whether to delete the database-managed entity (defaults to true).
-     */
-    boolean automaticallyDelete() default true;
+  /**
+   * @return whether to delete the database-managed entity (defaults to true).
+   */
+  boolean automaticallyDelete() default true;
 }

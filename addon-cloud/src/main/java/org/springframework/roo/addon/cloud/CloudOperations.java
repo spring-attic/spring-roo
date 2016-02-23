@@ -12,37 +12,37 @@ import org.springframework.roo.addon.cloud.providers.CloudProviderId;
  * @since 1.2.6
  */
 public interface CloudOperations {
-	
-	/**
-	 * This method checks if setup command is available
-	 * 
-	 * @return (boolean) 
-	 */
-	boolean isSetupCommandAvailable();
 
-	/**
-	 * This method execute install provider method
-	 * 
-	 * @param provider
-	 * @param configuration 
-	 */
-	void installProvider(CloudProviderId provider, String configuration);
+  /**
+   * This method checks if setup command is available
+   * 
+   * @return (boolean) 
+   */
+  boolean isSetupCommandAvailable();
 
-	/**
-	 * 
-	 * Get available providers on the system
-	 * 
-	 * @return A CloudProviderId List
-	 */
-	List<CloudProviderId> getProvidersId();
+  /**
+   * This method execute install provider method
+   * 
+   * @param provider
+   * @param configuration 
+   */
+  void installProvider(CloudProviderId provider, String configuration);
 
-	/**
-	 * Gets the current provider by name
-	 * 
-	 * @param name
-	 *            Provider Name
-	 * @return CloudProviderId
-	 */
-	CloudProviderId getProviderIdByName(String name);
+  /**
+   * 
+   * Get available providers on the system
+   * 
+   * @return A CloudProviderId List
+   */
+  List<CloudProviderId> getProvidersId();
+
+  /**
+   * Gets the current provider by name
+   * 
+   * @param name
+   *            Provider Name
+   * @return CloudProviderId
+   */
+  CloudProviderId getProviderIdByName(String name);
 
 }

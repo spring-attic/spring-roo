@@ -8,36 +8,36 @@ package org.springframework.roo.addon.web.mvc.controller.addon.details;
  */
 public class DateTimeFormatDetails {
 
-    /**
-     * Factory method for a {@link DateTimeFormatDetails} with the given pattern
-     * 
-     * @param the pattern to set (can be <code>null</code>)
-     * @return a non-<code>null</code> instance
-     */
-    public static DateTimeFormatDetails withPattern(final String pattern) {
-        final DateTimeFormatDetails instance = new DateTimeFormatDetails();
-        instance.pattern = pattern;
-        return instance;
-    }
+  /**
+   * Factory method for a {@link DateTimeFormatDetails} with the given pattern
+   * 
+   * @param the pattern to set (can be <code>null</code>)
+   * @return a non-<code>null</code> instance
+   */
+  public static DateTimeFormatDetails withPattern(final String pattern) {
+    final DateTimeFormatDetails instance = new DateTimeFormatDetails();
+    instance.pattern = pattern;
+    return instance;
+  }
 
-    /**
-     * Factory method for a {@link DateTimeFormatDetails} with the given style
-     * 
-     * @param style the style to set (can be <code>null</code>)
-     * @return a non-<code>null</code> instance
-     */
-    public static DateTimeFormatDetails withStyle(final String style) {
-        final DateTimeFormatDetails instance = new DateTimeFormatDetails();
-        instance.style = style;
-        return instance;
-    }
+  /**
+   * Factory method for a {@link DateTimeFormatDetails} with the given style
+   * 
+   * @param style the style to set (can be <code>null</code>)
+   * @return a non-<code>null</code> instance
+   */
+  public static DateTimeFormatDetails withStyle(final String style) {
+    final DateTimeFormatDetails instance = new DateTimeFormatDetails();
+    instance.style = style;
+    return instance;
+  }
 
-    public String pattern;
-    public String style;
+  public String pattern;
+  public String style;
 
-    @Override
-    public String toString() {
-        // For debugging
-        return style + ":" + pattern;
-    }
+  @Override
+  public String toString() {
+    // For debugging
+    return style + ":" + pattern;
+  }
 }

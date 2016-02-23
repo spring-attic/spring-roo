@@ -8,5 +8,5 @@ package org.springframework.roo.addon.web.mvc.embedded;
  */
 public interface EmbeddedCompletor {
 
-    String name();
+  String name();
 }

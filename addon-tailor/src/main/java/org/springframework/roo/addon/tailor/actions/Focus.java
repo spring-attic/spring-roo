@@ -29,60 +29,57 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class Focus extends AbstractAction {
 
-    @Reference protected ProjectOperations projectOperations;
+  @Reference
+  protected ProjectOperations projectOperations;
 
-    private final String baseCommand = "module focus --moduleName ";
+  private final String baseCommand = "module focus --moduleName ";
 
-    @Override
-    public void executeImpl(final CommandTransformation trafo,
-            final ActionConfig config) {
-        if ("~".equals(config.getModule())) {
-            trafo.addOutputCommand(baseCommand, "~");
-            return;
-        }
-
-        // If a command is tailored right after the shell was started, sometimes
-        // the module names are not yet loaded
-        if (projectOperations.getModuleNames().isEmpty()) {
-            throw new IllegalStateException(
-                    "Module names not loaded, please try again.");
-        }
-
-        // If comma-separated list: Module name will be checked against both
-        // those values
-        final String[] matches = config.getModule().split(",");
-
-        // If not root: Check if module name actually exists
-        for (final String moduleName : projectOperations.getModuleNames()) {
-            // if (StringUtils.isEmpty(moduleName)) {
-            // continue;
-            // }
-            boolean matchesAll = true;
-            for (final String matche : matches) {
-                final String match = matche;
-                if (match.startsWith("/")
-                        && moduleName.contains(match.substring(1))) {
-                    matchesAll = false;
-                    break;
-                }
-                else if (!match.startsWith("/") && !moduleName.contains(match)) {
-                    matchesAll = false;
-                    break;
-                }
-            }
-            if (matchesAll) {
-                trafo.addOutputCommand(baseCommand, moduleName);
-                return;
-            }
-        }
+  @Override
+  public void executeImpl(final CommandTransformation trafo, final ActionConfig config) {
+    if ("~".equals(config.getModule())) {
+      trafo.addOutputCommand(baseCommand, "~");
+      return;
     }
 
-    public String getDescription(final ActionConfig config) {
-        return "Focusing: " + config.getModule();
+    // If a command is tailored right after the shell was started, sometimes
+    // the module names are not yet loaded
+    if (projectOperations.getModuleNames().isEmpty()) {
+      throw new IllegalStateException("Module names not loaded, please try again.");
     }
 
-    public boolean isValid(final ActionConfig config) {
-        return config != null && StringUtils.isNotBlank(config.getModule());
+    // If comma-separated list: Module name will be checked against both
+    // those values
+    final String[] matches = config.getModule().split(",");
+
+    // If not root: Check if module name actually exists
+    for (final String moduleName : projectOperations.getModuleNames()) {
+      // if (StringUtils.isEmpty(moduleName)) {
+      // continue;
+      // }
+      boolean matchesAll = true;
+      for (final String matche : matches) {
+        final String match = matche;
+        if (match.startsWith("/") && moduleName.contains(match.substring(1))) {
+          matchesAll = false;
+          break;
+        } else if (!match.startsWith("/") && !moduleName.contains(match)) {
+          matchesAll = false;
+          break;
+        }
+      }
+      if (matchesAll) {
+        trafo.addOutputCommand(baseCommand, moduleName);
+        return;
+      }
     }
+  }
+
+  public String getDescription(final ActionConfig config) {
+    return "Focusing: " + config.getModule();
+  }
+
+  public boolean isValid(final ActionConfig config) {
+    return config != null && StringUtils.isNotBlank(config.getModule());
+  }
 
 }

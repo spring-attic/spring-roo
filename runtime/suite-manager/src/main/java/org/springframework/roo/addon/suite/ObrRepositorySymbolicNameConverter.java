@@ -27,89 +27,87 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Component
 @Service
-public class ObrRepositorySymbolicNameConverter implements
-        Converter<ObrRepositorySymbolicName> {
-	
-	private BundleContext context;
-	private static final Logger LOGGER = HandlerUtils
-			.getLogger(ObrRepositorySymbolicNameConverter.class);
+public class ObrRepositorySymbolicNameConverter implements Converter<ObrRepositorySymbolicName> {
 
-    @Reference private AddonSuiteOperations operations;
-    private RepositoryAdmin repositoryAdmin;
-    
-    private List<Repository> repositories;
-    
-    protected void activate(final ComponentContext cContext) {
-		context = cContext.getBundleContext();
-		repositories = new ArrayList<Repository>();
-	}
-    
+  private BundleContext context;
+  private static final Logger LOGGER = HandlerUtils
+      .getLogger(ObrRepositorySymbolicNameConverter.class);
 
-    public ObrRepositorySymbolicName convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        return new ObrRepositorySymbolicName(value.trim());
+  @Reference
+  private AddonSuiteOperations operations;
+  private RepositoryAdmin repositoryAdmin;
+
+  private List<Repository> repositories;
+
+  protected void activate(final ComponentContext cContext) {
+    context = cContext.getBundleContext();
+    repositories = new ArrayList<Repository>();
+  }
+
+
+  public ObrRepositorySymbolicName convertFromText(final String value, final Class<?> requiredType,
+      final String optionContext) {
+    return new ObrRepositorySymbolicName(value.trim());
+  }
+
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String originalUserInput, final String optionContext,
+      final MethodTarget target) {
+
+    // Getting installed repositories
+    populateRepositories();
+
+    for (Repository repo : repositories) {
+      completions.add(new Completion(repo.getURI()));
     }
+    return false;
+  }
 
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String originalUserInput,
-            final String optionContext, final MethodTarget target) {
-    	
-    	// Getting installed repositories
-    	populateRepositories();
-    	
-    	for(Repository repo : repositories){
-			completions.add(new Completion(repo.getURI()));
-    	}
-        return false;
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return ObrRepositorySymbolicName.class.isAssignableFrom(requiredType);
+  }
+
+  /**
+  * Method to populate current Repositories using OSGi Serive
+  */
+  private void populateRepositories() {
+
+    // Cleaning Repositories
+    repositories.clear();
+
+    // Validating that RepositoryAdmin exists
+    Validate.notNull(getRepositoryAdmin(), "RepositoryAdmin not found");
+
+    for (Repository repo : getRepositoryAdmin().listRepositories()) {
+      repositories.add(repo);
     }
+  }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return ObrRepositorySymbolicName.class.isAssignableFrom(requiredType);
+  /**
+   * Method to get RepositoryAdmin Service implementation
+   * 
+   * @return
+   */
+  public RepositoryAdmin getRepositoryAdmin() {
+    if (repositoryAdmin == null) {
+      // Get all Services implement RepositoryAdmin interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(RepositoryAdmin.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          repositoryAdmin = (RepositoryAdmin) context.getService(ref);
+          return repositoryAdmin;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load RepositoryAdmin on AddonSearchImpl.");
+        return null;
+      }
+    } else {
+      return repositoryAdmin;
     }
-    
-    /**
-	 * Method to populate current Repositories using OSGi Serive
-	 */
-	private void populateRepositories() {
-
-		// Cleaning Repositories
-		repositories.clear();
-
-		// Validating that RepositoryAdmin exists
-		Validate.notNull(getRepositoryAdmin(), "RepositoryAdmin not found");
-
-		for (Repository repo : getRepositoryAdmin().listRepositories()) {
-			repositories.add(repo);
-		}
-	}
-    
-	/**
-	 * Method to get RepositoryAdmin Service implementation
-	 * 
-	 * @return
-	 */
-	public RepositoryAdmin getRepositoryAdmin() {
-		if (repositoryAdmin == null) {
-			// Get all Services implement RepositoryAdmin interface
-			try {
-				ServiceReference<?>[] references = context
-						.getAllServiceReferences(
-								RepositoryAdmin.class.getName(), null);
-
-				for (ServiceReference<?> ref : references) {
-					repositoryAdmin = (RepositoryAdmin) context.getService(ref);
-					return repositoryAdmin;
-				}
-
-				return null;
-
-			} catch (InvalidSyntaxException e) {
-				LOGGER.warning("Cannot load RepositoryAdmin on AddonSearchImpl.");
-				return null;
-			}
-		} else {
-			return repositoryAdmin;
-		}
-	}
+  }
 }

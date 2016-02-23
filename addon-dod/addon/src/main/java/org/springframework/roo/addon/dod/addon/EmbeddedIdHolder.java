@@ -16,29 +16,27 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public class EmbeddedIdHolder {
 
-    private final FieldMetadata embeddedIdField;
-    private final List<FieldMetadata> idFields;
+  private final FieldMetadata embeddedIdField;
+  private final List<FieldMetadata> idFields;
 
-    public EmbeddedIdHolder(final FieldMetadata embeddedIdField,
-            final List<FieldMetadata> idFields) {
-        Validate.notNull(embeddedIdField, "Identifier type required");
-        Validate.notNull(idFields, "Fields for %s required", embeddedIdField
-                .getFieldType().getFullyQualifiedTypeName());
-        this.embeddedIdField = embeddedIdField;
-        this.idFields = idFields;
-    }
+  public EmbeddedIdHolder(final FieldMetadata embeddedIdField, final List<FieldMetadata> idFields) {
+    Validate.notNull(embeddedIdField, "Identifier type required");
+    Validate.notNull(idFields, "Fields for %s required", embeddedIdField.getFieldType()
+        .getFullyQualifiedTypeName());
+    this.embeddedIdField = embeddedIdField;
+    this.idFields = idFields;
+  }
 
-    public FieldMetadata getEmbeddedIdField() {
-        return embeddedIdField;
-    }
+  public FieldMetadata getEmbeddedIdField() {
+    return embeddedIdField;
+  }
 
-    public JavaSymbolName getEmbeddedIdMutator() {
-        return new JavaSymbolName("set"
-                + StringUtils.capitalize(embeddedIdField.getFieldName()
-                        .getSymbolName()));
-    }
+  public JavaSymbolName getEmbeddedIdMutator() {
+    return new JavaSymbolName("set"
+        + StringUtils.capitalize(embeddedIdField.getFieldName().getSymbolName()));
+  }
 
-    public List<FieldMetadata> getIdFields() {
-        return idFields;
-    }
+  public List<FieldMetadata> getIdFields() {
+    return idFields;
+  }
 }

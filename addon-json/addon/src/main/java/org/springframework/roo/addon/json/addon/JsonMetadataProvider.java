@@ -28,93 +28,83 @@ import org.springframework.roo.project.LogicalPath;
 @Service
 public class JsonMetadataProvider extends AbstractItdMetadataProvider {
 
-    protected MetadataDependencyRegistryTracker registryTracker = null;
+  protected MetadataDependencyRegistryTracker registryTracker = null;
 
-    /**
-     * This service is being activated so setup it:
-     * <ul>
-     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-     * <li>Registers {@link RooJavaType#ROO_JSON} and 
-     * {@link RooJavaType#ROO_IDENTIFIER} as additional JavaTypes that will 
-     * trigger metadata registration.</li>
-     * </ul>
-     */
-    @Override
-    protected void activate(final ComponentContext cContext) {
-    	context = cContext.getBundleContext();
-        this.registryTracker = new MetadataDependencyRegistryTracker(context,
-                null, PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        this.registryTracker.open();
-        addMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
+  /**
+   * This service is being activated so setup it:
+   * <ul>
+   * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+   * <li>Registers {@link RooJavaType#ROO_JSON} and 
+   * {@link RooJavaType#ROO_IDENTIFIER} as additional JavaTypes that will 
+   * trigger metadata registration.</li>
+   * </ul>
+   */
+  @Override
+  protected void activate(final ComponentContext cContext) {
+    context = cContext.getBundleContext();
+    this.registryTracker =
+        new MetadataDependencyRegistryTracker(context, null,
+            PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+    this.registryTracker.open();
+    addMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
+  }
+
+  /**
+   * This service is being deactivated so unregister upstream-downstream 
+   * dependencies, triggers, matchers and listeners.
+   * 
+   * @param context
+   */
+  protected void deactivate(final ComponentContext context) {
+    MetadataDependencyRegistry registry = this.registryTracker.getService();
+    registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+        getProvidesType());
+    this.registryTracker.close();
+    removeMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
+  }
+
+  @Override
+  protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
+    return JsonMetadata.createIdentifier(javaType, path);
+  }
+
+  @Override
+  protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
+    final JavaType javaType = JsonMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = JsonMetadata.getPath(metadataIdentificationString);
+    final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    return physicalTypeIdentifier;
+  }
+
+  public String getItdUniquenessFilenameSuffix() {
+    return "Json";
+  }
+
+  @Override
+  protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+      final String metadataIdentificationString, final JavaType aspectName,
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
+    // Acquire bean info (we need getters details, specifically)
+    final JavaType javaType = JsonMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = JsonMetadata.getPath(metadataIdentificationString);
+
+    // We need to parse the annotation, if it is not present we will simply
+    // get the default annotation values
+    final JsonAnnotationValues annotationValues =
+        new JsonAnnotationValues(governorPhysicalTypeMetadata);
+
+    String plural = javaType.getSimpleTypeName() + "s";
+    final PluralMetadata pluralMetadata =
+        (PluralMetadata) getMetadataService().get(PluralMetadata.createIdentifier(javaType, path));
+    if (pluralMetadata != null) {
+      plural = pluralMetadata.getPlural();
     }
 
-    /**
-     * This service is being deactivated so unregister upstream-downstream 
-     * dependencies, triggers, matchers and listeners.
-     * 
-     * @param context
-     */
-    protected void deactivate(final ComponentContext context) {
-        MetadataDependencyRegistry registry = this.registryTracker.getService();
-        registry.deregisterDependency(
-                PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        this.registryTracker.close();
-        removeMetadataTriggers(ROO_JSON, ROO_IDENTIFIER);
-    }
+    return new JsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata,
+        plural, annotationValues);
+  }
 
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return JsonMetadata.createIdentifier(javaType, path);
-    }
-
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        final JavaType javaType = JsonMetadata
-                .getJavaType(metadataIdentificationString);
-        final LogicalPath path = JsonMetadata
-                .getPath(metadataIdentificationString);
-        final String physicalTypeIdentifier = PhysicalTypeIdentifier
-                .createIdentifier(javaType, path);
-        return physicalTypeIdentifier;
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "Json";
-    }
-
-    @Override
-    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-            final String metadataIdentificationString,
-            final JavaType aspectName,
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-            final String itdFilename) {
-        // Acquire bean info (we need getters details, specifically)
-        final JavaType javaType = JsonMetadata
-                .getJavaType(metadataIdentificationString);
-        final LogicalPath path = JsonMetadata
-                .getPath(metadataIdentificationString);
-
-        // We need to parse the annotation, if it is not present we will simply
-        // get the default annotation values
-        final JsonAnnotationValues annotationValues = new JsonAnnotationValues(
-                governorPhysicalTypeMetadata);
-
-        String plural = javaType.getSimpleTypeName() + "s";
-        final PluralMetadata pluralMetadata = (PluralMetadata) getMetadataService()
-                .get(PluralMetadata.createIdentifier(javaType, path));
-        if (pluralMetadata != null) {
-            plural = pluralMetadata.getPlural();
-        }
-
-        return new JsonMetadata(metadataIdentificationString, aspectName,
-                governorPhysicalTypeMetadata, plural, annotationValues);
-    }
-
-    public String getProvidesType() {
-        return JsonMetadata.getMetadataIdentiferType();
-    }
+  public String getProvidesType() {
+    return JsonMetadata.getMetadataIdentiferType();
+  }
 }

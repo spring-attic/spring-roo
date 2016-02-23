@@ -28,83 +28,70 @@ import org.w3c.dom.Document;
 @Component(componentAbstract = true)
 public abstract class AbstractOperations {
 
-    protected static Logger LOGGER = HandlerUtils
-            .getLogger(AbstractOperations.class);
+  protected static Logger LOGGER = HandlerUtils.getLogger(AbstractOperations.class);
 
-    @Reference(policy=ReferencePolicy.DYNAMIC)
-    protected FileManager fileManager;
+  @Reference(policy = ReferencePolicy.DYNAMIC)
+  protected FileManager fileManager;
 
-    protected BundleContext context;
+  protected BundleContext context;
 
-    protected void activate(final ComponentContext cContext) {
-    	context = cContext.getBundleContext();
+  protected void activate(final ComponentContext cContext) {
+    context = cContext.getBundleContext();
+  }
+
+  /**
+   * This method will copy the contents of a directory to another if the
+   * resource does not already exist in the target directory
+   * 
+   * @param sourceAntPath the source path
+   * @param targetDirectory the target directory
+   */
+  public void copyDirectoryContents(final String sourceAntPath, String targetDirectory,
+      final boolean replace) {
+    Validate.notBlank(sourceAntPath, "Source path required");
+    Validate.notBlank(targetDirectory, "Target directory required");
+
+    if (!targetDirectory.endsWith("/")) {
+      targetDirectory += "/";
     }
 
-    /**
-     * This method will copy the contents of a directory to another if the
-     * resource does not already exist in the target directory
-     * 
-     * @param sourceAntPath the source path
-     * @param targetDirectory the target directory
-     */
-    public void copyDirectoryContents(final String sourceAntPath,
-            String targetDirectory, final boolean replace) {
-        Validate.notBlank(sourceAntPath, "Source path required");
-        Validate.notBlank(targetDirectory, "Target directory required");
-
-        if (!targetDirectory.endsWith("/")) {
-            targetDirectory += "/";
-        }
-
-        if (!fileManager.exists(targetDirectory)) {
-            fileManager.createDirectory(targetDirectory);
-        }
-
-        final String path = FileUtils.getPath(getClass(), sourceAntPath);
-        final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(
-                context, path);
-        Validate.notNull(urls,
-                "Could not search bundles for resources for Ant Path '%s'",
-                path);
-        for (final URL url : urls) {
-            final String fileName = url.getPath().substring(
-                    url.getPath().lastIndexOf("/") + 1);
-            if (replace) {
-                try {
-                    String contents = IOUtils.toString(url);
-                    fileManager.createOrUpdateTextFileIfRequired(
-                            targetDirectory + fileName, contents, false);
-                }
-                catch (final Exception e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-            else {
-                if (!fileManager.exists(targetDirectory + fileName)) {
-                    InputStream inputStream = null;
-                    OutputStream outputStream = null;
-                    try {
-                        inputStream = url.openStream();
-                        outputStream = fileManager.createFile(
-                                targetDirectory + fileName).getOutputStream();
-                        IOUtils.copy(inputStream, outputStream);
-                    }
-                    catch (final Exception e) {
-                        throw new IllegalStateException(
-                                "Encountered an error during copying of resources for the add-on.",
-                                e);
-                    }
-                    finally {
-                        IOUtils.closeQuietly(inputStream);
-                        IOUtils.closeQuietly(outputStream);
-                    }
-                }
-            }
-        }
+    if (!fileManager.exists(targetDirectory)) {
+      fileManager.createDirectory(targetDirectory);
     }
 
-    public Document getDocumentTemplate(final String templateName) {
-        return XmlUtils.readXml(FileUtils.getInputStream(getClass(),
-                templateName));
+    final String path = FileUtils.getPath(getClass(), sourceAntPath);
+    final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(context, path);
+    Validate.notNull(urls, "Could not search bundles for resources for Ant Path '%s'", path);
+    for (final URL url : urls) {
+      final String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+      if (replace) {
+        try {
+          String contents = IOUtils.toString(url);
+          fileManager.createOrUpdateTextFileIfRequired(targetDirectory + fileName, contents, false);
+        } catch (final Exception e) {
+          throw new IllegalStateException(e);
+        }
+      } else {
+        if (!fileManager.exists(targetDirectory + fileName)) {
+          InputStream inputStream = null;
+          OutputStream outputStream = null;
+          try {
+            inputStream = url.openStream();
+            outputStream = fileManager.createFile(targetDirectory + fileName).getOutputStream();
+            IOUtils.copy(inputStream, outputStream);
+          } catch (final Exception e) {
+            throw new IllegalStateException(
+                "Encountered an error during copying of resources for the add-on.", e);
+          } finally {
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
+          }
+        }
+      }
     }
+  }
+
+  public Document getDocumentTemplate(final String templateName) {
+    return XmlUtils.readXml(FileUtils.getInputStream(getClass(), templateName));
+  }
 }

@@ -11,13 +11,13 @@ import org.springframework.roo.project.Feature;
  */
 public interface SecurityOperations extends Feature {
 
-    String SECURITY_FILTER_NAME = "springSecurityFilterChain";
+  String SECURITY_FILTER_NAME = "springSecurityFilterChain";
 
-    void installSecurity();
+  void installSecurity();
 
-    void installPermissionEvaluator(JavaPackage permissionEvaluatorPackage);
+  void installPermissionEvaluator(JavaPackage permissionEvaluatorPackage);
 
-    boolean isSecurityInstallationPossible();
+  boolean isSecurityInstallationPossible();
 
-    boolean isServicePermissionEvaluatorInstallationPossible();
+  boolean isServicePermissionEvaluatorInstallationPossible();
 }

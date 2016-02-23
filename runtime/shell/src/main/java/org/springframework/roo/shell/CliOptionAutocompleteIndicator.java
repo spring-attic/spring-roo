@@ -16,30 +16,30 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface CliOptionAutocompleteIndicator {
-    
-    /**
-     * @return the name of the command that contains the option to check 
-     * values.
-     * 
-     */
-    String command();
 
-    /**
-     * @return the param (option) which needs to return its possible values.
-     * 
-     */
-    String param();
-    
-    /**
-     * @return the error message if the command is executed breaking this 
-     * dependency 
-     * 
-     */
-    String help();
-   
-    /**
-     * @return true if autocomplete operation should include an space on finish when only
-     * one result has been returned.
-     */
-    boolean includeSpaceOnFinish() default true;
+  /**
+   * @return the name of the command that contains the option to check 
+   * values.
+   * 
+   */
+  String command();
+
+  /**
+   * @return the param (option) which needs to return its possible values.
+   * 
+   */
+  String param();
+
+  /**
+   * @return the error message if the command is executed breaking this 
+   * dependency 
+   * 
+   */
+  String help();
+
+  /**
+   * @return true if autocomplete operation should include an space on finish when only
+   * one result has been returned.
+   */
+  boolean includeSpaceOnFinish() default true;
 }

@@ -24,42 +24,38 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class SchemaConverter implements Converter<Set<Schema>> {
 
-    @Reference private DbreModelService dbreModelService;
+  @Reference
+  private DbreModelService dbreModelService;
 
-    public Set<Schema> convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        final Set<Schema> schemas = new HashSet<Schema>();
-        for (final String schemaName : StringUtils.split(value, " ")) {
-            schemas.add(new Schema(schemaName));
+  public Set<Schema> convertFromText(final String value, final Class<?> requiredType,
+      final String optionContext) {
+    final Set<Schema> schemas = new HashSet<Schema>();
+    for (final String schemaName : StringUtils.split(value, " ")) {
+      schemas.add(new Schema(schemaName));
+    }
+    return schemas;
+  }
+
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String existingData, final String optionContext,
+      final MethodTarget target) {
+    try {
+      if (dbreModelService.supportsSchema(false)) {
+        final Set<Schema> schemas = dbreModelService.getSchemas(false);
+        for (final Schema schema : schemas) {
+          completions.add(new Completion(schema.getName()));
         }
-        return schemas;
+      } else {
+        completions.add(new Completion(DbreModelService.NO_SCHEMA_REQUIRED));
+      }
+    } catch (final Exception e) {
+      completions.add(new Completion("unable-to-obtain-connection"));
     }
 
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String existingData,
-            final String optionContext, final MethodTarget target) {
-        try {
-            if (dbreModelService.supportsSchema(false)) {
-                final Set<Schema> schemas = dbreModelService.getSchemas(false);
-                for (final Schema schema : schemas) {
-                    completions.add(new Completion(schema.getName()));
-                }
-            }
-            else {
-                completions.add(new Completion(
-                        DbreModelService.NO_SCHEMA_REQUIRED));
-            }
-        }
-        catch (final Exception e) {
-            completions.add(new Completion("unable-to-obtain-connection"));
-        }
+    return true;
+  }
 
-        return true;
-    }
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return Set.class.isAssignableFrom(requiredType)
-                && optionContext.contains("schema");
-    }
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return Set.class.isAssignableFrom(requiredType) && optionContext.contains("schema");
+  }
 }

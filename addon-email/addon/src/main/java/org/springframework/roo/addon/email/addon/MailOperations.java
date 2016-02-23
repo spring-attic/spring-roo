@@ -9,30 +9,29 @@ import org.springframework.roo.project.Feature;
  * 
  * @author Ben Alex
  */
-public interface MailOperations extends Feature{
-	
-	static final String FEATURE_NAME = "email";
+public interface MailOperations extends Feature {
 
-    void configureTemplateMessage(String from, String subject);
+  static final String FEATURE_NAME = "email";
 
-    void injectEmailTemplate(JavaType targetType, JavaSymbolName fieldName,
-            boolean async);
+  void configureTemplateMessage(String from, String subject);
 
-    void installEmail(String hostServer, MailProtocol protocol, String port,
-            String encoding, String username, String password);
+  void injectEmailTemplate(JavaType targetType, JavaSymbolName fieldName, boolean async);
 
-    /**
-     * Indicates whether the command for adding a JavaMailSender to the user's
-     * project is available.
-     * 
-     * @return see above
-     */
-    boolean isEmailInstallationPossible();
+  void installEmail(String hostServer, MailProtocol protocol, String port, String encoding,
+      String username, String password);
 
-    /**
-     * Indicates whether the commands relating to mail templates are available
-     * 
-     * @return see above
-     */
-    boolean isManageEmailAvailable();
+  /**
+   * Indicates whether the command for adding a JavaMailSender to the user's
+   * project is available.
+   * 
+   * @return see above
+   */
+  boolean isEmailInstallationPossible();
+
+  /**
+   * Indicates whether the commands relating to mail templates are available
+   * 
+   * @return see above
+   */
+  boolean isManageEmailAvailable();
 }

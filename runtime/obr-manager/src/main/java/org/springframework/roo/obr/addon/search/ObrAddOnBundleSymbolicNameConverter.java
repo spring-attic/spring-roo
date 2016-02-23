@@ -21,30 +21,29 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class ObrAddOnBundleSymbolicNameConverter implements
-        Converter<ObrAddOnBundleSymbolicName> {
+public class ObrAddOnBundleSymbolicNameConverter implements Converter<ObrAddOnBundleSymbolicName> {
 
-    @Reference private ObrAddOnSearchOperations operations;
+  @Reference
+  private ObrAddOnSearchOperations operations;
 
-    public ObrAddOnBundleSymbolicName convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        return new ObrAddOnBundleSymbolicName(value.trim());
+  public ObrAddOnBundleSymbolicName convertFromText(final String value,
+      final Class<?> requiredType, final String optionContext) {
+    return new ObrAddOnBundleSymbolicName(value.trim());
+  }
+
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String originalUserInput, final String optionContext,
+      final MethodTarget target) {
+    final Map<String, ObrBundle> bundles = operations.getAddOnCache();
+    for (final Entry<String, ObrBundle> entry : bundles.entrySet()) {
+      final String bsn = entry.getKey();
+      final ObrBundle bundle = entry.getValue();
+      completions.add(new Completion(bsn));
     }
+    return false;
+  }
 
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String originalUserInput,
-            final String optionContext, final MethodTarget target) {
-        final Map<String, ObrBundle> bundles = operations.getAddOnCache();
-        for (final Entry<String, ObrBundle> entry : bundles.entrySet()) {
-            final String bsn = entry.getKey();
-            final ObrBundle bundle = entry.getValue();
-            completions.add(new Completion(bsn));
-        }
-        return false;
-    }
-
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return ObrAddOnBundleSymbolicName.class.isAssignableFrom(requiredType);
-    }
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return ObrAddOnBundleSymbolicName.class.isAssignableFrom(requiredType);
+  }
 }

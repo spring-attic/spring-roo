@@ -18,72 +18,76 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 
-    @AutoPopulate boolean create = true;
-    @AutoPopulate boolean delete = true;
-    @AutoPopulate boolean exposeFinders = true;
-    @AutoPopulate JavaType formBackingObject;
-    @AutoPopulate String path;
-    @AutoPopulate boolean populateMethods = true;
-    @AutoPopulate boolean registerConverters = true;
-    @AutoPopulate boolean update = true;
+  @AutoPopulate
+  boolean create = true;
+  @AutoPopulate
+  boolean delete = true;
+  @AutoPopulate
+  boolean exposeFinders = true;
+  @AutoPopulate
+  JavaType formBackingObject;
+  @AutoPopulate
+  String path;
+  @AutoPopulate
+  boolean populateMethods = true;
+  @AutoPopulate
+  boolean registerConverters = true;
+  @AutoPopulate
+  boolean update = true;
 
-    public WebScaffoldAnnotationValues(
-            final ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {
-        super(governorPhysicalTypeDetails, RooJavaType.ROO_WEB_SCAFFOLD);
-        AutoPopulationUtils.populate(this, annotationMetadata);
-    }
+  public WebScaffoldAnnotationValues(final ClassOrInterfaceTypeDetails governorPhysicalTypeDetails) {
+    super(governorPhysicalTypeDetails, RooJavaType.ROO_WEB_SCAFFOLD);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
 
-    /**
-     * Constructor
-     * 
-     * @param governorPhysicalTypeMetadata
-     */
-    public WebScaffoldAnnotationValues(
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-        super(governorPhysicalTypeMetadata, RooJavaType.ROO_WEB_SCAFFOLD);
-        AutoPopulationUtils.populate(this, annotationMetadata);
-    }
+  /**
+   * Constructor
+   * 
+   * @param governorPhysicalTypeMetadata
+   */
+  public WebScaffoldAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+    super(governorPhysicalTypeMetadata, RooJavaType.ROO_WEB_SCAFFOLD);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
 
-    public JavaType getFormBackingObject() {
-        return formBackingObject;
-    }
+  public JavaType getFormBackingObject() {
+    return formBackingObject;
+  }
 
-    public String getPath() {
-        return path;
-    }
+  public String getPath() {
+    return path;
+  }
 
-    public boolean isCreate() {
-        return create;
-    }
+  public boolean isCreate() {
+    return create;
+  }
 
-    public boolean isDelete() {
-        return delete;
-    }
+  public boolean isDelete() {
+    return delete;
+  }
 
-    public boolean isExposeFinders() {
-        return exposeFinders;
-    }
+  public boolean isExposeFinders() {
+    return exposeFinders;
+  }
 
-    public boolean isPopulateMethods() {
-        return populateMethods;
-    }
+  public boolean isPopulateMethods() {
+    return populateMethods;
+  }
 
-    public boolean isRegisterConverters() {
-        return registerConverters;
-    }
+  public boolean isRegisterConverters() {
+    return registerConverters;
+  }
 
-    public boolean isUpdate() {
-        return update;
-    }
+  public boolean isUpdate() {
+    return update;
+  }
 
-    @Override
-    public String toString() {
-        // For debugging
-        return "WebScaffoldAnnotationValues [" + "create=" + create
-                + ", delete=" + delete + ", exposeFinders=" + exposeFinders
-                + ", populateMethods=" + populateMethods
-                + ", registerConverters=" + registerConverters + ", update="
-                + update + ", formBackingObject=" + formBackingObject
-                + ", path=" + path + "]";
-    }
+  @Override
+  public String toString() {
+    // For debugging
+    return "WebScaffoldAnnotationValues [" + "create=" + create + ", delete=" + delete
+        + ", exposeFinders=" + exposeFinders + ", populateMethods=" + populateMethods
+        + ", registerConverters=" + registerConverters + ", update=" + update
+        + ", formBackingObject=" + formBackingObject + ", path=" + path + "]";
+  }
 }

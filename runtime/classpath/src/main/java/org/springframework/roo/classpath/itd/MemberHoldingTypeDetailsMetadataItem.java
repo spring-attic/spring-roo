@@ -17,18 +17,18 @@ import org.springframework.roo.metadata.MetadataItem;
  * @since 1.1.1
  * @param <T> the type of {@link MemberHoldingTypeDetails} that will be provided
  */
-public interface MemberHoldingTypeDetailsMetadataItem<T extends MemberHoldingTypeDetails>
-        extends MetadataItem {
+public interface MemberHoldingTypeDetailsMetadataItem<T extends MemberHoldingTypeDetails> extends
+    MetadataItem {
 
-    /**
-     * Obtains the {@link MemberHoldingTypeDetails}, if available.
-     * <p>
-     * An {@link MemberHoldingTypeDetails} should be returned even if no members
-     * should be introduced. Only return null if there was a failure during
-     * parsing or other unexpected condition.
-     * 
-     * @return the details, or null if the details are unavailable or no member
-     *         details are required
-     */
-    T getMemberHoldingTypeDetails();
+  /**
+   * Obtains the {@link MemberHoldingTypeDetails}, if available.
+   * <p>
+   * An {@link MemberHoldingTypeDetails} should be returned even if no members
+   * should be introduced. Only return null if there was a failure during
+   * parsing or other unexpected condition.
+   * 
+   * @return the details, or null if the details are unavailable or no member
+   *         details are required
+   */
+  T getMemberHoldingTypeDetails();
 }

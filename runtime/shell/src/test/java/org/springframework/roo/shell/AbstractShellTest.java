@@ -15,16 +15,16 @@ import org.junit.Test;
  */
 public class AbstractShellTest {
 
-    @Test
-    public void testProps() {
-        // Set up
-        final AbstractShell shell = mock(AbstractShell.class);
-        when(shell.props()).thenCallRealMethod();
+  @Test
+  public void testProps() {
+    // Set up
+    final AbstractShell shell = mock(AbstractShell.class);
+    when(shell.props()).thenCallRealMethod();
 
-        // Invoke
-        final String props = shell.props();
+    // Invoke
+    final String props = shell.props();
 
-        // Check
-        assertNotNull(props);
-    }
+    // Check
+    assertNotNull(props);
+  }
 }

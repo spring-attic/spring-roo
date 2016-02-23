@@ -26,121 +26,112 @@ import org.springframework.roo.model.JavaType;
  */
 public class DateField extends FieldDetails {
 
-    private DateTime dateFormat;
+  private DateTime dateFormat;
 
-    /** Whether the JSR 303 @Future annotation will be added */
-    private boolean future;
+  /** Whether the JSR 303 @Future annotation will be added */
+  private boolean future;
 
-    /** Whether the JSR 303 @Past annotation will be added */
-    private boolean past;
+  /** Whether the JSR 303 @Past annotation will be added */
+  private boolean past;
 
-    /**
-     * Custom date formatting through a DateTime pattern such as yyyy/mm/dd
-     * h:mm:ss a.
-     */
-    private String pattern;
+  /**
+   * Custom date formatting through a DateTime pattern such as yyyy/mm/dd
+   * h:mm:ss a.
+   */
+  private String pattern;
 
-    /** Whether the JSR 220 @Temporal annotation will be added */
-    private DateFieldPersistenceType persistenceType;
+  /** Whether the JSR 220 @Temporal annotation will be added */
+  private DateFieldPersistenceType persistenceType;
 
-    private DateTime timeFormat;
+  private DateTime timeFormat;
 
-    public DateField(final String physicalTypeIdentifier,
-            final JavaType fieldType, final JavaSymbolName fieldName) {
-        super(physicalTypeIdentifier, fieldType, fieldName);
+  public DateField(final String physicalTypeIdentifier, final JavaType fieldType,
+      final JavaSymbolName fieldName) {
+    super(physicalTypeIdentifier, fieldType, fieldName);
+  }
+
+  @Override
+  public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
+    super.decorateAnnotationsList(annotations);
+    if (past) {
+      annotations.add(new AnnotationMetadataBuilder(PAST));
     }
-
-    @Override
-    public void decorateAnnotationsList(
-            final List<AnnotationMetadataBuilder> annotations) {
-        super.decorateAnnotationsList(annotations);
-        if (past) {
-            annotations.add(new AnnotationMetadataBuilder(PAST));
-        }
-        if (future) {
-            annotations.add(new AnnotationMetadataBuilder(FUTURE));
-        }
-        if (persistenceType != null) {
-            // Add JSR 220 @Temporal annotation
-            String value = null;
-            if (persistenceType == DateFieldPersistenceType.JPA_DATE) {
-                value = "DATE";
-            }
-            else if (persistenceType == DateFieldPersistenceType.JPA_TIME) {
-                value = "TIME";
-            }
-            else if (persistenceType == DateFieldPersistenceType.JPA_TIMESTAMP) {
-                value = "TIMESTAMP";
-            }
-            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-            attrs.add(new EnumAttributeValue(new JavaSymbolName("value"),
-                    new EnumDetails(TEMPORAL_TYPE, new JavaSymbolName(value))));
-            annotations.add(new AnnotationMetadataBuilder(TEMPORAL, attrs));
-        }
-        // Always add a DateTimeFormat annotation
-        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-        if (pattern != null) {
-            attributes.add(new StringAttributeValue(new JavaSymbolName(
-                    "pattern"), pattern));
-        }
-        else {
-            final String dateStyle = null != dateFormat ? String
-                    .valueOf(dateFormat.getShortKey()) : "M";
-            final String timeStyle = null != timeFormat ? String
-                    .valueOf(timeFormat.getShortKey()) : "-";
-            attributes.add(new StringAttributeValue(
-                    new JavaSymbolName("style"), dateStyle + timeStyle));
-        }
-        annotations.add(new AnnotationMetadataBuilder(DATE_TIME_FORMAT,
-                attributes));
+    if (future) {
+      annotations.add(new AnnotationMetadataBuilder(FUTURE));
     }
-
-    public DateTime getDateFormat() {
-        return dateFormat;
+    if (persistenceType != null) {
+      // Add JSR 220 @Temporal annotation
+      String value = null;
+      if (persistenceType == DateFieldPersistenceType.JPA_DATE) {
+        value = "DATE";
+      } else if (persistenceType == DateFieldPersistenceType.JPA_TIME) {
+        value = "TIME";
+      } else if (persistenceType == DateFieldPersistenceType.JPA_TIMESTAMP) {
+        value = "TIMESTAMP";
+      }
+      final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+      attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(TEMPORAL_TYPE,
+          new JavaSymbolName(value))));
+      annotations.add(new AnnotationMetadataBuilder(TEMPORAL, attrs));
     }
-
-    public String getPattern() {
-        return pattern;
+    // Always add a DateTimeFormat annotation
+    final List<AnnotationAttributeValue<?>> attributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
+    if (pattern != null) {
+      attributes.add(new StringAttributeValue(new JavaSymbolName("pattern"), pattern));
+    } else {
+      final String dateStyle = null != dateFormat ? String.valueOf(dateFormat.getShortKey()) : "M";
+      final String timeStyle = null != timeFormat ? String.valueOf(timeFormat.getShortKey()) : "-";
+      attributes.add(new StringAttributeValue(new JavaSymbolName("style"), dateStyle + timeStyle));
     }
+    annotations.add(new AnnotationMetadataBuilder(DATE_TIME_FORMAT, attributes));
+  }
 
-    public DateFieldPersistenceType getPersistenceType() {
-        return persistenceType;
-    }
+  public DateTime getDateFormat() {
+    return dateFormat;
+  }
 
-    public DateTime getTimeFormat() {
-        return timeFormat;
-    }
+  public String getPattern() {
+    return pattern;
+  }
 
-    public boolean isFuture() {
-        return future;
-    }
+  public DateFieldPersistenceType getPersistenceType() {
+    return persistenceType;
+  }
 
-    public boolean isPast() {
-        return past;
-    }
+  public DateTime getTimeFormat() {
+    return timeFormat;
+  }
 
-    public void setDateFormat(final DateTime dateFormat) {
-        this.dateFormat = dateFormat;
-    }
+  public boolean isFuture() {
+    return future;
+  }
 
-    public void setFuture(final boolean future) {
-        this.future = future;
-    }
+  public boolean isPast() {
+    return past;
+  }
 
-    public void setPast(final boolean past) {
-        this.past = past;
-    }
+  public void setDateFormat(final DateTime dateFormat) {
+    this.dateFormat = dateFormat;
+  }
 
-    public void setPattern(final String pattern) {
-        this.pattern = pattern;
-    }
+  public void setFuture(final boolean future) {
+    this.future = future;
+  }
 
-    public void setPersistenceType(
-            final DateFieldPersistenceType persistenceType) {
-        this.persistenceType = persistenceType;
-    }
+  public void setPast(final boolean past) {
+    this.past = past;
+  }
 
-    public void setTimeFormat(final DateTime timeFormat) {
-        this.timeFormat = timeFormat;
-    }
+  public void setPattern(final String pattern) {
+    this.pattern = pattern;
+  }
+
+  public void setPersistenceType(final DateFieldPersistenceType persistenceType) {
+    this.persistenceType = persistenceType;
+  }
+
+  public void setTimeFormat(final DateTime timeFormat) {
+    this.timeFormat = timeFormat;
+  }
 }

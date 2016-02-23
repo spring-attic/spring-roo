@@ -12,30 +12,30 @@ import org.springframework.roo.model.JavaType;
  */
 public interface ServiceOperations {
 
-    /**
-     * Check if developer is able to use 'service' commands
-     * 
-     * @return true if service commands are available
-     */
-    boolean areServiceCommandsAvailable();
+  /**
+   * Check if developer is able to use 'service' commands
+   * 
+   * @return true if service commands are available
+   */
+  boolean areServiceCommandsAvailable();
 
-    /**
-     * Generates new service interface and its implementation for some specific
-     * domain entity.
-     * 
-     * @param domainType entity related with service
-     * @param interfaceType service interface to generate
-     * @param implType service implementation to generate. 
-     */
-    void addService(JavaType domainType, JavaType interfaceType, JavaType implType);
+  /**
+   * Generates new service interface and its implementation for some specific
+   * domain entity.
+   * 
+   * @param domainType entity related with service
+   * @param interfaceType service interface to generate
+   * @param implType service implementation to generate. 
+   */
+  void addService(JavaType domainType, JavaType interfaceType, JavaType implType);
 
-    /**
-     * Generates new services interface and its implementations for every domain
-     * entity of generated project
-     * 
-     * @param apiPackage
-     * @param implPackage
-     */
-    void addAllServices(JavaPackage apiPackage, JavaPackage implPackage);
+  /**
+   * Generates new services interface and its implementations for every domain
+   * entity of generated project
+   * 
+   * @param apiPackage
+   * @param implPackage
+   */
+  void addAllServices(JavaPackage apiPackage, JavaPackage implPackage);
 
 }

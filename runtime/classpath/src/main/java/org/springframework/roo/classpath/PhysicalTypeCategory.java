@@ -8,5 +8,5 @@ package org.springframework.roo.classpath;
  */
 public enum PhysicalTypeCategory {
 
-    ANNOTATION, CLASS, ENUMERATION, INTERFACE, ITD, OTHER;
+  ANNOTATION, CLASS, ENUMERATION, INTERFACE, ITD, OTHER;
 }

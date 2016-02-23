@@ -30,37 +30,35 @@ import org.springframework.roo.support.util.CollectionUtils;
 @Service
 public class EqualsOperationsImpl implements EqualsOperations {
 
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private TypeManagementService typeManagementService;
+  @Reference
+  private TypeLocationService typeLocationService;
+  @Reference
+  private TypeManagementService typeManagementService;
 
-    public void addEqualsAndHashCodeMethods(final JavaType javaType,
-            final boolean appendSuper, final Set<String> excludeFields) {
-        // Add @RooEquals annotation to class if not yet present
-        final ClassOrInterfaceTypeDetails cid = typeLocationService
-                .getTypeDetails(javaType);
-        if (cid == null || cid.getTypeAnnotation(ROO_EQUALS) != null) {
-            return;
-        }
-
-        final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(
-                ROO_EQUALS);
-        if (appendSuper) {
-            annotationBuilder.addBooleanAttribute("appendSuper", appendSuper);
-        }
-        if (!CollectionUtils.isEmpty(excludeFields)) {
-            final List<StringAttributeValue> attributes = new ArrayList<StringAttributeValue>();
-            for (final String excludeField : excludeFields) {
-                attributes.add(new StringAttributeValue(new JavaSymbolName(
-                        "value"), excludeField));
-            }
-            annotationBuilder
-                    .addAttribute(new ArrayAttributeValue<StringAttributeValue>(
-                            new JavaSymbolName("excludeFields"), attributes));
-        }
-
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                cid);
-        cidBuilder.addAnnotation(annotationBuilder.build());
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+  public void addEqualsAndHashCodeMethods(final JavaType javaType, final boolean appendSuper,
+      final Set<String> excludeFields) {
+    // Add @RooEquals annotation to class if not yet present
+    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
+    if (cid == null || cid.getTypeAnnotation(ROO_EQUALS) != null) {
+      return;
     }
+
+    final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_EQUALS);
+    if (appendSuper) {
+      annotationBuilder.addBooleanAttribute("appendSuper", appendSuper);
+    }
+    if (!CollectionUtils.isEmpty(excludeFields)) {
+      final List<StringAttributeValue> attributes = new ArrayList<StringAttributeValue>();
+      for (final String excludeField : excludeFields) {
+        attributes.add(new StringAttributeValue(new JavaSymbolName("value"), excludeField));
+      }
+      annotationBuilder.addAttribute(new ArrayAttributeValue<StringAttributeValue>(
+          new JavaSymbolName("excludeFields"), attributes));
+    }
+
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(cid);
+    cidBuilder.addAnnotation(annotationBuilder.build());
+    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
 }

@@ -41,59 +41,59 @@ import java.util.SortedSet;
  */
 public interface MetadataLogger {
 
-    /**
-     * @return a snapshot of timing statistics that have been collated so far
-     *         (never null, but may be empty)
-     */
-    SortedSet<MetadataTimingStatistic> getTimings();
+  /**
+   * @return a snapshot of timing statistics that have been collated so far
+   *         (never null, but may be empty)
+   */
+  SortedSet<MetadataTimingStatistic> getTimings();
 
-    /**
-     * @return the currently active trace level (0 = none, 1 = major events, 2 =
-     *         all events)
-     */
-    int getTraceLevel();
+  /**
+   * @return the currently active trace level (0 = none, 1 = major events, 2 =
+   *         all events)
+   */
+  int getTraceLevel();
 
-    /**
-     * Logs a message against the given event identifier.
-     * 
-     * @param message to log (required)
-     */
-    void log(String message);
+  /**
+   * Logs a message against the given event identifier.
+   * 
+   * @param message to log (required)
+   */
+  void log(String message);
 
-    /**
-     * Enable low-level tracing of event delivery information. Defaults to level
-     * 0 (none).
-     * 
-     * @param trace the level (0 = none, 1 = major events, 2 = all events)
-     */
-    void setTraceLevel(int trace);
+  /**
+   * Enable low-level tracing of event delivery information. Defaults to level
+   * 0 (none).
+   * 
+   * @param trace the level (0 = none, 1 = major events, 2 = all events)
+   */
+  void setTraceLevel(int trace);
 
-    /**
-     * Increments the current stack level. The current stack level determines
-     * the indentation of logged messages. It is required that for every
-     * increment, a corresponding {@link #decrementLevel()} is invoked.
-     */
-    void startEvent();
+  /**
+   * Increments the current stack level. The current stack level determines
+   * the indentation of logged messages. It is required that for every
+   * increment, a corresponding {@link #decrementLevel()} is invoked.
+   */
+  void startEvent();
 
-    /**
-     * Starts the timer counting against the responsible class. The timer must
-     * eventually be {@link #stopTimer()}, but timings will cease being counted
-     * against the responsible class when a new {@link #startTimer(String)} is
-     * invoked.
-     * 
-     * @param responsibleClass the class responsible for this timing (required)
-     */
-    void startTimer(String responsibleClass);
+  /**
+   * Starts the timer counting against the responsible class. The timer must
+   * eventually be {@link #stopTimer()}, but timings will cease being counted
+   * against the responsible class when a new {@link #startTimer(String)} is
+   * invoked.
+   * 
+   * @param responsibleClass the class responsible for this timing (required)
+   */
+  void startTimer(String responsibleClass);
 
-    /**
-     * Decrements the current stack level.
-     */
-    void stopEvent();
+  /**
+   * Decrements the current stack level.
+   */
+  void stopEvent();
 
-    /**
-     * Stops the most recently started timer. This is mandatory and must be in
-     * the reverse order timers were started. When a timer stops is also when we
-     * update its timings.
-     */
-    void stopTimer();
+  /**
+   * Stops the most recently started timer. This is mandatory and must be in
+   * the reverse order timers were started. When a timer stops is also when we
+   * update its timings.
+   */
+  void stopTimer();
 }

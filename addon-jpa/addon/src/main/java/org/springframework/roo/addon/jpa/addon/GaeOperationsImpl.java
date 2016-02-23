@@ -28,55 +28,56 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class GaeOperationsImpl implements GaeOperations {
 
-	protected final static Logger LOGGER = HandlerUtils.getLogger(GaeOperationsImpl.class);
-	
-	// ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-	
-    private ProjectOperations projectOperations;
-    
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
+  protected final static Logger LOGGER = HandlerUtils.getLogger(GaeOperationsImpl.class);
+
+  // ------------ OSGi component attributes ----------------
+  private BundleContext context;
+
+  private ProjectOperations projectOperations;
+
+  protected void activate(final ComponentContext context) {
+    this.context = context.getBundleContext();
+  }
+
+  public String getName() {
+    return FeatureNames.GAE;
+  }
+
+  public boolean isInstalledInModule(final String moduleName) {
+
+    if (projectOperations == null) {
+      projectOperations = getProjectOperations();
     }
 
-    public String getName() {
-        return FeatureNames.GAE;
-    }
+    Validate.notNull(projectOperations, "ProjectOperations is required");
 
-    public boolean isInstalledInModule(final String moduleName) {
-    	
-    	if(projectOperations == null){
-    		projectOperations = getProjectOperations();
-    	}
-    	
-    	Validate.notNull(projectOperations, "ProjectOperations is required");
-    	
-        final Pom pom = projectOperations.getPomFromModuleName(moduleName);
-        if (pom == null) {
-            return false;
-        }
-        for (final Plugin buildPlugin : pom.getBuildPlugins()) {
-            if ("appengine-maven-plugin".equals(buildPlugin.getArtifactId())) {
-                return true;
-            }
-        }
-        return false;
+    final Pom pom = projectOperations.getPomFromModuleName(moduleName);
+    if (pom == null) {
+      return false;
     }
-    
-    public ProjectOperations getProjectOperations(){
-    	// Get all Services implement ProjectOperations interface
-		try {
-			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-			
-			for(ServiceReference<?> ref : references){
-				return (ProjectOperations) this.context.getService(ref);
-			}
-			
-			return null;
-			
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load ProjectOperations on GaeOperationsImpl.");
-			return null;
-		}
+    for (final Plugin buildPlugin : pom.getBuildPlugins()) {
+      if ("appengine-maven-plugin".equals(buildPlugin.getArtifactId())) {
+        return true;
+      }
     }
+    return false;
+  }
+
+  public ProjectOperations getProjectOperations() {
+    // Get all Services implement ProjectOperations interface
+    try {
+      ServiceReference<?>[] references =
+          this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+      for (ServiceReference<?> ref : references) {
+        return (ProjectOperations) this.context.getService(ref);
+      }
+
+      return null;
+
+    } catch (InvalidSyntaxException e) {
+      LOGGER.warning("Cannot load ProjectOperations on GaeOperationsImpl.");
+      return null;
+    }
+  }
 }

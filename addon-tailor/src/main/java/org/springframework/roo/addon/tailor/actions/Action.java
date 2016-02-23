@@ -20,27 +20,27 @@ import org.springframework.roo.addon.tailor.CommandTransformation;
  */
 public interface Action {
 
-    /**
-     * Triggers action execution
-     * 
-     * @param command - resource to be processed
-     * @param config - configuration of action
-     */
-    void execute(CommandTransformation command, ActionConfig config);
+  /**
+   * Triggers action execution
+   * 
+   * @param command - resource to be processed
+   * @param config - configuration of action
+   */
+  void execute(CommandTransformation command, ActionConfig config);
 
-    /**
-     * Action info
-     * 
-     * @param config - configuration of action
-     * @return description of actual action
-     */
-    String getDescription(ActionConfig config);
+  /**
+   * Action info
+   * 
+   * @param config - configuration of action
+   * @return description of actual action
+   */
+  String getDescription(ActionConfig config);
 
-    /**
-     * Checks if an ActionConfig is valid for an action execution.
-     * 
-     * @param config will be checked
-     * @return true if valid, otherwise false
-     */
-    boolean isValid(ActionConfig config);
+  /**
+   * Checks if an ActionConfig is valid for an action execution.
+   * 
+   * @param config will be checked
+   * @return true if valid, otherwise false
+   */
+  boolean isValid(ActionConfig config);
 }

@@ -12,19 +12,19 @@ import org.springframework.roo.model.JavaType;
  */
 public interface TriggerBasedMetadataProvider extends MetadataProvider {
 
-    /**
-     * Causes this provider to generate metadata if the given annotation is
-     * present.
-     * 
-     * @param trigger the trigger to register (can be <code>null</code>)
-     */
-    void addMetadataTrigger(JavaType trigger);
+  /**
+   * Causes this provider to generate metadata if the given annotation is
+   * present.
+   * 
+   * @param trigger the trigger to register (can be <code>null</code>)
+   */
+  void addMetadataTrigger(JavaType trigger);
 
-    /**
-     * Stops this provider generating metadata if the given annotation is
-     * present.
-     * 
-     * @param trigger the trigger to deregister (can be <code>null</code>)
-     */
-    void removeMetadataTrigger(JavaType trigger);
+  /**
+   * Stops this provider generating metadata if the given annotation is
+   * present.
+   * 
+   * @param trigger the trigger to deregister (can be <code>null</code>)
+   */
+  void removeMetadataTrigger(JavaType trigger);
 }

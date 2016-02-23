@@ -16,59 +16,59 @@ import java.util.Stack;
  */
 public interface UndoManager {
 
-    /**
-     * Registers an undoable operation in the {@link Stack}.
-     * 
-     * @param undoableOperation to register in a {@link Stack} (required)
-     */
-    void add(UndoableOperation undoableOperation);
+  /**
+   * Registers an undoable operation in the {@link Stack}.
+   * 
+   * @param undoableOperation to register in a {@link Stack} (required)
+   */
+  void add(UndoableOperation undoableOperation);
 
-    /**
-     * @param undoListener registers a new undo listener (required)
-     */
-    void addUndoListener(UndoListener undoListener);
+  /**
+   * @param undoListener registers a new undo listener (required)
+   */
+  void addUndoListener(UndoListener undoListener);
 
-    /**
-     * Indicates a caller wishes the {@link UndoManager} or "flush" its
-     * contents. The exact meaning of a flush is implementation dependent. It is
-     * guaranteed to not change the undo stack, but simply notify
-     * {@link UndoListener}s.
-     */
-    void flush();
+  /**
+   * Indicates a caller wishes the {@link UndoManager} or "flush" its
+   * contents. The exact meaning of a flush is implementation dependent. It is
+   * guaranteed to not change the undo stack, but simply notify
+   * {@link UndoListener}s.
+   */
+  void flush();
 
-    /**
-     * @param undoListener removes a previously-registered undo listener
-     *            (required)
-     */
-    void removeUndoListener(UndoListener undoListener);
+  /**
+   * @param undoListener removes a previously-registered undo listener
+   *            (required)
+   */
+  void removeUndoListener(UndoListener undoListener);
 
-    /**
-     * Resets the undo {@link Stack}, and guarantees to clear the {@link Stack}.
-     * <p>
-     * Executing this command guarantees the {@link Stack} will be empty upon
-     * return, with every element reset.
-     */
-    void reset();
+  /**
+   * Resets the undo {@link Stack}, and guarantees to clear the {@link Stack}.
+   * <p>
+   * Executing this command guarantees the {@link Stack} will be empty upon
+   * return, with every element reset.
+   */
+  void reset();
 
-    /**
-     * @param undoEnabled enables or disables the undo feature, which is useful
-     *            for debugging (defaults to true)
-     */
-    void setUndoEnabled(boolean undoEnabled);
+  /**
+   * @param undoEnabled enables or disables the undo feature, which is useful
+   *            for debugging (defaults to true)
+   */
+  void setUndoEnabled(boolean undoEnabled);
 
-    /**
-     * Replays the undo {@link Stack}, and guarantees to clear the {@link Stack}
-     * .
-     * <p>
-     * The first operation that returns false to
-     * {@link UndoableOperation#undo()} will cause the remainder of the
-     * {@link Stack} to stop undoing.
-     * <p>
-     * Executing this command guarantees the {@link Stack} will be empty upon
-     * return, with every element either undone or reset.
-     * 
-     * @return true if all {@link UndoableOperation}s in the {@link Stack} were
-     *         successfully undone
-     */
-    boolean undo();
+  /**
+   * Replays the undo {@link Stack}, and guarantees to clear the {@link Stack}
+   * .
+   * <p>
+   * The first operation that returns false to
+   * {@link UndoableOperation#undo()} will cause the remainder of the
+   * {@link Stack} to stop undoing.
+   * <p>
+   * Executing this command guarantees the {@link Stack} will be empty upon
+   * return, with every element either undone or reset.
+   * 
+   * @return true if all {@link UndoableOperation}s in the {@link Stack} were
+   *         successfully undone
+   */
+  boolean undo();
 }

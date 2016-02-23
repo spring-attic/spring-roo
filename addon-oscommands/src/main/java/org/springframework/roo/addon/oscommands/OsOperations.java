@@ -11,12 +11,12 @@ import java.io.IOException;
  */
 public interface OsOperations {
 
-    /**
-     * Attempts the execution of a commands and delegates the output to the
-     * standard logger.
-     * 
-     * @param command the command to execute
-     * @throws IOException if an error occurs
-     */
-    void executeCommand(String command) throws IOException;
+  /**
+   * Attempts the execution of a commands and delegates the output to the
+   * standard logger.
+   * 
+   * @param command the command to execute
+   * @throws IOException if an error occurs
+   */
+  void executeCommand(String command) throws IOException;
 }

@@ -22,39 +22,37 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class ProviderIdConverter implements Converter<CloudProviderId> {
 
-    @Reference
-    private CloudOperations operations;
+  @Reference
+  private CloudOperations operations;
 
-    protected void bindOperations(CloudOperations operations) {
-        this.operations = operations;
-    }
+  protected void bindOperations(CloudOperations operations) {
+    this.operations = operations;
+  }
 
-    protected void unbindOperations(CloudOperations operations) {
-        this.operations = null;
-    }
+  protected void unbindOperations(CloudOperations operations) {
+    this.operations = null;
+  }
 
-    @Override
-    public CloudProviderId convertFromText(String value, Class<?> targetType,
-            String optionContext) {
-        return operations.getProviderIdByName(value);
-    }
+  @Override
+  public CloudProviderId convertFromText(String value, Class<?> targetType, String optionContext) {
+    return operations.getProviderIdByName(value);
+  }
 
-    @Override
-    public boolean getAllPossibleValues(List<Completion> completions,
-            Class<?> targetType, String existingData, String optionContext,
-            MethodTarget target) {
-        for (final CloudProviderId id : operations.getProvidersId()) {
-            if (existingData.isEmpty() || id.getId().equals(existingData)
-                    || id.getId().startsWith(existingData)) {
-                completions.add(new Completion(id.getId()));
-            }
-        }
-        return true;
+  @Override
+  public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType,
+      String existingData, String optionContext, MethodTarget target) {
+    for (final CloudProviderId id : operations.getProvidersId()) {
+      if (existingData.isEmpty() || id.getId().equals(existingData)
+          || id.getId().startsWith(existingData)) {
+        completions.add(new Completion(id.getId()));
+      }
     }
+    return true;
+  }
 
-    @Override
-    public boolean supports(Class<?> type, String optionContext) {
-        return CloudProviderId.class.isAssignableFrom(type);
-    }
+  @Override
+  public boolean supports(Class<?> type, String optionContext) {
+    return CloudProviderId.class.isAssignableFrom(type);
+  }
 
 }

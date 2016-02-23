@@ -36,93 +36,95 @@ import org.springframework.roo.support.logging.LoggingOutputStream;
 @Component
 @Service
 public class FelixDelegator implements CommandMarker, ShellStatusListener {
-	
-    private BundleContext context;
-    
-    @Reference private Shell rooShell;
-    @Reference private CommandProcessor commandProcessor;
 
-    protected static final Logger LOGGER = HandlerUtils
-            .getLogger(LoggingOutputStream.class);
+  private BundleContext context;
 
-    protected void activate(final ComponentContext cContext) {
-        context = cContext.getBundleContext();
-        rooShell.addShellStatusListener(this);
-    }
+  @Reference
+  private Shell rooShell;
+  @Reference
+  private CommandProcessor commandProcessor;
 
-    protected void deactivate(final ComponentContext context) {
-        this.context = null;
-        rooShell.removeShellStatusListener(this);
-    }
-    
-    @CliCommand(value = "!g", help = "Passes a command directly through to the Felix shell infrastructure")
-    public void shell(
-            @CliOption(key = "", mandatory = false, specifiedDefaultValue = "help", unspecifiedDefaultValue = "help", help = "The command to pass to Felix (WARNING: no validation or security checks are performed)") final String commandLine)
-            throws Exception {
+  protected static final Logger LOGGER = HandlerUtils.getLogger(LoggingOutputStream.class);
 
-        perform(commandLine);
-    }
-    
-    @CliCommand(value = { "exit", "quit" }, help = "Exits the shell")
-    public ExitShellRequest quit() {
-        return ExitShellRequest.NORMAL_EXIT;
-    }
+  protected void activate(final ComponentContext cContext) {
+    context = cContext.getBundleContext();
+    rooShell.addShellStatusListener(this);
+  }
 
-    public void onShellStatusChange(final ShellStatus oldStatus,
-            final ShellStatus newStatus) {
-        if (newStatus.getStatus().equals(Status.SHUTTING_DOWN)) {
-            try {
-                if (rooShell != null) {
-                    if (rooShell.getExitShellRequest() != null) {
-                        // ROO-836
-                        System.setProperty("roo.exit", Integer
-                                .toString(rooShell.getExitShellRequest()
-                                        .getExitCode()));
-                    }
-                    System.setProperty("developmentMode",
-                            Boolean.toString(rooShell.isDevelopmentMode()));
-                }
-                perform("shutdown");
-            }
-            catch (final Exception e) {
-                throw new IllegalStateException(e);
-            }
+  protected void deactivate(final ComponentContext context) {
+    this.context = null;
+    rooShell.removeShellStatusListener(this);
+  }
+
+  @CliCommand(value = "!g",
+      help = "Passes a command directly through to the Felix shell infrastructure")
+  public void shell(
+      @CliOption(
+          key = "",
+          mandatory = false,
+          specifiedDefaultValue = "help",
+          unspecifiedDefaultValue = "help",
+          help = "The command to pass to Felix (WARNING: no validation or security checks are performed)") final String commandLine)
+      throws Exception {
+
+    perform(commandLine);
+  }
+
+  @CliCommand(value = {"exit", "quit"}, help = "Exits the shell")
+  public ExitShellRequest quit() {
+    return ExitShellRequest.NORMAL_EXIT;
+  }
+
+  public void onShellStatusChange(final ShellStatus oldStatus, final ShellStatus newStatus) {
+    if (newStatus.getStatus().equals(Status.SHUTTING_DOWN)) {
+      try {
+        if (rooShell != null) {
+          if (rooShell.getExitShellRequest() != null) {
+            // ROO-836
+            System.setProperty("roo.exit",
+                Integer.toString(rooShell.getExitShellRequest().getExitCode()));
+          }
+          System.setProperty("developmentMode", Boolean.toString(rooShell.isDevelopmentMode()));
         }
+        perform("shutdown");
+      } catch (final Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+  }
+
+  private void perform(final String commandLine) throws Exception {
+    if ("shutdown".equals(commandLine)) {
+      context.getBundle(0).stop();
+      return;
     }
 
-    private void perform(final String commandLine) throws Exception {
-        if("shutdown".equals(commandLine)) {
-            context.getBundle(0).stop();
-            return;
-        }
+    ByteArrayOutputStream sysOut = new ByteArrayOutputStream();
+    ByteArrayOutputStream sysErr = new ByteArrayOutputStream();
 
-        ByteArrayOutputStream sysOut = new ByteArrayOutputStream();
-        ByteArrayOutputStream sysErr = new ByteArrayOutputStream();
+    final PrintStream printStreamOut = new PrintStream(sysOut);
+    final PrintStream printErrOut = new PrintStream(sysErr);
+    try {
+      final CommandSession commandSession =
+          commandProcessor.createSession(System.in, printStreamOut, printErrOut);
+      Object result = commandSession.execute(commandLine);
 
-        final PrintStream printStreamOut = new PrintStream(sysOut);
-        final PrintStream printErrOut = new PrintStream(sysErr);
-        try {
-            final CommandSession commandSession = commandProcessor.createSession(System.in, printStreamOut, printErrOut);
-            Object result = commandSession.execute(commandLine);
+      if (result != null) {
+        printStreamOut.println(commandSession.format(result, Converter.INSPECT));
+      }
 
-            if(result != null) {
-                printStreamOut.println(commandSession.format(result, Converter.INSPECT));
-            }
+      if (sysOut.size() > 0) {
+        LOGGER.log(Level.INFO, new String(sysOut.toByteArray()));
+      }
 
-            if(sysOut.size() > 0) {
-                LOGGER.log(Level.INFO, new String(sysOut.toByteArray()));
-            }
-
-            if(sysErr.size() > 0) {
-                LOGGER.log(Level.SEVERE, new String(sysErr.toByteArray()));
-            }
-        }
-        catch(Throwable ex) {
-            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-        }
-        finally {
-            printStreamOut.close();
-            printErrOut.close();
-        }
+      if (sysErr.size() > 0) {
+        LOGGER.log(Level.SEVERE, new String(sysErr.toByteArray()));
+      }
+    } catch (Throwable ex) {
+      LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+    } finally {
+      printStreamOut.close();
+      printErrOut.close();
     }
+  }
 }

@@ -23,41 +23,35 @@ import org.w3c.dom.Element;
 @Service
 public class MicrobloggingEmbeddedProvider extends AbstractEmbeddedProvider {
 
-    public boolean embed(final String url, final String viewName) {
-        // Expected format http://twitter.com/#search?q=@SpringRoo
-        if (url.contains("twitter.com")) {
-            final Map<String, String> options = new HashMap<String, String>();
-            options.put("provider", "TWITTER");
-            options.put("searchTerm", url.substring(url.indexOf("q=") + 2));
-            return install(viewName, options);
-        }
-        return false;
+  public boolean embed(final String url, final String viewName) {
+    // Expected format http://twitter.com/#search?q=@SpringRoo
+    if (url.contains("twitter.com")) {
+      final Map<String, String> options = new HashMap<String, String>();
+      options.put("provider", "TWITTER");
+      options.put("searchTerm", url.substring(url.indexOf("q=") + 2));
+      return install(viewName, options);
     }
+    return false;
+  }
 
-    public boolean install(final String viewName,
-            final Map<String, String> options) {
-        if (options == null || options.size() != 2
-                || !options.containsKey("provider")
-                || !options.get("provider").equalsIgnoreCase("TWITTER")
-                || !options.containsKey("searchTerm")) {
-            return false;
-        }
-        String searchTerm = options.get("searchTerm");
-        try {
-            searchTerm = URLDecoder.decode(searchTerm, "UTF-8");
-        }
-        catch (final UnsupportedEncodingException ignore) {
-        }
-        installTagx("microblogging");
-        final Element twitter = new XmlElementBuilder("embed:microblogging",
-                XmlUtils.getDocumentBuilder().newDocument())
-                .addAttribute("id", "twitter_" + searchTerm)
-                .addAttribute("searchTerm", searchTerm).build();
-        twitter.setAttribute("z",
-                XmlRoundTripUtils.calculateUniqueKeyFor(twitter));
-        installJspx(
-                getViewName(viewName, options.get("provider").toLowerCase()),
-                null, twitter);
-        return true;
+  public boolean install(final String viewName, final Map<String, String> options) {
+    if (options == null || options.size() != 2 || !options.containsKey("provider")
+        || !options.get("provider").equalsIgnoreCase("TWITTER")
+        || !options.containsKey("searchTerm")) {
+      return false;
     }
+    String searchTerm = options.get("searchTerm");
+    try {
+      searchTerm = URLDecoder.decode(searchTerm, "UTF-8");
+    } catch (final UnsupportedEncodingException ignore) {
+    }
+    installTagx("microblogging");
+    final Element twitter =
+        new XmlElementBuilder("embed:microblogging", XmlUtils.getDocumentBuilder().newDocument())
+            .addAttribute("id", "twitter_" + searchTerm).addAttribute("searchTerm", searchTerm)
+            .build();
+    twitter.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(twitter));
+    installJspx(getViewName(viewName, options.get("provider").toLowerCase()), null, twitter);
+    return true;
+  }
 }

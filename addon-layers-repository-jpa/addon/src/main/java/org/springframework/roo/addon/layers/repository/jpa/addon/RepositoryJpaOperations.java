@@ -11,26 +11,26 @@ import org.springframework.roo.project.Feature;
  */
 public interface RepositoryJpaOperations extends Feature {
 
-    /**
-     * Checks if it's possible to generate new repositories on current project.
-     * 
-     * @return true if is possible to generate new repositories. If not, return
-     *         false
-     */
-    boolean isRepositoryInstallationPossible();
+  /**
+   * Checks if it's possible to generate new repositories on current project.
+   * 
+   * @return true if is possible to generate new repositories. If not, return
+   *         false
+   */
+  boolean isRepositoryInstallationPossible();
 
-    /**
-     * Add new repository related with some existing entity.
-     * 
-     * @param interfaceType new interface that will be generated
-     * @param domainType The domain entity this repository should expose
-     */
-    void addRepository(JavaType interfaceType, JavaType domainType);
+  /**
+   * Add new repository related with some existing entity.
+   * 
+   * @param interfaceType new interface that will be generated
+   * @param domainType The domain entity this repository should expose
+   */
+  void addRepository(JavaType interfaceType, JavaType domainType);
 
-    /**
-     * Add new repository for all existing entities.
-     * 
-     * @param repositoriesPackage package where repositories will be generated
-     */
-    void generateAllRepositories(JavaPackage repositoriesPackage);
+  /**
+   * Add new repository for all existing entities.
+   * 
+   * @param repositoriesPackage package where repositories will be generated
+   */
+  void generateAllRepositories(JavaPackage repositoriesPackage);
 }

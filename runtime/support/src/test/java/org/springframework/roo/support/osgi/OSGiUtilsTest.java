@@ -17,23 +17,21 @@ import org.osgi.service.component.ComponentContext;
  */
 public class OSGiUtilsTest {
 
-    private static final String ROO_WORKING_DIRECTORY = "/some/file/path";
+  private static final String ROO_WORKING_DIRECTORY = "/some/file/path";
 
-    @Test
-    public void testGetRooWorkingDirectory() {
-        // Set up
-        final BundleContext mockBundleContext = mock(BundleContext.class);
-        when(mockBundleContext.getProperty(ROO_WORKING_DIRECTORY_PROPERTY))
-                .thenReturn(ROO_WORKING_DIRECTORY);
-        final ComponentContext mockComponentContext = mock(ComponentContext.class);
-        when(mockComponentContext.getBundleContext()).thenReturn(
-                mockBundleContext);
+  @Test
+  public void testGetRooWorkingDirectory() {
+    // Set up
+    final BundleContext mockBundleContext = mock(BundleContext.class);
+    when(mockBundleContext.getProperty(ROO_WORKING_DIRECTORY_PROPERTY)).thenReturn(
+        ROO_WORKING_DIRECTORY);
+    final ComponentContext mockComponentContext = mock(ComponentContext.class);
+    when(mockComponentContext.getBundleContext()).thenReturn(mockBundleContext);
 
-        // Invoke
-        final String rooWorkingDirectory = OSGiUtils
-                .getRooWorkingDirectory(mockComponentContext);
+    // Invoke
+    final String rooWorkingDirectory = OSGiUtils.getRooWorkingDirectory(mockComponentContext);
 
-        // Check
-        assertEquals(ROO_WORKING_DIRECTORY, rooWorkingDirectory);
-    }
+    // Check
+    assertEquals(ROO_WORKING_DIRECTORY, rooWorkingDirectory);
+  }
 }

@@ -32,91 +32,99 @@ import org.springframework.roo.shell.ShellContext;
 @Service
 public class ServiceCommands implements CommandMarker {
 
-    @Reference private ServiceOperations serviceOperations;
-    @Reference private ProjectOperations projectOperations;
+  @Reference
+  private ServiceOperations serviceOperations;
+  @Reference
+  private ProjectOperations projectOperations;
 
-    @CliAvailabilityIndicator({ "service add", "service all" })
-    public boolean isServiceCommandAvailable() {
-        return serviceOperations.areServiceCommandsAvailable();
+  @CliAvailabilityIndicator({"service add", "service all"})
+  public boolean isServiceCommandAvailable() {
+    return serviceOperations.areServiceCommandsAvailable();
+  }
+
+  // ROO-3717: Service secure methods will be updated on future commits
+  /*@CliAvailabilityIndicator({ "service secure type", "service secure all" })
+  public boolean isSecureServiceCommandAvailable() {
+      return serviceOperations.isSecureServiceInstallationPossible();
+  }*/
+
+  @CliOptionVisibilityIndicator(command = "service add", params = "interface",
+      help = "--interface parameter is not availbale if you don't specify --entity parameter")
+  public boolean isIterfaceVisible(ShellContext shellContext) {
+
+    // Get all defined parameters
+    Map<String, String> parameters = shellContext.getParameters();
+
+    // If --entity has been defined, show --class parameter
+    if (parameters.containsKey("entity") && StringUtils.isNotBlank(parameters.get("entity"))) {
+      return true;
     }
-    
-    // ROO-3717: Service secure methods will be updated on future commits
-    /*@CliAvailabilityIndicator({ "service secure type", "service secure all" })
-    public boolean isSecureServiceCommandAvailable() {
-        return serviceOperations.isSecureServiceInstallationPossible();
-    }*/
-    
-    @CliOptionVisibilityIndicator(command = "service add", params="interface", help="--interface parameter is not availbale if you don't specify --entity parameter")
-    public boolean isIterfaceVisible(ShellContext shellContext) {
+    return false;
+  }
 
-        // Get all defined parameters
-        Map<String, String> parameters = shellContext.getParameters();
+  @CliCommand(value = "service add", help = "Creates new service interface and its implementation.")
+  public void service(@CliOption(key = "entity", unspecifiedDefaultValue = "*",
+      optionContext = PROJECT, mandatory = true,
+      help = "The domain entity this service should expose") final JavaType domainType,
+      @CliOption(key = "interface", mandatory = true,
+          help = "The service interface to be generated") final JavaType interfaceType,
+      @CliOption(key = "class", mandatory = false,
+          help = "The service implementation to be generated") final JavaType implType) {
 
-        // If --entity has been defined, show --class parameter
-        if (parameters.containsKey("entity")
-                && StringUtils.isNotBlank(parameters.get("entity"))) {
-            return true;
-        }
-        return false;
-    }
+    serviceOperations.addService(domainType, interfaceType, implType);
+  }
 
-    @CliCommand(value = "service add", help = "Creates new service interface and its implementation.")
-    public void service(
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = true, help = "The domain entity this service should expose") final JavaType domainType,
-            @CliOption(key = "interface", mandatory = true, help = "The service interface to be generated") final JavaType interfaceType,
-            @CliOption(key = "class", mandatory = false, help = "The service implementation to be generated") final JavaType implType) {
+  @CliCommand(
+      value = "service all",
+      help = "Creates new service interface and its implementation for every entity of generated project.")
+  public void service(
+      @CliOption(key = "apiPackage", mandatory = true, help = "The java interface package") final JavaPackage apiPackage,
+      @CliOption(key = "implPackage", mandatory = true,
+          help = "The java package of the implementation classes for the interfaces") JavaPackage implPackage) {
 
-        serviceOperations.addService(domainType, interfaceType, implType);
-    }
+    serviceOperations.addAllServices(apiPackage, implPackage);
+  }
 
-    @CliCommand(value = "service all", help = "Creates new service interface and its implementation for every entity of generated project.")
-    public void service(
-            @CliOption(key = "apiPackage", mandatory = true, help = "The java interface package") final JavaPackage apiPackage,
-            @CliOption(key = "implPackage", mandatory = true, help = "The java package of the implementation classes for the interfaces") JavaPackage implPackage) {
+  // ROO-3717: Service secure methods will be updated on future commits
+  /*@CliCommand(value = "service secure type", help = "Adds @RooService annotation to target type with options for authentication, authorization, and a permission evaluator")
+  public void secureService(
+          @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
+          @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
+          @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this service should expose") final JavaType domainType,
+          @CliOption(key = "requireAuthentication", unspecifiedDefaultValue = "false", specifiedDefaultValue = "ture", mandatory = false, help = "Whether or not users must be authenticated to use the service") final boolean requireAuthentication,
+          @CliOption(key = "authorizedRoles", mandatory = false, help = "The role authorized the use the methods in the service") final String role,
+          @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator,
+          @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
 
-        serviceOperations.addAllServices(apiPackage, implPackage);
-    }
-    
-    // ROO-3717: Service secure methods will be updated on future commits
-    /*@CliCommand(value = "service secure type", help = "Adds @RooService annotation to target type with options for authentication, authorization, and a permission evaluator")
-    public void secureService(
-            @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-            @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
-            @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this service should expose") final JavaType domainType,
-            @CliOption(key = "requireAuthentication", unspecifiedDefaultValue = "false", specifiedDefaultValue = "ture", mandatory = false, help = "Whether or not users must be authenticated to use the service") final boolean requireAuthentication,
-            @CliOption(key = "authorizedRoles", mandatory = false, help = "The role authorized the use the methods in the service") final String role,
-            @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator,
-            @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
+      if (classType == null) {
+          classType = new JavaType(interfaceType.getFullyQualifiedTypeName()
+                  + "Impl");
+      }
+      if (useXmlConfiguration == null) {
+          useXmlConfiguration = Boolean.FALSE;
+      }
+      serviceOperations.setupService(interfaceType, classType, domainType,
+              requireAuthentication, role, usePermissionEvaluator,
+              useXmlConfiguration);
+  }
 
-        if (classType == null) {
-            classType = new JavaType(interfaceType.getFullyQualifiedTypeName()
-                    + "Impl");
-        }
-        if (useXmlConfiguration == null) {
-            useXmlConfiguration = Boolean.FALSE;
-        }
-        serviceOperations.setupService(interfaceType, classType, domainType,
-                requireAuthentication, role, usePermissionEvaluator,
-                useXmlConfiguration);
-    }
+  @CliCommand(value = "service secure all", help = "Adds @RooService annotation to all entities with options for authentication, authorization, and a permission evaluator")
+  public void secureServiceAll(
+          @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
+          @CliOption(key = "classPackage", mandatory = false, help = "The java package of the implementation classes for the interfaces") JavaPackage classPackage,
+          @CliOption(key = "requireAuthentication", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not users must be authenticated to use the service") final boolean requireAuthentication,
+          @CliOption(key = "authorizedRole", mandatory = false, help = "The role authorized the use the methods in the service (additional roles can be added after creation)") final String role,
+          @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator,
+          @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
 
-    @CliCommand(value = "service secure all", help = "Adds @RooService annotation to all entities with options for authentication, authorization, and a permission evaluator")
-    public void secureServiceAll(
-            @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
-            @CliOption(key = "classPackage", mandatory = false, help = "The java package of the implementation classes for the interfaces") JavaPackage classPackage,
-            @CliOption(key = "requireAuthentication", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not users must be authenticated to use the service") final boolean requireAuthentication,
-            @CliOption(key = "authorizedRole", mandatory = false, help = "The role authorized the use the methods in the service (additional roles can be added after creation)") final String role,
-            @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator,
-            @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
-
-        if (classPackage == null) {
-            classPackage = interfacePackage;
-        }
-        if (useXmlConfiguration == null) {
-            useXmlConfiguration = Boolean.FALSE;
-        }
-        serviceOperations.setupAllServices(interfacePackage, classPackage,
-                requireAuthentication, role, usePermissionEvaluator,
-                useXmlConfiguration);
-    }*/
+      if (classPackage == null) {
+          classPackage = interfacePackage;
+      }
+      if (useXmlConfiguration == null) {
+          useXmlConfiguration = Boolean.FALSE;
+      }
+      serviceOperations.setupAllServices(interfacePackage, classPackage,
+              requireAuthentication, role, usePermissionEvaluator,
+              useXmlConfiguration);
+  }*/
 }

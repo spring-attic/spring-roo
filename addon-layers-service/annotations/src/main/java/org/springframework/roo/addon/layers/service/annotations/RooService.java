@@ -18,16 +18,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooService {
 
-    /**
-     * The name of this annotation's "entity" attribute
-     */
-    String ENTITY_ATTRIBUTE = "entity";
+  /**
+   * The name of this annotation's "entity" attribute
+   */
+  String ENTITY_ATTRIBUTE = "entity";
 
-    /**
-     * Returns the domain type managed by this service
-     * 
-     * @return a non-<code>null</code> class
-     */
-    Class<?> entity();
+  /**
+   * Returns the domain type managed by this service
+   * 
+   * @return a non-<code>null</code> class
+   */
+  Class<?> entity();
 
 }

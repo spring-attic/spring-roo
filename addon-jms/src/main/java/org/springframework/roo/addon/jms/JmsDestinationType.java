@@ -7,5 +7,5 @@ package org.springframework.roo.addon.jms;
  * @since 1.0
  */
 public enum JmsDestinationType {
-    DURABLE_TOPIC, QUEUE, TOPIC;
+  DURABLE_TOPIC, QUEUE, TOPIC;
 }

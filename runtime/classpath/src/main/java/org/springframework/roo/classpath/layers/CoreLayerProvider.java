@@ -9,10 +9,10 @@ package org.springframework.roo.classpath.layers;
  */
 public abstract class CoreLayerProvider extends LayerAdapter {
 
-    /**
-     * This implementation returns {@link LayerProvider#CORE_LAYER_PRIORITY}
-     */
-    public int getPriority() {
-        return CORE_LAYER_PRIORITY;
-    }
+  /**
+   * This implementation returns {@link LayerProvider#CORE_LAYER_PRIORITY}
+   */
+  public int getPriority() {
+    return CORE_LAYER_PRIORITY;
+  }
 }

@@ -15,17 +15,16 @@ import org.springframework.roo.file.monitor.event.FileOperation;
  */
 public class FileMonitoringRequest extends MonitoringRequest {
 
-    public FileMonitoringRequest(final File file,
-            final Collection<FileOperation> notifyOn) {
-        super(file, notifyOn);
-        Validate.isTrue(file.isFile(), "File '%s' must be a file", file);
-    }
+  public FileMonitoringRequest(final File file, final Collection<FileOperation> notifyOn) {
+    super(file, notifyOn);
+    Validate.isTrue(file.isFile(), "File '%s' must be a file", file);
+  }
 
-    @Override
-    public String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("resource", getFile());
-        builder.append("notifyOn", getNotifyOn());
-        return builder.toString();
-    }
+  @Override
+  public String toString() {
+    final ToStringBuilder builder = new ToStringBuilder(this);
+    builder.append("resource", getFile());
+    builder.append("notifyOn", getNotifyOn());
+    return builder.toString();
+  }
 }

@@ -8,24 +8,24 @@ package org.springframework.roo.addon.dbre.addon.model;
  * @since 1.1
  */
 public enum CascadeAction {
-    CASCADE("cascade"), NONE("none"), RESTRICT("restrict"), SET_DEFAULT(
-            "setdefault"), SET_NULL("setnull");
-    public static CascadeAction getCascadeAction(final String code) {
-        for (final CascadeAction cascadeAction : CascadeAction.values()) {
-            if (cascadeAction.getCode().equals(code)) {
-                return cascadeAction;
-            }
-        }
-        return NONE;
+  CASCADE("cascade"), NONE("none"), RESTRICT("restrict"), SET_DEFAULT("setdefault"), SET_NULL(
+      "setnull");
+  public static CascadeAction getCascadeAction(final String code) {
+    for (final CascadeAction cascadeAction : CascadeAction.values()) {
+      if (cascadeAction.getCode().equals(code)) {
+        return cascadeAction;
+      }
     }
+    return NONE;
+  }
 
-    private String code;
+  private String code;
 
-    private CascadeAction(final String code) {
-        this.code = code;
-    }
+  private CascadeAction(final String code) {
+    this.code = code;
+  }
 
-    public String getCode() {
-        return code;
-    }
+  public String getCode() {
+    return code;
+  }
 }

@@ -11,42 +11,41 @@ import org.springframework.roo.model.JavaType;
 
 public class BooleanField extends FieldDetails {
 
-    /** Whether the JSR 303 @AssertFalse annotation will be added */
-    private boolean assertFalse;
+  /** Whether the JSR 303 @AssertFalse annotation will be added */
+  private boolean assertFalse;
 
-    /** Whether the JSR 303 @AssertTrue annotation will be added */
-    private boolean assertTrue;
+  /** Whether the JSR 303 @AssertTrue annotation will be added */
+  private boolean assertTrue;
 
-    public BooleanField(final String physicalTypeIdentifier,
-            final JavaType fieldType, final JavaSymbolName fieldName) {
-        super(physicalTypeIdentifier, fieldType, fieldName);
+  public BooleanField(final String physicalTypeIdentifier, final JavaType fieldType,
+      final JavaSymbolName fieldName) {
+    super(physicalTypeIdentifier, fieldType, fieldName);
+  }
+
+  @Override
+  public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
+    super.decorateAnnotationsList(annotations);
+    if (assertTrue) {
+      annotations.add(new AnnotationMetadataBuilder(ASSERT_TRUE));
     }
-
-    @Override
-    public void decorateAnnotationsList(
-            final List<AnnotationMetadataBuilder> annotations) {
-        super.decorateAnnotationsList(annotations);
-        if (assertTrue) {
-            annotations.add(new AnnotationMetadataBuilder(ASSERT_TRUE));
-        }
-        if (assertFalse) {
-            annotations.add(new AnnotationMetadataBuilder(ASSERT_FALSE));
-        }
+    if (assertFalse) {
+      annotations.add(new AnnotationMetadataBuilder(ASSERT_FALSE));
     }
+  }
 
-    public boolean isAssertFalse() {
-        return assertFalse;
-    }
+  public boolean isAssertFalse() {
+    return assertFalse;
+  }
 
-    public boolean isAssertTrue() {
-        return assertTrue;
-    }
+  public boolean isAssertTrue() {
+    return assertTrue;
+  }
 
-    public void setAssertFalse(final boolean assertFalse) {
-        this.assertFalse = assertFalse;
-    }
+  public void setAssertFalse(final boolean assertFalse) {
+    this.assertFalse = assertFalse;
+  }
 
-    public void setAssertTrue(final boolean assertTrue) {
-        this.assertTrue = assertTrue;
-    }
+  public void setAssertTrue(final boolean assertTrue) {
+    this.assertTrue = assertTrue;
+  }
 }

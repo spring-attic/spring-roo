@@ -25,44 +25,44 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
  */
 public interface NotifiableFileMonitorService extends FileMonitorService {
 
-    /**
-     * Indicates the canonical path specified should be treated as if it had
-     * changed. The last update time will become equal to actual disk timestamp.
-     * <p>
-     * The implementation must only present the indicated file once in a given
-     * {@link FileMonitorService#scanAll()} or {@link #scanNotified()}
-     * invocation, even if this method has been repeatedly called and/or the
-     * file was detected as changed using normal last updated timestamps.
-     * <p>
-     * No attempt is made to verify whether the presented path is subject to
-     * monitoring or not. It is expected that {@link FileEventListener}s will
-     * ignore files they are not interested in.
-     * 
-     * @param fileCanonicalPath required (not null)
-     */
-    void notifyChanged(String fileCanonicalPath);
+  /**
+   * Indicates the canonical path specified should be treated as if it had
+   * changed. The last update time will become equal to actual disk timestamp.
+   * <p>
+   * The implementation must only present the indicated file once in a given
+   * {@link FileMonitorService#scanAll()} or {@link #scanNotified()}
+   * invocation, even if this method has been repeatedly called and/or the
+   * file was detected as changed using normal last updated timestamps.
+   * <p>
+   * No attempt is made to verify whether the presented path is subject to
+   * monitoring or not. It is expected that {@link FileEventListener}s will
+   * ignore files they are not interested in.
+   * 
+   * @param fileCanonicalPath required (not null)
+   */
+  void notifyChanged(String fileCanonicalPath);
 
-    void notifyCreated(String fileCanonicalPath);
+  void notifyCreated(String fileCanonicalPath);
 
-    /**
-     * Notifies this service that the given file system resource is about to be
-     * deleted
-     * 
-     * @param fileCanonicalPath
-     */
-    void notifyDeleted(String fileCanonicalPath);
+  /**
+   * Notifies this service that the given file system resource is about to be
+   * deleted
+   * 
+   * @param fileCanonicalPath
+   */
+  void notifyDeleted(String fileCanonicalPath);
 
-    /**
-     * Similar to {@link #scanAll()} except will only notify those files
-     * explicitly advised via notification methods on
-     * {@link NotifiableFileMonitorService}. This is designed to allow faster
-     * operation where a full disk scan (as would be provided by
-     * {@link #scanAll()} is unnecessary.
-     * <p>
-     * Note that executing this method will result in change notifications
-     * 
-     * @return the number of changes detected during this invocation (can be 0
-     *         or above)
-     */
-    int scanNotified();
+  /**
+   * Similar to {@link #scanAll()} except will only notify those files
+   * explicitly advised via notification methods on
+   * {@link NotifiableFileMonitorService}. This is designed to allow faster
+   * operation where a full disk scan (as would be provided by
+   * {@link #scanAll()} is unnecessary.
+   * <p>
+   * Note that executing this method will result in change notifications
+   * 
+   * @return the number of changes detected during this invocation (can be 0
+   *         or above)
+   */
+  int scanNotified();
 }

@@ -14,20 +14,19 @@ import org.springframework.roo.project.Path;
  */
 public class PhysicalTypeIdentifierTest {
 
-    private static final String USER_PROJECT_TYPE = "com.foo.Bar";
+  private static final String USER_PROJECT_TYPE = "com.foo.Bar";
 
-    @Test
-    public void testGetJavaType() {
-        // Set up
-        final String metadataId = "MID:"
-                + PhysicalTypeIdentifier.class.getName() + "#"
-                + Path.SRC_MAIN_JAVA + "?" + USER_PROJECT_TYPE;
+  @Test
+  public void testGetJavaType() {
+    // Set up
+    final String metadataId =
+        "MID:" + PhysicalTypeIdentifier.class.getName() + "#" + Path.SRC_MAIN_JAVA + "?"
+            + USER_PROJECT_TYPE;
 
-        // Invoke
-        final JavaType javaType = PhysicalTypeIdentifier
-                .getJavaType(metadataId);
+    // Invoke
+    final JavaType javaType = PhysicalTypeIdentifier.getJavaType(metadataId);
 
-        // Check
-        assertEquals(USER_PROJECT_TYPE, javaType.getFullyQualifiedTypeName());
-    }
+    // Check
+    assertEquals(USER_PROJECT_TYPE, javaType.getFullyQualifiedTypeName());
+  }
 }

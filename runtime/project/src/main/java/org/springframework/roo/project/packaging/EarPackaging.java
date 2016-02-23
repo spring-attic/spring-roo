@@ -18,15 +18,15 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class EarPackaging extends AbstractCorePackagingProvider {
 
-    /**
-     * Constructor
-     */
-    public EarPackaging() {
-        // ear-pom-template.xml doesn't exist because we won't allow ear packaging projects
-        super("ear", "ear-pom-template.xml");
-    }
+  /**
+   * Constructor
+   */
+  public EarPackaging() {
+    // ear-pom-template.xml doesn't exist because we won't allow ear packaging projects
+    super("ear", "ear-pom-template.xml");
+  }
 
-    public Collection<Path> getPaths() {
-        return null;
-    }
+  public Collection<Path> getPaths() {
+    return null;
+  }
 }

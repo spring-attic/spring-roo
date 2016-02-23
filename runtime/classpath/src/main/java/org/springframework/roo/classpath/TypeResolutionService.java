@@ -5,7 +5,7 @@ import org.springframework.roo.model.JavaType;
 
 public interface TypeResolutionService {
 
-    JavaType getJavaType(String fileIdentifier);
+  JavaType getJavaType(String fileIdentifier);
 
-    JavaPackage getPackage(String fileIdentifier);
+  JavaPackage getPackage(String fileIdentifier);
 }

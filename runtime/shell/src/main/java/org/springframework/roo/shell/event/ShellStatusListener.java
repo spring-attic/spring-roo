@@ -8,11 +8,11 @@ package org.springframework.roo.shell.event;
  */
 public interface ShellStatusListener {
 
-    /**
-     * Invoked by the shell to report a new status.
-     * 
-     * @param oldStatus the old status
-     * @param newStatus the new status
-     */
-    void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus);
+  /**
+   * Invoked by the shell to report a new status.
+   * 
+   * @param oldStatus the old status
+   * @param newStatus the new status
+   */
+  void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus);
 }

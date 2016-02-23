@@ -13,250 +13,240 @@ import org.apache.commons.lang3.Validate;
  * @since 1.1
  */
 public class Table {
-    private String catalog;
-    private final Set<Column> columns = new LinkedHashSet<Column>();
-    private String description;
-    private final Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
-    private final Set<ForeignKey> importedKeys = new LinkedHashSet<ForeignKey>();
-    private boolean includeNonPortableAttributes;
-    private boolean disableVersionFields;
-    private boolean disableGeneratedIdentifiers;
-    private final Set<Index> indices = new LinkedHashSet<Index>();
-    private boolean joinTable;
-    private final String name;
-    private final Schema schema;
+  private String catalog;
+  private final Set<Column> columns = new LinkedHashSet<Column>();
+  private String description;
+  private final Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
+  private final Set<ForeignKey> importedKeys = new LinkedHashSet<ForeignKey>();
+  private boolean includeNonPortableAttributes;
+  private boolean disableVersionFields;
+  private boolean disableGeneratedIdentifiers;
+  private final Set<Index> indices = new LinkedHashSet<Index>();
+  private boolean joinTable;
+  private final String name;
+  private final Schema schema;
 
-    Table(final String name, final Schema schema) {
-        Validate.notBlank(name, "Table name required");
-        Validate.notNull(schema, "Table schema required");
-        this.name = name;
-        this.schema = schema;
+  Table(final String name, final Schema schema) {
+    Validate.notBlank(name, "Table name required");
+    Validate.notNull(schema, "Table schema required");
+    this.name = name;
+    this.schema = schema;
+  }
+
+  public boolean addColumn(final Column column) {
+    Validate.notNull(column, "Column required");
+    return columns.add(column);
+  }
+
+  public boolean addExportedKey(final ForeignKey exportedKey) {
+    Validate.notNull(exportedKey, "Exported key required");
+    return exportedKeys.add(exportedKey);
+  }
+
+  public boolean addImportedKey(final ForeignKey foreignKey) {
+    Validate.notNull(foreignKey, "Foreign key required");
+    return importedKeys.add(foreignKey);
+  }
+
+  public boolean addIndex(final Index index) {
+    Validate.notNull(index, "Index required");
+    return indices.add(index);
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
     }
-
-    public boolean addColumn(final Column column) {
-        Validate.notNull(column, "Column required");
-        return columns.add(column);
+    if (obj == null) {
+      return false;
     }
-
-    public boolean addExportedKey(final ForeignKey exportedKey) {
-        Validate.notNull(exportedKey, "Exported key required");
-        return exportedKeys.add(exportedKey);
+    if (!(obj instanceof Table)) {
+      return false;
     }
-
-    public boolean addImportedKey(final ForeignKey foreignKey) {
-        Validate.notNull(foreignKey, "Foreign key required");
-        return importedKeys.add(foreignKey);
+    final Table other = (Table) obj;
+    if (name == null) {
+      if (other.name != null) {
+        return false;
+      }
+    } else if (!name.equalsIgnoreCase(other.name)) {
+      return false;
     }
-
-    public boolean addIndex(final Index index) {
-        Validate.notNull(index, "Index required");
-        return indices.add(index);
+    if (schema == null) {
+      if (other.schema != null) {
+        return false;
+      }
+    } else if (!schema.equals(other.schema)) {
+      return false;
     }
+    return true;
+  }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
+  public Column findColumn(final String name) {
+    for (final Column column : columns) {
+      if (column.getName().equalsIgnoreCase(name)) {
+        return column;
+      }
+    }
+    return null;
+  }
+
+  public ForeignKey findImportedKeyByLocalColumnName(final String localColumnName) {
+    for (final ForeignKey foreignKey : importedKeys) {
+      for (final Reference reference : foreignKey.getReferences()) {
+        if (reference.getLocalColumnName().equalsIgnoreCase(localColumnName)) {
+          return foreignKey;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Table)) {
-            return false;
-        }
-        final Table other = (Table) obj;
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        }
-        else if (!name.equalsIgnoreCase(other.name)) {
-            return false;
-        }
-        if (schema == null) {
-            if (other.schema != null) {
-                return false;
-            }
-        }
-        else if (!schema.equals(other.schema)) {
-            return false;
-        }
-        return true;
+      }
     }
+    return null;
+  }
 
-    public Column findColumn(final String name) {
-        for (final Column column : columns) {
-            if (column.getName().equalsIgnoreCase(name)) {
-                return column;
-            }
-        }
-        return null;
-    }
+  public String getCatalog() {
+    return StringUtils.trimToNull(catalog);
+  }
 
-    public ForeignKey findImportedKeyByLocalColumnName(
-            final String localColumnName) {
-        for (final ForeignKey foreignKey : importedKeys) {
-            for (final Reference reference : foreignKey.getReferences()) {
-                if (reference.getLocalColumnName().equalsIgnoreCase(
-                        localColumnName)) {
-                    return foreignKey;
-                }
-            }
-        }
-        return null;
-    }
+  public int getColumnCount() {
+    return columns.size();
+  }
 
-    public String getCatalog() {
-        return StringUtils.trimToNull(catalog);
-    }
+  public Set<Column> getColumns() {
+    return columns;
+  }
 
-    public int getColumnCount() {
-        return columns.size();
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public Set<Column> getColumns() {
-        return columns;
+  public int getExportedKeyCountByForeignTableName(final String foreignTableName) {
+    int count = 0;
+    for (final ForeignKey exportedKey : exportedKeys) {
+      if (exportedKey.getForeignTableName().equalsIgnoreCase(foreignTableName)) {
+        count++;
+      }
     }
+    return count;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public Set<ForeignKey> getExportedKeys() {
+    return exportedKeys;
+  }
 
-    public int getExportedKeyCountByForeignTableName(
-            final String foreignTableName) {
-        int count = 0;
-        for (final ForeignKey exportedKey : exportedKeys) {
-            if (exportedKey.getForeignTableName().equalsIgnoreCase(
-                    foreignTableName)) {
-                count++;
-            }
-        }
-        return count;
-    }
+  public String getFullyQualifiedTableName() {
+    return DbreModelService.NO_SCHEMA_REQUIRED.equals(schema.getName()) ? name : schema.getName()
+        + "." + name;
+  }
 
-    public Set<ForeignKey> getExportedKeys() {
-        return exportedKeys;
+  public ForeignKey getImportedKey(final String name) {
+    for (final ForeignKey foreignKey : importedKeys) {
+      Validate.notBlank(foreignKey.getName(), "Foreign key name required");
+      if (foreignKey.getName().equalsIgnoreCase(name)) {
+        return foreignKey;
+      }
     }
+    return null;
+  }
 
-    public String getFullyQualifiedTableName() {
-        return DbreModelService.NO_SCHEMA_REQUIRED.equals(schema.getName()) ? name
-                : schema.getName() + "." + name;
-    }
+  public int getImportedKeyCount() {
+    return importedKeys.size();
+  }
 
-    public ForeignKey getImportedKey(final String name) {
-        for (final ForeignKey foreignKey : importedKeys) {
-            Validate.notBlank(foreignKey.getName(), "Foreign key name required");
-            if (foreignKey.getName().equalsIgnoreCase(name)) {
-                return foreignKey;
-            }
-        }
-        return null;
+  public int getImportedKeyCountByForeignTableName(final String foreignTableName) {
+    int count = 0;
+    for (final ForeignKey foreignKey : importedKeys) {
+      if (foreignKey.getForeignTableName().equalsIgnoreCase(foreignTableName)) {
+        count++;
+      }
     }
+    return count;
+  }
 
-    public int getImportedKeyCount() {
-        return importedKeys.size();
-    }
+  public Set<ForeignKey> getImportedKeys() {
+    return importedKeys;
+  }
 
-    public int getImportedKeyCountByForeignTableName(
-            final String foreignTableName) {
-        int count = 0;
-        for (final ForeignKey foreignKey : importedKeys) {
-            if (foreignKey.getForeignTableName().equalsIgnoreCase(
-                    foreignTableName)) {
-                count++;
-            }
-        }
-        return count;
-    }
+  public Set<Index> getIndices() {
+    return indices;
+  }
 
-    public Set<ForeignKey> getImportedKeys() {
-        return importedKeys;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public Set<Index> getIndices() {
-        return indices;
-    }
+  public int getPrimaryKeyCount() {
+    return getPrimaryKeys().size();
+  }
 
-    public String getName() {
-        return name;
+  public Set<Column> getPrimaryKeys() {
+    final Set<Column> primaryKeys = new LinkedHashSet<Column>();
+    for (final Column column : columns) {
+      if (column.isPrimaryKey()) {
+        primaryKeys.add(column);
+      }
     }
+    return primaryKeys;
+  }
 
-    public int getPrimaryKeyCount() {
-        return getPrimaryKeys().size();
-    }
+  public Schema getSchema() {
+    return schema;
+  }
 
-    public Set<Column> getPrimaryKeys() {
-        final Set<Column> primaryKeys = new LinkedHashSet<Column>();
-        for (final Column column : columns) {
-            if (column.isPrimaryKey()) {
-                primaryKeys.add(column);
-            }
-        }
-        return primaryKeys;
-    }
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + name.hashCode();
+    result = prime * result + schema.hashCode();
+    return result;
+  }
 
-    public Schema getSchema() {
-        return schema;
-    }
+  public boolean isIncludeNonPortableAttributes() {
+    return includeNonPortableAttributes;
+  }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + name.hashCode();
-        result = prime * result + schema.hashCode();
-        return result;
-    }
+  public boolean isDisableVersionFields() {
+    return disableVersionFields;
+  }
 
-    public boolean isIncludeNonPortableAttributes() {
-        return includeNonPortableAttributes;
-    }
+  public boolean isDisableGeneratedIdentifiers() {
+    return disableGeneratedIdentifiers;
+  }
 
-    public boolean isDisableVersionFields() {
-        return disableVersionFields;
-    }
+  public boolean isJoinTable() {
+    return joinTable;
+  }
 
-    public boolean isDisableGeneratedIdentifiers() {
-        return disableGeneratedIdentifiers;
-    }
+  public void setCatalog(final String catalog) {
+    this.catalog = catalog;
+  }
 
-    public boolean isJoinTable() {
-        return joinTable;
-    }
+  public void setDescription(final String description) {
+    this.description = description;
+  }
 
-    public void setCatalog(final String catalog) {
-        this.catalog = catalog;
-    }
+  public void setIncludeNonPortableAttributes(final boolean includeNonPortableAttributes) {
+    this.includeNonPortableAttributes = includeNonPortableAttributes;
+  }
 
-    public void setDescription(final String description) {
-        this.description = description;
-    }
+  public void setDisableVersionFields(final boolean disableVersionFields) {
+    this.disableVersionFields = disableVersionFields;
+  }
 
-    public void setIncludeNonPortableAttributes(
-            final boolean includeNonPortableAttributes) {
-        this.includeNonPortableAttributes = includeNonPortableAttributes;
-    }
+  public void setDisableGeneratedIdentifiers(final boolean disableGeneratedIdentifiers) {
+    this.disableGeneratedIdentifiers = disableGeneratedIdentifiers;
+  }
 
-    public void setDisableVersionFields(final boolean disableVersionFields) {
-        this.disableVersionFields = disableVersionFields;
-    }
+  public void setJoinTable(final boolean joinTable) {
+    this.joinTable = joinTable;
+  }
 
-    public void setDisableGeneratedIdentifiers(
-            final boolean disableGeneratedIdentifiers) {
-        this.disableGeneratedIdentifiers = disableGeneratedIdentifiers;
-    }
-
-    public void setJoinTable(final boolean joinTable) {
-        this.joinTable = joinTable;
-    }
-
-    @Override
-    public String toString() {
-        return String
-                .format("Table [name=%s, schema=%s, catalog=%s, description=%s, columns=%s, importedKeys=%s, exportedKeys=%s, indices=%s, includeNonPortableAttributes=%s, disableVersionFields=%s, disableGeneratedIdentifiers=%s]",
-                        name, schema.getName(), catalog, description, columns,
-                        importedKeys, exportedKeys, indices,
-                        includeNonPortableAttributes, disableVersionFields,
-                        disableGeneratedIdentifiers);
-    }
+  @Override
+  public String toString() {
+    return String
+        .format(
+            "Table [name=%s, schema=%s, catalog=%s, description=%s, columns=%s, importedKeys=%s, exportedKeys=%s, indices=%s, includeNonPortableAttributes=%s, disableVersionFields=%s, disableGeneratedIdentifiers=%s]",
+            name, schema.getName(), catalog, description, columns, importedKeys, exportedKeys,
+            indices, includeNonPortableAttributes, disableVersionFields,
+            disableGeneratedIdentifiers);
+  }
 }

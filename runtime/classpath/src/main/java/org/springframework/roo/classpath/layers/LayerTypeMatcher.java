@@ -28,49 +28,44 @@ import org.springframework.roo.model.JavaType;
  */
 public class LayerTypeMatcher extends AnnotatedTypeMatcher {
 
-    private final JavaSymbolName domainTypesAttribute;
-    private final JavaType layerAnnotationType;
+  private final JavaSymbolName domainTypesAttribute;
+  private final JavaType layerAnnotationType;
 
-    /**
-     * Constructor
-     * 
-     * @param layerAnnotation the annotation type to match on and read
-     *            attributes of (required)
-     * @param domainTypesAttribute the attribute of the above annotation that
-     *            identifies the domain type(s) being managed (required)
-     */
-    public LayerTypeMatcher(final JavaType layerAnnotation,
-            final JavaSymbolName domainTypesAttribute) {
-        super(CustomDataKeys.LAYER_TYPE, layerAnnotation);
-        Validate.notNull(layerAnnotation, "Layer annotation is required");
-        Validate.notNull(domainTypesAttribute,
-                "Domain types attribute is required");
-        this.domainTypesAttribute = domainTypesAttribute;
-        layerAnnotationType = layerAnnotation;
-    }
+  /**
+   * Constructor
+   * 
+   * @param layerAnnotation the annotation type to match on and read
+   *            attributes of (required)
+   * @param domainTypesAttribute the attribute of the above annotation that
+   *            identifies the domain type(s) being managed (required)
+   */
+  public LayerTypeMatcher(final JavaType layerAnnotation, final JavaSymbolName domainTypesAttribute) {
+    super(CustomDataKeys.LAYER_TYPE, layerAnnotation);
+    Validate.notNull(layerAnnotation, "Layer annotation is required");
+    Validate.notNull(domainTypesAttribute, "Domain types attribute is required");
+    this.domainTypesAttribute = domainTypesAttribute;
+    layerAnnotationType = layerAnnotation;
+  }
 
-    @Override
-    public Object getTagValue(final MemberHoldingTypeDetails type) {
-        final AnnotationMetadata layerAnnotation = MemberFindingUtils
-                .getAnnotationOfType(type.getAnnotations(), layerAnnotationType);
-        if (layerAnnotation == null
-                || layerAnnotation.getAttribute(domainTypesAttribute) == null) {
-            return null;
-        }
-        final AnnotationAttributeValue<?> value = layerAnnotation
-                .getAttribute(domainTypesAttribute);
-        final List<JavaType> domainTypes = new ArrayList<JavaType>();
-        if (value instanceof ClassAttributeValue) {
-            domainTypes.add(((ClassAttributeValue) value).getValue());
-        }
-        else if (value instanceof ArrayAttributeValue<?>) {
-            final ArrayAttributeValue<?> castValue = (ArrayAttributeValue<?>) value;
-            for (final AnnotationAttributeValue<?> val : castValue.getValue()) {
-                if (val instanceof ClassAttributeValue) {
-                    domainTypes.add(((ClassAttributeValue) val).getValue());
-                }
-            }
-        }
-        return domainTypes;
+  @Override
+  public Object getTagValue(final MemberHoldingTypeDetails type) {
+    final AnnotationMetadata layerAnnotation =
+        MemberFindingUtils.getAnnotationOfType(type.getAnnotations(), layerAnnotationType);
+    if (layerAnnotation == null || layerAnnotation.getAttribute(domainTypesAttribute) == null) {
+      return null;
     }
+    final AnnotationAttributeValue<?> value = layerAnnotation.getAttribute(domainTypesAttribute);
+    final List<JavaType> domainTypes = new ArrayList<JavaType>();
+    if (value instanceof ClassAttributeValue) {
+      domainTypes.add(((ClassAttributeValue) value).getValue());
+    } else if (value instanceof ArrayAttributeValue<?>) {
+      final ArrayAttributeValue<?> castValue = (ArrayAttributeValue<?>) value;
+      for (final AnnotationAttributeValue<?> val : castValue.getValue()) {
+        if (val instanceof ClassAttributeValue) {
+          domainTypes.add(((ClassAttributeValue) val).getValue());
+        }
+      }
+    }
+    return domainTypes;
+  }
 }

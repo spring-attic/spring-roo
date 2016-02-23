@@ -14,8 +14,8 @@ import org.w3c.dom.Element;
  */
 public class ConfigurationTest {
 
-    @Test
-    public void testInstanceDoesNotEqualNull() {
-        assertFalse(new Configuration(mock(Element.class)).equals(null));
-    }
+  @Test
+  public void testInstanceDoesNotEqualNull() {
+    assertFalse(new Configuration(mock(Element.class)).equals(null));
+  }
 }

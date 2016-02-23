@@ -13,32 +13,32 @@ import org.junit.Test;
  */
 public class CliOptionContextTest {
 
-    private static final String OPTION_CONTEXT = "anything";
+  private static final String OPTION_CONTEXT = "anything";
 
-    @Test
-    public void testGetOptionContextWhenNoneSet() {
-        CliOptionContext.setOptionContext(null);
-        assertNull(CliOptionContext.getOptionContext());
-    }
+  @Test
+  public void testGetOptionContextWhenNoneSet() {
+    CliOptionContext.setOptionContext(null);
+    assertNull(CliOptionContext.getOptionContext());
+  }
 
-    @Test
-    public void testResetOptionContext() {
-        // Set up
-        CliOptionContext.setOptionContext(OPTION_CONTEXT);
+  @Test
+  public void testResetOptionContext() {
+    // Set up
+    CliOptionContext.setOptionContext(OPTION_CONTEXT);
 
-        // Invoke
-        CliOptionContext.resetOptionContext();
+    // Invoke
+    CliOptionContext.resetOptionContext();
 
-        // Check
-        assertNull(CliOptionContext.getOptionContext());
-    }
+    // Check
+    assertNull(CliOptionContext.getOptionContext());
+  }
 
-    @Test
-    public void testSetAndGetOptionContext() {
-        // Set up
-        CliOptionContext.setOptionContext(OPTION_CONTEXT);
+  @Test
+  public void testSetAndGetOptionContext() {
+    // Set up
+    CliOptionContext.setOptionContext(OPTION_CONTEXT);
 
-        // Invoke and check
-        assertEquals(OPTION_CONTEXT, CliOptionContext.getOptionContext());
-    }
+    // Invoke and check
+    assertEquals(OPTION_CONTEXT, CliOptionContext.getOptionContext());
+  }
 }

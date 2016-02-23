@@ -9,5 +9,5 @@ package org.springframework.roo.model;
  */
 public interface CustomDataKey<T> extends Criteria<T> {
 
-    String name();
+  String name();
 }

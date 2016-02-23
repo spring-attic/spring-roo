@@ -18,19 +18,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class ItalianLanguage extends AbstractLanguage {
 
-    public InputStream getFlagGraphic() {
-        return FileUtils.getInputStream(getClass(), "it.png");
-    }
+  public InputStream getFlagGraphic() {
+    return FileUtils.getInputStream(getClass(), "it.png");
+  }
 
-    public String getLanguage() {
-        return "Italiano";
-    }
+  public String getLanguage() {
+    return "Italiano";
+  }
 
-    public Locale getLocale() {
-        return Locale.ITALIAN;
-    }
+  public Locale getLocale() {
+    return Locale.ITALIAN;
+  }
 
-    public InputStream getMessageBundle() {
-        return FileUtils.getInputStream(getClass(), "messages_it.properties");
-    }
+  public InputStream getMessageBundle() {
+    return FileUtils.getInputStream(getClass(), "messages_it.properties");
+  }
 }

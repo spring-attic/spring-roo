@@ -15,9 +15,9 @@ package org.springframework.roo.model;
  */
 public interface Builder<T> {
 
-    /**
-     * @return the immutable object this builder creates (never returns null,
-     *         but may throw an exception)
-     */
-    T build();
+  /**
+   * @return the immutable object this builder creates (never returns null,
+   *         but may throw an exception)
+   */
+  T build();
 }

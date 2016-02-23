@@ -8,8 +8,8 @@ package org.springframework.roo.classpath.details.comments;
  */
 public interface CommentedJavaStructure {
 
-    CommentStructure getCommentStructure();
+  CommentStructure getCommentStructure();
 
-    void setCommentStructure(CommentStructure commentStructure);
+  void setCommentStructure(CommentStructure commentStructure);
 
 }

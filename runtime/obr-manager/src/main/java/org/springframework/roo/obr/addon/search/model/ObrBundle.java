@@ -7,168 +7,169 @@ import org.osgi.framework.Version;
 
 public class ObrBundle {
 
-    private String symbolicName;
-	private String presentationName;
-	private Long size;
-	private String uri;
-	private Version version;
-	private List<String> commands;
+  private String symbolicName;
+  private String presentationName;
+  private Long size;
+  private String uri;
+  private Version version;
+  private List<String> commands;
 
-    public ObrBundle(final String symbolicName) {
-        super();
-        this.symbolicName = symbolicName;
-        this.commands = new ArrayList<String>();
+  public ObrBundle(final String symbolicName) {
+    super();
+    this.symbolicName = symbolicName;
+    this.commands = new ArrayList<String>();
+  }
+
+  public ObrBundle(String symbolicName, String presentationName, Long size, Version version) {
+    super();
+    this.symbolicName = symbolicName;
+    this.setPresentationName(presentationName);
+    this.setVersion(version);
+    this.setSize(size);
+    this.commands = new ArrayList<String>();
+  }
+
+  public ObrBundle(String symbolicName, String presentationName, Long size, Version version,
+      String uri) {
+    super();
+    this.symbolicName = symbolicName;
+    this.setPresentationName(presentationName);
+    this.setVersion(version);
+    this.setSize(size);
+    this.setUri(uri);
+    this.commands = new ArrayList<String>();
+  }
+
+
+  public ObrBundle(String symbolicName, String presentationName, Long size, Version version,
+      String uri, List<String> commands) {
+    super();
+    this.symbolicName = symbolicName;
+    this.setPresentationName(presentationName);
+    this.setVersion(version);
+    this.setSize(size);
+    this.setUri(uri);
+    this.commands = commands;
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
     }
-    
-    public ObrBundle(String symbolicName, String presentationName, Long size, Version version) {
-		super();
-		this.symbolicName = symbolicName;
-		this.setPresentationName(presentationName);
-		this.setVersion(version);
-		this.setSize(size);
-		this.commands = new ArrayList<String>();
-	}
-
-    public ObrBundle(String symbolicName, String presentationName, Long size, Version version, String uri) {
-		super();
-		this.symbolicName = symbolicName;
-		this.setPresentationName(presentationName);
-		this.setVersion(version);
-		this.setSize(size);
-		this.setUri(uri);
-		this.commands = new ArrayList<String>();
-	}
-    
-    
-    public ObrBundle(String symbolicName, String presentationName, Long size, Version version, String uri, List<String> commands) {
-		super();
-		this.symbolicName = symbolicName;
-		this.setPresentationName(presentationName);
-		this.setVersion(version);
-		this.setSize(size);
-		this.setUri(uri);
-		this.commands = commands;
-	}
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ObrBundle other = (ObrBundle) obj;
-        if (symbolicName == null) {
-            if (other.symbolicName != null) {
-                return false;
-            }
-        }
-        else if (!symbolicName.equals(other.symbolicName)) {
-            return false;
-        }
-        return true;
+    if (obj == null) {
+      return false;
     }
-
-
-
-    public String getSymbolicName() {
-        return symbolicName;
+    if (getClass() != obj.getClass()) {
+      return false;
     }
+    final ObrBundle other = (ObrBundle) obj;
+    if (symbolicName == null) {
+      if (other.symbolicName != null) {
+        return false;
+      }
+    } else if (!symbolicName.equals(other.symbolicName)) {
+      return false;
+    }
+    return true;
+  }
 
-	/**
-	 * @return the presentationName
-	 */
-	public String getPresentationName() {
-		return presentationName;
-	}
 
-	/**
-	 * @param presentationName the presentationName to set
-	 */
-	public void setPresentationName(String presentationName) {
-		this.presentationName = presentationName;
-	}
 
-	/**
-	 * @return the version
-	 */
-	public Version getVersion() {
-		return version;
-	}
+  public String getSymbolicName() {
+    return symbolicName;
+  }
 
-	/**
-	 * @param version the version to set
-	 */
-	public void setVersion(Version version) {
-		this.version = version;
-	}
-	
-	/**
-	 * Method to add available commands on Bundle
-	 * 
-	 * @param command
-	 */
-	public void addCommand(String command){
-		this.commands.add(command);
-	}
+  /**
+   * @return the presentationName
+   */
+  public String getPresentationName() {
+    return presentationName;
+  }
 
-	/**
-	 * Method to remove commands from Bundle
-	 * 
-	 * @param command
-	 */
-	public void removeCommand(String command){
-		this.commands.remove(command);
-	}
-	
-	/**
-	 * Method that returns Bundle Commands
-	 * 
-	 * @return
-	 */
-	public List<String> getCommands(){
-		return this.commands;
-	}
-	
-	/**
-	 * Method to set commands
-	 * 
-	 * @param commands
-	 */
-	public void setCommands(List<String> commands){
-		this.commands = commands;
-	}
+  /**
+   * @param presentationName the presentationName to set
+   */
+  public void setPresentationName(String presentationName) {
+    this.presentationName = presentationName;
+  }
 
-	/**
-	 * @return the size
-	 */
-	public Long getSize() {
-		return this.size;
-	}
+  /**
+   * @return the version
+   */
+  public Version getVersion() {
+    return version;
+  }
 
-	/**
-	 * @param size the size to set
-	 */
-	public void setSize(Long size) {
-		this.size = size;
-	}
+  /**
+   * @param version the version to set
+   */
+  public void setVersion(Version version) {
+    this.version = version;
+  }
 
-	/**
-	 * @return the uri
-	 */
-	public String getUri() {
-		return uri;
-	}
+  /**
+   * Method to add available commands on Bundle
+   * 
+   * @param command
+   */
+  public void addCommand(String command) {
+    this.commands.add(command);
+  }
 
-	/**
-	 * @param uri the uri to set
-	 */
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
+  /**
+   * Method to remove commands from Bundle
+   * 
+   * @param command
+   */
+  public void removeCommand(String command) {
+    this.commands.remove(command);
+  }
+
+  /**
+   * Method that returns Bundle Commands
+   * 
+   * @return
+   */
+  public List<String> getCommands() {
+    return this.commands;
+  }
+
+  /**
+   * Method to set commands
+   * 
+   * @param commands
+   */
+  public void setCommands(List<String> commands) {
+    this.commands = commands;
+  }
+
+  /**
+   * @return the size
+   */
+  public Long getSize() {
+    return this.size;
+  }
+
+  /**
+   * @param size the size to set
+   */
+  public void setSize(Long size) {
+    this.size = size;
+  }
+
+  /**
+   * @return the uri
+   */
+  public String getUri() {
+    return uri;
+  }
+
+  /**
+   * @param uri the uri to set
+   */
+  public void setUri(String uri) {
+    this.uri = uri;
+  }
 
 }

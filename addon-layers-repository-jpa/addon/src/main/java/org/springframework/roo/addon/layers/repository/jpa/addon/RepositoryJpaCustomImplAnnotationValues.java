@@ -16,25 +16,26 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class RepositoryJpaCustomImplAnnotationValues extends AbstractAnnotationValues {
 
-    @AutoPopulate private JavaType repository;
+  @AutoPopulate
+  private JavaType repository;
 
-    /**
-     * Constructor
-     * 
-     * @param governorPhysicalTypeMetadata the metadata to parse (required)
-     */
-    public RepositoryJpaCustomImplAnnotationValues(
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-        super(governorPhysicalTypeMetadata, RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
-        AutoPopulationUtils.populate(this, annotationMetadata);
-    }
+  /**
+   * Constructor
+   * 
+   * @param governorPhysicalTypeMetadata the metadata to parse (required)
+   */
+  public RepositoryJpaCustomImplAnnotationValues(
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+    super(governorPhysicalTypeMetadata, RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
 
-    /**
-     * Returns the repository type implemented by the annotated class
-     * 
-     * @return a non-<code>null</code> type
-     */
-    public JavaType getRepository() {
-        return repository;
-    }
+  /**
+   * Returns the repository type implemented by the annotated class
+   * 
+   * @return a non-<code>null</code> type
+   */
+  public JavaType getRepository() {
+    return repository;
+  }
 }

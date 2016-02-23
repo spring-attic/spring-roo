@@ -11,15 +11,15 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
  * @since 1.2.0
  */
 public class PluralAnnotationValuesTest extends
-        AnnotationValuesTestCase<RooPlural, PluralAnnotationValues> {
+    AnnotationValuesTestCase<RooPlural, PluralAnnotationValues> {
 
-    @Override
-    protected Class<RooPlural> getAnnotationClass() {
-        return RooPlural.class;
-    }
+  @Override
+  protected Class<RooPlural> getAnnotationClass() {
+    return RooPlural.class;
+  }
 
-    @Override
-    protected Class<PluralAnnotationValues> getValuesClass() {
-        return PluralAnnotationValues.class;
-    }
+  @Override
+  protected Class<PluralAnnotationValues> getValuesClass() {
+    return PluralAnnotationValues.class;
+  }
 }

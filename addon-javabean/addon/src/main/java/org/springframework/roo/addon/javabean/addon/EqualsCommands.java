@@ -30,55 +30,63 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class EqualsCommands implements CommandMarker {
-	
-	protected final static Logger LOGGER = HandlerUtils.getLogger(
-			EqualsCommands.class);
 
-    @Reference private EqualsOperations equalsOperations;
-    
-    private ProjectOperations projectOperations;
-    
-    // ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-    
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
-    }
-    
-    @CliAvailabilityIndicator("equals")
-    public boolean isEqualsAvailable() {
-    	return getProjectOperations().isFocusedProjectAvailable();
-    }
+  protected final static Logger LOGGER = HandlerUtils.getLogger(EqualsCommands.class);
 
-    @CliCommand(value = "equals", help = "Add equals and hashCode methods to a class")
-    public void addEquals(
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class") final JavaType javaType,
-            @CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether to call the super class equals and hashCode methods") final boolean appendSuper,
-            @CliOption(key = "excludeFields", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-fields", help = "The fields to exclude in the equals and hashcode methods. Multiple field names must be a double-quoted list separated by spaces") final Set<String> excludeFields) {
+  @Reference
+  private EqualsOperations equalsOperations;
 
-        equalsOperations.addEqualsAndHashCodeMethods(javaType, appendSuper,
-                excludeFields);
+  private ProjectOperations projectOperations;
+
+  // ------------ OSGi component attributes ----------------
+  private BundleContext context;
+
+  protected void activate(final ComponentContext context) {
+    this.context = context.getBundleContext();
+  }
+
+  @CliAvailabilityIndicator("equals")
+  public boolean isEqualsAvailable() {
+    return getProjectOperations().isFocusedProjectAvailable();
+  }
+
+  @CliCommand(value = "equals", help = "Add equals and hashCode methods to a class")
+  public void addEquals(
+      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+          optionContext = UPDATE_PROJECT, help = "The name of the class") final JavaType javaType,
+      @CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "Whether to call the super class equals and hashCode methods") final boolean appendSuper,
+      @CliOption(
+          key = "excludeFields",
+          mandatory = false,
+          specifiedDefaultValue = "",
+          optionContext = "exclude-fields",
+          help = "The fields to exclude in the equals and hashcode methods. Multiple field names must be a double-quoted list separated by spaces") final Set<String> excludeFields) {
+
+    equalsOperations.addEqualsAndHashCodeMethods(javaType, appendSuper, excludeFields);
+  }
+
+  public ProjectOperations getProjectOperations() {
+    if (projectOperations == null) {
+      // Get all Shell implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          projectOperations = (ProjectOperations) this.context.getService(ref);
+          return projectOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on EqualsCommands.");
+        return null;
+      }
+    } else {
+      return projectOperations;
     }
-    
-    public ProjectOperations getProjectOperations(){
-    	if(projectOperations == null){
-    		// Get all Shell implement ProjectOperations interface
-    		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				projectOperations = (ProjectOperations) this.context.getService(ref);
-    				return projectOperations;
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load ProjectOperations on EqualsCommands.");
-    			return null;
-    		}
-    	}else{
-    		return projectOperations;
-    	}
-    }
+  }
 }

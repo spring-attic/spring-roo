@@ -6,41 +6,41 @@ import org.w3c.dom.Element;
 
 public class ParentBuilder implements Builder<Parent> {
 
-    private final String artifactId;
-    private final String groupId;
-    private final String pomPath;
-    private final String relativePath;
-    private final String version;
+  private final String artifactId;
+  private final String groupId;
+  private final String pomPath;
+  private final String relativePath;
+  private final String version;
 
-    public ParentBuilder(final Element parentElement, final String pomPath) {
-        groupId = XmlUtils.getTextContent("/project/groupId", parentElement);
-        artifactId = XmlUtils.getTextContent("/project/artifactId", parentElement);
-        version = XmlUtils.getTextContent("/project/version", parentElement);
-        relativePath = XmlUtils.getTextContent("/project/relativePath", parentElement);
-        this.pomPath = pomPath;
-    }
+  public ParentBuilder(final Element parentElement, final String pomPath) {
+    groupId = XmlUtils.getTextContent("/project/groupId", parentElement);
+    artifactId = XmlUtils.getTextContent("/project/artifactId", parentElement);
+    version = XmlUtils.getTextContent("/project/version", parentElement);
+    relativePath = XmlUtils.getTextContent("/project/relativePath", parentElement);
+    this.pomPath = pomPath;
+  }
 
-    public Parent build() {
-        return new Parent(groupId, artifactId, version, relativePath, pomPath);
-    }
+  public Parent build() {
+    return new Parent(groupId, artifactId, version, relativePath, pomPath);
+  }
 
-    public String getArtifactId() {
-        return artifactId;
-    }
+  public String getArtifactId() {
+    return artifactId;
+  }
 
-    public String getGroupId() {
-        return groupId;
-    }
+  public String getGroupId() {
+    return groupId;
+  }
 
-    public String getPomPath() {
-        return pomPath;
-    }
+  public String getPomPath() {
+    return pomPath;
+  }
 
-    public String getRelativePath() {
-        return relativePath;
-    }
+  public String getRelativePath() {
+    return relativePath;
+  }
 
-    public String getVersion() {
-        return version;
-    }
+  public String getVersion() {
+    return version;
+  }
 }

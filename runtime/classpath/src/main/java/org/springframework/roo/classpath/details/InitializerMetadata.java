@@ -8,7 +8,7 @@ package org.springframework.roo.classpath.details;
  */
 public interface InitializerMetadata extends IdentifiableJavaStructure {
 
-    String getBody();
+  String getBody();
 
-    boolean isStatic();
+  boolean isStatic();
 }

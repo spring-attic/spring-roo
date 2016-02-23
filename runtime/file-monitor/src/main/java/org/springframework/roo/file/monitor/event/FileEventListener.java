@@ -8,12 +8,12 @@ package org.springframework.roo.file.monitor.event;
  */
 public interface FileEventListener {
 
-    /**
-     * Invoked by a
-     * {@link org.springframework.roo.file.monitor.polling.PollingFileMonitorService}
-     * to report a new status.
-     * 
-     * @param fileEvent the file event (never null)
-     */
-    void onFileEvent(FileEvent fileEvent);
+  /**
+   * Invoked by a
+   * {@link org.springframework.roo.file.monitor.polling.PollingFileMonitorService}
+   * to report a new status.
+   * 
+   * @param fileEvent the file event (never null)
+   */
+  void onFileEvent(FileEvent fileEvent);
 }

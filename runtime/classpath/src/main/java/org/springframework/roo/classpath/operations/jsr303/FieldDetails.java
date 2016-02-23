@@ -27,187 +27,183 @@ import org.springframework.roo.model.JavaType;
  */
 public class FieldDetails {
 
-    /** The JPA @Column value */
-    private String column;
+  /** The JPA @Column value */
+  private String column;
 
-    /** Any JavaDoc comments (reserved for future expansion) */
-    protected String comment = "";
+  /** Any JavaDoc comments (reserved for future expansion) */
+  protected String comment = "";
 
-    /** The name of the field to be added */
-    private final JavaSymbolName fieldName;
+  /** The name of the field to be added */
+  private final JavaSymbolName fieldName;
 
-    /** The type of field to be added */
-    private final JavaType fieldType;
+  /** The type of field to be added */
+  private final JavaType fieldType;
 
-    /** Whether the JSR 303 @NotNull annotation will be added */
-    private boolean notNull;
+  /** Whether the JSR 303 @NotNull annotation will be added */
+  private boolean notNull;
 
-    /** Whether the JSR 303 @Null annotation will be added */
-    private boolean nullRequired;
+  /** Whether the JSR 303 @Null annotation will be added */
+  private boolean nullRequired;
 
-    /** The type that will receive the field */
-    private final String physicalTypeIdentifier;
+  /** The type that will receive the field */
+  private final String physicalTypeIdentifier;
 
-    /** Whether unique = true is added to the @Column annotation */
-    private boolean unique;
+  /** Whether unique = true is added to the @Column annotation */
+  private boolean unique;
 
-    /** The Spring @Value value **/
-    private String value;
+  /** The Spring @Value value **/
+  private String value;
 
-    /** Field Modifiers (e.g. private, transient) */
-    private int modifiers;
+  /** Field Modifiers (e.g. private, transient) */
+  private int modifiers;
 
-    /** Contains field annotations */
-    private List<AnnotationMetadataBuilder> annotations;
+  /** Contains field annotations */
+  private List<AnnotationMetadataBuilder> annotations;
 
-    /**
-     * Constructor
-     * 
-     * @param physicalTypeIdentifier
-     * @param fieldType
-     * @param fieldName
-     */
-    public FieldDetails(final String physicalTypeIdentifier,
-            final JavaType fieldType, final JavaSymbolName fieldName) {
-        Validate.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier),
-                "Destination physical type identifier is invalid");
-        Validate.notNull(fieldType, "Field type required");
-        Validate.notNull(fieldName, "Field name required");
-        this.physicalTypeIdentifier = physicalTypeIdentifier;
-        this.fieldType = fieldType;
-        this.fieldName = fieldName;
+  /**
+   * Constructor
+   * 
+   * @param physicalTypeIdentifier
+   * @param fieldType
+   * @param fieldName
+   */
+  public FieldDetails(final String physicalTypeIdentifier, final JavaType fieldType,
+      final JavaSymbolName fieldName) {
+    Validate.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier),
+        "Destination physical type identifier is invalid");
+    Validate.notNull(fieldType, "Field type required");
+    Validate.notNull(fieldName, "Field name required");
+    this.physicalTypeIdentifier = physicalTypeIdentifier;
+    this.fieldType = fieldType;
+    this.fieldName = fieldName;
+  }
+
+  public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
+    Validate.notNull(annotations);
+
+    if (notNull) {
+      annotations.add(new AnnotationMetadataBuilder(NOT_NULL));
     }
 
-    public void decorateAnnotationsList(
-            final List<AnnotationMetadataBuilder> annotations) {
-        Validate.notNull(annotations);
-
-        if (notNull) {
-            annotations.add(new AnnotationMetadataBuilder(NOT_NULL));
-        }
-
-        if (nullRequired) {
-            annotations.add(new AnnotationMetadataBuilder(NULL));
-        }
-
-        AnnotationMetadataBuilder columnBuilder = null;
-        if (column != null) {
-            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-            attrs.add(new StringAttributeValue(new JavaSymbolName("name"),
-                    column));
-            columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
-        }
-        if (unique) {
-            if (columnBuilder != null) {
-                columnBuilder.addBooleanAttribute("unique", true);
-            }
-            else {
-                final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-                attrs.add(new BooleanAttributeValue(
-                        new JavaSymbolName("unique"), true));
-                columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
-            }
-        }
-        if (value != null) {
-            final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-            attrs.add(new StringAttributeValue(new JavaSymbolName("value"),
-                    value));
-            annotations.add(new AnnotationMetadataBuilder(VALUE, attrs));
-        }
-        if (fieldName.getSymbolName().equals("created")) {
-            if (columnBuilder == null) {
-                columnBuilder = new AnnotationMetadataBuilder(COLUMN);
-            }
-            columnBuilder.addBooleanAttribute("updatable", false);
-        }
-
-        if (columnBuilder != null) {
-            annotations.add(columnBuilder);
-        }
+    if (nullRequired) {
+      annotations.add(new AnnotationMetadataBuilder(NULL));
     }
 
-    public String getColumn() {
-        return column;
+    AnnotationMetadataBuilder columnBuilder = null;
+    if (column != null) {
+      final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+      attrs.add(new StringAttributeValue(new JavaSymbolName("name"), column));
+      columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
+    }
+    if (unique) {
+      if (columnBuilder != null) {
+        columnBuilder.addBooleanAttribute("unique", true);
+      } else {
+        final List<AnnotationAttributeValue<?>> attrs =
+            new ArrayList<AnnotationAttributeValue<?>>();
+        attrs.add(new BooleanAttributeValue(new JavaSymbolName("unique"), true));
+        columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
+      }
+    }
+    if (value != null) {
+      final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+      attrs.add(new StringAttributeValue(new JavaSymbolName("value"), value));
+      annotations.add(new AnnotationMetadataBuilder(VALUE, attrs));
+    }
+    if (fieldName.getSymbolName().equals("created")) {
+      if (columnBuilder == null) {
+        columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+      }
+      columnBuilder.addBooleanAttribute("updatable", false);
     }
 
-    public String getComment() {
-        return comment;
+    if (columnBuilder != null) {
+      annotations.add(columnBuilder);
     }
+  }
 
-    public JavaSymbolName getFieldName() {
-        return fieldName;
+  public String getColumn() {
+    return column;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public JavaSymbolName getFieldName() {
+    return fieldName;
+  }
+
+  public JavaType getFieldType() {
+    return fieldType;
+  }
+
+  public String getPhysicalTypeIdentifier() {
+    return physicalTypeIdentifier;
+  }
+
+  public String getValue() {
+    return value;
+  }
+
+  public boolean isNotNull() {
+    return notNull;
+  }
+
+  public boolean isNullRequired() {
+    return nullRequired;
+  }
+
+  public boolean isUnique() {
+    return unique;
+  }
+
+  public int getModifiers() {
+    return modifiers;
+  }
+
+  public List<AnnotationMetadataBuilder> getAnnotations() {
+    return annotations;
+  }
+
+  public List<AnnotationMetadataBuilder> getInitedAnnotations() {
+    if (annotations == null) {
+      annotations = new ArrayList<AnnotationMetadataBuilder>();
     }
+    return annotations;
+  }
 
-    public JavaType getFieldType() {
-        return fieldType;
+  public void setColumn(final String column) {
+    this.column = column;
+  }
+
+  public void setComment(final String comment) {
+    if (StringUtils.isNotBlank(comment)) {
+      this.comment = comment;
     }
+  }
 
-    public String getPhysicalTypeIdentifier() {
-        return physicalTypeIdentifier;
-    }
+  public void setNotNull(final boolean notNull) {
+    this.notNull = notNull;
+  }
 
-    public String getValue() {
-        return value;
-    }
+  public void setNullRequired(final boolean nullRequired) {
+    this.nullRequired = nullRequired;
+  }
 
-    public boolean isNotNull() {
-        return notNull;
-    }
+  public void setUnique(final boolean unique) {
+    this.unique = unique;
+  }
 
-    public boolean isNullRequired() {
-        return nullRequired;
-    }
+  public void setValue(final String value) {
+    this.value = value;
+  }
 
-    public boolean isUnique() {
-        return unique;
-    }
+  public void setModifiers(int modifiers) {
+    this.modifiers = modifiers;
+  }
 
-    public int getModifiers() {
-        return modifiers;
-    }
-
-    public List<AnnotationMetadataBuilder> getAnnotations() {
-        return annotations;
-    }
-
-	public List<AnnotationMetadataBuilder> getInitedAnnotations() {
-		if (annotations == null) {
-			annotations = new ArrayList<AnnotationMetadataBuilder>();
-		}
-		return annotations;
-	}
-
-    public void setColumn(final String column) {
-        this.column = column;
-    }
-
-    public void setComment(final String comment) {
-        if (StringUtils.isNotBlank(comment)) {
-            this.comment = comment;
-        }
-    }
-
-    public void setNotNull(final boolean notNull) {
-        this.notNull = notNull;
-    }
-
-    public void setNullRequired(final boolean nullRequired) {
-        this.nullRequired = nullRequired;
-    }
-
-    public void setUnique(final boolean unique) {
-        this.unique = unique;
-    }
-
-    public void setValue(final String value) {
-        this.value = value;
-    }
-
-    public void setModifiers(int modifiers) {
-        this.modifiers = modifiers;
-    }
-
-    public void setAnnotations(List<AnnotationMetadataBuilder> annotations) {
-        this.annotations = annotations;
-    }
+  public void setAnnotations(List<AnnotationMetadataBuilder> annotations) {
+    this.annotations = annotations;
+  }
 }

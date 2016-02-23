@@ -24,63 +24,57 @@ import org.springframework.roo.project.Path;
  */
 public class JspMetadata extends AbstractMetadataItem {
 
-    private static final String PROVIDES_TYPE_STRING = JspMetadata.class
-            .getName();
-    private static final String PROVIDES_TYPE = MetadataIdentificationUtils
-            .create(PROVIDES_TYPE_STRING);
+  private static final String PROVIDES_TYPE_STRING = JspMetadata.class.getName();
+  private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+      .create(PROVIDES_TYPE_STRING);
 
-    public static String createIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-                PROVIDES_TYPE_STRING, javaType, path);
-    }
+  public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
+    return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+  }
 
-    public static JavaType getJavaType(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getJavaType(
-                PROVIDES_TYPE_STRING, metadataIdentificationString);
-    }
+  public static JavaType getJavaType(final String metadataIdentificationString) {
+    return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING,
+        metadataIdentificationString);
+  }
 
-    public static String getMetadataIdentiferType() {
-        return PROVIDES_TYPE;
-    }
+  public static String getMetadataIdentiferType() {
+    return PROVIDES_TYPE;
+  }
 
-    public static LogicalPath getPath(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
+  public static LogicalPath getPath(final String metadataIdentificationString) {
+    return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+        metadataIdentificationString);
+  }
 
-    public static boolean isValid(final String metadataIdentificationString) {
-        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
-                metadataIdentificationString);
-    }
+  public static boolean isValid(final String metadataIdentificationString) {
+    return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+        metadataIdentificationString);
+  }
 
-    private final WebScaffoldAnnotationValues annotationValues;
+  private final WebScaffoldAnnotationValues annotationValues;
 
-    private final WebScaffoldMetadata webScaffoldMetadata;
+  private final WebScaffoldMetadata webScaffoldMetadata;
 
-    public JspMetadata(final String identifier,
-            final WebScaffoldMetadata webScaffoldMetadata) {
-        super(identifier);
-        Validate.isTrue(
-                isValid(identifier),
-                "Metadata identification string '%s' does not appear to be a valid",
-                identifier);
-        Validate.notNull(webScaffoldMetadata, "Web scaffold metadata required");
+  public JspMetadata(final String identifier, final WebScaffoldMetadata webScaffoldMetadata) {
+    super(identifier);
+    Validate.isTrue(isValid(identifier),
+        "Metadata identification string '%s' does not appear to be a valid", identifier);
+    Validate.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
-        this.webScaffoldMetadata = webScaffoldMetadata;
-        annotationValues = webScaffoldMetadata.getAnnotationValues();
-    }
+    this.webScaffoldMetadata = webScaffoldMetadata;
+    annotationValues = webScaffoldMetadata.getAnnotationValues();
+  }
 
-    public WebScaffoldAnnotationValues getAnnotationValues() {
-        return annotationValues;
-    }
+  public WebScaffoldAnnotationValues getAnnotationValues() {
+    return annotationValues;
+  }
 
-    @Override
-    public String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("identifier", getId());
-        builder.append("valid", valid);
-        builder.append("web scaffold metadata id", webScaffoldMetadata.getId());
-        return builder.toString();
-    }
+  @Override
+  public String toString() {
+    final ToStringBuilder builder = new ToStringBuilder(this);
+    builder.append("identifier", getId());
+    builder.append("valid", valid);
+    builder.append("web scaffold metadata id", webScaffoldMetadata.getId());
+    return builder.toString();
+  }
 }

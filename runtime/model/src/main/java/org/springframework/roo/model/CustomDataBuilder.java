@@ -16,66 +16,65 @@ import java.util.Set;
  */
 public class CustomDataBuilder implements Builder<CustomData> {
 
-    private final Map<Object, Object> customData = new LinkedHashMap<Object, Object>();
+  private final Map<Object, Object> customData = new LinkedHashMap<Object, Object>();
 
-    /**
-     * Constructor for an empty builder
-     */
-    public CustomDataBuilder() {
-    }
+  /**
+   * Constructor for an empty builder
+   */
+  public CustomDataBuilder() {}
 
-    /**
-     * Constructor for a builder initialised with the given contents
-     * 
-     * @param existing can be <code>null</code>
-     */
-    public CustomDataBuilder(final CustomData existing) {
-        append(existing);
-    }
+  /**
+   * Constructor for a builder initialised with the given contents
+   * 
+   * @param existing can be <code>null</code>
+   */
+  public CustomDataBuilder(final CustomData existing) {
+    append(existing);
+  }
 
-    /**
-     * Appends the given custom data to this builder
-     * 
-     * @param customData the custom data to append; can be <code>null</code> to
-     *            make no changes
-     */
-    public void append(final CustomData customData) {
-        if (customData != null) {
-            for (final Object key : customData.keySet()) {
-                this.customData.put(key, customData.get(key));
-            }
-        }
+  /**
+   * Appends the given custom data to this builder
+   * 
+   * @param customData the custom data to append; can be <code>null</code> to
+   *            make no changes
+   */
+  public void append(final CustomData customData) {
+    if (customData != null) {
+      for (final Object key : customData.keySet()) {
+        this.customData.put(key, customData.get(key));
+      }
     }
+  }
 
-    public CustomData build() {
-        return new CustomDataImpl(customData);
-    }
+  public CustomData build() {
+    return new CustomDataImpl(customData);
+  }
 
-    public void clear() {
-        customData.clear();
-    }
+  public void clear() {
+    customData.clear();
+  }
 
-    public Object get(final Object key) {
-        return customData.get(key);
-    }
+  public Object get(final Object key) {
+    return customData.get(key);
+  }
 
-    public Set<Object> keySet() {
-        return customData.keySet();
-    }
+  public Set<Object> keySet() {
+    return customData.keySet();
+  }
 
-    public Object put(final Object key, final Object value) {
-        return customData.put(key, value);
-    }
+  public Object put(final Object key, final Object value) {
+    return customData.put(key, value);
+  }
 
-    public Object remove(final Object key) {
-        return customData.remove(key);
-    }
+  public Object remove(final Object key) {
+    return customData.remove(key);
+  }
 
-    public int size() {
-        return customData.size();
-    }
+  public int size() {
+    return customData.size();
+  }
 
-    public Collection<Object> values() {
-        return customData.values();
-    }
+  public Collection<Object> values() {
+    return customData.values();
+  }
 }

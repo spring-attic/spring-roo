@@ -8,10 +8,10 @@ package org.springframework.roo.model;
  */
 public interface CustomDataAccessor {
 
-    /**
-     * Provides immutable access to the custom data stored against the instance.
-     * 
-     * @return the custom data (never returns null)
-     */
-    CustomData getCustomData();
+  /**
+   * Provides immutable access to the custom data stored against the instance.
+   * 
+   * @return the custom data (never returns null)
+   */
+  CustomData getCustomData();
 }

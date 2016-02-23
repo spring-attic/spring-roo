@@ -14,6 +14,5 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @author Stefan Schmidt
  * @since 1.1.1
  */
-public interface ConversionServiceMetadataProvider extends
-        ItdTriggerBasedMetadataProvider {
+public interface ConversionServiceMetadataProvider extends ItdTriggerBasedMetadataProvider {
 }

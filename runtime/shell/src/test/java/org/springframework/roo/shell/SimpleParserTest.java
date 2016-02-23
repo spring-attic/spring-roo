@@ -12,41 +12,41 @@ import org.junit.Test;
  */
 public class SimpleParserTest {
 
-    // Fixture
-    private SimpleParser simpleParser;
+  // Fixture
+  private SimpleParser simpleParser;
 
-    /**
-     * Asserts that normalising the given input produces the given output
-     * 
-     * @param input can't be <code>null</code>
-     * @param output
-     */
-    private void assertNormalised(final String input, final String output) {
-        Assert.assertEquals(output, simpleParser.normalise(input));
-    }
+  /**
+   * Asserts that normalising the given input produces the given output
+   * 
+   * @param input can't be <code>null</code>
+   * @param output
+   */
+  private void assertNormalised(final String input, final String output) {
+    Assert.assertEquals(output, simpleParser.normalise(input));
+  }
 
-    @Before
-    public void setUp() {
-        simpleParser = new SimpleParser();
-    }
+  @Before
+  public void setUp() {
+    simpleParser = new SimpleParser();
+  }
 
-    @Test
-    public void testNormaliseEmptyString() {
-        assertNormalised("", "");
-    }
+  @Test
+  public void testNormaliseEmptyString() {
+    assertNormalised("", "");
+  }
 
-    @Test
-    public void testNormaliseMultipleWords() {
-        assertNormalised(" security   setup ", "security setup");
-    }
+  @Test
+  public void testNormaliseMultipleWords() {
+    assertNormalised(" security   setup ", "security setup");
+  }
 
-    @Test
-    public void testNormaliseSingleWord() {
-        assertNormalised("hint", "hint");
-    }
+  @Test
+  public void testNormaliseSingleWord() {
+    assertNormalised("hint", "hint");
+  }
 
-    @Test
-    public void testNormaliseSpaces() {
-        assertNormalised("    ", "");
-    }
+  @Test
+  public void testNormaliseSpaces() {
+    assertNormalised("    ", "");
+  }
 }

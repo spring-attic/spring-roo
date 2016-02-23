@@ -26,85 +26,89 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 @Component
 public class HelpCommands implements CommandMarker {
-	
-	private static final String HELP_COMMAND = "help";
-	private static final String REFERENCE_GUIDE_COMMAND = "reference guide";
 
-	@Reference HelpService helpService;
-	
-	 protected final static Logger LOGGER = HandlerUtils.getLogger(
-			 HelpCommands.class);
-	
-    // ------------ OSGi component attributes ----------------
-   	private BundleContext context;
-   	
-   	private Shell shell;
-   	private ProcessManager processManager;
-    
-    protected void activate(final ComponentContext context) {
-    	this.context = context.getBundleContext();
-    }
-    
-    @CliAvailabilityIndicator(REFERENCE_GUIDE_COMMAND)
-    public boolean isReferenceGuideAvailable() {
-    	return getShell().isDevelopmentMode() && getProcessManager().isDevelopmentMode();
+  private static final String HELP_COMMAND = "help";
+  private static final String REFERENCE_GUIDE_COMMAND = "reference guide";
+
+  @Reference
+  HelpService helpService;
+
+  protected final static Logger LOGGER = HandlerUtils.getLogger(HelpCommands.class);
+
+  // ------------ OSGi component attributes ----------------
+  private BundleContext context;
+
+  private Shell shell;
+  private ProcessManager processManager;
+
+  protected void activate(final ComponentContext context) {
+    this.context = context.getBundleContext();
+  }
+
+  @CliAvailabilityIndicator(REFERENCE_GUIDE_COMMAND)
+  public boolean isReferenceGuideAvailable() {
+    return getShell().isDevelopmentMode() && getProcessManager().isDevelopmentMode();
+  }
+
+  @CliCommand(
+      value = REFERENCE_GUIDE_COMMAND,
+      help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory")
+  public void helpReferenceGuide() {
+    helpService.helpReferenceGuide();
+  }
+
+  @CliCommand(value = HELP_COMMAND, help = "Shows system help")
+  public void obtainHelp(@CliOption(key = {"", "command"}, optionContext = "availableCommands",
+      help = "Command name to provide help for") final String buffer) {
+
+    helpService.obtainHelp(buffer);
+  }
+
+  public ProcessManager getProcessManager() {
+    if (processManager == null) {
+      // Get all components implement ProcessManager interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ProcessManager.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          processManager = (ProcessManager) this.context.getService(ref);
+          return processManager;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProcessManager on ProcessManagerDiagnosticListener.");
+        return null;
+      }
+    } else {
+      return processManager;
     }
 
-    @CliCommand(value = REFERENCE_GUIDE_COMMAND, help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory")
-    public void helpReferenceGuide() {
-    	helpService.helpReferenceGuide();
+  }
+
+  public Shell getShell() {
+    if (shell == null) {
+      // Get all Shell implement Shell interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(Shell.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          shell = (Shell) this.context.getService(ref);
+          return shell;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load Shell on HelpCommands.");
+        return null;
+      }
+    } else {
+      return shell;
     }
 
-    @CliCommand(value = HELP_COMMAND, help = "Shows system help")
-    public void obtainHelp(
-            @CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") final String buffer) {
-
-    	helpService.obtainHelp(buffer);
-    }
-    
-    public ProcessManager getProcessManager(){
-    	if(processManager == null){
-        	// Get all components implement ProcessManager interface
-    		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(ProcessManager.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				processManager = (ProcessManager) this.context.getService(ref);
-    				return processManager;
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load ProcessManager on ProcessManagerDiagnosticListener.");
-    			return null;
-    		}
-    	}else{
-    		return processManager;
-    	}
-
-    }
-    
-    public Shell getShell(){
-    	if(shell == null){
-    		// Get all Shell implement Shell interface
-    		try {
-    			ServiceReference<?>[] references = this.context.getAllServiceReferences(Shell.class.getName(), null);
-    			
-    			for(ServiceReference<?> ref : references){
-    				shell = (Shell) this.context.getService(ref);
-    				return shell;
-    			}
-    			
-    			return null;
-    			
-    		} catch (InvalidSyntaxException e) {
-    			LOGGER.warning("Cannot load Shell on HelpCommands.");
-    			return null;
-    		}
-    	}else{
-    		return shell;
-    	}
-    	
-    }
+  }
 }

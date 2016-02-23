@@ -9,11 +9,11 @@ package org.springframework.roo.support.util;
  */
 public interface Filter<T> {
 
-    /**
-     * Indicates whether to include the given instance in the filtered results
-     * 
-     * @param type the type to evaluate; can be <code>null</code>
-     * @return <code>false</code> to exclude the given type
-     */
-    boolean include(T instance);
+  /**
+   * Indicates whether to include the given instance in the filtered results
+   * 
+   * @param type the type to evaluate; can be <code>null</code>
+   * @return <code>false</code> to exclude the given type
+   */
+  boolean include(T instance);
 }

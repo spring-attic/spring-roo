@@ -11,9 +11,9 @@ import org.springframework.roo.addon.dbre.addon.model.Schema;
  */
 public class OracleDialect extends AbstractDialect implements Dialect {
 
-    public String getQuerySequencesString(final Schema schema) {
-        Validate.notNull(schema, "Schema required");
-        return "SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '"
-                + schema.getName() + "'";
-    }
+  public String getQuerySequencesString(final Schema schema) {
+    Validate.notNull(schema, "Schema required");
+    return "SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getName()
+        + "'";
+  }
 }

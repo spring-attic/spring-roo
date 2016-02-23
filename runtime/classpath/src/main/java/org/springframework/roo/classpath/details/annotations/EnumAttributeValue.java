@@ -16,33 +16,31 @@ import org.springframework.roo.model.JavaSymbolName;
  * @author Ben Alex
  * @since 1.0
  */
-public class EnumAttributeValue extends
-        AbstractAnnotationAttributeValue<EnumDetails> {
-    private final EnumDetails value;
+public class EnumAttributeValue extends AbstractAnnotationAttributeValue<EnumDetails> {
+  private final EnumDetails value;
 
-    public EnumAttributeValue(final JavaSymbolName name, final EnumDetails value) {
-        super(name);
-        Validate.notNull(value, "Value required");
-        this.value = value;
-    }
+  public EnumAttributeValue(final JavaSymbolName name, final EnumDetails value) {
+    super(name);
+    Validate.notNull(value, "Value required");
+    this.value = value;
+  }
 
-    @SuppressWarnings("all")
-    public Enum<?> getAsEnum() throws ClassNotFoundException {
-        final Class<?> enumType = getClass().getClassLoader().loadClass(
-                value.getType().getFullyQualifiedTypeName());
-        Validate.isTrue(enumType.isEnum(),
-                "Should have obtained an Enum but failed for type '%s'",
-                enumType.getName());
-        final String name = value.getField().getSymbolName();
-        return Enum.valueOf((Class<? extends Enum>) enumType, name);
-    }
+  @SuppressWarnings("all")
+  public Enum<?> getAsEnum() throws ClassNotFoundException {
+    final Class<?> enumType =
+        getClass().getClassLoader().loadClass(value.getType().getFullyQualifiedTypeName());
+    Validate.isTrue(enumType.isEnum(), "Should have obtained an Enum but failed for type '%s'",
+        enumType.getName());
+    final String name = value.getField().getSymbolName();
+    return Enum.valueOf((Class<? extends Enum>) enumType, name);
+  }
 
-    public EnumDetails getValue() {
-        return value;
-    }
+  public EnumDetails getValue() {
+    return value;
+  }
 
-    @Override
-    public String toString() {
-        return getName() + " -> " + value.toString();
-    }
+  @Override
+  public String toString() {
+    return getName() + " -> " + value.toString();
+  }
 }

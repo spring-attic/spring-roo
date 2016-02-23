@@ -11,23 +11,23 @@ package org.springframework.roo.shell;
  *
  */
 public interface CommandListener {
-	
-	/**
-	 * This method will be executed when some command finish 
-	 * success  
-	 */
-	public void onCommandSuccess();
-	
-	/**
-	 * This method will be executed when some command fails
-	 */
-	public void onCommandFails();
 
-	/**
-	 * This method will be executed before command execution
-	 * 
-	 * @param parseResult 
-	 */
-	public void onCommandBegin(ParseResult parseResult);
+  /**
+   * This method will be executed when some command finish 
+   * success  
+   */
+  public void onCommandSuccess();
+
+  /**
+   * This method will be executed when some command fails
+   */
+  public void onCommandFails();
+
+  /**
+   * This method will be executed before command execution
+   * 
+   * @param parseResult 
+   */
+  public void onCommandBegin(ParseResult parseResult);
 
 }

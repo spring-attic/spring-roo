@@ -15,32 +15,30 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @since 1.0
  */
-public class DefaultPhysicalTypeDetails extends
-        AbstractCustomDataAccessorProvider implements PhysicalTypeDetails {
+public class DefaultPhysicalTypeDetails extends AbstractCustomDataAccessorProvider implements
+    PhysicalTypeDetails {
 
-    private final JavaType javaType;
-    private final PhysicalTypeCategory physicalTypeCategory;
+  private final JavaType javaType;
+  private final PhysicalTypeCategory physicalTypeCategory;
 
-    public DefaultPhysicalTypeDetails(
-            final PhysicalTypeCategory physicalTypeCategory,
-            final JavaType javaType) {
-        super(CustomDataImpl.NONE);
-        Validate.notNull(javaType, "Java type required");
-        Validate.notNull(physicalTypeCategory,
-                "Physical type category required");
-        this.javaType = javaType;
-        this.physicalTypeCategory = physicalTypeCategory;
-    }
+  public DefaultPhysicalTypeDetails(final PhysicalTypeCategory physicalTypeCategory,
+      final JavaType javaType) {
+    super(CustomDataImpl.NONE);
+    Validate.notNull(javaType, "Java type required");
+    Validate.notNull(physicalTypeCategory, "Physical type category required");
+    this.javaType = javaType;
+    this.physicalTypeCategory = physicalTypeCategory;
+  }
 
-    public JavaType getName() {
-        return getType();
-    }
+  public JavaType getName() {
+    return getType();
+  }
 
-    public PhysicalTypeCategory getPhysicalTypeCategory() {
-        return physicalTypeCategory;
-    }
+  public PhysicalTypeCategory getPhysicalTypeCategory() {
+    return physicalTypeCategory;
+  }
 
-    public JavaType getType() {
-        return javaType;
-    }
+  public JavaType getType() {
+    return javaType;
+  }
 }

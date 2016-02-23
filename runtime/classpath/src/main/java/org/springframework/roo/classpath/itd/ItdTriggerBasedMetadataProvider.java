@@ -12,5 +12,5 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1
  */
 public interface ItdTriggerBasedMetadataProvider extends ItdMetadataProvider,
-        TriggerBasedMetadataProvider {
+    TriggerBasedMetadataProvider {
 }

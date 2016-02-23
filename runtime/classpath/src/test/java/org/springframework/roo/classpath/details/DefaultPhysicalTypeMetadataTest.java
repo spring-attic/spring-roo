@@ -22,51 +22,46 @@ import org.springframework.roo.project.Path;
  */
 public class DefaultPhysicalTypeMetadataTest {
 
-    private static final String CANONICAL_PATH = "/usr/bob/projects/foo/Foo.java";
-    private static final String METADATA_ID = PhysicalTypeIdentifier
-            .createIdentifier(new JavaType("com.example.Bar"),
-                    LogicalPath.getInstance(Path.SRC_MAIN_JAVA, ""));
+  private static final String CANONICAL_PATH = "/usr/bob/projects/foo/Foo.java";
+  private static final String METADATA_ID = PhysicalTypeIdentifier.createIdentifier(new JavaType(
+      "com.example.Bar"), LogicalPath.getInstance(Path.SRC_MAIN_JAVA, ""));
 
-    // Fixture
-    private DefaultPhysicalTypeMetadata metadata;
-    @Mock private ClassOrInterfaceTypeDetails mockClassOrInterfaceTypeDetails;
+  // Fixture
+  private DefaultPhysicalTypeMetadata metadata;
+  @Mock
+  private ClassOrInterfaceTypeDetails mockClassOrInterfaceTypeDetails;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        metadata = new DefaultPhysicalTypeMetadata(METADATA_ID, CANONICAL_PATH,
-                mockClassOrInterfaceTypeDetails);
-    }
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+    metadata =
+        new DefaultPhysicalTypeMetadata(METADATA_ID, CANONICAL_PATH,
+            mockClassOrInterfaceTypeDetails);
+  }
 
-    @Test
-    public void testGetItdCanoncialPath() {
-        // Set up
-        final ItdMetadataProvider mockItdMetadataProvider = mock(ItdMetadataProvider.class);
-        when(mockItdMetadataProvider.getItdUniquenessFilenameSuffix())
-                .thenReturn("MySuffix");
+  @Test
+  public void testGetItdCanoncialPath() {
+    // Set up
+    final ItdMetadataProvider mockItdMetadataProvider = mock(ItdMetadataProvider.class);
+    when(mockItdMetadataProvider.getItdUniquenessFilenameSuffix()).thenReturn("MySuffix");
 
-        // Invoke
-        final String itdCanonicalPath = metadata
-                .getItdCanoncialPath(mockItdMetadataProvider);
+    // Invoke
+    final String itdCanonicalPath = metadata.getItdCanoncialPath(mockItdMetadataProvider);
 
-        // Check
-        assertEquals("/usr/bob/projects/foo/Foo_Roo_MySuffix.aj",
-                itdCanonicalPath);
-    }
+    // Check
+    assertEquals("/usr/bob/projects/foo/Foo_Roo_MySuffix.aj", itdCanonicalPath);
+  }
 
-    @Test
-    public void testGetItdCanonicalPath() {
-        // Set up
-        final ItdMetadataProvider mockItdMetadataProvider = mock(ItdMetadataProvider.class);
-        when(mockItdMetadataProvider.getItdUniquenessFilenameSuffix())
-                .thenReturn("MySuffix");
+  @Test
+  public void testGetItdCanonicalPath() {
+    // Set up
+    final ItdMetadataProvider mockItdMetadataProvider = mock(ItdMetadataProvider.class);
+    when(mockItdMetadataProvider.getItdUniquenessFilenameSuffix()).thenReturn("MySuffix");
 
-        // Invoke
-        final String itdCanonicalPath = metadata
-                .getItdCanonicalPath(mockItdMetadataProvider);
+    // Invoke
+    final String itdCanonicalPath = metadata.getItdCanonicalPath(mockItdMetadataProvider);
 
-        // Check
-        assertEquals("/usr/bob/projects/foo/Foo_Roo_MySuffix.aj",
-                itdCanonicalPath);
-    }
+    // Check
+    assertEquals("/usr/bob/projects/foo/Foo_Roo_MySuffix.aj", itdCanonicalPath);
+  }
 }

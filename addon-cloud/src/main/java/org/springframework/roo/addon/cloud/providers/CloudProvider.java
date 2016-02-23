@@ -9,23 +9,23 @@ package org.springframework.roo.addon.cloud.providers;
  */
 public interface CloudProvider {
 
-    /**
-     * Gets provider name
-     * 
-     * @return
-     */
-    String getName();
+  /**
+   * Gets provider name
+   * 
+   * @return
+   */
+  String getName();
 
-    /**
-     * 
-     */
-    String getDescription();
+  /**
+   * 
+   */
+  String getDescription();
 
-    /**
-     * This method installs the provider that implements the interface
-     * 
-     * @param configuration 
-     */
-    void setup(String configuration);
+  /**
+   * This method installs the provider that implements the interface
+   * 
+   * @param configuration 
+   */
+  void setup(String configuration);
 
 }

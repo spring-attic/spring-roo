@@ -15,40 +15,36 @@ import org.springframework.roo.model.JavaType;
 
 public class UploadedFileField extends FieldDetails {
 
-    private boolean autoUpload;
-    private final UploadedFileContentType contentType;
+  private boolean autoUpload;
+  private final UploadedFileContentType contentType;
 
-    public UploadedFileField(final String physicalTypeIdentifier,
-            final JavaSymbolName fieldName,
-            final UploadedFileContentType contentType) {
-        super(physicalTypeIdentifier, JavaType.BYTE_ARRAY_PRIMITIVE, fieldName);
-        this.contentType = contentType;
+  public UploadedFileField(final String physicalTypeIdentifier, final JavaSymbolName fieldName,
+      final UploadedFileContentType contentType) {
+    super(physicalTypeIdentifier, JavaType.BYTE_ARRAY_PRIMITIVE, fieldName);
+    this.contentType = contentType;
+  }
+
+  @Override
+  public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
+    super.decorateAnnotationsList(annotations);
+
+    final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+    attrs.add(new StringAttributeValue(new JavaSymbolName("contentType"), contentType
+        .getContentType()));
+
+    if (autoUpload) {
+      attrs.add(new BooleanAttributeValue(new JavaSymbolName("autoUpload"), autoUpload));
     }
 
-    @Override
-    public void decorateAnnotationsList(
-            final List<AnnotationMetadataBuilder> annotations) {
-        super.decorateAnnotationsList(annotations);
+    annotations.add(new AnnotationMetadataBuilder(ROO_UPLOADED_FILE, attrs));
+    annotations.add(new AnnotationMetadataBuilder(LOB));
+  }
 
-        final List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-        attrs.add(new StringAttributeValue(new JavaSymbolName("contentType"),
-                contentType.getContentType()));
+  public UploadedFileContentType getContentType() {
+    return contentType;
+  }
 
-        if (autoUpload) {
-            attrs.add(new BooleanAttributeValue(
-                    new JavaSymbolName("autoUpload"), autoUpload));
-        }
-
-        annotations
-                .add(new AnnotationMetadataBuilder(ROO_UPLOADED_FILE, attrs));
-        annotations.add(new AnnotationMetadataBuilder(LOB));
-    }
-
-    public UploadedFileContentType getContentType() {
-        return contentType;
-    }
-
-    public void setAutoUpload(final boolean autoUpload) {
-        this.autoUpload = autoUpload;
-    }
+  public void setAutoUpload(final boolean autoUpload) {
+    this.autoUpload = autoUpload;
+  }
 }

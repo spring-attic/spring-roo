@@ -11,12 +11,12 @@ import org.springframework.roo.addon.tailor.actions.Action;
  */
 public interface ActionLocator {
 
-    Action getAction(String caseInsensitiveKey);
+  Action getAction(String caseInsensitiveKey);
 
-    /**
-     * Get all available actions
-     * 
-     * @return map of actions
-     */
-    Map<String, Action> getAllActions();
+  /**
+   * Get all available actions
+   * 
+   * @return map of actions
+   */
+  Map<String, Action> getAllActions();
 }

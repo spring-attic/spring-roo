@@ -16,20 +16,20 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
  */
 public class DbManagedAnnotationValues extends AbstractAnnotationValues {
 
-    @AutoPopulate private boolean automaticallyDelete = true;
+  @AutoPopulate
+  private boolean automaticallyDelete = true;
 
-    /**
-     * Constructor
-     * 
-     * @param governorPhysicalTypeMetadata
-     */
-    public DbManagedAnnotationValues(
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-        super(governorPhysicalTypeMetadata, ROO_DB_MANAGED);
-        AutoPopulationUtils.populate(this, annotationMetadata);
-    }
+  /**
+   * Constructor
+   * 
+   * @param governorPhysicalTypeMetadata
+   */
+  public DbManagedAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+    super(governorPhysicalTypeMetadata, ROO_DB_MANAGED);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
 
-    public boolean isAutomaticallyDelete() {
-        return automaticallyDelete;
-    }
+  public boolean isAutomaticallyDelete() {
+    return automaticallyDelete;
+  }
 }

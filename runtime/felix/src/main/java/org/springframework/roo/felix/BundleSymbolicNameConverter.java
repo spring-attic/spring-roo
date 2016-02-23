@@ -22,82 +22,79 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class BundleSymbolicNameConverter implements
-        Converter<BundleSymbolicName> {
+public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName> {
 
-    private ComponentContext context;
-    // Handler service field is solely to ensure it starts before
-    // BundleSymbolicNameConverter
-    @Reference protected HttpPgpUrlStreamHandlerService handlerService;
-    @Reference private RepositoryAdmin repositoryAdmin;
+  private ComponentContext context;
+  // Handler service field is solely to ensure it starts before
+  // BundleSymbolicNameConverter
+  @Reference
+  protected HttpPgpUrlStreamHandlerService handlerService;
+  @Reference
+  private RepositoryAdmin repositoryAdmin;
 
-    protected void activate(final ComponentContext context) {
-        this.context = context;
+  protected void activate(final ComponentContext context) {
+    this.context = context;
+  }
+
+  public BundleSymbolicName convertFromText(final String value, final Class<?> requiredType,
+      final String optionContext) {
+    return new BundleSymbolicName(value.trim());
+  }
+
+  protected void deactivate(final ComponentContext context) {
+    this.context = null;
+  }
+
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String originalUserInput, final String optionContext,
+      final MethodTarget target) {
+    boolean local = false;
+    boolean obr = false;
+
+    if ("".equals(optionContext)) {
+      local = true;
     }
 
-    public BundleSymbolicName convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        return new BundleSymbolicName(value.trim());
+    if (optionContext.contains("local")) {
+      local = true;
     }
 
-    protected void deactivate(final ComponentContext context) {
-        this.context = null;
+    if (optionContext.contains("obr")) {
+      obr = true;
     }
 
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String originalUserInput,
-            final String optionContext, final MethodTarget target) {
-        boolean local = false;
-        boolean obr = false;
-
-        if ("".equals(optionContext)) {
-            local = true;
+    if (local) {
+      final Bundle[] bundles = context.getBundleContext().getBundles();
+      if (bundles != null) {
+        for (final Bundle bundle : bundles) {
+          final String bsn = bundle.getSymbolicName();
+          if (bsn != null && bsn.startsWith(originalUserInput)) {
+            completions.add(new Completion(bsn));
+          }
         }
+      }
+    }
 
-        if (optionContext.contains("local")) {
-            local = true;
-        }
-
-        if (optionContext.contains("obr")) {
-            obr = true;
-        }
-
-        if (local) {
-            final Bundle[] bundles = context.getBundleContext().getBundles();
-            if (bundles != null) {
-                for (final Bundle bundle : bundles) {
-                    final String bsn = bundle.getSymbolicName();
-                    if (bsn != null && bsn.startsWith(originalUserInput)) {
-                        completions.add(new Completion(bsn));
-                    }
-                }
+    if (obr) {
+      final Repository[] repositories = repositoryAdmin.listRepositories();
+      if (repositories != null) {
+        for (final Repository repository : repositories) {
+          final Resource[] resources = repository.getResources();
+          if (resources != null) {
+            for (final Resource resource : resources) {
+              if (resource.getSymbolicName().startsWith(originalUserInput)) {
+                completions.add(new Completion(resource.getSymbolicName()));
+              }
             }
+          }
         }
-
-        if (obr) {
-            final Repository[] repositories = repositoryAdmin
-                    .listRepositories();
-            if (repositories != null) {
-                for (final Repository repository : repositories) {
-                    final Resource[] resources = repository.getResources();
-                    if (resources != null) {
-                        for (final Resource resource : resources) {
-                            if (resource.getSymbolicName().startsWith(
-                                    originalUserInput)) {
-                                completions.add(new Completion(resource
-                                        .getSymbolicName()));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
+      }
     }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return BundleSymbolicName.class.isAssignableFrom(requiredType);
-    }
+    return false;
+  }
+
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return BundleSymbolicName.class.isAssignableFrom(requiredType);
+  }
 }

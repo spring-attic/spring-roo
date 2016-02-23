@@ -23,36 +23,36 @@ import org.springframework.roo.model.JavaType;
  */
 public class EnumField extends FieldDetails {
 
-    private EnumType enumType;
+  private EnumType enumType;
 
-    public EnumField(final String physicalTypeIdentifier,
-            final JavaType fieldType, final JavaSymbolName fieldName) {
-        super(physicalTypeIdentifier, fieldType, fieldName);
+  public EnumField(final String physicalTypeIdentifier, final JavaType fieldType,
+      final JavaSymbolName fieldName) {
+    super(physicalTypeIdentifier, fieldType, fieldName);
+  }
+
+  @Override
+  public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
+    super.decorateAnnotationsList(annotations);
+    final List<AnnotationAttributeValue<?>> attributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
+
+    if (enumType != null) {
+      JavaSymbolName value = new JavaSymbolName("ORDINAL");
+      if (enumType == EnumType.STRING) {
+        value = new JavaSymbolName("STRING");
+      }
+      attributes.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(ENUM_TYPE,
+          value)));
     }
 
-    @Override
-    public void decorateAnnotationsList(
-            final List<AnnotationMetadataBuilder> annotations) {
-        super.decorateAnnotationsList(annotations);
-        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+    annotations.add(new AnnotationMetadataBuilder(ENUMERATED, attributes));
+  }
 
-        if (enumType != null) {
-            JavaSymbolName value = new JavaSymbolName("ORDINAL");
-            if (enumType == EnumType.STRING) {
-                value = new JavaSymbolName("STRING");
-            }
-            attributes.add(new EnumAttributeValue(new JavaSymbolName("value"),
-                    new EnumDetails(ENUM_TYPE, value)));
-        }
+  public EnumType getEnumType() {
+    return enumType;
+  }
 
-        annotations.add(new AnnotationMetadataBuilder(ENUMERATED, attributes));
-    }
-
-    public EnumType getEnumType() {
-        return enumType;
-    }
-
-    public void setEnumType(final EnumType enumType) {
-        this.enumType = enumType;
-    }
+  public void setEnumType(final EnumType enumType) {
+    this.enumType = enumType;
+  }
 }

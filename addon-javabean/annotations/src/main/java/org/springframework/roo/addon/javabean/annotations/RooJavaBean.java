@@ -16,15 +16,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooJavaBean {
 
-    /**
-     * @return whether to generate getters for each non-transient field declared
-     *         in this class (defaults to true)
-     */
-    boolean gettersByDefault() default true;
+  /**
+   * @return whether to generate getters for each non-transient field declared
+   *         in this class (defaults to true)
+   */
+  boolean gettersByDefault() default true;
 
-    /**
-     * @return whether to generate setters for each non-transient field declared
-     *         in this class (defaults to true)
-     */
-    boolean settersByDefault() default true;
+  /**
+   * @return whether to generate setters for each non-transient field declared
+   *         in this class (defaults to true)
+   */
+  boolean settersByDefault() default true;
 }

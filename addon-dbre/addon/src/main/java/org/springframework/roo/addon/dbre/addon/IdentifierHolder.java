@@ -13,31 +13,29 @@ import org.springframework.roo.classpath.details.FieldMetadata;
  */
 public class IdentifierHolder {
 
-    private final List<FieldMetadata> embeddedIdentifierFields;
-    private final boolean embeddedIdField;
-    private final FieldMetadata identifierField;
+  private final List<FieldMetadata> embeddedIdentifierFields;
+  private final boolean embeddedIdField;
+  private final FieldMetadata identifierField;
 
-    public IdentifierHolder(final FieldMetadata identifierField,
-            final boolean embeddedIdField,
-            final List<FieldMetadata> embeddedIdentifierFields) {
-        Validate.notNull(identifierField, "Identifier field required");
-        Validate.notNull(embeddedIdentifierFields, "Fields for "
-                + identifierField.getFieldType().getFullyQualifiedTypeName()
-                + " required");
-        this.identifierField = identifierField;
-        this.embeddedIdField = embeddedIdField;
-        this.embeddedIdentifierFields = embeddedIdentifierFields;
-    }
+  public IdentifierHolder(final FieldMetadata identifierField, final boolean embeddedIdField,
+      final List<FieldMetadata> embeddedIdentifierFields) {
+    Validate.notNull(identifierField, "Identifier field required");
+    Validate.notNull(embeddedIdentifierFields, "Fields for "
+        + identifierField.getFieldType().getFullyQualifiedTypeName() + " required");
+    this.identifierField = identifierField;
+    this.embeddedIdField = embeddedIdField;
+    this.embeddedIdentifierFields = embeddedIdentifierFields;
+  }
 
-    public List<FieldMetadata> getEmbeddedIdentifierFields() {
-        return embeddedIdentifierFields;
-    }
+  public List<FieldMetadata> getEmbeddedIdentifierFields() {
+    return embeddedIdentifierFields;
+  }
 
-    public FieldMetadata getIdentifierField() {
-        return identifierField;
-    }
+  public FieldMetadata getIdentifierField() {
+    return identifierField;
+  }
 
-    public boolean isEmbeddedIdField() {
-        return embeddedIdField;
-    }
+  public boolean isEmbeddedIdField() {
+    return embeddedIdField;
+  }
 }

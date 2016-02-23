@@ -8,11 +8,11 @@ package org.springframework.roo.addon.dbre.addon.model.dialect;
  */
 public abstract class AbstractDialect {
 
-    public AbstractDialect() {
-        super();
-    }
+  public AbstractDialect() {
+    super();
+  }
 
-    public boolean supportsSequences() {
-        return true;
-    }
+  public boolean supportsSequences() {
+    return true;
+  }
 }

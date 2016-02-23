@@ -10,33 +10,33 @@ import org.apache.commons.lang3.Validate;
  */
 public class UndoEvent {
 
-    public enum UndoOperation {
-        FLUSH, RESET, UNDO
-    }
+  public enum UndoOperation {
+    FLUSH, RESET, UNDO
+  }
 
-    private final UndoOperation operation;
+  private final UndoOperation operation;
 
-    public UndoEvent(final UndoOperation operation) {
-        Validate.notNull(operation, "Operation required");
-        this.operation = operation;
-    }
+  public UndoEvent(final UndoOperation operation) {
+    Validate.notNull(operation, "Operation required");
+    this.operation = operation;
+  }
 
-    public UndoOperation getOperation() {
-        return operation;
-    }
+  public UndoOperation getOperation() {
+    return operation;
+  }
 
-    public boolean isFlushing() {
-        return operation == UndoOperation.FLUSH;
-    }
+  public boolean isFlushing() {
+    return operation == UndoOperation.FLUSH;
+  }
 
-    public boolean isResetting() {
-        return operation == UndoOperation.RESET;
-    }
+  public boolean isResetting() {
+    return operation == UndoOperation.RESET;
+  }
 
-    /**
-     * @return true if undoing, false if committing
-     */
-    public boolean isUndoing() {
-        return operation == UndoOperation.UNDO;
-    }
+  /**
+   * @return true if undoing, false if committing
+   */
+  public boolean isUndoing() {
+    return operation == UndoOperation.UNDO;
+  }
 }

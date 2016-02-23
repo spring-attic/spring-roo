@@ -11,9 +11,9 @@ import org.springframework.roo.addon.dbre.addon.model.Schema;
  */
 public class DerbyDialect extends AbstractDialect implements Dialect {
 
-    public String getQuerySequencesString(final Schema schema) {
-        Validate.notNull(schema, "Schema required");
-        return "SELECT SEQUENCENAME FROM SYS.SYSSEQUENCES WHERE SEQUENCENAME = '"
-                + schema.getName() + "'";
-    }
+  public String getQuerySequencesString(final Schema schema) {
+    Validate.notNull(schema, "Schema required");
+    return "SELECT SEQUENCENAME FROM SYS.SYSSEQUENCES WHERE SEQUENCENAME = '" + schema.getName()
+        + "'";
+  }
 }

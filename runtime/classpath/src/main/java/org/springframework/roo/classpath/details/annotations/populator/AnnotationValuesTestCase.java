@@ -22,56 +22,50 @@ import org.junit.Test;
  */
 public abstract class AnnotationValuesTestCase<A, V extends AbstractAnnotationValues> {
 
-    /**
-     * Subclasses must return the class of annotation whose value class is being
-     * tested
-     * 
-     * @return a non-<code>null</code> annotation type
-     */
-    protected abstract Class<A> getAnnotationClass();
+  /**
+   * Subclasses must return the class of annotation whose value class is being
+   * tested
+   * 
+   * @return a non-<code>null</code> annotation type
+   */
+  protected abstract Class<A> getAnnotationClass();
 
-    /**
-     * Subclasses must return the values class being tested
-     * 
-     * @return a non-<code>null</code> class
-     */
-    protected abstract Class<V> getValuesClass();
+  /**
+   * Subclasses must return the values class being tested
+   * 
+   * @return a non-<code>null</code> class
+   */
+  protected abstract Class<V> getValuesClass();
 
-    @Test
-    public void testAllAnnotationAttributesHaveAValueField() {
-        final Class<A> annotationClass = getAnnotationClass();
-        assertTrue("Invalid annotation class " + annotationClass,
-                annotationClass.isAnnotation());
-        for (final Method method : annotationClass.getDeclaredMethods()) {
-            // Look for a field of this name in the values class or any
-            // superclass
-            final Field valueField = findField(getValuesClass(),
-                    method.getName());
-            assertNotNull("No value field found for annotation attribute "
-                    + method, valueField);
-            final int fieldModifiers = valueField.getModifiers();
-            assertFalse("Value field " + valueField + " is final",
-                    Modifier.isFinal(fieldModifiers));
-            assertNotNull("Value field " + valueField
-                    + " is not auto-populated",
-                    valueField.getAnnotation(AutoPopulate.class));
-        }
+  @Test
+  public void testAllAnnotationAttributesHaveAValueField() {
+    final Class<A> annotationClass = getAnnotationClass();
+    assertTrue("Invalid annotation class " + annotationClass, annotationClass.isAnnotation());
+    for (final Method method : annotationClass.getDeclaredMethods()) {
+      // Look for a field of this name in the values class or any
+      // superclass
+      final Field valueField = findField(getValuesClass(), method.getName());
+      assertNotNull("No value field found for annotation attribute " + method, valueField);
+      final int fieldModifiers = valueField.getModifiers();
+      assertFalse("Value field " + valueField + " is final", Modifier.isFinal(fieldModifiers));
+      assertNotNull("Value field " + valueField + " is not auto-populated",
+          valueField.getAnnotation(AutoPopulate.class));
     }
+  }
 
-    private Field findField(final Class<?> clazz, final String name) {
-        Validate.notNull(clazz, "Class must not be null");
-        Validate.notNull(name,
-                "Either name or type of the field must be specified");
-        Class<?> searchType = clazz;
-        while (!Object.class.equals(searchType) && searchType != null) {
-            final Field[] fields = searchType.getDeclaredFields();
-            for (final Field field : fields) {
-                if (name.equals(field.getName())) {
-                    return field;
-                }
-            }
-            searchType = searchType.getSuperclass();
+  private Field findField(final Class<?> clazz, final String name) {
+    Validate.notNull(clazz, "Class must not be null");
+    Validate.notNull(name, "Either name or type of the field must be specified");
+    Class<?> searchType = clazz;
+    while (!Object.class.equals(searchType) && searchType != null) {
+      final Field[] fields = searchType.getDeclaredFields();
+      for (final Field field : fields) {
+        if (name.equals(field.getName())) {
+          return field;
         }
-        return null;
+      }
+      searchType = searchType.getSuperclass();
     }
+    return null;
+  }
 }

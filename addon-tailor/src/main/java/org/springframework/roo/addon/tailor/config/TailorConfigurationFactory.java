@@ -9,12 +9,12 @@ import java.util.List;
  */
 public interface TailorConfigurationFactory {
 
-    /**
-     * Creates a tailor configuration.
-     * 
-     * @param name - configuration name
-     * @return - tailor configuration
-     */
-    List<TailorConfiguration> createTailorConfiguration();
+  /**
+   * Creates a tailor configuration.
+   * 
+   * @param name - configuration name
+   * @return - tailor configuration
+   */
+  List<TailorConfiguration> createTailorConfiguration();
 
 }

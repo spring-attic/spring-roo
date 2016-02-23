@@ -15,25 +15,26 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class JavaBeanAnnotationValues extends AbstractAnnotationValues {
 
-    @AutoPopulate private boolean gettersByDefault = true;
-    @AutoPopulate private boolean settersByDefault = true;
+  @AutoPopulate
+  private boolean gettersByDefault = true;
+  @AutoPopulate
+  private boolean settersByDefault = true;
 
-    /**
-     * Constructor
-     * 
-     * @param governorPhysicalTypeMetadata
-     */
-    public JavaBeanAnnotationValues(
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-        super(governorPhysicalTypeMetadata, RooJavaType.ROO_JAVA_BEAN);
-        AutoPopulationUtils.populate(this, annotationMetadata);
-    }
+  /**
+   * Constructor
+   * 
+   * @param governorPhysicalTypeMetadata
+   */
+  public JavaBeanAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+    super(governorPhysicalTypeMetadata, RooJavaType.ROO_JAVA_BEAN);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
 
-    public boolean isGettersByDefault() {
-        return gettersByDefault;
-    }
+  public boolean isGettersByDefault() {
+    return gettersByDefault;
+  }
 
-    public boolean isSettersByDefault() {
-        return settersByDefault;
-    }
+  public boolean isSettersByDefault() {
+    return settersByDefault;
+  }
 }

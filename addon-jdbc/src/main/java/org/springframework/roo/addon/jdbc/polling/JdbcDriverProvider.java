@@ -14,9 +14,9 @@ import org.springframework.roo.addon.jdbc.polling.internal.PollingJdbcDriverMana
  */
 public interface JdbcDriverProvider {
 
-    /**
-     * See {@link JdbcDriverManager#loadDriver(String, boolean)} for
-     * description.
-     */
-    Driver loadDriver(String driverClassName) throws RuntimeException;
+  /**
+   * See {@link JdbcDriverManager#loadDriver(String, boolean)} for
+   * description.
+   */
+  Driver loadDriver(String driverClassName) throws RuntimeException;
 }

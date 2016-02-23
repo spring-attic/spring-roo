@@ -9,17 +9,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface CliCommand {
 
-    /**
-     * @return a help message for this command (the default is a blank String,
-     *         which means there is no help)
-     */
-    String help() default "";
+  /**
+   * @return a help message for this command (the default is a blank String,
+   *         which means there is no help)
+   */
+  String help() default "";
 
-    /**
-     * @return one or more strings which must serve as the start of a particular
-     *         command in order to match this method (these must be unique
-     *         within the entire application; if not unique, behaviour is not
-     *         specified)
-     */
-    String[] value();
+  /**
+   * @return one or more strings which must serve as the start of a particular
+   *         command in order to match this method (these must be unique
+   *         within the entire application; if not unique, behaviour is not
+   *         specified)
+   */
+  String[] value();
 }

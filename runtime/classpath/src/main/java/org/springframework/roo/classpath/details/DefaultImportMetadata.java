@@ -13,62 +13,60 @@ import org.springframework.roo.model.JavaType;
  * @author James Tyrrell
  * @since 1.1.1
  */
-public class DefaultImportMetadata extends
-        AbstractIdentifiableJavaStructureProvider implements ImportMetadata,
-        CommentedJavaStructure {
+public class DefaultImportMetadata extends AbstractIdentifiableJavaStructureProvider implements
+    ImportMetadata, CommentedJavaStructure {
 
-    private final JavaPackage importPackage;
-    private final JavaType importType;
-    private CommentStructure commentStructure;
-    private boolean isAsterisk = false;
-    private boolean isStatic = false;
+  private final JavaPackage importPackage;
+  private final JavaType importType;
+  private CommentStructure commentStructure;
+  private boolean isAsterisk = false;
+  private boolean isStatic = false;
 
-    // Package protected to mandate the use of ImportMetadataBuilder
-    DefaultImportMetadata(final CustomData customData,
-            final String declaredByMetadataId, final int modifier,
-            final JavaPackage importPackage, final JavaType importType,
-            final boolean isStatic, final boolean isAsterisk) {
-        super(customData, declaredByMetadataId, modifier);
-        this.importPackage = importPackage;
-        this.importType = importType;
-        this.isStatic = isStatic;
-        this.isAsterisk = isAsterisk;
-    }
+  // Package protected to mandate the use of ImportMetadataBuilder
+  DefaultImportMetadata(final CustomData customData, final String declaredByMetadataId,
+      final int modifier, final JavaPackage importPackage, final JavaType importType,
+      final boolean isStatic, final boolean isAsterisk) {
+    super(customData, declaredByMetadataId, modifier);
+    this.importPackage = importPackage;
+    this.importType = importType;
+    this.isStatic = isStatic;
+    this.isAsterisk = isAsterisk;
+  }
 
-    public JavaPackage getImportPackage() {
-        return importPackage;
-    }
+  public JavaPackage getImportPackage() {
+    return importPackage;
+  }
 
-    public JavaType getImportType() {
-        return importType;
-    }
+  public JavaType getImportType() {
+    return importType;
+  }
 
-    public boolean isAsterisk() {
-        return isAsterisk;
-    }
+  public boolean isAsterisk() {
+    return isAsterisk;
+  }
 
-    public boolean isStatic() {
-        return isStatic;
-    }
+  public boolean isStatic() {
+    return isStatic;
+  }
 
-    @Override
-    public String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("declaredByMetadataId", getDeclaredByMetadataId());
-        builder.append("typePackage", importPackage);
-        builder.append("type", importType);
-        builder.append("isStatic", isStatic);
-        builder.append("isAsterisk", isAsterisk);
-        return builder.toString();
-    }
+  @Override
+  public String toString() {
+    final ToStringBuilder builder = new ToStringBuilder(this);
+    builder.append("declaredByMetadataId", getDeclaredByMetadataId());
+    builder.append("typePackage", importPackage);
+    builder.append("type", importType);
+    builder.append("isStatic", isStatic);
+    builder.append("isAsterisk", isAsterisk);
+    return builder.toString();
+  }
 
-    @Override
-    public CommentStructure getCommentStructure() {
-        return commentStructure;
-    }
+  @Override
+  public CommentStructure getCommentStructure() {
+    return commentStructure;
+  }
 
-    @Override
-    public void setCommentStructure(CommentStructure commentStructure) {
-        this.commentStructure = commentStructure;
-    }
+  @Override
+  public void setCommentStructure(CommentStructure commentStructure) {
+    this.commentStructure = commentStructure;
+  }
 }

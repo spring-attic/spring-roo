@@ -48,162 +48,159 @@ import org.springframework.roo.model.JavaType;
  */
 public interface MemberDetails {
 
-    /**
-     * Locates the specified type-level annotation on any of the
-     * {@link MemberHoldingTypeDetails} in this {@link MemberDetails}.
-     * 
-     * @param type the type of annotation to locate (required)
-     * @return the annotation, or <code>null</code> if not found
-     * @since 1.2.0
-     */
-    AnnotationMetadata getAnnotation(JavaType type);
+  /**
+   * Locates the specified type-level annotation on any of the
+   * {@link MemberHoldingTypeDetails} in this {@link MemberDetails}.
+   * 
+   * @param type the type of annotation to locate (required)
+   * @return the annotation, or <code>null</code> if not found
+   * @since 1.2.0
+   */
+  AnnotationMetadata getAnnotation(JavaType type);
 
-    /**
-     * Searches all {@link MemberHoldingTypeDetails} and returns all
-     * constructors.
-     * 
-     * @return zero or more constructors (never null)
-     * @since 1.2.0
-     */
-    List<ConstructorMetadata> getConstructors();
+  /**
+   * Searches all {@link MemberHoldingTypeDetails} and returns all
+   * constructors.
+   * 
+   * @return zero or more constructors (never null)
+   * @since 1.2.0
+   */
+  List<ConstructorMetadata> getConstructors();
 
-    /**
-     * Returns an immutable representation of the member holders.
-     * 
-     * @return a List of immutable member holders (never null or empty)
-     */
-    List<MemberHoldingTypeDetails> getDetails();
+  /**
+   * Returns an immutable representation of the member holders.
+   * 
+   * @return a List of immutable member holders (never null or empty)
+   */
+  List<MemberHoldingTypeDetails> getDetails();
 
-    /**
-     * Returns the names of this type's dynamic finders
-     * 
-     * @return a non-<code>null</code> list
-     * @since 1.2.0
-     */
-    List<String> getDynamicFinderNames();
+  /**
+   * Returns the names of this type's dynamic finders
+   * 
+   * @return a non-<code>null</code> list
+   * @since 1.2.0
+   */
+  List<String> getDynamicFinderNames();
 
-    /**
-     * Searches all {@link MemberHoldingTypeDetails} and returns all fields.
-     * 
-     * @return zero or more fields (never null)
-     */
-    List<FieldMetadata> getFields();
+  /**
+   * Searches all {@link MemberHoldingTypeDetails} and returns all fields.
+   * 
+   * @return zero or more fields (never null)
+   */
+  List<FieldMetadata> getFields();
 
-    /**
-     * Locates a method with the name presented. Searches all
-     * {@link MemberDetails} until the first such method is located or none can
-     * be found.
-     * 
-     * @param methodName the method name to locate (can be <code>null</code>)
-     * @return the first located method, or <code>null</code> if the method name
-     *         is <code>null</code> or such a method cannot be found
-     * @since 1.2.0
-     */
-    MethodMetadata getMethod(JavaSymbolName methodName);
+  /**
+   * Locates a method with the name presented. Searches all
+   * {@link MemberDetails} until the first such method is located or none can
+   * be found.
+   * 
+   * @param methodName the method name to locate (can be <code>null</code>)
+   * @return the first located method, or <code>null</code> if the method name
+   *         is <code>null</code> or such a method cannot be found
+   * @since 1.2.0
+   */
+  MethodMetadata getMethod(JavaSymbolName methodName);
 
-    /**
-     * Locates a method with the name and parameter signature presented.
-     * Searches all {@link MemberDetails} until the first such method is located
-     * or none can be found.
-     * 
-     * @param methodName the method name to locate (can be <code>null</code>)
-     * @param parameters the method parameter signature to locate (can be null
-     *            if no parameters are required)
-     * @return the first located method, or <code>null</code> if the method name
-     *         is <code>null</code> or such a method cannot be found
-     * @since 1.2.0
-     */
-    MethodMetadata getMethod(JavaSymbolName methodName,
-            List<JavaType> parameters);
+  /**
+   * Locates a method with the name and parameter signature presented.
+   * Searches all {@link MemberDetails} until the first such method is located
+   * or none can be found.
+   * 
+   * @param methodName the method name to locate (can be <code>null</code>)
+   * @param parameters the method parameter signature to locate (can be null
+   *            if no parameters are required)
+   * @return the first located method, or <code>null</code> if the method name
+   *         is <code>null</code> or such a method cannot be found
+   * @since 1.2.0
+   */
+  MethodMetadata getMethod(JavaSymbolName methodName, List<JavaType> parameters);
 
-    /**
-     * Locates a method with the name and parameter signature presented that is
-     * not declared by the presented MID.
-     * 
-     * @param methodName the method name to locate (can be <code>null</code>)
-     * @param parameters the method parameter signature to locate (can be null
-     *            if no parameters are required)
-     * @param excludingMid the MID that a found method cannot be declared by
-     * @return the first located method, or <code>null</code> if the method name
-     *         is <code>null</code> or such a method cannot be found
-     * @since 1.2.0
-     */
-    MethodMetadata getMethod(JavaSymbolName methodName,
-            List<JavaType> parameters, String excludingMid);
+  /**
+   * Locates a method with the name and parameter signature presented that is
+   * not declared by the presented MID.
+   * 
+   * @param methodName the method name to locate (can be <code>null</code>)
+   * @param parameters the method parameter signature to locate (can be null
+   *            if no parameters are required)
+   * @param excludingMid the MID that a found method cannot be declared by
+   * @return the first located method, or <code>null</code> if the method name
+   *         is <code>null</code> or such a method cannot be found
+   * @since 1.2.0
+   */
+  MethodMetadata getMethod(JavaSymbolName methodName, List<JavaType> parameters, String excludingMid);
 
-    /**
-     * Searches all {@link MemberHoldingTypeDetails} and returns all methods.
-     * 
-     * @return zero or more methods (never null)
-     * @since 1.2.0
-     */
-    List<MethodMetadata> getMethods();
+  /**
+   * Searches all {@link MemberHoldingTypeDetails} and returns all methods.
+   * 
+   * @return zero or more methods (never null)
+   * @since 1.2.0
+   */
+  List<MethodMetadata> getMethods();
 
-    /**
-     * Searches all {@link MemberDetails} and returns all methods which contain
-     * a given {@link CustomData} tag.
-     * 
-     * @param memberDetails the {@link MemberDetails} to search (required)
-     * @param tagKey the {@link CustomData} key to search for
-     * @return zero or more methods (never null)
-     * @since 1.2.0
-     */
-    List<MethodMetadata> getMethodsWithTag(Object tagKey);
+  /**
+   * Searches all {@link MemberDetails} and returns all methods which contain
+   * a given {@link CustomData} tag.
+   * 
+   * @param memberDetails the {@link MemberDetails} to search (required)
+   * @param tagKey the {@link CustomData} key to search for
+   * @return zero or more methods (never null)
+   * @since 1.2.0
+   */
+  List<MethodMetadata> getMethodsWithTag(Object tagKey);
 
-    /**
-     * Determines the most concrete {@link MemberHoldingTypeDetails} in cases
-     * where multiple matches are found for a given tag.
-     * 
-     * @param tagKey the {@link CustomData} key to search for (required)
-     * @return the most concrete tagged method or <code>null</code> if not found
-     * @since 1.2.0
-     */
-    MethodMetadata getMostConcreteMethodWithTag(Object tagKey);
+  /**
+   * Determines the most concrete {@link MemberHoldingTypeDetails} in cases
+   * where multiple matches are found for a given tag.
+   * 
+   * @param tagKey the {@link CustomData} key to search for (required)
+   * @return the most concrete tagged method or <code>null</code> if not found
+   * @since 1.2.0
+   */
+  MethodMetadata getMostConcreteMethodWithTag(Object tagKey);
 
-    /**
-     * Returns the type of this class' persistent fields, including those in
-     * collections, but excluding:
-     * <ul>
-     * <li>the ID field</li>
-     * <li>the version field</li>
-     * <li>JPA-transient fields</li>
-     * <li>immutable fields (i.e. that don't have both a getter and a setter)</li>
-     * <li>embedded ID fields</li>
-     * <li>the collection types themselves</li>
-     * </ul>
-     * 
-     * @param thisType the owning Java type (required)
-     * @param persistenceMemberLocator for finding the ID and version fields
-     *            (required)
-     * @return a non-<code>null</code> set with stable iteration order
-     * @since 1.2.0
-     */
-    Set<JavaType> getPersistentFieldTypes(JavaType thisType,
-            PersistenceMemberLocator persistenceMemberLocator);
+  /**
+   * Returns the type of this class' persistent fields, including those in
+   * collections, but excluding:
+   * <ul>
+   * <li>the ID field</li>
+   * <li>the version field</li>
+   * <li>JPA-transient fields</li>
+   * <li>immutable fields (i.e. that don't have both a getter and a setter)</li>
+   * <li>embedded ID fields</li>
+   * <li>the collection types themselves</li>
+   * </ul>
+   * 
+   * @param thisType the owning Java type (required)
+   * @param persistenceMemberLocator for finding the ID and version fields
+   *            (required)
+   * @return a non-<code>null</code> set with stable iteration order
+   * @since 1.2.0
+   */
+  Set<JavaType> getPersistentFieldTypes(JavaType thisType,
+      PersistenceMemberLocator persistenceMemberLocator);
 
-    /**
-     * Indicates whether a method specified by the method attributes is present
-     * and isn't declared by the passed in MID.
-     * 
-     * @param methodName the name of the method being searched for
-     * @param parameterTypes the parameters of the method being searched for
-     * @param declaredByMetadataId the MID to be used to see if a found method
-     *            is declared by the MID
-     * @return see above
-     * @since 1.2.0
-     */
-    boolean isMethodDeclaredByAnother(JavaSymbolName methodName,
-            List<JavaType> parameterTypes, String declaredByMetadataId);
+  /**
+   * Indicates whether a method specified by the method attributes is present
+   * and isn't declared by the passed in MID.
+   * 
+   * @param methodName the name of the method being searched for
+   * @param parameterTypes the parameters of the method being searched for
+   * @param declaredByMetadataId the MID to be used to see if a found method
+   *            is declared by the MID
+   * @return see above
+   * @since 1.2.0
+   */
+  boolean isMethodDeclaredByAnother(JavaSymbolName methodName, List<JavaType> parameterTypes,
+      String declaredByMetadataId);
 
-    /**
-     * Indicates whether the requesting MID is annotated with the specified
-     * annotation.
-     * 
-     * @param annotationMetadata the annotation to look for
-     * @param requestingMid the MID interested in
-     * @return see above
-     * @since 1.2.0
-     */
-    boolean isRequestingAnnotatedWith(AnnotationMetadata annotationMetadata,
-            String requestingMid);
+  /**
+   * Indicates whether the requesting MID is annotated with the specified
+   * annotation.
+   * 
+   * @param annotationMetadata the annotation to look for
+   * @param requestingMid the MID interested in
+   * @return see above
+   * @since 1.2.0
+   */
+  boolean isRequestingAnnotatedWith(AnnotationMetadata annotationMetadata, String requestingMid);
 }

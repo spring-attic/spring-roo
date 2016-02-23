@@ -13,13 +13,13 @@ import java.io.File;
  * @since 1.0
  */
 public interface FilenameResolver {
-    /**
-     * Resolves the presented {@link File} into a meaningful name for display
-     * purposes.
-     * 
-     * @param file to resolve (required)
-     * @return a string-based representation of the file name (never null or
-     *         empty)
-     */
-    String getMeaningfulName(File file);
+  /**
+   * Resolves the presented {@link File} into a meaningful name for display
+   * purposes.
+   * 
+   * @param file to resolve (required)
+   * @return a string-based representation of the file name (never null or
+   *         empty)
+   */
+  String getMeaningfulName(File file);
 }

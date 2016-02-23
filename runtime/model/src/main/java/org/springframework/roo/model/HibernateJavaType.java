@@ -9,12 +9,11 @@ package org.springframework.roo.model;
  */
 public final class HibernateJavaType {
 
-    public static final JavaType VALIDATOR_CONSTRAINTS_EMAIL = new JavaType(
-            "org.hibernate.validator.constraints.Email");
+  public static final JavaType VALIDATOR_CONSTRAINTS_EMAIL = new JavaType(
+      "org.hibernate.validator.constraints.Email");
 
-    /**
-     * Constructor is private to prevent instantiation
-     */
-    private HibernateJavaType() {
-    }
+  /**
+   * Constructor is private to prevent instantiation
+   */
+  private HibernateJavaType() {}
 }

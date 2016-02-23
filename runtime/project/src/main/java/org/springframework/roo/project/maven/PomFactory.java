@@ -10,14 +10,14 @@ import org.w3c.dom.Element;
  */
 public interface PomFactory {
 
-    /**
-     * Creates a {@link Pom} by reading a <code>pom.xml</code> file
-     * 
-     * @param root the root element of the XML file (required)
-     * @param pomPath the canonical path of the XML file (required)
-     * @param moduleName the name of the module to which the POM belongs (blank
-     *            means the root or only POM)
-     * @return a non-<code>null</code> instance
-     */
-    Pom getInstance(Element root, String pomPath, String moduleName);
+  /**
+   * Creates a {@link Pom} by reading a <code>pom.xml</code> file
+   * 
+   * @param root the root element of the XML file (required)
+   * @param pomPath the canonical path of the XML file (required)
+   * @param moduleName the name of the module to which the POM belongs (blank
+   *            means the root or only POM)
+   * @return a non-<code>null</code> instance
+   */
+  Pom getInstance(Element root, String pomPath, String moduleName);
 }

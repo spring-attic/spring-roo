@@ -18,20 +18,20 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class EsaPackaging extends AbstractCorePackagingProvider {
 
-    /**
-     * Constructor
-     */
-    public EsaPackaging() {
-        super("esa", "parent-esa-template.xml");
-    }
+  /**
+   * Constructor
+   */
+  public EsaPackaging() {
+    super("esa", "parent-esa-template.xml");
+  }
 
-    @Override
-    protected void createOtherArtifacts(final JavaPackage topLevelPackage,
-            final String module, final ProjectOperations projectOperations) {
-        // No artifacts are applicable for POM modules
-    }
+  @Override
+  protected void createOtherArtifacts(final JavaPackage topLevelPackage, final String module,
+      final ProjectOperations projectOperations) {
+    // No artifacts are applicable for POM modules
+  }
 
-    public Collection<Path> getPaths() {
-        return null;
-    }
+  public Collection<Path> getPaths() {
+    return null;
+  }
 }

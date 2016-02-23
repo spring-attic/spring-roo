@@ -29,86 +29,77 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class LoggingOperationsImpl implements LoggingOperations {
 
-    @Reference private FileManager fileManager;
-    @Reference private PathResolver pathResolver;
-    @Reference private ProjectOperations projectOperations;
+  @Reference
+  private FileManager fileManager;
+  @Reference
+  private PathResolver pathResolver;
+  @Reference
+  private ProjectOperations projectOperations;
 
-    public void configureLogging(final LogLevel logLevel,
-            final LoggerPackage loggerPackage) {
-        Validate.notNull(logLevel, "LogLevel required");
-        Validate.notNull(loggerPackage, "LoggerPackage required");
+  public void configureLogging(final LogLevel logLevel, final LoggerPackage loggerPackage) {
+    Validate.notNull(logLevel, "LogLevel required");
+    Validate.notNull(loggerPackage, "LoggerPackage required");
 
-        setupProperties(logLevel, loggerPackage);
+    setupProperties(logLevel, loggerPackage);
+  }
+
+  public boolean isLoggingInstallationPossible() {
+    return projectOperations.isFocusedProjectAvailable();
+  }
+
+  private void setupProperties(final LogLevel logLevel, final LoggerPackage loggerPackage) {
+    final String filePath =
+        pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
+    MutableFile log4jMutableFile = null;
+    final Properties props = new Properties();
+
+    InputStream inputStream = null;
+    try {
+      if (fileManager.exists(filePath)) {
+        log4jMutableFile = fileManager.updateFile(filePath);
+        inputStream = log4jMutableFile.getInputStream();
+        props.load(inputStream);
+      } else {
+        log4jMutableFile = fileManager.createFile(filePath);
+        inputStream = FileUtils.getInputStream(getClass(), "log4j-template.properties");
+        Validate.notNull(inputStream, "Could not acquire log4j configuration template");
+        props.load(inputStream);
+      }
+    } catch (final IOException ioe) {
+      throw new IllegalStateException(ioe);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
     }
 
-    public boolean isLoggingInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable();
+    final JavaPackage topLevelPackage =
+        projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName());
+    final String logStr = "log4j.logger.";
+
+    switch (loggerPackage) {
+      case ROOT:
+        props.remove("log4j.rootLogger");
+        props.setProperty("log4j.rootLogger", logLevel.name() + ", stdout");
+        break;
+      case PROJECT:
+        props.remove(logStr + topLevelPackage.getFullyQualifiedPackageName());
+        props.setProperty(logStr + topLevelPackage.getFullyQualifiedPackageName(), logLevel.name());
+        break;
+      default:
+        for (final String packageName : loggerPackage.getPackageNames()) {
+          props.remove(logStr + packageName);
+          props.setProperty(logStr + packageName, logLevel.name());
+        }
+        break;
     }
 
-    private void setupProperties(final LogLevel logLevel,
-            final LoggerPackage loggerPackage) {
-        final String filePath = pathResolver.getFocusedIdentifier(
-                Path.SRC_MAIN_RESOURCES, "log4j.properties");
-        MutableFile log4jMutableFile = null;
-        final Properties props = new Properties();
-
-        InputStream inputStream = null;
-        try {
-            if (fileManager.exists(filePath)) {
-                log4jMutableFile = fileManager.updateFile(filePath);
-                inputStream = log4jMutableFile.getInputStream();
-                props.load(inputStream);
-            }
-            else {
-                log4jMutableFile = fileManager.createFile(filePath);
-                inputStream = FileUtils.getInputStream(getClass(),
-                        "log4j-template.properties");
-                Validate.notNull(inputStream,
-                        "Could not acquire log4j configuration template");
-                props.load(inputStream);
-            }
-        }
-        catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
-        finally {
-            IOUtils.closeQuietly(inputStream);
-        }
-
-        final JavaPackage topLevelPackage = projectOperations
-                .getTopLevelPackage(projectOperations.getFocusedModuleName());
-        final String logStr = "log4j.logger.";
-
-        switch (loggerPackage) {
-        case ROOT:
-            props.remove("log4j.rootLogger");
-            props.setProperty("log4j.rootLogger", logLevel.name() + ", stdout");
-            break;
-        case PROJECT:
-            props.remove(logStr
-                    + topLevelPackage.getFullyQualifiedPackageName());
-            props.setProperty(
-                    logStr + topLevelPackage.getFullyQualifiedPackageName(),
-                    logLevel.name());
-            break;
-        default:
-            for (final String packageName : loggerPackage.getPackageNames()) {
-                props.remove(logStr + packageName);
-                props.setProperty(logStr + packageName, logLevel.name());
-            }
-            break;
-        }
-
-        OutputStream outputStream = null;
-        try {
-            outputStream = log4jMutableFile.getOutputStream();
-            props.store(outputStream, "Updated at " + new Date());
-        }
-        catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
-        finally {
-            IOUtils.closeQuietly(outputStream);
-        }
+    OutputStream outputStream = null;
+    try {
+      outputStream = log4jMutableFile.getOutputStream();
+      props.store(outputStream, "Updated at " + new Date());
+    } catch (final IOException ioe) {
+      throw new IllegalStateException(ioe);
+    } finally {
+      IOUtils.closeQuietly(outputStream);
     }
+  }
 }

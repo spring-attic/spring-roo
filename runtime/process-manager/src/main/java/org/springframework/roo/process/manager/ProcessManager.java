@@ -60,42 +60,42 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
  */
 public interface ProcessManager extends ProcessManagerStatusProvider {
 
-    /**
-     * Execute a user command within a "transaction". This method blocks until
-     * {@link ProcessManagerStatus#AVAILABLE}.
-     * <p>
-     * This method may throw {@link RuntimeException}s that occurred while
-     * executing.
-     * 
-     * @param <T> the class of the object that
-     *            {@link CommandCallback#callback()} will return (required)
-     * @param callback the callback to actually executed (required)
-     * @return the result of executing the callback
-     */
-    <T> T execute(CommandCallback<T> callback);
+  /**
+   * Execute a user command within a "transaction". This method blocks until
+   * {@link ProcessManagerStatus#AVAILABLE}.
+   * <p>
+   * This method may throw {@link RuntimeException}s that occurred while
+   * executing.
+   * 
+   * @param <T> the class of the object that
+   *            {@link CommandCallback#callback()} will return (required)
+   * @param callback the callback to actually executed (required)
+   * @return the result of executing the callback
+   */
+  <T> T execute(CommandCallback<T> callback);
 
-    long getLastScanDuration();
+  long getLastScanDuration();
 
-    long getMinimumDelayBetweenScan();
+  long getMinimumDelayBetweenScan();
 
-    /**
-     * @return true if the system is in development mode, which generally means
-     *         more detailed diagnostics are requested from add-ons (defaults to
-     *         false)
-     */
-    boolean isDevelopmentMode();
+  /**
+   * @return true if the system is in development mode, which generally means
+   *         more detailed diagnostics are requested from add-ons (defaults to
+   *         false)
+   */
+  boolean isDevelopmentMode();
 
-    void setDevelopmentMode(boolean developmentMode);
+  void setDevelopmentMode(boolean developmentMode);
 
-    void setMinimumDelayBetweenScan(long minimumDelayBetweenScan);
+  void setMinimumDelayBetweenScan(long minimumDelayBetweenScan);
 
-    /**
-     * Allows the process manager to terminate gracefully. In particular this
-     * means any background threads it has started are terminated. It is safe to
-     * call this method more than once, but no other method in the process
-     * manager need operate correctly after termination.
-     */
-    void terminate();
+  /**
+   * Allows the process manager to terminate gracefully. In particular this
+   * means any background threads it has started are terminated. It is safe to
+   * call this method more than once, but no other method in the process
+   * manager need operate correctly after termination.
+   */
+  void terminate();
 
-    void timerBasedScan();
+  void timerBasedScan();
 }

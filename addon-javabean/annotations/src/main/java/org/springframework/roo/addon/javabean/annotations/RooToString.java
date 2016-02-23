@@ -23,14 +23,14 @@ import java.util.Collection;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooToString {
 
-    /**
-     * @return an array of fields to exclude in the toString method
-     */
-    String[] excludeFields() default "";
+  /**
+   * @return an array of fields to exclude in the toString method
+   */
+  String[] excludeFields() default "";
 
-    /**
-     * @return the name of the {@link Object#toString()} method to generate
-     *         (defaults to "toString"; if empty, does not create)
-     */
-    String toStringMethod() default "toString";
+  /**
+   * @return the name of the {@link Object#toString()} method to generate
+   *         (defaults to "toString"; if empty, does not create)
+   */
+  String toStringMethod() default "toString";
 }

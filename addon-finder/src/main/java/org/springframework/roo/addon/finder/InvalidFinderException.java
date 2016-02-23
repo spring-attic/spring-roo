@@ -8,9 +8,9 @@ package org.springframework.roo.addon.finder;
  */
 public class InvalidFinderException extends RuntimeException {
 
-    private static final long serialVersionUID = 2328865678880608749L;
+  private static final long serialVersionUID = 2328865678880608749L;
 
-    public InvalidFinderException(final String string) {
-        super(string);
-    }
+  public InvalidFinderException(final String string) {
+    super(string);
+  }
 }

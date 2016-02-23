@@ -12,7 +12,7 @@ package org.springframework.roo.project;
  */
 public interface Feature {
 
-    String getName();
+  String getName();
 
-    boolean isInstalledInModule(String moduleName);
+  boolean isInstalledInModule(String moduleName);
 }
