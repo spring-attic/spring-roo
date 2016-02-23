@@ -924,6 +924,22 @@
                         <dependenciesAsLibraries>true</dependenciesAsLibraries>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                    <artifactId>maven-java-formatter-plugin</artifactId>
+                    <version>0.4</version>
+                    <configuration>
+                        <lineEnding>LF</lineEnding>
+                        <configFile>${devel.resources.path}/eclipse-java-google-style_no-doc-format.xml</configFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>format</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>               
             </plugins>
         </pluginManagement>
         <plugins>
@@ -940,6 +956,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <osgi.version>6.0.0</osgi.version>
         <slf4j.version>1.7.12</slf4j.version>
+        <devel.resources.path>${project.parent.parent.parent.basedir}/devel-resources</devel.resources.path>
     </properties>
 
     <profiles>

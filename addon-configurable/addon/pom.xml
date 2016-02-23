@@ -70,9 +70,19 @@
             <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
     </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                <artifactId>maven-java-formatter-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
    	<properties>
-    	<target.jar.directory>${basedir}/../../target/all</target.jar.directory>  
-	</properties>
+        <target.jar.directory>${basedir}/../../target/all</target.jar.directory>
+        <devel.resources.path>${project.parent.parent.parent.parent.basedir}/devel-resources</devel.resources.path>
+    </properties>
 	
 </project>

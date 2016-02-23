@@ -34,4 +34,13 @@
     <properties>
         <bundle.activator>${project.artifactId}.Activator</bundle.activator>
     </properties>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                <artifactId>maven-java-formatter-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
