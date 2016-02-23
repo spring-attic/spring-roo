@@ -768,12 +768,18 @@ public class SimpleParser implements Parser {
                         if (key.equals(lastOptionKey)) {
                             final List<Completion> allValues = new ArrayList<Completion>();
                             String suffix = " ";
-
+                            
+                           
                             // First, use an autocomplete indicator if any
                             List<String> values = getPossibleValuesByIndicator(
                                     methodTarget.getKey(), option,
                                     shellContext);
+                            
                             if (values != null) {
+                            	if(!hasToIncludeSpaceOnFinish(methodTarget.getKey(), option)){
+                            		suffix="";
+                            	}
+                            	
                                 for (String value : values) {
                                     allValues.add(new Completion(value));
                                 }
@@ -1731,6 +1737,32 @@ public class SimpleParser implements Parser {
                                     shellContext);
                 }
             }
+        }
+        catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "ERROR: Error trying to get autocomplete values for '%s' option on '%s' command. Please, fix errors on indicator method and also be sure return type is a List<String>",
+                    option[0], command));
+        }
+    }
+
+    
+    @SuppressWarnings("unchecked")
+    private boolean hasToIncludeSpaceOnFinish(String command,
+            CliOption cliOption) {
+        String[] option = cliOption.key();
+        try {
+            MethodTarget optionAutocompleteIndicator = optionAutocompleteIndicators
+                    .get(command.concat("|").concat(option[0]));
+            if (optionAutocompleteIndicator != null) {
+            	CliOptionAutocompleteIndicator autocompleteIndicator = optionAutocompleteIndicator
+                        .getMethod()
+                        .getAnnotation(CliOptionAutocompleteIndicator.class);
+            	
+            	return autocompleteIndicator.includeSpaceOnFinish();
+            		
+            }
+            
+            return true;
         }
         catch (Exception e) {
             throw new RuntimeException(String.format(

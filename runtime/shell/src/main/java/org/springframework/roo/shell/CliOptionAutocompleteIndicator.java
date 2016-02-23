@@ -36,4 +36,10 @@ public @interface CliOptionAutocompleteIndicator {
      * 
      */
     String help();
+   
+    /**
+     * @return true if autocomplete operation should include an space on finish when only
+     * one result has been returned.
+     */
+    boolean includeSpaceOnFinish() default true;
 }
