@@ -136,7 +136,7 @@
 
     <properties>
         <target.jar.directory>${basedir}/../../target/all</target.jar.directory>
-        <devel.resources.path>${project.parent.parent.parent.parent.basedir}/devel-resources</devel.resources.path>
+        <main.basedir>${basedir}/../..</main.basedir>
     </properties>
 
 </project>

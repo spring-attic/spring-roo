@@ -105,4 +105,8 @@
             </plugin>
         </plugins>
     </build>
+    
+    <properties>
+        <main.basedir>${basedir}/../..</main.basedir>
+    </properties>
 </project>
