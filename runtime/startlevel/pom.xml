@@ -31,7 +31,18 @@
             <artifactId>commons-io</artifactId>
         </dependency>
     </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                <artifactId>maven-java-formatter-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    
     <properties>
         <bundle.activator>${project.artifactId}.Activator</bundle.activator>
+        <main.basedir>${basedir}/../..</main.basedir>
     </properties>
 </project>

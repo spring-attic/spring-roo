@@ -119,7 +119,26 @@
             <email>ilenca1990 at gmail dot com</email>
             <timezone>+1</timezone>
         </developer>
+        <developer>
+            <name>Sergio Clares Martínez</name>
+            <id>sclaresmt</id>
+            <email>sclaresmt at gmail dot com</email>
+            <timezone>+1</timezone>
+        </developer>
     </developers>
+
+    <properties>
+        <java.version>1.7</java.version>
+        <junit.version>4.11</junit.version>
+        <powermock.version>1.4.12</powermock.version>
+        <spring.version>3.2.8.RELEASE</spring.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <osgi.version>6.0.0</osgi.version>
+        <slf4j.version>1.7.12</slf4j.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <main.basedir>${basedir}</main.basedir>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -924,6 +943,22 @@
                         <dependenciesAsLibraries>true</dependenciesAsLibraries>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                    <artifactId>maven-java-formatter-plugin</artifactId>
+                    <version>0.4</version>
+                    <configuration>
+                        <lineEnding>LF</lineEnding>
+                        <configFile>${main.basedir}/devel-resources/eclipse-java-google-style_no-doc-format.xml</configFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>format</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>               
             </plugins>
         </pluginManagement>
         <plugins>
@@ -933,14 +968,6 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <junit.version>4.11</junit.version>
-        <powermock.version>1.4.12</powermock.version>
-        <spring.version>3.2.8.RELEASE</spring.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <osgi.version>6.0.0</osgi.version>
-        <slf4j.version>1.7.12</slf4j.version>
-    </properties>
 
     <profiles>
         <profile>

@@ -19,8 +19,19 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-   	<properties>
-    	<target.jar.directory>${basedir}/../../target/all</target.jar.directory>  
-	</properties>
+   	
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                <artifactId>maven-java-formatter-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <target.jar.directory>${basedir}/../../target/all</target.jar.directory>
+        <main.basedir>${basedir}/../..</main.basedir>
+    </properties>
 	
 </project>
