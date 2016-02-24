@@ -119,6 +119,12 @@
             <email>ilenca1990 at gmail dot com</email>
             <timezone>+1</timezone>
         </developer>
+        <developer>
+            <name>Sergio Clares Martínez</name>
+            <id>sclaresmt</id>
+            <email>sclaresmt at gmail dot com</email>
+            <timezone>+1</timezone>
+        </developer>
     </developers>
 
     <properties>
