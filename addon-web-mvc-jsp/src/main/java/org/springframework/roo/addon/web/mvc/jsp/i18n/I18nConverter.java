@@ -20,37 +20,39 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class I18nConverter implements Converter<I18n> {
 
-  @Reference
-  private I18nSupport i18nSupport;
+    @Reference private I18nSupport i18nSupport;
 
-  public I18n convertFromText(final String value, final Class<?> requiredType,
-      final String optionContext) {
-    if (value.length() == 2) {
-      return i18nSupport.getLanguage(new Locale(value, "", ""));
-      // Disabled due to ROO-1584
-      // } else if (value.length() == 5) {
-      // String[] split = value.split("_");
-      // return i18nSupport.getLanguage(new Locale(split[0],
-      // split[1].toUpperCase(), ""));
+    public I18n convertFromText(final String value,
+            final Class<?> requiredType, final String optionContext) {
+        if (value.length() == 2) {
+            return i18nSupport.getLanguage(new Locale(value, "", ""));
+            // Disabled due to ROO-1584
+            // } else if (value.length() == 5) {
+            // String[] split = value.split("_");
+            // return i18nSupport.getLanguage(new Locale(split[0],
+            // split[1].toUpperCase(), ""));
+        }
+        return null;
     }
-    return null;
-  }
 
-  public boolean getAllPossibleValues(final List<Completion> completions,
-      final Class<?> requiredType, final String existingData, final String optionContext,
-      final MethodTarget target) {
-    for (final I18n i18n : i18nSupport.getSupportedLanguages()) {
-      final Locale locale = i18n.getLocale();
-      final StringBuilder localeString = new StringBuilder(locale.getLanguage());
-      if (locale.getCountry() == null || locale.getCountry().length() > 0) {
-        localeString.append("_").append(locale.getCountry().toUpperCase());
-      }
-      completions.add(new Completion(localeString.toString()));
+    public boolean getAllPossibleValues(final List<Completion> completions,
+            final Class<?> requiredType, final String existingData,
+            final String optionContext, final MethodTarget target) {
+        for (final I18n i18n : i18nSupport.getSupportedLanguages()) {
+            final Locale locale = i18n.getLocale();
+            final StringBuilder localeString = new StringBuilder(
+                    locale.getLanguage());
+            if (locale.getCountry() == null || locale.getCountry().length() > 0) {
+                localeString.append("_").append(
+                        locale.getCountry().toUpperCase());
+            }
+            completions.add(new Completion(localeString.toString()));
+        }
+        return true;
     }
-    return true;
-  }
 
-  public boolean supports(final Class<?> requiredType, final String optionContext) {
-    return I18n.class.isAssignableFrom(requiredType);
-  }
+    public boolean supports(final Class<?> requiredType,
+            final String optionContext) {
+        return I18n.class.isAssignableFrom(requiredType);
+    }
 }

@@ -8,5 +8,6 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @author Stefan Schmidt
  * @since 1.1.3
  */
-public interface WebJsonMetadataProvider extends ItdTriggerBasedMetadataProvider {
+public interface WebJsonMetadataProvider extends
+        ItdTriggerBasedMetadataProvider {
 }

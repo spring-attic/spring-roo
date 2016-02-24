@@ -21,61 +21,70 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class DefaultMutableFile implements MutableFile {
 
-  private final File file;
-  private final NotifiableFileMonitorService fileMonitorService;
-  private final ManagedMessageRenderer managedMessageRenderer;
+    private final File file;
+    private final NotifiableFileMonitorService fileMonitorService;
+    private final ManagedMessageRenderer managedMessageRenderer;
 
-  public DefaultMutableFile(final File file, final NotifiableFileMonitorService fileMonitorService,
-      final ManagedMessageRenderer managedMessageRenderer) {
-    Validate.notNull(file, "File required");
-    Validate.notNull(managedMessageRenderer, "Message renderer required");
-    Validate.isTrue(file.isFile(), "A mutable file must actually be a file (not a directory)");
-    Validate.isTrue(file.exists(), "A mutable file must actually exist");
-    this.file = file;
-    this.managedMessageRenderer = managedMessageRenderer;
-    // null is permitted
-    this.fileMonitorService = fileMonitorService;
-  }
-
-  public String getCanonicalPath() {
-    return FileUtils.getCanonicalPath(file);
-  }
-
-  public InputStream getInputStream() {
-    // Do more checks, in case the file has changed since this instance was
-    // constructed
-    Validate.isTrue(file.isFile(), "A mutable file must actually be a file (not a directory)");
-    Validate.isTrue(file.exists(), "A mutable file must actually exist");
-    try {
-      return new BufferedInputStream(new FileInputStream(file));
-    } catch (final IOException ioe) {
-      throw new IllegalStateException("Unable to acquire input stream for file '"
-          + getCanonicalPath() + "'", ioe);
+    public DefaultMutableFile(final File file,
+            final NotifiableFileMonitorService fileMonitorService,
+            final ManagedMessageRenderer managedMessageRenderer) {
+        Validate.notNull(file, "File required");
+        Validate.notNull(managedMessageRenderer, "Message renderer required");
+        Validate.isTrue(file.isFile(),
+                "A mutable file must actually be a file (not a directory)");
+        Validate.isTrue(file.exists(), "A mutable file must actually exist");
+        this.file = file;
+        this.managedMessageRenderer = managedMessageRenderer;
+        // null is permitted
+        this.fileMonitorService = fileMonitorService;
     }
-  }
 
-  public OutputStream getOutputStream() {
-    // Do more checks, in case the file has changed since this instance was
-    // constructed
-    Validate.isTrue(file.isFile(), "A mutable file must actually be a file (not a directory)");
-    Validate.isTrue(file.exists(), "A mutable file must actually exist");
-
-    try {
-      return new MonitoredOutputStream(file, managedMessageRenderer, fileMonitorService);
-    } catch (final IOException ioe) {
-      throw new IllegalStateException("Unable to acquire output stream for file '"
-          + getCanonicalPath() + "'", ioe);
+    public String getCanonicalPath() {
+        return FileUtils.getCanonicalPath(file);
     }
-  }
 
-  public void setDescriptionOfChange(final String message) {
-    managedMessageRenderer.setDescriptionOfChange(message);
-  }
+    public InputStream getInputStream() {
+        // Do more checks, in case the file has changed since this instance was
+        // constructed
+        Validate.isTrue(file.isFile(),
+                "A mutable file must actually be a file (not a directory)");
+        Validate.isTrue(file.exists(), "A mutable file must actually exist");
+        try {
+            return new BufferedInputStream(new FileInputStream(file));
+        }
+        catch (final IOException ioe) {
+            throw new IllegalStateException(
+                    "Unable to acquire input stream for file '"
+                            + getCanonicalPath() + "'", ioe);
+        }
+    }
 
-  @Override
-  public String toString() {
-    final ToStringBuilder builder = new ToStringBuilder(this);
-    builder.append("file", getCanonicalPath());
-    return builder.toString();
-  }
+    public OutputStream getOutputStream() {
+        // Do more checks, in case the file has changed since this instance was
+        // constructed
+        Validate.isTrue(file.isFile(),
+                "A mutable file must actually be a file (not a directory)");
+        Validate.isTrue(file.exists(), "A mutable file must actually exist");
+
+        try {
+            return new MonitoredOutputStream(file, managedMessageRenderer,
+                    fileMonitorService);
+        }
+        catch (final IOException ioe) {
+            throw new IllegalStateException(
+                    "Unable to acquire output stream for file '"
+                            + getCanonicalPath() + "'", ioe);
+        }
+    }
+
+    public void setDescriptionOfChange(final String message) {
+        managedMessageRenderer.setDescriptionOfChange(message);
+    }
+
+    @Override
+    public String toString() {
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("file", getCanonicalPath());
+        return builder.toString();
+    }
 }

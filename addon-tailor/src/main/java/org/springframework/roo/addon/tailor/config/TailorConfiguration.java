@@ -13,67 +13,68 @@ import java.util.List;
  */
 public class TailorConfiguration {
 
-  private final List<CommandConfiguration> commandConfigs = new ArrayList<CommandConfiguration>();
+    private final List<CommandConfiguration> commandConfigs = new ArrayList<CommandConfiguration>();
 
-  private final String name;
+    private final String name;
 
-  private String description;
+    private String description;
 
-  private boolean isActive = false;
+    private boolean isActive = false;
 
-  /**
-   * Constructor
-   * 
-   * @param name Name of the configuration. Should be unique over all
-   *            TailorConfiguration instances in the container
-   */
-  public TailorConfiguration(final String name) {
-    this.name = name;
-  }
-
-  public TailorConfiguration(final String name, final String description) {
-    this.name = name;
-    this.description = description;
-  }
-
-  public void addCommandConfig(final CommandConfiguration newConfig) {
-    commandConfigs.add(newConfig);
-  }
-
-  /**
-   * Looks up the CommandConfiguration for a specific command.
-   * 
-   * @param fullCommandString The command string to check
-   * @return CommandConfiguration for the command in this TailorConfiguration;
-   *         null if no configuration present for the command
-   */
-  public CommandConfiguration getCommandConfigFor(final String fullCommandString) {
-    for (final CommandConfiguration config : commandConfigs) {
-      if (fullCommandString.startsWith(config.getCommandName())) {
-        return config;
-      }
+    /**
+     * Constructor
+     * 
+     * @param name Name of the configuration. Should be unique over all
+     *            TailorConfiguration instances in the container
+     */
+    public TailorConfiguration(final String name) {
+        this.name = name;
     }
-    return null;
-  }
 
-  public List<CommandConfiguration> getCommandConfigs() {
-    return commandConfigs;
-  }
+    public TailorConfiguration(final String name, final String description) {
+        this.name = name;
+        this.description = description;
+    }
 
-  public String getDescription() {
-    return description;
-  }
+    public void addCommandConfig(final CommandConfiguration newConfig) {
+        commandConfigs.add(newConfig);
+    }
 
-  public String getName() {
-    return name;
-  }
+    /**
+     * Looks up the CommandConfiguration for a specific command.
+     * 
+     * @param fullCommandString The command string to check
+     * @return CommandConfiguration for the command in this TailorConfiguration;
+     *         null if no configuration present for the command
+     */
+    public CommandConfiguration getCommandConfigFor(
+            final String fullCommandString) {
+        for (final CommandConfiguration config : commandConfigs) {
+            if (fullCommandString.startsWith(config.getCommandName())) {
+                return config;
+            }
+        }
+        return null;
+    }
 
-  public boolean isActive() {
-    return isActive;
-  }
+    public List<CommandConfiguration> getCommandConfigs() {
+        return commandConfigs;
+    }
 
-  public void setActive(final boolean isActive) {
-    this.isActive = isActive;
-  }
+    public String getDescription() {
+        return description;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(final boolean isActive) {
+        this.isActive = isActive;
+    }
 
 }

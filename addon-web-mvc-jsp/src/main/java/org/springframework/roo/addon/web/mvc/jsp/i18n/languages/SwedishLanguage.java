@@ -18,19 +18,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class SwedishLanguage extends AbstractLanguage {
 
-  public InputStream getFlagGraphic() {
-    return FileUtils.getInputStream(getClass(), "sv.png");
-  }
+    public InputStream getFlagGraphic() {
+        return FileUtils.getInputStream(getClass(), "sv.png");
+    }
 
-  public String getLanguage() {
-    return "Svenska";
-  }
+    public String getLanguage() {
+        return "Svenska";
+    }
 
-  public Locale getLocale() {
-    return new Locale("sv");
-  }
+    public Locale getLocale() {
+        return new Locale("sv");
+    }
 
-  public InputStream getMessageBundle() {
-    return FileUtils.getInputStream(getClass(), "messages_sv.properties");
-  }
+    public InputStream getMessageBundle() {
+        return FileUtils.getInputStream(getClass(), "messages_sv.properties");
+    }
 }

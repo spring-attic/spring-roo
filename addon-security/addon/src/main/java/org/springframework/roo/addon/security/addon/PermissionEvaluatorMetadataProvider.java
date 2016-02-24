@@ -33,169 +33,177 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class PermissionEvaluatorMetadataProvider extends
-    AbstractMemberDiscoveringItdMetadataProvider {
+        AbstractMemberDiscoveringItdMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(PermissionEvaluatorMetadataProvider.class);
+	
+    private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
-  protected final static Logger LOGGER = HandlerUtils
-      .getLogger(PermissionEvaluatorMetadataProvider.class);
+    protected MetadataDependencyRegistryTracker registryTracker = null;
 
-  private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Set ignore trigger annotations. It means that other MD providers 
+     * that want to discover whether a type has finders can do so.</li>
+     * </ul>
+     */
+    @Override
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
 
-  protected MetadataDependencyRegistryTracker registryTracker = null;
-
-  /**
-   * This service is being activated so setup it:
-   * <ul>
-   * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Set ignore trigger annotations. It means that other MD providers 
-   * that want to discover whether a type has finders can do so.</li>
-   * </ul>
-   */
-  @Override
-  protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
-
-    this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
-            PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-    this.registryTracker.open();
-    setIgnoreTriggerAnnotations(true);
-  }
-
-  /**
-   * This service is being deactivated so unregister upstream-downstream 
-   * dependencies, triggers, matchers and listeners.
-   * 
-   * @param context
-   */
-  protected void deactivate(final ComponentContext context) {
-    MetadataDependencyRegistry registry = this.registryTracker.getService();
-    registry.removeNotificationListener(this);
-    registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
-        getProvidesType());
-    this.registryTracker.close();
-  }
-
-  @Override
-  public String getItdUniquenessFilenameSuffix() {
-    return "PermissionEvaluator";
-  }
-
-  @Override
-  public String getProvidesType() {
-    return PermissionEvaluatorMetadata.getMetadataIdentiferType();
-  }
-
-  @Override
-  protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
-    // Determine the governor for this ITD, and whether any metadata is even
-    // hoping to hear about changes to that JavaType and its ITDs
-    final JavaType governor = itdTypeDetails.getName();
-    final String localMid = managedEntityTypes.get(governor);
-    if (localMid != null) {
-      return localMid;
+    	this.registryTracker = 
+    			new MetadataDependencyRegistryTracker(context, this,
+    					PhysicalTypeIdentifier.getMetadataIdentiferType(),
+    	                getProvidesType());
+    	this.registryTracker.open();
+        setIgnoreTriggerAnnotations(true);
     }
 
-    final MemberHoldingTypeDetails memberHoldingTypeDetails =
-        getTypeLocationService().getTypeDetails(governor);
-    if (memberHoldingTypeDetails != null) {
-      for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
-        final String localMidType = managedEntityTypes.get(type);
-        if (localMidType != null) {
-          return localMidType;
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+    	MetadataDependencyRegistry registry = this.registryTracker.getService();
+    	registry.removeNotificationListener(this);
+    	registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+    	this.registryTracker.close();
+    }
+
+    @Override
+    public String getItdUniquenessFilenameSuffix() {
+        return "PermissionEvaluator";
+    }
+
+    @Override
+    public String getProvidesType() {
+        return PermissionEvaluatorMetadata.getMetadataIdentiferType();
+    }
+
+    @Override
+    protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+        // Determine the governor for this ITD, and whether any metadata is even
+        // hoping to hear about changes to that JavaType and its ITDs
+        final JavaType governor = itdTypeDetails.getName();
+        final String localMid = managedEntityTypes.get(governor);
+        if (localMid != null) {
+            return localMid;
         }
-      }
-    }
-    return null;
-  }
 
-  @Override
-  protected String createLocalIdentifier(JavaType javaType, LogicalPath path) {
-    return PermissionEvaluatorMetadata.createIdentifier(javaType, path);
-  }
-
-  @Override
-  protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
-    final JavaType javaType = PermissionEvaluatorMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = PermissionEvaluatorMetadata.getPath(metadataIdentificationString);
-    return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-  }
-
-  @Override
-  protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-      final String metadataIdentificationString, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-
-    final ClassOrInterfaceTypeDetails permissionEvaluatorClass =
-        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-    if (permissionEvaluatorClass == null) {
-      return null;
-    }
-
-    JavaType permissionEvaluatorInterface = null;
-
-    for (final JavaType implementedType : permissionEvaluatorClass.getImplementsTypes()) {
-      if (implementedType.equals(PERMISSION_EVALUATOR)) {
-        permissionEvaluatorInterface = implementedType;
-        break;
-      }
-    }
-
-    //Checks to ensure the supposed permission evaluator class actually implements PermissionEvaluator
-    if (permissionEvaluatorInterface == null) {
-      return null;
-    }
-
-    final PermissionEvaluatorAnnotationValues annotationValues =
-        new PermissionEvaluatorAnnotationValues(governorPhysicalTypeMetadata);
-
-    //AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(permissionEvaluatorClass.getAnnotations(), RooJavaType.ROO_PERMISSION_EVALUATOR);
-    //Checks to ensure permission evaluator class includes the @RooPermissionEvaluator annotation
-    /*if (annotationValues == null) {
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
+                .getTypeDetails(governor);
+        if (memberHoldingTypeDetails != null) {
+            for (final JavaType type : memberHoldingTypeDetails
+                    .getLayerEntities()) {
+                final String localMidType = managedEntityTypes.get(type);
+                if (localMidType != null) {
+                    return localMidType;
+                }
+            }
+        }
         return null;
-    }*/
-
-    final MemberDetails permissionEvaluatorClassDetails =
-        getMemberDetailsScanner().getMemberDetails(getClass().getName(), permissionEvaluatorClass);
-
-    Map<JavaType, String> domainTypesToPlurals = getDomainTypesToPlurals();
-
-    //AnnotationAttributeValue<Boolean> defaultReturnValue = annotationMetadata.getAttribute("defaultReturnValue");
-
-    return new PermissionEvaluatorMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, permissionEvaluatorClassDetails, annotationValues, // == null ? false : defaultReturnValue.getValue(), 
-        domainTypesToPlurals);
-  }
-
-  private Map<JavaType, String> getDomainTypesToPlurals() {
-
-    Map<JavaType, String> domainTypesToPlurals = new HashMap<JavaType, String>();
-    for (ClassOrInterfaceTypeDetails cid : getTypeLocationService()
-        .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE)) {
-      AnnotationMetadata annotationMetadata =
-          MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_SERVICE);
-      AnnotationAttributeValue<Boolean> usePermissionEvaluator =
-          annotationMetadata.getAttribute("usePermissionEvaluator");
-      if (usePermissionEvaluator == null || usePermissionEvaluator.getValue() == false) {
-        continue;
-      }
-      AnnotationAttributeValue<Collection<ClassAttributeValue>> domainTypes =
-          annotationMetadata.getAttribute("domainTypes");
-      for (ClassAttributeValue domainType : domainTypes.getValue()) {
-        final ClassOrInterfaceTypeDetails domainTypeDetails =
-            getTypeLocationService().getTypeDetails(domainType.getValue());
-        if (domainTypeDetails == null) {
-          return null;
-        }
-        final LogicalPath path =
-            PhysicalTypeIdentifier.getPath(domainTypeDetails.getDeclaredByMetadataId());
-        final String pluralId = PluralMetadata.createIdentifier(domainType.getValue(), path);
-        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
-        if (pluralMetadata == null) {
-          continue;
-        }
-        domainTypesToPlurals.put(domainType.getValue(), pluralMetadata.getPlural());
-      }
     }
-    return domainTypesToPlurals;
-  }
+
+    @Override
+    protected String createLocalIdentifier(JavaType javaType, LogicalPath path) {
+        return PermissionEvaluatorMetadata.createIdentifier(javaType, path);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            String metadataIdentificationString) {
+        final JavaType javaType = PermissionEvaluatorMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = PermissionEvaluatorMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString, 
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+    	
+        final ClassOrInterfaceTypeDetails permissionEvaluatorClass = governorPhysicalTypeMetadata
+                .getMemberHoldingTypeDetails();
+        if (permissionEvaluatorClass == null) {
+            return null;
+        }
+        
+        JavaType permissionEvaluatorInterface = null;
+
+        for (final JavaType implementedType : permissionEvaluatorClass
+                .getImplementsTypes()) {
+            if (implementedType.equals(PERMISSION_EVALUATOR)) {
+                permissionEvaluatorInterface = implementedType;
+                break;
+            }
+        }
+
+        //Checks to ensure the supposed permission evaluator class actually implements PermissionEvaluator
+        if (permissionEvaluatorInterface == null) {
+            return null;
+        }
+        
+        final PermissionEvaluatorAnnotationValues annotationValues = new PermissionEvaluatorAnnotationValues(
+                governorPhysicalTypeMetadata);
+        
+        //AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(permissionEvaluatorClass.getAnnotations(), RooJavaType.ROO_PERMISSION_EVALUATOR);
+        //Checks to ensure permission evaluator class includes the @RooPermissionEvaluator annotation
+        /*if (annotationValues == null) {
+            return null;
+        }*/
+        
+        final MemberDetails permissionEvaluatorClassDetails = getMemberDetailsScanner()
+                .getMemberDetails(getClass().getName(),
+                        permissionEvaluatorClass);
+        
+        Map<JavaType, String> domainTypesToPlurals = getDomainTypesToPlurals();
+        
+        //AnnotationAttributeValue<Boolean> defaultReturnValue = annotationMetadata.getAttribute("defaultReturnValue");
+
+        return new PermissionEvaluatorMetadata(metadataIdentificationString,
+                aspectName, governorPhysicalTypeMetadata,
+                permissionEvaluatorClassDetails, 
+                annotationValues, // == null ? false : defaultReturnValue.getValue(), 
+                domainTypesToPlurals);
+    }
+    
+    private Map<JavaType, String> getDomainTypesToPlurals() {
+    	
+    	Map<JavaType, String>  domainTypesToPlurals = new HashMap<JavaType, String> ();
+    	for (ClassOrInterfaceTypeDetails cid : getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE)) {
+    		AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_SERVICE);
+    		AnnotationAttributeValue<Boolean> usePermissionEvaluator = annotationMetadata.getAttribute("usePermissionEvaluator");
+    		if (usePermissionEvaluator == null || usePermissionEvaluator.getValue() == false){
+    			continue;
+    		}
+    		AnnotationAttributeValue<Collection<ClassAttributeValue>> domainTypes = annotationMetadata.getAttribute("domainTypes");
+            for (ClassAttributeValue domainType : domainTypes.getValue()) {
+	    		final ClassOrInterfaceTypeDetails domainTypeDetails = getTypeLocationService()
+	                    .getTypeDetails(domainType.getValue());
+	            if (domainTypeDetails == null) {
+	                return null;
+	            }
+	            final LogicalPath path = PhysicalTypeIdentifier
+	                    .getPath(domainTypeDetails.getDeclaredByMetadataId());
+	            final String pluralId = PluralMetadata.createIdentifier(domainType.getValue(),
+	                    path);
+	            final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+	                    .get(pluralId);
+	            if (pluralMetadata == null) {
+	                continue;
+	            }
+	    		domainTypesToPlurals.put(domainType.getValue(), pluralMetadata.getPlural());
+            }
+    	}
+    	return domainTypesToPlurals;
+    }
 }

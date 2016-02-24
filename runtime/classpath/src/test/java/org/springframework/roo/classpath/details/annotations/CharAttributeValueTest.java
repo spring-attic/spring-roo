@@ -13,8 +13,9 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public class CharAttributeValueTest {
 
-  @Test
-  public void testToString() {
-    assertEquals("baz -> q", new CharAttributeValue(new JavaSymbolName("baz"), 'q').toString());
-  }
+    @Test
+    public void testToString() {
+        assertEquals("baz -> q", new CharAttributeValue(new JavaSymbolName(
+                "baz"), 'q').toString());
+    }
 }

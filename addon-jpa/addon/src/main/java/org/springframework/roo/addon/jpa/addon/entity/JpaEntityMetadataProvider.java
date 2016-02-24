@@ -9,5 +9,6 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @author Juan Carlos García
  * @since 1.2.0
  */
-public interface JpaEntityMetadataProvider extends ItdTriggerBasedMetadataProvider {
+public interface JpaEntityMetadataProvider extends
+        ItdTriggerBasedMetadataProvider {
 }

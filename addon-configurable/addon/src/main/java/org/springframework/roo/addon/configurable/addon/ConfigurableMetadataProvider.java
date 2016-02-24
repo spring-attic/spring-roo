@@ -13,5 +13,6 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @author Ben Alex
  * @since 1.0
  */
-public interface ConfigurableMetadataProvider extends ItdTriggerBasedMetadataProvider {
+public interface ConfigurableMetadataProvider extends
+        ItdTriggerBasedMetadataProvider {
 }

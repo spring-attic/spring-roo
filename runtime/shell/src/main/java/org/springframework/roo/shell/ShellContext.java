@@ -12,34 +12,34 @@ import java.util.Map;
  */
 public interface ShellContext {
 
-  /**
-   * Check if --force global parameter has been defined with 'true' value.
-   * 
-   * @return true if --force global parameter has been defined with 'true'
-   *         value
-   */
-  boolean isForce();
+    /**
+     * Check if --force global parameter has been defined with 'true' value.
+     * 
+     * @return true if --force global parameter has been defined with 'true'
+     *         value
+     */
+    boolean isForce();
+    
+    /**
+     * Returns value of --profile global parameter
+     * 
+     * @return String with profile name
+     */
+    String getProfile();
 
-  /**
-   * Returns value of --profile global parameter
-   * 
-   * @return String with profile name
-   */
-  String getProfile();
+    /**
+     * Returns last executed command
+     * 
+     * @return String with last executed command
+     */
+    String getExecutedCommand();
 
-  /**
-   * Returns last executed command
-   * 
-   * @return String with last executed command
-   */
-  String getExecutedCommand();
-
-  /**
-   * Returns a map with current parameters written on shell
-   * 
-   * @return Map<String, String> where key is parameter name and value is the
-   *         defined value on current shell
-   */
-  Map<String, String> getParameters();
+    /**
+     * Returns a map with current parameters written on shell
+     * 
+     * @return Map<String, String> where key is parameter name and value is the
+     *         defined value on current shell
+     */
+    Map<String, String> getParameters();
 
 }

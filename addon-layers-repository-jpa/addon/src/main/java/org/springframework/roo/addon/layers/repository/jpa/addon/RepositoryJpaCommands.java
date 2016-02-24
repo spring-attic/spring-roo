@@ -28,45 +28,39 @@ import org.springframework.roo.shell.ShellContext;
 @Service
 public class RepositoryJpaCommands implements CommandMarker {
 
-  @Reference
-  private RepositoryJpaOperations repositoryJpaOperations;
+    @Reference private RepositoryJpaOperations repositoryJpaOperations;
 
-  @CliAvailabilityIndicator({"repository jpa add", "repository jpa all"})
-  public boolean isRepositoryCommandAvailable() {
-    return repositoryJpaOperations.isRepositoryInstallationPossible();
-  }
+    @CliAvailabilityIndicator({"repository jpa add", "repository jpa all"})
+    public boolean isRepositoryCommandAvailable() {
+        return repositoryJpaOperations.isRepositoryInstallationPossible();
+    }
+    
+    @CliCommand(value = "repository jpa all", help = "Generates new Spring Data repository for all entities.")
+    public void all(
+            @CliOption(key = "package", mandatory = true, help = "The package where repositories will be generated") final JavaPackage repositoriesPackage) {
 
-  @CliCommand(value = "repository jpa all",
-      help = "Generates new Spring Data repository for all entities.")
-  public void all(
-      @CliOption(key = "package", mandatory = true,
-          help = "The package where repositories will be generated") final JavaPackage repositoriesPackage) {
-
-    repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
-  }
-
-  @CliOptionVisibilityIndicator(params = {"interface"}, command = "repository jpa add",
-      help = "You should specify --entity param to be able to specify repository name")
-  public boolean isClassVisible(ShellContext shellContext) {
-    // Get all defined parameters
-    Map<String, String> parameters = shellContext.getParameters();
-
-    // If --entity has been defined, show --class parameter
-    if (parameters.containsKey("entity") && StringUtils.isNotBlank(parameters.get("entity"))) {
-      return true;
+        repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
+    }
+    
+    @CliOptionVisibilityIndicator(params = { "interface" }, command = "repository jpa add", help = "You should specify --entity param to be able to specify repository name")
+    public boolean isClassVisible(ShellContext shellContext){
+        // Get all defined parameters
+        Map<String, String> parameters = shellContext.getParameters();
+        
+        // If --entity has been defined, show --class parameter
+        if (parameters.containsKey("entity")
+                && StringUtils.isNotBlank(parameters.get("entity"))) {
+            return true;
+        }
+        
+        return false;
     }
 
-    return false;
-  }
+    @CliCommand(value = "repository jpa add", help = "Generates new Spring Data repository for specified entity.")
+    public void repository(
+            @CliOption(key = "interface", mandatory = true, help = "The java Spring Data repository to generate.") final JavaType interfaceType,
+            @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*", optionContext = PROJECT, help = "The domain entity this repository should expose") final JavaType domainType) {
 
-  @CliCommand(value = "repository jpa add",
-      help = "Generates new Spring Data repository for specified entity.")
-  public void repository(
-      @CliOption(key = "interface", mandatory = true,
-          help = "The java Spring Data repository to generate.") final JavaType interfaceType,
-      @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*",
-          optionContext = PROJECT, help = "The domain entity this repository should expose") final JavaType domainType) {
-
-    repositoryJpaOperations.addRepository(interfaceType, domainType);
-  }
+        repositoryJpaOperations.addRepository(interfaceType, domainType);
+    }
 }

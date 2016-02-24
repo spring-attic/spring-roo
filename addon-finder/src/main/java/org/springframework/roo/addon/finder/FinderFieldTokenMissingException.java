@@ -8,9 +8,9 @@ package org.springframework.roo.addon.finder;
  */
 public class FinderFieldTokenMissingException extends RuntimeException {
 
-  private static final long serialVersionUID = 2328865678880608749L;
+    private static final long serialVersionUID = 2328865678880608749L;
 
-  public FinderFieldTokenMissingException(final String string) {
-    super(string);
-  }
+    public FinderFieldTokenMissingException(final String string) {
+        super(string);
+    }
 }

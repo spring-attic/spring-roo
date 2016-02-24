@@ -9,5 +9,5 @@ package org.springframework.roo.addon.finder;
  */
 public interface Token {
 
-  String getValue();
+    String getValue();
 }

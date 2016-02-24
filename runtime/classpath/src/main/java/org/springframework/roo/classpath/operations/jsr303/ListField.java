@@ -13,16 +13,19 @@ import org.springframework.roo.model.JavaType;
 
 public class ListField extends SetField {
 
-  public ListField(final String physicalTypeIdentifier, final JavaType fieldType,
-      final JavaSymbolName fieldName, final JavaType genericParameterTypeName,
-      final Cardinality cardinality) {
-    super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName, cardinality);
-  }
+    public ListField(final String physicalTypeIdentifier,
+            final JavaType fieldType, final JavaSymbolName fieldName,
+            final JavaType genericParameterTypeName,
+            final Cardinality cardinality) {
+        super(physicalTypeIdentifier, fieldType, fieldName,
+                genericParameterTypeName, cardinality);
+    }
 
-  @Override
-  public JavaType getInitializer() {
-    final List<JavaType> params = new ArrayList<JavaType>();
-    params.add(getGenericParameterTypeName());
-    return new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params);
-  }
+    @Override
+    public JavaType getInitializer() {
+        final List<JavaType> params = new ArrayList<JavaType>();
+        params.add(getGenericParameterTypeName());
+        return new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0,
+                DataType.TYPE, null, params);
+    }
 }

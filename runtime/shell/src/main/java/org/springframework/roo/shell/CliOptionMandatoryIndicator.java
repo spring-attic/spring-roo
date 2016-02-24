@@ -19,20 +19,20 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface CliOptionMandatoryIndicator {
 
-  /**
-   * @return the name of the command that contains the option to set mandatory
-   *         dynamically.
-   */
-  String command();
+    /**
+     * @return the name of the command that contains the option to set mandatory
+     *         dynamically.
+     */
+    String command();
 
-  /**
-   * @return the name of the option to set mandatory dynamically.
-   * 
-   * <b>IMPORTANT</b>: 
-   * - Parameters should be setted as mandatory on @CliOption to use them on params 
-   *   attribute.
-   * - On the other hand, if @CliOption has more than one key, this attribute must be
-   *   setted with the first value
-   */
-  String[] params();
+    /**
+     * @return the name of the option to set mandatory dynamically.
+     * 
+     * <b>IMPORTANT</b>: 
+     * - Parameters should be setted as mandatory on @CliOption to use them on params 
+     *   attribute.
+     * - On the other hand, if @CliOption has more than one key, this attribute must be
+     *   setted with the first value
+     */
+    String[] params();
 }

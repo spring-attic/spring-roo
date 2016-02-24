@@ -20,104 +20,109 @@ import org.junit.Test;
  */
 public class CollectionUtilsTest {
 
-  private static class Child extends Parent {
-  }
-
-  private static class Parent {
-    @Override
-    public String toString() {
-      return getClass().getSimpleName();
+    private static class Child extends Parent {
     }
-  }
 
-  // A simple filter for testing the filtering methods
-  private static final Filter<String> NON_BLANK_FILTER = new Filter<String>() {
-    public boolean include(final String instance) {
-      return StringUtils.isNotBlank(instance);
+    private static class Parent {
+        @Override
+        public String toString() {
+            return getClass().getSimpleName();
+        }
     }
-  };
 
-  @Test
-  public void testFilterNonNullIterableWithNonNullFilter() {
-    // Set up
-    final Iterable<String> inputs = Arrays.asList("a", "", null, "b");
+    // A simple filter for testing the filtering methods
+    private static final Filter<String> NON_BLANK_FILTER = new Filter<String>() {
+        public boolean include(final String instance) {
+            return StringUtils.isNotBlank(instance);
+        }
+    };
 
-    // Invoke
-    final List<? extends String> results = CollectionUtils.filter(inputs, NON_BLANK_FILTER);
+    @Test
+    public void testFilterNonNullIterableWithNonNullFilter() {
+        // Set up
+        final Iterable<String> inputs = Arrays.asList("a", "", null, "b");
 
-    // Check
-    assertEquals(Arrays.asList("a", "b"), results);
-  }
+        // Invoke
+        final List<? extends String> results = CollectionUtils.filter(inputs,
+                NON_BLANK_FILTER);
 
-  @Test
-  public void testFilterNonNullIterableWithNullFilter() {
-    // Set up
-    final Iterable<String> inputs = Arrays.asList("a", "");
+        // Check
+        assertEquals(Arrays.asList("a", "b"), results);
+    }
 
-    // Invoke
-    final List<? extends String> results = CollectionUtils.filter(inputs, null);
+    @Test
+    public void testFilterNonNullIterableWithNullFilter() {
+        // Set up
+        final Iterable<String> inputs = Arrays.asList("a", "");
 
-    // Check
-    assertEquals(inputs, results);
-  }
+        // Invoke
+        final List<? extends String> results = CollectionUtils.filter(inputs,
+                null);
 
-  @Test
-  public void testFilterNullCollection() {
-    assertEquals(0, CollectionUtils.filter(null, NON_BLANK_FILTER).size());
-  }
+        // Check
+        assertEquals(inputs, results);
+    }
 
-  @Test
-  public void testFirstElementOfEmptyCollection() {
-    assertNull(CollectionUtils.firstElementOf(Collections.emptySet()));
-  }
+    @Test
+    public void testFilterNullCollection() {
+        assertEquals(0, CollectionUtils.filter(null, NON_BLANK_FILTER).size());
+    }
 
-  @Test
-  public void testFirstElementOfMultiElementCollection() {
-    final String[] members = {"x", "y", "z"};
-    assertEquals(members[0], CollectionUtils.firstElementOf(Arrays.asList(members)));
-  }
+    @Test
+    public void testFirstElementOfEmptyCollection() {
+        assertNull(CollectionUtils.firstElementOf(Collections.emptySet()));
+    }
 
-  @Test
-  public void testFirstElementOfNullCollection() {
-    assertNull(CollectionUtils.firstElementOf(null));
-  }
+    @Test
+    public void testFirstElementOfMultiElementCollection() {
+        final String[] members = { "x", "y", "z" };
+        assertEquals(members[0],
+                CollectionUtils.firstElementOf(Arrays.asList(members)));
+    }
 
-  @Test
-  public void testFirstElementOfSingleElementCollection() {
-    final String member = "x";
-    assertEquals(member, CollectionUtils.firstElementOf(Collections.singleton(member)));
-  }
+    @Test
+    public void testFirstElementOfNullCollection() {
+        assertNull(CollectionUtils.firstElementOf(null));
+    }
 
-  @Test
-  public void testPopulateNonNullCollectionWithNonNullCollection() {
-    // Set up
-    final Collection<Parent> originalCollection = new ArrayList<Parent>();
-    originalCollection.add(new Parent());
-    final Child child = new Child();
+    @Test
+    public void testFirstElementOfSingleElementCollection() {
+        final String member = "x";
+        assertEquals(member,
+                CollectionUtils.firstElementOf(Collections.singleton(member)));
+    }
 
-    // Invoke
-    final Collection<Parent> result =
-        CollectionUtils.populate(originalCollection, Arrays.asList(child));
+    @Test
+    public void testPopulateNonNullCollectionWithNonNullCollection() {
+        // Set up
+        final Collection<Parent> originalCollection = new ArrayList<Parent>();
+        originalCollection.add(new Parent());
+        final Child child = new Child();
 
-    // Check
-    assertEquals(Collections.singletonList(child), result);
-  }
+        // Invoke
+        final Collection<Parent> result = CollectionUtils.populate(
+                originalCollection, Arrays.asList(child));
 
-  @Test
-  public void testPopulateNonNullCollectionWithNullCollection() {
-    // Set up
-    final Collection<Parent> collection = new ArrayList<Parent>();
-    collection.add(new Parent());
+        // Check
+        assertEquals(Collections.singletonList(child), result);
+    }
 
-    // Invoke
-    final Collection<Parent> result = CollectionUtils.populate(collection, null);
+    @Test
+    public void testPopulateNonNullCollectionWithNullCollection() {
+        // Set up
+        final Collection<Parent> collection = new ArrayList<Parent>();
+        collection.add(new Parent());
 
-    // Check
-    assertEquals(0, result.size());
-  }
+        // Invoke
+        final Collection<Parent> result = CollectionUtils.populate(collection,
+                null);
 
-  @Test
-  public void testPopulateNullCollectionWithNullCollection() {
-    assertNull(CollectionUtils.populate(null, null));
-  }
+        // Check
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testPopulateNullCollectionWithNullCollection() {
+        assertNull(CollectionUtils.populate(null, null));
+    }
 }

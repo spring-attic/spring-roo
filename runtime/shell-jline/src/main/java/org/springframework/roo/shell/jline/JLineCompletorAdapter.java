@@ -18,27 +18,31 @@ import org.springframework.roo.shell.Parser;
  */
 public class JLineCompletorAdapter implements Completor {
 
-  private final Parser parser;
+    private final Parser parser;
 
-  public JLineCompletorAdapter(final Parser parser) {
-    Validate.notNull(parser, "Parser required");
-    this.parser = parser;
-  }
-
-  @SuppressWarnings("all")
-  public int complete(final String buffer, final int cursor, final List candidates) {
-    int result;
-    try {
-      JLineLogHandler.cancelRedrawProhibition();
-      final List<Completion> completions = new ArrayList<Completion>();
-      result = parser.completeAdvanced(buffer, cursor, completions);
-      for (final Completion completion : completions) {
-        candidates.add(new jline.Completion(completion.getValue(), completion.getFormattedValue(),
-            completion.getHeading()));
-      }
-    } finally {
-      JLineLogHandler.prohibitRedraw();
+    public JLineCompletorAdapter(final Parser parser) {
+        Validate.notNull(parser, "Parser required");
+        this.parser = parser;
     }
-    return result;
-  }
+
+    @SuppressWarnings("all")
+    public int complete(final String buffer, final int cursor,
+            final List candidates) {
+        int result;
+        try {
+            JLineLogHandler.cancelRedrawProhibition();
+            final List<Completion> completions = new ArrayList<Completion>();
+            result = parser.completeAdvanced(buffer, cursor, completions);
+            for (final Completion completion : completions) {
+                candidates
+                        .add(new jline.Completion(completion.getValue(),
+                                completion.getFormattedValue(), completion
+                                        .getHeading()));
+            }
+        }
+        finally {
+            JLineLogHandler.prohibitRedraw();
+        }
+        return result;
+    }
 }

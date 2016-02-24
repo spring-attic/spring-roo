@@ -32,181 +32,183 @@ import org.springframework.roo.support.util.AnsiEscapeCode;
 @Component
 @Service
 public class LastUsedImpl implements LastUsed, CommandListener {
-
-  private static final Logger LOGGER = HandlerUtils.getLogger(LastUsedImpl.class);
-
-  // ------------ OSGi component attributes ----------------
-  private BundleContext context;
-
-  protected void deactivate(final ComponentContext cContext) {
-    if (shell != null) {
-      shell.removeListener(this);
-    }
-  }
-
-  // Verified fields
-  private JavaPackage topLevelPackage;
-  private JavaPackage javaPackage;
-  private JavaType javaType;
-  private Pom module;
-
-  // Not Verified fields
-  private JavaPackage topLevelPackageNotVerified;
-  private JavaPackage javaPackageNotVerified;
-  private JavaType javaTypeNotVerified;
-  private Pom moduleNotVerified;
-
-  private boolean isVerified;
-
-  @Reference
-  private ProjectOperations projectOperations;
-  @Reference
-  private Shell shell;
-  @Reference
-  private TypeLocationService typeLocationService;
-
-  private boolean listenerRegistered;
-
-  public JavaPackage getJavaPackage() {
-    return javaPackage;
-  }
-
-  public JavaType getJavaType() {
-    return javaType;
-  }
-
-  public JavaPackage getTopLevelPackage() {
-    return topLevelPackage;
-  }
-
-  public JavaPackage getJavaPackageNotVerified() {
-    return javaPackageNotVerified;
-  }
-
-  public JavaType getJavaTypeNotVerified() {
-    return javaTypeNotVerified;
-  }
-
-  public JavaPackage getTopLevelPackageNotVerified() {
-    return topLevelPackageNotVerified;
-  }
-
-  public boolean isVerified() {
-    return isVerified;
-  }
-
-  public void setPackage(final JavaPackage javaPackage) {
-    Validate.notNull(javaPackage, "JavaPackage required");
-    if (javaPackage.getFullyQualifiedPackageName().startsWith("java.")) {
-      return;
-    }
-    javaType = null;
-    this.javaPackage = javaPackage;
-    setPromptPath(javaPackage.getFullyQualifiedPackageName());
-  }
-
-  private void setPromptPath(final String fullyQualifiedName) {
-    if (topLevelPackage == null) {
-      return;
+	
+	 private static final Logger LOGGER = HandlerUtils
+	            .getLogger(LastUsedImpl.class);
+	    
+    // ------------ OSGi component attributes ----------------
+   	private BundleContext context;
+   	
+   	protected void deactivate(final ComponentContext cContext) {
+   		if (shell != null) {
+   			shell.removeListener(this);
+   		}
     }
 
-    String moduleName = "";
-    if (module != null && StringUtils.isNotBlank(module.getModuleName())) {
-      moduleName =
-          AnsiEscapeCode.decorate(module.getModuleName() + MODULE_PATH_SEPARATOR,
-              AnsiEscapeCode.FG_CYAN);
+	// Verified fields
+    private JavaPackage topLevelPackage;
+    private JavaPackage javaPackage;
+    private JavaType javaType;
+    private Pom module;
+    
+    // Not Verified fields
+    private JavaPackage topLevelPackageNotVerified;
+    private JavaPackage javaPackageNotVerified;
+    private JavaType javaTypeNotVerified;
+    private Pom moduleNotVerified;
+    
+    private boolean isVerified;
+    
+    @Reference private ProjectOperations projectOperations;
+    @Reference private Shell shell;
+    @Reference private TypeLocationService typeLocationService;
+
+	private boolean listenerRegistered;
+
+    public JavaPackage getJavaPackage() {
+        return javaPackage;
     }
 
-    topLevelPackage =
-        new JavaPackage(typeLocationService.getTopLevelPackageForModule(projectOperations
-            .getFocusedModule()));
-    final String path =
-        moduleName
-            + fullyQualifiedName.replace(topLevelPackage.getFullyQualifiedPackageName(),
-                TOP_LEVEL_PACKAGE_SYMBOL);
-    shell.setPromptPath(path, StringUtils.isNotBlank(moduleName));
-  }
-
-  public void setTopLevelPackage(final JavaPackage topLevelPackage) {
-    this.topLevelPackage = topLevelPackage;
-  }
-
-  public void setType(final JavaType javaType) {
-    Validate.notNull(javaType, "JavaType required");
-    if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
-      return;
+    public JavaType getJavaType() {
+        return javaType;
     }
-    this.javaType = javaType;
-    javaPackage = javaType.getPackage();
-    setPromptPath(javaType.getFullyQualifiedTypeName());
-  }
 
-  public void setTypeNotVerified(JavaType javaType) {
-    Validate.notNull(javaType, "JavaType required");
-    if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
-      return;
+    public JavaPackage getTopLevelPackage() {
+        return topLevelPackage;
     }
-    registerListener();
-    this.javaTypeNotVerified = javaType;
-    javaPackageNotVerified = javaType.getPackage();
-    this.isVerified = false;
-  }
-
-  private void registerListener() {
-    if (listenerRegistered) {
-      return;
+    
+    public JavaPackage getJavaPackageNotVerified() {
+        return javaPackageNotVerified;
     }
-    shell.addListerner(this);
-    listenerRegistered = true;
-  }
 
-  public void setType(final JavaType javaType, final Pom module) {
-    Validate.notNull(javaType, "JavaType required");
-    if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
-      return;
+    public JavaType getJavaTypeNotVerified() {
+        return javaTypeNotVerified;
     }
-    this.module = module;
-    this.javaType = javaType;
-    javaPackage = javaType.getPackage();
-    setPromptPath(javaType.getFullyQualifiedTypeName());
-  }
 
-  public void setTypeNotVerified(JavaType javaType, Pom module) {
-    Validate.notNull(javaType, "JavaType required");
-    if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
-      return;
+    public JavaPackage getTopLevelPackageNotVerified() {
+        return topLevelPackageNotVerified;
     }
-    registerListener();
-    this.moduleNotVerified = module;
-    this.javaTypeNotVerified = javaType;
-    javaPackageNotVerified = javaType.getPackage();
-    this.isVerified = false;
-  }
-
-
-  /**
-   * CommandListener methods
-   */
-  @Override
-  public void onCommandSuccess() {
-    // If is not verified but finish success, set last used
-    if (!isVerified) {
-      setType(javaTypeNotVerified, moduleNotVerified);
+    
+    public boolean isVerified(){
+    	return isVerified;
     }
-  }
 
-  @Override
-  public void onCommandFails() {
-    this.moduleNotVerified = null;
-    this.javaTypeNotVerified = null;
-    javaPackageNotVerified = null;
-    this.isVerified = false;
-  }
+    public void setPackage(final JavaPackage javaPackage) {
+        Validate.notNull(javaPackage, "JavaPackage required");
+        if (javaPackage.getFullyQualifiedPackageName().startsWith("java.")) {
+            return;
+        }
+        javaType = null;
+        this.javaPackage = javaPackage;
+        setPromptPath(javaPackage.getFullyQualifiedPackageName());
+    }
 
-  @Override
-  public void onCommandBegin(ParseResult parseResult) {
-    // TODO Auto-generated method stub
+    private void setPromptPath(final String fullyQualifiedName) {
+        if (topLevelPackage == null) {
+            return;
+        }
 
-  }
+        String moduleName = "";
+        if (module != null && StringUtils.isNotBlank(module.getModuleName())) {
+            moduleName = AnsiEscapeCode.decorate(module.getModuleName()
+                    + MODULE_PATH_SEPARATOR, AnsiEscapeCode.FG_CYAN);
+        }
+
+        topLevelPackage = new JavaPackage(
+                typeLocationService
+                        .getTopLevelPackageForModule(projectOperations
+                                .getFocusedModule()));
+        final String path = moduleName
+                + fullyQualifiedName.replace(
+                        topLevelPackage.getFullyQualifiedPackageName(),
+                        TOP_LEVEL_PACKAGE_SYMBOL);
+        shell.setPromptPath(path, StringUtils.isNotBlank(moduleName));
+    }
+
+    public void setTopLevelPackage(final JavaPackage topLevelPackage) {
+        this.topLevelPackage = topLevelPackage;
+    }
+
+    public void setType(final JavaType javaType) {
+        Validate.notNull(javaType, "JavaType required");
+        if (javaType.getPackage().getFullyQualifiedPackageName()
+                .startsWith("java.")) {
+            return;
+        }
+        this.javaType = javaType;
+        javaPackage = javaType.getPackage();
+        setPromptPath(javaType.getFullyQualifiedTypeName());
+    }
+    
+	public void setTypeNotVerified(JavaType javaType) {
+		Validate.notNull(javaType, "JavaType required");
+        if (javaType.getPackage().getFullyQualifiedPackageName()
+                .startsWith("java.")) {
+            return;
+        }
+        registerListener();
+        this.javaTypeNotVerified = javaType;
+        javaPackageNotVerified = javaType.getPackage();
+        this.isVerified = false;
+	}
+
+    private void registerListener() {
+		if (listenerRegistered) {
+			return;
+		}
+		shell.addListerner(this);
+		listenerRegistered = true;
+	}
+
+	public void setType(final JavaType javaType, final Pom module) {
+        Validate.notNull(javaType, "JavaType required");
+        if (javaType.getPackage().getFullyQualifiedPackageName()
+                .startsWith("java.")) {
+            return;
+        }
+        this.module = module;
+        this.javaType = javaType;
+        javaPackage = javaType.getPackage();
+        setPromptPath(javaType.getFullyQualifiedTypeName());
+    }
+    
+	public void setTypeNotVerified(JavaType javaType, Pom module) {
+        Validate.notNull(javaType, "JavaType required");
+        if (javaType.getPackage().getFullyQualifiedPackageName()
+                .startsWith("java.")) {
+            return;
+        }
+        registerListener();
+        this.moduleNotVerified = module;
+        this.javaTypeNotVerified = javaType;
+        javaPackageNotVerified = javaType.getPackage();
+        this.isVerified = false;
+	}
+
+    
+    /**
+     * CommandListener methods
+     */
+	@Override
+	public void onCommandSuccess() {
+		// If is not verified but finish success, set last used
+		if (!isVerified){
+			setType(javaTypeNotVerified, moduleNotVerified);
+		}
+	}
+
+	@Override
+	public void onCommandFails() {
+		this.moduleNotVerified = null;
+        this.javaTypeNotVerified = null;
+        javaPackageNotVerified = null;
+        this.isVerified = false;
+	}
+
+	@Override
+	public void onCommandBegin(ParseResult parseResult) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

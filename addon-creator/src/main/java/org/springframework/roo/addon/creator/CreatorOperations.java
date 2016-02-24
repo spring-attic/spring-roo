@@ -13,22 +13,25 @@ import org.springframework.roo.model.JavaPackage;
  */
 public interface CreatorOperations {
 
-  void createSimpleAddon(JavaPackage topLevelPackage, String description, String projectName,
-      String folder);
+    void createSimpleAddon(JavaPackage topLevelPackage, String description,
+            String projectName, String folder);
+    
+    void createAdvancedAddon(JavaPackage topLevelPackage, String description,
+            String projectName, String folder);
+    
+    void createRooAddonSuite(JavaPackage topLevelPackage, String description,
+    		String projectName);
 
-  void createAdvancedAddon(JavaPackage topLevelPackage, String description, String projectName,
-      String folder);
+    void createI18nAddon(JavaPackage topLevelPackage, String language,
+            Locale locale, File messageBundle, File flagGraphic,
+            String description, String projectName);
 
-  void createRooAddonSuite(JavaPackage topLevelPackage, String description, String projectName);
+    void createWrapperAddon(JavaPackage topLevelPackage, String groupId,
+            String artifactId, String version, String vendorName,
+            String lincenseUrl, String docUrl, String osgiImports,
+            String description, String projectName);
 
-  void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale,
-      File messageBundle, File flagGraphic, String description, String projectName);
-
-  void createWrapperAddon(JavaPackage topLevelPackage, String groupId, String artifactId,
-      String version, String vendorName, String lincenseUrl, String docUrl, String osgiImports,
-      String description, String projectName);
-
-  boolean isAddonCreatePossible();
-
-
+    boolean isAddonCreatePossible();
+    
+    
 }

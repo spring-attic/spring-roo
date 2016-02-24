@@ -45,48 +45,47 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class JLineShellComponent extends JLineShell {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JLineShellComponent.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(JLineShellComponent.class);
+    @Reference ExecutionStrategy executionStrategy;
+    @Reference Parser parser;
 
-  // ------------ OSGi component attributes ----------------
-  private BundleContext context;
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
+        final Thread thread = new Thread(this, "Spring Roo JLine Shell");
+        thread.start();
+    }
 
-  @Reference
-  ExecutionStrategy executionStrategy;
-  @Reference
-  Parser parser;
+    protected void deactivate(final ComponentContext context) {
+        this.context = null;
+        closeShell();
+    }
 
-  protected void activate(final ComponentContext context) {
-    this.context = context.getBundleContext();
-    final Thread thread = new Thread(this, "Spring Roo JLine Shell");
-    thread.start();
-  }
+    @Override
+    protected Collection<URL> findResources(final String path) {
+        // For an OSGi bundle search, we add the root prefix to the given path
+        return OSGiUtils.findEntriesByPath(context,
+                OSGiUtils.ROOT_PATH + path);
+    }
 
-  protected void deactivate(final ComponentContext context) {
-    this.context = null;
-    closeShell();
-  }
-
-  @Override
-  protected Collection<URL> findResources(final String path) {
-    // For an OSGi bundle search, we add the root prefix to the given path
-    return OSGiUtils.findEntriesByPath(context, OSGiUtils.ROOT_PATH + path);
-  }
-
-  @Override
-  protected ExecutionStrategy getExecutionStrategy() {
-    return executionStrategy;
-  }
+    @Override
+    protected ExecutionStrategy getExecutionStrategy() {
+        return executionStrategy;
+    }
 
 
-  @Override
-  protected Parser getParser() {
-    return parser;
-  }
+    @Override
+    protected Parser getParser() {
+        return parser;
+    }
 
-  @Override
-  public String getStartupNotifications() {
-    return null;
-  }
+    @Override
+    public String getStartupNotifications() {
+        return null;
+    }
 
 }

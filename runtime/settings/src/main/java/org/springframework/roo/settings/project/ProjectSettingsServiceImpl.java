@@ -34,146 +34,141 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class ProjectSettingsServiceImpl implements ProjectSettingsService {
 
-  private static final Path PROJECT_CONFIG_FOLDER_LOCATION = Path.ROOT_ROO_CONFIG;
-  private static final String PROJECT_CONFIG_FILE_FOLDER = "config/";
-  private static final String PROJECT_CONFIG_FILE_NAME = "project.properties";
+	private static final Path PROJECT_CONFIG_FOLDER_LOCATION = Path.ROOT_ROO_CONFIG;
+	private static final String PROJECT_CONFIG_FILE_FOLDER = "config/";
+	private static final String PROJECT_CONFIG_FILE_NAME = "project.properties";
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(ProjectSettingsServiceImpl.class);
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ProjectSettingsServiceImpl.class);
 
-  @Reference
-  private PathResolver pathResolver;
+	@Reference
+	private PathResolver pathResolver;
 
-  private PropFilesManagerService propFilesManager;
-  private FileManager fileManager;
+	private PropFilesManagerService propFilesManager;
+	private FileManager fileManager;
 
-  // ------------ OSGi component attributes ----------------
-  private BundleContext context;
+	// ------------ OSGi component attributes ----------------
+	private BundleContext context;
 
-  protected void activate(final ComponentContext context) {
-    this.context = context.getBundleContext();
-  }
+	protected void activate(final ComponentContext context) {
+		this.context = context.getBundleContext();
+	}
 
-  @Override
-  public void addProperty(final String key, final String value, final boolean force) {
-    getPropFilesManager().addPropertyIfNotExists(
-        LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""), getProjectSettingsFileName(),
-        key, value, force);
-  }
+	@Override
+	public void addProperty(final String key, final String value, final boolean force) {
+		getPropFilesManager().addPropertyIfNotExists(LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
+				getProjectSettingsFileName(), key, value, force);
+	}
 
-  @Override
-  public void removeProperty(final String key) {
-    getPropFilesManager().removeProperty(
-        LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""), getProjectSettingsFileName(),
-        key);
-  }
+	@Override
+	public void removeProperty(final String key) {
+		getPropFilesManager().removeProperty(LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
+				getProjectSettingsFileName(), key);
+	}
 
-  @Override
-  public Map<String, String> getProperties() {
-    return getPropFilesManager().getProperties(
-        LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""), getProjectSettingsFileName());
-  }
+	@Override
+	public Map<String, String> getProperties() {
+		return getPropFilesManager().getProperties(LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
+				getProjectSettingsFileName());
+	}
 
-  @Override
-  public SortedSet<String> getPropertyKeys(boolean includeValues) {
-    return getPropFilesManager().getPropertyKeys(
-        LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""), getProjectSettingsFileName(),
-        includeValues);
-  }
+	@Override
+	public SortedSet<String> getPropertyKeys(boolean includeValues) {
+		return getPropFilesManager().getPropertyKeys(LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
+				getProjectSettingsFileName(), includeValues);
+	}
 
-  @Override
-  public String getProperty(final String key) {
-    return getPropFilesManager().getProperty(
-        LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""), getProjectSettingsFileName(),
-        key);
-  }
+	@Override
+	public String getProperty(final String key) {
+		return getPropFilesManager().getProperty(LogicalPath.getInstance(PROJECT_CONFIG_FOLDER_LOCATION, ""),
+				getProjectSettingsFileName(), key);
+	}
 
-  @Override
-  public String getProjectSettingsLocation() {
+	@Override
+	public String getProjectSettingsLocation() {
 
-    return pathResolver.getFocusedIdentifier(PROJECT_CONFIG_FOLDER_LOCATION,
-        getProjectSettingsFileName());
-  }
+		return pathResolver.getFocusedIdentifier(PROJECT_CONFIG_FOLDER_LOCATION, getProjectSettingsFileName());
+	}
 
-  @Override
-  public boolean existsProjectSettingsFile() {
-    return getFileManager().exists(getProjectSettingsLocation());
-  }
+	@Override
+	public boolean existsProjectSettingsFile() {
+		return getFileManager().exists(getProjectSettingsLocation());
+	}
 
-  /**
-   * Method that generates application configuration filename path using
-   * project setting folder and filename. This filename has a ".project"
-   * extension.
-   *
-   * @return
-   */
-  private String getProjectSettingsFileName() {
-    String fileName = PROJECT_CONFIG_FILE_FOLDER;
-    fileName = fileName.concat(PROJECT_CONFIG_FILE_NAME);
+	/**
+	 * Method that generates application configuration filename path using
+	 * project setting folder and filename. This filename has a ".project"
+	 * extension.
+	 *
+	 * @return
+	 */
+	private String getProjectSettingsFileName() {
+		String fileName = PROJECT_CONFIG_FILE_FOLDER;
+		fileName = fileName.concat(PROJECT_CONFIG_FILE_NAME);
 
-    return fileName;
-  }
+		return fileName;
+	}
 
-  @Override
-  public void createProjectSettingsFile() {
-    getFileManager().createFile(getProjectSettingsLocation());
-  }
+	@Override
+	public void createProjectSettingsFile() {
+		getFileManager().createFile(getProjectSettingsLocation());
+	}
 
-  /**
-   * Method that finds the propFilesManagerService.
-   * 
-   * @return the propFilesManagerService. Null is returned if service is not
-   *         found
-   */
-  public PropFilesManagerService getPropFilesManager() {
-    if (propFilesManager == null) {
-      // Get all Services implement PropFilesManagerService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PropFilesManagerService.class.getName(), null);
+	/**
+	 * Method that finds the propFilesManagerService.
+	 * 
+	 * @return the propFilesManagerService. Null is returned if service is not
+	 *         found
+	 */
+	public PropFilesManagerService getPropFilesManager() {
+		if (propFilesManager == null) {
+			// Get all Services implement PropFilesManagerService interface
+			try {
+				ServiceReference<?>[] references = this.context
+						.getAllServiceReferences(PropFilesManagerService.class.getName(), null);
 
-        for (ServiceReference<?> ref : references) {
-          propFilesManager = (PropFilesManagerService) this.context.getService(ref);
-          return propFilesManager;
-        }
+				for (ServiceReference<?> ref : references) {
+					propFilesManager = (PropFilesManagerService) this.context.getService(ref);
+					return propFilesManager;
+				}
 
-        return null;
+				return null;
 
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PropFilesManagerService on ProjectSettingsServiceImpl.");
-        return null;
-      }
-    } else {
-      return propFilesManager;
-    }
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load PropFilesManagerService on ProjectSettingsServiceImpl.");
+				return null;
+			}
+		} else {
+			return propFilesManager;
+		}
 
-  }
+	}
 
-  /**
-   * Method that finds the filesManager.
-   * 
-   * @return the filesManager. Null is returned if service is not found
-   */
-  public FileManager getFileManager() {
-    if (fileManager == null) {
-      // Get all Services implement FileManager interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(FileManager.class.getName(), null);
+	/**
+	 * Method that finds the filesManager.
+	 * 
+	 * @return the filesManager. Null is returned if service is not found
+	 */
+	public FileManager getFileManager() {
+		if (fileManager == null) {
+			// Get all Services implement FileManager interface
+			try {
+				ServiceReference<?>[] references = this.context.getAllServiceReferences(FileManager.class.getName(),
+						null);
 
-        for (ServiceReference<?> ref : references) {
-          fileManager = (FileManager) this.context.getService(ref);
-          return fileManager;
-        }
+				for (ServiceReference<?> ref : references) {
+					fileManager = (FileManager) this.context.getService(ref);
+					return fileManager;
+				}
 
-        return null;
+				return null;
 
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load FileManager on ProjectSettingsServiceImpl.");
-        return null;
-      }
-    } else {
-      return fileManager;
-    }
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load FileManager on ProjectSettingsServiceImpl.");
+				return null;
+			}
+		} else {
+			return fileManager;
+		}
 
-  }
+	}
 }

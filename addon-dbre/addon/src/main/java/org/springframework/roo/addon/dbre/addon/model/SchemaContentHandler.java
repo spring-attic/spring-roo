@@ -15,27 +15,29 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class SchemaContentHandler extends DefaultHandler {
 
-  private Schema schema;
+    private Schema schema;
 
-  /**
-   * Constructor for no schema
-   */
-  public SchemaContentHandler() {}
-
-  /**
-   * Returns the parsed schema
-   * 
-   * @return <code>null</code> if not parsed yet
-   */
-  public Schema getSchema() {
-    return schema;
-  }
-
-  @Override
-  public void startElement(final String uri, final String localName, final String qName,
-      final Attributes attributes) throws SAXException {
-    if (qName.equals("database")) {
-      schema = new Schema(attributes.getValue("name"));
+    /**
+     * Constructor for no schema
+     */
+    public SchemaContentHandler() {
     }
-  }
+
+    /**
+     * Returns the parsed schema
+     * 
+     * @return <code>null</code> if not parsed yet
+     */
+    public Schema getSchema() {
+        return schema;
+    }
+
+    @Override
+    public void startElement(final String uri, final String localName,
+            final String qName, final Attributes attributes)
+            throws SAXException {
+        if (qName.equals("database")) {
+            schema = new Schema(attributes.getValue("name"));
+        }
+    }
 }

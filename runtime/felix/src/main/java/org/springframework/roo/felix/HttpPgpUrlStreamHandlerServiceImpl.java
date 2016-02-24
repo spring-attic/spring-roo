@@ -47,101 +47,113 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  */
 @Component
 @Service
-public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandlerService implements
-    HttpPgpUrlStreamHandlerService {
+public class HttpPgpUrlStreamHandlerServiceImpl extends
+        AbstractURLStreamHandlerService implements
+        HttpPgpUrlStreamHandlerService {
 
-  private static final Logger LOGGER = HandlerUtils
-      .getLogger(HttpPgpUrlStreamHandlerServiceImpl.class);
+    private static final Logger LOGGER = HandlerUtils
+            .getLogger(HttpPgpUrlStreamHandlerServiceImpl.class);
 
-  @Reference
-  private PgpService pgpService;
-  @Reference
-  private UrlInputStreamService urlInputStreamService;
+    @Reference private PgpService pgpService;
+    @Reference private UrlInputStreamService urlInputStreamService;
 
-  protected void activate(final ComponentContext context) {
-    final Hashtable<String, String> dict = new Hashtable<String, String>();
-    dict.put(URLConstants.URL_HANDLER_PROTOCOL, "httppgp");
-    context.getBundleContext().registerService(URLStreamHandlerService.class.getName(), this, dict);
-  }
-
-  @Override
-  public URLConnection openConnection(final URL u) throws IOException {
-    // Convert httppgp:// URL into a standard http:// URL
-    final URL resourceUrl = new URL(u.toExternalForm().replace("httppgp", "http"));
-    // Add .asc to the end of the standard resource URL
-    final URL ascUrl = new URL(resourceUrl.toExternalForm() + ".asc");
-
-    // Start with the ASC file, as if this is for an untrusted key, there's
-    // no point download the larger resource
-    final File ascUrlFile = File.createTempFile("roo_asc", null);
-    ascUrlFile.deleteOnExit();
-
-    InputStream inputStream = null;
-    FileOutputStream outputStream = null;
-    try {
-      outputStream = new FileOutputStream(ascUrlFile);
-      inputStream = urlInputStreamService.openConnection(ascUrl);
-      IOUtils.copy(inputStream, outputStream);
-    } catch (final IOException ioe) {
-      // This is not considered fatal; it is likely the ASC isn't
-      // available, so we will continue
-      ascUrlFile.delete();
-    } finally {
-      IOUtils.closeQuietly(inputStream);
-      IOUtils.closeQuietly(outputStream);
+    protected void activate(final ComponentContext context) {
+        final Hashtable<String, String> dict = new Hashtable<String, String>();
+        dict.put(URLConstants.URL_HANDLER_PROTOCOL, "httppgp");
+        context.getBundleContext().registerService(
+                URLStreamHandlerService.class.getName(), this, dict);
     }
 
-    // Abort if a signature wasn't downloaded (this is a httppgp:// URL
-    // after all, so it should be available)
-    Validate
-        .isTrue(ascUrlFile.exists(),
-            "Signature verification file is not available at '%s'; continuing",
-            ascUrl.toExternalForm());
+    @Override
+    public URLConnection openConnection(final URL u) throws IOException {
+        // Convert httppgp:// URL into a standard http:// URL
+        final URL resourceUrl = new URL(u.toExternalForm().replace("httppgp",
+                "http"));
+        // Add .asc to the end of the standard resource URL
+        final URL ascUrl = new URL(resourceUrl.toExternalForm() + ".asc");
 
-    // Decide if this signature file is well-formed and of a key ID that is
-    // trusted by the user
-    InputStream resource = null;
-    InputStream signature = null;
-    try {
-      signature = new FileInputStream(ascUrlFile);
-      final SignatureDecision decision = pgpService.isSignatureAcceptable(signature);
-      if (!decision.isSignatureAcceptable()) {
-        LOGGER.log(Level.SEVERE, "Download URL '" + resourceUrl.toExternalForm() + "' failed");
-        LOGGER.log(Level.SEVERE,
-            "This resource was signed with PGP key ID '" + decision.getSignatureAsHex()
-                + "', which is not currently trusted");
-        LOGGER
-            .log(
-                Level.SEVERE,
-                "Use 'pgp key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic trust' to trust any keys");
-        throw new IOException("Download URL '" + resourceUrl.toExternalForm()
-            + "' has untrusted PGP signature " + JdkDelegatingLogListener.DO_NOT_LOG);
-      }
+        // Start with the ASC file, as if this is for an untrusted key, there's
+        // no point download the larger resource
+        final File ascUrlFile = File.createTempFile("roo_asc", null);
+        ascUrlFile.deleteOnExit();
 
-      // So far so good. Next we need the actual resource to ensure the
-      // ASC file really did sign it
-      final File resourceFile = File.createTempFile("roo_resource", null);
-      resourceFile.deleteOnExit();
+        InputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(ascUrlFile);
+            inputStream = urlInputStreamService.openConnection(ascUrl);
+            IOUtils.copy(inputStream, outputStream);
+        }
+        catch (final IOException ioe) {
+            // This is not considered fatal; it is likely the ASC isn't
+            // available, so we will continue
+            ascUrlFile.delete();
+        }
+        finally {
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
+        }
 
-      inputStream = urlInputStreamService.openConnection(resourceUrl);
-      outputStream = new FileOutputStream(resourceFile);
-      IOUtils.copy(inputStream, outputStream);
+        // Abort if a signature wasn't downloaded (this is a httppgp:// URL
+        // after all, so it should be available)
+        Validate.isTrue(
+                ascUrlFile.exists(),
+                "Signature verification file is not available at '%s'; continuing",
+                ascUrl.toExternalForm());
 
-      resource = new FileInputStream(resourceFile);
-      signature = new FileInputStream(ascUrlFile);
-      Validate.isTrue(pgpService.isResourceSignedBySignature(resource, signature),
-          "PGP signature illegal for URL '%s'", resourceUrl.toExternalForm());
+        // Decide if this signature file is well-formed and of a key ID that is
+        // trusted by the user
+        InputStream resource = null;
+        InputStream signature = null;
+        try {
+            signature = new FileInputStream(ascUrlFile);
+            final SignatureDecision decision = pgpService
+                    .isSignatureAcceptable(signature);
+            if (!decision.isSignatureAcceptable()) {
+                LOGGER.log(Level.SEVERE,
+                        "Download URL '" + resourceUrl.toExternalForm()
+                                + "' failed");
+                LOGGER.log(
+                        Level.SEVERE,
+                        "This resource was signed with PGP key ID '"
+                                + decision.getSignatureAsHex()
+                                + "', which is not currently trusted");
+                LOGGER.log(
+                        Level.SEVERE,
+                        "Use 'pgp key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic trust' to trust any keys");
+                throw new IOException("Download URL '"
+                        + resourceUrl.toExternalForm()
+                        + "' has untrusted PGP signature "
+                        + JdkDelegatingLogListener.DO_NOT_LOG);
+            }
 
-      // Excellent it worked! We don't need the ASC file anymore, so get
-      // rid of it
-      ascUrlFile.delete();
+            // So far so good. Next we need the actual resource to ensure the
+            // ASC file really did sign it
+            final File resourceFile = File.createTempFile("roo_resource", null);
+            resourceFile.deleteOnExit();
 
-      return resourceFile.toURI().toURL().openConnection();
-    } finally {
-      IOUtils.closeQuietly(resource);
-      IOUtils.closeQuietly(signature);
-      IOUtils.closeQuietly(inputStream);
-      IOUtils.closeQuietly(outputStream);
+            inputStream = urlInputStreamService.openConnection(resourceUrl);
+            outputStream = new FileOutputStream(resourceFile);
+            IOUtils.copy(inputStream, outputStream);
+
+            resource = new FileInputStream(resourceFile);
+            signature = new FileInputStream(ascUrlFile);
+            Validate.isTrue(
+                    pgpService.isResourceSignedBySignature(resource, signature),
+                    "PGP signature illegal for URL '%s'",
+                    resourceUrl.toExternalForm());
+
+            // Excellent it worked! We don't need the ASC file anymore, so get
+            // rid of it
+            ascUrlFile.delete();
+
+            return resourceFile.toURI().toURL().openConnection();
+        }
+        finally {
+            IOUtils.closeQuietly(resource);
+            IOUtils.closeQuietly(signature);
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
+        }
     }
-  }
 }

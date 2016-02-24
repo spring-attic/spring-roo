@@ -28,81 +28,83 @@ import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTrack
  */
 @Component
 @Service
-public class ProjectPathMonitoringInitializer implements MetadataNotificationListener {
+public class ProjectPathMonitoringInitializer implements
+        MetadataNotificationListener {
 
-  private static final FileOperation[] MONITORED_OPERATIONS = {MONITORING_START, MONITORING_FINISH,
-      CREATED, RENAMED, UPDATED, DELETED};
+    private static final FileOperation[] MONITORED_OPERATIONS = {
+            MONITORING_START, MONITORING_FINISH, CREATED, RENAMED, UPDATED,
+            DELETED };
 
-  @Reference
-  private NotifiableFileMonitorService fileMonitorService;
-  @Reference
-  private PathResolver pathResolver;
-  private boolean pathsRegistered;
-  @Reference
-  private UndoManager undoManager;
+    @Reference private NotifiableFileMonitorService fileMonitorService;
+    @Reference private PathResolver pathResolver;
+    private boolean pathsRegistered;
+    @Reference private UndoManager undoManager;
 
-  protected MetadataDependencyRegistryTracker registryTracker = null;
+    protected MetadataDependencyRegistryTracker registryTracker = null;
 
-  /**
-   * This service is being activated so setup it:
-   * <ul>
-   * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * </ul>
-   */
-  protected void activate(final ComponentContext context) {
-    this.registryTracker = new MetadataDependencyRegistryTracker(context.getBundleContext(), this);
-    this.registryTracker.open();
-  }
-
-  /**
-   * This service is being deactivated so unregister upstream-downstream 
-   * dependencies, triggers, matchers and listeners.
-   * 
-   * @param context
-   */
-  protected void deactivate(final ComponentContext context) {
-    MetadataDependencyRegistry registry = this.registryTracker.getService();
-    registry.removeNotificationListener(this);
-    this.registryTracker.close();
-  }
-
-  private void monitorPathIfExists(final LogicalPath logicalPath) {
-    final String canonicalPath = pathResolver.getRoot(logicalPath);
-    // The path can be blank if a sub-folder contains a POM that doesn't
-    // belong to a module
-    if (StringUtils.isNotBlank(canonicalPath)) {
-      final File directory = new File(canonicalPath);
-      if (directory.isDirectory()) {
-        final MonitoringRequest request =
-            new DirectoryMonitoringRequest(directory, true, MONITORED_OPERATIONS);
-        new UndoableMonitoringRequest(undoManager, fileMonitorService, request, true);
-      }
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * </ul>
+     */
+    protected void activate(final ComponentContext context) {
+        this.registryTracker = new MetadataDependencyRegistryTracker(
+                context.getBundleContext(), this);
+        this.registryTracker.open();
     }
-  }
 
-  private void monitorProjectPaths() {
-    for (final LogicalPath logicalPath : pathResolver.getPaths()) {
-      if (requiresMonitoring(logicalPath)) {
-        monitorPathIfExists(logicalPath);
-      }
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.removeNotificationListener(this);
+        this.registryTracker.close();
     }
-  }
 
-  public void notify(final String upstreamDependency, final String downstreamDependency) {
-    if (pathsRegistered) {
-      return;
+    private void monitorPathIfExists(final LogicalPath logicalPath) {
+        final String canonicalPath = pathResolver.getRoot(logicalPath);
+        // The path can be blank if a sub-folder contains a POM that doesn't
+        // belong to a module
+        if (StringUtils.isNotBlank(canonicalPath)) {
+            final File directory = new File(canonicalPath);
+            if (directory.isDirectory()) {
+                final MonitoringRequest request = new DirectoryMonitoringRequest(
+                        directory, true, MONITORED_OPERATIONS);
+                new UndoableMonitoringRequest(undoManager, fileMonitorService,
+                        request, true);
+            }
+        }
     }
-    monitorProjectPaths();
-    pathsRegistered = true;
-  }
 
-  private boolean requiresMonitoring(final LogicalPath logicalPath) {
-    if (logicalPath.isProjectRoot()) {
-      return false; // already monitored by ProcessManager
+    private void monitorProjectPaths() {
+        for (final LogicalPath logicalPath : pathResolver.getPaths()) {
+            if (requiresMonitoring(logicalPath)) {
+                monitorPathIfExists(logicalPath);
+            }
+        }
     }
-    if (StringUtils.isBlank(logicalPath.getModule())) {
-      return true; // non-root path within root module
+
+    public void notify(final String upstreamDependency,
+            final String downstreamDependency) {
+        if (pathsRegistered) {
+            return;
+        }
+        monitorProjectPaths();
+        pathsRegistered = true;
     }
-    return logicalPath.isModuleRoot();
-  }
+
+    private boolean requiresMonitoring(final LogicalPath logicalPath) {
+        if (logicalPath.isProjectRoot()) {
+            return false; // already monitored by ProcessManager
+        }
+        if (StringUtils.isBlank(logicalPath.getModule())) {
+            return true; // non-root path within root module
+        }
+        return logicalPath.isModuleRoot();
+    }
 }

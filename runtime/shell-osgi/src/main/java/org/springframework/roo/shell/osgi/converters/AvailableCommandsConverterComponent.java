@@ -13,5 +13,6 @@ import org.springframework.roo.shell.converters.StaticFieldConverterImpl;
  */
 @Component
 @Service
-public class AvailableCommandsConverterComponent extends AvailableCommandsConverter {
+public class AvailableCommandsConverterComponent extends
+        AvailableCommandsConverter {
 }

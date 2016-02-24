@@ -18,25 +18,25 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
-  @AutoPopulate
-  private JavaType entity;
+    @AutoPopulate private JavaType entity;
 
-  /**
-   * Constructor
-   * 
-   * @param governorPhysicalTypeMetadata the metadata to parse (required)
-   */
-  public RepositoryJpaAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-    super(governorPhysicalTypeMetadata, RooJavaType.ROO_REPOSITORY_JPA);
-    AutoPopulationUtils.populate(this, annotationMetadata);
-  }
+    /**
+     * Constructor
+     * 
+     * @param governorPhysicalTypeMetadata the metadata to parse (required)
+     */
+    public RepositoryJpaAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, RooJavaType.ROO_REPOSITORY_JPA);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-  /**
-   * Returns the entity type managed by the annotated repository
-   * 
-   * @return a non-<code>null</code> type
-   */
-  public JavaType getEntity() {
-    return entity;
-  }
+    /**
+     * Returns the entity type managed by the annotated repository
+     * 
+     * @return a non-<code>null</code> type
+     */
+    public JavaType getEntity() {
+        return entity;
+    }
 }

@@ -8,5 +8,6 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @author Stefan Schmidt
  * @since 1.1
  */
-public interface WebScaffoldMetadataProvider extends ItdTriggerBasedMetadataProvider {
+public interface WebScaffoldMetadataProvider extends
+        ItdTriggerBasedMetadataProvider {
 }

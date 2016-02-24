@@ -41,143 +41,148 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class RepositoryJpaCustomImplMetadataProviderImpl extends
-    AbstractMemberDiscoveringItdMetadataProvider implements RepositoryJpaCustomImplMetadataProvider {
+        AbstractMemberDiscoveringItdMetadataProvider implements
+        RepositoryJpaCustomImplMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(RepositoryJpaCustomImplMetadataProviderImpl.class);
 
-  protected final static Logger LOGGER = HandlerUtils
-      .getLogger(RepositoryJpaCustomImplMetadataProviderImpl.class);
+    private final Map<JavaType, String> domainTypeToRepositoryMidMap = new LinkedHashMap<JavaType, String>();
+    private final Map<String, JavaType> repositoryMidToDomainTypeMap = new LinkedHashMap<String, JavaType>();
 
-  private final Map<JavaType, String> domainTypeToRepositoryMidMap =
-      new LinkedHashMap<JavaType, String>();
-  private final Map<String, JavaType> repositoryMidToDomainTypeMap =
-      new LinkedHashMap<String, JavaType>();
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+    protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
 
-  protected MetadataDependencyRegistryTracker registryTracker = null;
-  protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
+     * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA_CUSTOM_IMPL} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * <li>Set ensure the governor type details represent a class.</li>
+     * </ul>
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        super.setDependsOnGovernorBeingAClass(false);
+    	this.registryTracker = 
+    			new MetadataDependencyRegistryTracker(context, this,
+    					PhysicalTypeIdentifier.getMetadataIdentiferType(),
+    	                getProvidesType());
+    	this.registryTracker.open();
 
-  /**
-   * This service is being activated so setup it:
-   * <ul>
-   * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA_CUSTOM_IMPL} as additional 
-   * JavaType that will trigger metadata registration.</li>
-   * <li>Set ensure the governor type details represent a class.</li>
-   * </ul>
-   */
-  @Override
-  @SuppressWarnings("unchecked")
-  protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
-    super.setDependsOnGovernorBeingAClass(false);
-    this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
-            PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-    this.registryTracker.open();
+        addMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
 
-    addMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
-
-    this.keyDecoratorTracker =
-        new CustomDataKeyDecoratorTracker(context, getClass(), new LayerTypeMatcher(
-            ROO_REPOSITORY_JPA_CUSTOM_IMPL, new JavaSymbolName(
-                RooJpaRepositoryCustomImpl.REPOSITORY_ATTRIBUTE)));
-    this.keyDecoratorTracker.open();
-  }
-
-  /**
-   * This service is being deactivated so unregister upstream-downstream 
-   * dependencies, triggers, matchers and listeners.
-   * 
-   * @param context
-   */
-  protected void deactivate(final ComponentContext context) {
-    MetadataDependencyRegistry registry = this.registryTracker.getService();
-    registry.removeNotificationListener(this);
-    registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
-        getProvidesType());
-    this.registryTracker.close();
-
-    removeMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
-
-    CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
-    keyDecorator.unregisterMatchers(getClass());
-    this.keyDecoratorTracker.close();
-  }
-
-  @Override
-  protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return RepositoryJpaCustomImplMetadata.createIdentifier(javaType, path);
-  }
-
-  @Override
-  protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType =
-        RepositoryJpaCustomImplMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = RepositoryJpaCustomImplMetadata.getPath(metadataIdentificationString);
-    return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-  }
-
-  public String getItdUniquenessFilenameSuffix() {
-    return "Jpa_Repository_Custom_Impl";
-  }
-
-  @Override
-  protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-    // Determine the governor for this ITD, and whether any metadata is even
-    // hoping to hear about changes to that JavaType and its ITDs
-    final JavaType governor = itdTypeDetails.getName();
-    final String localMid = domainTypeToRepositoryMidMap.get(governor);
-    if (localMid != null) {
-      return localMid;
+        this.keyDecoratorTracker = new CustomDataKeyDecoratorTracker(context, getClass(),
+                new LayerTypeMatcher(ROO_REPOSITORY_JPA_CUSTOM_IMPL, new JavaSymbolName(
+                        RooJpaRepositoryCustomImpl.REPOSITORY_ATTRIBUTE)));
+        this.keyDecoratorTracker.open();
     }
 
-    final MemberHoldingTypeDetails memberHoldingTypeDetails =
-        getTypeLocationService().getTypeDetails(governor);
-    if (memberHoldingTypeDetails != null) {
-      for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
-        final String localMidType = domainTypeToRepositoryMidMap.get(type);
-        if (localMidType != null) {
-          return localMidType;
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+    	MetadataDependencyRegistry registry = this.registryTracker.getService();
+    	registry.removeNotificationListener(this);
+    	registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+    	this.registryTracker.close();
+
+    	removeMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+
+    	CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
+    	keyDecorator.unregisterMatchers(getClass());
+    	this.keyDecoratorTracker.close();
+    }
+
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return RepositoryJpaCustomImplMetadata.createIdentifier(javaType, path);
+    }
+
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = RepositoryJpaCustomImplMetadata
+                .getJavaType(metadataIdentificationString);
+        final LogicalPath path = RepositoryJpaCustomImplMetadata
+                .getPath(metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
+
+    public String getItdUniquenessFilenameSuffix() {
+        return "Jpa_Repository_Custom_Impl";
+    }
+
+    @Override
+    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+        // Determine the governor for this ITD, and whether any metadata is even
+        // hoping to hear about changes to that JavaType and its ITDs
+        final JavaType governor = itdTypeDetails.getName();
+        final String localMid = domainTypeToRepositoryMidMap.get(governor);
+        if (localMid != null) {
+            return localMid;
         }
-      }
+
+        final MemberHoldingTypeDetails memberHoldingTypeDetails = getTypeLocationService()
+                .getTypeDetails(governor);
+        if (memberHoldingTypeDetails != null) {
+            for (final JavaType type : memberHoldingTypeDetails
+                    .getLayerEntities()) {
+                final String localMidType = domainTypeToRepositoryMidMap
+                        .get(type);
+                if (localMidType != null) {
+                    return localMidType;
+                }
+            }
+        }
+        return null;
     }
-    return null;
-  }
 
-  @Override
-  protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-      final String metadataIdentificationString, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-    final RepositoryJpaCustomImplAnnotationValues annotationValues =
-        new RepositoryJpaCustomImplAnnotationValues(governorPhysicalTypeMetadata);
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+        final RepositoryJpaCustomImplAnnotationValues annotationValues = new RepositoryJpaCustomImplAnnotationValues(
+                governorPhysicalTypeMetadata);
 
-    // Getting repository custom
-    JavaType repositoryCustom = annotationValues.getRepository();
+        // Getting repository custom
+        JavaType repositoryCustom = annotationValues.getRepository();
 
-    // Validate that contains repository interface
-    Validate.notNull(repositoryCustom,
-        "ERROR: You need to specify interface repository to be implemented.");
+        // Validate that contains repository interface
+        Validate.notNull(repositoryCustom,
+                "ERROR: You need to specify interface repository to be implemented.");
 
-    ClassOrInterfaceTypeDetails repositoryDetails =
-        getTypeLocationService().getTypeDetails(repositoryCustom);
+        ClassOrInterfaceTypeDetails repositoryDetails = getTypeLocationService()
+                .getTypeDetails(repositoryCustom);
 
-    AnnotationMetadata repositoryCustomAnnotation =
-        repositoryDetails.getAnnotation(ROO_REPOSITORY_JPA_CUSTOM);
+        AnnotationMetadata repositoryCustomAnnotation = repositoryDetails
+                .getAnnotation(ROO_REPOSITORY_JPA_CUSTOM);
 
-    Validate.notNull(repositoryCustomAnnotation,
-        "ERROR: Repository interface should be annotated with @RooJpaRepositoryCustom");
+        Validate.notNull(repositoryCustomAnnotation,
+                "ERROR: Repository interface should be annotated with @RooJpaRepositoryCustom");
 
-    AnnotationAttributeValue<JavaType> entityAttribute =
-        repositoryCustomAnnotation.getAttribute("entity");
+        AnnotationAttributeValue<JavaType> entityAttribute = repositoryCustomAnnotation
+                .getAttribute("entity");
 
-    Validate
-        .notNull(entityAttribute,
-            "ERROR: Repository interface should be contain an entity on @RooJpaRepositoryCustom annotation");
+        Validate.notNull(entityAttribute,
+                "ERROR: Repository interface should be contain an entity on @RooJpaRepositoryCustom annotation");
 
-    return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue());
-  }
+        return new RepositoryJpaCustomImplMetadata(metadataIdentificationString,
+                aspectName, governorPhysicalTypeMetadata, annotationValues,
+                entityAttribute.getValue());
+    }
 
-  public String getProvidesType() {
-    return RepositoryJpaCustomImplMetadata.getMetadataIdentiferType();
-  }
+    public String getProvidesType() {
+        return RepositoryJpaCustomImplMetadata.getMetadataIdentiferType();
+    }
 }

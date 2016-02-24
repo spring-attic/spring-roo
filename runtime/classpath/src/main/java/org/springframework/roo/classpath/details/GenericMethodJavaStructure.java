@@ -7,9 +7,9 @@ package org.springframework.roo.classpath.details;
  * @since 2.0
  */
 public interface GenericMethodJavaStructure {
+	
+	String getGenericDefinition();
 
-  String getGenericDefinition();
-
-  void setGenericDefinition(String genericDefinition);
+	void setGenericDefinition(String genericDefinition);
 
 }

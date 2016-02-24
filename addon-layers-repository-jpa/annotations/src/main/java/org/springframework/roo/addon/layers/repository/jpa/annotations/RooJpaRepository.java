@@ -20,17 +20,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooJpaRepository {
 
-  /**
-   * The name of this annotation's attribute that specifies the managed
-   * entity.
-   */
-  String ENTITY_ATTRIBUTE = "entity";
-
-  /**
-   * The entity managed by the annotated repository
-   * 
-   * @return a non-<code>null</code> entity type
-   */
-  Class<?> entity(); // No default => mandatory
-
+    /**
+     * The name of this annotation's attribute that specifies the managed
+     * entity.
+     */
+    String ENTITY_ATTRIBUTE = "entity";
+    
+    /**
+     * The entity managed by the annotated repository
+     * 
+     * @return a non-<code>null</code> entity type
+     */
+    Class<?> entity(); // No default => mandatory
+    
 }

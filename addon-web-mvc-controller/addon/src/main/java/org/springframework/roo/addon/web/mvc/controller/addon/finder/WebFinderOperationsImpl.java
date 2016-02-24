@@ -33,74 +33,79 @@ import org.springframework.roo.model.RooJavaType;
 @Service
 public class WebFinderOperationsImpl implements WebFinderOperations {
 
-  @Reference
-  private ControllerOperations controllerOperations;
-  @Reference
-  private MetadataService metadataService;
-  @Reference
-  private TypeLocationService typeLocationService;
-  @Reference
-  private TypeManagementService typeManagementService;
+    @Reference private ControllerOperations controllerOperations;
+    @Reference private MetadataService metadataService;
+    @Reference private TypeLocationService typeLocationService;
+    @Reference private TypeManagementService typeManagementService;
 
-  public void annotateAll() {
-    // First, find all entities with finders.
-    final Set<JavaType> finderEntities = new HashSet<JavaType>();
+    public void annotateAll() {
+        // First, find all entities with finders.
+        final Set<JavaType> finderEntities = new HashSet<JavaType>();
 
-    // Second, find controllers for those entities.
-    for (final ClassOrInterfaceTypeDetails cod : typeLocationService
-        .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_WEB_SCAFFOLD)) {
-      final PhysicalTypeMetadata ptm =
-          (PhysicalTypeMetadata) metadataService.get(typeLocationService
-              .getPhysicalTypeIdentifier(cod.getName()));
-      Validate.notNull(ptm, "Java source code unavailable for type %s", cod.getName()
-          .getFullyQualifiedTypeName());
-      final WebScaffoldAnnotationValues webScaffoldAnnotationValues =
-          new WebScaffoldAnnotationValues(ptm);
-      for (final JavaType finderEntity : finderEntities) {
-        if (finderEntity.equals(webScaffoldAnnotationValues.getFormBackingObject())) {
-          annotateType(cod.getName(), finderEntity);
-          break;
+        // Second, find controllers for those entities.
+        for (final ClassOrInterfaceTypeDetails cod : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_WEB_SCAFFOLD)) {
+            final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
+                    .get(typeLocationService.getPhysicalTypeIdentifier(cod
+                            .getName()));
+            Validate.notNull(ptm, "Java source code unavailable for type %s",
+                    cod.getName().getFullyQualifiedTypeName());
+            final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
+                    ptm);
+            for (final JavaType finderEntity : finderEntities) {
+                if (finderEntity.equals(webScaffoldAnnotationValues
+                        .getFormBackingObject())) {
+                    annotateType(cod.getName(), finderEntity);
+                    break;
+                }
+            }
         }
-      }
-    }
-  }
-
-  public void annotateType(final JavaType controllerType, final JavaType entityType) {
-    Validate.notNull(controllerType, "Controller type required");
-    Validate.notNull(entityType, "Entity type required");
-
-    final String id = typeLocationService.getPhysicalTypeIdentifier(controllerType);
-    if (id == null) {
-      throw new IllegalArgumentException("Cannot locate source for '"
-          + controllerType.getFullyQualifiedTypeName() + "'");
     }
 
-    // Obtain the physical type and itd mutable details
-    final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
-    Validate.notNull(ptm, "Java source code unavailable for type %s",
-        PhysicalTypeIdentifier.getFriendlyName(id));
-    final WebScaffoldAnnotationValues webScaffoldAnnotationValues =
-        new WebScaffoldAnnotationValues(ptm);
-    if (!webScaffoldAnnotationValues.isAnnotationFound()
-        || !webScaffoldAnnotationValues.getFormBackingObject().equals(entityType)) {
-      throw new IllegalArgumentException("Aborting, this controller type does not manage the "
-          + entityType.getSimpleTypeName() + " form backing type.");
+    public void annotateType(final JavaType controllerType,
+            final JavaType entityType) {
+        Validate.notNull(controllerType, "Controller type required");
+        Validate.notNull(entityType, "Entity type required");
+
+        final String id = typeLocationService
+                .getPhysicalTypeIdentifier(controllerType);
+        if (id == null) {
+            throw new IllegalArgumentException("Cannot locate source for '"
+                    + controllerType.getFullyQualifiedTypeName() + "'");
+        }
+
+        // Obtain the physical type and itd mutable details
+        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
+                .get(id);
+        Validate.notNull(ptm, "Java source code unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(id));
+        final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
+                ptm);
+        if (!webScaffoldAnnotationValues.isAnnotationFound()
+                || !webScaffoldAnnotationValues.getFormBackingObject().equals(
+                        entityType)) {
+            throw new IllegalArgumentException(
+                    "Aborting, this controller type does not manage the "
+                            + entityType.getSimpleTypeName()
+                            + " form backing type.");
+        }
+
+        final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
+        Validate.notNull(ptd,
+                "Java source code details unavailable for type %s",
+                PhysicalTypeIdentifier.getFriendlyName(id));
+        final ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
+        if (null == MemberFindingUtils.getAnnotationOfType(
+                cid.getAnnotations(), RooJavaType.ROO_WEB_FINDER)) {
+            final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
+                    cid);
+            cidBuilder.addAnnotation(new AnnotationMetadataBuilder(
+                    RooJavaType.ROO_WEB_FINDER));
+            typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+        }
     }
 
-    final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-    Validate.notNull(ptd, "Java source code details unavailable for type %s",
-        PhysicalTypeIdentifier.getFriendlyName(id));
-    final ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptd;
-    if (null == MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(),
-        RooJavaType.ROO_WEB_FINDER)) {
-      final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-          new ClassOrInterfaceTypeDetailsBuilder(cid);
-      cidBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_FINDER));
-      typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    public boolean isWebFinderInstallationPossible() {
+        return controllerOperations.isControllerInstallationPossible();
     }
-  }
-
-  public boolean isWebFinderInstallationPossible() {
-    return controllerOperations.isControllerInstallationPossible();
-  }
 }

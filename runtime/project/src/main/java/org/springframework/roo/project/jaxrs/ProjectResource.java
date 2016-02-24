@@ -36,148 +36,161 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Path("project")
 public class ProjectResource implements ResourceMarker {
 
-  private BundleContext context;
-  private static final Logger LOGGER = HandlerUtils.getLogger(ProjectResource.class);
+    private BundleContext context;
+    private static final Logger LOGGER = HandlerUtils
+            .getLogger(ProjectResource.class);
 
-  private Shell shell;
-  private ProjectOperations projectOperations;
-  private MavenOperations mavenOperations;
+    private Shell shell;
+    private ProjectOperations projectOperations;
+    private MavenOperations mavenOperations;
 
-  protected void activate(final ComponentContext cContext) {
-    this.context = cContext.getBundleContext();
-  }
-
-  @GET
-  @Produces("application/json")
-  public JsonObject getProject() {
-    JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-    ProjectOperations prjOperations = getProjectOperations();
-    MavenOperations mvnOperations = getMavenOperations();
-
-    // Checking if project exists
-    if (!mvnOperations.isCreateProjectAvailable()) {
-
-      // Getting project info
-      jsonBuilder.add("projectName", prjOperations.getFocusedProjectName())
-          .add("topLevelPackage", getProjectOperations().getFocusedTopLevelPackage().toString())
-          .add("exists", true);
-    } else {
-      String message = "No Spring Roo project has been created yet.";
-
-      // Returning JSON
-      jsonBuilder.add("success", true).add("message", message);
+    protected void activate(final ComponentContext cContext) {
+        this.context = cContext.getBundleContext();
     }
 
-    // Returning JSON
-    JsonObject jsonObject = jsonBuilder.build();
-    return jsonObject;
-  }
+    @GET
+    @Produces("application/json")
+    public JsonObject getProject() {
+        JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+        ProjectOperations prjOperations = getProjectOperations();
+        MavenOperations mvnOperations = getMavenOperations();
 
-  @POST
-  @Consumes("application/x-www-form-urlencoded")
-  @Produces("application/json")
-  public JsonObject setupProject(@FormParam("projectName") String projectName,
-      @FormParam("topLevelPackage") String topLevelPackage) {
+        // Checking if project exists
+        if (!mvnOperations.isCreateProjectAvailable()) {
 
-    // Execute project command
-    // TODO: Replace with Project command
-    boolean status =
-        getShell().executeCommand(
-            "project setup --projectName " + projectName + " --topLevelPackage " + topLevelPackage);
+            // Getting project info
+            jsonBuilder
+                    .add("projectName", prjOperations.getFocusedProjectName())
+                    .add("topLevelPackage",
+                            getProjectOperations().getFocusedTopLevelPackage()
+                                    .toString()).add("exists", true);
+        }
+        else {
+            String message = "No Spring Roo project has been created yet.";
 
-    String message = "Spring Roo project has been generated correctly!";
-    if (!status) {
-      message = "Error configuring Spring Roo project";
-    }
-
-    // Returning JSON
-    JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-    jsonBuilder.add("success", status).add("message", message);
-
-    JsonObject jsonObject = jsonBuilder.build();
-    return jsonObject;
-  }
-
-  /**
-   * Method to get MavenOperations Service implementation
-   * 
-   * @return
-   */
-  public MavenOperations getMavenOperations() {
-    if (mavenOperations == null) {
-      // Get all Services implement MavenOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(MavenOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (MavenOperations) this.context.getService(ref);
+            // Returning JSON
+            jsonBuilder.add("success", true).add("message", message);
         }
 
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MavenOperations on ProjectConfigurationController.");
-        return null;
-      }
-    } else {
-      return mavenOperations;
+        // Returning JSON
+        JsonObject jsonObject = jsonBuilder.build();
+        return jsonObject;
     }
 
-  }
+    @POST
+    @Consumes("application/x-www-form-urlencoded")
+    @Produces("application/json")
+    public JsonObject setupProject(
+            @FormParam("projectName") String projectName,
+            @FormParam("topLevelPackage") String topLevelPackage) {
 
-  /**
-   * Method to get ProjectOperations Service implementation
-   * 
-   * @return
-   */
-  public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+        // Execute project command
+        // TODO: Replace with Project command
+        boolean status = getShell().executeCommand(
+                "project setup --projectName " + projectName
+                        + " --topLevelPackage " + topLevelPackage);
 
-        for (ServiceReference<?> ref : references) {
-          return (ProjectOperations) this.context.getService(ref);
+        String message = "Spring Roo project has been generated correctly!";
+        if (!status) {
+            message = "Error configuring Spring Roo project";
         }
 
-        return null;
+        // Returning JSON
+        JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+        jsonBuilder.add("success", status).add("message", message);
 
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on ProjectConfigurationController.");
-        return null;
-      }
-    } else {
-      return projectOperations;
+        JsonObject jsonObject = jsonBuilder.build();
+        return jsonObject;
     }
-  }
 
-  /**
-   * Method to get Shell Service implementation
-   * 
-   * @return
-   */
-  public Shell getShell() {
-    if (shell == null) {
-      // Get all Services implement Shell interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(Shell.class.getName(), null);
+    /**
+     * Method to get MavenOperations Service implementation
+     * 
+     * @return
+     */
+    public MavenOperations getMavenOperations() {
+        if (mavenOperations == null) {
+            // Get all Services implement MavenOperations interface
+            try {
+                ServiceReference<?>[] references = this.context
+                        .getAllServiceReferences(
+                                MavenOperations.class.getName(), null);
 
-        for (ServiceReference<?> ref : references) {
-          shell = (Shell) context.getService(ref);
-          return shell;
+                for (ServiceReference<?> ref : references) {
+                    return (MavenOperations) this.context.getService(ref);
+                }
+
+                return null;
+
+            }
+            catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load MavenOperations on ProjectConfigurationController.");
+                return null;
+            }
+        }
+        else {
+            return mavenOperations;
         }
 
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load Shell on ProjectConfigurationController.");
-        return null;
-      }
-    } else {
-      return shell;
     }
-  }
+
+    /**
+     * Method to get ProjectOperations Service implementation
+     * 
+     * @return
+     */
+    public ProjectOperations getProjectOperations() {
+        if (projectOperations == null) {
+            // Get all Services implement ProjectOperations interface
+            try {
+                ServiceReference<?>[] references = this.context
+                        .getAllServiceReferences(
+                                ProjectOperations.class.getName(), null);
+
+                for (ServiceReference<?> ref : references) {
+                    return (ProjectOperations) this.context.getService(ref);
+                }
+
+                return null;
+
+            }
+            catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load ProjectOperations on ProjectConfigurationController.");
+                return null;
+            }
+        }
+        else {
+            return projectOperations;
+        }
+    }
+
+    /**
+     * Method to get Shell Service implementation
+     * 
+     * @return
+     */
+    public Shell getShell() {
+        if (shell == null) {
+            // Get all Services implement Shell interface
+            try {
+                ServiceReference<?>[] references = context
+                        .getAllServiceReferences(Shell.class.getName(), null);
+
+                for (ServiceReference<?> ref : references) {
+                    shell = (Shell) context.getService(ref);
+                    return shell;
+                }
+
+                return null;
+
+            }
+            catch (InvalidSyntaxException e) {
+                LOGGER.warning("Cannot load Shell on ProjectConfigurationController.");
+                return null;
+            }
+        }
+        else {
+            return shell;
+        }
+    }
 }

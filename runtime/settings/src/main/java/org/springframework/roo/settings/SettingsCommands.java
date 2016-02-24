@@ -20,28 +20,28 @@ import org.springframework.roo.shell.ShellContext;
 @Service
 public class SettingsCommands implements CommandMarker {
 
-  @Reference
-  private SettingsOperations settingsOperations;
+	@Reference
+	private SettingsOperations settingsOperations;
 
-  @CliCommand(value = "settings list", help = "Lists all settings added into configuration")
-  public void listSettings() {
-    settingsOperations.listSettings();
-  }
+	@CliCommand(value = "settings list", help = "Lists all settings added into configuration")
+	public void listSettings() {
+		settingsOperations.listSettings();
+	}
 
-  @CliCommand(value = "settings add", help = "Adds or updates a particular setting")
-  public void addSetting(
-      @CliOption(key = "name", mandatory = true, help = "The setting name that should be changed") final String name,
-      @CliOption(key = "value", mandatory = true, help = "The new vale for this settings name") final String value,
-      ShellContext shellContext) {
+	@CliCommand(value = "settings add", help = "Adds or updates a particular setting")
+	public void addSetting(
+			@CliOption(key = "name", mandatory = true, help = "The setting name that should be changed") final String name,
+			@CliOption(key = "value", mandatory = true, help = "The new vale for this settings name") final String value,
+			ShellContext shellContext) {
 
-    settingsOperations.addSetting(name, value, shellContext.isForce());
-  }
+		settingsOperations.addSetting(name, value, shellContext.isForce());
+	}
 
-  @CliCommand(value = "settings remove", help = "Removes an specific setting from configuration")
-  public void removeSetting(@CliOption(key = "name", mandatory = true,
-      help = "The settings name that should be removed") final String name) {
+	@CliCommand(value = "settings remove", help = "Removes an specific setting from configuration")
+	public void removeSetting(
+			@CliOption(key = "name", mandatory = true, help = "The settings name that should be removed") final String name) {
 
-    settingsOperations.removeSetting(name);
-  }
+		settingsOperations.removeSetting(name);
+	}
 
 }

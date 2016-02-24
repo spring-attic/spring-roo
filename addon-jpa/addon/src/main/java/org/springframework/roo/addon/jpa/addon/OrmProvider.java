@@ -13,34 +13,34 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public enum OrmProvider {
 
-  ECLIPSELINK("org.eclipse.persistence.jpa.PersistenceProvider"), HIBERNATE(
-      "org.hibernate.jpa.HibernatePersistenceProvider");
+    ECLIPSELINK("org.eclipse.persistence.jpa.PersistenceProvider"), HIBERNATE(
+            "org.hibernate.jpa.HibernatePersistenceProvider");
 
-  private final String adapter;
+    private final String adapter;
 
-  /**
-   * Constructor
-   * 
-   * @param adapter (required)
-   */
-  private OrmProvider(final String adapter) {
-    Validate.notBlank(adapter, "Adapter is required");
-    this.adapter = adapter;
-  }
+    /**
+     * Constructor
+     * 
+     * @param adapter (required)
+     */
+    private OrmProvider(final String adapter) {
+        Validate.notBlank(adapter, "Adapter is required");
+        this.adapter = adapter;
+    }
 
-  public String getAdapter() {
-    return adapter;
-  }
+    public String getAdapter() {
+        return adapter;
+    }
 
-  public String getConfigPrefix() {
-    return "/configuration/ormProviders/provider[@id='" + name() + "']";
-  }
+    public String getConfigPrefix() {
+        return "/configuration/ormProviders/provider[@id='" + name() + "']";
+    }
 
-  @Override
-  public String toString() {
-    final ToStringBuilder builder = new ToStringBuilder(this);
-    builder.append("provider", name());
-    builder.append("adapter", adapter);
-    return builder.toString();
-  }
+    @Override
+    public String toString() {
+        final ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("provider", name());
+        builder.append("adapter", adapter);
+        return builder.toString();
+    }
 }

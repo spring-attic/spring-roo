@@ -18,103 +18,90 @@ import org.springframework.roo.model.JavaType;
  */
 public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 
-  @AutoPopulate
-  private String catalog = "";
-  @AutoPopulate
-  private String entityName = "";
-  @AutoPopulate
-  private String identifierColumn = "";
-  @AutoPopulate
-  private String identifierField = "";
-  @AutoPopulate
-  private JavaType identifierType;
-  @AutoPopulate
-  private String inheritanceType = "";
-  @AutoPopulate
-  private boolean mappedSuperclass;
-  @AutoPopulate
-  private String schema = "";
-  @AutoPopulate
-  private String sequenceName = null;
-  @AutoPopulate
-  private String table = "";
-  @AutoPopulate
-  private String versionColumn = "";
-  @AutoPopulate
-  private String versionField = VERSION_FIELD_DEFAULT;
-  @AutoPopulate
-  private JavaType versionType = JavaType.INT_OBJECT;
-  @AutoPopulate
-  private boolean readOnly;
+    @AutoPopulate private String catalog = "";
+    @AutoPopulate private String entityName = "";
+    @AutoPopulate private String identifierColumn = "";
+    @AutoPopulate private String identifierField = "";
+    @AutoPopulate private JavaType identifierType;
+    @AutoPopulate private String inheritanceType = "";
+    @AutoPopulate private boolean mappedSuperclass;
+    @AutoPopulate private String schema = "";
+    @AutoPopulate private String sequenceName = null;
+    @AutoPopulate private String table = "";
+    @AutoPopulate private String versionColumn = "";
+    @AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;
+    @AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
+    @AutoPopulate private boolean readOnly;
 
-  /**
-   * Constructor for reading the values of the given annotation
-   * 
-   * @param annotatedType the type from which to read the values (required)
-   * @param triggerAnnotation the type of annotation from which to read the
-   *            values (required)
-   * @since 1.2.0
-   */
-  public JpaEntityAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> annotatedType,
-      final JavaType annotationType) {
-    super(annotatedType, annotationType);
-    // TODO move to superclass for this and all sibling classes?
-    AutoPopulationUtils.populate(this, annotationMetadata);
-  }
+    /**
+     * Constructor for reading the values of the given annotation
+     * 
+     * @param annotatedType the type from which to read the values (required)
+     * @param triggerAnnotation the type of annotation from which to read the
+     *            values (required)
+     * @since 1.2.0
+     */
+    public JpaEntityAnnotationValues(
+            final MemberHoldingTypeDetailsMetadataItem<?> annotatedType,
+            final JavaType annotationType) {
+        super(annotatedType, annotationType);
+        // TODO move to superclass for this and all sibling classes?
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-  public String getCatalog() {
-    return catalog;
-  }
+    public String getCatalog() {
+        return catalog;
+    }
 
-  public String getEntityName() {
-    return entityName;
-  }
+    public String getEntityName() {
+        return entityName;
+    }
 
-  public String getIdentifierColumn() {
-    return identifierColumn;
-  }
+    public String getIdentifierColumn() {
+        return identifierColumn;
+    }
 
-  public String getIdentifierField() {
-    return identifierField;
-  }
+    public String getIdentifierField() {
+        return identifierField;
+    }
 
-  public JavaType getIdentifierType() {
-    return identifierType;
-  }
+    public JavaType getIdentifierType() {
+        return identifierType;
+    }
 
-  public String getInheritanceType() {
-    return inheritanceType;
-  }
+    public String getInheritanceType() {
+        return inheritanceType;
+    }
 
-  public String getSchema() {
-    return schema;
-  }
+    public String getSchema() {
+        return schema;
+    }
 
-  public String getSequenceName() {
-    return sequenceName;
-  }
+    public String getSequenceName() {
+        return sequenceName;
+    }
 
-  public String getTable() {
-    return table;
-  }
+    public String getTable() {
+        return table;
+    }
 
-  public String getVersionColumn() {
-    return versionColumn;
-  }
+    public String getVersionColumn() {
+        return versionColumn;
+    }
 
-  public String getVersionField() {
-    return versionField;
-  }
+    public String getVersionField() {
+        return versionField;
+    }
 
-  public JavaType getVersionType() {
-    return versionType;
-  }
+    public JavaType getVersionType() {
+        return versionType;
+    }
 
-  public boolean isMappedSuperclass() {
-    return mappedSuperclass;
-  }
-
-  public boolean isReadOnly() {
-    return readOnly;
-  }
+    public boolean isMappedSuperclass() {
+        return mappedSuperclass;
+    }
+    
+    public boolean isReadOnly() {
+        return readOnly;
+    }
 }

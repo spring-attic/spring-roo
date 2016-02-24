@@ -27,123 +27,119 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class SettingsOperationsImpl implements SettingsOperations {
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(SettingsOperationsImpl.class);
+	protected final static Logger LOGGER = HandlerUtils.getLogger(SettingsOperationsImpl.class);
 
-  ProjectSettingsService projectSettingsService;
+	ProjectSettingsService projectSettingsService;
 
-  // ------------ OSGi component attributes ----------------
-  private BundleContext context;
+	// ------------ OSGi component attributes ----------------
+	private BundleContext context;
 
-  protected void activate(final ComponentContext context) {
-    this.context = context.getBundleContext();
-  }
+	protected void activate(final ComponentContext context) {
+		this.context = context.getBundleContext();
+	}
 
-  @Override
-  public void addSetting(String name, String value, boolean force) {
-    Validate.notNull(name, "Name required");
-    Validate.notNull(value, "Value required");
+	@Override
+	public void addSetting(String name, String value, boolean force) {
+		Validate.notNull(name, "Name required");
+		Validate.notNull(value, "Value required");
 
-    // Checks if project settings file exists
-    if (!getProjectSettingsService().existsProjectSettingsFile()) {
-      // Creates project settings file
-      getProjectSettingsService().createProjectSettingsFile();
-    }
+		// Checks if project settings file exists
+		if (!getProjectSettingsService().existsProjectSettingsFile()) {
+			// Creates project settings file
+			getProjectSettingsService().createProjectSettingsFile();
+		}
 
-    // Adds a setting
-    getProjectSettingsService().addProperty(name, value, force);
-  }
+		// Adds a setting
+		getProjectSettingsService().addProperty(name, value, force);
+	}
 
-  @Override
-  public void removeSetting(String name) {
-    Validate.notNull(name, "Name required");
+	@Override
+	public void removeSetting(String name) {
+		Validate.notNull(name, "Name required");
 
-    // Checks if project settings file exists
-    if (getProjectSettingsService().existsProjectSettingsFile()) {
+		// Checks if project settings file exists
+		if (getProjectSettingsService().existsProjectSettingsFile()) {
 
-      // Checks if property exists
-      if (getProjectSettingsService().getProperty(name) != null) {
+			// Checks if property exists
+			if (getProjectSettingsService().getProperty(name) != null) {
+				
+				// Remove setting
+				getProjectSettingsService().removeProperty(name);
+				
+			} else {
+				LOGGER.log(Level.INFO, "WARNING: Property {0} is not defined on current settings", name);
+			}
+		} else {
+			LOGGER.log(Level.INFO,
+					"WARNING: Project settings file not found. Use 'settings add' command to configure your project.");
+		}
+	}
 
-        // Remove setting
-        getProjectSettingsService().removeProperty(name);
+	@Override
+	public void listSettings() {
+		// Checks if project settings file exists
+		if (getProjectSettingsService().existsProjectSettingsFile()) {
 
-      } else {
-        LOGGER.log(Level.INFO, "WARNING: Property {0} is not defined on current settings", name);
-      }
-    } else {
-      LOGGER
-          .log(Level.INFO,
-              "WARNING: Project settings file not found. Use 'settings add' command to configure your project.");
-    }
-  }
+			Map<String, String> properties = getProjectSettingsService().getProperties();
+			printHeader();
+			if (properties.size() > 0) {
+				// Print results
+				for (Entry<String, String> property : properties.entrySet()) {
+					LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
+				}
+			} else {
+				LOGGER.log(Level.INFO, "No properties found");
+			}
+			printFooter();
 
-  @Override
-  public void listSettings() {
-    // Checks if project settings file exists
-    if (getProjectSettingsService().existsProjectSettingsFile()) {
+		} else {
+			LOGGER.log(Level.INFO,
+					"WARNING: Project settings file not found. Use 'settings add' command to configure your project.");
+		}
 
-      Map<String, String> properties = getProjectSettingsService().getProperties();
-      printHeader();
-      if (properties.size() > 0) {
-        // Print results
-        for (Entry<String, String> property : properties.entrySet()) {
-          LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
-        }
-      } else {
-        LOGGER.log(Level.INFO, "No properties found");
-      }
-      printFooter();
+	}
 
-    } else {
-      LOGGER
-          .log(Level.INFO,
-              "WARNING: Project settings file not found. Use 'settings add' command to configure your project.");
-    }
+	/**
+	 * Method that prints header of Spring Roo Configuration
+	 */
+	public void printHeader() {
+		String header = "#===============================================#\n"
+				+ "#      SPRING ROO CONFIGURATION PROPERTIES      #\n"
+				+ "#===============================================#\n";
+		LOGGER.log(Level.INFO, header);
+	}
 
-  }
+	/**
+	 * Method that prints footer of Spring Roo Configuration
+	 */
+	public void printFooter() {
+		LOGGER.log(Level.INFO, "");
+		String footer = "These properties will be taken in mind during project generation.\n"
+				+ "Use 'settings add' command to define some Spring Roo Configuration " + "properties.";
+		LOGGER.log(Level.INFO, footer);
+	}
 
-  /**
-   * Method that prints header of Spring Roo Configuration
-   */
-  public void printHeader() {
-    String header =
-        "#===============================================#\n"
-            + "#      SPRING ROO CONFIGURATION PROPERTIES      #\n"
-            + "#===============================================#\n";
-    LOGGER.log(Level.INFO, header);
-  }
+	public ProjectSettingsService getProjectSettingsService() {
+		if (projectSettingsService == null) {
+			// Get all Services implement ProjectSettingsServic interface
+			try {
+				ServiceReference<?>[] references = this.context
+						.getAllServiceReferences(ProjectSettingsService.class.getName(), null);
 
-  /**
-   * Method that prints footer of Spring Roo Configuration
-   */
-  public void printFooter() {
-    LOGGER.log(Level.INFO, "");
-    String footer =
-        "These properties will be taken in mind during project generation.\n"
-            + "Use 'settings add' command to define some Spring Roo Configuration " + "properties.";
-    LOGGER.log(Level.INFO, footer);
-  }
+				for (ServiceReference<?> ref : references) {
+					return (ProjectSettingsService) this.context.getService(ref);
+				}
 
-  public ProjectSettingsService getProjectSettingsService() {
-    if (projectSettingsService == null) {
-      // Get all Services implement ProjectSettingsServic interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectSettingsService.class.getName(), null);
+				return null;
 
-        for (ServiceReference<?> ref : references) {
-          return (ProjectSettingsService) this.context.getService(ref);
-        }
+			} catch (InvalidSyntaxException e) {
+				LOGGER.warning("Cannot load ProjectSettingsService on SettingsOperationsImpl.");
+				return null;
+			}
+		} else {
+			return projectSettingsService;
+		}
 
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectSettingsService on SettingsOperationsImpl.");
-        return null;
-      }
-    } else {
-      return projectSettingsService;
-    }
-
-  }
+	}
 
 }

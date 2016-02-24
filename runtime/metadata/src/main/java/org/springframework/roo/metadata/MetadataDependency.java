@@ -24,44 +24,44 @@ package org.springframework.roo.metadata;
  */
 public class MetadataDependency {
 
-  protected String upstreamDependency;
-  protected String downstreamDependency;
+    protected String upstreamDependency;
+    protected String downstreamDependency;
 
-  /**
-   * @param upstream the upstream dependency (required)
-   * @param downstream the downstream dependency (required)
-   */
-  public MetadataDependency(String upstream, String downstream) {
-    this.upstreamDependency = upstream;
-    this.downstreamDependency = downstream;
-  }
+    /**
+     * @param upstream the upstream dependency (required)
+     * @param downstream the downstream dependency (required)
+     */
+    public MetadataDependency(String upstream, String downstream) {
+        this.upstreamDependency = upstream;
+        this.downstreamDependency = downstream;
+    }
 
-  /**
-   * @return the downstreamDependency
-   */
-  public String getDownstreamDependency() {
-    return downstreamDependency;
-  }
+    /**
+     * @return the downstreamDependency
+     */
+    public String getDownstreamDependency() {
+        return downstreamDependency;
+    }
 
-  /**
-   * @param downstreamDependency the downstreamDependency to set
-   */
-  public void setDownstreamDependency(String downstreamDependency) {
-    this.downstreamDependency = downstreamDependency;
-  }
+    /**
+     * @param downstreamDependency the downstreamDependency to set
+     */
+    public void setDownstreamDependency(String downstreamDependency) {
+        this.downstreamDependency = downstreamDependency;
+    }
 
-  /**
-   * @return the upstreamDependency
-   */
-  public String getUpstreamDependency() {
-    return upstreamDependency;
-  }
+    /**
+     * @return the upstreamDependency
+     */
+    public String getUpstreamDependency() {
+        return upstreamDependency;
+    }
 
-  /**
-   * @param upstreamDependency the upstreamDependency to set
-   */
-  public void setUpstreamDependency(String upstreamDependency) {
-    this.upstreamDependency = upstreamDependency;
-  }
+    /**
+     * @param upstreamDependency the upstreamDependency to set
+     */
+    public void setUpstreamDependency(String upstreamDependency) {
+        this.upstreamDependency = upstreamDependency;
+    }
 
 }

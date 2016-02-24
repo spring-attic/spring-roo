@@ -82,287 +82,297 @@ import org.springframework.roo.support.util.CollectionUtils;
  */
 @Component
 @Service
-public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider
-    implements JpaEntityMetadataProvider {
+public class JpaEntityMetadataProviderImpl extends
+        AbstractIdentifierServiceAwareMetadataProvider implements
+        JpaEntityMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(JpaEntityMetadataProviderImpl.class);
+	
+    // JPA-related field matchers
+    private static final FieldMatcher JPA_COLUMN_FIELD_MATCHER = new FieldMatcher(
+            COLUMN_FIELD, AnnotationMetadataBuilder.getInstance(COLUMN));
+    private static final FieldMatcher JPA_EMBEDDED_FIELD_MATCHER = new FieldMatcher(
+            EMBEDDED_FIELD, AnnotationMetadataBuilder.getInstance(EMBEDDED));
+    private static final FieldMatcher JPA_EMBEDDED_ID_FIELD_MATCHER = new FieldMatcher(
+            EMBEDDED_ID_FIELD,
+            AnnotationMetadataBuilder.getInstance(EMBEDDED_ID));
+    private static final FieldMatcher JPA_ENUMERATED_FIELD_MATCHER = new FieldMatcher(
+            ENUMERATED_FIELD, AnnotationMetadataBuilder.getInstance(ENUMERATED));
+    private static final FieldMatcher JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER = new FieldMatcher(
+            IDENTIFIER_FIELD, AnnotationMetadataBuilder.getInstance(ID),
+            AnnotationMetadataBuilder.getInstance(EMBEDDED_ID));
+    private static final FieldMatcher JPA_ID_FIELD_MATCHER = new FieldMatcher(
+            IDENTIFIER_FIELD, AnnotationMetadataBuilder.getInstance(ID));
+    private static final FieldMatcher JPA_LOB_FIELD_MATCHER = new FieldMatcher(
+            LOB_FIELD, AnnotationMetadataBuilder.getInstance(LOB));
+    private static final FieldMatcher JPA_MANY_TO_MANY_FIELD_MATCHER = new FieldMatcher(
+            MANY_TO_MANY_FIELD,
+            AnnotationMetadataBuilder.getInstance(MANY_TO_MANY));
+    private static final FieldMatcher JPA_MANY_TO_ONE_FIELD_MATCHER = new FieldMatcher(
+            MANY_TO_ONE_FIELD,
+            AnnotationMetadataBuilder.getInstance(MANY_TO_ONE));
+    private static final FieldMatcher JPA_ONE_TO_MANY_FIELD_MATCHER = new FieldMatcher(
+            ONE_TO_MANY_FIELD,
+            AnnotationMetadataBuilder.getInstance(ONE_TO_MANY));
+    private static final FieldMatcher JPA_ONE_TO_ONE_FIELD_MATCHER = new FieldMatcher(
+            ONE_TO_ONE_FIELD, AnnotationMetadataBuilder.getInstance(ONE_TO_ONE));
+    private static final FieldMatcher JPA_TRANSIENT_FIELD_MATCHER = new FieldMatcher(
+            TRANSIENT_FIELD, AnnotationMetadataBuilder.getInstance(TRANSIENT));
+    private static final FieldMatcher JPA_VERSION_FIELD_MATCHER = new FieldMatcher(
+            VERSION_FIELD, AnnotationMetadataBuilder.getInstance(VERSION));
+    private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class
+            .getName();
+    private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+            .create(PROVIDES_TYPE_STRING);
 
-  protected final static Logger LOGGER = HandlerUtils
-      .getLogger(JpaEntityMetadataProviderImpl.class);
+    // The order of this array is the order in which we look for annotations. We
+    // use the values of the first one found.
+    private static final JavaType[] TRIGGER_ANNOTATIONS = {
+            // We trigger off RooJpaEntity
+            ROO_JPA_ENTITY};
 
-  // JPA-related field matchers
-  private static final FieldMatcher JPA_COLUMN_FIELD_MATCHER = new FieldMatcher(COLUMN_FIELD,
-      AnnotationMetadataBuilder.getInstance(COLUMN));
-  private static final FieldMatcher JPA_EMBEDDED_FIELD_MATCHER = new FieldMatcher(EMBEDDED_FIELD,
-      AnnotationMetadataBuilder.getInstance(EMBEDDED));
-  private static final FieldMatcher JPA_EMBEDDED_ID_FIELD_MATCHER = new FieldMatcher(
-      EMBEDDED_ID_FIELD, AnnotationMetadataBuilder.getInstance(EMBEDDED_ID));
-  private static final FieldMatcher JPA_ENUMERATED_FIELD_MATCHER = new FieldMatcher(
-      ENUMERATED_FIELD, AnnotationMetadataBuilder.getInstance(ENUMERATED));
-  private static final FieldMatcher JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER = new FieldMatcher(
-      IDENTIFIER_FIELD, AnnotationMetadataBuilder.getInstance(ID),
-      AnnotationMetadataBuilder.getInstance(EMBEDDED_ID));
-  private static final FieldMatcher JPA_ID_FIELD_MATCHER = new FieldMatcher(IDENTIFIER_FIELD,
-      AnnotationMetadataBuilder.getInstance(ID));
-  private static final FieldMatcher JPA_LOB_FIELD_MATCHER = new FieldMatcher(LOB_FIELD,
-      AnnotationMetadataBuilder.getInstance(LOB));
-  private static final FieldMatcher JPA_MANY_TO_MANY_FIELD_MATCHER = new FieldMatcher(
-      MANY_TO_MANY_FIELD, AnnotationMetadataBuilder.getInstance(MANY_TO_MANY));
-  private static final FieldMatcher JPA_MANY_TO_ONE_FIELD_MATCHER = new FieldMatcher(
-      MANY_TO_ONE_FIELD, AnnotationMetadataBuilder.getInstance(MANY_TO_ONE));
-  private static final FieldMatcher JPA_ONE_TO_MANY_FIELD_MATCHER = new FieldMatcher(
-      ONE_TO_MANY_FIELD, AnnotationMetadataBuilder.getInstance(ONE_TO_MANY));
-  private static final FieldMatcher JPA_ONE_TO_ONE_FIELD_MATCHER = new FieldMatcher(
-      ONE_TO_ONE_FIELD, AnnotationMetadataBuilder.getInstance(ONE_TO_ONE));
-  private static final FieldMatcher JPA_TRANSIENT_FIELD_MATCHER = new FieldMatcher(TRANSIENT_FIELD,
-      AnnotationMetadataBuilder.getInstance(TRANSIENT));
-  private static final FieldMatcher JPA_VERSION_FIELD_MATCHER = new FieldMatcher(VERSION_FIELD,
-      AnnotationMetadataBuilder.getInstance(VERSION));
-  private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class.getName();
-  private static final String PROVIDES_TYPE = MetadataIdentificationUtils
-      .create(PROVIDES_TYPE_STRING);
+    private CustomDataKeyDecorator customDataKeyDecorator;
+    private ProjectOperations projectOperations;
 
-  // The order of this array is the order in which we look for annotations. We
-  // use the values of the first one found.
-  private static final JavaType[] TRIGGER_ANNOTATIONS = {
-  // We trigger off RooJpaEntity
-  ROO_JPA_ENTITY};
+    protected MetadataDependencyRegistryTracker registryTracker = null;
+    protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
 
-  private CustomDataKeyDecorator customDataKeyDecorator;
-  private ProjectOperations projectOperations;
-
-  protected MetadataDependencyRegistryTracker registryTracker = null;
-  protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
-
-  /**
-   * This service is being activated so setup it:
-   * <ul>
-   * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#TRIGGER_ANNOTATIONS} as additional 
-   * JavaType that will trigger metadata registration.</li>
-   * </ul>
-   */
-  @Override
-  protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
-    this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, null,
-            PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
-    this.registryTracker.open();
-    addMetadataTriggers(TRIGGER_ANNOTATIONS);
-
-    this.keyDecoratorTracker =
-        new CustomDataKeyDecoratorTracker(context, getClass(), getMatchers());
-    this.keyDecoratorTracker.open();
-  }
-
-  /**
-   * This service is being deactivated so unregister upstream-downstream 
-   * dependencies, triggers, matchers and listeners.
-   * 
-   * @param context
-   */
-  protected void deactivate(final ComponentContext context) {
-    MetadataDependencyRegistry registry = this.registryTracker.getService();
-    registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
-    this.registryTracker.close();
-    removeMetadataTriggers(TRIGGER_ANNOTATIONS);
-
-    CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
-    keyDecorator.unregisterMatchers(getClass());
-    this.keyDecoratorTracker.close();
-  }
-
-  @Override
-  protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-  }
-
-  @Override
-  protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType = getType(metadataIdentificationString);
-    final LogicalPath path =
-        PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
-            metadataIdentificationString);
-    return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-  }
-
-  /**
-   * Returns the {@link Identifier} for the entity identified by the given
-   * metadata ID.
-   * 
-   * @param metadataIdentificationString
-   * @return <code>null</code> if there isn't one
-   */
-  private Identifier getIdentifier(final String metadataIdentificationString) {
-    final JavaType entity = getType(metadataIdentificationString);
-    final List<Identifier> identifiers = getIdentifiersForType(entity);
-    if (CollectionUtils.isEmpty(identifiers)) {
-      return null;
-    }
-    // We have potential identifier information from an IdentifierService.
-    // We only use this identifier information if the user did NOT provide
-    // ANY identifier-related attributes on @RooJpaEntity....
-    Validate
-        .isTrue(
-            identifiers.size() == 1,
-            "Identifier service indicates %d fields illegally for the entity '%s' (should only be one identifier field given this is an entity, not an Identifier class)",
-            identifiers.size(), entity.getSimpleTypeName());
-    return identifiers.iterator().next();
-  }
-
-  public String getItdUniquenessFilenameSuffix() {
-    return "Jpa_Entity";
-  }
-
-  /**
-   * Returns the {@link JpaEntityAnnotationValues} for the given domain type
-   * 
-   * @param governorPhysicalType (required)
-   * @return a non-<code>null</code> instance
-   */
-  private JpaEntityAnnotationValues getJpaEntityAnnotationValues(
-      final PhysicalTypeMetadata governorPhysicalType) {
-    for (final JavaType triggerAnnotation : TRIGGER_ANNOTATIONS) {
-      final JpaEntityAnnotationValues annotationValues =
-          new JpaEntityAnnotationValues(governorPhysicalType, triggerAnnotation);
-      if (annotationValues.isAnnotationFound()) {
-        return annotationValues;
-      }
-    }
-    throw new IllegalStateException(getClass().getSimpleName()
-        + " was triggered but not by any of " + Arrays.toString(TRIGGER_ANNOTATIONS));
-  }
-
-  @Override
-  protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-      final String metadataIdentificationString, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
-
-    if (projectOperations == null) {
-      projectOperations = getProjectOperations();
-    }
-    Validate.notNull(projectOperations, "ProjectOperations is required");
-
-    // Find out the entity-level JPA details from the trigger annotation
-    final JpaEntityAnnotationValues jpaEntityAnnotationValues =
-        getJpaEntityAnnotationValues(governorPhysicalType);
-
-    /*
-     * Walk the inheritance hierarchy for any existing JpaEntityMetadata. We
-     * don't need to monitor any such parent, as any changes to its Java
-     * type will trickle down to the governing java type.
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
+     * <li>Registers {@link RooJavaType#TRIGGER_ANNOTATIONS} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
      */
-    final JpaEntityMetadata parent =
-        getParentMetadata(governorPhysicalType.getMemberHoldingTypeDetails());
+    @Override
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                null, PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                PROVIDES_TYPE);
+        this.registryTracker.open();
+        addMetadataTriggers(TRIGGER_ANNOTATIONS);
 
-    // Get the governor's members
-    final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalType);
-
-    // Get the governor's ID field, if any
-    final Identifier identifier = getIdentifier(metadataIdentificationString);
-
-    boolean isGaeEnabled = false;
-    boolean isDatabaseDotComEnabled = false;
-    final String moduleName =
-        PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
-    if (projectOperations.isProjectAvailable(moduleName)) {
-      // If the project itself changes, we want a chance to refresh this
-      // item
-      getMetadataDependencyRegistry().registerDependency(
-          ProjectMetadata.getProjectIdentifier(moduleName), metadataIdentificationString);
-      isGaeEnabled = projectOperations.isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
-      isDatabaseDotComEnabled =
-          projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.DATABASE_DOT_COM);
+        this.keyDecoratorTracker = new CustomDataKeyDecoratorTracker(context,
+                getClass(), getMatchers());
+        this.keyDecoratorTracker.open();
     }
 
-    // Getting entity details
-    JavaType entity = JpaEntityMetadata.getJavaType(metadataIdentificationString);
-    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                PROVIDES_TYPE);
+        this.registryTracker.close();
+        removeMetadataTriggers(TRIGGER_ANNOTATIONS);
 
-    return new JpaEntityMetadata(metadataIdentificationString, aspectName, governorPhysicalType,
-        parent, governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled,
-        isDatabaseDotComEnabled, entityDetails);
-  }
+        CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
+        keyDecorator.unregisterMatchers(getClass());
+        this.keyDecoratorTracker.close();
+    }
 
-  public String getProvidesType() {
-    return PROVIDES_TYPE;
-  }
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                PROVIDES_TYPE_STRING, javaType, path);
+    }
 
-  private JavaType getType(final String metadataIdentificationString) {
-    return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING,
-        metadataIdentificationString);
-  }
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(
+            final String metadataIdentificationString) {
+        final JavaType javaType = getType(metadataIdentificationString);
+        final LogicalPath path = PhysicalTypeIdentifierNamingUtils.getPath(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-  @SuppressWarnings("unchecked")
-  private Matcher<? extends CustomDataAccessor>[] getMatchers() {
-    Matcher<? extends CustomDataAccessor>[] matchers =
-        new Matcher[] {
-            // Type matchers
-            new MidTypeMatcher(IDENTIFIER_TYPE, IdentifierMetadata.class.getName()),
-            new AnnotatedTypeMatcher(PERSISTENT_TYPE, ROO_JPA_ENTITY),
-            // Field matchers
-            JPA_COLUMN_FIELD_MATCHER,
-            JPA_EMBEDDED_FIELD_MATCHER,
-            JPA_EMBEDDED_ID_FIELD_MATCHER,
-            JPA_ENUMERATED_FIELD_MATCHER,
-            JPA_ID_FIELD_MATCHER,
-            JPA_LOB_FIELD_MATCHER,
-            JPA_MANY_TO_MANY_FIELD_MATCHER,
-            JPA_MANY_TO_ONE_FIELD_MATCHER,
-            JPA_ONE_TO_MANY_FIELD_MATCHER,
-            JPA_ONE_TO_ONE_FIELD_MATCHER,
-            JPA_TRANSIENT_FIELD_MATCHER,
-            JPA_VERSION_FIELD_MATCHER,
-            // Method matchers
-            new MethodMatcher(Arrays.asList(JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER),
-                IDENTIFIER_ACCESSOR_METHOD, true),
-            new MethodMatcher(Arrays.asList(JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER),
-                IDENTIFIER_MUTATOR_METHOD, false),
-            new MethodMatcher(Arrays.asList(JPA_VERSION_FIELD_MATCHER), VERSION_ACCESSOR_METHOD,
-                true),
-            new MethodMatcher(Arrays.asList(JPA_VERSION_FIELD_MATCHER), VERSION_MUTATOR_METHOD,
-                false)};
-    return matchers;
-  }
-
-  public CustomDataKeyDecorator getCustomDataKeyDecorator() {
-    if (customDataKeyDecorator == null) {
-      // Get all Services implement CustomDataKeyDecorator interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (CustomDataKeyDecorator) context.getService(ref);
+    /**
+     * Returns the {@link Identifier} for the entity identified by the given
+     * metadata ID.
+     * 
+     * @param metadataIdentificationString
+     * @return <code>null</code> if there isn't one
+     */
+    private Identifier getIdentifier(final String metadataIdentificationString) {
+        final JavaType entity = getType(metadataIdentificationString);
+        final List<Identifier> identifiers = getIdentifiersForType(entity);
+        if (CollectionUtils.isEmpty(identifiers)) {
+            return null;
         }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load CustomDataKeyDecorator on JpaEntityMetadataProviderImpl.");
-        return null;
-      }
-    } else {
-      return customDataKeyDecorator;
+        // We have potential identifier information from an IdentifierService.
+        // We only use this identifier information if the user did NOT provide
+        // ANY identifier-related attributes on @RooJpaEntity....
+        Validate.isTrue(
+                identifiers.size() == 1,
+                "Identifier service indicates %d fields illegally for the entity '%s' (should only be one identifier field given this is an entity, not an Identifier class)",
+                identifiers.size(), entity.getSimpleTypeName());
+        return identifiers.iterator().next();
     }
 
-  }
-
-  public ProjectOperations getProjectOperations() {
-    // Get all Services implement ProjectOperations interface
-    try {
-      ServiceReference<?>[] references =
-          context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (ProjectOperations) context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load ProjectOperations on JpaEntityMetadataProviderImpl.");
-      return null;
+    public String getItdUniquenessFilenameSuffix() {
+        return "Jpa_Entity";
     }
-  }
+
+    /**
+     * Returns the {@link JpaEntityAnnotationValues} for the given domain type
+     * 
+     * @param governorPhysicalType (required)
+     * @return a non-<code>null</code> instance
+     */
+    private JpaEntityAnnotationValues getJpaEntityAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalType) {
+        for (final JavaType triggerAnnotation : TRIGGER_ANNOTATIONS) {
+            final JpaEntityAnnotationValues annotationValues = new JpaEntityAnnotationValues(
+                    governorPhysicalType, triggerAnnotation);
+            if (annotationValues.isAnnotationFound()) {
+                return annotationValues;
+            }
+        }
+        throw new IllegalStateException(getClass().getSimpleName()
+                + " was triggered but not by any of "
+                + Arrays.toString(TRIGGER_ANNOTATIONS));
+    }
+
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalType,
+            final String itdFilename) {
+    	
+    	if(projectOperations == null){
+    		projectOperations = getProjectOperations();
+    	}
+    	Validate.notNull(projectOperations, "ProjectOperations is required");
+    	
+        // Find out the entity-level JPA details from the trigger annotation
+        final JpaEntityAnnotationValues jpaEntityAnnotationValues = getJpaEntityAnnotationValues(governorPhysicalType);
+
+        /*
+         * Walk the inheritance hierarchy for any existing JpaEntityMetadata. We
+         * don't need to monitor any such parent, as any changes to its Java
+         * type will trickle down to the governing java type.
+         */
+        final JpaEntityMetadata parent = getParentMetadata(governorPhysicalType
+                .getMemberHoldingTypeDetails());
+
+        // Get the governor's members
+        final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalType);
+
+        // Get the governor's ID field, if any
+        final Identifier identifier = getIdentifier(metadataIdentificationString);
+
+        boolean isGaeEnabled = false;
+        boolean isDatabaseDotComEnabled = false;
+        final String moduleName = PhysicalTypeIdentifierNamingUtils.getPath(
+                metadataIdentificationString).getModule();
+        if (projectOperations.isProjectAvailable(moduleName)) {
+            // If the project itself changes, we want a chance to refresh this
+            // item
+            getMetadataDependencyRegistry().registerDependency(
+                    ProjectMetadata.getProjectIdentifier(moduleName),
+                    metadataIdentificationString);
+            isGaeEnabled = projectOperations.isFeatureInstalledInModule(
+                    FeatureNames.GAE, moduleName);
+            isDatabaseDotComEnabled = projectOperations
+                    .isFeatureInstalledInFocusedModule(FeatureNames.DATABASE_DOT_COM);
+        }
+        
+        // Getting entity details
+        JavaType entity = JpaEntityMetadata.getJavaType(metadataIdentificationString);
+        ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+
+        return new JpaEntityMetadata(metadataIdentificationString, aspectName,
+                governorPhysicalType, parent, governorMemberDetails,
+                identifier, jpaEntityAnnotationValues, isGaeEnabled,
+                isDatabaseDotComEnabled, entityDetails);
+    }
+
+    public String getProvidesType() {
+        return PROVIDES_TYPE;
+    }
+
+    private JavaType getType(final String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(
+                PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+        @SuppressWarnings("unchecked")
+        private Matcher<? extends CustomDataAccessor>[] getMatchers() {
+                Matcher<? extends CustomDataAccessor>[] matchers = new Matcher[] {
+                // Type matchers
+                new MidTypeMatcher(IDENTIFIER_TYPE, IdentifierMetadata.class
+                        .getName()),
+                new AnnotatedTypeMatcher(PERSISTENT_TYPE, ROO_JPA_ENTITY),
+                // Field matchers
+                JPA_COLUMN_FIELD_MATCHER, JPA_EMBEDDED_FIELD_MATCHER,
+                JPA_EMBEDDED_ID_FIELD_MATCHER,
+                JPA_ENUMERATED_FIELD_MATCHER,
+                JPA_ID_FIELD_MATCHER,
+                JPA_LOB_FIELD_MATCHER,
+                JPA_MANY_TO_MANY_FIELD_MATCHER,
+                JPA_MANY_TO_ONE_FIELD_MATCHER,
+                JPA_ONE_TO_MANY_FIELD_MATCHER,
+                JPA_ONE_TO_ONE_FIELD_MATCHER,
+                JPA_TRANSIENT_FIELD_MATCHER,
+                JPA_VERSION_FIELD_MATCHER,
+                // Method matchers
+                new MethodMatcher(Arrays
+                        .asList(JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER),
+                        IDENTIFIER_ACCESSOR_METHOD, true), new MethodMatcher(
+                        Arrays.asList(JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER),
+                        IDENTIFIER_MUTATOR_METHOD, false), new MethodMatcher(
+                        Arrays.asList(JPA_VERSION_FIELD_MATCHER),
+                        VERSION_ACCESSOR_METHOD, true), new MethodMatcher(
+                        Arrays.asList(JPA_VERSION_FIELD_MATCHER),
+                        VERSION_MUTATOR_METHOD, false)};
+                return matchers;
+    }
+    
+    public CustomDataKeyDecorator getCustomDataKeyDecorator(){
+    	if(customDataKeyDecorator == null){
+    		// Get all Services implement CustomDataKeyDecorator interface
+    		try {
+    			ServiceReference<?>[] references = context.getAllServiceReferences(CustomDataKeyDecorator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (CustomDataKeyDecorator) context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load CustomDataKeyDecorator on JpaEntityMetadataProviderImpl.");
+    			return null;
+    		}
+    	}else{
+    		return customDataKeyDecorator;
+    	}
+    	
+    }
+    
+    public ProjectOperations getProjectOperations(){
+    	// Get all Services implement ProjectOperations interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (ProjectOperations) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load ProjectOperations on JpaEntityMetadataProviderImpl.");
+			return null;
+		}
+    }
 }

@@ -10,9 +10,9 @@ import org.springframework.roo.model.JavaType;
  */
 public interface WebFinderOperations {
 
-  void annotateAll();
+    void annotateAll();
 
-  void annotateType(JavaType controllerType, JavaType entityType);
+    void annotateType(JavaType controllerType, JavaType entityType);
 
-  boolean isWebFinderInstallationPossible();
+    boolean isWebFinderInstallationPossible();
 }

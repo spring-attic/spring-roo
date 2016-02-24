@@ -7,20 +7,20 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.model.RooJavaType;
 
 public class PermissionEvaluatorAnnotationValues extends AbstractAnnotationValues {
-  @AutoPopulate
-  private final boolean defaultReturnValue = false;
+    @AutoPopulate private final boolean defaultReturnValue = false;
+    
+    /**
+     * Constructor
+     * 
+     * @param governorPhysicalTypeMetadata to parse (required)
+     */
+    public PermissionEvaluatorAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, RooJavaType.ROO_PERMISSION_EVALUATOR);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-  /**
-   * Constructor
-   * 
-   * @param governorPhysicalTypeMetadata to parse (required)
-   */
-  public PermissionEvaluatorAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-    super(governorPhysicalTypeMetadata, RooJavaType.ROO_PERMISSION_EVALUATOR);
-    AutoPopulationUtils.populate(this, annotationMetadata);
-  }
-
-  public boolean getDefaultReturnValue() {
-    return defaultReturnValue;
-  }
+	public boolean getDefaultReturnValue() {
+		return defaultReturnValue;
+	}
 }

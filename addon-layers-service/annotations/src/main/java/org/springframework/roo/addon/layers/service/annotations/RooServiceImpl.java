@@ -16,16 +16,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooServiceImpl {
 
-  /**
-   * The name of this annotation's "service" attribute
-   */
-  String SERVICE_ATTRIBUTE = "service";
+    /**
+     * The name of this annotation's "service" attribute
+     */
+    String SERVICE_ATTRIBUTE = "service";
 
-  /**
-   * Returns the service implemented by current class
-   * 
-   * @return a non-<code>null</code> class
-   */
-  Class<?> service();
+    /**
+     * Returns the service implemented by current class
+     * 
+     * @return a non-<code>null</code> class
+     */
+    Class<?> service();
 
 }

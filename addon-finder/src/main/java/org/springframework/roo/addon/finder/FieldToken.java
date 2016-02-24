@@ -13,38 +13,38 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public class FieldToken implements Token, Comparable<FieldToken> {
 
-  private final FieldMetadata field;
-  private JavaSymbolName fieldName;
+    private final FieldMetadata field;
+    private JavaSymbolName fieldName;
 
-  /**
-   * Constructor
-   * 
-   * @param field
-   */
-  public FieldToken(final FieldMetadata field) {
-    Validate.notNull(field, "FieldMetadata required");
-    this.field = field;
-    fieldName = field.getFieldName();
-  }
+    /**
+     * Constructor
+     * 
+     * @param field
+     */
+    public FieldToken(final FieldMetadata field) {
+        Validate.notNull(field, "FieldMetadata required");
+        this.field = field;
+        fieldName = field.getFieldName();
+    }
 
-  public int compareTo(final FieldToken o) {
-    final int l = o.getValue().length() - getValue().length();
-    return l == 0 ? -1 : l;
-  }
+    public int compareTo(final FieldToken o) {
+        final int l = o.getValue().length() - getValue().length();
+        return l == 0 ? -1 : l;
+    }
 
-  public FieldMetadata getField() {
-    return field;
-  }
+    public FieldMetadata getField() {
+        return field;
+    }
 
-  public JavaSymbolName getFieldName() {
-    return fieldName;
-  }
+    public JavaSymbolName getFieldName() {
+        return fieldName;
+    }
 
-  public String getValue() {
-    return field.getFieldName().getSymbolNameCapitalisedFirstLetter();
-  }
+    public String getValue() {
+        return field.getFieldName().getSymbolNameCapitalisedFirstLetter();
+    }
 
-  public void setFieldName(final JavaSymbolName fieldName) {
-    this.fieldName = fieldName;
-  }
+    public void setFieldName(final JavaSymbolName fieldName) {
+        this.fieldName = fieldName;
+    }
 }

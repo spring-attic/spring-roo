@@ -85,677 +85,756 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class WebMetadataServiceImpl implements WebMetadataService {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
+	
+	// ------------ OSGi component attributes ----------------
+   	private BundleContext context;
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
+    private static final MethodParameter FIRST_RESULT_PARAMETER = new MethodParameter(
+            JavaType.INT_PRIMITIVE, "firstResult");
+    private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
+    private static final MethodParameter MAX_RESULTS_PARAMETER = new MethodParameter(
+            JavaType.INT_PRIMITIVE, "sizeNo");
+    private static final MethodParameter SORT_FIELDNAME_PARAMETER = new MethodParameter(
+            JavaType.STRING, "sortFieldName");
+    private static final MethodParameter SORT_ORDER_PARAMETER = new MethodParameter(
+            JavaType.STRING, "sortOrder");
+    
+    private LayerService layerService;
+    private MemberDetailsScanner memberDetailsScanner;
+    private MetadataDependencyRegistry metadataDependencyRegistry;
+    private MetadataService metadataService;
+    private PersistenceMemberLocator persistenceMemberLocator;
+    private TypeLocationService typeLocationService;
 
-  // ------------ OSGi component attributes ----------------
-  private BundleContext context;
-
-  private static final MethodParameter FIRST_RESULT_PARAMETER = new MethodParameter(
-      JavaType.INT_PRIMITIVE, "firstResult");
-  private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-  private static final MethodParameter MAX_RESULTS_PARAMETER = new MethodParameter(
-      JavaType.INT_PRIMITIVE, "sizeNo");
-  private static final MethodParameter SORT_FIELDNAME_PARAMETER = new MethodParameter(
-      JavaType.STRING, "sortFieldName");
-  private static final MethodParameter SORT_ORDER_PARAMETER = new MethodParameter(JavaType.STRING,
-      "sortOrder");
-
-  private LayerService layerService;
-  private MemberDetailsScanner memberDetailsScanner;
-  private MetadataDependencyRegistry metadataDependencyRegistry;
-  private MetadataService metadataService;
-  private PersistenceMemberLocator persistenceMemberLocator;
-  private TypeLocationService typeLocationService;
-
-  private final Map<String, String> pathMap = new HashMap<String, String>();
-
-  protected void activate(final ComponentContext context) {
-    this.context = context.getBundleContext();
-  }
-
-  private String getControllerPathForType(final JavaType type,
-      final String metadataIdentificationString) {
-
-    if (metadataService == null) {
-      metadataService = getMetadataService();
+    private final Map<String, String> pathMap = new HashMap<String, String>();
+    
+    protected void activate(final ComponentContext context) {
+    	this.context = context.getBundleContext();
     }
-    Validate.notNull(metadataService, "MetadataService is required");
 
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
-    Validate.notNull(typeLocationService, "TypeLocationService is required");
-
-    if (pathMap.containsKey(type.getFullyQualifiedTypeName())
-        && !typeLocationService.hasTypeChanged(getClass().getName(), type)) {
-      return pathMap.get(type.getFullyQualifiedTypeName());
-    }
-    String webScaffoldMetadataKey = null;
-    WebScaffoldMetadata webScaffoldMetadata = null;
-    for (final ClassOrInterfaceTypeDetails cid : typeLocationService
-        .findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
-      for (final AnnotationMetadata annotation : cid.getAnnotations()) {
-        if (annotation.getAnnotationType().equals(ROO_WEB_SCAFFOLD)) {
-          final AnnotationAttributeValue<?> formBackingObject =
-              annotation.getAttribute(new JavaSymbolName("formBackingObject"));
-          if (formBackingObject instanceof ClassAttributeValue) {
-            final ClassAttributeValue formBackingObjectValue =
-                (ClassAttributeValue) formBackingObject;
-            if (formBackingObjectValue.getValue().equals(type)) {
-              final AnnotationAttributeValue<String> path = annotation.getAttribute("path");
-              if (path != null) {
-                final String pathString = path.getValue();
-                pathMap.put(type.getFullyQualifiedTypeName(), pathString);
-                return pathString;
-              }
-              final LogicalPath cidPath =
-                  PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-              webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(cid.getName(), cidPath);
-              webScaffoldMetadata =
-                  (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
-              break;
+    private String getControllerPathForType(final JavaType type,
+            final String metadataIdentificationString) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+        if (pathMap.containsKey(type.getFullyQualifiedTypeName())
+                && !typeLocationService.hasTypeChanged(getClass().getName(),
+                        type)) {
+            return pathMap.get(type.getFullyQualifiedTypeName());
+        }
+        String webScaffoldMetadataKey = null;
+        WebScaffoldMetadata webScaffoldMetadata = null;
+        for (final ClassOrInterfaceTypeDetails cid : typeLocationService
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
+            for (final AnnotationMetadata annotation : cid.getAnnotations()) {
+                if (annotation.getAnnotationType().equals(ROO_WEB_SCAFFOLD)) {
+                    final AnnotationAttributeValue<?> formBackingObject = annotation
+                            .getAttribute(new JavaSymbolName(
+                                    "formBackingObject"));
+                    if (formBackingObject instanceof ClassAttributeValue) {
+                        final ClassAttributeValue formBackingObjectValue = (ClassAttributeValue) formBackingObject;
+                        if (formBackingObjectValue.getValue().equals(type)) {
+                            final AnnotationAttributeValue<String> path = annotation
+                                    .getAttribute("path");
+                            if (path != null) {
+                                final String pathString = path.getValue();
+                                pathMap.put(type.getFullyQualifiedTypeName(),
+                                        pathString);
+                                return pathString;
+                            }
+                            final LogicalPath cidPath = PhysicalTypeIdentifier
+                                    .getPath(cid.getDeclaredByMetadataId());
+                            webScaffoldMetadataKey = WebScaffoldMetadata
+                                    .createIdentifier(cid.getName(), cidPath);
+                            webScaffoldMetadata = (WebScaffoldMetadata) metadataService
+                                    .get(webScaffoldMetadataKey);
+                            break;
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-    }
-    if (webScaffoldMetadata != null) {
-      registerDependency(webScaffoldMetadataKey, metadataIdentificationString);
-      final String path = webScaffoldMetadata.getAnnotationValues().getPath();
-      pathMap.put(type.getFullyQualifiedTypeName(), path);
-      return path;
-    }
-    return getPlural(type, metadataIdentificationString).toLowerCase();
-  }
-
-  public Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(
-      final JavaType domainType, final String metadataId) {
-
-    if (metadataDependencyRegistry == null) {
-      metadataDependencyRegistry = getMetadataDependencyRegistry();
-    }
-    Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
-
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
-    Validate.notNull(typeLocationService, "TypeLocationService is required");
-
-    final String domainTypeMid = typeLocationService.getPhysicalTypeIdentifier(domainType);
-    if (domainTypeMid != null) {
-      metadataDependencyRegistry.registerDependency(domainTypeMid, metadataId);
-    }
-
-    final JavaTypePersistenceMetadataDetails persistenceDetails =
-        getJavaTypePersistenceMetadataDetails(domainType, getMemberDetails(domainType), metadataId);
-    if (persistenceDetails == null) {
-      return Collections.emptyMap();
-    }
-    final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> additions =
-        new HashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
-    additions.put(COUNT_ALL_METHOD, persistenceDetails.getCountMethod());
-    additions.put(REMOVE_METHOD, persistenceDetails.getRemoveMethod());
-    additions.put(FIND_METHOD, persistenceDetails.getFindMethod());
-    additions.put(FIND_ALL_METHOD, persistenceDetails.getFindAllMethod());
-    additions.put(FIND_ENTRIES_METHOD, persistenceDetails.getFindEntriesMethod());
-    additions.put(FIND_ALL_SORTED_METHOD, persistenceDetails.getFindAllSortedMethod());
-    additions.put(FIND_ENTRIES_SORTED_METHOD, persistenceDetails.getFindEntriesSortedMethod());
-    additions.put(MERGE_METHOD, persistenceDetails.getMergeMethod());
-    additions.put(PERSIST_METHOD, persistenceDetails.getPersistMethod());
-    return additions;
-  }
-
-  public Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(final JavaType javaType,
-      final MemberDetails memberDetails, final String metadataIdentificationString) {
-
-    Validate.notNull(javaType, "Java type required");
-    Validate.notNull(memberDetails, "Member details required");
-
-    final MethodMetadata identifierAccessor =
-        getPersistenceMemberLocator().getIdentifierAccessor(javaType);
-    final MethodMetadata versionAccessor =
-        getPersistenceMemberLocator().getVersionAccessor(javaType);
-
-    final Map<JavaSymbolName, DateTimeFormatDetails> dates =
-        new LinkedHashMap<JavaSymbolName, DateTimeFormatDetails>();
-    final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails =
-        getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString);
-
-    for (final MethodMetadata method : memberDetails.getMethods()) {
-      // Only interested in accessors
-      if (!BeanInfoUtils.isAccessorMethod(method)) {
-        continue;
-      }
-      // Not interested in fields that are not exposed via a mutator and
-      // accessor and in identifiers and version fields
-      if (method.hasSameName(identifierAccessor, versionAccessor)) {
-        continue;
-      }
-      final FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
-      if (field == null || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
-        continue;
-      }
-      final JavaType returnType = method.getReturnType();
-      if (!JdkJavaType.isDateField(returnType)) {
-        continue;
-      }
-      final AnnotationMetadata annotation =
-          MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT);
-      final JavaSymbolName patternSymbol = new JavaSymbolName("pattern");
-      final JavaSymbolName styleSymbol = new JavaSymbolName("style");
-      DateTimeFormatDetails dateTimeFormat = null;
-      if (annotation != null) {
-        if (annotation.getAttributeNames().contains(styleSymbol)) {
-          dateTimeFormat =
-              DateTimeFormatDetails.withStyle(annotation.getAttribute(styleSymbol).getValue()
-                  .toString());
-        } else if (annotation.getAttributeNames().contains(patternSymbol)) {
-          dateTimeFormat =
-              DateTimeFormatDetails.withPattern(annotation.getAttribute(patternSymbol).getValue()
-                  .toString());
+        if (webScaffoldMetadata != null) {
+            registerDependency(webScaffoldMetadataKey,
+                    metadataIdentificationString);
+            final String path = webScaffoldMetadata.getAnnotationValues()
+                    .getPath();
+            pathMap.put(type.getFullyQualifiedTypeName(), path);
+            return path;
         }
-      }
-      if (dateTimeFormat != null) {
-        registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
-        dates.put(field.getFieldName(), dateTimeFormat);
-        if (javaTypePersistenceMetadataDetails != null) {
-          for (final String finder : javaTypePersistenceMetadataDetails.getFinderNames()) {
-            if (finder.contains(StringUtils.capitalize(field.getFieldName().getSymbolName())
-                + "Between")) {
-              dates.put(
-                  new JavaSymbolName("min"
-                      + StringUtils.capitalize(field.getFieldName().getSymbolName())),
-                  dateTimeFormat);
-              dates.put(
-                  new JavaSymbolName("max"
-                      + StringUtils.capitalize(field.getFieldName().getSymbolName())),
-                  dateTimeFormat);
+        return getPlural(type, metadataIdentificationString).toLowerCase();
+    }
+
+    public Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(
+            final JavaType domainType, final String metadataId) {
+    	
+    	if(metadataDependencyRegistry == null){
+    		metadataDependencyRegistry = getMetadataDependencyRegistry();
+    	}
+    	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+        final String domainTypeMid = typeLocationService
+                .getPhysicalTypeIdentifier(domainType);
+        if (domainTypeMid != null) {
+            metadataDependencyRegistry.registerDependency(domainTypeMid,
+                    metadataId);
+        }
+
+        final JavaTypePersistenceMetadataDetails persistenceDetails = getJavaTypePersistenceMetadataDetails(
+                domainType, getMemberDetails(domainType), metadataId);
+        if (persistenceDetails == null) {
+            return Collections.emptyMap();
+        }
+        final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> additions = new HashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
+        additions.put(COUNT_ALL_METHOD, persistenceDetails.getCountMethod());
+        additions.put(REMOVE_METHOD, persistenceDetails.getRemoveMethod());
+        additions.put(FIND_METHOD, persistenceDetails.getFindMethod());
+        additions.put(FIND_ALL_METHOD, persistenceDetails.getFindAllMethod());
+        additions.put(FIND_ENTRIES_METHOD,
+                persistenceDetails.getFindEntriesMethod());
+        additions.put(FIND_ALL_SORTED_METHOD, persistenceDetails.getFindAllSortedMethod());
+        additions.put(FIND_ENTRIES_SORTED_METHOD,
+                persistenceDetails.getFindEntriesSortedMethod());
+        additions.put(MERGE_METHOD, persistenceDetails.getMergeMethod());
+        additions.put(PERSIST_METHOD, persistenceDetails.getPersistMethod());
+        return additions;
+    }
+
+    public Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(
+            final JavaType javaType, final MemberDetails memberDetails,
+            final String metadataIdentificationString) {
+    	
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
+
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
+                .getIdentifierAccessor(javaType);
+        final MethodMetadata versionAccessor = getPersistenceMemberLocator()
+                .getVersionAccessor(javaType);
+
+        final Map<JavaSymbolName, DateTimeFormatDetails> dates = new LinkedHashMap<JavaSymbolName, DateTimeFormatDetails>();
+        final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(
+                javaType, memberDetails, metadataIdentificationString);
+
+        for (final MethodMetadata method : memberDetails.getMethods()) {
+            // Only interested in accessors
+            if (!BeanInfoUtils.isAccessorMethod(method)) {
+                continue;
             }
-          }
+            // Not interested in fields that are not exposed via a mutator and
+            // accessor and in identifiers and version fields
+            if (method.hasSameName(identifierAccessor, versionAccessor)) {
+                continue;
+            }
+            final FieldMetadata field = BeanInfoUtils
+                    .getFieldForJavaBeanMethod(memberDetails, method);
+            if (field == null
+                    || !BeanInfoUtils.hasAccessorAndMutator(field,
+                            memberDetails)) {
+                continue;
+            }
+            final JavaType returnType = method.getReturnType();
+            if (!JdkJavaType.isDateField(returnType)) {
+                continue;
+            }
+            final AnnotationMetadata annotation = MemberFindingUtils
+                    .getAnnotationOfType(field.getAnnotations(),
+                            DATE_TIME_FORMAT);
+            final JavaSymbolName patternSymbol = new JavaSymbolName("pattern");
+            final JavaSymbolName styleSymbol = new JavaSymbolName("style");
+            DateTimeFormatDetails dateTimeFormat = null;
+            if (annotation != null) {
+                if (annotation.getAttributeNames().contains(styleSymbol)) {
+                    dateTimeFormat = DateTimeFormatDetails.withStyle(annotation
+                            .getAttribute(styleSymbol).getValue().toString());
+                }
+                else if (annotation.getAttributeNames().contains(patternSymbol)) {
+                    dateTimeFormat = DateTimeFormatDetails
+                            .withPattern(annotation.getAttribute(patternSymbol)
+                                    .getValue().toString());
+                }
+            }
+            if (dateTimeFormat != null) {
+                registerDependency(field.getDeclaredByMetadataId(),
+                        metadataIdentificationString);
+                dates.put(field.getFieldName(), dateTimeFormat);
+                if (javaTypePersistenceMetadataDetails != null) {
+                    for (final String finder : javaTypePersistenceMetadataDetails
+                            .getFinderNames()) {
+                        if (finder.contains(StringUtils.capitalize(field
+                                .getFieldName().getSymbolName()) + "Between")) {
+                            dates.put(
+                                    new JavaSymbolName("min"
+                                            + StringUtils.capitalize(field
+                                                    .getFieldName()
+                                                    .getSymbolName())),
+                                    dateTimeFormat);
+                            dates.put(
+                                    new JavaSymbolName("max"
+                                            + StringUtils.capitalize(field
+                                                    .getFieldName()
+                                                    .getSymbolName())),
+                                    dateTimeFormat);
+                        }
+                    }
+                }
+            }
+            else {
+                LOGGER.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on "
+                        + field.getFieldType().getFullyQualifiedTypeName()
+                        + "."
+                        + field.getFieldName()
+                        + " to use automatic date conversion in Spring MVC");
+            }
         }
-      } else {
-        LOGGER.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on "
-            + field.getFieldType().getFullyQualifiedTypeName() + "." + field.getFieldName()
-            + " to use automatic date conversion in Spring MVC");
-      }
+        return Collections.unmodifiableMap(dates);
     }
-    return Collections.unmodifiableMap(dates);
-  }
 
-  public List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(final JavaType javaType,
-      final MemberDetails memberDetails, final String metadataIdentificationString) {
-    Validate.notNull(javaType, "Java type required");
-    Validate.notNull(memberDetails, "Member details required");
+    public List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(
+            final JavaType javaType, final MemberDetails memberDetails,
+            final String metadataIdentificationString) {
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
 
-    final List<JavaTypeMetadataDetails> dependentTypes = new ArrayList<JavaTypeMetadataDetails>();
-    for (final MethodMetadata method : memberDetails.getMethods()) {
-      final JavaType type = method.getReturnType();
-      if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type)) {
-        final FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
-        if (field != null
-            && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null) {
-          final MemberDetails typeMemberDetails = getMemberDetails(type);
-          if (getJavaTypePersistenceMetadataDetails(type, typeMemberDetails,
-              metadataIdentificationString) != null) {
-            dependentTypes.add(getJavaTypeMetadataDetails(type, typeMemberDetails,
-                metadataIdentificationString));
-          }
+        final List<JavaTypeMetadataDetails> dependentTypes = new ArrayList<JavaTypeMetadataDetails>();
+        for (final MethodMetadata method : memberDetails.getMethods()) {
+            final JavaType type = method.getReturnType();
+            if (BeanInfoUtils.isAccessorMethod(method)
+                    && isApplicationType(type)) {
+                final FieldMetadata field = BeanInfoUtils
+                        .getFieldForJavaBeanMethod(memberDetails, method);
+                if (field != null
+                        && MemberFindingUtils.getAnnotationOfType(
+                                field.getAnnotations(), NOT_NULL) != null) {
+                    final MemberDetails typeMemberDetails = getMemberDetails(type);
+                    if (getJavaTypePersistenceMetadataDetails(type,
+                            typeMemberDetails, metadataIdentificationString) != null) {
+                        dependentTypes
+                                .add(getJavaTypeMetadataDetails(type,
+                                        typeMemberDetails,
+                                        metadataIdentificationString));
+                    }
+                }
+            }
         }
-      }
+        return Collections.unmodifiableList(dependentTypes);
     }
-    return Collections.unmodifiableList(dependentTypes);
-  }
 
-  public Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(
-      final JavaType formBackingType, final MemberDetails formBackingTypeDetails,
-      final String metadataIdentificationString) {
+    public Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(
+            final JavaType formBackingType,
+            final MemberDetails formBackingTypeDetails,
+            final String metadataIdentificationString) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+        Validate.notNull(formBackingType, "Java type required");
+        Validate.notNull(formBackingTypeDetails, "Member details required");
 
-    if (metadataService == null) {
-      metadataService = getMetadataService();
-    }
-    Validate.notNull(metadataService, "MetadataService is required");
-
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
-    Validate.notNull(typeLocationService, "TypeLocationService is required");
-
-    Validate.notNull(formBackingType, "Java type required");
-    Validate.notNull(formBackingTypeDetails, "Member details required");
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(formBackingType);
-    Validate.notNull(formBackingType,
-        "Class or interface type details isn't available for type '%s'", formBackingType);
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
-    final String finderMetadataKey = FinderMetadata.createIdentifier(formBackingType, logicalPath);
-    registerDependency(finderMetadataKey, metadataIdentificationString);
-    final FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
-    if (finderMetadata == null) {
-      return null;
-    }
-    final SortedSet<FinderMetadataDetails> finderMetadataDetails =
-        new TreeSet<FinderMetadataDetails>();
-    for (final MethodMetadata method : finderMetadata.getAllDynamicFinders()) {
-      final List<JavaSymbolName> parameterNames = method.getParameterNames();
-      final List<JavaType> parameterTypes =
-          AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
-      final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-      for (int i = 0; i < parameterTypes.size(); i++) {
-        JavaSymbolName fieldName = null;
-        if (parameterNames.get(i).getSymbolName().startsWith("max")
-            || parameterNames.get(i).getSymbolName().startsWith("min")) {
-          fieldName =
-              new JavaSymbolName(Introspector.decapitalize(StringUtils.capitalize(parameterNames
-                  .get(i).getSymbolName().substring(3))));
-        } else {
-          fieldName = parameterNames.get(i);
+        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
+                .getTypeDetails(formBackingType);
+        Validate.notNull(
+                formBackingType,
+                "Class or interface type details isn't available for type '%s'",
+                formBackingType);
+        final LogicalPath logicalPath = PhysicalTypeIdentifier
+                .getPath(javaTypeDetails.getDeclaredByMetadataId());
+        final String finderMetadataKey = FinderMetadata.createIdentifier(
+                formBackingType, logicalPath);
+        registerDependency(finderMetadataKey, metadataIdentificationString);
+        final FinderMetadata finderMetadata = (FinderMetadata) metadataService
+                .get(finderMetadataKey);
+        if (finderMetadata == null) {
+            return null;
         }
-        final FieldMetadata field =
-            BeanInfoUtils.getFieldForPropertyName(formBackingTypeDetails, fieldName);
-        if (field != null) {
-          final FieldMetadataBuilder fieldMd = new FieldMetadataBuilder(field);
-          fieldMd.setFieldName(parameterNames.get(i));
-          fields.add(fieldMd.build());
+        final SortedSet<FinderMetadataDetails> finderMetadataDetails = new TreeSet<FinderMetadataDetails>();
+        for (final MethodMetadata method : finderMetadata
+                .getAllDynamicFinders()) {
+            final List<JavaSymbolName> parameterNames = method
+                    .getParameterNames();
+            final List<JavaType> parameterTypes = AnnotatedJavaType
+                    .convertFromAnnotatedJavaTypes(method.getParameterTypes());
+            final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
+            for (int i = 0; i < parameterTypes.size(); i++) {
+                JavaSymbolName fieldName = null;
+                if (parameterNames.get(i).getSymbolName().startsWith("max")
+                        || parameterNames.get(i).getSymbolName()
+                                .startsWith("min")) {
+                    fieldName = new JavaSymbolName(
+                            Introspector.decapitalize(StringUtils
+                                    .capitalize(parameterNames.get(i)
+                                            .getSymbolName().substring(3))));
+                }
+                else {
+                    fieldName = parameterNames.get(i);
+                }
+                final FieldMetadata field = BeanInfoUtils
+                        .getFieldForPropertyName(formBackingTypeDetails,
+                                fieldName);
+                if (field != null) {
+                    final FieldMetadataBuilder fieldMd = new FieldMetadataBuilder(
+                            field);
+                    fieldMd.setFieldName(parameterNames.get(i));
+                    fields.add(fieldMd.build());
+                }
+            }
+            final FinderMetadataDetails details = new FinderMetadataDetails(
+                    method.getMethodName().getSymbolName(), method, fields);
+            finderMetadataDetails.add(details);
         }
-      }
-      final FinderMetadataDetails details =
-          new FinderMetadataDetails(method.getMethodName().getSymbolName(), method, fields);
-      finderMetadataDetails.add(details);
+        
+        SortedSet<FinderMetadataDetails> finderMetadataDetailsWoCountMethods = new TreeSet<FinderMetadataDetails>();
+        for(FinderMetadataDetails dynamicFinderMethod : finderMetadataDetails) {
+        	if(!dynamicFinderMethod.getFinderName().startsWith("count")) {
+        		finderMetadataDetailsWoCountMethods.add(dynamicFinderMethod);
+        	}
+        }
+        
+        return Collections.unmodifiableSortedSet(finderMetadataDetailsWoCountMethods);
     }
 
-    SortedSet<FinderMetadataDetails> finderMetadataDetailsWoCountMethods =
-        new TreeSet<FinderMetadataDetails>();
-    for (FinderMetadataDetails dynamicFinderMethod : finderMetadataDetails) {
-      if (!dynamicFinderMethod.getFinderName().startsWith("count")) {
-        finderMetadataDetailsWoCountMethods.add(dynamicFinderMethod);
-      }
+    public FieldMetadata getIdentifierField(final JavaType javaType) {
+        return CollectionUtils.firstElementOf(getPersistenceMemberLocator()
+                .getIdentifierFields(javaType));
     }
 
-    return Collections.unmodifiableSortedSet(finderMetadataDetailsWoCountMethods);
-  }
-
-  public FieldMetadata getIdentifierField(final JavaType javaType) {
-    return CollectionUtils.firstElementOf(getPersistenceMemberLocator().getIdentifierFields(
-        javaType));
-  }
-
-  public JavaTypeMetadataDetails getJavaTypeMetadataDetails(final JavaType javaType,
-      final MemberDetails memberDetails, final String metadataIdentificationString) {
-    Validate.notNull(javaType, "Java type required");
-    registerDependency(memberDetails.getDetails().get(memberDetails.getDetails().size() - 1)
-        .getDeclaredByMetadataId(), metadataIdentificationString);
-    return new JavaTypeMetadataDetails(javaType, getPlural(javaType, metadataIdentificationString),
-        isEnumType(javaType), isApplicationType(javaType), getJavaTypePersistenceMetadataDetails(
-            javaType, memberDetails, metadataIdentificationString), getControllerPathForType(
-            javaType, metadataIdentificationString));
-  }
-
-  public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(
-      final JavaType javaType, final MemberDetails memberDetails,
-      final String metadataIdentificationString) {
-
-
-    if (layerService == null) {
-      layerService = getLayerService();
-    }
-    Validate.notNull(layerService, "LayerService is required");
-
-    Validate.notNull(javaType, "Java type required");
-    Validate.notNull(memberDetails, "Member details required");
-    Validate.notBlank(metadataIdentificationString, "Metadata id required");
-
-    final MethodMetadata idAccessor =
-        memberDetails.getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
-    if (idAccessor == null) {
-      return null;
+    public JavaTypeMetadataDetails getJavaTypeMetadataDetails(
+            final JavaType javaType, final MemberDetails memberDetails,
+            final String metadataIdentificationString) {
+        Validate.notNull(javaType, "Java type required");
+        registerDependency(
+                memberDetails.getDetails()
+                        .get(memberDetails.getDetails().size() - 1)
+                        .getDeclaredByMetadataId(),
+                metadataIdentificationString);
+        return new JavaTypeMetadataDetails(
+                javaType,
+                getPlural(javaType, metadataIdentificationString),
+                isEnumType(javaType),
+                isApplicationType(javaType),
+                getJavaTypePersistenceMetadataDetails(javaType, memberDetails,
+                        metadataIdentificationString),
+                getControllerPathForType(javaType, metadataIdentificationString));
     }
 
-    final FieldMetadata idField =
-        CollectionUtils.firstElementOf(getPersistenceMemberLocator().getIdentifierFields(javaType));
-    if (idField == null) {
-      return null;
-    }
+    public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(
+            final JavaType javaType, final MemberDetails memberDetails,
+            final String metadataIdentificationString) {
+    	
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
+        Validate.notBlank(metadataIdentificationString, "Metadata id required");
 
-    final JavaType idType = getPersistenceMemberLocator().getIdentifierType(javaType);
-    if (idType == null) {
-      return null;
-    }
-
-    registerDependency(idAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
-    registerDependency(idField.getDeclaredByMetadataId(), metadataIdentificationString);
-
-    final MethodParameter entityParameter =
-        new MethodParameter(javaType, JavaSymbolName.getReservedWordSafeName(javaType));
-    final MethodParameter idParameter =
-        new MethodParameter(idType, idField.getFieldName().getSymbolName());
-    final MethodMetadata versionAccessor =
-        memberDetails.getMostConcreteMethodWithTag(VERSION_ACCESSOR_METHOD);
-    final MemberTypeAdditions persistMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD.name(),
-            javaType, idType, LAYER_POSITION, entityParameter);
-    final MemberTypeAdditions removeMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString, REMOVE_METHOD.name(),
-            javaType, idType, LAYER_POSITION, entityParameter);
-    final MemberTypeAdditions mergeMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD.name(),
-            javaType, idType, LAYER_POSITION, entityParameter);
-    final MemberTypeAdditions findAllMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD.name(),
-            javaType, idType, LAYER_POSITION);
-    final MemberTypeAdditions findAllSortedMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString,
-            FIND_ALL_SORTED_METHOD.name(), javaType, idType, LAYER_POSITION,
-            SORT_FIELDNAME_PARAMETER, SORT_ORDER_PARAMETER);
-    final MemberTypeAdditions findMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(),
-            javaType, idType, LAYER_POSITION, idParameter);
-    final MemberTypeAdditions countMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD.name(),
-            javaType, idType, LAYER_POSITION);
-    final MemberTypeAdditions findEntriesMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString,
-            FIND_ENTRIES_METHOD.name(), javaType, idType, LAYER_POSITION, FIRST_RESULT_PARAMETER,
-            MAX_RESULTS_PARAMETER);
-    final MemberTypeAdditions findEntriesSortedMethod =
-        layerService.getMemberTypeAdditions(metadataIdentificationString,
-            FIND_ENTRIES_SORTED_METHOD.name(), javaType, idType, LAYER_POSITION,
-            FIRST_RESULT_PARAMETER, MAX_RESULTS_PARAMETER, SORT_FIELDNAME_PARAMETER,
-            SORT_ORDER_PARAMETER);
-
-    final List<String> dynamicFinderNames = memberDetails.getDynamicFinderNames();
-
-    return new JavaTypePersistenceMetadataDetails(idType, idField, idAccessor, versionAccessor,
-        persistMethod, mergeMethod, removeMethod, findAllMethod, findAllSortedMethod, findMethod,
-        countMethod, findEntriesMethod, findEntriesSortedMethod, dynamicFinderNames,
-        isRooIdentifier(javaType, memberDetails), getPersistenceMemberLocator()
-            .getEmbeddedIdentifierFields(javaType));
-  }
-
-  public MemberDetails getMemberDetails(final JavaType javaType) {
-
-    if (memberDetailsScanner == null) {
-      memberDetailsScanner = getMemberDetailsScanner();
-    }
-    Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
-
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
-    Validate.notNull(typeLocationService, "TypeLocationService is required");
-
-    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
-    Validate.notNull(cid, "Unable to obtain physical type metadata for type %s",
-        javaType.getFullyQualifiedTypeName());
-    return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), cid);
-  }
-
-  private String getPlural(final JavaType javaType, final String metadataIdentificationString) {
-
-    if (metadataService == null) {
-      metadataService = getMetadataService();
-    }
-    Validate.notNull(metadataService, "MetadataService is required");
-
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
-    Validate.notNull(typeLocationService, "TypeLocationService is required");
-
-    Validate.notNull(javaType, "Java type required");
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(javaType);
-    Validate.notNull(javaTypeDetails,
-        "Class or interface type details isn't available for type '%s'", javaType);
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
-    final String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, logicalPath);
-    final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
-    if (pluralMetadata != null) {
-      registerDependency(pluralMetadata.getId(), metadataIdentificationString);
-      final String plural = pluralMetadata.getPlural();
-      if (plural.equalsIgnoreCase(javaType.getSimpleTypeName())) {
-        return plural + "Items";
-      } else {
-        return plural;
-      }
-    }
-    return javaType.getSimpleTypeName() + "s";
-  }
-
-  public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(
-      final JavaType baseType, final MemberDetails baseTypeDetails,
-      final String metadataIdentificationString) {
-
-    Validate.notNull(baseType, "Java type required");
-    Validate.notNull(baseTypeDetails, "Member details required");
-    Validate.isTrue(isApplicationType(baseType), "The type %s does not belong to this application",
-        baseType);
-
-    final SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes =
-        new TreeMap<JavaType, JavaTypeMetadataDetails>();
-    specialTypes.put(baseType,
-        getJavaTypeMetadataDetails(baseType, baseTypeDetails, metadataIdentificationString));
-
-    for (final JavaType fieldType : baseTypeDetails.getPersistentFieldTypes(baseType,
-        getPersistenceMemberLocator())) {
-      if (isApplicationType(fieldType)) {
-        final MemberDetails fieldTypeDetails = getMemberDetails(fieldType);
-        specialTypes.put(fieldType,
-            getJavaTypeMetadataDetails(fieldType, fieldTypeDetails, metadataIdentificationString));
-      }
-    }
-
-    return specialTypes;
-  }
-
-  public List<FieldMetadata> getScaffoldEligibleFieldMetadata(final JavaType javaType,
-      final MemberDetails memberDetails, final String metadataIdentificationString) {
-
-    Validate.notNull(javaType, "Java type required");
-    Validate.notNull(memberDetails, "Member details required");
-
-    final MethodMetadata identifierAccessor =
-        getPersistenceMemberLocator().getIdentifierAccessor(javaType);
-    final MethodMetadata versionAccessor =
-        getPersistenceMemberLocator().getVersionAccessor(javaType);
-
-    final Map<JavaSymbolName, FieldMetadata> fields =
-        new LinkedHashMap<JavaSymbolName, FieldMetadata>();
-    final List<MethodMetadata> methods = memberDetails.getMethods();
-
-    for (final MethodMetadata method : methods) {
-      // Only interested in accessors
-      if (!BeanInfoUtils.isAccessorMethod(method)
-          || method.hasSameName(identifierAccessor, versionAccessor)) {
-        continue;
-      }
-
-      final FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
-      if (field == null || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
-        continue;
-      }
-      final JavaSymbolName fieldName = field.getFieldName();
-      registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-      if (!fields.containsKey(fieldName)) {
-        fields.put(fieldName, field);
-      }
-    }
-    return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields.values()));
-  }
-
-  public boolean isApplicationType(final JavaType javaType) {
-
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
-    Validate.notNull(typeLocationService, "TypeLocationService is required");
-
-    return typeLocationService.isInProject(javaType);
-  }
-
-  private boolean isEnumType(final JavaType javaType) {
-
-    if (metadataService == null) {
-      metadataService = getMetadataService();
-    }
-    Validate.notNull(metadataService, "MetadataService is required");
-
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
-    Validate.notNull(typeLocationService, "TypeLocationService is required");
-
-    Validate.notNull(javaType, "Java type required");
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(javaType);
-    if (javaTypeDetails != null) {
-      if (javaTypeDetails.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public boolean isRooIdentifier(final JavaType javaType, final MemberDetails memberDetails) {
-    Validate.notNull(javaType, "Java type required");
-    Validate.notNull(memberDetails, "Member details required");
-    return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, IDENTIFIER_TYPE)
-        .size() > 0;
-  }
-
-  private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
-
-    if (metadataDependencyRegistry == null) {
-      metadataDependencyRegistry = getMetadataDependencyRegistry();
-    }
-    Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
-
-    if (metadataDependencyRegistry != null
-        && StringUtils.isNotBlank(upstreamDependency)
-        && StringUtils.isNotBlank(downStreamDependency)
-        && !upstreamDependency.equals(downStreamDependency)
-        && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(
-            MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
-      metadataDependencyRegistry.registerDependency(upstreamDependency, downStreamDependency);
-    }
-  }
-
-  public LayerService getLayerService() {
-    // Get all Services implement LayerService interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(LayerService.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (LayerService) this.context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load LayerService on WebMetadataServiceImpl.");
-      return null;
-    }
-  }
-
-  public MemberDetailsScanner getMemberDetailsScanner() {
-    // Get all Services implement MemberDetailsScanner interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (MemberDetailsScanner) this.context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load MemberDetailsScanner on WebMetadataServiceImpl.");
-      return null;
-    }
-  }
-
-  public MetadataDependencyRegistry getMetadataDependencyRegistry() {
-    // Get all Services implement MetadataDependencyRegistry interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (MetadataDependencyRegistry) this.context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load MetadataDependencyRegistry on WebMetadataServiceImpl.");
-      return null;
-    }
-  }
-
-  public MetadataService getMetadataService() {
-    // Get all Services implement MetadataService interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(MetadataService.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (MetadataService) this.context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load MetadataService on WebMetadataServiceImpl.");
-      return null;
-    }
-  }
-
-  public PersistenceMemberLocator getPersistenceMemberLocator() {
-    if (persistenceMemberLocator == null) {
-      // Get all Services implement PersistenceMemberLocator interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (PersistenceMemberLocator) this.context.getService(ref);
+        final MethodMetadata idAccessor = memberDetails
+                .getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
+        if (idAccessor == null) {
+            return null;
         }
 
-        return null;
+        final FieldMetadata idField = CollectionUtils
+                .firstElementOf(getPersistenceMemberLocator()
+                        .getIdentifierFields(javaType));
+        if (idField == null) {
+            return null;
+        }
 
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PersistenceMemberLocator on WebMetadataServiceImpl.");
-        return null;
-      }
-    } else {
-      return persistenceMemberLocator;
+        final JavaType idType = getPersistenceMemberLocator()
+                .getIdentifierType(javaType);
+        if (idType == null) {
+            return null;
+        }
+
+        registerDependency(idAccessor.getDeclaredByMetadataId(),
+                metadataIdentificationString);
+        registerDependency(idField.getDeclaredByMetadataId(),
+                metadataIdentificationString);
+
+        final MethodParameter entityParameter = new MethodParameter(javaType,
+                JavaSymbolName.getReservedWordSafeName(javaType));
+        final MethodParameter idParameter = new MethodParameter(idType, idField
+                .getFieldName().getSymbolName());
+        final MethodMetadata versionAccessor = memberDetails
+                .getMostConcreteMethodWithTag(VERSION_ACCESSOR_METHOD);
+        final MemberTypeAdditions persistMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        PERSIST_METHOD.name(), javaType, idType,
+                        LAYER_POSITION, entityParameter);
+        final MemberTypeAdditions removeMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        REMOVE_METHOD.name(), javaType, idType, LAYER_POSITION,
+                        entityParameter);
+        final MemberTypeAdditions mergeMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        MERGE_METHOD.name(), javaType, idType, LAYER_POSITION,
+                        entityParameter);
+        final MemberTypeAdditions findAllMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        FIND_ALL_METHOD.name(), javaType, idType,
+                        LAYER_POSITION);
+        final MemberTypeAdditions findAllSortedMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        FIND_ALL_SORTED_METHOD.name(), javaType, idType,
+                        LAYER_POSITION, SORT_FIELDNAME_PARAMETER,
+                        SORT_ORDER_PARAMETER);
+        final MemberTypeAdditions findMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        FIND_METHOD.name(), javaType, idType, LAYER_POSITION,
+                        idParameter);
+        final MemberTypeAdditions countMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        COUNT_ALL_METHOD.name(), javaType, idType,
+                        LAYER_POSITION);
+        final MemberTypeAdditions findEntriesMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        FIND_ENTRIES_METHOD.name(), javaType, idType,
+                        LAYER_POSITION, FIRST_RESULT_PARAMETER,
+                        MAX_RESULTS_PARAMETER);
+        final MemberTypeAdditions findEntriesSortedMethod = layerService
+                .getMemberTypeAdditions(metadataIdentificationString,
+                        FIND_ENTRIES_SORTED_METHOD.name(), javaType, idType,
+                        LAYER_POSITION, FIRST_RESULT_PARAMETER,
+                        MAX_RESULTS_PARAMETER, SORT_FIELDNAME_PARAMETER,
+                        SORT_ORDER_PARAMETER);
+        
+        final List<String> dynamicFinderNames = memberDetails
+                .getDynamicFinderNames();
+
+        return new JavaTypePersistenceMetadataDetails(idType, idField,
+                idAccessor, versionAccessor, persistMethod, mergeMethod,
+                removeMethod, findAllMethod, findAllSortedMethod, findMethod, countMethod,
+                findEntriesMethod, findEntriesSortedMethod, dynamicFinderNames, isRooIdentifier(
+                        javaType, memberDetails),
+                getPersistenceMemberLocator().getEmbeddedIdentifierFields(javaType));
     }
 
-  }
-
-  public TypeLocationService getTypeLocationService() {
-    // Get all Services implement TypeLocationService interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (TypeLocationService) this.context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load TypeLocationService on WebMetadataServiceImpl.");
-      return null;
+    public MemberDetails getMemberDetails(final JavaType javaType) {
+    	
+    	if(memberDetailsScanner == null){
+    		memberDetailsScanner = getMemberDetailsScanner();
+    	}
+    	Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+        final ClassOrInterfaceTypeDetails cid = typeLocationService
+                .getTypeDetails(javaType);
+        Validate.notNull(cid,
+                "Unable to obtain physical type metadata for type %s",
+                javaType.getFullyQualifiedTypeName());
+        return memberDetailsScanner.getMemberDetails(
+                WebMetadataServiceImpl.class.getName(), cid);
     }
-  }
 
+    private String getPlural(final JavaType javaType,
+            final String metadataIdentificationString) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+        Validate.notNull(javaType, "Java type required");
 
+        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
+                .getTypeDetails(javaType);
+        Validate.notNull(
+                javaTypeDetails,
+                "Class or interface type details isn't available for type '%s'",
+                javaType);
+        final LogicalPath logicalPath = PhysicalTypeIdentifier
+                .getPath(javaTypeDetails.getDeclaredByMetadataId());
+        final String pluralMetadataKey = PluralMetadata.createIdentifier(
+                javaType, logicalPath);
+        final PluralMetadata pluralMetadata = (PluralMetadata) metadataService
+                .get(pluralMetadataKey);
+        if (pluralMetadata != null) {
+            registerDependency(pluralMetadata.getId(),
+                    metadataIdentificationString);
+            final String plural = pluralMetadata.getPlural();
+            if (plural.equalsIgnoreCase(javaType.getSimpleTypeName())) {
+                return plural + "Items";
+            }
+            else {
+                return plural;
+            }
+        }
+        return javaType.getSimpleTypeName() + "s";
+    }
+
+    public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(
+            final JavaType baseType, final MemberDetails baseTypeDetails,
+            final String metadataIdentificationString) {
+    	
+        Validate.notNull(baseType, "Java type required");
+        Validate.notNull(baseTypeDetails, "Member details required");
+        Validate.isTrue(isApplicationType(baseType),
+                "The type %s does not belong to this application", baseType);
+
+        final SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
+        specialTypes.put(
+                baseType,
+                getJavaTypeMetadataDetails(baseType, baseTypeDetails,
+                        metadataIdentificationString));
+
+        for (final JavaType fieldType : baseTypeDetails
+                .getPersistentFieldTypes(baseType, getPersistenceMemberLocator())) {
+            if (isApplicationType(fieldType)) {
+                final MemberDetails fieldTypeDetails = getMemberDetails(fieldType);
+                specialTypes.put(
+                        fieldType,
+                        getJavaTypeMetadataDetails(fieldType, fieldTypeDetails,
+                                metadataIdentificationString));
+            }
+        }
+
+        return specialTypes;
+    }
+
+    public List<FieldMetadata> getScaffoldEligibleFieldMetadata(
+            final JavaType javaType, final MemberDetails memberDetails,
+            final String metadataIdentificationString) {
+    	
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
+
+        final MethodMetadata identifierAccessor = getPersistenceMemberLocator()
+                .getIdentifierAccessor(javaType);
+        final MethodMetadata versionAccessor = getPersistenceMemberLocator()
+                .getVersionAccessor(javaType);
+
+        final Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
+        final List<MethodMetadata> methods = memberDetails.getMethods();
+
+        for (final MethodMetadata method : methods) {
+            // Only interested in accessors
+            if (!BeanInfoUtils.isAccessorMethod(method)
+                    || method.hasSameName(identifierAccessor, versionAccessor)) {
+                continue;
+            }
+
+            final FieldMetadata field = BeanInfoUtils
+                    .getFieldForJavaBeanMethod(memberDetails, method);
+            if (field == null
+                    || !BeanInfoUtils.hasAccessorAndMutator(field,
+                            memberDetails)) {
+                continue;
+            }
+            final JavaSymbolName fieldName = field.getFieldName();
+            registerDependency(method.getDeclaredByMetadataId(),
+                    metadataIdentificationString);
+            if (!fields.containsKey(fieldName)) {
+                fields.put(fieldName, field);
+            }
+        }
+        return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields
+                .values()));
+    }
+
+    public boolean isApplicationType(final JavaType javaType) {
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+        return typeLocationService.isInProject(javaType);
+    }
+
+    private boolean isEnumType(final JavaType javaType) {
+    	
+    	if(metadataService == null){
+    		metadataService = getMetadataService();
+    	}
+    	Validate.notNull(metadataService, "MetadataService is required");
+    	
+    	if(typeLocationService == null){
+    		typeLocationService = getTypeLocationService();
+    	}
+    	Validate.notNull(typeLocationService, "TypeLocationService is required");
+    	
+        Validate.notNull(javaType, "Java type required");
+        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
+                .getTypeDetails(javaType);
+        if (javaTypeDetails != null) {
+            if (javaTypeDetails.getPhysicalTypeCategory().equals(
+                    PhysicalTypeCategory.ENUMERATION)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isRooIdentifier(final JavaType javaType,
+            final MemberDetails memberDetails) {
+        Validate.notNull(javaType, "Java type required");
+        Validate.notNull(memberDetails, "Member details required");
+        return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(
+                memberDetails, IDENTIFIER_TYPE).size() > 0;
+    }
+
+    private void registerDependency(final String upstreamDependency,
+            final String downStreamDependency) {
+    	
+    	if(metadataDependencyRegistry == null){
+    		metadataDependencyRegistry = getMetadataDependencyRegistry();
+    	}
+    	Validate.notNull(metadataDependencyRegistry, "MetadataDependencyRegistry is required");
+    	
+        if (metadataDependencyRegistry != null
+                && StringUtils.isNotBlank(upstreamDependency)
+                && StringUtils.isNotBlank(downStreamDependency)
+                && !upstreamDependency.equals(downStreamDependency)
+                && !MetadataIdentificationUtils.getMetadataClass(
+                        downStreamDependency).equals(
+                        MetadataIdentificationUtils
+                                .getMetadataClass(upstreamDependency))) {
+            metadataDependencyRegistry.registerDependency(upstreamDependency,
+                    downStreamDependency);
+        }
+    }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    public MemberDetailsScanner getMemberDetailsScanner(){
+    	// Get all Services implement MemberDetailsScanner interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MemberDetailsScanner) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MemberDetailsScanner on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    public MetadataDependencyRegistry getMetadataDependencyRegistry(){
+    	// Get all Services implement MetadataDependencyRegistry interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataDependencyRegistry) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataDependencyRegistry on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    public MetadataService getMetadataService(){
+    	// Get all Services implement MetadataService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (MetadataService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load MetadataService on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    public PersistenceMemberLocator getPersistenceMemberLocator(){
+    	if(persistenceMemberLocator == null){
+    		// Get all Services implement PersistenceMemberLocator interface
+    		try {
+    			ServiceReference<?>[] references = this.context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
+    			
+    			for(ServiceReference<?> ref : references){
+    				return (PersistenceMemberLocator) this.context.getService(ref);
+    			}
+    			
+    			return null;
+    			
+    		} catch (InvalidSyntaxException e) {
+    			LOGGER.warning("Cannot load PersistenceMemberLocator on WebMetadataServiceImpl.");
+    			return null;
+    		}
+    	}else{
+    		return persistenceMemberLocator;
+    	}
+    	
+    }
+    
+    public TypeLocationService getTypeLocationService(){
+    	// Get all Services implement TypeLocationService interface
+		try {
+			ServiceReference<?>[] references = this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (TypeLocationService) this.context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load TypeLocationService on WebMetadataServiceImpl.");
+			return null;
+		}
+    }
+    
+    
 }

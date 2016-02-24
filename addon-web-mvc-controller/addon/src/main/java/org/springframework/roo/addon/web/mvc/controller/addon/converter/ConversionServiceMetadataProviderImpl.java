@@ -57,277 +57,297 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Component
 @Service
-public class ConversionServiceMetadataProviderImpl extends AbstractItdMetadataProvider implements
-    ConversionServiceMetadataProvider {
+public class ConversionServiceMetadataProviderImpl extends
+        AbstractItdMetadataProvider implements
+        ConversionServiceMetadataProvider {
+	
+	protected final static Logger LOGGER = HandlerUtils.getLogger(ConversionServiceMetadataProviderImpl.class);
+	
+	private final static JavaType EMBEDDABLE_ANNOTATION = new JavaType("javax.persistence.Embeddable");
 
-  protected final static Logger LOGGER = HandlerUtils
-      .getLogger(ConversionServiceMetadataProviderImpl.class);
+    // Stores the MID (as accepted by this
+    // ConversionServiceMetadataProviderImpl) for the one (and only one)
+    // application-wide conversion service
+    private String applicationConversionServiceFactoryBeanMid;
 
-  private final static JavaType EMBEDDABLE_ANNOTATION =
-      new JavaType("javax.persistence.Embeddable");
+    private LayerService layerService;
 
-  // Stores the MID (as accepted by this
-  // ConversionServiceMetadataProviderImpl) for the one (and only one)
-  // application-wide conversion service
-  private String applicationConversionServiceFactoryBeanMid;
+    protected MetadataDependencyRegistryTracker registryTracker = null;
 
-  private LayerService layerService;
-
-  protected MetadataDependencyRegistryTracker registryTracker = null;
-
-  /**
-   * This service is being activated so setup it:
-   * <ul>
-   * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_CONVERSION_SERVICE} as additional 
-   * JavaType that will trigger metadata registration.</li>
-   * </ul>
-   */
-  @Override
-  protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
-    this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, null, new MetadataDependency(
-            PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType()),
-            new MetadataDependency(WebScaffoldMetadata.getMetadataIdentiferType(),
-                getProvidesType()));
-    this.registryTracker.open();
-    addMetadataTrigger(ROO_CONVERSION_SERVICE);
-  }
-
-  /**
-   * This service is being deactivated so unregister upstream-downstream 
-   * dependencies, triggers, matchers and listeners.
-   * 
-   * @param context
-   */
-  protected void deactivate(final ComponentContext context) {
-    MetadataDependencyRegistry registry = this.registryTracker.getService();
-    registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
-        getProvidesType());
-    registry
-        .deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
-    this.registryTracker.close();
-    removeMetadataTrigger(ROO_CONVERSION_SERVICE);
-  }
-
-  @Override
-  protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return PhysicalTypeIdentifierNamingUtils.createIdentifier(
-        ConversionServiceMetadata.class.getName(), javaType, path);
-  }
-
-  @Override
-  protected String getGovernorPhysicalTypeIdentifier(final String metadataId) {
-    final JavaType javaType =
-        PhysicalTypeIdentifierNamingUtils.getJavaType(ConversionServiceMetadata.class.getName(),
-            metadataId);
-    final LogicalPath path =
-        PhysicalTypeIdentifierNamingUtils.getPath(ConversionServiceMetadata.class.getName(),
-            metadataId);
-    return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-  }
-
-  public String getItdUniquenessFilenameSuffix() {
-    return "ConversionService";
-  }
-
-  @Override
-  protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-      final String metadataIdentificationString, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-
-    if (layerService == null) {
-      layerService = getLayerService();
+    /**
+     * This service is being activated so setup it:
+     * <ul>
+     * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
+     * <li>Registers {@link RooJavaType#ROO_CONVERSION_SERVICE} as additional 
+     * JavaType that will trigger metadata registration.</li>
+     * </ul>
+     */
+    @Override
+    protected void activate(final ComponentContext cContext) {
+    	context = cContext.getBundleContext();
+        this.registryTracker = new MetadataDependencyRegistryTracker(context,
+                null, new MetadataDependency(
+                        PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                        getProvidesType()), 
+                new MetadataDependency(
+                        WebScaffoldMetadata.getMetadataIdentiferType(),
+                        getProvidesType()));
+        this.registryTracker.open();
+        addMetadataTrigger(ROO_CONVERSION_SERVICE);
     }
-    Validate.notNull(layerService, "LayerService is required");
 
-    applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
+    /**
+     * This service is being deactivated so unregister upstream-downstream 
+     * dependencies, triggers, matchers and listeners.
+     * 
+     * @param context
+     */
+    protected void deactivate(final ComponentContext context) {
+        MetadataDependencyRegistry registry = this.registryTracker.getService();
+        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+                getProvidesType());
+        registry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(),
+                getProvidesType());
+        this.registryTracker.close();
+        removeMetadataTrigger(ROO_CONVERSION_SERVICE);
+    }
 
-    // To get here we know the governor is the
-    // ApplicationConversionServiceFactoryBean so let's go ahead and create
-    // its ITD
-    final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes =
-        new HashMap<JavaType, Map<Object, JavaSymbolName>>();
-    final Set<JavaType> relevantDomainTypes = new LinkedHashSet<JavaType>();
-    final Map<JavaType, MemberTypeAdditions> findMethods =
-        new HashMap<JavaType, MemberTypeAdditions>();
-    final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
-    final Map<JavaType, List<MethodMetadata>> toStringMethods =
-        new HashMap<JavaType, List<MethodMetadata>>();
-    final List<JavaType> embeddableToStringMethods = new ArrayList<JavaType>();
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(
+                ConversionServiceMetadata.class.getName(), javaType, path);
+    }
 
-    for (final ClassOrInterfaceTypeDetails controllerTypeDetails : getTypeLocationService()
-        .findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
-      getMetadataDependencyRegistry().registerDependency(
-          controllerTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(final String metadataId) {
+        final JavaType javaType = PhysicalTypeIdentifierNamingUtils
+                .getJavaType(ConversionServiceMetadata.class.getName(),
+                        metadataId);
+        final LogicalPath path = PhysicalTypeIdentifierNamingUtils.getPath(
+                ConversionServiceMetadata.class.getName(), metadataId);
+        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-      final WebScaffoldAnnotationValues webScaffoldAnnotationValues =
-          new WebScaffoldAnnotationValues(controllerTypeDetails);
-      final JavaType formBackingObject = webScaffoldAnnotationValues.getFormBackingObject();
-      if (formBackingObject == null) {
-        continue;
-      }
-      final MemberDetails memberDetails = getMemberDetails(formBackingObject);
+    public String getItdUniquenessFilenameSuffix() {
+        return "ConversionService";
+    }
 
-      // Find composite primary key types requiring a converter
-      final List<FieldMetadata> embeddedIdFields =
-          MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataKeys.EMBEDDED_ID_FIELD);
-      if (embeddedIdFields.size() > 1) {
-        throw new IllegalStateException("Found multiple embedded ID fields in "
-            + formBackingObject.getFullyQualifiedTypeName() + " type. Only one is allowed.");
-      } else if (embeddedIdFields.size() == 1) {
-        final Map<Object, JavaSymbolName> jsonMethodNames =
-            new LinkedHashMap<Object, JavaSymbolName>();
-        final MemberDetails fieldMemberDetails =
-            getMemberDetails(embeddedIdFields.get(0).getFieldType());
-        final MethodMetadata fromJsonMethod =
-            MemberFindingUtils.getMostConcreteMethodWithTag(fieldMemberDetails,
-                CustomDataJsonTags.FROM_JSON_METHOD);
-        if (fromJsonMethod != null) {
-          jsonMethodNames.put(CustomDataJsonTags.FROM_JSON_METHOD, fromJsonMethod.getMethodName());
-          final MethodMetadata toJsonMethod =
-              MemberFindingUtils.getMostConcreteMethodWithTag(fieldMemberDetails,
-                  CustomDataJsonTags.TO_JSON_METHOD);
-          if (toJsonMethod != null) {
-            jsonMethodNames.put(CustomDataJsonTags.TO_JSON_METHOD, toJsonMethod.getMethodName());
-            compositePrimaryKeyTypes.put(embeddedIdFields.get(0).getFieldType(), jsonMethodNames);
-          }
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+            final String itdFilename) {
+    	
+    	if(layerService == null){
+    		layerService = getLayerService();
+    	}
+    	Validate.notNull(layerService, "LayerService is required");
+    	
+        applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
+
+        // To get here we know the governor is the
+        // ApplicationConversionServiceFactoryBean so let's go ahead and create
+        // its ITD
+        final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = new HashMap<JavaType, Map<Object, JavaSymbolName>>();
+        final Set<JavaType> relevantDomainTypes = new LinkedHashSet<JavaType>();
+        final Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
+        final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
+        final Map<JavaType, List<MethodMetadata>> toStringMethods = new HashMap<JavaType, List<MethodMetadata>>();
+        final List<JavaType> embeddableToStringMethods = new ArrayList<JavaType>();
+
+        for (final ClassOrInterfaceTypeDetails controllerTypeDetails : getTypeLocationService()
+                .findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
+            getMetadataDependencyRegistry().registerDependency(
+                    controllerTypeDetails.getDeclaredByMetadataId(),
+                    metadataIdentificationString);
+
+            final WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(
+                    controllerTypeDetails);
+            final JavaType formBackingObject = webScaffoldAnnotationValues
+                    .getFormBackingObject();
+            if (formBackingObject == null) {
+                continue;
+            }
+            final MemberDetails memberDetails = getMemberDetails(formBackingObject);
+
+            // Find composite primary key types requiring a converter
+            final List<FieldMetadata> embeddedIdFields = MemberFindingUtils
+                    .getFieldsWithTag(memberDetails,
+                            CustomDataKeys.EMBEDDED_ID_FIELD);
+            if (embeddedIdFields.size() > 1) {
+                throw new IllegalStateException(
+                        "Found multiple embedded ID fields in "
+                                + formBackingObject.getFullyQualifiedTypeName()
+                                + " type. Only one is allowed.");
+            }
+            else if (embeddedIdFields.size() == 1) {
+                final Map<Object, JavaSymbolName> jsonMethodNames = new LinkedHashMap<Object, JavaSymbolName>();
+                final MemberDetails fieldMemberDetails = getMemberDetails(embeddedIdFields
+                        .get(0).getFieldType());
+                final MethodMetadata fromJsonMethod = MemberFindingUtils
+                        .getMostConcreteMethodWithTag(fieldMemberDetails,
+                                CustomDataJsonTags.FROM_JSON_METHOD);
+                if (fromJsonMethod != null) {
+                    jsonMethodNames.put(CustomDataJsonTags.FROM_JSON_METHOD,
+                            fromJsonMethod.getMethodName());
+                    final MethodMetadata toJsonMethod = MemberFindingUtils
+                            .getMostConcreteMethodWithTag(fieldMemberDetails,
+                                    CustomDataJsonTags.TO_JSON_METHOD);
+                    if (toJsonMethod != null) {
+                        jsonMethodNames.put(CustomDataJsonTags.TO_JSON_METHOD,
+                                toJsonMethod.getMethodName());
+                        compositePrimaryKeyTypes.put(embeddedIdFields.get(0)
+                                .getFieldType(), jsonMethodNames);
+                    }
+                }
+            }
+
+            final JavaType identifierType = getPersistenceMemberLocator()
+                    .getIdentifierType(formBackingObject);
+            if (identifierType == null) {
+                // This type either has no ID field (e.g. an embedded type) or
+                // it's ID type is unknown right now;
+                // don't generate a converter for it; this will happen later if
+                // and when the ID field becomes known.
+                continue;
+            }
+
+            relevantDomainTypes.add(formBackingObject);
+            idTypes.put(formBackingObject, identifierType);
+            final MemberTypeAdditions findMethod = layerService
+                    .getMemberTypeAdditions(metadataIdentificationString,
+                            CustomDataKeys.FIND_METHOD.name(),
+                            formBackingObject, identifierType,
+                            LayerType.HIGHEST.getPosition(),
+                            new MethodParameter(identifierType, "id"));
+            findMethods.put(formBackingObject, findMethod);
+            toStringMethods.put(
+                    formBackingObject,
+                    getToStringMethods(memberDetails,
+                            metadataIdentificationString));
         }
-      }
+        
+        // Getting embeddable classes and adding toString methods
+        for (final ClassOrInterfaceTypeDetails embeddableTypeDetails : getTypeLocationService()
+                .findClassesOrInterfaceDetailsWithAnnotation(EMBEDDABLE_ANNOTATION)) {
+        	JavaType embeddableType = embeddableTypeDetails.getType();
+        	// Adding embeddable type to generate conversor method
+        	embeddableToStringMethods.add(embeddableType);
+        }
 
-      final JavaType identifierType =
-          getPersistenceMemberLocator().getIdentifierType(formBackingObject);
-      if (identifierType == null) {
-        // This type either has no ID field (e.g. an embedded type) or
-        // it's ID type is unknown right now;
-        // don't generate a converter for it; this will happen later if
-        // and when the ID field becomes known.
-        continue;
-      }
-
-      relevantDomainTypes.add(formBackingObject);
-      idTypes.put(formBackingObject, identifierType);
-      final MemberTypeAdditions findMethod =
-          layerService.getMemberTypeAdditions(metadataIdentificationString,
-              CustomDataKeys.FIND_METHOD.name(), formBackingObject, identifierType,
-              LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
-      findMethods.put(formBackingObject, findMethod);
-      toStringMethods.put(formBackingObject,
-          getToStringMethods(memberDetails, metadataIdentificationString));
+        return new ConversionServiceMetadata(getTypeLocationService(), metadataIdentificationString,
+                aspectName, governorPhysicalTypeMetadata, findMethods, idTypes,
+                relevantDomainTypes, compositePrimaryKeyTypes, toStringMethods, embeddableToStringMethods);
     }
 
-    // Getting embeddable classes and adding toString methods
-    for (final ClassOrInterfaceTypeDetails embeddableTypeDetails : getTypeLocationService()
-        .findClassesOrInterfaceDetailsWithAnnotation(EMBEDDABLE_ANNOTATION)) {
-      JavaType embeddableType = embeddableTypeDetails.getType();
-      // Adding embeddable type to generate conversor method
-      embeddableToStringMethods.add(embeddableType);
+	public String getProvidesType() {
+        return MetadataIdentificationUtils
+                .create(ConversionServiceMetadata.class.getName());
     }
 
-    return new ConversionServiceMetadata(getTypeLocationService(), metadataIdentificationString,
-        aspectName, governorPhysicalTypeMetadata, findMethods, idTypes, relevantDomainTypes,
-        compositePrimaryKeyTypes, toStringMethods, embeddableToStringMethods);
-  }
+    private List<MethodMetadata> getToStringMethods(
+            final MemberDetails memberDetails,
+            final String metadataIdentificationString) {
+        final List<MethodMetadata> toStringMethods = new ArrayList<MethodMetadata>();
 
-  public String getProvidesType() {
-    return MetadataIdentificationUtils.create(ConversionServiceMetadata.class.getName());
-  }
+        int counter = 0;
+        for (final MethodMetadata method : memberDetails.getMethods()) {
+            // Track any changes to that method (eg it goes away)
+            getMetadataDependencyRegistry().registerDependency(
+                    method.getDeclaredByMetadataId(),
+                    metadataIdentificationString);
 
-  private List<MethodMetadata> getToStringMethods(final MemberDetails memberDetails,
-      final String metadataIdentificationString) {
-    final List<MethodMetadata> toStringMethods = new ArrayList<MethodMetadata>();
+            if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
+                counter++;
+                toStringMethods.add(method);
+            }
+        }
 
-    int counter = 0;
-    for (final MethodMetadata method : memberDetails.getMethods()) {
-      // Track any changes to that method (eg it goes away)
-      getMetadataDependencyRegistry().registerDependency(method.getDeclaredByMetadataId(),
-          metadataIdentificationString);
-
-      if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
-        counter++;
-        toStringMethods.add(method);
-      }
+        return toStringMethods;
     }
 
-    return toStringMethods;
-  }
+    private boolean isMethodOfInterest(final MethodMetadata method,
+            final MemberDetails memberDetails) {
+        if (!BeanInfoUtils.isAccessorMethod(method)) {
+            return false; // Only interested in accessors
+        }
+        if (method.getCustomData().keySet()
+                .contains(CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD)
+                || method.getCustomData().keySet()
+                        .contains(CustomDataKeys.VERSION_ACCESSOR_METHOD)) {
+            return false; // Only interested in methods which are not accessors
+                          // for persistence id or version fields
+        }
 
-  private boolean isMethodOfInterest(final MethodMetadata method, final MemberDetails memberDetails) {
-    if (!BeanInfoUtils.isAccessorMethod(method)) {
-      return false; // Only interested in accessors
-    }
-    if (method.getCustomData().keySet().contains(CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD)
-        || method.getCustomData().keySet().contains(CustomDataKeys.VERSION_ACCESSOR_METHOD)) {
-      return false; // Only interested in methods which are not accessors
-                    // for persistence id or version fields
-    }
-
-    final FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(memberDetails, method);
-    if (field == null) {
-      return false;
-    }
-    final JavaType fieldType = field.getFieldType();
-    if (fieldType.isCommonCollectionType()
-        || fieldType.isArray() // Exclude collections and arrays
-        || getTypeLocationService().isInProject(fieldType) // Exclude
-        // references to
-        // other domain
-        // objects as they
-        // are too verbose
-        || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)
-        || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean
-                                                     // values as they
-                                                     // would not be
-                                                     // meaningful in
-                                                     // this
-                                                     // presentation
-        || field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD) /*
-                                                                                   * Not
-                                                                                   * interested
-                                                                                   * in embedded
-                                                                                   * types
-                                                                                   */) {
-      return false;
-    }
-    return true;
-  }
-
-  @Override
-  protected String resolveDownstreamDependencyIdentifier(final String upstreamDependency) {
-    if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency)
-        .equals(
-            MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata
-                .getMetadataIdentiferType()))) {
-      // A WebScaffoldMetadata upstream MID has changed or become
-      // available for the first time
-      // It's OK to return null if we don't yet know the MID because its
-      // JavaType has never been found
-      return applicationConversionServiceFactoryBeanMid;
+        final FieldMetadata field = BeanInfoUtils.getFieldForJavaBeanMethod(
+                memberDetails, method);
+        if (field == null) {
+            return false;
+        }
+        final JavaType fieldType = field.getFieldType();
+        if (fieldType.isCommonCollectionType()
+                || fieldType.isArray() // Exclude collections and arrays
+                || getTypeLocationService().isInProject(fieldType) // Exclude
+                                                              // references to
+                                                              // other domain
+                                                              // objects as they
+                                                              // are too verbose
+                || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)
+                || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean
+                                                             // values as they
+                                                             // would not be
+                                                             // meaningful in
+                                                             // this
+                                                             // presentation
+                || field.getCustomData().keySet()
+                        .contains(CustomDataKeys.EMBEDDED_FIELD) /*
+                                                                  * Not
+                                                                  * interested
+                                                                  * in embedded
+                                                                  * types
+                                                                  */) {
+            return false;
+        }
+        return true;
     }
 
-    // It wasn't a WebScaffoldMetadata, so we can let the superclass handle
-    // it
-    // (it's expected it would be a PhysicalTypeIdentifier notification, as
-    // that's the only other thing we registered to receive)
-    return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
-  }
+    @Override
+    protected String resolveDownstreamDependencyIdentifier(
+            final String upstreamDependency) {
+        if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency)
+                .equals(MetadataIdentificationUtils
+                        .getMetadataClass(WebScaffoldMetadata
+                                .getMetadataIdentiferType()))) {
+            // A WebScaffoldMetadata upstream MID has changed or become
+            // available for the first time
+            // It's OK to return null if we don't yet know the MID because its
+            // JavaType has never been found
+            return applicationConversionServiceFactoryBeanMid;
+        }
 
-  public LayerService getLayerService() {
-    // Get all Services implement LayerService interface
-    try {
-      ServiceReference<?>[] references =
-          context.getAllServiceReferences(LayerService.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (LayerService) context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load LayerService on ConversionServiceMetadataProviderImpl.");
-      return null;
+        // It wasn't a WebScaffoldMetadata, so we can let the superclass handle
+        // it
+        // (it's expected it would be a PhysicalTypeIdentifier notification, as
+        // that's the only other thing we registered to receive)
+        return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
     }
-  }
+    
+    public LayerService getLayerService(){
+    	// Get all Services implement LayerService interface
+		try {
+			ServiceReference<?>[] references = context.getAllServiceReferences(LayerService.class.getName(), null);
+			
+			for(ServiceReference<?> ref : references){
+				return (LayerService) context.getService(ref);
+			}
+			
+			return null;
+			
+		} catch (InvalidSyntaxException e) {
+			LOGGER.warning("Cannot load LayerService on ConversionServiceMetadataProviderImpl.");
+			return null;
+		}
+    }
 }

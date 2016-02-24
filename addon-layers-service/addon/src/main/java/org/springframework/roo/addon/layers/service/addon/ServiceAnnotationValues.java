@@ -18,21 +18,21 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
-  @AutoPopulate
-  private JavaType entity;
+    @AutoPopulate private JavaType entity;
 
-  /**
-   * Constructor
-   * 
-   * @param governorPhysicalTypeMetadata to parse (required)
-   */
-  public ServiceAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-    super(governorPhysicalTypeMetadata, RooJavaType.ROO_SERVICE);
-    AutoPopulationUtils.populate(this, annotationMetadata);
-  }
+    /**
+     * Constructor
+     * 
+     * @param governorPhysicalTypeMetadata to parse (required)
+     */
+    public ServiceAnnotationValues(
+            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, RooJavaType.ROO_SERVICE);
+        AutoPopulationUtils.populate(this, annotationMetadata);
+    }
 
-  public JavaType getEntity() {
-    return entity;
-  }
+    public JavaType getEntity() {
+        return entity;
+    }
 
 }

@@ -18,24 +18,24 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class PortuguesBRLanguage extends AbstractLanguage {
 
-  @Override
-  public InputStream getFlagGraphic() {
-    return FileUtils.getInputStream(getClass(), "ptbr.png");
-  }
+	@Override
+	public InputStream getFlagGraphic() {
+		return FileUtils.getInputStream(getClass(), "ptbr.png");
+	}
 
-  @Override
-  public String getLanguage() {
-    return "Portugues";
-  }
+	@Override
+	public String getLanguage() {
+		return "Portugues";
+	}
 
-  @Override
-  public Locale getLocale() {
-    return new Locale("pt");
-  }
+	@Override
+	public Locale getLocale() {
+		return new Locale("pt");
+	}
 
-  @Override
-  public InputStream getMessageBundle() {
-    return FileUtils.getInputStream(getClass(), "messages_ptbr.properties");
-  }
+	@Override
+	public InputStream getMessageBundle() {
+		return FileUtils.getInputStream(getClass(), "messages_ptbr.properties");
+	}
 
 }

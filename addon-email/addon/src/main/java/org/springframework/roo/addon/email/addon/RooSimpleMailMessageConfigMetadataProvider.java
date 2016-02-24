@@ -24,58 +24,57 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class RooSimpleMailMessageConfigMetadataProvider extends AbstractItdMetadataProvider {
 
-  protected final static Logger LOGGER = HandlerUtils
-      .getLogger(RooSimpleMailMessageConfigMetadataProvider.class);
+    protected final static Logger LOGGER = HandlerUtils
+            .getLogger(RooSimpleMailMessageConfigMetadataProvider.class);
 
-  public static final JavaType ROO_SIMPLE_MAIL_MESSAGE_CONFIG_ANNOTATION = new JavaType(
-      RooSimpleMailMessageConfig.class);
+    public static final JavaType ROO_SIMPLE_MAIL_MESSAGE_CONFIG_ANNOTATION = new JavaType(RooSimpleMailMessageConfig.class);
+    
+    protected void activate(final ComponentContext cContext) {
+        context = cContext.getBundleContext();
+        getMetadataDependencyRegistry().addNotificationListener(this);
+		getMetadataDependencyRegistry().registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+				getProvidesType());
+		addMetadataTrigger(ROO_SIMPLE_MAIL_MESSAGE_CONFIG_ANNOTATION);
+    }
 
-  protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
-    getMetadataDependencyRegistry().addNotificationListener(this);
-    getMetadataDependencyRegistry().registerDependency(
-        PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-    addMetadataTrigger(ROO_SIMPLE_MAIL_MESSAGE_CONFIG_ANNOTATION);
-  }
+    protected void deactivate(final ComponentContext context) {
+    	getMetadataDependencyRegistry().removeNotificationListener(this);
+		getMetadataDependencyRegistry().deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+				getProvidesType());
+		removeMetadataTrigger(ROO_SIMPLE_MAIL_MESSAGE_CONFIG_ANNOTATION);
+    }
 
-  protected void deactivate(final ComponentContext context) {
-    getMetadataDependencyRegistry().removeNotificationListener(this);
-    getMetadataDependencyRegistry().deregisterDependency(
-        PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-    removeMetadataTrigger(ROO_SIMPLE_MAIL_MESSAGE_CONFIG_ANNOTATION);
-  }
-
-  @Override
-  protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return RooSimpleMailMessageConfigMetadata.createIdentifier(javaType, path);
-  }
+    @Override
+    protected String createLocalIdentifier(final JavaType javaType,
+            final LogicalPath path) {
+    	return RooSimpleMailMessageConfigMetadata.createIdentifier(javaType, path);
+    }
 
 
-  @Override
-  protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType =
-        RooSimpleMailMessageConfigMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path =
-        RooSimpleMailMessageConfigMetadata.getPath(metadataIdentificationString);
-    return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-  }
+    @Override
+    protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
+    	final JavaType javaType = RooSimpleMailMessageConfigMetadata.getJavaType(metadataIdentificationString);
+		final LogicalPath path = RooSimpleMailMessageConfigMetadata.getPath(metadataIdentificationString);
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+    }
 
-  public String getItdUniquenessFilenameSuffix() {
-    return "SimpleMailMessageConfig";
-  }
+    public String getItdUniquenessFilenameSuffix() {
+        return "SimpleMailMessageConfig";
+    }
 
-  @Override
-  protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-      final String metadataIdentificationString, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
+    @Override
+    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+            final String metadataIdentificationString,
+            final JavaType aspectName,
+            final PhysicalTypeMetadata governorPhysicalType,
+            final String itdFilename) {
 
-    return new RooSimpleMailMessageConfigMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalType);
-  }
+    	return new RooSimpleMailMessageConfigMetadata(metadataIdentificationString, aspectName, governorPhysicalType);
+    }
 
-  @Override
-  public String getProvidesType() {
-    return RooSimpleMailMessageConfigMetadata.getMetadataIdentiferType();
-  }
+	@Override
+	public String getProvidesType() {
+		return RooSimpleMailMessageConfigMetadata.getMetadataIdentiferType();
+	}
 
 }
