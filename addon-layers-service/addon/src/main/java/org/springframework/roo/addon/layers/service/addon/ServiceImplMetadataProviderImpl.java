@@ -5,6 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -159,27 +160,65 @@ public class ServiceImplMetadataProviderImpl extends
 
         // Validate that contains service interface
         Validate.notNull(serviceInterface,
-                "ERROR: You need to specify interface service to be implemented.");
+                "ERROR: You need to specify service interface to be implemented.");
 
-        ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService()
+        ClassOrInterfaceTypeDetails interfaceTypeDetails = getTypeLocationService()
                 .getTypeDetails(serviceInterface);
 
-        AnnotationMetadata serviceAnnotation = serviceDetails
-                .getAnnotation(ROO_SERVICE);
-
+        // Getting related entity
+        AnnotationMetadata serviceAnnotation = interfaceTypeDetails.getAnnotation(ROO_SERVICE);
+        
         Validate.notNull(serviceAnnotation,
                 "ERROR: Service interface should be annotated with @RooService");
-
-        AnnotationAttributeValue<JavaType> entityAttribute = serviceAnnotation
+        
+        AnnotationAttributeValue<JavaType> relatedEntity = serviceAnnotation
                 .getAttribute("entity");
+        
+        Validate.notNull(relatedEntity,
+                "ERROR: @RooService annotation should has a reference to managed entity");
+        
+        JavaType entity = relatedEntity.getValue();
+        
+        ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService()
+                .getTypeDetails(entity);
+        AnnotationMetadata entityAnnotation = entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY);
+        
+        Validate.notNull(entityAnnotation,
+                "ERROR: Related entity should be annotated with @RooJpaEntity");
 
-        Validate.notNull(entityAttribute,
-                "ERROR: Service interface should be contain an entity on @RooService annotation");
-
-
-        return new ServiceImplMetadata(metadataIdentificationString,
-                aspectName, governorPhysicalTypeMetadata, annotationValues,
-                entityAttribute.getValue());
+        // Getting entity identifier type
+        final JavaType identifierType = getPersistenceMemberLocator()
+                .getIdentifierType(entity);
+        
+        Validate.notNull(identifierType,
+                "ERROR: Related entity should define a field annotated with @Id");
+        
+        // Check if related entity is readOnly or not
+        AnnotationAttributeValue<Boolean> readOnlyAttribute = entityAnnotation.getAttribute("readOnly");
+       
+        boolean readOnly = false;
+        if(readOnlyAttribute != null && readOnlyAttribute.getValue()){
+            readOnly = true;
+        }
+        
+        // Getting related repository to current entity
+        Set<ClassOrInterfaceTypeDetails> repositories = getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+                RooJavaType.ROO_REPOSITORY_JPA);
+        
+        ClassOrInterfaceTypeDetails repositoryDetails = null;
+        for(ClassOrInterfaceTypeDetails repository : repositories){
+            AnnotationAttributeValue<JavaType> entityAttr = repository
+                    .getAnnotation(RooJavaType.ROO_REPOSITORY_JPA)
+                    .getAttribute("entity");
+            
+            if(entityAttr.getValue().equals(entity)){
+                repositoryDetails = repository;
+            }
+        }
+        
+        return new ServiceImplMetadata(metadataIdentificationString, aspectName,
+                governorPhysicalTypeMetadata, serviceInterface,
+                repositoryDetails, entity, identifierType, readOnly);
     }
 
     public String getProvidesType() {
