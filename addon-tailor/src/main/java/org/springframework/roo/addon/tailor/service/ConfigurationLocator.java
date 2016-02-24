@@ -13,21 +13,21 @@ import org.springframework.roo.addon.tailor.config.TailorConfiguration;
  */
 public interface ConfigurationLocator {
 
-    /**
-     * @return the currently active TailorConfiguration
-     */
-    TailorConfiguration getActiveTailorConfiguration();
+  /**
+   * @return the currently active TailorConfiguration
+   */
+  TailorConfiguration getActiveTailorConfiguration();
 
-    /**
-     * @return all available {@link TailorConfiguration} instances
-     */
-    Map<String, TailorConfiguration> getAvailableConfigurations();
+  /**
+   * @return all available {@link TailorConfiguration} instances
+   */
+  Map<String, TailorConfiguration> getAvailableConfigurations();
 
-    /**
-     * Activate Tailor Configuration with certain name
-     * 
-     * @param name Name of configuration to be activated
-     */
-    void setActiveTailorConfiguration(String name);
+  /**
+   * Activate Tailor Configuration with certain name
+   * 
+   * @param name Name of configuration to be activated
+   */
+  void setActiveTailorConfiguration(String name);
 
 }

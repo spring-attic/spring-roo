@@ -14,56 +14,59 @@ import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataIte
  */
 public class IdentifierAnnotationValues extends AbstractAnnotationValues {
 
-    @AutoPopulate private boolean dbManaged;
-    @AutoPopulate private boolean gettersByDefault = true;
-    @AutoPopulate private boolean noArgConstructor = true;
-    @AutoPopulate private boolean settersByDefault;
+  @AutoPopulate
+  private boolean dbManaged;
+  @AutoPopulate
+  private boolean gettersByDefault = true;
+  @AutoPopulate
+  private boolean noArgConstructor = true;
+  @AutoPopulate
+  private boolean settersByDefault;
 
-    /**
-     * Constructor that reads the {@link RooIdentifier} annotation on the given
-     * governor
-     * 
-     * @param governor the governor's metadata (required)
-     */
-    public IdentifierAnnotationValues(
-            final MemberHoldingTypeDetailsMetadataItem<?> governor) {
-        super(governor, RooIdentifier.class);
-        AutoPopulationUtils.populate(this, annotationMetadata);
-    }
+  /**
+   * Constructor that reads the {@link RooIdentifier} annotation on the given
+   * governor
+   * 
+   * @param governor the governor's metadata (required)
+   */
+  public IdentifierAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> governor) {
+    super(governor, RooIdentifier.class);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
 
-    /**
-     * Indicates whether the identifier class is managed by DBRE
-     * 
-     * @return
-     */
-    public boolean isDbManaged() {
-        return dbManaged;
-    }
+  /**
+   * Indicates whether the identifier class is managed by DBRE
+   * 
+   * @return
+   */
+  public boolean isDbManaged() {
+    return dbManaged;
+  }
 
-    /**
-     * Indicates whether to generate getters for the id fields
-     * 
-     * @return
-     */
-    public boolean isGettersByDefault() {
-        return gettersByDefault;
-    }
+  /**
+   * Indicates whether to generate getters for the id fields
+   * 
+   * @return
+   */
+  public boolean isGettersByDefault() {
+    return gettersByDefault;
+  }
 
-    /**
-     * Indicates whether to generate a no-argument constructor for the class
-     * 
-     * @return
-     */
-    public boolean isNoArgConstructor() {
-        return noArgConstructor;
-    }
+  /**
+   * Indicates whether to generate a no-argument constructor for the class
+   * 
+   * @return
+   */
+  public boolean isNoArgConstructor() {
+    return noArgConstructor;
+  }
 
-    /**
-     * Indicates whether to generate setters for the id fields
-     * 
-     * @return
-     */
-    public boolean isSettersByDefault() {
-        return settersByDefault;
-    }
+  /**
+   * Indicates whether to generate setters for the id fields
+   * 
+   * @return
+   */
+  public boolean isSettersByDefault() {
+    return settersByDefault;
+  }
 }

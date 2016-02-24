@@ -35,83 +35,83 @@ import static org.powermock.api.mockito.PowerMockito.when;
         JavaParser.class, JavaParserUtils.class })*/
 public class JavaParserTypeParsingServiceTest {
 
-    private static final String DECLARED_BY_MID = "MID:foo#bar";
-    private static final String EMPTY_FILE = "package com.example;";
+  private static final String DECLARED_BY_MID = "MID:foo#bar";
+  private static final String EMPTY_FILE = "package com.example;";
 
-    private static final String SOURCE_FILE = "package com.example;" + ""
-            + "public class MyClass {}" + "" + "class TargetClass {}" + ""
-            + "class OtherClass {}";
-    @Mock private MetadataService mockMetadataService;
-    @Mock private TypeLocationService mockTypeLocationService;
+  private static final String SOURCE_FILE = "package com.example;" + "" + "public class MyClass {}"
+      + "" + "class TargetClass {}" + "" + "class OtherClass {}";
+  @Mock
+  private MetadataService mockMetadataService;
+  @Mock
+  private TypeLocationService mockTypeLocationService;
 
-    // Fixture
-    private JavaParserTypeParsingService typeParsingService;
+  // Fixture
+  private JavaParserTypeParsingService typeParsingService;
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        typeParsingService = new JavaParserTypeParsingService();
-        typeParsingService.metadataService = mockMetadataService;
-        typeParsingService.typeLocationService = mockTypeLocationService;
-    }
+  @Before
+  public void setUp() throws Exception {
+    MockitoAnnotations.initMocks(this);
+    typeParsingService = new JavaParserTypeParsingService();
+    typeParsingService.metadataService = mockMetadataService;
+    typeParsingService.typeLocationService = mockTypeLocationService;
+  }
 
-    @Test
-    public void testGetTypeFromStringWhenFileContainsNoSuchType() {
-        // Set up
-        final JavaType mockTargetType = mock(JavaType.class);
-        when(mockTargetType.getSimpleTypeName()).thenReturn("NoSuchType");
+  @Test
+  public void testGetTypeFromStringWhenFileContainsNoSuchType() {
+    // Set up
+    final JavaType mockTargetType = mock(JavaType.class);
+    when(mockTargetType.getSimpleTypeName()).thenReturn("NoSuchType");
 
-        // Invoke
-        final ClassOrInterfaceTypeDetails locatedType = typeParsingService
-                .getTypeFromString(SOURCE_FILE, DECLARED_BY_MID, mockTargetType);
+    // Invoke
+    final ClassOrInterfaceTypeDetails locatedType =
+        typeParsingService.getTypeFromString(SOURCE_FILE, DECLARED_BY_MID, mockTargetType);
 
-        // Check
-        assertNull(locatedType);
-    }
+    // Check
+    assertNull(locatedType);
+  }
 
-    @Test
-    public void testGetTypeFromStringWhenFileContainsNoTypes() {
-        // Set up
-        final JavaType mockTargetType = mock(JavaType.class);
+  @Test
+  public void testGetTypeFromStringWhenFileContainsNoTypes() {
+    // Set up
+    final JavaType mockTargetType = mock(JavaType.class);
 
-        // Invoke
-        final ClassOrInterfaceTypeDetails locatedType = typeParsingService
-                .getTypeFromString(EMPTY_FILE, DECLARED_BY_MID, mockTargetType);
+    // Invoke
+    final ClassOrInterfaceTypeDetails locatedType =
+        typeParsingService.getTypeFromString(EMPTY_FILE, DECLARED_BY_MID, mockTargetType);
 
-        // Check
-        assertNull(locatedType);
-    }
+    // Check
+    assertNull(locatedType);
+  }
 
-    @Test
-    public void testGetTypeFromStringWhenFileContainsThatType()
-            throws Exception {
-        // Set up
-        /*final JavaType mockTargetType = mock(JavaType.class);
-        final TypeDeclaration mockTypeDeclaration = mock(TypeDeclaration.class);
-        final ClassOrInterfaceTypeDetails mockClassOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
-        final JavaParserClassOrInterfaceTypeDetailsBuilder mockBuilder = mock(JavaParserClassOrInterfaceTypeDetailsBuilder.class);
-        when(mockBuilder.build()).thenReturn(mockClassOrInterfaceTypeDetails);
+  @Test
+  public void testGetTypeFromStringWhenFileContainsThatType() throws Exception {
+    // Set up
+    /*final JavaType mockTargetType = mock(JavaType.class);
+    final TypeDeclaration mockTypeDeclaration = mock(TypeDeclaration.class);
+    final ClassOrInterfaceTypeDetails mockClassOrInterfaceTypeDetails = mock(ClassOrInterfaceTypeDetails.class);
+    final JavaParserClassOrInterfaceTypeDetailsBuilder mockBuilder = mock(JavaParserClassOrInterfaceTypeDetailsBuilder.class);
+    when(mockBuilder.build()).thenReturn(mockClassOrInterfaceTypeDetails);
 
-        mockStatic(JavaParserUtils.class);
-        when(
-                JavaParserUtils.locateTypeDeclaration(
-                        any(CompilationUnit.class), eq(mockTargetType)))
-                .thenReturn(mockTypeDeclaration);
+    mockStatic(JavaParserUtils.class);
+    when(
+            JavaParserUtils.locateTypeDeclaration(
+                    any(CompilationUnit.class), eq(mockTargetType)))
+            .thenReturn(mockTypeDeclaration);
 
-        mockStatic(JavaParserClassOrInterfaceTypeDetailsBuilder.class);
-        when(
-                JavaParserClassOrInterfaceTypeDetailsBuilder.getInstance(
-                        any(CompilationUnit.class),
-                        (CompilationUnitServices) eq(null),
-                        eq(mockTypeDeclaration), eq(DECLARED_BY_MID),
-                        eq(mockTargetType), eq(mockMetadataService),
-                        eq(mockTypeLocationService))).thenReturn(mockBuilder);
+    mockStatic(JavaParserClassOrInterfaceTypeDetailsBuilder.class);
+    when(
+            JavaParserClassOrInterfaceTypeDetailsBuilder.getInstance(
+                    any(CompilationUnit.class),
+                    (CompilationUnitServices) eq(null),
+                    eq(mockTypeDeclaration), eq(DECLARED_BY_MID),
+                    eq(mockTargetType), eq(mockMetadataService),
+                    eq(mockTypeLocationService))).thenReturn(mockBuilder);
 
-        // Invoke
-        final ClassOrInterfaceTypeDetails locatedType = typeParsingService
-                .getTypeFromString(SOURCE_FILE, DECLARED_BY_MID, mockTargetType);
+    // Invoke
+    final ClassOrInterfaceTypeDetails locatedType = typeParsingService
+            .getTypeFromString(SOURCE_FILE, DECLARED_BY_MID, mockTargetType);
 
-        // Check
-        assertSame(mockClassOrInterfaceTypeDetails, locatedType);*/
-    }
+    // Check
+    assertSame(mockClassOrInterfaceTypeDetails, locatedType);*/
+  }
 }

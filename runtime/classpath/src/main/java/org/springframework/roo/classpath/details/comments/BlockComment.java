@@ -5,10 +5,9 @@ package org.springframework.roo.classpath.details.comments;
  */
 public class BlockComment extends AbstractComment {
 
-    public BlockComment() {
-    }
+  public BlockComment() {}
 
-    public BlockComment(String comment) {
-        super(comment);
-    }
+  public BlockComment(String comment) {
+    super(comment);
+  }
 }

@@ -13,20 +13,20 @@ import java.util.logging.Logger;
  */
 public interface UndoableOperation {
 
-    /**
-     * Release any temporary resources consumed by the {@link UndoableOperation}
-     * .
-     * <p>
-     * No exceptions may be thrown.
-     */
-    void reset();
+  /**
+   * Release any temporary resources consumed by the {@link UndoableOperation}
+   * .
+   * <p>
+   * No exceptions may be thrown.
+   */
+  void reset();
 
-    /**
-     * Attempt to undo the changes, and release any resources consumed.
-     * <p>
-     * No exceptions may be thrown.
-     * 
-     * @return whether the undo was successful or not
-     */
-    boolean undo();
+  /**
+   * Attempt to undo the changes, and release any resources consumed.
+   * <p>
+   * No exceptions may be thrown.
+   * 
+   * @return whether the undo was successful or not
+   */
+  boolean undo();
 }

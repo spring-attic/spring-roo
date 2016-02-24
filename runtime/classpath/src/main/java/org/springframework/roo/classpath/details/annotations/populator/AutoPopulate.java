@@ -17,9 +17,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface AutoPopulate {
-    /**
-     * @return the name of the annotation value to read (defaults to an empty
-     *         string, which denotes the name of the field should be used)
-     */
-    String value() default "";
+  /**
+   * @return the name of the annotation value to read (defaults to an empty
+   *         string, which denotes the name of the field should be used)
+   */
+  String value() default "";
 }

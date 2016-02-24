@@ -11,26 +11,26 @@ import org.springframework.roo.classpath.details.MethodMetadata;
  * @since 1.1.3
  */
 public class MethodMetadataCustomDataKey extends
-        InvocableMemberMetadataCustomDataKey<MethodMetadata> {
+    InvocableMemberMetadataCustomDataKey<MethodMetadata> {
 
-    private final String tag;
+  private final String tag;
 
-    /**
-     * Constructor
-     * 
-     * @param tag
-     */
-    public MethodMetadataCustomDataKey(final String tag) {
-        Validate.notBlank(tag, "Invalid tag '%s'", tag);
-        this.tag = tag;
-    }
+  /**
+   * Constructor
+   * 
+   * @param tag
+   */
+  public MethodMetadataCustomDataKey(final String tag) {
+    Validate.notBlank(tag, "Invalid tag '%s'", tag);
+    this.tag = tag;
+  }
 
-    public String name() {
-        return tag;
-    }
+  public String name() {
+    return tag;
+  }
 
-    @Override
-    public String toString() {
-        return tag;
-    }
+  @Override
+  public String toString() {
+    return tag;
+  }
 }

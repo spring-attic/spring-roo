@@ -9,12 +9,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @since 1.0
  */
 public enum EnumType {
-    ORDINAL, STRING;
+  ORDINAL, STRING;
 
-    @Override
-    public String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("name", name());
-        return builder.toString();
-    }
+  @Override
+  public String toString() {
+    final ToStringBuilder builder = new ToStringBuilder(this);
+    builder.append("name", name());
+    return builder.toString();
+  }
 }

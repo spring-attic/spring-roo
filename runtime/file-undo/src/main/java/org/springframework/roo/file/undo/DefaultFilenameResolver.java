@@ -13,14 +13,12 @@ import org.apache.commons.lang3.Validate;
  */
 public class DefaultFilenameResolver implements FilenameResolver {
 
-    public String getMeaningfulName(final File file) {
-        Validate.notNull(file, "File required");
-        try {
-            return file.getCanonicalPath();
-        }
-        catch (final IOException ioe) {
-            throw new IllegalStateException("Could not resolve filename for '"
-                    + file + "'", ioe);
-        }
+  public String getMeaningfulName(final File file) {
+    Validate.notNull(file, "File required");
+    try {
+      return file.getCanonicalPath();
+    } catch (final IOException ioe) {
+      throw new IllegalStateException("Could not resolve filename for '" + file + "'", ioe);
     }
+  }
 }

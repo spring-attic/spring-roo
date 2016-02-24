@@ -19,17 +19,16 @@ import org.springframework.roo.settings.project.ProjectSettingsServiceImpl;
  */
 public class ProjectSettingsServiceImplTest {
 
-    // Fixture
-    private ProjectSettingsService projectSettingsService;
+  // Fixture
+  private ProjectSettingsService projectSettingsService;
 
-    @Before
-    public void setUp()
-            throws IllegalArgumentException, IllegalAccessException {
-    	projectSettingsService = new ProjectSettingsServiceImpl();
-    }
+  @Before
+  public void setUp() throws IllegalArgumentException, IllegalAccessException {
+    projectSettingsService = new ProjectSettingsServiceImpl();
+  }
 
-    @Test
-    public void testAddProperty() {
-        // TODO
-    }
+  @Test
+  public void testAddProperty() {
+    // TODO
+  }
 }

@@ -17,29 +17,29 @@ import org.springframework.roo.model.CustomDataKey;
  */
 public interface Matcher<T extends CustomDataAccessor> {
 
-    /**
-     * Returns a key indicating the type of custom data returned by
-     * {@link #matches(List)}
-     * 
-     * @return a non-<code>null</code> key
-     */
-    CustomDataKey<T> getCustomDataKey();
+  /**
+   * Returns a key indicating the type of custom data returned by
+   * {@link #matches(List)}
+   * 
+   * @return a non-<code>null</code> key
+   */
+  CustomDataKey<T> getCustomDataKey();
 
-    /**
-     * Returns the value associated with the given key that should be applied to
-     * the matched instance.
-     * 
-     * @param key the custom data key
-     * @return a value (can be null)
-     */
-    Object getTagValue(T key);
+  /**
+   * Returns the value associated with the given key that should be applied to
+   * the matched instance.
+   * 
+   * @param key the custom data key
+   * @return a value (can be null)
+   */
+  Object getTagValue(T key);
 
-    /**
-     * Returns the {@link CustomDataAccessor}s for any elements of the given
-     * list that meet this matcher's inclusion criteria.
-     * 
-     * @param memberHoldingTypeDetailsList the list to check for matches
-     * @return a non-<code>null</code> list
-     */
-    List<T> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList);
+  /**
+   * Returns the {@link CustomDataAccessor}s for any elements of the given
+   * list that meet this matcher's inclusion criteria.
+   * 
+   * @param memberHoldingTypeDetailsList the list to check for matches
+   * @return a non-<code>null</code> list
+   */
+  List<T> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList);
 }

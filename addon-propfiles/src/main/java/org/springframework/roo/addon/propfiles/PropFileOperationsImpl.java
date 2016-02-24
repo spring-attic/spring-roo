@@ -23,60 +23,59 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class PropFileOperationsImpl implements PropFileOperations {
 
-    protected final static Logger LOGGER = HandlerUtils
-            .getLogger(PropFileOperationsImpl.class);
+  protected final static Logger LOGGER = HandlerUtils.getLogger(PropFileOperationsImpl.class);
 
-    @Reference private ProjectOperations projectOperations;
-    @Reference private ApplicationConfigService applicationConfigService;
+  @Reference
+  private ProjectOperations projectOperations;
+  @Reference
+  private ApplicationConfigService applicationConfigService;
 
-    @Override
-    public boolean arePropertiesCommandAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
+  @Override
+  public boolean arePropertiesCommandAvailable() {
+    return projectOperations.isFocusedProjectAvailable();
+  }
+
+  @Override
+  public void addProperty(final String key, final String value, final String profile,
+      final boolean force) {
+    applicationConfigService.addProperty(key, value, profile, force);
+  }
+
+  @Override
+  public void removeProperty(String key, String profile) {
+    applicationConfigService.removeProperty(key, profile);
+
+  }
+
+  @Override
+  public void listProperties(String profile) {
+    Map<String, String> properties = applicationConfigService.getProperties(profile);
+
+    if (properties.size() > 0) {
+
+      printHeader();
+
+      for (Entry<String, String> property : properties.entrySet()) {
+        LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
+      }
+
+    } else {
+      LOGGER.log(Level.INFO, String.format(
+          "WARNING: No properties found on '%s' application config properties file.",
+          applicationConfigService.getSpringConfigLocation(profile)));
     }
 
-    @Override
-    public void addProperty(final String key, final String value,
-            final String profile, final boolean force) {
-        applicationConfigService.addProperty(key, value, profile, force);
-    }
+  }
 
-    @Override
-    public void removeProperty(String key, String profile) {
-        applicationConfigService.removeProperty(key, profile);
-
-    }
-
-    @Override
-    public void listProperties(String profile) {
-        Map<String, String> properties = applicationConfigService
-                .getProperties(profile);
-
-        if (properties.size() > 0) {
-
-            printHeader();
-
-            for (Entry<String, String> property : properties.entrySet()) {
-                LOGGER.log(Level.INFO, property.getKey().concat("=")
-                        .concat(property.getValue()));
-            }
-
-        }
-        else {
-            LOGGER.log(Level.INFO, String.format(
-                    "WARNING: No properties found on '%s' application config properties file.",
-                    applicationConfigService.getSpringConfigLocation(profile)));
-        }
-
-    }
-
-    /**
-     * Method that prints header of Spring Roo Configuration
-     */
-    public void printHeader() {
-        String header = "#===============================================#\n"
-                + "#      APPLICATION CONFIGURATION PROPERTIES     #\n"
-                + "#===============================================#\n";
-        LOGGER.log(Level.INFO, header);
-    }
+  /**
+   * Method that prints header of Spring Roo Configuration
+   */
+  public void printHeader() {
+    String header =
+        "#===============================================#\n"
+            + "#      APPLICATION CONFIGURATION PROPERTIES     #\n"
+            + "#===============================================#\n";
+    LOGGER.log(Level.INFO, header);
+  }
 
 }

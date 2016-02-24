@@ -13,15 +13,15 @@ import org.springframework.roo.addon.dbre.addon.DbreTypeUtils;
  */
 public class DbreTypeUtilsTest {
 
-    @Test
-    public void testSuggestPackageName() {
-        String tableName = "table2";
-        assertEquals("table2", DbreTypeUtils.suggestPackageName(tableName));
+  @Test
+  public void testSuggestPackageName() {
+    String tableName = "table2";
+    assertEquals("table2", DbreTypeUtils.suggestPackageName(tableName));
 
-        tableName = "1Roo-2424";
-        assertEquals("p1roo2424", DbreTypeUtils.suggestPackageName(tableName));
+    tableName = "1Roo-2424";
+    assertEquals("p1roo2424", DbreTypeUtils.suggestPackageName(tableName));
 
-        tableName = "/-roo_2425_p";
-        assertEquals("roo_2425_p", DbreTypeUtils.suggestPackageName(tableName));
-    }
+    tableName = "/-roo_2425_p";
+    assertEquals("roo_2425_p", DbreTypeUtils.suggestPackageName(tableName));
+  }
 }

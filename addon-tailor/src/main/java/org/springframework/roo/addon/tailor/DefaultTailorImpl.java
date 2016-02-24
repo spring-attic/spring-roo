@@ -31,95 +31,84 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 @Component
 public class DefaultTailorImpl implements Tailor {
-    @Reference protected ActionLocator actionLocator;
-    @Reference protected ConfigurationLocator configLocator;
-    @Reference protected Shell shell;
+  @Reference
+  protected ActionLocator actionLocator;
+  @Reference
+  protected ConfigurationLocator configLocator;
+  @Reference
+  protected Shell shell;
 
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(DefaultTailorImpl.class);
-    protected boolean inBlockComment = false;
+  private static final Logger LOGGER = HandlerUtils.getLogger(DefaultTailorImpl.class);
+  protected boolean inBlockComment = false;
 
-    /**
-     * @Inheritdoc
-     */
-    public List<String> sew(String command) {
-        if (StringUtils.isBlank(command)) {
-            return Collections.emptyList();
-        }
-        try {
-            // validate if it is commented
-            final CommentedLine comment = new CommentedLine(command,
-                    inBlockComment);
-            TailorHelper.removeComment(comment);
-            inBlockComment = comment.getInBlockComment();
-            command = comment.getLine();
-            if (StringUtils.isBlank(command)) {
-                return Collections.emptyList();
-            }
-            // parse and tailor
-            final CommandTransformation commandTrafo = new CommandTransformation(
-                    command);
-            execute(commandTrafo);
-            return commandTrafo.getOutputCommands();
-        }
-        catch (final Exception e) {
-            // Do nothing if exception happened
-            LOGGER.log(
-                    Level.WARNING,
-                    "Error tailoring, cancelled command execution: "
-                            + e.getMessage());
-            return Collections.emptyList();
-        }
+  /**
+   * @Inheritdoc
+   */
+  public List<String> sew(String command) {
+    if (StringUtils.isBlank(command)) {
+      return Collections.emptyList();
     }
-
-    // We have to done explicit injection to support API compatibility with STS
-    // shell
-    protected void activate(final ComponentContext context) {
-        if (shell != null) {
-            shell.setTailor(this);
-        }
+    try {
+      // validate if it is commented
+      final CommentedLine comment = new CommentedLine(command, inBlockComment);
+      TailorHelper.removeComment(comment);
+      inBlockComment = comment.getInBlockComment();
+      command = comment.getLine();
+      if (StringUtils.isBlank(command)) {
+        return Collections.emptyList();
+      }
+      // parse and tailor
+      final CommandTransformation commandTrafo = new CommandTransformation(command);
+      execute(commandTrafo);
+      return commandTrafo.getOutputCommands();
+    } catch (final Exception e) {
+      // Do nothing if exception happened
+      LOGGER.log(Level.WARNING, "Error tailoring, cancelled command execution: " + e.getMessage());
+      return Collections.emptyList();
     }
+  }
 
-    protected void deactivate(final ComponentContext context) {
-        if (shell != null) {
-            shell.setTailor(null);
-        }
+  // We have to done explicit injection to support API compatibility with STS
+  // shell
+  protected void activate(final ComponentContext context) {
+    if (shell != null) {
+      shell.setTailor(this);
     }
+  }
 
-    protected void logInDevelopmentMode(final Level level, final String logMsg) {
-        if (shell.isDevelopmentMode()) {
-            LOGGER.log(level, logMsg);
-        }
+  protected void deactivate(final ComponentContext context) {
+    if (shell != null) {
+      shell.setTailor(null);
     }
+  }
 
-    private void execute(final CommandTransformation commandTrafo) {
-        final TailorConfiguration configuration = configLocator
-                .getActiveTailorConfiguration();
-        if (configuration == null) {
-            return;
-        }
-        final CommandConfiguration commandConfig = configuration
-                .getCommandConfigFor(commandTrafo.getInputCommand());
-        if (commandConfig == null) {
-            return;
-        }
-        logInDevelopmentMode(Level.INFO,
-                "Tailor: detected " + commandTrafo.getInputCommand());
-
-        for (final ActionConfig config : commandConfig.getActions()) {
-            final Action component = actionLocator.getAction(config
-                    .getActionTypeId());
-            if (component != null) {
-                logInDevelopmentMode(Level.INFO,
-                        "\tTailoring: " + component.getDescription(config));
-                component.execute(commandTrafo, config);
-            }
-            else {
-                logInDevelopmentMode(
-                        Level.WARNING,
-                        "\tTailoring: Couldn't find action '"
-                                + config.getActionTypeId());
-            }
-        }
+  protected void logInDevelopmentMode(final Level level, final String logMsg) {
+    if (shell.isDevelopmentMode()) {
+      LOGGER.log(level, logMsg);
     }
+  }
+
+  private void execute(final CommandTransformation commandTrafo) {
+    final TailorConfiguration configuration = configLocator.getActiveTailorConfiguration();
+    if (configuration == null) {
+      return;
+    }
+    final CommandConfiguration commandConfig =
+        configuration.getCommandConfigFor(commandTrafo.getInputCommand());
+    if (commandConfig == null) {
+      return;
+    }
+    logInDevelopmentMode(Level.INFO, "Tailor: detected " + commandTrafo.getInputCommand());
+
+    for (final ActionConfig config : commandConfig.getActions()) {
+      final Action component = actionLocator.getAction(config.getActionTypeId());
+      if (component != null) {
+        logInDevelopmentMode(Level.INFO, "\tTailoring: " + component.getDescription(config));
+        component.execute(commandTrafo, config);
+      } else {
+        logInDevelopmentMode(Level.WARNING,
+            "\tTailoring: Couldn't find action '" + config.getActionTypeId());
+      }
+    }
+  }
 }

@@ -8,8 +8,8 @@ package org.springframework.roo.project.packaging;
  */
 public class JarPackagingTest extends PackagingProviderTestCase<JarPackaging> {
 
-    @Override
-    protected JarPackaging getProvider() {
-        return new JarPackaging();
-    }
+  @Override
+  protected JarPackaging getProvider() {
+    return new JarPackaging();
+  }
 }

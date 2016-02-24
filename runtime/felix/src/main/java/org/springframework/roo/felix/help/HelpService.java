@@ -9,14 +9,14 @@ package org.springframework.roo.felix.help;
  */
 public interface HelpService {
 
-	/**
-	 * Obtains Help Reference Guide
-	 */
-	void helpReferenceGuide();
-	
-	/**
-	 * Obtains Help
-	 */
-	void obtainHelp(String buffer);
+  /**
+   * Obtains Help Reference Guide
+   */
+  void helpReferenceGuide();
+
+  /**
+   * Obtains Help
+   */
+  void obtainHelp(String buffer);
 
 }

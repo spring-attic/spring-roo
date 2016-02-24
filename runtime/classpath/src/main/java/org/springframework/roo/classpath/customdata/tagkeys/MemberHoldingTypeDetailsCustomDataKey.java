@@ -11,24 +11,24 @@ import org.springframework.roo.model.CustomDataKey;
  * @since 1.1.3
  */
 public class MemberHoldingTypeDetailsCustomDataKey implements
-        CustomDataKey<MemberHoldingTypeDetails> {
-    private final String name;
+    CustomDataKey<MemberHoldingTypeDetails> {
+  private final String name;
 
-    public MemberHoldingTypeDetailsCustomDataKey(final String name) {
-        this.name = name;
-    }
+  public MemberHoldingTypeDetailsCustomDataKey(final String name) {
+    this.name = name;
+  }
 
-    public boolean meets(final MemberHoldingTypeDetails memberHoldingTypeDetails)
-            throws IllegalStateException {
-        return true;
-    }
+  public boolean meets(final MemberHoldingTypeDetails memberHoldingTypeDetails)
+      throws IllegalStateException {
+    return true;
+  }
 
-    public String name() {
-        return name;
-    }
+  public String name() {
+    return name;
+  }
 
-    @Override
-    public String toString() {
-        return name;
-    }
+  @Override
+  public String toString() {
+    return name;
+  }
 }

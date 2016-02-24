@@ -13,35 +13,34 @@ import org.junit.Test;
  */
 public class JdkJavaTypeTest {
 
-    /**
-     * Asserts that the given {@link JavaType} represents a valid JDK type
-     * 
-     * @param javaType
-     * @throws Exception
-     */
-    private void assertValidJdkType(final JavaType javaType) throws Exception {
-        Class.forName(javaType.getFullyQualifiedTypeName());
-    }
+  /**
+   * Asserts that the given {@link JavaType} represents a valid JDK type
+   * 
+   * @param javaType
+   * @throws Exception
+   */
+  private void assertValidJdkType(final JavaType javaType) throws Exception {
+    Class.forName(javaType.getFullyQualifiedTypeName());
+  }
 
-    /**
-     * Indicates whether the given field is a public constant
-     * 
-     * @param field the field to check (required)
-     * @return see above
-     */
-    private boolean isPublicConstant(final Field field) {
-        final int modifiers = field.getModifiers();
-        return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)
-                && Modifier.isFinal(modifiers);
-    }
+  /**
+   * Indicates whether the given field is a public constant
+   * 
+   * @param field the field to check (required)
+   * @return see above
+   */
+  private boolean isPublicConstant(final Field field) {
+    final int modifiers = field.getModifiers();
+    return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)
+        && Modifier.isFinal(modifiers);
+  }
 
-    @Test
-    public void testClassNamesAreActualJdkTypes() throws Exception {
-        for (final Field field : JdkJavaType.class.getDeclaredFields()) {
-            if (isPublicConstant(field)
-                    && JavaType.class.equals(field.getType())) {
-                assertValidJdkType((JavaType) field.get(null));
-            }
-        }
+  @Test
+  public void testClassNamesAreActualJdkTypes() throws Exception {
+    for (final Field field : JdkJavaType.class.getDeclaredFields()) {
+      if (isPublicConstant(field) && JavaType.class.equals(field.getType())) {
+        assertValidJdkType((JavaType) field.get(null));
+      }
     }
+  }
 }

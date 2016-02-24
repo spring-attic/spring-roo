@@ -15,31 +15,31 @@ import org.springframework.roo.model.JavaSymbolName;
  * @param <Y> the type of each {@link AnnotationAttributeValue}
  */
 public class ArrayAttributeValue<Y extends AnnotationAttributeValue<?>> extends
-        AbstractAnnotationAttributeValue<List<Y>> {
+    AbstractAnnotationAttributeValue<List<Y>> {
 
-    private final List<Y> value;
+  private final List<Y> value;
 
-    /**
-     * Constructor
-     * 
-     * @param name the attribute name (required)
-     * @param value the attribute values (required)
-     */
-    public ArrayAttributeValue(final JavaSymbolName name, final List<Y> value) {
-        super(name);
-        Validate.notNull(value, "Value required");
-        this.value = value;
-    }
+  /**
+   * Constructor
+   * 
+   * @param name the attribute name (required)
+   * @param value the attribute values (required)
+   */
+  public ArrayAttributeValue(final JavaSymbolName name, final List<Y> value) {
+    super(name);
+    Validate.notNull(value, "Value required");
+    this.value = value;
+  }
 
-    /**
-     * Returns an unmodifiable copy of the array values
-     */
-    public List<Y> getValue() {
-        return Collections.unmodifiableList(value);
-    }
+  /**
+   * Returns an unmodifiable copy of the array values
+   */
+  public List<Y> getValue() {
+    return Collections.unmodifiableList(value);
+  }
 
-    @Override
-    public String toString() {
-        return getName() + " -> {" + StringUtils.join(value, ",") + "}";
-    }
+  @Override
+  public String toString() {
+    return getName() + " -> {" + StringUtils.join(value, ",") + "}";
+  }
 }

@@ -9,12 +9,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * @since 1.0
  */
 public enum InheritanceType {
-    JOINED, SINGLE_TABLE, TABLE_PER_CLASS;
+  JOINED, SINGLE_TABLE, TABLE_PER_CLASS;
 
-    @Override
-    public String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("name", name());
-        return builder.toString();
-    }
+  @Override
+  public String toString() {
+    final ToStringBuilder builder = new ToStringBuilder(this);
+    builder.append("name", name());
+    return builder.toString();
+  }
 }

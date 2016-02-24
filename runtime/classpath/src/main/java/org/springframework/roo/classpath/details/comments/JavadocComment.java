@@ -5,10 +5,9 @@ package org.springframework.roo.classpath.details.comments;
  */
 public class JavadocComment extends AbstractComment {
 
-    public JavadocComment() {
-    }
+  public JavadocComment() {}
 
-    public JavadocComment(String comment) {
-        super(comment);
-    }
+  public JavadocComment(String comment) {
+    super(comment);
+  }
 }

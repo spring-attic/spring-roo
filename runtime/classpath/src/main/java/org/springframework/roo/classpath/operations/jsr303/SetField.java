@@ -43,93 +43,84 @@ import org.springframework.roo.model.JavaType;
  */
 public class SetField extends CollectionField {
 
-    private final Cardinality cardinality;
+  private final Cardinality cardinality;
 
-    private Fetch fetch;
-    /**
-     * Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be
-     * added
-     */
-    private JavaSymbolName mappedBy;
+  private Fetch fetch;
+  /**
+   * Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be
+   * added
+   */
+  private JavaSymbolName mappedBy;
 
-    public SetField(final String physicalTypeIdentifier,
-            final JavaType fieldType, final JavaSymbolName fieldName,
-            final JavaType genericParameterTypeName,
-            final Cardinality cardinality) {
-        super(physicalTypeIdentifier, fieldType, fieldName,
-                genericParameterTypeName);
-        this.cardinality = cardinality;
-    }
+  public SetField(final String physicalTypeIdentifier, final JavaType fieldType,
+      final JavaSymbolName fieldName, final JavaType genericParameterTypeName,
+      final Cardinality cardinality) {
+    super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName);
+    this.cardinality = cardinality;
+  }
 
-    @Override
-    public void decorateAnnotationsList(
-            final List<AnnotationMetadataBuilder> annotations) {
-        super.decorateAnnotationsList(annotations);
-        final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+  @Override
+  public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
+    super.decorateAnnotationsList(annotations);
+    final List<AnnotationAttributeValue<?>> attributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
 
-        if (cardinality == null) {
-            // Assume set field is an enum
-            annotations.add(new AnnotationMetadataBuilder(ELEMENT_COLLECTION));
+    if (cardinality == null) {
+      // Assume set field is an enum
+      annotations.add(new AnnotationMetadataBuilder(ELEMENT_COLLECTION));
+    } else {
+      attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(
+          CASCADE_TYPE, new JavaSymbolName("ALL"))));
+      if (fetch != null) {
+        JavaSymbolName value = new JavaSymbolName("EAGER");
+        if (fetch == Fetch.LAZY) {
+          value = new JavaSymbolName("LAZY");
         }
-        else {
-            attributes.add(new EnumAttributeValue(
-                    new JavaSymbolName("cascade"), new EnumDetails(
-                            CASCADE_TYPE, new JavaSymbolName("ALL"))));
-            if (fetch != null) {
-                JavaSymbolName value = new JavaSymbolName("EAGER");
-                if (fetch == Fetch.LAZY) {
-                    value = new JavaSymbolName("LAZY");
-                }
-                attributes.add(new EnumAttributeValue(new JavaSymbolName(
-                        "fetch"), new EnumDetails(FETCH_TYPE, value)));
-            }
-            if (mappedBy != null) {
-                attributes.add(new StringAttributeValue(new JavaSymbolName(
-                        "mappedBy"), mappedBy.getSymbolName()));
-            }
+        attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(
+            FETCH_TYPE, value)));
+      }
+      if (mappedBy != null) {
+        attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy
+            .getSymbolName()));
+      }
 
-            switch (cardinality) {
-            case ONE_TO_MANY:
-                annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY,
-                        attributes));
-                break;
-            case MANY_TO_MANY:
-                annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY,
-                        attributes));
-                break;
-            case ONE_TO_ONE:
-                annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE,
-                        attributes));
-                break;
-            default:
-                annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE,
-                        attributes));
-                break;
-            }
-        }
+      switch (cardinality) {
+        case ONE_TO_MANY:
+          annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY, attributes));
+          break;
+        case MANY_TO_MANY:
+          annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY, attributes));
+          break;
+        case ONE_TO_ONE:
+          annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE, attributes));
+          break;
+        default:
+          annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE, attributes));
+          break;
+      }
     }
+  }
 
-    public Fetch getFetch() {
-        return fetch;
-    }
+  public Fetch getFetch() {
+    return fetch;
+  }
 
-    @Override
-    public JavaType getInitializer() {
-        final List<JavaType> params = new ArrayList<JavaType>();
-        params.add(getGenericParameterTypeName());
-        return new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0,
-                DataType.TYPE, null, params);
-    }
+  @Override
+  public JavaType getInitializer() {
+    final List<JavaType> params = new ArrayList<JavaType>();
+    params.add(getGenericParameterTypeName());
+    return new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params);
+  }
 
-    public JavaSymbolName getMappedBy() {
-        return mappedBy;
-    }
+  public JavaSymbolName getMappedBy() {
+    return mappedBy;
+  }
 
-    public void setFetch(final Fetch fetch) {
-        this.fetch = fetch;
-    }
+  public void setFetch(final Fetch fetch) {
+    this.fetch = fetch;
+  }
 
-    public void setMappedBy(final JavaSymbolName mappedBy) {
-        this.mappedBy = mappedBy;
-    }
+  public void setMappedBy(final JavaSymbolName mappedBy) {
+    this.mappedBy = mappedBy;
+  }
 }

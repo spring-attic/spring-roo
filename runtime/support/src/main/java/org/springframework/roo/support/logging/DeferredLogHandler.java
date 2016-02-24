@@ -34,104 +34,102 @@ import org.apache.commons.lang3.Validate;
  */
 public class DeferredLogHandler extends Handler {
 
-    private final Handler fallbackHandler;
-    private boolean fallbackMode = false;
-    private final Level fallbackPushLevel;
-    private final List<LogRecord> logRecords = Collections
-            .synchronizedList(new ArrayList<LogRecord>());
-    private Handler targetHandler;
+  private final Handler fallbackHandler;
+  private boolean fallbackMode = false;
+  private final Level fallbackPushLevel;
+  private final List<LogRecord> logRecords = Collections
+      .synchronizedList(new ArrayList<LogRecord>());
+  private Handler targetHandler;
 
-    /**
-     * Creates an instance that will publish all recorded {@link LogRecord}
-     * instances to the specified fallback {@link Handler} if an event of the
-     * specified {@link Level} is received.
-     * 
-     * @param fallbackHandler to publish events to (mandatory)
-     * @param fallbackPushLevel the level which will trigger an event
-     *            publication (mandatory)
-     */
-    public DeferredLogHandler(final Handler fallbackHandler,
-            final Level fallbackPushLevel) {
-        Validate.notNull(fallbackHandler, "Fallback handler required");
-        Validate.notNull(fallbackPushLevel, "Fallback push level required");
-        this.fallbackHandler = fallbackHandler;
-        this.fallbackPushLevel = fallbackPushLevel;
-    }
+  /**
+   * Creates an instance that will publish all recorded {@link LogRecord}
+   * instances to the specified fallback {@link Handler} if an event of the
+   * specified {@link Level} is received.
+   * 
+   * @param fallbackHandler to publish events to (mandatory)
+   * @param fallbackPushLevel the level which will trigger an event
+   *            publication (mandatory)
+   */
+  public DeferredLogHandler(final Handler fallbackHandler, final Level fallbackPushLevel) {
+    Validate.notNull(fallbackHandler, "Fallback handler required");
+    Validate.notNull(fallbackPushLevel, "Fallback push level required");
+    this.fallbackHandler = fallbackHandler;
+    this.fallbackPushLevel = fallbackPushLevel;
+  }
 
-    @Override
-    public void close() throws SecurityException {
-        if (targetHandler == null) {
-            fallbackMode = true;
-        }
-        if (fallbackMode) {
-            publishLogRecordsTo(fallbackHandler);
-            fallbackHandler.close();
-            return;
-        }
-        targetHandler.close();
+  @Override
+  public void close() throws SecurityException {
+    if (targetHandler == null) {
+      fallbackMode = true;
     }
+    if (fallbackMode) {
+      publishLogRecordsTo(fallbackHandler);
+      fallbackHandler.close();
+      return;
+    }
+    targetHandler.close();
+  }
 
-    @Override
-    public void flush() {
-        if (targetHandler == null) {
-            fallbackMode = true;
-        }
-        if (fallbackMode) {
-            publishLogRecordsTo(fallbackHandler);
-            fallbackHandler.flush();
-            return;
-        }
-        targetHandler.flush();
+  @Override
+  public void flush() {
+    if (targetHandler == null) {
+      fallbackMode = true;
     }
+    if (fallbackMode) {
+      publishLogRecordsTo(fallbackHandler);
+      fallbackHandler.flush();
+      return;
+    }
+    targetHandler.flush();
+  }
 
-    /**
-     * @return the target {@link Handler}, or null if there is no target
-     *         {@link Handler} defined so far
-     */
-    public Handler getTargetHandler() {
-        return targetHandler;
-    }
+  /**
+   * @return the target {@link Handler}, or null if there is no target
+   *         {@link Handler} defined so far
+   */
+  public Handler getTargetHandler() {
+    return targetHandler;
+  }
 
-    /**
-     * Stores the log record internally.
-     */
-    @Override
-    public void publish(final LogRecord record) {
-        if (!isLoggable(record)) {
-            return;
-        }
-        if (fallbackMode) {
-            fallbackHandler.publish(record);
-            return;
-        }
-        if (targetHandler != null) {
-            targetHandler.publish(record);
-            return;
-        }
-        synchronized (logRecords) {
-            logRecords.add(record);
-        }
-        if (!fallbackMode
-                && record.getLevel().intValue() >= fallbackPushLevel.intValue()) {
-            fallbackMode = true;
-            publishLogRecordsTo(fallbackHandler);
-        }
+  /**
+   * Stores the log record internally.
+   */
+  @Override
+  public void publish(final LogRecord record) {
+    if (!isLoggable(record)) {
+      return;
     }
+    if (fallbackMode) {
+      fallbackHandler.publish(record);
+      return;
+    }
+    if (targetHandler != null) {
+      targetHandler.publish(record);
+      return;
+    }
+    synchronized (logRecords) {
+      logRecords.add(record);
+    }
+    if (!fallbackMode && record.getLevel().intValue() >= fallbackPushLevel.intValue()) {
+      fallbackMode = true;
+      publishLogRecordsTo(fallbackHandler);
+    }
+  }
 
-    private void publishLogRecordsTo(final Handler destination) {
-        synchronized (logRecords) {
-            for (final LogRecord record : logRecords) {
-                destination.publish(record);
-            }
-            logRecords.clear();
-        }
+  private void publishLogRecordsTo(final Handler destination) {
+    synchronized (logRecords) {
+      for (final LogRecord record : logRecords) {
+        destination.publish(record);
+      }
+      logRecords.clear();
     }
+  }
 
-    public void setTargetHandler(final Handler targetHandler) {
-        Validate.notNull(targetHandler, "Must specify a target handler");
-        this.targetHandler = targetHandler;
-        if (!fallbackMode) {
-            publishLogRecordsTo(this.targetHandler);
-        }
+  public void setTargetHandler(final Handler targetHandler) {
+    Validate.notNull(targetHandler, "Must specify a target handler");
+    this.targetHandler = targetHandler;
+    if (!fallbackMode) {
+      publishLogRecordsTo(this.targetHandler);
     }
+  }
 }

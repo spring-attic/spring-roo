@@ -15,19 +15,18 @@ import org.springframework.roo.shell.MethodTarget;
  */
 public class BigIntegerConverter implements Converter<BigInteger> {
 
-    public BigInteger convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        return new BigInteger(value);
-    }
+  public BigInteger convertFromText(final String value, final Class<?> requiredType,
+      final String optionContext) {
+    return new BigInteger(value);
+  }
 
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String existingData,
-            final String optionContext, final MethodTarget target) {
-        return false;
-    }
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String existingData, final String optionContext,
+      final MethodTarget target) {
+    return false;
+  }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return BigInteger.class.isAssignableFrom(requiredType);
-    }
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return BigInteger.class.isAssignableFrom(requiredType);
+  }
 }

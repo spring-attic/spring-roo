@@ -8,8 +8,8 @@ package org.springframework.roo.project.packaging;
  */
 public class PomPackagingTest extends PackagingProviderTestCase<PomPackaging> {
 
-    @Override
-    protected PomPackaging getProvider() {
-        return new PomPackaging();
-    }
+  @Override
+  protected PomPackaging getProvider() {
+    return new PomPackaging();
+  }
 }

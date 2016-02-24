@@ -29,9 +29,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface CliAvailabilityIndicator {
 
-    /**
-     * @return the name of the command or commands that this availability
-     *         indicator represents
-     */
-    String[] value();
+  /**
+   * @return the name of the command or commands that this availability
+   *         indicator represents
+   */
+  String[] value();
 }

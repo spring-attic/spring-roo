@@ -24,28 +24,27 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class OsCommands implements CommandMarker {
 
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(OsCommands.class);
+  private static final Logger LOGGER = HandlerUtils.getLogger(OsCommands.class);
 
-    @Reference private OsOperations osOperations;
+  @Reference
+  private OsOperations osOperations;
 
-    @CliCommand(value = "!", help = "Allows execution of operating system (OS) commands.")
-    public void command(
-            @CliOption(key = { "", "command" }, mandatory = false, specifiedDefaultValue = "", unspecifiedDefaultValue = "", help = "The command to execute") final String command) {
+  @CliCommand(value = "!", help = "Allows execution of operating system (OS) commands.")
+  public void command(
+      @CliOption(key = {"", "command"}, mandatory = false, specifiedDefaultValue = "",
+          unspecifiedDefaultValue = "", help = "The command to execute") final String command) {
 
-        if (StringUtils.isNotBlank(command)) {
-            try {
-                osOperations.executeCommand(command);
-            }
-            catch (final IOException e) {
-                LOGGER.severe("Unable to execute command " + command + " ["
-                        + e.getMessage() + "]");
-            }
-        }
+    if (StringUtils.isNotBlank(command)) {
+      try {
+        osOperations.executeCommand(command);
+      } catch (final IOException e) {
+        LOGGER.severe("Unable to execute command " + command + " [" + e.getMessage() + "]");
+      }
     }
+  }
 
-    @CliAvailabilityIndicator("!")
-    public boolean isCommandAvailable() {
-        return true; // This command is always available!
-    }
+  @CliAvailabilityIndicator("!")
+  public boolean isCommandAvailable() {
+    return true; // This command is always available!
+  }
 }

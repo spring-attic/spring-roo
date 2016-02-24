@@ -5,11 +5,11 @@ package org.springframework.roo.classpath.details.comments;
  */
 public class LineComment extends AbstractComment {
 
-    public LineComment() {
+  public LineComment() {
 
-    }
+  }
 
-    public LineComment(String comment) {
-        super(comment);
-    }
+  public LineComment(String comment) {
+    super(comment);
+  }
 }

@@ -24,78 +24,75 @@ import org.springframework.roo.support.util.CollectionUtils;
  */
 @Component
 @Service
-@Reference(name = "config", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = TailorConfigurationFactory.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+@Reference(name = "config", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC,
+    referenceInterface = TailorConfigurationFactory.class,
+    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultConfigurationLocator implements ConfigurationLocator {
 
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(DefaultConfigurationLocator.class);
+  private static final Logger LOGGER = HandlerUtils.getLogger(DefaultConfigurationLocator.class);
 
-    /**
-     * Name of currently activated configuration
-     */
-    private String activatedTailorConfigName = null;
+  /**
+   * Name of currently activated configuration
+   */
+  private String activatedTailorConfigName = null;
 
-    /**
-     * Map of all available configurations - dynamically bound by Felix on
-     * startup
-     */
-    private final Map<String, TailorConfiguration> configurations = new LinkedHashMap<String, TailorConfiguration>();
+  /**
+   * Map of all available configurations - dynamically bound by Felix on
+   * startup
+   */
+  private final Map<String, TailorConfiguration> configurations =
+      new LinkedHashMap<String, TailorConfiguration>();
 
-    public TailorConfiguration getActiveTailorConfiguration() {
+  public TailorConfiguration getActiveTailorConfiguration() {
 
-        return configurations.get(activatedTailorConfigName);
+    return configurations.get(activatedTailorConfigName);
+  }
+
+  public Map<String, TailorConfiguration> getAvailableConfigurations() {
+
+    return configurations;
+  }
+
+  public void setActiveTailorConfiguration(final String name) {
+    if (name == null) {
+      activatedTailorConfigName = null;
+      LOGGER.info("Tailor deactivated");
+      return;
     }
-
-    public Map<String, TailorConfiguration> getAvailableConfigurations() {
-
-        return configurations;
+    if (configurations.get(name) != null) {
+      activatedTailorConfigName = name;
+    } else {
+      LOGGER.severe("Couldn't activate tailor configuration '" + name + "', not available.");
     }
+  }
 
-    public void setActiveTailorConfiguration(final String name) {
-        if (name == null) {
-            activatedTailorConfigName = null;
-            LOGGER.info("Tailor deactivated");
-            return;
-        }
-        if (configurations.get(name) != null) {
-            activatedTailorConfigName = name;
-        }
-        else {
-            LOGGER.severe("Couldn't activate tailor configuration '" + name
-                    + "', not available.");
-        }
+  protected void bindConfig(final TailorConfigurationFactory factory) {
+    final List<TailorConfiguration> configs = factory.createTailorConfiguration();
+    if (CollectionUtils.isEmpty(configs)) {
+      return;
     }
+    for (final TailorConfiguration config : configs) {
+      if (configurations.get(config.getName()) != null) {
+        LOGGER.warning("TailorConfiguration duplicate '" + config.getName()
+            + "', not binding again: " + config.toString());
+      }
+      if (config.isActive()) {
+        activatedTailorConfigName = config.getName();
+      }
+      configurations.put(config.getName(), config);
+    }
+  }
 
-    protected void bindConfig(final TailorConfigurationFactory factory) {
-        final List<TailorConfiguration> configs = factory
-                .createTailorConfiguration();
-        if (CollectionUtils.isEmpty(configs)) {
-            return;
-        }
-        for (final TailorConfiguration config : configs) {
-            if (configurations.get(config.getName()) != null) {
-                LOGGER.warning("TailorConfiguration duplicate '"
-                        + config.getName() + "', not binding again: "
-                        + config.toString());
-            }
-            if (config.isActive()) {
-                activatedTailorConfigName = config.getName();
-            }
-            configurations.put(config.getName(), config);
-        }
+  protected void unbindConfig(final TailorConfigurationFactory factory) {
+    // TODO It's a little unelegant to call "create" method here again, but
+    // we need the name...
+    final List<TailorConfiguration> configs = factory.createTailorConfiguration();
+    if (CollectionUtils.isEmpty(configs)) {
+      return;
     }
-
-    protected void unbindConfig(final TailorConfigurationFactory factory) {
-        // TODO It's a little unelegant to call "create" method here again, but
-        // we need the name...
-        final List<TailorConfiguration> configs = factory
-                .createTailorConfiguration();
-        if (CollectionUtils.isEmpty(configs)) {
-            return;
-        }
-        for (final TailorConfiguration config : configs) {
-            configurations.remove(config.getName());
-        }
+    for (final TailorConfiguration config : configs) {
+      configurations.remove(config.getName());
     }
+  }
 
 }

@@ -26,34 +26,33 @@ import org.springframework.roo.model.RooJavaType;
 @Service
 public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
 
-    private final Map<JavaType, Set<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, Set<ClassOrInterfaceTypeDetails>>();
-    @Reference private TypeLocationService typeLocationService;
+  private final Map<JavaType, Set<ClassOrInterfaceTypeDetails>> cacheMap =
+      new HashMap<JavaType, Set<ClassOrInterfaceTypeDetails>>();
+  @Reference
+  private TypeLocationService typeLocationService;
 
-    public Collection<ClassOrInterfaceTypeDetails> getRepositories(
-            final JavaType domainType) {
-        if (!cacheMap.containsKey(domainType)) {
-            cacheMap.put(domainType, new HashSet<ClassOrInterfaceTypeDetails>());
-        }
-        final Set<ClassOrInterfaceTypeDetails> existing = cacheMap
-                .get(domainType);
-        final Set<ClassOrInterfaceTypeDetails> located = typeLocationService
-                .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
-        if (existing.containsAll(located)) {
-            return existing;
-        }
-        final Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
-        for (final ClassOrInterfaceTypeDetails cid : located) {
-            final RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(
-                    new DefaultPhysicalTypeMetadata(
-                            cid.getDeclaredByMetadataId(),
-                            typeLocationService
-                                    .getPhysicalTypeCanonicalPath(cid
-                                            .getDeclaredByMetadataId()), cid));
-            if (annotationValues.getEntity() != null
-                    && annotationValues.getEntity().equals(domainType)) {
-                toReturn.put(cid.getDeclaredByMetadataId(), cid);
-            }
-        }
-        return toReturn.values();
+  public Collection<ClassOrInterfaceTypeDetails> getRepositories(final JavaType domainType) {
+    if (!cacheMap.containsKey(domainType)) {
+      cacheMap.put(domainType, new HashSet<ClassOrInterfaceTypeDetails>());
     }
+    final Set<ClassOrInterfaceTypeDetails> existing = cacheMap.get(domainType);
+    final Set<ClassOrInterfaceTypeDetails> located =
+        typeLocationService
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+    if (existing.containsAll(located)) {
+      return existing;
+    }
+    final Map<String, ClassOrInterfaceTypeDetails> toReturn =
+        new HashMap<String, ClassOrInterfaceTypeDetails>();
+    for (final ClassOrInterfaceTypeDetails cid : located) {
+      final RepositoryJpaAnnotationValues annotationValues =
+          new RepositoryJpaAnnotationValues(new DefaultPhysicalTypeMetadata(
+              cid.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(cid
+                  .getDeclaredByMetadataId()), cid));
+      if (annotationValues.getEntity() != null && annotationValues.getEntity().equals(domainType)) {
+        toReturn.put(cid.getDeclaredByMetadataId(), cid);
+      }
+    }
+    return toReturn.values();
+  }
 }

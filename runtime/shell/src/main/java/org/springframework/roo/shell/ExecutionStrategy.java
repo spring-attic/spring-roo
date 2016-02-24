@@ -13,29 +13,29 @@ package org.springframework.roo.shell;
  */
 public interface ExecutionStrategy {
 
-    /**
-     * Executes the method indicated by the {@link ParseResult}.
-     * 
-     * @param parseResult that should be executed (never presented as null)
-     * @return an object which will be rendered by the {@link Shell}
-     *         implementation (may return null)
-     * @throws RuntimeException which is handled by the {@link Shell}
-     *             implementation
-     */
-    Object execute(ParseResult parseResult) throws RuntimeException;
+  /**
+   * Executes the method indicated by the {@link ParseResult}.
+   * 
+   * @param parseResult that should be executed (never presented as null)
+   * @return an object which will be rendered by the {@link Shell}
+   *         implementation (may return null)
+   * @throws RuntimeException which is handled by the {@link Shell}
+   *             implementation
+   */
+  Object execute(ParseResult parseResult) throws RuntimeException;
 
-    /**
-     * Indicates commands are able to be presented. This generally means all
-     * important system startup activities have completed.
-     * 
-     * @return whether commands can be presented for processing at this time
-     */
-    boolean isReadyForCommands();
+  /**
+   * Indicates commands are able to be presented. This generally means all
+   * important system startup activities have completed.
+   * 
+   * @return whether commands can be presented for processing at this time
+   */
+  boolean isReadyForCommands();
 
-    /**
-     * Indicates the execution runtime should be terminated. This allows it to
-     * cleanup before returning control flow to the caller. Necessary for clean
-     * shutdowns.
-     */
-    void terminate();
+  /**
+   * Indicates the execution runtime should be terminated. This allows it to
+   * cleanup before returning control flow to the caller. Necessary for clean
+   * shutdowns.
+   */
+  void terminate();
 }

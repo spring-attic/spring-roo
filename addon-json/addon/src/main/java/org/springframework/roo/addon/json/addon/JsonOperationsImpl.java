@@ -26,67 +26,66 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class JsonOperationsImpl implements JsonOperations {
 
-    @Reference private ProjectOperations projectOperations;
-    @Reference private TypeLocationService typeLocationService;
-    @Reference private TypeManagementService typeManagementService;
+  @Reference
+  private ProjectOperations projectOperations;
+  @Reference
+  private TypeLocationService typeLocationService;
+  @Reference
+  private TypeManagementService typeManagementService;
 
-    public void annotateAll() {
-        annotateAll(false, false);
+  public void annotateAll() {
+    annotateAll(false, false);
+  }
+
+  public void annotateAll(final boolean deepSerialize) {
+    annotateAll(deepSerialize, false);
+  }
+
+  public void annotateAll(final boolean deepSerialize, final boolean iso8601Dates) {
+    for (final JavaType type : typeLocationService.findTypesWithAnnotation(ROO_JAVA_BEAN)) {
+      annotateType(type, "", deepSerialize, iso8601Dates);
+    }
+  }
+
+  public void annotateType(final JavaType javaType, final String rootName) {
+    annotateType(javaType, rootName, false);
+  }
+
+  public void annotateType(final JavaType javaType, final String rootName,
+      final boolean deepSerialize) {
+    annotateType(javaType, rootName, false, false);
+  }
+
+  public void annotateType(final JavaType javaType, final String rootName,
+      final boolean deepSerialize, final boolean iso8601Dates) {
+    Validate.notNull(javaType, "Java type required");
+
+    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
+    if (cid == null) {
+      throw new IllegalArgumentException("Cannot locate source for '"
+          + javaType.getFullyQualifiedTypeName() + "'");
     }
 
-    public void annotateAll(final boolean deepSerialize) {
-        annotateAll(deepSerialize, false);
+    if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_JSON) == null) {
+      final AnnotationMetadataBuilder annotationBuilder =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_JSON);
+      if (rootName != null && rootName.length() > 0) {
+        annotationBuilder.addStringAttribute("rootName", rootName);
+      }
+      if (deepSerialize) {
+        annotationBuilder.addBooleanAttribute("deepSerialize", true);
+      }
+      if (iso8601Dates) {
+        annotationBuilder.addBooleanAttribute("iso8601Dates", true);
+      }
+      final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(cid);
+      cidBuilder.addAnnotation(annotationBuilder);
+      typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
     }
+  }
 
-    public void annotateAll(final boolean deepSerialize,
-            final boolean iso8601Dates) {
-        for (final JavaType type : typeLocationService
-                .findTypesWithAnnotation(ROO_JAVA_BEAN)) {
-            annotateType(type, "", deepSerialize, iso8601Dates);
-        }
-    }
-
-    public void annotateType(final JavaType javaType, final String rootName) {
-        annotateType(javaType, rootName, false);
-    }
-
-    public void annotateType(final JavaType javaType, final String rootName,
-            final boolean deepSerialize) {
-        annotateType(javaType, rootName, false, false);
-    }
-
-    public void annotateType(final JavaType javaType, final String rootName,
-            final boolean deepSerialize, final boolean iso8601Dates) {
-        Validate.notNull(javaType, "Java type required");
-
-        final ClassOrInterfaceTypeDetails cid = typeLocationService
-                .getTypeDetails(javaType);
-        if (cid == null) {
-            throw new IllegalArgumentException("Cannot locate source for '"
-                    + javaType.getFullyQualifiedTypeName() + "'");
-        }
-
-        if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(),
-                RooJavaType.ROO_JSON) == null) {
-            final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(
-                    RooJavaType.ROO_JSON);
-            if (rootName != null && rootName.length() > 0) {
-                annotationBuilder.addStringAttribute("rootName", rootName);
-            }
-            if (deepSerialize) {
-                annotationBuilder.addBooleanAttribute("deepSerialize", true);
-            }
-            if (iso8601Dates) {
-                annotationBuilder.addBooleanAttribute("iso8601Dates", true);
-            }
-            final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                    cid);
-            cidBuilder.addAnnotation(annotationBuilder);
-            typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-        }
-    }
-
-    public boolean isJsonInstallationPossible() {
-        return projectOperations.isFocusedProjectAvailable();
-    }
+  public boolean isJsonInstallationPossible() {
+    return projectOperations.isFocusedProjectAvailable();
+  }
 }

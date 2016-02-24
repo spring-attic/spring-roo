@@ -7,5 +7,5 @@ package org.springframework.roo.addon.email.annotations;
  * @since 2.0
  */
 public @interface RooSimpleMailMessageConfig {
-    
+
 }

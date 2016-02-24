@@ -8,6 +8,5 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @author Alan Stewart
  * @since 1.1
  */
-public interface SerializableMetadataProvider extends
-        ItdTriggerBasedMetadataProvider {
+public interface SerializableMetadataProvider extends ItdTriggerBasedMetadataProvider {
 }

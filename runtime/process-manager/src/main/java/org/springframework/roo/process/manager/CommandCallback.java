@@ -9,10 +9,10 @@ package org.springframework.roo.process.manager;
  */
 public interface CommandCallback<T> {
 
-    /**
-     * Execute the user-defined logic.
-     * 
-     * @return a result of the logic (can be null)
-     */
-    T callback();
+  /**
+   * Execute the user-defined logic.
+   * 
+   * @return a result of the logic (can be null)
+   */
+  T callback();
 }

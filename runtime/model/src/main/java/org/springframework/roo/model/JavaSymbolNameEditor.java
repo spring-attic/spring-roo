@@ -13,22 +13,22 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class JavaSymbolNameEditor extends PropertyEditorSupport {
 
-    @Override
-    public String getAsText() {
-        final JavaSymbolName obj = (JavaSymbolName) getValue();
-        if (obj == null) {
-            return null;
-        }
-        return obj.getSymbolName();
+  @Override
+  public String getAsText() {
+    final JavaSymbolName obj = (JavaSymbolName) getValue();
+    if (obj == null) {
+      return null;
     }
+    return obj.getSymbolName();
+  }
 
-    @Override
-    public void setAsText(String text) throws IllegalArgumentException {
-        if (text == null || "".equals(text)) {
-            setValue(null);
-        }
-        // Symbol names never start with a capital
-        text = StringUtils.uncapitalize(text);
-        setValue(new JavaSymbolName(text));
+  @Override
+  public void setAsText(String text) throws IllegalArgumentException {
+    if (text == null || "".equals(text)) {
+      setValue(null);
     }
+    // Symbol names never start with a capital
+    text = StringUtils.uncapitalize(text);
+    setValue(new JavaSymbolName(text));
+  }
 }

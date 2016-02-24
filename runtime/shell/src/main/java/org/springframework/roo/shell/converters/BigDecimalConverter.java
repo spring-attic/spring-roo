@@ -15,19 +15,18 @@ import org.springframework.roo.shell.MethodTarget;
  */
 public class BigDecimalConverter implements Converter<BigDecimal> {
 
-    public BigDecimal convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        return new BigDecimal(value);
-    }
+  public BigDecimal convertFromText(final String value, final Class<?> requiredType,
+      final String optionContext) {
+    return new BigDecimal(value);
+  }
 
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String existingData,
-            final String optionContext, final MethodTarget target) {
-        return false;
-    }
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String existingData, final String optionContext,
+      final MethodTarget target) {
+    return false;
+  }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return BigDecimal.class.isAssignableFrom(requiredType);
-    }
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return BigDecimal.class.isAssignableFrom(requiredType);
+  }
 }

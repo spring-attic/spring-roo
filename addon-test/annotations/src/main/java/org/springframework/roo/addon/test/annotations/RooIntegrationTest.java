@@ -15,29 +15,29 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface RooIntegrationTest {
 
-    boolean count() default true;
+  boolean count() default true;
 
-    /**
-     * @return the type of class that will have an entity test created
-     *         (required; must offer entity services)
-     */
-    Class<?> entity();
+  /**
+   * @return the type of class that will have an entity test created
+   *         (required; must offer entity services)
+   */
+  Class<?> entity();
 
-    boolean find() default true;
+  boolean find() default true;
 
-    boolean findAll() default true;
+  boolean findAll() default true;
 
-    int findAllMaximum() default 250;
+  int findAllMaximum() default 250;
 
-    boolean findEntries() default true;
+  boolean findEntries() default true;
 
-    boolean flush() default true;
+  boolean flush() default true;
 
-    boolean merge() default true;
+  boolean merge() default true;
 
-    boolean persist() default true;
+  boolean persist() default true;
 
-    boolean remove() default true;
+  boolean remove() default true;
 
-    boolean transactional() default true;
+  boolean transactional() default true;
 }

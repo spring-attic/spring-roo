@@ -21,23 +21,27 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class WebFinderCommands implements CommandMarker {
 
-    @Reference private WebFinderOperations webFinderOperations;
+  @Reference
+  private WebFinderOperations webFinderOperations;
 
-    @CliCommand(value = "web mvc finder add", help = "Adds @RooWebFinder annotation to MVC controller type")
-    public void add(
-            @CliOption(key = "formBackingType", mandatory = true, help = "The finder-enabled type") final JavaType finderType,
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The controller java type to apply this annotation to") final JavaType controllerType) {
+  @CliCommand(value = "web mvc finder add",
+      help = "Adds @RooWebFinder annotation to MVC controller type")
+  public void add(@CliOption(key = "formBackingType", mandatory = true,
+      help = "The finder-enabled type") final JavaType finderType, @CliOption(key = "class",
+      mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT,
+      help = "The controller java type to apply this annotation to") final JavaType controllerType) {
 
-        webFinderOperations.annotateType(controllerType, finderType);
-    }
+    webFinderOperations.annotateType(controllerType, finderType);
+  }
 
-    @CliCommand(value = "web mvc finder all", help = "Adds @RooWebFinder annotation to existing MVC controllers")
-    public void all() {
-        webFinderOperations.annotateAll();
-    }
+  @CliCommand(value = "web mvc finder all",
+      help = "Adds @RooWebFinder annotation to existing MVC controllers")
+  public void all() {
+    webFinderOperations.annotateAll();
+  }
 
-    @CliAvailabilityIndicator({ "web mvc finder add", "web mvc finder all" })
-    public boolean isCommandAvailable() {
-        return webFinderOperations.isWebFinderInstallationPossible();
-    }
+  @CliAvailabilityIndicator({"web mvc finder add", "web mvc finder all"})
+  public boolean isCommandAvailable() {
+    return webFinderOperations.isWebFinderInstallationPossible();
+  }
 }

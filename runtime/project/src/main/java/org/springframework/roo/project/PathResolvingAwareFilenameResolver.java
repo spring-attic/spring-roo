@@ -19,10 +19,11 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class PathResolvingAwareFilenameResolver implements FilenameResolver {
 
-    @Reference private PathResolver pathResolver;
+  @Reference
+  private PathResolver pathResolver;
 
-    public String getMeaningfulName(final File file) {
-        Validate.notNull(file, "File required");
-        return pathResolver.getFriendlyName(FileUtils.getCanonicalPath(file));
-    }
+  public String getMeaningfulName(final File file) {
+    Validate.notNull(file, "File required");
+    return pathResolver.getFriendlyName(FileUtils.getCanonicalPath(file));
+  }
 }

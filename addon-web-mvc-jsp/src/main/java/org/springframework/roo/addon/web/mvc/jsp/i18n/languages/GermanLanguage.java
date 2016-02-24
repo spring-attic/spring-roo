@@ -18,19 +18,19 @@ import org.springframework.roo.support.util.FileUtils;
 @Service
 public class GermanLanguage extends AbstractLanguage {
 
-    public InputStream getFlagGraphic() {
-        return FileUtils.getInputStream(getClass(), "de.png");
-    }
+  public InputStream getFlagGraphic() {
+    return FileUtils.getInputStream(getClass(), "de.png");
+  }
 
-    public String getLanguage() {
-        return "Deubuilderh";
-    }
+  public String getLanguage() {
+    return "Deubuilderh";
+  }
 
-    public Locale getLocale() {
-        return Locale.GERMAN;
-    }
+  public Locale getLocale() {
+    return Locale.GERMAN;
+  }
 
-    public InputStream getMessageBundle() {
-        return FileUtils.getInputStream(getClass(), "messages_de.properties");
-    }
+  public InputStream getMessageBundle() {
+    return FileUtils.getInputStream(getClass(), "messages_de.properties");
+  }
 }

@@ -11,12 +11,11 @@ import org.springframework.roo.process.manager.ProcessManager;
  */
 public interface ProcessManagerStatusListener {
 
-    /**
-     * Invoked by the {@link ProcessManager} to report a new status.
-     * 
-     * @param oldStatus the old status
-     * @param newStatus the new status
-     */
-    void onProcessManagerStatusChange(ProcessManagerStatus oldStatus,
-            ProcessManagerStatus newStatus);
+  /**
+   * Invoked by the {@link ProcessManager} to report a new status.
+   * 
+   * @param oldStatus the old status
+   * @param newStatus the new status
+   */
+  void onProcessManagerStatusChange(ProcessManagerStatus oldStatus, ProcessManagerStatus newStatus);
 }

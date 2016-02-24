@@ -22,26 +22,24 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class IncludeExcludeTablesConverter implements Converter<Set<String>> {
 
-    public Set<String> convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        final Set<String> tables = new LinkedHashSet<String>();
-        final StringTokenizer st = new StringTokenizer(value, " ");
-        while (st.hasMoreTokens()) {
-            tables.add(st.nextToken());
-        }
-        return tables;
+  public Set<String> convertFromText(final String value, final Class<?> requiredType,
+      final String optionContext) {
+    final Set<String> tables = new LinkedHashSet<String>();
+    final StringTokenizer st = new StringTokenizer(value, " ");
+    while (st.hasMoreTokens()) {
+      tables.add(st.nextToken());
     }
+    return tables;
+  }
 
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String existingData,
-            final String optionContext, final MethodTarget target) {
-        return false;
-    }
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String existingData, final String optionContext,
+      final MethodTarget target) {
+    return false;
+  }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return Set.class.isAssignableFrom(requiredType)
-                && (optionContext.contains("include-tables") || optionContext
-                        .contains("exclude-tables"));
-    }
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return Set.class.isAssignableFrom(requiredType)
+        && (optionContext.contains("include-tables") || optionContext.contains("exclude-tables"));
+  }
 }

@@ -20,23 +20,22 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class JavaSymbolNameConverter implements Converter<JavaSymbolName> {
 
-    public JavaSymbolName convertFromText(final String value,
-            final Class<?> requiredType, final String optionContext) {
-        if (StringUtils.isBlank(value)) {
-            return null;
-        }
-
-        return new JavaSymbolName(value);
+  public JavaSymbolName convertFromText(final String value, final Class<?> requiredType,
+      final String optionContext) {
+    if (StringUtils.isBlank(value)) {
+      return null;
     }
 
-    public boolean getAllPossibleValues(final List<Completion> completions,
-            final Class<?> requiredType, final String existingData,
-            final String optionContext, final MethodTarget target) {
-        return false;
-    }
+    return new JavaSymbolName(value);
+  }
 
-    public boolean supports(final Class<?> requiredType,
-            final String optionContext) {
-        return JavaSymbolName.class.isAssignableFrom(requiredType);
-    }
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String existingData, final String optionContext,
+      final MethodTarget target) {
+    return false;
+  }
+
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return JavaSymbolName.class.isAssignableFrom(requiredType);
+  }
 }

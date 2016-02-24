@@ -17,52 +17,52 @@ import org.junit.Test;
  */
 public class JavaPackageTest {
 
-    private static final JavaPackage CHILD = new JavaPackage("com.foo.bar");
-    private static final JavaPackage PARENT = new JavaPackage("com.foo");
+  private static final JavaPackage CHILD = new JavaPackage("com.foo.bar");
+  private static final JavaPackage PARENT = new JavaPackage("com.foo");
 
-    @Test
-    public void testChildPackageIsWithinParent() {
-        assertTrue(CHILD.isWithin(PARENT));
-    }
+  @Test
+  public void testChildPackageIsWithinParent() {
+    assertTrue(CHILD.isWithin(PARENT));
+  }
 
-    @Test
-    public void testGetElementsOfMultiLevelPackage() {
-        // Set up
-        final JavaPackage javaPackage = CHILD;
+  @Test
+  public void testGetElementsOfMultiLevelPackage() {
+    // Set up
+    final JavaPackage javaPackage = CHILD;
 
-        // Invoke
-        final List<String> elements = javaPackage.getElements();
+    // Invoke
+    final List<String> elements = javaPackage.getElements();
 
-        // Check
-        assertEquals(Arrays.asList("com", "foo", "bar"), elements);
-        assertEquals("bar", javaPackage.getLastElement());
-    }
+    // Check
+    assertEquals(Arrays.asList("com", "foo", "bar"), elements);
+    assertEquals("bar", javaPackage.getLastElement());
+  }
 
-    @Test
-    public void testGetElementsOfSingleLevelPackage() {
-        // Set up
-        final JavaPackage javaPackage = new JavaPackage("me");
+  @Test
+  public void testGetElementsOfSingleLevelPackage() {
+    // Set up
+    final JavaPackage javaPackage = new JavaPackage("me");
 
-        // Invoke
-        final List<String> elements = javaPackage.getElements();
+    // Invoke
+    final List<String> elements = javaPackage.getElements();
 
-        // Check
-        assertEquals(Arrays.asList("me"), elements);
-        assertEquals("me", javaPackage.getLastElement());
-    }
+    // Check
+    assertEquals(Arrays.asList("me"), elements);
+    assertEquals("me", javaPackage.getLastElement());
+  }
 
-    @Test
-    public void testPackageIsNotWithinNullPackage() {
-        assertFalse(PARENT.isWithin(null));
-    }
+  @Test
+  public void testPackageIsNotWithinNullPackage() {
+    assertFalse(PARENT.isWithin(null));
+  }
 
-    @Test
-    public void testPackageIsWithinSelf() {
-        assertTrue(PARENT.isWithin(PARENT));
-    }
+  @Test
+  public void testPackageIsWithinSelf() {
+    assertTrue(PARENT.isWithin(PARENT));
+  }
 
-    @Test
-    public void testParentPackageIsNotWithinChild() {
-        assertFalse(PARENT.isWithin(CHILD));
-    }
+  @Test
+  public void testParentPackageIsNotWithinChild() {
+    assertFalse(PARENT.isWithin(CHILD));
+  }
 }

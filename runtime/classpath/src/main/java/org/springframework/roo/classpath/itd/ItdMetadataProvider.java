@@ -62,34 +62,34 @@ import org.springframework.roo.project.Path;
  */
 public interface ItdMetadataProvider extends MetadataProvider {
 
-    /**
-     * Obtains an identifier that would be validly recognized by this
-     * {@link ItdMetadataProvider} instance. The identifier must represent the
-     * presented physical Java type identifier.
-     * <p>
-     * The presented physical Java type identifier need not presently exist in
-     * the {@link MetadataService}. Implementations must not rely on the
-     * metadata being available at this moment. Implementations by returning a
-     * value from this method do not guarantee that metadata for the returned
-     * identifier will subsequently made available. As such this method is a
-     * basic conversion method and shouldn't perform any analysis.
-     * 
-     * @param physicalJavaTypeIdentifier to convert into a local metadata
-     *            identifier (required)
-     * @return an identifier acceptable to this provider (must not return null
-     *         or an empty string)
-     */
-    String getIdForPhysicalJavaType(String physicalJavaTypeIdentifier);
+  /**
+   * Obtains an identifier that would be validly recognized by this
+   * {@link ItdMetadataProvider} instance. The identifier must represent the
+   * presented physical Java type identifier.
+   * <p>
+   * The presented physical Java type identifier need not presently exist in
+   * the {@link MetadataService}. Implementations must not rely on the
+   * metadata being available at this moment. Implementations by returning a
+   * value from this method do not guarantee that metadata for the returned
+   * identifier will subsequently made available. As such this method is a
+   * basic conversion method and shouldn't perform any analysis.
+   * 
+   * @param physicalJavaTypeIdentifier to convert into a local metadata
+   *            identifier (required)
+   * @return an identifier acceptable to this provider (must not return null
+   *         or an empty string)
+   */
+  String getIdForPhysicalJavaType(String physicalJavaTypeIdentifier);
 
-    /**
-     * Returns the suffix that makes filenames unique for this implementation.
-     * This suffix is appended to the end of the
-     * {@link PhysicalTypeIdentifierNamingUtils} filename + "_Roo_" portion.
-     * This suffix should not contain any periods and as such does not represent
-     * the filename's extension.
-     * 
-     * @return the filename suffix that makes ITDs produced by this
-     *         implementation unique (cannot be null or an empty string)
-     */
-    String getItdUniquenessFilenameSuffix();
+  /**
+   * Returns the suffix that makes filenames unique for this implementation.
+   * This suffix is appended to the end of the
+   * {@link PhysicalTypeIdentifierNamingUtils} filename + "_Roo_" portion.
+   * This suffix should not contain any periods and as such does not represent
+   * the filename's extension.
+   * 
+   * @return the filename suffix that makes ITDs produced by this
+   *         implementation unique (cannot be null or an empty string)
+   */
+  String getItdUniquenessFilenameSuffix();
 }

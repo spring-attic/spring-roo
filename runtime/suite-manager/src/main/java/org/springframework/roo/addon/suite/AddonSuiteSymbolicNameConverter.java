@@ -26,58 +26,57 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class AddonSuiteSymbolicNameConverter implements Converter<AddonSuiteSymbolicName> {
 
-	private BundleContext context;
-	private static final Logger LOGGER = HandlerUtils
-			.getLogger(AddonSuiteSymbolicNameConverter.class);
+  private BundleContext context;
+  private static final Logger LOGGER = HandlerUtils
+      .getLogger(AddonSuiteSymbolicNameConverter.class);
 
-	private List<Subsystem> installedSubsystems;
+  private List<Subsystem> installedSubsystems;
 
-	protected void activate(final ComponentContext cContext) {
-		context = cContext.getBundleContext();
-		installedSubsystems = new ArrayList<Subsystem>();
-	}
+  protected void activate(final ComponentContext cContext) {
+    context = cContext.getBundleContext();
+    installedSubsystems = new ArrayList<Subsystem>();
+  }
 
-	public AddonSuiteSymbolicName convertFromText(final String value,
-			final Class<?> requiredType, final String optionContext) {
-		return new AddonSuiteSymbolicName(value.trim());
-	}
+  public AddonSuiteSymbolicName convertFromText(final String value, final Class<?> requiredType,
+      final String optionContext) {
+    return new AddonSuiteSymbolicName(value.trim());
+  }
 
-	public boolean getAllPossibleValues(final List<Completion> completions,
-			final Class<?> requiredType, final String originalUserInput,
-			final String optionContext, final MethodTarget target) {
+  public boolean getAllPossibleValues(final List<Completion> completions,
+      final Class<?> requiredType, final String originalUserInput, final String optionContext,
+      final MethodTarget target) {
 
-		// Getting installed Roo Addon Suites
-		populateRooAddonSuites();
+    // Getting installed Roo Addon Suites
+    populateRooAddonSuites();
 
-		for (Subsystem subsystem : installedSubsystems) {
-			completions.add(new Completion(subsystem.getSymbolicName()));
-		}
-		return false;
-	}
+    for (Subsystem subsystem : installedSubsystems) {
+      completions.add(new Completion(subsystem.getSymbolicName()));
+    }
+    return false;
+  }
 
-	public boolean supports(final Class<?> requiredType,
-			final String optionContext) {
-		return AddonSuiteSymbolicName.class.isAssignableFrom(requiredType);
-	}
+  public boolean supports(final Class<?> requiredType, final String optionContext) {
+    return AddonSuiteSymbolicName.class.isAssignableFrom(requiredType);
+  }
 
-	/**
-	 * Method to populate current Roo Addon Suites using OSGi Serive
-	 */
-	private void populateRooAddonSuites() {
+  /**
+   * Method to populate current Roo Addon Suites using OSGi Serive
+   */
+  private void populateRooAddonSuites() {
 
-		installedSubsystems.clear();
+    installedSubsystems.clear();
 
-		// Get all Services implement Subsystem interface
-		try {
-			ServiceReference<?>[] references = context.getAllServiceReferences(
-					Subsystem.class.getName(), null);
-			for (ServiceReference<?> ref : references) {
-				Subsystem subsystem = (Subsystem) context.getService(ref);
-				installedSubsystems.add(subsystem);
-			}
+    // Get all Services implement Subsystem interface
+    try {
+      ServiceReference<?>[] references =
+          context.getAllServiceReferences(Subsystem.class.getName(), null);
+      for (ServiceReference<?> ref : references) {
+        Subsystem subsystem = (Subsystem) context.getService(ref);
+        installedSubsystems.add(subsystem);
+      }
 
-		} catch (InvalidSyntaxException e) {
-			LOGGER.warning("Cannot load Subsystem on AddonSymbolicName.");
-		}
-	}
+    } catch (InvalidSyntaxException e) {
+      LOGGER.warning("Cannot load Subsystem on AddonSymbolicName.");
+    }
+  }
 }

@@ -25,43 +25,42 @@ import org.springframework.roo.model.JavaType;
  */
 public class RepositoryLayerMethodTest {
 
-    @Mock private JavaType mockIdType;
-    // Fixture
-    @Mock private JavaType mockTargetEntity;
+  @Mock
+  private JavaType mockIdType;
+  // Fixture
+  @Mock
+  private JavaType mockTargetEntity;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+  }
+
+  @Test
+  public void testCallFlushMethod() {
+    // Invoke
+    final String methodCall =
+        RepositoryJpaLayerMethod.FLUSH.getCall(Collections.<MethodParameter>emptyList());
+
+    // Check
+    assertEquals("flush()", methodCall);
+  }
+
+  @Test
+  public void testNamesAreUniqueAndNotBlank() {
+    final Set<String> names = new HashSet<String>();
+    for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod.values()) {
+      final String name = method.getName();
+      names.add(name);
+      assertTrue(StringUtils.isNotBlank(name));
     }
+    assertEquals(RepositoryJpaLayerMethod.values().length, names.size());
+  }
 
-    @Test
-    public void testCallFlushMethod() {
-        // Invoke
-        final String methodCall = RepositoryJpaLayerMethod.FLUSH
-                .getCall(Collections.<MethodParameter> emptyList());
-
-        // Check
-        assertEquals("flush()", methodCall);
+  @Test
+  public void testParameterTypesAreNotNull() {
+    for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod.values()) {
+      assertNotNull(method.getParameterTypes(mockTargetEntity, mockIdType));
     }
-
-    @Test
-    public void testNamesAreUniqueAndNotBlank() {
-        final Set<String> names = new HashSet<String>();
-        for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod
-                .values()) {
-            final String name = method.getName();
-            names.add(name);
-            assertTrue(StringUtils.isNotBlank(name));
-        }
-        assertEquals(RepositoryJpaLayerMethod.values().length, names.size());
-    }
-
-    @Test
-    public void testParameterTypesAreNotNull() {
-        for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod
-                .values()) {
-            assertNotNull(method
-                    .getParameterTypes(mockTargetEntity, mockIdType));
-        }
-    }
+  }
 }

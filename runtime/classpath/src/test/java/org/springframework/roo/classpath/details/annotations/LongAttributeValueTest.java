@@ -13,9 +13,9 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public class LongAttributeValueTest {
 
-    @Test
-    public void testToString() {
-        assertEquals("beast -> 666", new LongAttributeValue(new JavaSymbolName(
-                "beast"), 666).toString());
-    }
+  @Test
+  public void testToString() {
+    assertEquals("beast -> 666",
+        new LongAttributeValue(new JavaSymbolName("beast"), 666).toString());
+  }
 }

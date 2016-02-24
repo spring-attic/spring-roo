@@ -15,42 +15,37 @@ import org.junit.Test;
  */
 public class MethodTargetTest {
 
-    private static final Object TARGET_1 = new CommandMarker() {
-    };
-    private static final Object TARGET_2 = new CommandMarker() {
-    };
-    private static final Method METHOD_1 = TARGET_1.getClass().getMethods()[0]; // Unmockable
-    private static final Method METHOD_2 = TARGET_2.getClass().getMethods()[1]; // Unmockable
+  private static final Object TARGET_1 = new CommandMarker() {};
+  private static final Object TARGET_2 = new CommandMarker() {};
+  private static final Method METHOD_1 = TARGET_1.getClass().getMethods()[0]; // Unmockable
+  private static final Method METHOD_2 = TARGET_2.getClass().getMethods()[1]; // Unmockable
 
-    @Test
-    public void testInstanceDoesNotEqualNull() {
-        assertFalse(new MethodTarget(METHOD_1, TARGET_1).equals(null));
-    }
+  @Test
+  public void testInstanceDoesNotEqualNull() {
+    assertFalse(new MethodTarget(METHOD_1, TARGET_1).equals(null));
+  }
 
-    @Test
-    public void testInstanceEqualsItself() {
-        final MethodTarget instance = new MethodTarget(METHOD_1, TARGET_1);
-        assertEquals(instance, instance);
-    }
+  @Test
+  public void testInstanceEqualsItself() {
+    final MethodTarget instance = new MethodTarget(METHOD_1, TARGET_1);
+    assertEquals(instance, instance);
+  }
 
-    @Test
-    public void testInstancesWithDifferentMethodAreNotEqual() {
-        assertFalse(new MethodTarget(METHOD_1, TARGET_1)
-                .equals(new MethodTarget(METHOD_2, TARGET_1)));
-    }
+  @Test
+  public void testInstancesWithDifferentMethodAreNotEqual() {
+    assertFalse(new MethodTarget(METHOD_1, TARGET_1).equals(new MethodTarget(METHOD_2, TARGET_1)));
+  }
 
-    @Test
-    public void testInstancesWithDifferentTargetAreNotEqual() {
-        assertFalse(new MethodTarget(METHOD_1, TARGET_1)
-                .equals(new MethodTarget(METHOD_1, TARGET_2)));
-    }
+  @Test
+  public void testInstancesWithDifferentTargetAreNotEqual() {
+    assertFalse(new MethodTarget(METHOD_1, TARGET_1).equals(new MethodTarget(METHOD_1, TARGET_2)));
+  }
 
-    @Test
-    public void testInstancesWithSameMethodAndTargetAreEqualAndHaveSameHashCode() {
-        final MethodTarget instance1 = new MethodTarget(METHOD_1, TARGET_1,
-                "the-buff", "the-key");
-        final MethodTarget instance2 = new MethodTarget(METHOD_1, TARGET_1);
-        assertEquals(instance1, instance2);
-        assertEquals(instance1.hashCode(), instance2.hashCode());
-    }
+  @Test
+  public void testInstancesWithSameMethodAndTargetAreEqualAndHaveSameHashCode() {
+    final MethodTarget instance1 = new MethodTarget(METHOD_1, TARGET_1, "the-buff", "the-key");
+    final MethodTarget instance2 = new MethodTarget(METHOD_1, TARGET_1);
+    assertEquals(instance1, instance2);
+    assertEquals(instance1.hashCode(), instance2.hashCode());
+  }
 }

@@ -36,64 +36,63 @@ package org.springframework.roo.metadata;
  * @author Ben Alex
  * @since 1.0
  */
-public interface MetadataService extends MetadataNotificationListener,
-        MetadataCache {
+public interface MetadataService extends MetadataNotificationListener, MetadataCache {
 
-    /**
-     * Returns the {@link MetadataItem} with the given ID, generating it from
-     * scratch and caching the result. For performance reasons it's preferable
-     * to call {@link #get(String)} if possible, to take advantage of the cache.
-     * 
-     * @param metadataIdentificationString the ID of the {@link MetadataItem} to
-     *            acquire; must identify a metadata instance, i.e. return
-     *            <code>true</code> when passed to
-     *            {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}
-     * @return the metadata, or <code>null</code> if the ID was valid but the
-     *         metadata is not currently available
-     * @throws an exception if the given type of metadata is not supported
-     */
-    MetadataItem evictAndGet(String metadataIdentificationString);
+  /**
+   * Returns the {@link MetadataItem} with the given ID, generating it from
+   * scratch and caching the result. For performance reasons it's preferable
+   * to call {@link #get(String)} if possible, to take advantage of the cache.
+   * 
+   * @param metadataIdentificationString the ID of the {@link MetadataItem} to
+   *            acquire; must identify a metadata instance, i.e. return
+   *            <code>true</code> when passed to
+   *            {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}
+   * @return the metadata, or <code>null</code> if the ID was valid but the
+   *         metadata is not currently available
+   * @throws an exception if the given type of metadata is not supported
+   */
+  MetadataItem evictAndGet(String metadataIdentificationString);
 
-    /**
-     * Returns the {@link MetadataItem} with the given ID, from the cache if
-     * possible.
-     * 
-     * @param metadataIdentificationString the ID of the {@link MetadataItem} to
-     *            acquire; must identify a metadata instance, i.e. return
-     *            <code>true</code> when passed to
-     *            {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}
-     * @return the metadata, or <code>null</code> if the ID was valid but the
-     *         metadata is not currently available
-     * @throws an exception if the given type of metadata is not supported
-     */
-    MetadataItem get(String metadataIdentificationString);
+  /**
+   * Returns the {@link MetadataItem} with the given ID, from the cache if
+   * possible.
+   * 
+   * @param metadataIdentificationString the ID of the {@link MetadataItem} to
+   *            acquire; must identify a metadata instance, i.e. return
+   *            <code>true</code> when passed to
+   *            {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}
+   * @return the metadata, or <code>null</code> if the ID was valid but the
+   *         metadata is not currently available
+   * @throws an exception if the given type of metadata is not supported
+   */
+  MetadataItem get(String metadataIdentificationString);
 
-    /**
-     * Creates the requested {@link MetadataItem} if possible, returning null if
-     * the item cannot be created or found. Implementations will delegate
-     * creation events to the respective registered {@link MetadataProvider},
-     * and may at their option retrieve a cached instance.
-     * <p>
-     * This method will throw an exception if the caller has provided an invalid
-     * input argument. This would be the case if the input argument is null,
-     * empty, does not return true from
-     * {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}, or the
-     * requested metadata identifier is not of the same class as indicated by
-     * getProvidesType()).
-     * <p>
-     * An exception will also be thrown if the identification string is related
-     * to a provider that is not registered.
-     * 
-     * @param metadataIdentificationString to acquire (required and must be
-     *            supported by this provider)
-     * @param evictCache forces eviction of the instance from any caches before
-     *            attempting retrieval
-     * @return the metadata, or null if the identification was valid and a
-     *         provider was found, but the metadata is unavailable
-     * @deprecated use {@link #evictAndGet(String)} instead of calling
-     *             {@link #get(String, true)} or {@link #get(String)} instead of
-     *             calling {@link #get(String, false)}
-     */
-    @Deprecated
-    MetadataItem get(String metadataIdentificationString, boolean evictCache);
+  /**
+   * Creates the requested {@link MetadataItem} if possible, returning null if
+   * the item cannot be created or found. Implementations will delegate
+   * creation events to the respective registered {@link MetadataProvider},
+   * and may at their option retrieve a cached instance.
+   * <p>
+   * This method will throw an exception if the caller has provided an invalid
+   * input argument. This would be the case if the input argument is null,
+   * empty, does not return true from
+   * {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}, or the
+   * requested metadata identifier is not of the same class as indicated by
+   * getProvidesType()).
+   * <p>
+   * An exception will also be thrown if the identification string is related
+   * to a provider that is not registered.
+   * 
+   * @param metadataIdentificationString to acquire (required and must be
+   *            supported by this provider)
+   * @param evictCache forces eviction of the instance from any caches before
+   *            attempting retrieval
+   * @return the metadata, or null if the identification was valid and a
+   *         provider was found, but the metadata is unavailable
+   * @deprecated use {@link #evictAndGet(String)} instead of calling
+   *             {@link #get(String, true)} or {@link #get(String)} instead of
+   *             calling {@link #get(String, false)}
+   */
+  @Deprecated
+  MetadataItem get(String metadataIdentificationString, boolean evictCache);
 }

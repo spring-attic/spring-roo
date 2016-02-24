@@ -28,142 +28,156 @@ import org.springframework.roo.project.LogicalPath;
  */
 public class RooSimpleMailMessageConfigMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-	private static final String PROVIDES_TYPE_STRING = RooSimpleMailMessageConfigMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+  private static final String PROVIDES_TYPE_STRING = RooSimpleMailMessageConfigMetadata.class
+      .getName();
+  private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+      .create(PROVIDES_TYPE_STRING);
 
-	public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
+  public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
+    return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+  }
 
-	public static JavaType getJavaType(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+  public static JavaType getJavaType(final String metadataIdentificationString) {
+    return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING,
+        metadataIdentificationString);
+  }
 
-	public static String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
+  public static String getMetadataIdentiferType() {
+    return PROVIDES_TYPE;
+  }
 
-	public static LogicalPath getPath(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+  public static LogicalPath getPath(final String metadataIdentificationString) {
+    return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING,
+        metadataIdentificationString);
+  }
 
-	public static boolean isValid(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+  public static boolean isValid(final String metadataIdentificationString) {
+    return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING,
+        metadataIdentificationString);
+  }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param identifier
-	 *            the ID of the metadata to create (must be a valid ID)
-	 * @param aspectName
-	 *            the name of the ITD to be created (required)
-	 * @param governorPhysicalTypeMetadata
-	 *            the governor (required)
-	 */
-	public RooSimpleMailMessageConfigMetadata(final String identifier, final JavaType aspectName,
-			final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+  /**
+   * Constructor
+   * 
+   * @param identifier
+   *            the ID of the metadata to create (must be a valid ID)
+   * @param aspectName
+   *            the name of the ITD to be created (required)
+   * @param governorPhysicalTypeMetadata
+   *            the governor (required)
+   */
+  public RooSimpleMailMessageConfigMetadata(final String identifier, final JavaType aspectName,
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 
-		super(identifier, aspectName, governorPhysicalTypeMetadata);
+    super(identifier, aspectName, governorPhysicalTypeMetadata);
 
-		// Add all necessary fields
-		addFields();
-		
-		// Including @Bean method
-		builder.addMethod(getSimpleMailMessageMethod());
+    // Add all necessary fields
+    addFields();
 
-		// Create a representation of the desired output ITD
-		itdTypeDetails = builder.build();
+    // Including @Bean method
+    builder.addMethod(getSimpleMailMessageMethod());
 
-	}
+    // Create a representation of the desired output ITD
+    itdTypeDetails = builder.build();
 
-	/**
-	 * Method to add all necessary fields
-	 */
-	private void addFields() {
+  }
 
-		// Generating host field
-		FieldMetadataBuilder hostField = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName("host"),
-				JavaType.STRING, null);
-		AnnotationMetadataBuilder hostValueAnnotation = new AnnotationMetadataBuilder(SpringJavaType.VALUE);
-		hostValueAnnotation.addStringAttribute("value", "${spring.mail.host}");
-		hostField.addAnnotation(hostValueAnnotation);
-		builder.addField(hostField);
+  /**
+   * Method to add all necessary fields
+   */
+  private void addFields() {
 
-		// Generating from field
-		FieldMetadataBuilder fromField = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName("from"),
-				JavaType.STRING, null);
-		AnnotationMetadataBuilder fromValueAnnotation = new AnnotationMetadataBuilder(SpringJavaType.VALUE);
-		fromValueAnnotation.addStringAttribute("value", "${email.from}");
-		fromField.addAnnotation(fromValueAnnotation);
-		builder.addField(fromField);
+    // Generating host field
+    FieldMetadataBuilder hostField =
+        new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName("host"),
+            JavaType.STRING, null);
+    AnnotationMetadataBuilder hostValueAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.VALUE);
+    hostValueAnnotation.addStringAttribute("value", "${spring.mail.host}");
+    hostField.addAnnotation(hostValueAnnotation);
+    builder.addField(hostField);
 
-		// Generating subject field
-		FieldMetadataBuilder subjectField = new FieldMetadataBuilder(getId(), Modifier.PRIVATE,
-				new JavaSymbolName("subject"), JavaType.STRING, null);
-		AnnotationMetadataBuilder subjectValueAnnotation = new AnnotationMetadataBuilder(SpringJavaType.VALUE);
-		subjectValueAnnotation.addStringAttribute("value", "${email.subject}");
-		subjectField.addAnnotation(subjectValueAnnotation);
-		builder.addField(subjectField);
+    // Generating from field
+    FieldMetadataBuilder fromField =
+        new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName("from"),
+            JavaType.STRING, null);
+    AnnotationMetadataBuilder fromValueAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.VALUE);
+    fromValueAnnotation.addStringAttribute("value", "${email.from}");
+    fromField.addAnnotation(fromValueAnnotation);
+    builder.addField(fromField);
 
-	}
-	
-	/**
-	 * Method that generates simpleMailMessage method
-	 * 
-	 * @return
-	 */
-	private MethodMetadataBuilder getSimpleMailMessageMethod() {
-		// Define method parameter types
-		List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    // Generating subject field
+    FieldMetadataBuilder subjectField =
+        new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName("subject"),
+            JavaType.STRING, null);
+    AnnotationMetadataBuilder subjectValueAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.VALUE);
+    subjectValueAnnotation.addStringAttribute("value", "${email.subject}");
+    subjectField.addAnnotation(subjectValueAnnotation);
+    builder.addField(subjectField);
 
-		// Define method parameter names
-		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+  }
 
-		// Create the method body
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+  /**
+   * Method that generates simpleMailMessage method
+   * 
+   * @return
+   */
+  private MethodMetadataBuilder getSimpleMailMessageMethod() {
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 
-		buildSimpleMailMessageMethodBody(bodyBuilder);
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
-		// Use the MethodMetadataBuilder for easy creation of MethodMetadata
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-				new JavaSymbolName("simpleMailMessage"), SpringJavaType.SIMPLE_MAIL_MESSAGE, parameterTypes, parameterNames, bodyBuilder);
-		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.context.annotation.Bean")));
+    // Create the method body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		return methodBuilder; // Build and return a MethodMetadata
-	}
+    buildSimpleMailMessageMethodBody(bodyBuilder);
 
-	/**
-	 * Method that generates simpleMailMessage method body
-	 * 
-	 * @param bodyBuilder
-	 */
-	private void buildSimpleMailMessageMethodBody(InvocableMemberBodyBuilder bodyBuilder) {
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+            new JavaSymbolName("simpleMailMessage"), SpringJavaType.SIMPLE_MAIL_MESSAGE,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType(
+        "org.springframework.context.annotation.Bean")));
 
-		// SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-		bodyBuilder.appendFormalLine("SimpleMailMessage simpleMailMessage = new SimpleMailMessage();");
-		
-		// simpleMailMessage.setFrom(from);
-		bodyBuilder.appendFormalLine("simpleMailMessage.setFrom(from);");
-		
-		// simpleMailMessage.setSubject(subject);
-		bodyBuilder.appendFormalLine("simpleMailMessage.setSubject(subject);");
-	       
-		// return simpleMailMessage;
-		bodyBuilder.appendFormalLine("return simpleMailMessage;");
-		
-	}
+    return methodBuilder; // Build and return a MethodMetadata
+  }
 
-	@Override
-	public String toString() {
-		final ToStringBuilder builder = new ToStringBuilder(this);
-		builder.append("identifier", getId());
-		builder.append("valid", valid);
-		builder.append("aspectName", aspectName);
-		builder.append("destinationType", destination);
-		builder.append("governor", governorPhysicalTypeMetadata.getId());
-		builder.append("itdTypeDetails", itdTypeDetails);
-		return builder.toString();
-	}
+  /**
+   * Method that generates simpleMailMessage method body
+   * 
+   * @param bodyBuilder
+   */
+  private void buildSimpleMailMessageMethodBody(InvocableMemberBodyBuilder bodyBuilder) {
+
+    // SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+    bodyBuilder.appendFormalLine("SimpleMailMessage simpleMailMessage = new SimpleMailMessage();");
+
+    // simpleMailMessage.setFrom(from);
+    bodyBuilder.appendFormalLine("simpleMailMessage.setFrom(from);");
+
+    // simpleMailMessage.setSubject(subject);
+    bodyBuilder.appendFormalLine("simpleMailMessage.setSubject(subject);");
+
+    // return simpleMailMessage;
+    bodyBuilder.appendFormalLine("return simpleMailMessage;");
+
+  }
+
+  @Override
+  public String toString() {
+    final ToStringBuilder builder = new ToStringBuilder(this);
+    builder.append("identifier", getId());
+    builder.append("valid", valid);
+    builder.append("aspectName", aspectName);
+    builder.append("destinationType", destination);
+    builder.append("governor", governorPhysicalTypeMetadata.getId());
+    builder.append("itdTypeDetails", itdTypeDetails);
+    return builder.toString();
+  }
 
 }

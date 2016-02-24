@@ -14,23 +14,22 @@ import java.util.Set;
  */
 public class SchemaIntrospector extends AbstractIntrospector {
 
-    public SchemaIntrospector(final Connection connection) throws SQLException {
-        super(connection);
+  public SchemaIntrospector(final Connection connection) throws SQLException {
+    super(connection);
+  }
+
+  public Set<Schema> getSchemas() throws SQLException {
+    final Set<Schema> schemas = new LinkedHashSet<Schema>();
+
+    final ResultSet rs = databaseMetaData.getSchemas();
+    try {
+      while (rs.next()) {
+        schemas.add(new Schema(rs.getString("TABLE_SCHEM")));
+      }
+    } finally {
+      rs.close();
     }
 
-    public Set<Schema> getSchemas() throws SQLException {
-        final Set<Schema> schemas = new LinkedHashSet<Schema>();
-
-        final ResultSet rs = databaseMetaData.getSchemas();
-        try {
-            while (rs.next()) {
-                schemas.add(new Schema(rs.getString("TABLE_SCHEM")));
-            }
-        }
-        finally {
-            rs.close();
-        }
-
-        return schemas;
-    }
+    return schemas;
+  }
 }

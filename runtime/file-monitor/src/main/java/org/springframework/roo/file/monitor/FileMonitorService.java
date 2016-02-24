@@ -28,71 +28,71 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
  */
 public interface FileMonitorService {
 
-    /**
-     * @param request a monitoring request
-     * @return true if the monitor did not already contain the specified request
-     */
-    boolean add(MonitoringRequest request);
+  /**
+   * @param request a monitoring request
+   * @return true if the monitor did not already contain the specified request
+   */
+  boolean add(MonitoringRequest request);
 
-    /**
-     * Locates all {@link FileDetails} which match the presented Ant path.
-     * 
-     * @param antPath the Ant path to evaluate, as per the canonical file path
-     *            format (required)
-     * @return all matching identifiers (may be empty, but never null)
-     */
-    public SortedSet<FileDetails> findMatchingAntPath(String antPath);
+  /**
+   * Locates all {@link FileDetails} which match the presented Ant path.
+   * 
+   * @param antPath the Ant path to evaluate, as per the canonical file path
+   *            format (required)
+   * @return all matching identifiers (may be empty, but never null)
+   */
+  public SortedSet<FileDetails> findMatchingAntPath(String antPath);
 
-    /**
-     * Provides a list of canonical paths which represent changes to the file
-     * system since the requesting class last requested the change set. The
-     * returned change set is relative the requesting class in order to provide
-     * a list of changes to a number of callers, instead of a point of time
-     * snapshot which would change depending on the order invocation. This
-     * method should provide a more robust implementation of {@link #isDirty()}
-     * as the change set isn't cleared when a scan is performed and greater
-     * insight is given into what has changed instead of just indicating if the
-     * filesystem is dirty.
-     * 
-     * @param requestingClass the invoking class (required)
-     * @return file system changes that occurred since the last invocation by
-     *         the requesting class (may be empty, but never null)
-     */
-    Collection<String> getDirtyFiles(String requestingClass);
+  /**
+   * Provides a list of canonical paths which represent changes to the file
+   * system since the requesting class last requested the change set. The
+   * returned change set is relative the requesting class in order to provide
+   * a list of changes to a number of callers, instead of a point of time
+   * snapshot which would change depending on the order invocation. This
+   * method should provide a more robust implementation of {@link #isDirty()}
+   * as the change set isn't cleared when a scan is performed and greater
+   * insight is given into what has changed instead of just indicating if the
+   * filesystem is dirty.
+   * 
+   * @param requestingClass the invoking class (required)
+   * @return file system changes that occurred since the last invocation by
+   *         the requesting class (may be empty, but never null)
+   */
+  Collection<String> getDirtyFiles(String requestingClass);
 
-    /**
-     * Indicates the files currently being monitored, which is potentially
-     * useful for newly-registered {@link FileEventListener} instances that may
-     * have missed previous events.
-     * 
-     * @return every file currently being monitored (never null, but may be
-     *         empty if there are no files being monitored)
-     */
-    List<FileDetails> getMonitored();
+  /**
+   * Indicates the files currently being monitored, which is potentially
+   * useful for newly-registered {@link FileEventListener} instances that may
+   * have missed previous events.
+   * 
+   * @return every file currently being monitored (never null, but may be
+   *         empty if there are no files being monitored)
+   */
+  List<FileDetails> getMonitored();
 
-    /**
-     * Indicates on a best-efforts basis whether there are known changes to the
-     * disk which would be reported should {@link #scanAll()} be invoked. This
-     * method is not required to return a guaranteed outcome of what will happen
-     * should {@link #scanAll()} be invoked, but callers may rely on this method
-     * to assist with optimisations where applicable.
-     * 
-     * @return true if there are known changes to be notified during the next
-     *         {@link #scanAll}
-     */
-    boolean isDirty();
+  /**
+   * Indicates on a best-efforts basis whether there are known changes to the
+   * disk which would be reported should {@link #scanAll()} be invoked. This
+   * method is not required to return a guaranteed outcome of what will happen
+   * should {@link #scanAll()} be invoked, but callers may rely on this method
+   * to assist with optimisations where applicable.
+   * 
+   * @return true if there are known changes to be notified during the next
+   *         {@link #scanAll}
+   */
+  boolean isDirty();
 
-    /**
-     * @param request a monitoring request
-     * @return true if this set contained the specified element
-     */
-    boolean remove(MonitoringRequest request);
+  /**
+   * @param request a monitoring request
+   * @return true if this set contained the specified element
+   */
+  boolean remove(MonitoringRequest request);
 
-    /**
-     * Execute a scan of all monitored locations.
-     * 
-     * @return the number of changes detected during this invocation (can be 0
-     *         or above)
-     */
-    int scanAll();
+  /**
+   * Execute a scan of all monitored locations.
+   * 
+   * @return the number of changes detected during this invocation (can be 0
+   *         or above)
+   */
+  int scanAll();
 }

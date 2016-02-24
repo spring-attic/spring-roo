@@ -17,17 +17,16 @@ import org.junit.Test;
  */
 public class ApplicationConfigServiceImplTest {
 
-    // Fixture
-    private ApplicationConfigService applicationConfigService;
+  // Fixture
+  private ApplicationConfigService applicationConfigService;
 
-    @Before
-    public void setUp()
-            throws IllegalArgumentException, IllegalAccessException {
-        applicationConfigService = new ApplicationConfigServiceImpl();
-    }
+  @Before
+  public void setUp() throws IllegalArgumentException, IllegalAccessException {
+    applicationConfigService = new ApplicationConfigServiceImpl();
+  }
 
-    @Test
-    public void testAddProperty() {
-        // TODO
-    }
+  @Test
+  public void testAddProperty() {
+    // TODO
+  }
 }

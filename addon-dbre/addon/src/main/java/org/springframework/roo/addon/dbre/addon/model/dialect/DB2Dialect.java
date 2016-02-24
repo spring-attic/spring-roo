@@ -11,9 +11,8 @@ import org.springframework.roo.addon.dbre.addon.model.Schema;
  */
 public class DB2Dialect extends AbstractDialect implements Dialect {
 
-    public String getQuerySequencesString(final Schema schema) {
-        Validate.notNull(schema, "Schema required");
-        return "SELELCT SEQNAME FROM SYSIBM.SYSSEQUENCES WHRE SEQSCHEMA = '"
-                + schema.getName() + "'";
-    }
+  public String getQuerySequencesString(final Schema schema) {
+    Validate.notNull(schema, "Schema required");
+    return "SELELCT SEQNAME FROM SYSIBM.SYSSEQUENCES WHRE SEQSCHEMA = '" + schema.getName() + "'";
+  }
 }

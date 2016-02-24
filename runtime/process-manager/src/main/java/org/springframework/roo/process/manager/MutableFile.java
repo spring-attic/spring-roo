@@ -22,18 +22,18 @@ import org.springframework.roo.file.undo.UndoManager;
  */
 public interface MutableFile {
 
-    String getCanonicalPath();
+  String getCanonicalPath();
 
-    InputStream getInputStream();
+  InputStream getInputStream();
 
-    OutputStream getOutputStream();
+  OutputStream getOutputStream();
 
-    /**
-     * Permits presentation of additional information about a change being made
-     * via {@link #getOutputStream()}.
-     * 
-     * @param message the additional information (can be null or empty to clear
-     *            any extra information)
-     */
-    void setDescriptionOfChange(String message);
+  /**
+   * Permits presentation of additional information about a change being made
+   * via {@link #getOutputStream()}.
+   * 
+   * @param message the additional information (can be null or empty to clear
+   *            any extra information)
+   */
+  void setDescriptionOfChange(String message);
 }

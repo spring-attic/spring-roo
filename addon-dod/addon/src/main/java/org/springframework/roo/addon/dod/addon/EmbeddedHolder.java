@@ -15,28 +15,26 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public class EmbeddedHolder {
 
-    private final FieldMetadata embeddedField;
-    private final List<FieldMetadata> fields;
+  private final FieldMetadata embeddedField;
+  private final List<FieldMetadata> fields;
 
-    public EmbeddedHolder(final FieldMetadata embeddedField,
-            final List<FieldMetadata> fields) {
-        Validate.notNull(embeddedField, "Identifier type required");
-        Validate.notNull(fields, "Fields for "
-                + embeddedField.getFieldType().getFullyQualifiedTypeName()
-                + " required");
-        this.embeddedField = embeddedField;
-        this.fields = fields;
-    }
+  public EmbeddedHolder(final FieldMetadata embeddedField, final List<FieldMetadata> fields) {
+    Validate.notNull(embeddedField, "Identifier type required");
+    Validate.notNull(fields, "Fields for "
+        + embeddedField.getFieldType().getFullyQualifiedTypeName() + " required");
+    this.embeddedField = embeddedField;
+    this.fields = fields;
+  }
 
-    public FieldMetadata getEmbeddedField() {
-        return embeddedField;
-    }
+  public FieldMetadata getEmbeddedField() {
+    return embeddedField;
+  }
 
-    public JavaSymbolName getEmbeddedMutatorMethodName() {
-        return BeanInfoUtils.getMutatorMethodName(embeddedField);
-    }
+  public JavaSymbolName getEmbeddedMutatorMethodName() {
+    return BeanInfoUtils.getMutatorMethodName(embeddedField);
+  }
 
-    public List<FieldMetadata> getFields() {
-        return fields;
-    }
+  public List<FieldMetadata> getFields() {
+    return fields;
+  }
 }

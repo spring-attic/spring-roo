@@ -20,84 +20,76 @@ import org.springframework.roo.file.undo.UndoEvent.UndoOperation;
 @Service
 public class DefaultUndoManager implements UndoManager {
 
-    private final Set<UndoListener> listeners = new HashSet<UndoListener>();
-    private final Stack<UndoableOperation> stack = new Stack<UndoableOperation>();
-    private boolean undoEnabled = true;
+  private final Set<UndoListener> listeners = new HashSet<UndoListener>();
+  private final Stack<UndoableOperation> stack = new Stack<UndoableOperation>();
+  private boolean undoEnabled = true;
 
-    protected void activate(final ComponentContext context) {
+  protected void activate(final ComponentContext context) {}
+
+  public void add(final UndoableOperation undoableOperation) {
+    Validate.notNull(undoableOperation, "Undoable operation required");
+    stack.push(undoableOperation);
+  }
+
+  public void addUndoListener(final UndoListener undoListener) {
+    listeners.add(undoListener);
+  }
+
+  public void flush() {
+    notifyListeners(UndoOperation.FLUSH);
+  }
+
+  private void notifyListeners(final UndoOperation operation) {
+    for (final UndoListener listener : listeners) {
+      listener.onUndoEvent(new UndoEvent(operation));
     }
+  }
 
-    public void add(final UndoableOperation undoableOperation) {
-        Validate.notNull(undoableOperation, "Undoable operation required");
-        stack.push(undoableOperation);
+  public void removeUndoListener(final UndoListener undoListener) {
+    listeners.remove(undoListener);
+  }
+
+  public void reset() {
+    while (!stack.empty()) {
+      final UndoableOperation op = stack.pop();
+      try {
+        op.reset();
+      } catch (final Throwable t) {
+        throw new IllegalStateException("UndoableOperation '" + op
+            + "' threw an exception, in violation of the interface contract");
+      }
     }
+    notifyListeners(UndoOperation.RESET);
+  }
 
-    public void addUndoListener(final UndoListener undoListener) {
-        listeners.add(undoListener);
+  public void setUndoEnabled(final boolean undoEnabled) {
+    this.undoEnabled = undoEnabled;
+  }
+
+  public boolean undo() {
+    boolean undoMode = true;
+    if (!undoEnabled) {
+      // Force the undo stack to simply reset (but not perform any undos)
+      undoMode = false;
     }
-
-    public void flush() {
-        notifyListeners(UndoOperation.FLUSH);
-    }
-
-    private void notifyListeners(final UndoOperation operation) {
-        for (final UndoListener listener : listeners) {
-            listener.onUndoEvent(new UndoEvent(operation));
-        }
-    }
-
-    public void removeUndoListener(final UndoListener undoListener) {
-        listeners.remove(undoListener);
-    }
-
-    public void reset() {
-        while (!stack.empty()) {
-            final UndoableOperation op = stack.pop();
-            try {
-                op.reset();
-            }
-            catch (final Throwable t) {
-                throw new IllegalStateException(
-                        "UndoableOperation '"
-                                + op
-                                + "' threw an exception, in violation of the interface contract");
-            }
-        }
-        notifyListeners(UndoOperation.RESET);
-    }
-
-    public void setUndoEnabled(final boolean undoEnabled) {
-        this.undoEnabled = undoEnabled;
-    }
-
-    public boolean undo() {
-        boolean undoMode = true;
-        if (!undoEnabled) {
-            // Force the undo stack to simply reset (but not perform any undos)
+    while (!stack.empty()) {
+      final UndoableOperation op = stack.pop();
+      try {
+        if (undoMode) {
+          if (!op.undo()) {
+            // Undo failed, so switch to reset mode going forward
             undoMode = false;
+          }
+        } else {
+          // In reset mode
+          op.reset();
         }
-        while (!stack.empty()) {
-            final UndoableOperation op = stack.pop();
-            try {
-                if (undoMode) {
-                    if (!op.undo()) {
-                        // Undo failed, so switch to reset mode going forward
-                        undoMode = false;
-                    }
-                }
-                else {
-                    // In reset mode
-                    op.reset();
-                }
-            }
-            catch (final Throwable t) {
-                throw new IllegalStateException(
-                        "UndoableOperation '"
-                                + op
-                                + "' threw an exception, in violation of the interface contract");
-            }
-        }
-        notifyListeners(UndoOperation.UNDO);
-        return undoMode;
+      } catch (final Throwable t) {
+        throw new IllegalStateException("UndoableOperation '" + op
+            + "' threw an exception, in violation of the interface contract");
+      }
     }
+    notifyListeners(UndoOperation.UNDO);
+    return undoMode;
+  }
 }

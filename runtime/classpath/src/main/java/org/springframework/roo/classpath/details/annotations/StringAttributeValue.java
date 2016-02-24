@@ -12,22 +12,21 @@ import org.springframework.roo.model.JavaSymbolName;
  * @author Ben Alex
  * @since 1.0
  */
-public class StringAttributeValue extends
-        AbstractAnnotationAttributeValue<String> {
-    private final String value;
+public class StringAttributeValue extends AbstractAnnotationAttributeValue<String> {
+  private final String value;
 
-    public StringAttributeValue(final JavaSymbolName name, final String value) {
-        super(name);
-        Validate.notNull(value, "Value required");
-        this.value = value;
-    }
+  public StringAttributeValue(final JavaSymbolName name, final String value) {
+    super(name);
+    Validate.notNull(value, "Value required");
+    this.value = value;
+  }
 
-    public String getValue() {
-        return value;
-    }
+  public String getValue() {
+    return value;
+  }
 
-    @Override
-    public String toString() {
-        return getName() + " -> " + value;
-    }
+  @Override
+  public String toString() {
+    return getName() + " -> " + value;
+  }
 }

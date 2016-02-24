@@ -11,9 +11,9 @@ import org.springframework.roo.addon.dbre.addon.model.Schema;
  */
 public class PostgreSQLDialect extends AbstractDialect implements Dialect {
 
-    public String getQuerySequencesString(final Schema schema) {
-        Validate.notNull(schema, "Schema required");
-        return "SELECT RELNAME FROM PG_CLASS WHERE RELKIND = 'S' AND RELNAMESPACE IN (SELECT OID FROM PG_NAMESPACE WHERE NSPNAME = '"
-                + schema.getName() + "')";
-    }
+  public String getQuerySequencesString(final Schema schema) {
+    Validate.notNull(schema, "Schema required");
+    return "SELECT RELNAME FROM PG_CLASS WHERE RELKIND = 'S' AND RELNAMESPACE IN (SELECT OID FROM PG_NAMESPACE WHERE NSPNAME = '"
+        + schema.getName() + "')";
+  }
 }

@@ -16,50 +16,48 @@ import org.junit.Test;
  */
 public class PairListTest {
 
-    private static final int KEY_1 = 10;
-    private static final int KEY_2 = 20;
-    private static final String VALUE_1 = "a";
-    private static final String VALUE_2 = "b";
-    private static final MutablePair<Integer, String> PAIR_1 = new MutablePair<Integer, String>(
-            KEY_1, VALUE_1);
-    private static final MutablePair<Integer, String> PAIR_2 = new MutablePair<Integer, String>(
-            KEY_2, VALUE_2);
+  private static final int KEY_1 = 10;
+  private static final int KEY_2 = 20;
+  private static final String VALUE_1 = "a";
+  private static final String VALUE_2 = "b";
+  private static final MutablePair<Integer, String> PAIR_1 = new MutablePair<Integer, String>(
+      KEY_1, VALUE_1);
+  private static final MutablePair<Integer, String> PAIR_2 = new MutablePair<Integer, String>(
+      KEY_2, VALUE_2);
 
-    @Test
-    public void testConstructFromListsOfKeysAndValues() {
-        // Invoke
-        final PairList<Integer, String> pairs = new PairList<Integer, String>(
-                Arrays.asList(KEY_1, KEY_2), Arrays.asList(VALUE_1, VALUE_2));
+  @Test
+  public void testConstructFromListsOfKeysAndValues() {
+    // Invoke
+    final PairList<Integer, String> pairs =
+        new PairList<Integer, String>(Arrays.asList(KEY_1, KEY_2), Arrays.asList(VALUE_1, VALUE_2));
 
-        // Check
-        assertEquals(2, pairs.size());
-        assertEquals(PAIR_1, pairs.get(0));
-        assertEquals(PAIR_2, pairs.get(1));
-    }
+    // Check
+    assertEquals(2, pairs.size());
+    assertEquals(PAIR_1, pairs.get(0));
+    assertEquals(PAIR_2, pairs.get(1));
+  }
 
-    @Test
-    public void testConstructFromNulListsOfKeysAndValues() {
-        // Invoke
-        final PairList<Integer, String> pairs = new PairList<Integer, String>(
-                null, null);
+  @Test
+  public void testConstructFromNulListsOfKeysAndValues() {
+    // Invoke
+    final PairList<Integer, String> pairs = new PairList<Integer, String>(null, null);
 
-        // Check
-        assertEquals(0, pairs.size());
-    }
+    // Check
+    assertEquals(0, pairs.size());
+  }
 
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testConstructFromVarargArrayOfPairs() {
-        // Invoke
-        final PairList<Integer, String> pairs = new PairList<Integer, String>(
-                PAIR_1, PAIR_2);
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testConstructFromVarargArrayOfPairs() {
+    // Invoke
+    final PairList<Integer, String> pairs = new PairList<Integer, String>(PAIR_1, PAIR_2);
 
-        // Check
-        assertEquals(2, pairs.size());
-        assertEquals(Arrays.asList(KEY_1, KEY_2), pairs.getKeys());
-        assertEquals(Arrays.asList(VALUE_1, VALUE_2), pairs.getValues());
-        final Pair<Integer, String>[] array = pairs.toArray();
-        assertEquals(pairs.size(), array.length);
-        assertEquals(pairs, Arrays.asList(array));
-    }
+    // Check
+    assertEquals(2, pairs.size());
+    assertEquals(Arrays.asList(KEY_1, KEY_2), pairs.getKeys());
+    assertEquals(Arrays.asList(VALUE_1, VALUE_2), pairs.getValues());
+    final Pair<Integer, String>[] array = pairs.toArray();
+    assertEquals(pairs.size(), array.length);
+    assertEquals(pairs, Arrays.asList(array));
+  }
 }

@@ -20,34 +20,32 @@ import org.springframework.roo.model.JavaType;
  */
 public class ClasspathOperationsImplTest {
 
-    // Fixture
-    private ClasspathOperationsImpl classpathOperations;
-    @Mock private TypeLocationService mockTypeLocationService;
+  // Fixture
+  private ClasspathOperationsImpl classpathOperations;
+  @Mock
+  private TypeLocationService mockTypeLocationService;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        classpathOperations = new ClasspathOperationsImpl();
-        classpathOperations.typeLocationService = mockTypeLocationService;
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+    classpathOperations = new ClasspathOperationsImpl();
+    classpathOperations.typeLocationService = mockTypeLocationService;
+  }
+
+  @Test
+  public void testFocusOnTypeThatCannotBeLocated() {
+    // Set up
+    final JavaType mockType = mock(JavaType.class);
+    final String typeName = "com.example.domain.Lost";
+    when(mockType.getFullyQualifiedTypeName()).thenReturn(typeName);
+    when(mockTypeLocationService.getPhysicalTypeIdentifier(mockType)).thenReturn(null);
+
+    // Invoke and check
+    try {
+      classpathOperations.focus(mockType);
+      fail("Expected a " + NullPointerException.class);
+    } catch (final NullPointerException expected) {
+      assertEquals("Cannot locate the type " + typeName, expected.getMessage());
     }
-
-    @Test
-    public void testFocusOnTypeThatCannotBeLocated() {
-        // Set up
-        final JavaType mockType = mock(JavaType.class);
-        final String typeName = "com.example.domain.Lost";
-        when(mockType.getFullyQualifiedTypeName()).thenReturn(typeName);
-        when(mockTypeLocationService.getPhysicalTypeIdentifier(mockType))
-                .thenReturn(null);
-
-        // Invoke and check
-        try {
-            classpathOperations.focus(mockType);
-            fail("Expected a " + NullPointerException.class);
-        }
-        catch (final NullPointerException expected) {
-            assertEquals("Cannot locate the type " + typeName,
-                    expected.getMessage());
-        }
-    }
+  }
 }

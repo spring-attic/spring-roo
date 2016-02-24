@@ -51,217 +51,209 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Service
 public class ClasspathOperationsImpl implements ClasspathOperations {
 
-    @Reference MetadataService metadataService;
-    @Reference PathResolver pathResolver;
-    @Reference ProjectOperations projectOperations;
-    @Reference StaticFieldConverter staticFieldConverter;
-    @Reference TypeLocationService typeLocationService;
-    @Reference TypeManagementService typeManagementService;
+  @Reference
+  MetadataService metadataService;
+  @Reference
+  PathResolver pathResolver;
+  @Reference
+  ProjectOperations projectOperations;
+  @Reference
+  StaticFieldConverter staticFieldConverter;
+  @Reference
+  TypeLocationService typeLocationService;
+  @Reference
+  TypeManagementService typeManagementService;
 
-    protected void activate(final ComponentContext context) {
-        staticFieldConverter.add(InheritanceType.class);
+  protected void activate(final ComponentContext context) {
+    staticFieldConverter.add(InheritanceType.class);
+  }
+
+  protected void deactivate(final ComponentContext context) {
+    staticFieldConverter.remove(InheritanceType.class);
+  }
+
+  @Override
+  public void createClass(final JavaType name, final boolean rooAnnotations,
+      final LogicalPath path, final JavaType superclass, final JavaType implementsType,
+      final boolean createAbstract, final boolean permitReservedWords) {
+    if (!permitReservedWords) {
+      ReservedWords.verifyReservedWordsNotPresent(name);
     }
 
-    protected void deactivate(final ComponentContext context) {
-        staticFieldConverter.remove(InheritanceType.class);
+    Validate.isTrue(!JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
+        "Class name '%s' is part of java.lang", name.getSimpleTypeName());
+
+    int modifier = Modifier.PUBLIC;
+    if (createAbstract) {
+      modifier |= Modifier.ABSTRACT;
     }
 
-    @Override
-    public void createClass(final JavaType name, final boolean rooAnnotations,
-            final LogicalPath path, final JavaType superclass,
-            final JavaType implementsType, final boolean createAbstract,
-            final boolean permitReservedWords) {
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(name);
-        }
+    final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name,
+            PhysicalTypeCategory.CLASS);
 
-        Validate.isTrue(
-                !JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
-                "Class name '%s' is part of java.lang",
-                name.getSimpleTypeName());
-
-        int modifier = Modifier.PUBLIC;
-        if (createAbstract) {
-            modifier |= Modifier.ABSTRACT;
-        }
-
-        final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(name, path);
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                declaredByMetadataId, modifier, name,
-                PhysicalTypeCategory.CLASS);
-
-        if (!superclass.equals(OBJECT)) {
-            final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService
-                    .getTypeDetails(superclass);
-            if (superclassClassOrInterfaceTypeDetails != null) {
-                cidBuilder
-                        .setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(
-                                superclassClassOrInterfaceTypeDetails));
-            }
-        }
-
-        final List<JavaType> extendsTypes = new ArrayList<JavaType>();
-        extendsTypes.add(superclass);
-        cidBuilder.setExtendsTypes(extendsTypes);
-
-        if (implementsType != null) {
-            final Set<JavaType> implementsTypes = new LinkedHashSet<JavaType>();
-            final ClassOrInterfaceTypeDetails typeDetails = typeLocationService
-                    .getTypeDetails(declaredByMetadataId);
-            if (typeDetails != null) {
-                implementsTypes.addAll(typeDetails.getImplementsTypes());
-            }
-            implementsTypes.add(implementsType);
-            cidBuilder.setImplementsTypes(implementsTypes);
-        }
-
-        if (rooAnnotations) {
-            final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-            annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
-            annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
-            annotations.add(new AnnotationMetadataBuilder(ROO_EQUALS));
-            annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
-            cidBuilder.setAnnotations(annotations);
-        }
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    if (!superclass.equals(OBJECT)) {
+      final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails =
+          typeLocationService.getTypeDetails(superclass);
+      if (superclassClassOrInterfaceTypeDetails != null) {
+        cidBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(
+            superclassClassOrInterfaceTypeDetails));
+      }
     }
 
-    @Override
-    public void createConstructor(final JavaType name, final Set<String> fields) {
-        final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService
-                .getTypeDetails(name);
-        Validate.notNull(javaTypeDetails,
-                "The type specified, '%s', doesn't exist",
-                name.getFullyQualifiedTypeName());
+    final List<JavaType> extendsTypes = new ArrayList<JavaType>();
+    extendsTypes.add(superclass);
+    cidBuilder.setExtendsTypes(extendsTypes);
 
-        final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(name,
-                        pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-        final List<FieldMetadata> constructorFields = new ArrayList<FieldMetadata>();
-        final List<? extends FieldMetadata> declaredFields = javaTypeDetails
-                .getDeclaredFields();
-        if (fields != null) {
-            for (final String field : fields) {
-                declared: for (final FieldMetadata declaredField : declaredFields) {
-                    if (field.equals(declaredField.getFieldName()
-                            .getSymbolName())) {
-                        constructorFields.add(declaredField);
-                        break declared;
-                    }
-                }
-            }
-            if (constructorFields.isEmpty()) {
-                // User supplied a set of fields that do not exist in the
-                // class, so return without creating any constructor
-                throw new IllegalArgumentException(String.format(
-                        "The set of fields provided for the constructor does not exist in the class '%s'",
-                        name));
-            }
-        }
-
-        // Search for an existing constructor
-        final List<JavaType> parameterTypes = new ArrayList<JavaType>();
-        for (final FieldMetadata fieldMetadata : constructorFields) {
-            parameterTypes.add(fieldMetadata.getFieldType());
-        }
-
-        final ConstructorMetadata result = javaTypeDetails
-                .getDeclaredConstructor(parameterTypes);
-        if (result != null) {
-            
-            // Found an existing constructor on this class
-            throw new IllegalArgumentException(String.format(
-                    "The class '%s' already has a constructor method with the same arguments and it cannot "
-                    + "be created. Use '--force' parameter to overrite it.",
-                    name));
-        }
-
-        final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-        final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("super();");
-        for (final FieldMetadata field : constructorFields) {
-            final String fieldName = field.getFieldName().getSymbolName();
-            bodyBuilder.appendFormalLine("this." + fieldName + " = "
-                    + fieldName + ";");
-            parameterNames.add(field.getFieldName());
-        }
-
-        // Create the constructor
-        final ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(
-                declaredByMetadataId);
-        constructorBuilder.setModifier(Modifier.PUBLIC);
-        constructorBuilder.setParameterTypes(AnnotatedJavaType
-                .convertFromJavaTypes(parameterTypes));
-        constructorBuilder.setParameterNames(parameterNames);
-        constructorBuilder.setBodyBuilder(bodyBuilder);
-
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                javaTypeDetails);
-        cidBuilder.addConstructor(constructorBuilder);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    if (implementsType != null) {
+      final Set<JavaType> implementsTypes = new LinkedHashSet<JavaType>();
+      final ClassOrInterfaceTypeDetails typeDetails =
+          typeLocationService.getTypeDetails(declaredByMetadataId);
+      if (typeDetails != null) {
+        implementsTypes.addAll(typeDetails.getImplementsTypes());
+      }
+      implementsTypes.add(implementsType);
+      cidBuilder.setImplementsTypes(implementsTypes);
     }
 
-    @Override
-    public void createEnum(final JavaType name, final LogicalPath path,
-            final boolean permitReservedWords) {
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(name);
+    if (rooAnnotations) {
+      final List<AnnotationMetadataBuilder> annotations =
+          new ArrayList<AnnotationMetadataBuilder>();
+      annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
+      annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
+      annotations.add(new AnnotationMetadataBuilder(ROO_EQUALS));
+      annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
+      cidBuilder.setAnnotations(annotations);
+    }
+    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
+
+  @Override
+  public void createConstructor(final JavaType name, final Set<String> fields) {
+    final ClassOrInterfaceTypeDetails javaTypeDetails = typeLocationService.getTypeDetails(name);
+    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist",
+        name.getFullyQualifiedTypeName());
+
+    final String declaredByMetadataId =
+        PhysicalTypeIdentifier.createIdentifier(name,
+            pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+    final List<FieldMetadata> constructorFields = new ArrayList<FieldMetadata>();
+    final List<? extends FieldMetadata> declaredFields = javaTypeDetails.getDeclaredFields();
+    if (fields != null) {
+      for (final String field : fields) {
+        declared: for (final FieldMetadata declaredField : declaredFields) {
+          if (field.equals(declaredField.getFieldName().getSymbolName())) {
+            constructorFields.add(declaredField);
+            break declared;
+          }
         }
-        final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(
-                name, path);
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                physicalTypeId, Modifier.PUBLIC, name,
-                PhysicalTypeCategory.ENUMERATION);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+      }
+      if (constructorFields.isEmpty()) {
+        // User supplied a set of fields that do not exist in the
+        // class, so return without creating any constructor
+        throw new IllegalArgumentException(
+            String.format(
+                "The set of fields provided for the constructor does not exist in the class '%s'",
+                name));
+      }
     }
 
-    @Override
-    public void createInterface(final JavaType name, final LogicalPath path,
-            final boolean permitReservedWords) {
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(name);
-        }
-
-        final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(name, path);
-        final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                declaredByMetadataId, Modifier.PUBLIC, name,
-                PhysicalTypeCategory.INTERFACE);
-        typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    // Search for an existing constructor
+    final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+    for (final FieldMetadata fieldMetadata : constructorFields) {
+      parameterTypes.add(fieldMetadata.getFieldType());
     }
 
-    @Override
-    public void enumConstant(final JavaType name,
-            final JavaSymbolName fieldName, final boolean permitReservedWords) {
-        if (!permitReservedWords) {
-            // No need to check the "name" as if the class exists it is assumed
-            // it is a legal name
-            ReservedWords.verifyReservedWordsNotPresent(fieldName);
-        }
+    final ConstructorMetadata result = javaTypeDetails.getDeclaredConstructor(parameterTypes);
+    if (result != null) {
 
-        final String declaredByMetadataId = PhysicalTypeIdentifier
-                .createIdentifier(name,
-                        pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-        typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
+      // Found an existing constructor on this class
+      throw new IllegalArgumentException(String.format(
+          "The class '%s' already has a constructor method with the same arguments and it cannot "
+              + "be created. Use '--force' parameter to overrite it.", name));
     }
 
-    @Override
-    public void focus(final JavaType type) {
-        Validate.notNull(type, "Specify the type to focus on");
-        final String physicalTypeIdentifier = typeLocationService
-                .getPhysicalTypeIdentifier(type);
-        Validate.notNull(physicalTypeIdentifier, "Cannot locate the type %s",
-                type.getFullyQualifiedTypeName());
-        final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService
-                .get(physicalTypeIdentifier);
-        Validate.notNull(ptm, "Class %s does not exist",
-                PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    bodyBuilder.appendFormalLine("super();");
+    for (final FieldMetadata field : constructorFields) {
+      final String fieldName = field.getFieldName().getSymbolName();
+      bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
+      parameterNames.add(field.getFieldName());
     }
 
-    @Override
-    public boolean isProjectAvailable() {
-        return projectOperations.isFocusedProjectAvailable();
+    // Create the constructor
+    final ConstructorMetadataBuilder constructorBuilder =
+        new ConstructorMetadataBuilder(declaredByMetadataId);
+    constructorBuilder.setModifier(Modifier.PUBLIC);
+    constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(parameterTypes));
+    constructorBuilder.setParameterNames(parameterNames);
+    constructorBuilder.setBodyBuilder(bodyBuilder);
+
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(javaTypeDetails);
+    cidBuilder.addConstructor(constructorBuilder);
+    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
+
+  @Override
+  public void createEnum(final JavaType name, final LogicalPath path,
+      final boolean permitReservedWords) {
+    if (!permitReservedWords) {
+      ReservedWords.verifyReservedWordsNotPresent(name);
     }
+    final String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(name, path);
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(physicalTypeId, Modifier.PUBLIC, name,
+            PhysicalTypeCategory.ENUMERATION);
+    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
+
+  @Override
+  public void createInterface(final JavaType name, final LogicalPath path,
+      final boolean permitReservedWords) {
+    if (!permitReservedWords) {
+      ReservedWords.verifyReservedWordsNotPresent(name);
+    }
+
+    final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name,
+            PhysicalTypeCategory.INTERFACE);
+    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
+
+  @Override
+  public void enumConstant(final JavaType name, final JavaSymbolName fieldName,
+      final boolean permitReservedWords) {
+    if (!permitReservedWords) {
+      // No need to check the "name" as if the class exists it is assumed
+      // it is a legal name
+      ReservedWords.verifyReservedWordsNotPresent(fieldName);
+    }
+
+    final String declaredByMetadataId =
+        PhysicalTypeIdentifier.createIdentifier(name,
+            pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+    typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
+  }
+
+  @Override
+  public void focus(final JavaType type) {
+    Validate.notNull(type, "Specify the type to focus on");
+    final String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(type);
+    Validate.notNull(physicalTypeIdentifier, "Cannot locate the type %s",
+        type.getFullyQualifiedTypeName());
+    final PhysicalTypeMetadata ptm =
+        (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
+    Validate.notNull(ptm, "Class %s does not exist",
+        PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+  }
+
+  @Override
+  public boolean isProjectAvailable() {
+    return projectOperations.isFocusedProjectAvailable();
+  }
 }

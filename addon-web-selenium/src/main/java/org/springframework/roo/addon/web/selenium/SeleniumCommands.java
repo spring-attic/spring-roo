@@ -20,28 +20,41 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class SeleniumCommands implements CommandMarker {
 
-    @Reference private SeleniumOperations seleniumOperations;
-    
-    @CliAvailabilityIndicator({ "selenium all", "selenium test" })
-    public boolean isJdkFieldManagementAvailable() {
-        return seleniumOperations.isSeleniumInstallationPossible();
-    }
+  @Reference
+  private SeleniumOperations seleniumOperations;
 
-    @CliCommand(value = "selenium test", help = "Creates a new Selenium test for a particular controller")
-    public void generateTest(
-            @CliOption(key = "controller", mandatory = true, help = "Controller to create a Selenium test for") final JavaType controller,
-            @CliOption(key = "name", mandatory = false, help = "Name of the test") final String name,
-            @CliOption(key = "serverUrl", mandatory = false, unspecifiedDefaultValue = "http://localhost:8080/", specifiedDefaultValue = "http://localhost:8080/", help = "URL of the server where the web application is available, including protocol, port and hostname") final String url) {
+  @CliAvailabilityIndicator({"selenium all", "selenium test"})
+  public boolean isJdkFieldManagementAvailable() {
+    return seleniumOperations.isSeleniumInstallationPossible();
+  }
 
-        seleniumOperations.generateTest(controller, name, url);
-    }
-    
-    @CliCommand(value = "selenium all", help = "Creates a Selenium tests for all controllers")
-    public void generateAll(
-    		@CliOption(key = "serverUrl", mandatory = false, unspecifiedDefaultValue = "http://localhost:8080/", specifiedDefaultValue = "http://localhost:8080/", help = "URL of the server where the web application is available, including protocol, port and hostname") final String url) {
+  @CliCommand(value = "selenium test",
+      help = "Creates a new Selenium test for a particular controller")
+  public void generateTest(
+      @CliOption(key = "controller", mandatory = true,
+          help = "Controller to create a Selenium test for") final JavaType controller,
+      @CliOption(key = "name", mandatory = false, help = "Name of the test") final String name,
+      @CliOption(
+          key = "serverUrl",
+          mandatory = false,
+          unspecifiedDefaultValue = "http://localhost:8080/",
+          specifiedDefaultValue = "http://localhost:8080/",
+          help = "URL of the server where the web application is available, including protocol, port and hostname") final String url) {
 
-        seleniumOperations.generateAll(url);
-    }
+    seleniumOperations.generateTest(controller, name, url);
+  }
+
+  @CliCommand(value = "selenium all", help = "Creates a Selenium tests for all controllers")
+  public void generateAll(
+      @CliOption(
+          key = "serverUrl",
+          mandatory = false,
+          unspecifiedDefaultValue = "http://localhost:8080/",
+          specifiedDefaultValue = "http://localhost:8080/",
+          help = "URL of the server where the web application is available, including protocol, port and hostname") final String url) {
+
+    seleniumOperations.generateAll(url);
+  }
 
 
 

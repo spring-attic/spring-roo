@@ -23,29 +23,27 @@ import org.springframework.roo.process.manager.ProcessManager;
  */
 public interface ProcessManagerStatusProvider {
 
-    /**
-     * Registers a new status listener.
-     * 
-     * @param processManagerStatusListener to register (cannot be null)
-     */
-    void addProcessManagerStatusListener(
-            ProcessManagerStatusListener processManagerStatusListener);
+  /**
+   * Registers a new status listener.
+   * 
+   * @param processManagerStatusListener to register (cannot be null)
+   */
+  void addProcessManagerStatusListener(ProcessManagerStatusListener processManagerStatusListener);
 
-    /**
-     * Returns the current {@link ProcessManager}.
-     * 
-     * @return the current status (never null)
-     */
-    ProcessManagerStatus getProcessManagerStatus();
+  /**
+   * Returns the current {@link ProcessManager}.
+   * 
+   * @return the current status (never null)
+   */
+  ProcessManagerStatus getProcessManagerStatus();
 
-    /**
-     * Removes an existing status listener.
-     * <p>
-     * If the presented status listener is not found, the method returns without
-     * exception.
-     * 
-     * @param processManagerStatusListener to remove (cannot be null)
-     */
-    void removeProcessManagerStatusListener(
-            ProcessManagerStatusListener processManagerStatusListener);
+  /**
+   * Removes an existing status listener.
+   * <p>
+   * If the presented status listener is not found, the method returns without
+   * exception.
+   * 
+   * @param processManagerStatusListener to remove (cannot be null)
+   */
+  void removeProcessManagerStatusListener(ProcessManagerStatusListener processManagerStatusListener);
 }

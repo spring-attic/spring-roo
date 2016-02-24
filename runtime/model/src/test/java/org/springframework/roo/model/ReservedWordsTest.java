@@ -10,61 +10,53 @@ import org.junit.Test;
  */
 public class ReservedWordsTest {
 
-    @Test
-    public void testVerifyReservedJavaKeywordsNotPresent() {
-        ReservedWords.verifyReservedJavaKeywordsNotPresent("test");
-    }
+  @Test
+  public void testVerifyReservedJavaKeywordsNotPresent() {
+    ReservedWords.verifyReservedJavaKeywordsNotPresent("test");
+  }
 
-    @Test
-    public void testVerifyReservedJavaKeywordsNotPresent2() {
-        ReservedWords.verifyReservedJavaKeywordsNotPresent(new JavaSymbolName(
-                "test"));
-    }
+  @Test
+  public void testVerifyReservedJavaKeywordsNotPresent2() {
+    ReservedWords.verifyReservedJavaKeywordsNotPresent(new JavaSymbolName("test"));
+  }
 
-    @Test
-    public void testVerifyReservedJavaKeywordsNotPresent3() {
-        ReservedWords.verifyReservedJavaKeywordsNotPresent(new JavaType(
-                "com.foo.bar.Foo"));
-    }
+  @Test
+  public void testVerifyReservedJavaKeywordsNotPresent3() {
+    ReservedWords.verifyReservedJavaKeywordsNotPresent(new JavaType("com.foo.bar.Foo"));
+  }
 
-    @Test(expected = IllegalStateException.class)
-    public void testVerifyReservedJavaKeywordsPresent() {
-        ReservedWords.verifyReservedJavaKeywordsNotPresent(new JavaSymbolName(
-                "if"));
-    }
+  @Test(expected = IllegalStateException.class)
+  public void testVerifyReservedJavaKeywordsPresent() {
+    ReservedWords.verifyReservedJavaKeywordsNotPresent(new JavaSymbolName("if"));
+  }
 
-    @Test(expected = IllegalStateException.class)
-    public void testVerifyReservedJavaKeywordsPresent2() {
-        ReservedWords.verifyReservedJavaKeywordsNotPresent(new JavaType(
-                "com.return.bar"));
-    }
+  @Test(expected = IllegalStateException.class)
+  public void testVerifyReservedJavaKeywordsPresent2() {
+    ReservedWords.verifyReservedJavaKeywordsNotPresent(new JavaType("com.return.bar"));
+  }
 
-    @Test
-    public void testVerifyReservedSqlKeywordsNotPresent() {
-        ReservedWords.verifyReservedSqlKeywordsNotPresent("ROW_VER_NO");
-    }
+  @Test
+  public void testVerifyReservedSqlKeywordsNotPresent() {
+    ReservedWords.verifyReservedSqlKeywordsNotPresent("ROW_VER_NO");
+  }
 
-    @Test
-    public void testVerifyReservedSqlKeywordsNotPresent2() {
-        ReservedWords.verifyReservedSqlKeywordsNotPresent(new JavaSymbolName(
-                "ROW_VER_NO"));
-    }
+  @Test
+  public void testVerifyReservedSqlKeywordsNotPresent2() {
+    ReservedWords.verifyReservedSqlKeywordsNotPresent(new JavaSymbolName("ROW_VER_NO"));
+  }
 
-    @Test
-    public void testVerifyReservedSqlKeywordsNotPresent3() {
-        ReservedWords.verifyReservedSqlKeywordsNotPresent(new JavaType(
-                "com.bar.Foo"));
-    }
+  @Test
+  public void testVerifyReservedSqlKeywordsNotPresent3() {
+    ReservedWords.verifyReservedSqlKeywordsNotPresent(new JavaType("com.bar.Foo"));
+  }
 
-    @Test(expected = IllegalStateException.class)
-    public void testVerifyReservedSqlKeywordsPresent() {
-        ReservedWords.verifyReservedSqlKeywordsNotPresent(new JavaSymbolName(
-                "alter"));
-    }
+  @Test(expected = IllegalStateException.class)
+  public void testVerifyReservedSqlKeywordsPresent() {
+    ReservedWords.verifyReservedSqlKeywordsNotPresent(new JavaSymbolName("alter"));
+  }
 
-    @Test(expected = IllegalStateException.class)
-    public void testVerifyReservedSqlKeywordsPresent2() {
-        ReservedWords.verifyReservedSqlKeywordsNotPresent(new JavaType(
-                "com.bar.Outer"));
-    }
+  @Test(expected = IllegalStateException.class)
+  public void testVerifyReservedSqlKeywordsPresent2() {
+    ReservedWords.verifyReservedSqlKeywordsNotPresent(new JavaType("com.bar.Outer"));
+  }
 }

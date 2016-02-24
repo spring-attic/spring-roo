@@ -5,20 +5,19 @@ package org.springframework.roo.classpath.details.comments;
  */
 public abstract class AbstractComment {
 
-    private String comment;
+  private String comment;
 
-    protected AbstractComment() {
-    }
+  protected AbstractComment() {}
 
-    protected AbstractComment(String comment) {
-        this.comment = comment;
-    }
+  protected AbstractComment(String comment) {
+    this.comment = comment;
+  }
 
-    public String getComment() {
-        return comment;
-    }
+  public String getComment() {
+    return comment;
+  }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
 }

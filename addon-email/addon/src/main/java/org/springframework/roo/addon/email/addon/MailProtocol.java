@@ -11,56 +11,54 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class MailProtocol implements Comparable<MailProtocol> {
 
-    public static final MailProtocol IMAP = new MailProtocol("IMAP", "imap");
-    public static final MailProtocol POP3 = new MailProtocol("POP3", "pop3");
-    public static final MailProtocol SMTP = new MailProtocol("SMTP", "smtp");
+  public static final MailProtocol IMAP = new MailProtocol("IMAP", "imap");
+  public static final MailProtocol POP3 = new MailProtocol("POP3", "pop3");
+  public static final MailProtocol SMTP = new MailProtocol("SMTP", "smtp");
 
-    private final String protocol;
-    private final String protocolLabel;
+  private final String protocol;
+  private final String protocolLabel;
 
-    public MailProtocol(final String protocolLabel, final String protocol) {
-        Validate.notNull(protocolLabel, "Protocol label required");
-        Validate.notNull(protocol, "protocol required");
-        this.protocolLabel = protocolLabel;
-        this.protocol = protocol;
+  public MailProtocol(final String protocolLabel, final String protocol) {
+    Validate.notNull(protocolLabel, "Protocol label required");
+    Validate.notNull(protocol, "protocol required");
+    this.protocolLabel = protocolLabel;
+    this.protocol = protocol;
+  }
+
+  public final int compareTo(final MailProtocol o) {
+    if (o == null) {
+      return -1;
     }
+    final int result = protocolLabel.compareTo(o.protocolLabel);
 
-    public final int compareTo(final MailProtocol o) {
-        if (o == null) {
-            return -1;
-        }
-        final int result = protocolLabel.compareTo(o.protocolLabel);
+    return result;
+  }
 
-        return result;
-    }
+  @Override
+  public final boolean equals(final Object obj) {
+    return obj instanceof MailProtocol && compareTo((MailProtocol) obj) == 0;
+  }
 
-    @Override
-    public final boolean equals(final Object obj) {
-        return obj instanceof MailProtocol
-                && compareTo((MailProtocol) obj) == 0;
-    }
+  public String getKey() {
+    return protocolLabel;
+  }
 
-    public String getKey() {
-        return protocolLabel;
-    }
+  public String getProtocol() {
+    return protocol;
+  }
 
-    public String getProtocol() {
-        return protocol;
-    }
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (protocolLabel == null ? 0 : protocolLabel.hashCode());
+    return result;
+  }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + (protocolLabel == null ? 0 : protocolLabel.hashCode());
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("provider", protocolLabel);
-        return builder.toString();
-    }
+  @Override
+  public String toString() {
+    final ToStringBuilder builder = new ToStringBuilder(this);
+    builder.append("provider", protocolLabel);
+    return builder.toString();
+  }
 }

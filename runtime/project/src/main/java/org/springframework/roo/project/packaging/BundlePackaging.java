@@ -24,24 +24,23 @@ import org.springframework.roo.project.ProjectOperations;
 @Service
 public class BundlePackaging implements CorePackagingProvider {
 
-    public String createArtifacts(final JavaPackage topLevelPackage,
-            final String nullableProjectName, final String javaVersion,
-            final GAV parentPom, final String module,
-            final ProjectOperations projectOperations) {
-        // Already created by the creator addon
-        return projectOperations.getPathResolver().getIdentifier(
-                LogicalPath.getInstance(Path.ROOT, ""), "pom.xml");
-    }
+  public String createArtifacts(final JavaPackage topLevelPackage,
+      final String nullableProjectName, final String javaVersion, final GAV parentPom,
+      final String module, final ProjectOperations projectOperations) {
+    // Already created by the creator addon
+    return projectOperations.getPathResolver().getIdentifier(
+        LogicalPath.getInstance(Path.ROOT, ""), "pom.xml");
+  }
 
-    public String getId() {
-        return "bundle";
-    }
+  public String getId() {
+    return "bundle";
+  }
 
-    public Collection<Path> getPaths() {
-        return Arrays.asList(SRC_MAIN_JAVA, SRC_MAIN_RESOURCES);
-    }
+  public Collection<Path> getPaths() {
+    return Arrays.asList(SRC_MAIN_JAVA, SRC_MAIN_RESOURCES);
+  }
 
-    public boolean isDefault() {
-        return false;
-    }
+  public boolean isDefault() {
+    return false;
+  }
 }

@@ -13,9 +13,9 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public class IntegerAttributeValueTest {
 
-    @Test
-    public void testToString() {
-        assertEquals("answer -> 42", new IntegerAttributeValue(
-                new JavaSymbolName("answer"), 42).toString());
-    }
+  @Test
+  public void testToString() {
+    assertEquals("answer -> 42",
+        new IntegerAttributeValue(new JavaSymbolName("answer"), 42).toString());
+  }
 }

@@ -11,7 +11,7 @@ import org.springframework.roo.shell.Converter;
  */
 public interface StaticFieldConverter extends Converter<Object> {
 
-    void add(Class<?> clazz);
+  void add(Class<?> clazz);
 
-    void remove(Class<?> clazz);
+  void remove(Class<?> clazz);
 }

@@ -24,52 +24,71 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class IntegrationTestCommands implements CommandMarker {
 
-    @Reference private IntegrationTestOperations integrationTestOperations;
+  @Reference
+  private IntegrationTestOperations integrationTestOperations;
 
-    @CliAvailabilityIndicator({ "test integration", "test mock", "test stub" })
-    public boolean isPersistentClassAvailable() {
-        return integrationTestOperations
-                .isIntegrationTestInstallationPossible();
+  @CliAvailabilityIndicator({"test integration", "test mock", "test stub"})
+  public boolean isPersistentClassAvailable() {
+    return integrationTestOperations.isIntegrationTestInstallationPossible();
+  }
+
+  @CliCommand(value = "test integration",
+      help = "Creates a new integration test for the specified entity")
+  public void newIntegrationTest(
+      @CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*",
+          optionContext = UPDATE_PROJECT,
+          help = "The name of the entity to create an integration test for") final JavaType entity,
+      @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
+          specifiedDefaultValue = "true",
+          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+      @CliOption(
+          key = "transactional",
+          mandatory = false,
+          unspecifiedDefaultValue = "true",
+          specifiedDefaultValue = "true",
+          help = "Indicates whether the created test cases should be run withing a Spring transaction") final boolean transactional) {
+
+    if (!permitReservedWords) {
+      ReservedWords.verifyReservedWordsNotPresent(entity);
     }
 
-    @CliCommand(value = "test integration", help = "Creates a new integration test for the specified entity")
-    public void newIntegrationTest(
-            @CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the entity to create an integration test for") final JavaType entity,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
-            @CliOption(key = "transactional", mandatory = false, unspecifiedDefaultValue = "true", specifiedDefaultValue = "true", help = "Indicates whether the created test cases should be run withing a Spring transaction") final boolean transactional) {
+    Validate
+        .isTrue(
+            BeanInfoUtils.isEntityReasonablyNamed(entity),
+            "Cannot create an integration test for an entity named 'Test' or 'TestCase' under any circumstances");
 
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(entity);
-        }
+    integrationTestOperations.newIntegrationTest(entity, transactional);
+  }
 
-        Validate.isTrue(
-                BeanInfoUtils.isEntityReasonablyNamed(entity),
-                "Cannot create an integration test for an entity named 'Test' or 'TestCase' under any circumstances");
+  @CliCommand(value = "test mock", help = "Creates a mock test for the specified entity")
+  public void newMockTest(
+      @CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*",
+          optionContext = UPDATE_PROJECT,
+          help = "The name of the entity this mock test is targeting") final JavaType entity,
+      @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
+          specifiedDefaultValue = "true",
+          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
-        integrationTestOperations.newIntegrationTest(entity, transactional);
+    if (!permitReservedWords) {
+      ReservedWords.verifyReservedWordsNotPresent(entity);
     }
 
-    @CliCommand(value = "test mock", help = "Creates a mock test for the specified entity")
-    public void newMockTest(
-            @CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the entity this mock test is targeting") final JavaType entity,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
+    integrationTestOperations.newMockTest(entity);
+  }
 
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(entity);
-        }
+  @CliCommand(value = "test stub", help = "Creates a test stub for the specified class")
+  public void newTestStub(
+      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+          optionContext = UPDATE_PROJECT,
+          help = "The name of the class this mock test is targeting") final JavaType javaType,
+      @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
+          specifiedDefaultValue = "true",
+          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
-        integrationTestOperations.newMockTest(entity);
+    if (!permitReservedWords) {
+      ReservedWords.verifyReservedWordsNotPresent(javaType);
     }
 
-    @CliCommand(value = "test stub", help = "Creates a test stub for the specified class")
-    public void newTestStub(
-            @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT, help = "The name of the class this mock test is targeting") final JavaType javaType,
-            @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
-
-        if (!permitReservedWords) {
-            ReservedWords.verifyReservedWordsNotPresent(javaType);
-        }
-
-        integrationTestOperations.newTestStub(javaType);
-    }
+    integrationTestOperations.newTestStub(javaType);
+  }
 }

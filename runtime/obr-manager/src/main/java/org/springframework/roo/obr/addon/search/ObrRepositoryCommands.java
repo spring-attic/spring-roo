@@ -17,28 +17,35 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class ObrRepositoryCommands implements CommandMarker {
 
-    @Reference private ObrRepositoryOperations operations;
+  @Reference
+  private ObrRepositoryOperations operations;
 
 
-    @CliCommand(value = "addon repository add", help = "Adds a new OBR Repository to ROO Shell")
-    public void addRepo(
-            @CliOption(key = "url", mandatory = true, help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml'") final String url) throws Exception{
-    	operations.addRepository(url);
-    }
-    
-    @CliCommand(value = "addon repository remove", help = "Removes an existing OBR Repository from ROO Shell")
-    public void removeRepo(
-            @CliOption(key = "url", mandatory = true, help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml'") final String url) throws Exception {
-    	operations.removeRepo(url);
-    }
-    
-    @CliCommand(value = "addon repository list", help = "Lists existing OBR Repositories")
-    public void listRepos() throws Exception{
-    	operations.listRepos();
-    }
-    
-    @CliCommand(value = "addon repository introspect", help = "Introspects all installed OBR Repositories and list all their addons")
-    public void introspectRepos() throws Exception{
-    	operations.introspectRepos();
-    }
+  @CliCommand(value = "addon repository add", help = "Adds a new OBR Repository to ROO Shell")
+  public void addRepo(
+      @CliOption(key = "url", mandatory = true,
+          help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml'") final String url)
+      throws Exception {
+    operations.addRepository(url);
+  }
+
+  @CliCommand(value = "addon repository remove",
+      help = "Removes an existing OBR Repository from ROO Shell")
+  public void removeRepo(
+      @CliOption(key = "url", mandatory = true,
+          help = "URL file that defines repository. Ex: 'http://localhost/repo/index.xml'") final String url)
+      throws Exception {
+    operations.removeRepo(url);
+  }
+
+  @CliCommand(value = "addon repository list", help = "Lists existing OBR Repositories")
+  public void listRepos() throws Exception {
+    operations.listRepos();
+  }
+
+  @CliCommand(value = "addon repository introspect",
+      help = "Introspects all installed OBR Repositories and list all their addons")
+  public void introspectRepos() throws Exception {
+    operations.introspectRepos();
+  }
 }

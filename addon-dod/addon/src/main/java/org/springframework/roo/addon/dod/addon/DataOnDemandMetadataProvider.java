@@ -8,6 +8,5 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @author Alan Stewart
  * @since 1.2.0
  */
-public interface DataOnDemandMetadataProvider extends
-        ItdTriggerBasedMetadataProvider {
+public interface DataOnDemandMetadataProvider extends ItdTriggerBasedMetadataProvider {
 }

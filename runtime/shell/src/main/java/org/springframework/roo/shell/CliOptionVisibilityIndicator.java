@@ -29,12 +29,12 @@ public @interface CliOptionVisibilityIndicator {
    * 
    */
   String[] params();
-  
+
   /**
    * @return the error message if the command is executed breaking this 
    * dependency 
    * 
    */
   String help();
-  
+
 }

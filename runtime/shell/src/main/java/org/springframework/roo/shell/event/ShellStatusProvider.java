@@ -20,27 +20,27 @@ package org.springframework.roo.shell.event;
  */
 public interface ShellStatusProvider {
 
-    /**
-     * Registers a new status listener.
-     * 
-     * @param shellStatusListener to register (cannot be null)
-     */
-    void addShellStatusListener(ShellStatusListener shellStatusListener);
+  /**
+   * Registers a new status listener.
+   * 
+   * @param shellStatusListener to register (cannot be null)
+   */
+  void addShellStatusListener(ShellStatusListener shellStatusListener);
 
-    /**
-     * Returns the current shell status.
-     * 
-     * @return the current status (never null)
-     */
-    ShellStatus getShellStatus();
+  /**
+   * Returns the current shell status.
+   * 
+   * @return the current status (never null)
+   */
+  ShellStatus getShellStatus();
 
-    /**
-     * Removes an existing status listener.
-     * <p>
-     * If the presented status listener is not found, the method returns without
-     * exception.
-     * 
-     * @param shellStatusListener to remove (cannot be null)
-     */
-    void removeShellStatusListener(ShellStatusListener shellStatusListener);
+  /**
+   * Removes an existing status listener.
+   * <p>
+   * If the presented status listener is not found, the method returns without
+   * exception.
+   * 
+   * @param shellStatusListener to remove (cannot be null)
+   */
+  void removeShellStatusListener(ShellStatusListener shellStatusListener);
 }

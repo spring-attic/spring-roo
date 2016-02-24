@@ -17,69 +17,63 @@ import org.springframework.roo.metadata.MetadataItem;
  */
 public abstract class AbstractMetadataCache implements MetadataCache {
 
-    private static final float hashTableLoadFactor = 0.75f;
+  private static final float hashTableLoadFactor = 0.75f;
 
-    private LinkedHashMap<String, MetadataItem> map;
-    private int maxCapacity = 100000;
+  private LinkedHashMap<String, MetadataItem> map;
+  private int maxCapacity = 100000;
 
-    protected AbstractMetadataCache() {
-        init();
+  protected AbstractMetadataCache() {
+    init();
+  }
+
+  public void evict(final String metadataIdentificationString) {
+    Validate.isTrue(
+        MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString),
+        "Only metadata instances can be cached (not '%s')", metadataIdentificationString);
+    map.remove(metadataIdentificationString);
+  }
+
+  public void evictAll() {
+    init();
+  }
+
+  protected int getCacheSize() {
+    return map.size();
+  }
+
+  protected MetadataItem getFromCache(final String metadataIdentificationString) {
+    Validate.isTrue(
+        MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString),
+        "Only metadata instances can be cached (not '%s')", metadataIdentificationString);
+    return map.get(metadataIdentificationString);
+  }
+
+  public int getMaxCapacity() {
+    return maxCapacity;
+  }
+
+  private void init() {
+    final int hashTableCapacity = (int) Math.ceil(maxCapacity / hashTableLoadFactor) + 1;
+    map = new LinkedHashMap<String, MetadataItem>(hashTableCapacity, hashTableLoadFactor, true) {
+      private static final long serialVersionUID = 1;
+
+      @Override
+      protected boolean removeEldestEntry(final Map.Entry<String, MetadataItem> eldest) {
+        return size() > maxCapacity;
+      }
+    };
+  }
+
+  public void put(final MetadataItem metadataItem) {
+    Validate.notNull(metadataItem, "A metadata item is required");
+    map.put(metadataItem.getId(), metadataItem);
+  }
+
+  public void setMaxCapacity(int maxCapacity) {
+    if (maxCapacity < 100) {
+      maxCapacity = 100;
     }
-
-    public void evict(final String metadataIdentificationString) {
-        Validate.isTrue(MetadataIdentificationUtils
-                .isIdentifyingInstance(metadataIdentificationString),
-                "Only metadata instances can be cached (not '%s')",
-                metadataIdentificationString);
-        map.remove(metadataIdentificationString);
-    }
-
-    public void evictAll() {
-        init();
-    }
-
-    protected int getCacheSize() {
-        return map.size();
-    }
-
-    protected MetadataItem getFromCache(
-            final String metadataIdentificationString) {
-        Validate.isTrue(MetadataIdentificationUtils
-                .isIdentifyingInstance(metadataIdentificationString),
-                "Only metadata instances can be cached (not '%s')",
-                metadataIdentificationString);
-        return map.get(metadataIdentificationString);
-    }
-
-    public int getMaxCapacity() {
-        return maxCapacity;
-    }
-
-    private void init() {
-        final int hashTableCapacity = (int) Math.ceil(maxCapacity
-                / hashTableLoadFactor) + 1;
-        map = new LinkedHashMap<String, MetadataItem>(hashTableCapacity,
-                hashTableLoadFactor, true) {
-            private static final long serialVersionUID = 1;
-
-            @Override
-            protected boolean removeEldestEntry(
-                    final Map.Entry<String, MetadataItem> eldest) {
-                return size() > maxCapacity;
-            }
-        };
-    }
-
-    public void put(final MetadataItem metadataItem) {
-        Validate.notNull(metadataItem, "A metadata item is required");
-        map.put(metadataItem.getId(), metadataItem);
-    }
-
-    public void setMaxCapacity(int maxCapacity) {
-        if (maxCapacity < 100) {
-            maxCapacity = 100;
-        }
-        this.maxCapacity = maxCapacity;
-        init();
-    }
+    this.maxCapacity = maxCapacity;
+    init();
+  }
 }

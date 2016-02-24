@@ -10,10 +10,10 @@ import org.osgi.framework.Bundle;
  */
 public interface BundleCallback {
 
-    /**
-     * Executes this callback on the given OSGi bundle
-     * 
-     * @param bundle the bundle to operate upon
-     */
-    void execute(Bundle bundle);
+  /**
+   * Executes this callback on the given OSGi bundle
+   * 
+   * @param bundle the bundle to operate upon
+   */
+  void execute(Bundle bundle);
 }

@@ -13,17 +13,16 @@ import java.sql.Driver;
  */
 public interface JdbcDriverManager {
 
-    /**
-     * Attempts to locate and instantiate the specified JDBC driver.
-     * <p>
-     * The JDBC driver must provide a public no-argument constructor.
-     * 
-     * @param driverClassName to load (required)
-     * @param displayAddOns display available add-ons if possible (required)
-     * @return the driver, or null if the driver could not be located
-     * @throws RuntimeException if the driver was located but could not be
-     *             instantiated
-     */
-    Driver loadDriver(String driverClassName, boolean displayAddOns)
-            throws RuntimeException;
+  /**
+   * Attempts to locate and instantiate the specified JDBC driver.
+   * <p>
+   * The JDBC driver must provide a public no-argument constructor.
+   * 
+   * @param driverClassName to load (required)
+   * @param displayAddOns display available add-ons if possible (required)
+   * @return the driver, or null if the driver could not be located
+   * @throws RuntimeException if the driver was located but could not be
+   *             instantiated
+   */
+  Driver loadDriver(String driverClassName, boolean displayAddOns) throws RuntimeException;
 }

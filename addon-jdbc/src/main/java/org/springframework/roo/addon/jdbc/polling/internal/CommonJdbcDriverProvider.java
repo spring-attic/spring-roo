@@ -24,41 +24,38 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
 @Service
 public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 
-    private BundleContext bundleContext;
+  private BundleContext bundleContext;
 
-    protected void activate(final ComponentContext context) {
-        bundleContext = context.getBundleContext();
+  protected void activate(final ComponentContext context) {
+    bundleContext = context.getBundleContext();
+  }
+
+  protected void deactivate(final ComponentContext context) {
+    bundleContext = null;
+  }
+
+  public Driver loadDriver(final String driverClassName) throws RuntimeException {
+    // Try a search
+    final Class<?> clazz =
+        BundleFindingUtils.findFirstBundleWithType(bundleContext, driverClassName);
+
+    if (clazz == null) {
+      // Let's give up given it doesn't seem to be loadable
+      return null;
     }
 
-    protected void deactivate(final ComponentContext context) {
-        bundleContext = null;
+    if (!Driver.class.isAssignableFrom(clazz)) {
+      // That's weird, it doesn't seem to be a driver
+      return null;
     }
 
-    public Driver loadDriver(final String driverClassName)
-            throws RuntimeException {
-        // Try a search
-        final Class<?> clazz = BundleFindingUtils.findFirstBundleWithType(
-                bundleContext, driverClassName);
-
-        if (clazz == null) {
-            // Let's give up given it doesn't seem to be loadable
-            return null;
-        }
-
-        if (!Driver.class.isAssignableFrom(clazz)) {
-            // That's weird, it doesn't seem to be a driver
-            return null;
-        }
-
-        // Time to create it and register etc
-        try {
-            final Driver result = (Driver) clazz.newInstance();
-            DriverManager.registerDriver(result);
-            return result;
-        }
-        catch (final Exception e) {
-            throw new IllegalStateException("Unable to load JDBC driver '"
-                    + driverClassName + "'", e);
-        }
+    // Time to create it and register etc
+    try {
+      final Driver result = (Driver) clazz.newInstance();
+      DriverManager.registerDriver(result);
+      return result;
+    } catch (final Exception e) {
+      throw new IllegalStateException("Unable to load JDBC driver '" + driverClassName + "'", e);
     }
+  }
 }

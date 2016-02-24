@@ -10,15 +10,15 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
  * @since 1.2.0
  */
 public class DataOnDemandAnnotationValuesTest extends
-        AnnotationValuesTestCase<RooDataOnDemand, DataOnDemandAnnotationValues> {
+    AnnotationValuesTestCase<RooDataOnDemand, DataOnDemandAnnotationValues> {
 
-    @Override
-    protected Class<RooDataOnDemand> getAnnotationClass() {
-        return RooDataOnDemand.class;
-    }
+  @Override
+  protected Class<RooDataOnDemand> getAnnotationClass() {
+    return RooDataOnDemand.class;
+  }
 
-    @Override
-    protected Class<DataOnDemandAnnotationValues> getValuesClass() {
-        return DataOnDemandAnnotationValues.class;
-    }
+  @Override
+  protected Class<DataOnDemandAnnotationValues> getValuesClass() {
+    return DataOnDemandAnnotationValues.class;
+  }
 }

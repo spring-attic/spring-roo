@@ -46,320 +46,293 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Path("entities")
 public class JpaEntityResource implements ResourceMarker {
 
-    private BundleContext context;
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(JpaEntityResource.class);
+  private BundleContext context;
+  private static final Logger LOGGER = HandlerUtils.getLogger(JpaEntityResource.class);
 
-    private Shell shell;
-    private TypeLocationService typeLocationService;
-    private ProjectOperations projectOperations;
+  private Shell shell;
+  private TypeLocationService typeLocationService;
+  private ProjectOperations projectOperations;
 
-    protected void activate(final ComponentContext cContext) {
-        this.context = cContext.getBundleContext();
+  protected void activate(final ComponentContext cContext) {
+    this.context = cContext.getBundleContext();
+  }
+
+  /**
+   * Method to obtain all created entities on current project
+   * 
+   * @param out
+   */
+  @GET
+  @Produces("application/json")
+  public JsonArray getAllEntities() {
+
+    // JSON Array to store the info about all entities
+    JsonArrayBuilder jsonAllEntitiesBuilder = Json.createArrayBuilder();
+
+    // Getting all entities
+    Set<ClassOrInterfaceTypeDetails> entities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            new JavaType(RooJavaBean.class));
+
+    Iterator<ClassOrInterfaceTypeDetails> it = entities.iterator();
+
+    while (it.hasNext()) {
+
+      // Getting entity
+      ClassOrInterfaceTypeDetails entity = it.next();
+
+      // Get the JsonObjectBuilder for this entity
+      JsonObjectBuilder jsonEntityBuilder = createJsonObjectBuilder(entity);
+
+      // Add the JSON Object of this entity to the list of entities info
+      jsonAllEntitiesBuilder.add(jsonEntityBuilder);
     }
 
-    /**
-     * Method to obtain all created entities on current project
-     * 
-     * @param out
-     */
-    @GET
-    @Produces("application/json")
-    public JsonArray getAllEntities() {
+    // Returning info
+    JsonArray jsonAllEntities = jsonAllEntitiesBuilder.build();
+    return jsonAllEntities;
+  }
 
-        // JSON Array to store the info about all entities
-        JsonArrayBuilder jsonAllEntitiesBuilder = Json.createArrayBuilder();
+  /**
+   * Create the JSON that contains all the info about the given entity.
+   * 
+   * @param entity
+   * @return
+   */
+  private JsonObjectBuilder createJsonObjectBuilder(ClassOrInterfaceTypeDetails entity) {
 
-        // Getting all entities
-        Set<ClassOrInterfaceTypeDetails> entities = getTypeLocationService()
-                .findClassesOrInterfaceDetailsWithAnnotation(
-                        new JavaType(RooJavaBean.class));
+    // Entity Name
+    String entityName = entity.getName().getFullyQualifiedTypeName();
+    String topLevelPackage = getProjectOperations().getFocusedTopLevelPackage().toString();
 
-        Iterator<ClassOrInterfaceTypeDetails> it = entities.iterator();
+    // Replacing topLevelPackage with ~
+    entityName = entityName.replace(topLevelPackage, "~");
 
-        while (it.hasNext()) {
+    // JSON Array to store the info about the fields of this entity
+    JsonArrayBuilder jsonFieldsBuilder = Json.createArrayBuilder();
 
-            // Getting entity
-            ClassOrInterfaceTypeDetails entity = it.next();
+    for (FieldMetadata field : entity.getDeclaredFields()) {
 
-            // Get the JsonObjectBuilder for this entity
-            JsonObjectBuilder jsonEntityBuilder = createJsonObjectBuilder(entity);
+      // Getting fields values
+      String fieldName = field.getFieldName().getSymbolName();
+      String fieldType = field.getFieldType().getSimpleTypeName();
 
-            // Add the JSON Object of this entity to the list of entities info
-            jsonAllEntitiesBuilder.add(jsonEntityBuilder);
+      // Getting referenced class
+      String referencedClass = "";
+      if (field.getFieldType().getSimpleTypeName().equals("Set")
+          || field.getFieldType().getSimpleTypeName().equals("List")) {
+        referencedClass = field.getFieldType().getParameters().get(0).getSimpleTypeName();
+      } else {
+        AnnotationMetadata manyToOneAnnotation =
+            field.getAnnotation(new JavaType("javax.persistence.ManyToOne"));
+        if (manyToOneAnnotation != null) {
+          referencedClass = field.getFieldType().getFullyQualifiedTypeName();
+          referencedClass = referencedClass.replace(topLevelPackage, "~");
+          fieldType = "Reference";
         }
+      }
 
-        // Returning info
-        JsonArray jsonAllEntities = jsonAllEntitiesBuilder.build();
-        return jsonAllEntities;
+      // JSON Object to store the info about this field
+      JsonObjectBuilder jsonFieldBuilder = Json.createObjectBuilder();
+      jsonFieldBuilder.add("fieldName", fieldName).add("type", fieldType)
+          .add("referencedClass", referencedClass);
+
+      // Add the JSON Object of this field to the list of fields info
+      jsonFieldsBuilder.add(jsonFieldBuilder);
     }
 
-    /**
-     * Create the JSON that contains all the info about the given entity.
-     * 
-     * @param entity
-     * @return
-     */
-    private JsonObjectBuilder createJsonObjectBuilder(
-            ClassOrInterfaceTypeDetails entity) {
+    // Checking if current entity is abstract
+    boolean isAbstractEntity = entity.isAbstract();
 
-        // Entity Name
-        String entityName = entity.getName().getFullyQualifiedTypeName();
-        String topLevelPackage = getProjectOperations()
-                .getFocusedTopLevelPackage().toString();
-
-        // Replacing topLevelPackage with ~
-        entityName = entityName.replace(topLevelPackage, "~");
-
-        // JSON Array to store the info about the fields of this entity
-        JsonArrayBuilder jsonFieldsBuilder = Json.createArrayBuilder();
-
-        for (FieldMetadata field : entity.getDeclaredFields()) {
-
-            // Getting fields values
-            String fieldName = field.getFieldName().getSymbolName();
-            String fieldType = field.getFieldType().getSimpleTypeName();
-
-            // Getting referenced class
-            String referencedClass = "";
-            if (field.getFieldType().getSimpleTypeName().equals("Set")
-                    || field.getFieldType().getSimpleTypeName().equals("List")) {
-                referencedClass = field.getFieldType().getParameters().get(0)
-                        .getSimpleTypeName();
-            }
-            else {
-                AnnotationMetadata manyToOneAnnotation = field
-                        .getAnnotation(new JavaType(
-                                "javax.persistence.ManyToOne"));
-                if (manyToOneAnnotation != null) {
-                    referencedClass = field.getFieldType()
-                            .getFullyQualifiedTypeName();
-                    referencedClass = referencedClass.replace(topLevelPackage,
-                            "~");
-                    fieldType = "Reference";
-                }
-            }
-
-            // JSON Object to store the info about this field
-            JsonObjectBuilder jsonFieldBuilder = Json.createObjectBuilder();
-            jsonFieldBuilder.add("fieldName", fieldName).add("type", fieldType)
-                    .add("referencedClass", referencedClass);
-
-            // Add the JSON Object of this field to the list of fields info
-            jsonFieldsBuilder.add(jsonFieldBuilder);
-        }
-
-        // Checking if current entity is abstract
-        boolean isAbstractEntity = entity.isAbstract();
-
-        // JSON Array to store the info about the parent classes of this entity
-        JsonArrayBuilder jsonExtendsBuilder = Json.createArrayBuilder();
-        for (JavaType extendsType : entity.getExtendsTypes()) {
-            jsonExtendsBuilder.add(extendsType.getFullyQualifiedTypeName()
-                    .replace(topLevelPackage, "~"));
-        }
-
-        // JSON Object to store the info about this entity
-        JsonObjectBuilder jsonEntityBuilder = Json.createObjectBuilder();
-        jsonEntityBuilder.add("entityName", entityName)
-                .add("extendsTypes", jsonExtendsBuilder)
-                .add("isAbstract", isAbstractEntity)
-                .add("fields", jsonFieldsBuilder);
-
-        return jsonEntityBuilder;
+    // JSON Array to store the info about the parent classes of this entity
+    JsonArrayBuilder jsonExtendsBuilder = Json.createArrayBuilder();
+    for (JavaType extendsType : entity.getExtendsTypes()) {
+      jsonExtendsBuilder.add(extendsType.getFullyQualifiedTypeName().replace(topLevelPackage, "~"));
     }
 
-    /**
-     * Method to obtain details of some entity
-     * 
-     * @param out
-     */
-    @GET
-    @Path("{entityName}")
-    @Produces("application/json")
-    public JsonObject getEntityDetails(
-            @PathParam("entityName") String entityName) {
+    // JSON Object to store the info about this entity
+    JsonObjectBuilder jsonEntityBuilder = Json.createObjectBuilder();
+    jsonEntityBuilder.add("entityName", entityName).add("extendsTypes", jsonExtendsBuilder)
+        .add("isAbstract", isAbstractEntity).add("fields", jsonFieldsBuilder);
 
-        // Getting all entities
-        Set<ClassOrInterfaceTypeDetails> entities = getTypeLocationService()
-                .findClassesOrInterfaceDetailsWithAnnotation(
-                        new JavaType(RooJavaBean.class));
-        String topLevelPackage = getProjectOperations()
-                .getFocusedTopLevelPackage().toString();
+    return jsonEntityBuilder;
+  }
 
-        Iterator<ClassOrInterfaceTypeDetails> it = entities.iterator();
+  /**
+   * Method to obtain details of some entity
+   * 
+   * @param out
+   */
+  @GET
+  @Path("{entityName}")
+  @Produces("application/json")
+  public JsonObject getEntityDetails(@PathParam("entityName") String entityName) {
 
-        JsonObjectBuilder jsonEntityBuilder = null;
-        boolean entityFound = false;
+    // Getting all entities
+    Set<ClassOrInterfaceTypeDetails> entities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            new JavaType(RooJavaBean.class));
+    String topLevelPackage = getProjectOperations().getFocusedTopLevelPackage().toString();
 
-        while (it.hasNext()) {
-            // Getting entity
-            ClassOrInterfaceTypeDetails entity = it.next();
+    Iterator<ClassOrInterfaceTypeDetails> it = entities.iterator();
 
-            // Entity Name
-            String currentEntityName = entity.getName()
-                    .getFullyQualifiedTypeName();
+    JsonObjectBuilder jsonEntityBuilder = null;
+    boolean entityFound = false;
 
-            // Replacing topLevelPackage with ~
-            currentEntityName = currentEntityName.replace(topLevelPackage, "~");
+    while (it.hasNext()) {
+      // Getting entity
+      ClassOrInterfaceTypeDetails entity = it.next();
 
-            // If current entity is not the requested entity, continue to
-            // next entity
-            if (!currentEntityName.toLowerCase().endsWith(
-                    entityName.toLowerCase())) {
-                continue;
-            }
+      // Entity Name
+      String currentEntityName = entity.getName().getFullyQualifiedTypeName();
 
-            // Get the JsonObjectBuilder for this entity
-            jsonEntityBuilder = createJsonObjectBuilder(entity);
-            entityFound = true;
-        }
+      // Replacing topLevelPackage with ~
+      currentEntityName = currentEntityName.replace(topLevelPackage, "~");
 
-        // Returning JSON
-        if(!entityFound) {
-            String message = "Entity '" + entityName + "' not found!";
+      // If current entity is not the requested entity, continue to
+      // next entity
+      if (!currentEntityName.toLowerCase().endsWith(entityName.toLowerCase())) {
+        continue;
+      }
 
-            jsonEntityBuilder = Json.createObjectBuilder();
-            jsonEntityBuilder.add("success", false).add("message", message);
-        }
-
-        JsonObject jsonEntity = jsonEntityBuilder.build();
-        return jsonEntity;
+      // Get the JsonObjectBuilder for this entity
+      jsonEntityBuilder = createJsonObjectBuilder(entity);
+      entityFound = true;
     }
 
-    /**
-     * Method to handle POST request of /entities service
-     * 
-     * @param request
-     * @param response
-     */
-    @POST
-    @Consumes("application/x-www-form-urlencoded")
-    @Produces("application/json")
-    public JsonObject createEntity(@FormParam("entityName") String entityName,
-            @FormParam("extends") String extendsType,
-            @FormParam("isAbstract") String isAbstract) {
+    // Returning JSON
+    if (!entityFound) {
+      String message = "Entity '" + entityName + "' not found!";
 
-        // Execute entity command
-        // TODO: Replace with JPA command
-        String entityCommand = "entity jpa --class " + entityName;
-
-        // Adding abstract if needed
-        if (isAbstract != null) {
-            entityCommand = entityCommand.concat(" --abstract ").concat(
-                    isAbstract);
-        }
-
-        // Adding extends if needed
-        if (extendsType != null && !"".equals(extendsType)) {
-            entityCommand = entityCommand.concat(" --extends ").concat(
-                    extendsType);
-        }
-
-        boolean status = getShell().executeCommand(entityCommand);
-
-        String message = "Created entity '" + entityName + "'!";
-        if (!status) {
-            message = "Error creating entity.";
-        }
-
-        // Returning JSON
-        JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-        jsonBuilder.add("success", status).add("message", message);
-
-        JsonObject jsonObject = jsonBuilder.build();
-        return jsonObject;
+      jsonEntityBuilder = Json.createObjectBuilder();
+      jsonEntityBuilder.add("success", false).add("message", message);
     }
 
-    /**
-     * Method to get TypeLocationService Service implementation
-     * 
-     * @return
-     */
-    public TypeLocationService getTypeLocationService() {
-        if (typeLocationService == null) {
-            // Get all TypeLocationService implement Shell interface
-            try {
-                ServiceReference<?>[] references = context
-                        .getAllServiceReferences(
-                                TypeLocationService.class.getName(), null);
+    JsonObject jsonEntity = jsonEntityBuilder.build();
+    return jsonEntity;
+  }
 
-                for (ServiceReference<?> ref : references) {
-                    typeLocationService = (TypeLocationService) context
-                            .getService(ref);
-                    return typeLocationService;
-                }
+  /**
+   * Method to handle POST request of /entities service
+   * 
+   * @param request
+   * @param response
+   */
+  @POST
+  @Consumes("application/x-www-form-urlencoded")
+  @Produces("application/json")
+  public JsonObject createEntity(@FormParam("entityName") String entityName,
+      @FormParam("extends") String extendsType, @FormParam("isAbstract") String isAbstract) {
 
-                return null;
+    // Execute entity command
+    // TODO: Replace with JPA command
+    String entityCommand = "entity jpa --class " + entityName;
 
-            }
-            catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load TypeLocationService on ProjectConfigurationController.");
-                return null;
-            }
-        }
-        else {
-            return typeLocationService;
-        }
+    // Adding abstract if needed
+    if (isAbstract != null) {
+      entityCommand = entityCommand.concat(" --abstract ").concat(isAbstract);
     }
 
-    /**
-     * Method to get Shell Service implementation
-     * 
-     * @return
-     */
-    public Shell getShell() {
-        if (shell == null) {
-            // Get all Services implement Shell interface
-            try {
-                ServiceReference<?>[] references = context
-                        .getAllServiceReferences(Shell.class.getName(), null);
-
-                for (ServiceReference<?> ref : references) {
-                    shell = (Shell) context.getService(ref);
-                    return shell;
-                }
-
-                return null;
-
-            }
-            catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load Shell on ProjectConfigurationController.");
-                return null;
-            }
-        }
-        else {
-            return shell;
-        }
+    // Adding extends if needed
+    if (extendsType != null && !"".equals(extendsType)) {
+      entityCommand = entityCommand.concat(" --extends ").concat(extendsType);
     }
 
-    /**
-     * Method to get ProjectOperations Service implementation
-     * 
-     * @return
-     */
-    public ProjectOperations getProjectOperations() {
-        if (projectOperations == null) {
-            // Get all Services implement ProjectOperations interface
-            try {
-                ServiceReference<?>[] references = this.context
-                        .getAllServiceReferences(
-                                ProjectOperations.class.getName(), null);
+    boolean status = getShell().executeCommand(entityCommand);
 
-                for (ServiceReference<?> ref : references) {
-                    return (ProjectOperations) this.context.getService(ref);
-                }
-
-                return null;
-
-            }
-            catch (InvalidSyntaxException e) {
-                LOGGER.warning("Cannot load ProjectOperations on EntitiesController.");
-                return null;
-            }
-        }
-        else {
-            return projectOperations;
-        }
+    String message = "Created entity '" + entityName + "'!";
+    if (!status) {
+      message = "Error creating entity.";
     }
+
+    // Returning JSON
+    JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+    jsonBuilder.add("success", status).add("message", message);
+
+    JsonObject jsonObject = jsonBuilder.build();
+    return jsonObject;
+  }
+
+  /**
+   * Method to get TypeLocationService Service implementation
+   * 
+   * @return
+   */
+  public TypeLocationService getTypeLocationService() {
+    if (typeLocationService == null) {
+      // Get all TypeLocationService implement Shell interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          typeLocationService = (TypeLocationService) context.getService(ref);
+          return typeLocationService;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load TypeLocationService on ProjectConfigurationController.");
+        return null;
+      }
+    } else {
+      return typeLocationService;
+    }
+  }
+
+  /**
+   * Method to get Shell Service implementation
+   * 
+   * @return
+   */
+  public Shell getShell() {
+    if (shell == null) {
+      // Get all Services implement Shell interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(Shell.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          shell = (Shell) context.getService(ref);
+          return shell;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load Shell on ProjectConfigurationController.");
+        return null;
+      }
+    } else {
+      return shell;
+    }
+  }
+
+  /**
+   * Method to get ProjectOperations Service implementation
+   * 
+   * @return
+   */
+  public ProjectOperations getProjectOperations() {
+    if (projectOperations == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          return (ProjectOperations) this.context.getService(ref);
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on EntitiesController.");
+        return null;
+      }
+    } else {
+      return projectOperations;
+    }
+  }
 }

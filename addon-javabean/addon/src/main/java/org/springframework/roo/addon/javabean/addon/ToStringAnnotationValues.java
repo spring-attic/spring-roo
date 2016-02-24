@@ -15,25 +15,26 @@ import org.springframework.roo.model.RooJavaType;
  */
 public class ToStringAnnotationValues extends AbstractAnnotationValues {
 
-    @AutoPopulate private String[] excludeFields;
-    @AutoPopulate private String toStringMethod = "toString";
+  @AutoPopulate
+  private String[] excludeFields;
+  @AutoPopulate
+  private String toStringMethod = "toString";
 
-    /**
-     * Constructor
-     * 
-     * @param governorPhysicalTypeMetadata
-     */
-    public ToStringAnnotationValues(
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-        super(governorPhysicalTypeMetadata, RooJavaType.ROO_TO_STRING);
-        AutoPopulationUtils.populate(this, annotationMetadata);
-    }
+  /**
+   * Constructor
+   * 
+   * @param governorPhysicalTypeMetadata
+   */
+  public ToStringAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+    super(governorPhysicalTypeMetadata, RooJavaType.ROO_TO_STRING);
+    AutoPopulationUtils.populate(this, annotationMetadata);
+  }
 
-    public String[] getExcludeFields() {
-        return excludeFields;
-    }
+  public String[] getExcludeFields() {
+    return excludeFields;
+  }
 
-    public String getToStringMethod() {
-        return toStringMethod;
-    }
+  public String getToStringMethod() {
+    return toStringMethod;
+  }
 }

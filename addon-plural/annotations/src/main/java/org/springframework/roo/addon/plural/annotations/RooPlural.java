@@ -11,13 +11,13 @@ import java.lang.annotation.Target;
  * @author Ben Alex
  * @since 1.0
  */
-@Target({ ElementType.TYPE, ElementType.FIELD })
+@Target({ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooPlural {
 
-    /**
-     * @return the plural name to use when working with this type or field
-     *         (defaults to an empty string, which means to compute dynamically)
-     */
-    String value() default "";
+  /**
+   * @return the plural name to use when working with this type or field
+   *         (defaults to an empty string, which means to compute dynamically)
+   */
+  String value() default "";
 }

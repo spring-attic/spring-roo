@@ -16,17 +16,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooJpaRepositoryCustomImpl {
 
-    /**
-     * The name of this annotation's attribute that specifies The interface
-     * implemented by the annotated type
-     */
-    String REPOSITORY_ATTRIBUTE = "repository";
+  /**
+   * The name of this annotation's attribute that specifies The interface
+   * implemented by the annotated type
+   */
+  String REPOSITORY_ATTRIBUTE = "repository";
 
-    /**
-     * The interface implemented by the annotated type
-     * 
-     * @return a non-<code>null</code> entity type
-     */
-    Class<?> repository(); // No default => mandatory
-    
+  /**
+   * The interface implemented by the annotated type
+   * 
+   * @return a non-<code>null</code> entity type
+   */
+  Class<?> repository(); // No default => mandatory
+
 }

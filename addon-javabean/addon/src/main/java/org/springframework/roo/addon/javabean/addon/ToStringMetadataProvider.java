@@ -26,94 +26,86 @@ import org.springframework.roo.project.LogicalPath;
  */
 @Component
 @Service
-public class ToStringMetadataProvider extends
-        AbstractMemberDiscoveringItdMetadataProvider {
+public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 
-    protected MetadataDependencyRegistryTracker registryTracker = null;
+  protected MetadataDependencyRegistryTracker registryTracker = null;
 
-    /**
-     * This service is being activated so setup it:
-     * <ul>
-     * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
-     * <li>Registers {@link RooJavaType#ROO_TO_STRING} as additional JavaType 
-     * that will trigger metadata registration.</li>
-     * </ul>
-     */
-    @Override
-    protected void activate(final ComponentContext cContext) {
-    	context = cContext.getBundleContext();
-        this.registryTracker = 
-                new MetadataDependencyRegistryTracker(context, this,
-                        PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                        getProvidesType());
-        this.registryTracker.open();
+  /**
+   * This service is being activated so setup it:
+   * <ul>
+   * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
+   * <li>Registers {@link RooJavaType#ROO_TO_STRING} as additional JavaType 
+   * that will trigger metadata registration.</li>
+   * </ul>
+   */
+  @Override
+  protected void activate(final ComponentContext cContext) {
+    context = cContext.getBundleContext();
+    this.registryTracker =
+        new MetadataDependencyRegistryTracker(context, this,
+            PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+    this.registryTracker.open();
 
-        addMetadataTrigger(ROO_TO_STRING);
+    addMetadataTrigger(ROO_TO_STRING);
+  }
+
+  /**
+   * This service is being deactivated so unregister upstream-downstream 
+   * dependencies, triggers, matchers and listeners.
+   * 
+   * @param context
+   */
+  protected void deactivate(final ComponentContext context) {
+    MetadataDependencyRegistry registry = this.registryTracker.getService();
+    registry.removeNotificationListener(this);
+    registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
+        getProvidesType());
+    this.registryTracker.close();
+
+    removeMetadataTrigger(ROO_TO_STRING);
+  }
+
+  @Override
+  protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
+    return ToStringMetadata.createIdentifier(javaType, path);
+  }
+
+  @Override
+  protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
+    final JavaType javaType = ToStringMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = ToStringMetadata.getPath(metadataIdentificationString);
+    return PhysicalTypeIdentifier.createIdentifier(javaType, path);
+  }
+
+  public String getItdUniquenessFilenameSuffix() {
+    return "ToString";
+  }
+
+  @Override
+  protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+    return getLocalMid(itdTypeDetails);
+  }
+
+  @Override
+  protected ItdTypeDetailsProvidingMetadataItem getMetadata(
+      final String metadataIdentificationString, final JavaType aspectName,
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
+    final ToStringAnnotationValues annotationValues =
+        new ToStringAnnotationValues(governorPhysicalTypeMetadata);
+    if (!annotationValues.isAnnotationFound()) {
+      return null;
     }
 
-    /**
-     * This service is being deactivated so unregister upstream-downstream 
-     * dependencies, triggers, matchers and listeners.
-     * 
-     * @param context
-     */
-    protected void deactivate(final ComponentContext context) {
-        MetadataDependencyRegistry registry = this.registryTracker.getService();
-        registry.removeNotificationListener(this);
-        registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
-                getProvidesType());
-        this.registryTracker.close();
-
-        removeMetadataTrigger(ROO_TO_STRING);
+    final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
+    if (memberDetails == null || memberDetails.getFields().isEmpty()) {
+      return null;
     }
 
-    @Override
-    protected String createLocalIdentifier(final JavaType javaType,
-            final LogicalPath path) {
-        return ToStringMetadata.createIdentifier(javaType, path);
-    }
+    return new ToStringMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, annotationValues);
+  }
 
-    @Override
-    protected String getGovernorPhysicalTypeIdentifier(
-            final String metadataIdentificationString) {
-        final JavaType javaType = ToStringMetadata
-                .getJavaType(metadataIdentificationString);
-        final LogicalPath path = ToStringMetadata
-                .getPath(metadataIdentificationString);
-        return PhysicalTypeIdentifier.createIdentifier(javaType, path);
-    }
-
-    public String getItdUniquenessFilenameSuffix() {
-        return "ToString";
-    }
-
-    @Override
-    protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-        return getLocalMid(itdTypeDetails);
-    }
-
-    @Override
-    protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-            final String metadataIdentificationString,
-            final JavaType aspectName,
-            final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-            final String itdFilename) {
-        final ToStringAnnotationValues annotationValues = new ToStringAnnotationValues(
-                governorPhysicalTypeMetadata);
-        if (!annotationValues.isAnnotationFound()) {
-            return null;
-        }
-
-        final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-        if (memberDetails == null || memberDetails.getFields().isEmpty()) {
-            return null;
-        }
-
-        return new ToStringMetadata(metadataIdentificationString, aspectName,
-                governorPhysicalTypeMetadata, annotationValues);
-    }
-
-    public String getProvidesType() {
-        return ToStringMetadata.getMetadataIdentiferType();
-    }
+  public String getProvidesType() {
+    return ToStringMetadata.getMetadataIdentiferType();
+  }
 }

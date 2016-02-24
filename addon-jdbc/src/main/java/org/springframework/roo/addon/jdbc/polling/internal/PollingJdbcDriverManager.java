@@ -32,59 +32,60 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Component
 @Service
-@Reference(name = "jdbcDriverProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = JdbcDriverProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+@Reference(name = "jdbcDriverProvider", strategy = ReferenceStrategy.EVENT,
+    policy = ReferencePolicy.DYNAMIC, referenceInterface = JdbcDriverProvider.class,
+    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class PollingJdbcDriverManager implements JdbcDriverManager {
 
-    private static final Logger LOGGER = HandlerUtils
-            .getLogger(PollingJdbcDriverManager.class);
+  private static final Logger LOGGER = HandlerUtils.getLogger(PollingJdbcDriverManager.class);
 
-    @Reference private AddOnSearch addOnSearch;
-    private final Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
+  @Reference
+  private AddOnSearch addOnSearch;
+  private final Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
 
-    protected void bindJdbcDriverProvider(final JdbcDriverProvider listener) {
-        synchronized (providers) {
-            providers.add(listener);
-        }
+  protected void bindJdbcDriverProvider(final JdbcDriverProvider listener) {
+    synchronized (providers) {
+      providers.add(listener);
     }
+  }
 
-    public Driver loadDriver(final String driverClassName,
-            final boolean displayAddOns) throws RuntimeException {
-        Validate.notBlank(driverClassName, "Driver class name required");
-        synchronized (providers) {
-            for (final JdbcDriverProvider provider : providers) {
-                final Driver driver = provider.loadDriver(driverClassName);
-                if (driver != null) {
-                    return driver;
-                }
-            }
-
-            if (!displayAddOns) {
-                // Caller requested add-on information not be displayed (might
-                // be in a TAB assist section etc)
-                return null;
-            }
-
-            // No implementation could provide it
-
-            // Do a silent (console message free) lookup of matches
-            final Integer matches = addOnSearch.searchAddOns(driverClassName, SearchType.JDBCDRIVER);
-
-            // Render to screen if required
-            if (matches == null) {
-                LOGGER.info("Spring Roo automatic add-on discovery service currently unavailable");
-            }
-            else if (matches > 0) {
-                LOGGER.info("Located add-on" + (matches == 1 ? "" : "s")
-                        + " that may offer this JDBC driver");
-            }
-
-            return null;
+  public Driver loadDriver(final String driverClassName, final boolean displayAddOns)
+      throws RuntimeException {
+    Validate.notBlank(driverClassName, "Driver class name required");
+    synchronized (providers) {
+      for (final JdbcDriverProvider provider : providers) {
+        final Driver driver = provider.loadDriver(driverClassName);
+        if (driver != null) {
+          return driver;
         }
-    }
+      }
 
-    protected void unbindJdbcDriverProvider(final JdbcDriverProvider listener) {
-        synchronized (providers) {
-            providers.remove(listener);
-        }
+      if (!displayAddOns) {
+        // Caller requested add-on information not be displayed (might
+        // be in a TAB assist section etc)
+        return null;
+      }
+
+      // No implementation could provide it
+
+      // Do a silent (console message free) lookup of matches
+      final Integer matches = addOnSearch.searchAddOns(driverClassName, SearchType.JDBCDRIVER);
+
+      // Render to screen if required
+      if (matches == null) {
+        LOGGER.info("Spring Roo automatic add-on discovery service currently unavailable");
+      } else if (matches > 0) {
+        LOGGER.info("Located add-on" + (matches == 1 ? "" : "s")
+            + " that may offer this JDBC driver");
+      }
+
+      return null;
     }
+  }
+
+  protected void unbindJdbcDriverProvider(final JdbcDriverProvider listener) {
+    synchronized (providers) {
+      providers.remove(listener);
+    }
+  }
 }

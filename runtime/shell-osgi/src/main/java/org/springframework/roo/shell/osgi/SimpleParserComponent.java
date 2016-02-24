@@ -25,51 +25,49 @@ import org.springframework.roo.support.api.AddOnSearch.SearchType;
  */
 @Component
 @Service(value = Parser.class)
-@References(value = {
-        @Reference(name = "addOnSearch", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = AddOnSearch.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY) })
-public class SimpleParserComponent extends SimpleParser implements
-        CommandMarker {
-    private AddOnSearch addOnSearch;
+@References(value = {@Reference(name = "addOnSearch", strategy = ReferenceStrategy.EVENT,
+    policy = ReferencePolicy.DYNAMIC, referenceInterface = AddOnSearch.class,
+    cardinality = ReferenceCardinality.OPTIONAL_UNARY)})
+public class SimpleParserComponent extends SimpleParser implements CommandMarker {
+  private AddOnSearch addOnSearch;
 
-    protected void activate(final ComponentContext cContext) {
-    	context = cContext.getBundleContext();
+  protected void activate(final ComponentContext cContext) {
+    context = cContext.getBundleContext();
+  }
+
+  protected void bindAddOnSearch(final AddOnSearch s) {
+    addOnSearch = s;
+  }
+
+  @Override
+  protected void commandNotFound(final Logger logger, final String buffer) {
+    logger.warning("Command '" + buffer + "' not found (for assistance press "
+        + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
+
+    if (addOnSearch == null) {
+      return;
     }
 
-    protected void bindAddOnSearch(final AddOnSearch s) {
-        addOnSearch = s;
+    // Decide which command they asked for
+    String command = buffer.trim();
+
+    // Truncate from the first option, if any was given
+    final int firstDash = buffer.indexOf("--");
+    if (firstDash > 1) {
+      command = buffer.substring(0, firstDash - 1).trim();
     }
 
-    @Override
-    protected void commandNotFound(final Logger logger, final String buffer) {
-        logger.warning("Command '" + buffer
-                + "' not found (for assistance press "
-                + AbstractShell.completionKeys
-                + " or type \"hint\" then hit ENTER)");
+    // Do a silent (console message free) lookup of matches
+    Integer matches = null;
+    matches = addOnSearch.searchAddOns(command, SearchType.ADDON);
 
-        if (addOnSearch == null) {
-            return;
-        }
-
-        // Decide which command they asked for
-        String command = buffer.trim();
-
-        // Truncate from the first option, if any was given
-        final int firstDash = buffer.indexOf("--");
-        if (firstDash > 1) {
-            command = buffer.substring(0, firstDash - 1).trim();
-        }
-
-        // Do a silent (console message free) lookup of matches
-        Integer matches = null;
-        matches = addOnSearch.searchAddOns(command, SearchType.ADDON);
-
-        // Render to screen if required
-        if (matches == null) {
-            logger.info("Spring Roo automatic add-on discovery service currently unavailable");
-        }
+    // Render to screen if required
+    if (matches == null) {
+      logger.info("Spring Roo automatic add-on discovery service currently unavailable");
     }
+  }
 
-    protected void unbindAddOnSearch(final AddOnSearch s) {
-        addOnSearch = null;
-    }
+  protected void unbindAddOnSearch(final AddOnSearch s) {
+    addOnSearch = null;
+  }
 }

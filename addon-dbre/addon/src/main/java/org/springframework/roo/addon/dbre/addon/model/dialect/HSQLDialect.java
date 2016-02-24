@@ -10,7 +10,7 @@ import org.springframework.roo.addon.dbre.addon.model.Schema;
  */
 public class HSQLDialect extends AbstractDialect implements Dialect {
 
-    public String getQuerySequencesString(final Schema schema) {
-        return "select sequence_name from system_sequences";
-    }
+  public String getQuerySequencesString(final Schema schema) {
+    return "select sequence_name from system_sequences";
+  }
 }

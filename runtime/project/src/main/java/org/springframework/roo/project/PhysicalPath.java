@@ -17,64 +17,64 @@ import org.springframework.roo.support.util.FileUtils;
  */
 public class PhysicalPath {
 
-    private final String canonicalPath;
-    private final File location;
-    private final LogicalPath logicalPath;
+  private final String canonicalPath;
+  private final File location;
+  private final LogicalPath logicalPath;
 
-    /**
-     * Constructor
-     * 
-     * @param logicalPath (required)
-     * @param location the physical location of this path (required)
-     */
-    public PhysicalPath(final LogicalPath logicalPath, final File location) {
-        Validate.notNull(logicalPath, "Module path required");
-        Validate.notNull(location, "Location required");
-        canonicalPath = FileUtils.getCanonicalPath(location);
-        this.logicalPath = logicalPath;
-        this.location = location;
-    }
+  /**
+   * Constructor
+   * 
+   * @param logicalPath (required)
+   * @param location the physical location of this path (required)
+   */
+  public PhysicalPath(final LogicalPath logicalPath, final File location) {
+    Validate.notNull(logicalPath, "Module path required");
+    Validate.notNull(location, "Location required");
+    canonicalPath = FileUtils.getCanonicalPath(location);
+    this.logicalPath = logicalPath;
+    this.location = location;
+  }
 
-    /**
-     * Returns the physical location of this path
-     * 
-     * @return a non-<code>null</code> location
-     */
-    public File getLocation() {
-        return location;
-    }
+  /**
+   * Returns the physical location of this path
+   * 
+   * @return a non-<code>null</code> location
+   */
+  public File getLocation() {
+    return location;
+  }
 
-    /**
-     * Returns the canonical path of this {@link PhysicalPath}
-     * 
-     * @return a non-blank canonical path
-     */
-    public String getLocationPath() {
-        return canonicalPath;
-    }
+  /**
+   * Returns the canonical path of this {@link PhysicalPath}
+   * 
+   * @return a non-blank canonical path
+   */
+  public String getLocationPath() {
+    return canonicalPath;
+  }
 
-    public LogicalPath getLogicalPath() {
-        return logicalPath;
-    }
+  public LogicalPath getLogicalPath() {
+    return logicalPath;
+  }
 
-    public Path getPath() {
-        return logicalPath.getPath();
-    }
+  public Path getPath() {
+    return logicalPath.getPath();
+  }
 
-    /**
-     * Indicates whether this path contains Java source code
-     * 
-     * @return see above
-     */
-    public boolean isSource() {
-        return logicalPath.getPath().isJavaSource();
-    }
+  /**
+   * Indicates whether this path contains Java source code
+   * 
+   * @return see above
+   */
+  public boolean isSource() {
+    return logicalPath.getPath().isJavaSource();
+  }
 
-    @Override
-    public final String toString() {
-        final ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("logicalPath", logicalPath);
-        builder.append("location", location);
-        return builder.toString();
-    }
+  @Override
+  public final String toString() {
+    final ToStringBuilder builder = new ToStringBuilder(this);
+    builder.append("logicalPath", logicalPath);
+    builder.append("location", location);
+    return builder.toString();
+  }
 }

@@ -20,9 +20,8 @@ import java.io.OutputStream;
  */
 public abstract class DerbyUtils {
 
-    public static final OutputStream DEV_NULL = new OutputStream() {
-        @Override
-        public void write(final int b) {
-        }
-    };
+  public static final OutputStream DEV_NULL = new OutputStream() {
+    @Override
+    public void write(final int b) {}
+  };
 }

@@ -14,15 +14,15 @@ import org.osgi.framework.BundleListener;
  */
 public interface RooBundleActivator extends BundleActivator, BundleListener {
 
-	/**
-	 * @return the lastTimeChange
-	 */
-	public Long getLastTimeBundleChange();
+  /**
+   * @return the lastTimeChange
+   */
+  public Long getLastTimeBundleChange();
 
-	/**
-	 * @param lastTimeChange the lastTimeChange to set
-	 */
-	public void setLastTimeBundleChange(Long lastTime);
+  /**
+   * @param lastTimeChange the lastTimeChange to set
+   */
+  public void setLastTimeBundleChange(Long lastTime);
 
 
 

@@ -11,26 +11,26 @@ import java.util.List;
  */
 public interface Parser {
 
-    /**
-     * Populates a list of completion candidates. This method is required for
-     * backward compatibility for STS versions up to 2.8.0.
-     * 
-     * @param buffer
-     * @param cursor
-     * @param candidates
-     * @return
-     */
-    int complete(String buffer, int cursor, List<String> candidates);
+  /**
+   * Populates a list of completion candidates. This method is required for
+   * backward compatibility for STS versions up to 2.8.0.
+   * 
+   * @param buffer
+   * @param cursor
+   * @param candidates
+   * @return
+   */
+  int complete(String buffer, int cursor, List<String> candidates);
 
-    /**
-     * Populates a list of completion candidates.
-     * 
-     * @param buffer
-     * @param cursor
-     * @param candidates
-     * @return
-     */
-    int completeAdvanced(String buffer, int cursor, List<Completion> candidates);
+  /**
+   * Populates a list of completion candidates.
+   * 
+   * @param buffer
+   * @param cursor
+   * @param candidates
+   * @return
+   */
+  int completeAdvanced(String buffer, int cursor, List<Completion> candidates);
 
-    ParseResult parse(String buffer);
+  ParseResult parse(String buffer);
 }

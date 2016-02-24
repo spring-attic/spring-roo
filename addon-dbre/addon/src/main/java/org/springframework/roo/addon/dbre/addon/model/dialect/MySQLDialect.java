@@ -10,13 +10,12 @@ import org.springframework.roo.addon.dbre.addon.model.Schema;
  */
 public class MySQLDialect extends AbstractDialect implements Dialect {
 
-    public String getQuerySequencesString(final Schema schema) {
-        throw new UnsupportedOperationException(
-                "MySQL does not support sequences");
-    }
+  public String getQuerySequencesString(final Schema schema) {
+    throw new UnsupportedOperationException("MySQL does not support sequences");
+  }
 
-    @Override
-    public boolean supportsSequences() {
-        return false;
-    }
+  @Override
+  public boolean supportsSequences() {
+    return false;
+  }
 }

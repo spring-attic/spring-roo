@@ -10,8 +10,8 @@ package org.springframework.roo.file.undo;
  */
 public interface UndoListener {
 
-    /**
-     * @param event the new event which took place (required)
-     */
-    void onUndoEvent(UndoEvent event);
+  /**
+   * @param event the new event which took place (required)
+   */
+  void onUndoEvent(UndoEvent event);
 }

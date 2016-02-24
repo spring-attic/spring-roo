@@ -19,40 +19,40 @@ import org.osgi.service.component.ComponentContext;
 @Service
 public class RooBundleActivatorImpl implements RooBundleActivator {
 
-	private Long lastTimeBundleChange;
+  private Long lastTimeBundleChange;
 
-	protected void activate(ComponentContext context) throws Exception {
-		start(context.getBundleContext());
-	}
+  protected void activate(ComponentContext context) throws Exception {
+    start(context.getBundleContext());
+  }
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		context.addBundleListener(this);
-	}
+  @Override
+  public void start(BundleContext context) throws Exception {
+    context.addBundleListener(this);
+  }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		context.removeBundleListener(this);
-	}
+  @Override
+  public void stop(BundleContext context) throws Exception {
+    context.removeBundleListener(this);
+  }
 
-	@Override
-	public void bundleChanged(BundleEvent event) {
-		setLastTimeBundleChange(System.currentTimeMillis());
-	}
+  @Override
+  public void bundleChanged(BundleEvent event) {
+    setLastTimeBundleChange(System.currentTimeMillis());
+  }
 
-	/**
-	 * @return the lastTimeChange
-	 */
-	public Long getLastTimeBundleChange() {
-		return lastTimeBundleChange == null ? Long.MAX_VALUE : lastTimeBundleChange;
-	}
+  /**
+   * @return the lastTimeChange
+   */
+  public Long getLastTimeBundleChange() {
+    return lastTimeBundleChange == null ? Long.MAX_VALUE : lastTimeBundleChange;
+  }
 
-	/**
-	 * @param lastTimeChange the lastTimeChange to set
-	 */
-	public void setLastTimeBundleChange(Long lastTime) {
-		lastTimeBundleChange = lastTime;
-	}
+  /**
+   * @param lastTimeChange the lastTimeChange to set
+   */
+  public void setLastTimeBundleChange(Long lastTime) {
+    lastTimeBundleChange = lastTime;
+  }
 
 
 
