@@ -31,9 +31,6 @@
             <artifactId>commons-io</artifactId>
         </dependency>
     </dependencies>
-    <properties>
-        <bundle.activator>${project.artifactId}.Activator</bundle.activator>
-    </properties>
     
     <build>
         <plugins>
@@ -45,6 +42,7 @@
     </build>
     
     <properties>
+        <bundle.activator>${project.artifactId}.Activator</bundle.activator>
         <main.basedir>${basedir}/../..</main.basedir>
     </properties>
 </project>
