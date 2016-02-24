@@ -40,6 +40,7 @@ These instructions detail how to get started with your freshly checked-out sourc
 . <<running-the-command-line-tool, Running the command line tool>>
 . <<git-polices, Git Polices>>
 . <<git-tips, Git Tips>>
+. <<code-style, Code Style>>
 . <<releasing, Releasing>>
 . <<help, Help>>
 
@@ -248,6 +249,17 @@ git pull --rebase
 The --rebase option will essentially do a 'git pull', but then it will reapply your commits again as if they happened after the 'git pull'. This avoids verbose logs like "Merge branch 'master'".
 
 If you're doing something non-trivial, it's best to create a branch. Learn more about this at http://sysmonblog.co.uk/misc/git_by_example/.
+
+[[code-style]]
+== Code Style
+
+Spring Roo project follows the https://github.com/google/styleguide[Google Code Style] convention.
+
+This format is applied automatically to the entire project using http://mvnrepository.com/artifact/com.googlecode.maven-java-formatter-plugin/maven-java-formatter-plugin[Maven Java Formatter plugin] and the https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml[Eclipse Java Code Format definition .xml file] included on _devel-resources_ folder.
+ 
+Spring Roo formats all _.java_ files when developer executes `mvn clean install`. 
+
+IMPORTANT: _Contributors must execute `mvn clean install` before sending some new pull request to be sure that Google Code Styles have been applied._
 
 [[releasing]]
 == Releasing
