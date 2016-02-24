@@ -26,9 +26,6 @@ public class RepositoryJpaCustomImplMetadata extends
     private static final String PROVIDES_TYPE = MetadataIdentificationUtils
             .create(PROVIDES_TYPE_STRING);
     
-    private static final JavaType QUERY_DSL_REPOSITORY_SUPPORT = new JavaType(
-            "org.springframework.data.jpa.repository.support.QueryDslRepositorySupport");
-    
     private ImportRegistrationResolver importResolver;
 
     public static String createIdentifier(final JavaType javaType,
@@ -77,9 +74,6 @@ public class RepositoryJpaCustomImplMetadata extends
         Validate.notNull(annotationValues, "Annotation values required");
         
         this.importResolver = builder.getImportRegistrationResolver();
-        
-        // RepositoryCustom implementation always extends QueryDslRepositorySupport
-        ensureGovernorExtends(QUERY_DSL_REPOSITORY_SUPPORT);
         
         // Get repository that needs to be implemented
         ensureGovernorImplements(annotationValues.getRepository());

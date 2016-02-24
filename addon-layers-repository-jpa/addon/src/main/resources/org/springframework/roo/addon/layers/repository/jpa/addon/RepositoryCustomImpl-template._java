@@ -1,0 +1,13 @@
+package __PACKAGE__;
+
+import org.springframework.data.jpa.repository.support.QueryDslRepositorySupport;
+import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
+import __ENTITY_IMPORT__;
+
+@RooJpaRepositoryCustomImpl(repository = __REPOSITORY_CUSTOM_INTERFACE__.class)
+public class __REPOSITORY_CUSTOM_IMPL__ extends QueryDslRepositorySupport{
+
+    __REPOSITORY_CUSTOM_IMPL__() {
+        super(__ENTITY_NAME__.class);
+    }
+}

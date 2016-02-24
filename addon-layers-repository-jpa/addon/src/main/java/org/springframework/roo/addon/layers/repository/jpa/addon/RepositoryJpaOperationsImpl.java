@@ -27,12 +27,10 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -151,14 +149,14 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
             generateReadOnlyRepository(interfaceType.getPackage());
         }
 
+        // Generates repository interface
+        addRepositoryInterface(interfaceType, domainType, entityDetails,
+                interfaceIdentifier);
+        
         // By default, generate RepositoryCustom interface and its
         // implementation that allow developers to include its dynamic queries
         // using QueryDSL
         addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage());
-
-        // Generates repository interface
-        addRepositoryInterface(interfaceType, domainType, entityDetails,
-                interfaceIdentifier);
 
     }
    
@@ -245,6 +243,92 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     }
     
     /**
+     * Method that generates RepositoryCustom implementation on current package.
+     * If this RepositoryCustom implementation already exists in this or other
+     * package, will not be generated.
+     * 
+     * @param interfaceType
+     * @param repository
+     * @param entity
+     * @return JavaType with existing or new RepositoryCustom implementation
+     */
+    private JavaType generateRepositoryCustomImpl(JavaType interfaceType,
+            JavaType repository, JavaType entity) {
+        
+        // Getting RepositoryCustomImpl JavaType
+        JavaType implType = new JavaType(
+                repository.getFullyQualifiedTypeName().concat("Impl"));
+
+        // Check if new class exists yet
+        final String implIdentifier = getPathResolver()
+                .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, implType);
+
+        if (getFileManager().exists(implIdentifier)) {
+            // Type already exists - return
+            return implType;
+        }
+        
+        // Check if already exists some class annotated with
+        // @RooJpaRepositoryCustomImpl
+        // that implements the same repositoryCustom interface.
+        Set<JavaType> repositoriesCustomImpl = getTypeLocationService()
+                .findTypesWithAnnotation(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+
+        if (!repositoriesCustomImpl.isEmpty()) {
+            Iterator<JavaType> it = repositoriesCustomImpl.iterator();
+            while(it.hasNext()){
+                JavaType repositoryCustom = it.next();
+                ClassOrInterfaceTypeDetails repositoryDetails = getTypeLocationService()
+                        .getTypeDetails(repositoryCustom);
+                AnnotationMetadata annotation = repositoryDetails
+                        .getAnnotation(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+                AnnotationAttributeValue<JavaType> repositoryType = annotation
+                        .getAttribute("repository");
+                if(repositoryType.getValue().equals(interfaceType)){
+                    return repositoryType.getValue();
+                }
+            }
+        }
+        
+        // If not, continue creating new RepositoryCustomImpl
+        InputStream inputStream = null;
+        try {
+            // Use defined template
+            inputStream = FileUtils.getInputStream(getClass(), "RepositoryCustomImpl-template._java");
+            String input = IOUtils.toString(inputStream);
+            // Replacing package
+            input = input.replace("__PACKAGE__",
+                    implType.getPackage().getFullyQualifiedPackageName());
+            
+            // Replacing entity import
+            input = input.replace("__ENTITY_IMPORT__",
+                    entity.getFullyQualifiedTypeName());
+            
+            // Replacing interface .class
+            input = input.replace("__REPOSITORY_CUSTOM_INTERFACE__",
+                    interfaceType.getSimpleTypeName());
+            
+            // Replacing class name
+            input = input.replaceAll("__REPOSITORY_CUSTOM_IMPL__",
+                    implType.getSimpleTypeName());
+            
+            // Replacing entity name
+            input = input.replace("__ENTITY_NAME__",
+                    entity.getSimpleTypeName());
+
+            // Creating RepositoryCustomImpl class
+            fileManager.createOrUpdateTextFileIfRequired(implIdentifier, input, false);
+        } catch (final IOException e) {
+            throw new IllegalStateException(String.format("Unable to create '%s'", implIdentifier), e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+        
+        return implType;
+
+    }
+    
+    /**
      * Method that generates RepositoryCustom interface and its implementation
      * for an specific entity
      * 
@@ -285,70 +369,17 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
                 new JavaSymbolName("entity"), domainType));
         
         interfaceBuilder.addAnnotation(repositoryCustomAnnotationMetadata);
-
-        // Getting RepositoryCustomImpl JavaTYpe
-        JavaType implType = new JavaType(
-                interfaceType.getFullyQualifiedTypeName().concat("Impl"));
-
-        // Check if new class exists yet
-        final String implIdentifier = getPathResolver()
-                .getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
-
-        if (getFileManager().exists(implIdentifier)) {
-            // Type already exists - return
-            return interfaceType;
-        }
-
-        final String implMId = PhysicalTypeIdentifier.createIdentifier(implType,
-                getPathResolver().getPath(implIdentifier));
-        final ClassOrInterfaceTypeDetailsBuilder implBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-                implMId, Modifier.PUBLIC, implType, PhysicalTypeCategory.CLASS);
         
-        // Generates @RooJpaRepositoryCustomImpl annotation with implemented interface
-        final AnnotationMetadataBuilder repositoryCustomImplAnnotationMetadata = new AnnotationMetadataBuilder(
-                ROO_REPOSITORY_JPA_CUSTOM_IMPL);
-        repositoryCustomImplAnnotationMetadata.addAttribute(new ClassAttributeValue(
-                new JavaSymbolName("repository"), interfaceType));
-        
-        implBuilder.addAnnotation(repositoryCustomImplAnnotationMetadata);
-        
-        // Adding default constructor
-        implBuilder.addConstructor(getRepositoryCustomImplConstructor(implType, domainType));
-
         // Save RepositoryCustom interface and its implementation on disk
         getTypeManagementService()
                 .createOrUpdateTypeOnDisk(interfaceBuilder.build());
-        getTypeManagementService()
-                .createOrUpdateTypeOnDisk(implBuilder.build());
+
+        generateRepositoryCustomImpl(interfaceType, repositoryType, domainType);
         
         return interfaceType;
 
     }
     
-    /**
-     * Returns constructor for RepositoryCustom implementation
-     * 
-     * @param implTaype new repositoryCustom implementation javatype
-     * @param domainType referenced entity
-     * @return ConstructorMetadata that contains necessary body
-     */
-    private ConstructorMetadata getRepositoryCustomImplConstructor(
-            JavaType implType, JavaType domainType) {
-        // Generating constructor builder
-        String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(implType,
-                pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
-        ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(
-                declaredByMetadataId);
-
-        // Generating body
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine(String.format("super(%s.class);",
-                domainType.getSimpleTypeName()));
-        constructorBuilder.setBodyBuilder(bodyBuilder);
-
-        return constructorBuilder.build();
-    }
-
     public FileManager getFileManager(){
     	if(fileManager == null){
     		// Get all Services implement FileManager interface
