@@ -246,11 +246,6 @@ public class JpaCommands implements CommandMarker {
     // project settings
     String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
 
-    // Check if extends is present
-    if (shellContext.getParameters().containsKey("extends")) {
-      return false;
-    }
-
     if (requiredColumnName != null && requiredColumnName.equals("true")) {
       return true;
     }
