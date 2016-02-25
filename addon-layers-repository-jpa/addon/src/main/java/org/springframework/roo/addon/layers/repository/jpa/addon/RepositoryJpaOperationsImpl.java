@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -36,6 +37,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -105,7 +107,16 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     Validate.notNull(interfaceType, "ERROR: You must specify an interface repository type.");
     Validate.notNull(domainType, "ERROR: You must specify a valid Entity. ");
 
-    // Check if new interface exists yet
+    // Check if entity provided type is annotated with @RooJpaEntity
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(domainType);
+    AnnotationMetadata entityAnnotation = entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY);
+
+    // Show an error indicating that entity should be annotated with
+    // @RooJpaEntity
+    Validate.notNull(entityAnnotation,
+        "ERROR: Provided entity should be annotated with @RooJpaEntity");
+
+    // Check if the new interface to be created exists yet
     final String interfaceIdentifier =
         getPathResolver().getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
 
@@ -114,23 +125,26 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       return;
     }
 
-    // Check if entity provided type is annotated with @RooJpaEntity
-    ClassOrInterfaceTypeDetails entityDetails = null;
-    Set<ClassOrInterfaceTypeDetails> entities =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY);
-    Iterator<ClassOrInterfaceTypeDetails> it = entities.iterator();
-    while (it.hasNext()) {
-      ClassOrInterfaceTypeDetails details = it.next();
-      if (details.getName().equals((domainType))) {
-        entityDetails = details;
-        break;
+    // Check if already exists a repository that manage current entity
+    // Only one repository per entity is allowed
+    Set<ClassOrInterfaceTypeDetails> existingRepositories =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA);
+
+    for (ClassOrInterfaceTypeDetails existingRepository : existingRepositories) {
+      AnnotationAttributeValue<Object> relatedEntity =
+          existingRepository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
+      if (relatedEntity.getValue().equals(domainType)) {
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "WARNING: Already exists a repository associated to the entity '%s'. Only one repository per entity is allowed.",
+                        domainType.getSimpleTypeName()));
+        return;
       }
     }
-
-    // Show an error indicating that entity should be annotated with
-    // @RooJpaEntity
-    Validate
-        .notNull(entityDetails, "ERROR: Provided entity should be annotated with @RooJpaEntity");
 
     // Check if current entity is defined as "readOnly".
     AnnotationAttributeValue<Boolean> readOnlyAttr =
