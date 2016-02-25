@@ -153,7 +153,7 @@ The Roo team just tends to use the shell command _mvn_ instead.
 
 Spring Roo project follows the https://github.com/google/styleguide[Google Code Style] convention.
 
-The http://mvnrepository.com/artifact/com.googlecode.maven-java-formatter-plugin/maven-java-formatter-plugin[Maven Java Formatter plugin] is included in the link:pom.xml to format the Java source files using the https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml[Eclipse Java Code Format definition .xml file] included on the _devel-resources_ folder.
+The http://mvnrepository.com/artifact/com.googlecode.maven-java-formatter-plugin/maven-java-formatter-plugin[Maven Java Formatter plugin] is included in the link:pom.xml[pom.xml] to format the Java source files using the https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml[Eclipse Java Code Format definition .xml file] included on the _devel-resources_ folder.
 
 [IMPORTANT]
 ====
