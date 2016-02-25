@@ -36,7 +36,7 @@ These instructions detail how to get started with your freshly checked-out sourc
 
 . <<one-time-setup-instructions, One-time setup instructions>>
 . <<gpg-pgp-setup, GPG (PGP) Setup>>
-. <<developing-within-eclipse, Developing within eclipse>>
+. <<developing-roo, Developing Roo>>
 . <<running-the-command-line-tool, Running the command line tool>>
 . <<git-polices, Git Polices>>
 . <<git-tips, Git Tips>>
@@ -134,8 +134,8 @@ Of course the most secure option is to type the password every time. However, *i
 
 NOTE: _if you're new to GPG: don't lose your private key! Backup the secring.gpg file, as you'll need it to ever revoke your key or sign a replacement key (the public key servers offer no way to revoke a key unless you can sign the revocation request)._
 
-[[developing-within-eclipse]]
-== Developing within eclipse
+[[developing-roo]]
+== Developing Roo
 
 Spring Roo itself does not use *AspectJ*, it is a standard _Maven_ project and
 therefore any *standard IDE* can be used for development. No extra plugins are
@@ -143,10 +143,24 @@ needed.
 
 The team use https://www.eclipse.org/[Eclipse] or https://spring.io/tools[STS] 
 to develop Roo, just import the project as standard Maven project 
-via _File > Import > Maven > Existing Maven Projects_ into Workspace. 
+via _File > Import > Maven > Existing Maven Projects_ into Workspace.
 
 In theory you could use the https://www.eclipse.org/m2e/[m2eclipse plugin].
 The Roo team just tends to use the shell command _mvn_ instead.
+
+[[code-style]]
+=== Code Style
+
+Spring Roo project follows the https://github.com/google/styleguide[Google Code Style] convention.
+
+The http://mvnrepository.com/artifact/com.googlecode.maven-java-formatter-plugin/maven-java-formatter-plugin[Maven Java Formatter plugin] is included in the link:pom.xml to format the Java source files using the https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml[Eclipse Java Code Format definition .xml file] included on the _devel-resources_ folder.
+
+[IMPORTANT]
+====
+Developers and contributors that uses STS or Eclipse should install the https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml[Eclipse Java Code Format definition .xml file] via _Window > Properties > Java > Code Style > Formatter > Import_
+
+Contributors must execute `mvn clean install` before sending the pull requests to be sure that Google Code Styles have been applied.
+====
 
 [[running-the-command-line-tool]]
 == Running the command line tool 
@@ -249,17 +263,6 @@ git pull --rebase
 The --rebase option will essentially do a 'git pull', but then it will reapply your commits again as if they happened after the 'git pull'. This avoids verbose logs like "Merge branch 'master'".
 
 If you're doing something non-trivial, it's best to create a branch. Learn more about this at http://sysmonblog.co.uk/misc/git_by_example/.
-
-[[code-style]]
-== Code Style
-
-Spring Roo project follows the https://github.com/google/styleguide[Google Code Style] convention.
-
-This format is applied automatically to the entire project using http://mvnrepository.com/artifact/com.googlecode.maven-java-formatter-plugin/maven-java-formatter-plugin[Maven Java Formatter plugin] and the https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml[Eclipse Java Code Format definition .xml file] included on _devel-resources_ folder.
- 
-Spring Roo formats all _.java_ files when developer executes `mvn clean install`. 
-
-IMPORTANT: _Contributors must execute `mvn clean install` before sending some new pull request to be sure that Google Code Styles have been applied._
 
 [[releasing]]
 == Releasing
