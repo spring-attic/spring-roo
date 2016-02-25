@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- 
 
-Eclipse Java Code Format definition based on Google Style
+These Java formating rules for Eclipse takes the Google Code Style as base and have been customized to not format the Javadoc comments.
+
+References:
  
- - https://github.com/google/styleguide
- - https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml
+* https://github.com/google/styleguide
+* https://github.com/google/styleguide/blob/gh-pages/eclipse-java-google-style.xml
 
 -->
 <profiles version="12">
