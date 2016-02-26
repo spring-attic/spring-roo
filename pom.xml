@@ -949,7 +949,7 @@
                     <version>0.4</version>
                     <configuration>
                         <lineEnding>LF</lineEnding>
-                        <configFile>${main.basedir}/devel-resources/eclipse-java-google-style_no-doc-format.xml</configFile>
+                        <configFile>${main.basedir}/devel-resources/eclipse-java-code-style-formatter.xml</configFile>
                     </configuration>
                     <executions>
                         <execution>
