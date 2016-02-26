@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.finder;
+package org.springframework.roo.addon.finder.addon;
 
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JpaJavaType.ENTITY_MANAGER;

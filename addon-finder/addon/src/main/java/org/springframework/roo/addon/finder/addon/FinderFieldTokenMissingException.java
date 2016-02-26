@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.finder;
+package org.springframework.roo.addon.finder.addon;
 
 /**
  * Thrown when a dynamic finder method cannot be matched.

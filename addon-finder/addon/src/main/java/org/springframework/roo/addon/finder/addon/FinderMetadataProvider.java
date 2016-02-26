@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.finder;
+package org.springframework.roo.addon.finder.addon;
 
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 

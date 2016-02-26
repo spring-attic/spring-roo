@@ -22,6 +22,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.dbre.annotations.RooDbManaged");
   public static final JavaType ROO_EQUALS = new JavaType(
       "org.springframework.roo.addon.javabean.annotations.RooEquals");
+  public static final JavaType ROO_FINDER = new JavaType(
+      "org.springframework.roo.addon.finder.annotations.RooFinder");
   public static final JavaType ROO_GWT_LOCATOR = new JavaType(
       "org.springframework.roo.addon.gwt.RooGwtLocator");
   public static final JavaType ROO_GWT_MIRRORED_FROM = new JavaType(

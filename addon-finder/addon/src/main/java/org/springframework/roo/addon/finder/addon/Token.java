@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.finder;
+package org.springframework.roo.addon.finder.addon;
 
 /**
  * A simple interface representing tokens in a JPA SQL query.

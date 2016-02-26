@@ -36,7 +36,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.finder.FinderMetadata;
+import org.springframework.roo.addon.finder.addon.FinderMetadata;
 import org.springframework.roo.addon.plural.addon.PluralMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;

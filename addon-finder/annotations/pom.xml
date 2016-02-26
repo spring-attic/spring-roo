@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>org.springframework.roo.addon.finder</artifactId>
+		<version>2.0.0.BUILD-SNAPSHOT</version>
+		<relativePath>../../addon-finder</relativePath>
+	</parent>
+	<artifactId>org.springframework.roo.addon.finder.annotations</artifactId>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Annotations - Finder</name>
+	<description>Support for the generation of finder methods for JPA-backed entities.</description>
+	<dependencies>
+		<!-- OSGi -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.cmpn</artifactId>
+		</dependency>
+		<!-- Apache Felix -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+				<artifactId>maven-java-formatter-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<properties>
+		<main.basedir>${basedir}/..</main.basedir>
+		<main.basedir>${basedir}/../..</main.basedir>
+	</properties>
+</project>
