@@ -140,7 +140,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
                 Level.INFO,
                 String
                     .format(
-                        "WARNING: Already exists a repository associated to the entity '%s'. Only one repository per entity is allowed.",
+                        "INFO: Already exists a repository associated to the entity '%s'. Only one repository per entity is allowed.",
                         domainType.getSimpleTypeName()));
         return;
       }
