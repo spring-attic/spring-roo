@@ -653,23 +653,23 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
-      @CliOption(key = "joinTableName", mandatory = true,
+      @CliOption(key = "joinTableName", mandatory = false,
           help = "Join table name. Most usually used in @ManyToMany relations") final String joinTableName,
       @CliOption(
           key = "joinColumns",
-          mandatory = true,
+          mandatory = false,
           help = "Comma separated list of join table's foreign key columns which references the table of the entity owning the association") final String joinColumns,
       @CliOption(
           key = "referencedColumns",
-          mandatory = true,
+          mandatory = false,
           help = "Comma separated list of foreign key referenced columns in the table of the entity owning the association") final String referencedColumns,
       @CliOption(
           key = "inverseJoinColumns",
-          mandatory = true,
+          mandatory = false,
           help = "Comma separated list of join table's foreign key columns which references the table of the entity that does not own the association") final String inverseJoinColumns,
       @CliOption(
           key = "inverseReferencedColumns",
-          mandatory = true,
+          mandatory = false,
           help = "Comma separated list of foreign key referenced columns in the table of the entity that does not own the association") final String inverseReferencedColumns,
       ShellContext shellContext) {
 
