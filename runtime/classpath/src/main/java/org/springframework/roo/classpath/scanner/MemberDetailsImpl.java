@@ -39,7 +39,7 @@ public class MemberDetailsImpl implements MemberDetails {
    * @param details the member holders that should be stored in this instance
    *            (can be <code>null</code>)
    */
-  MemberDetailsImpl(final Collection<? extends MemberHoldingTypeDetails> details) {
+  public MemberDetailsImpl(final Collection<? extends MemberHoldingTypeDetails> details) {
     Validate.notEmpty(details, "Member holding details required");
     CollectionUtils.populate(this.details, details);
   }

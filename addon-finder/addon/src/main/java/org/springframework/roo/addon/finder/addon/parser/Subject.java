@@ -1,0 +1,234 @@
+package org.springframework.roo.addon.finder.addon.parser;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.roo.classpath.details.FieldMetadata;
+
+
+/**
+ * Represents the subject part of the query. A query subject is enclosed between a database operation (query, read or find) and "By" token.
+ *  E.g. {@code findDistinctUserByNameOrderByAge} would have the subject {@code DistinctUser}.
+ *  Subject can have optional expressions like Distinct, limiting expressions such as First and Top, and a property which will be the result to return
+ * 
+ * @author Paula Navarro
+ * @since 2.0
+ */
+public class Subject {
+
+  // Supported query operations to read data
+  private static final String[] QUERY_TYPE = {"find", "query", "read"};
+
+  public static final String QUERY_PATTERN = StringUtils.join(QUERY_TYPE, "|");
+  private static final String DISTINCT = "Distinct";
+  private static final String LIMITING_QUERY_PATTERN = "((First|Top)(\\d+)?)?";
+
+  private static final Pattern COMPLETE_QUERY_TEMPLATE = Pattern.compile("^(" + QUERY_PATTERN
+      + ")(" + DISTINCT + ")?" + LIMITING_QUERY_PATTERN + "(\\p{Lu}.*?)??By");
+
+  private static final Pattern CORRECT_QUERY_TEMPLATE = Pattern.compile("^(" + QUERY_PATTERN
+      + ")?(" + DISTINCT + ")?(First|Top)?(\\d*)?(\\p{Lu}.*)?");
+
+  private boolean distinct;
+  private Integer maxResults;
+  private String operation = "";
+  private String limit = "";
+  private boolean isComplete = false;
+  private Pair<FieldMetadata, String> property = null;
+  private List<FieldMetadata> fields;
+
+  /**
+   * Extracts the subject expressions from a source and builds a structure which represents it.
+   * 
+   * @param source subject query
+   * @param fields entity properties
+   */
+  public Subject(String source, List<FieldMetadata> fields) {
+
+    Validate.notNull(source, "Subject should not be null");
+
+    this.fields = fields;
+    this.isComplete = isComplete(source);
+
+    Matcher grp = CORRECT_QUERY_TEMPLATE.matcher(source);
+
+    // Checks if query format and parameters are correct (not complete)
+    if (!grp.find()) {
+      return;
+    }
+
+    // Extract query type
+    operation = grp.group(1);
+
+    // Extract Distinct
+    this.distinct = source == null ? false : source.contains(DISTINCT);
+
+    // Extract if there is a limitation  expression
+    limit = grp.group(3);
+
+    if (limit != null) {
+      maxResults = StringUtils.isNotBlank(grp.group(4)) ? Integer.valueOf(grp.group(4)) : null;
+    }
+
+    // Extract property
+    property = extractValidField(grp.group(5), fields);
+
+  }
+
+  /**
+   * Extracts the property defined in source. If any property is found returns null.
+   * @param property
+   * @return Pair of property metadata and property name
+   */
+  public static Pair<FieldMetadata, String> extractValidField(String source,
+      List<FieldMetadata> fields) {
+    if (source == null) {
+      return null;
+    }
+
+    source = StringUtils.substringBefore(source, "By");
+
+    return PartTree.extractValidProperty(source, fields);
+  }
+
+  /**
+   * Checks if subject is completed. A completed subject has
+   * all their expressions well-defined, starts with read,
+   * query or find, and ends with "By" token.
+   * 
+   * @param subject
+   * @return true if subject is completed. Otherwise returns false.
+   */
+  private boolean isComplete(String subject) {
+    if (PartTree.matches(subject, COMPLETE_QUERY_TEMPLATE)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns whether we indicate distinct lookup of entities.
+   * 
+   * @return {@literal true} if distinct
+   */
+  public boolean isDistinct() {
+    return distinct;
+  }
+
+  /**
+   * Returns if subject is completed. Subject is complete if it has all
+   * its expressions well-defined, starts with a query type (read, query
+   * or find) and ends with "By" delimiter.
+   * 
+   * @return
+   */
+  public boolean isComplete() {
+    return isComplete;
+  }
+
+  /**
+   * Return the number of maximal results to return or {@literal null} if
+   * not restricted.
+   * 
+   * @return
+   */
+  public Integer getMaxResults() {
+    return maxResults;
+  }
+
+
+
+  @Override
+  public String toString() {
+    return (operation != null ? operation.toLowerCase() : "").concat(isDistinct() ? DISTINCT : "")
+        .concat(limit != null ? limit : "").concat(maxResults != null ? maxResults.toString() : "")
+        .concat(property != null ? property.getRight() : "").concat(isComplete ? "By" : "");
+  }
+
+  /**
+   * Returns true if subject expressions are well-defined (e.g. Distinct is defined before Top/First options) and the property belongs to the entity domain.
+   * @return 
+   */
+  public boolean isValid() {
+    return isValid(toString());
+  }
+
+  /**
+   * Returns true if source is a well-defined subject. However, it does not validate if the property exist in the entity domain
+   * @param source
+   * @return . 
+   */
+  public static boolean isValid(String source) {
+    if (PartTree.matches(source, COMPLETE_QUERY_TEMPLATE)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns the different queries that can be build based on the current subject expressions.
+   * The options are joined to the current query expression.
+   * 
+   * @return
+   */
+  public List<String> getOptions() {
+
+    List<String> options = new ArrayList<String>();
+
+    // Get current query to concatenate the new options
+    String query = toString();
+
+    // Checks if subject has an operation
+    if (StringUtils.isBlank(operation)) {
+      return Arrays.asList(QUERY_TYPE);
+    }
+
+    // Once operation is included subject definition can end, so "By" option is always available
+    options.add(query + "By");
+
+    // Check if a property is included
+    if (property == null) {
+
+      // If subject does not have a property, all properties are available
+      for (FieldMetadata field : fields) {
+        options.add(query.concat(StringUtils.capitalize(field.getFieldName().toString())));
+      }
+
+      // Check if subject has a limiting expression. It can only be added before the property
+      if (StringUtils.isBlank(limit)) {
+        options.add(query.concat("First"));
+        options.add(query.concat("Top"));
+
+        // Check if subject has Distinct expression. It can only be added before the property and limiting expression
+        if (!isDistinct()) {
+          options.add(query + DISTINCT);
+        }
+
+      } else if (getMaxResults() == null) {
+
+        // Optionally, a limiting expression can have a number as parameter
+        options.add(query + "[Number]");
+      }
+
+    } else {
+      // If the property is a reference to other entity, related entity properties are shown
+      List<FieldMetadata> fields = PartTree.getValidProperties(property.getLeft().getFieldType());
+
+      if (fields != null) {
+        for (FieldMetadata relatedEntityfield : fields) {
+          options.add(query.concat(StringUtils.capitalize(relatedEntityfield.getFieldName()
+              .toString())));
+        }
+      }
+    }
+
+    return options;
+  }
+
+}

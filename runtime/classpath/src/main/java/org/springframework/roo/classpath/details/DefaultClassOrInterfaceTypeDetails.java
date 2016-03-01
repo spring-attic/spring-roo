@@ -65,7 +65,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
    * @param enumConstants
    * @param registeredImports
    */
-  DefaultClassOrInterfaceTypeDetails(final CustomData customData,
+  public DefaultClassOrInterfaceTypeDetails(final CustomData customData,
       final String declaredByMetadataId, final int modifier,
       final List<AnnotationMetadata> annotations, final JavaType name,
       final PhysicalTypeCategory physicalTypeCategory,

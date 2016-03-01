@@ -26,7 +26,7 @@ public class DefaultFieldMetadata extends AbstractIdentifiableAnnotatedJavaStruc
   private CommentStructure commentStructure;
 
   // Package protected to mandate the use of FieldMetadataBuilder
-  DefaultFieldMetadata(final CustomData customData, final String declaredByMetadataId,
+  public DefaultFieldMetadata(final CustomData customData, final String declaredByMetadataId,
       final int modifier, final List<AnnotationMetadata> annotations,
       final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
     super(customData, declaredByMetadataId, modifier, annotations);
