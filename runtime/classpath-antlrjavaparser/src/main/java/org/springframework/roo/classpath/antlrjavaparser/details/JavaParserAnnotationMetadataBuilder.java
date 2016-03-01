@@ -110,7 +110,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
     for (final JavaSymbolName attributeName : annotation.getAttributeNames()) {
       final AnnotationAttributeValue<?> value = annotation.getAttribute(attributeName);
       Validate.notNull(value, "Unable to acquire value '%s' from annotation", attributeName);
-      final MemberValuePair memberValuePair = convert(value);
+      final MemberValuePair memberValuePair = convert(value, compilationUnitServices);
       // Validate.notNull(memberValuePair,
       // "Member value pair should have been set");
       if (memberValuePair != null) {
@@ -218,7 +218,8 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
   }
 
   @SuppressWarnings("unchecked")
-  private static MemberValuePair convert(final AnnotationAttributeValue<?> value) {
+  private static MemberValuePair convert(final AnnotationAttributeValue<?> value,
+      CompilationUnitServices compilationUnitServices) {
     if (value instanceof NestedAnnotationAttributeValue) {
       final NestedAnnotationAttributeValue castValue = (NestedAnnotationAttributeValue) value;
       AnnotationExpr annotationExpr;
@@ -231,17 +232,23 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
         annotationExpr =
             new SingleMemberAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation
                 .getAnnotationType().getSimpleTypeName()), convert(
-                nestedAnnotation.getAttribute(nestedAnnotation.getAttributeNames().get(0)))
-                .getValue());
+                nestedAnnotation.getAttribute(nestedAnnotation.getAttributeNames().get(0)),
+                compilationUnitServices).getValue());
       } else {
         final List<MemberValuePair> memberValuePairs = new ArrayList<MemberValuePair>();
         for (final JavaSymbolName attributeName : nestedAnnotation.getAttributeNames()) {
-          memberValuePairs.add(convert(nestedAnnotation.getAttribute(attributeName)));
+          memberValuePairs.add(convert(nestedAnnotation.getAttribute(attributeName),
+              compilationUnitServices));
         }
         annotationExpr =
             new NormalAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation
                 .getAnnotationType().getSimpleTypeName()), memberValuePairs);
       }
+
+      // Add imports for nested annotation types
+      JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(),
+          compilationUnitServices.getImports(), nestedAnnotation.getAnnotationType());
+
       // Rely on the nested instance to know its member value pairs
       return new MemberValuePair(value.getName().getSymbolName(), annotationExpr);
     }
@@ -313,7 +320,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
 
       final List<Expression> arrayElements = new ArrayList<Expression>();
       for (final AnnotationAttributeValue<?> v : castValue.getValue()) {
-        final MemberValuePair converted = convert(v);
+        final MemberValuePair converted = convert(v, compilationUnitServices);
         if (converted != null) {
           arrayElements.add(converted.getValue());
         }
