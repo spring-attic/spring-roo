@@ -1,9 +1,7 @@
 # Create project, entities and project settings to be able to test subsequent commands.
 project setup --topLevelPackage aaa.bbb.cc
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
-settings add --name spring.roo.jpa.require.table-name --value true
-settings add --name spring.roo.jpa.require.column-name --value true
-settings add --name spring.roo.jpa.require.sequence-name --value true
+settings add --name spring.roo.jpa.require.schema-object-name --value true
 enum type --class ~.enumerated.Enumerated
 
 #====================================================================================================================

@@ -57,12 +57,8 @@ public class JpaCommands implements CommandMarker {
   private static Logger LOGGER = HandlerUtils.getLogger(JpaCommands.class);
 
   // Project Settings 
-  private static final String SPRING_ROO_JPA_REQUIRE_TABLE_NAME =
-      "spring.roo.jpa.require.table-name";
-  private static final String SPRING_ROO_JPA_REQUIRE_COLUMN_NAME =
-      "spring.roo.jpa.require.column-name";
-  private static final String SPRING_ROO_JPA_REQUIRE_SEQUENCE_NAME =
-      "spring.roo.jpa.require.sequence-name";
+  private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
+      "spring.roo.jpa.require.schema-object-name";
 
   // Annotations
   private static final AnnotationMetadataBuilder ROO_EQUALS_BUILDER =
@@ -213,17 +209,18 @@ public class JpaCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_TABLE_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(params = {"table"}, command = "entity jpa")
   public boolean isTableMandatory(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.table-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredTableName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_TABLE_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredTableName != null && requiredTableName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -236,17 +233,18 @@ public class JpaCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(params = {"identifierColumn"}, command = "entity jpa")
   public boolean isColumnMandatory(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -259,17 +257,18 @@ public class JpaCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SEQUENCE_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(params = {"sequenceName"}, command = "entity jpa")
   public boolean isSequenceNameMandatory(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.sequence-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredSequenceName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SEQUENCE_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredSequenceName != null && requiredSequenceName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 

@@ -84,10 +84,8 @@ public class FieldCommands implements CommandMarker {
   private ProjectSettingsService projectSettings;
 
   // Project Settings 
-  private static final String SPRING_ROO_JPA_REQUIRE_COLUMN_NAME =
-      "spring.roo.jpa.require.column-name";
-  private static final String SPRING_ROO_JPA_REQUIRE_TABLE_NAME =
-      "spring.roo.jpa.require.table-name";
+  private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
+      "spring.roo.jpa.require.schema-object-name";
 
   private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
@@ -117,17 +115,18 @@ public class FieldCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(command = "field boolean", params = {"column"})
   public boolean isColumnMandatoryForFieldBoolean(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -194,17 +193,18 @@ public class FieldCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(command = "field date", params = {"column"})
   public boolean isColumnMandatoryForFieldDate(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -351,17 +351,18 @@ public class FieldCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(command = "field enum", params = {"column"})
   public boolean isColumnMandatoryForFieldEnum(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -417,17 +418,18 @@ public class FieldCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(command = "field number", params = {"column"})
   public boolean isColumnMandatoryForFieldNumber(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -530,17 +532,18 @@ public class FieldCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(command = "field reference", params = {"joinColumnName"})
   public boolean isColumnMandatoryForFieldReference(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -653,23 +656,23 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
-      @CliOption(key = "joinTableName", mandatory = false,
+      @CliOption(key = "joinTableName", mandatory = true,
           help = "Join table name. Most usually used in @ManyToMany relations") final String joinTableName,
       @CliOption(
           key = "joinColumns",
-          mandatory = false,
+          mandatory = true,
           help = "Comma separated list of join table's foreign key columns which references the table of the entity owning the association") final String joinColumns,
       @CliOption(
           key = "referencedColumns",
-          mandatory = false,
+          mandatory = true,
           help = "Comma separated list of foreign key referenced columns in the table of the entity owning the association") final String referencedColumns,
       @CliOption(
           key = "inverseJoinColumns",
-          mandatory = false,
+          mandatory = true,
           help = "Comma separated list of join table's foreign key columns which references the table of the entity that does not own the association") final String inverseJoinColumns,
       @CliOption(
           key = "inverseReferencedColumns",
-          mandatory = false,
+          mandatory = true,
           help = "Comma separated list of foreign key referenced columns in the table of the entity that does not own the association") final String inverseReferencedColumns,
       ShellContext shellContext) {
 
@@ -838,17 +841,18 @@ public class FieldCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(command = "field string", params = {"column"})
   public boolean isColumnMandatoryForFieldString(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -939,17 +943,18 @@ public class FieldCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(command = "field file", params = {"column"})
   public boolean isColumnMandatoryForFieldFile(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
@@ -1051,17 +1056,18 @@ public class FieldCommands implements CommandMarker {
    * 
    * @param shellContext
    * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_COLUMN_NAME} on project settings
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
   @CliOptionMandatoryIndicator(command = "field other", params = {"column"})
   public boolean isColumnMandatoryForFieldOther(ShellContext shellContext) {
 
-    // Check if property 'spring.roo.jpa.require.column-name' is defined on
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
     // project settings
-    String requiredColumnName = projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_COLUMN_NAME);
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
 
-    if (requiredColumnName != null && requiredColumnName.equals("true")) {
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
       return true;
     }
 
