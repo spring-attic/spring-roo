@@ -1,27 +1,21 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
 import static org.springframework.roo.model.JdkJavaType.HASH_SET;
-import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.ELEMENT_COLLECTION;
+import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.FETCH_TYPE;
-import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
-import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.details.annotations.*;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.Fetch;
-import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.EnumDetails;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.*;
 
 /**
  * Properties used by the one side of a many-to-one relationship or an @ElementCollection
@@ -44,8 +38,9 @@ import org.springframework.roo.model.JavaType;
 public class SetField extends CollectionField {
 
   private final Cardinality cardinality;
-
   private Fetch fetch;
+  private List<AnnotationAttributeValue<?>> joinTableAttributes;
+
   /**
    * Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be
    * added
@@ -99,6 +94,11 @@ public class SetField extends CollectionField {
           break;
       }
     }
+
+    // Add @JoinTable if required
+    if (joinTableAttributes != null) {
+      annotations.add(new AnnotationMetadataBuilder(JpaJavaType.JOIN_TABLE, joinTableAttributes));
+    }
   }
 
   public Fetch getFetch() {
@@ -122,5 +122,55 @@ public class SetField extends CollectionField {
 
   public void setMappedBy(final JavaSymbolName mappedBy) {
     this.mappedBy = mappedBy;
+  }
+
+  /**
+   * Fill {@link #joinTableAttributes} for building @JoinTable annotation
+   * 
+   * @param joinTableName
+   * @param joinColumns
+   * @param referencedColumns
+   * @param inverseJoinColumns
+   * @param inverseReferencedColumns
+   */
+  public void setJoinTableAnnotation(String joinTableName, String[] joinColumns,
+      String[] referencedColumns, String[] inverseJoinColumns, String[] inverseReferencedColumns) {
+
+    // Build @JoinColumn annotation for owner side of the relation
+    final List<AnnotationAttributeValue<?>> joinColumnsAnnotations =
+        new ArrayList<AnnotationAttributeValue<?>>();
+    for (int i = 0; i < joinColumns.length; i++) {
+      final AnnotationMetadataBuilder joinColumnAnnotation =
+          new AnnotationMetadataBuilder(JOIN_COLUMN);
+      joinColumnAnnotation.addStringAttribute("name", joinColumns[i]);
+      joinColumnAnnotation.addStringAttribute("referencedColumnName", referencedColumns[i]);
+      joinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
+          "joinColumns"), joinColumnAnnotation.build()));
+    }
+
+    // Build @JoinColumn annotation for the not owner side of the relation
+    final List<AnnotationAttributeValue<?>> inverseJoinColumnsAnnotations =
+        new ArrayList<AnnotationAttributeValue<?>>();
+    for (int i = 0; i < inverseJoinColumns.length; i++) {
+      final AnnotationMetadataBuilder inverseJoinColumnsAnnotation =
+          new AnnotationMetadataBuilder(JOIN_COLUMN);
+      inverseJoinColumnsAnnotation.addStringAttribute("name", inverseJoinColumns[i]);
+      inverseJoinColumnsAnnotation.addStringAttribute("referencedColumnName",
+          inverseReferencedColumns[i]);
+      inverseJoinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
+          "inverseJoinColumns"), inverseJoinColumnsAnnotation.build()));
+    }
+
+    // Add attributes for @JoinTable annotation
+    final List<AnnotationAttributeValue<?>> joinTableAttributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
+    joinTableAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), joinTableName));
+    joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+        new JavaSymbolName("joinColumns"), joinColumnsAnnotations));
+    joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+        new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnsAnnotations));
+
+    // Fill attributes field
+    this.joinTableAttributes = joinTableAttributes;
   }
 }

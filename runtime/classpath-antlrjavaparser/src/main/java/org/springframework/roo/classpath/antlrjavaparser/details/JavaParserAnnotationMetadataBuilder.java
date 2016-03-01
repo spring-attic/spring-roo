@@ -226,11 +226,11 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
       if (castValue.getValue().getAttributeNames().size() == 0) {
         annotationExpr =
             new MarkerAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation
-                .getAnnotationType().getFullyQualifiedTypeName()));
+                .getAnnotationType().getSimpleTypeName()));
       } else if (castValue.getValue().getAttributeNames().size() == 1) {
         annotationExpr =
             new SingleMemberAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation
-                .getAnnotationType().getFullyQualifiedTypeName()), convert(
+                .getAnnotationType().getSimpleTypeName()), convert(
                 nestedAnnotation.getAttribute(nestedAnnotation.getAttributeNames().get(0)))
                 .getValue());
       } else {
@@ -240,7 +240,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
         }
         annotationExpr =
             new NormalAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation
-                .getAnnotationType().getFullyQualifiedTypeName()), memberValuePairs);
+                .getAnnotationType().getSimpleTypeName()), memberValuePairs);
       }
       // Rely on the nested instance to know its member value pairs
       return new MemberValuePair(value.getName().getSymbolName(), annotationExpr);

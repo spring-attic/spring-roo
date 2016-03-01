@@ -86,6 +86,8 @@ public class FieldCommands implements CommandMarker {
   // Project Settings 
   private static final String SPRING_ROO_JPA_REQUIRE_COLUMN_NAME =
       "spring.roo.jpa.require.column-name";
+  private static final String SPRING_ROO_JPA_REQUIRE_TABLE_NAME =
+      "spring.roo.jpa.require.table-name";
 
   private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
@@ -651,6 +653,24 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+      @CliOption(key = "joinTableName", mandatory = true,
+          help = "Join table name. Most usually used in @ManyToMany relations") final String joinTableName,
+      @CliOption(
+          key = "joinColumns",
+          mandatory = true,
+          help = "Comma separated list of join table's foreign key columns which references the table of the entity owning the association") final String joinColumns,
+      @CliOption(
+          key = "referencedColumns",
+          mandatory = true,
+          help = "Comma separated list of foreign key referenced columns in the table of the entity owning the association") final String referencedColumns,
+      @CliOption(
+          key = "inverseJoinColumns",
+          mandatory = true,
+          help = "Comma separated list of join table's foreign key columns which references the table of the entity that does not own the association") final String inverseJoinColumns,
+      @CliOption(
+          key = "inverseReferencedColumns",
+          mandatory = true,
+          help = "Comma separated list of foreign key referenced columns in the table of the entity that does not own the association") final String inverseReferencedColumns,
       ShellContext shellContext) {
 
     final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
@@ -704,6 +724,22 @@ public class FieldCommands implements CommandMarker {
     }
     if (comment != null) {
       fieldDetails.setComment(comment);
+    }
+    if (joinTableName != null) {
+      // Create strings arrays and set @JoinTable annotation
+      String[] joinColumnsArray = joinColumns.replace(" ", "").split(",");
+      String[] referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
+      String[] inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
+      String[] inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
+
+      Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
+          "--joinColumns and --referencedColumns must have same number of column values");
+      Validate
+          .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
+              "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
+
+      fieldDetails.setJoinTableAnnotation(joinTableName, joinColumnsArray, referencedColumnsArray,
+          inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
     insertField(fieldDetails, permitReservedWords, transientModifier);
