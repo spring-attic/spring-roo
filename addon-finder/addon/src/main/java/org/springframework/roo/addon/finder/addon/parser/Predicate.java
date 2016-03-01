@@ -141,14 +141,14 @@ public class Predicate {
             options.add(subject.concat(type));
           }
 
-        } else if (lastAnd.shouldIgnoreCase() != IgnoreCaseType.ALWAYS
-            && Arrays.asList(Type.PREFIX_GROUP).contains(lastAnd.getOperator())) {
+        } else if (lastAnd.shouldIgnoreCase() != IgnoreCaseType.ALWAYS) {
 
-          // If the condition has not an operator but a group operator is defined, all operators belonging to the group are included
-          List<String> types = lastAnd.getSupportedOperators();
+          // If the condition has an operator, but it also acts as prefix of other operators, they are included
+          List<String> types = lastAnd.getSupportedOperatorsByPrefix(lastAnd.getOperator());
           for (String type : types) {
             options.add(subject.concat(type));
           }
+
         }
 
         if (lastAnd.shouldIgnoreCase() != IgnoreCaseType.ALWAYS) {

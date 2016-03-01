@@ -192,6 +192,55 @@ public class Part {
 
   }
 
+  /**
+   * Returns operators which name starts with a given prefix and are supported by the search expression property
+   * 
+   * @param prefix
+   * @return
+   */
+  public List<String> getSupportedOperatorsByPrefix(String prefix) {
+    if (property == null) {
+      return null;
+    }
+
+    List<String> typeKeywords = new ArrayList<String>();
+    List<Type> types = Type.getOperators(property.getLeft().getFieldType());
+
+    // Check if operator group is an operator
+    boolean removePrefix = Type.ALL_KEYWORDS.contains(prefix);
+
+    // Get operators
+    for (Type type : types) {
+      for (String keyword : type.getKeywords()) {
+
+        // Add operator if it does not belong to any group and operator group is not defined
+        if (StringUtils.isBlank(prefix) && !StringUtils.startsWithAny(keyword, Type.PREFIX_GROUP)) {
+          typeKeywords.add(keyword);
+        }
+
+        // Add operator if it belongs to the operator group specified
+        if (StringUtils.isNotBlank(prefix) && keyword.startsWith(prefix)) {
+
+          //If operator group is an operator as well, we need to remove the operator group prefix from operators (to avoid it appears two times )
+          if (removePrefix) {
+            typeKeywords.add(StringUtils.substringAfter(keyword, prefix));
+          } else {
+            typeKeywords.add(keyword);
+          }
+        }
+      }
+    }
+
+    // If there is not an operator group, all operator groups are available
+    if (StringUtils.isBlank(prefix)) {
+      typeKeywords.addAll(Arrays.asList(Type.PREFIX_GROUP));
+    }
+
+    return typeKeywords;
+
+  }
+
+
 
   /**
    * Returns true if the Part or search criteria has a property defined
