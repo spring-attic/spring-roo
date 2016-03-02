@@ -96,6 +96,13 @@ public @interface RooJpaEntity {
   String sequenceName() default "";
 
   /**
+   * Specifies the generation type strategy for the primary key @GeneratedValue
+   * 
+   * @return the generation type strategy to use (defaults to AUTO)
+   */
+  String generationType();
+
+  /**
    * Specifies the table name that should be used for the entity.
    * 
    * @return the name of the table to use (defaults to "")

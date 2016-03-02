@@ -32,8 +32,7 @@ import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.ReservedWords;
+import org.springframework.roo.model.*;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.*;
@@ -205,62 +204,15 @@ public class JpaCommands implements CommandMarker {
 
   /**
    * ROO-3709: Indicator that checks if exists some project setting that makes
-   * table parameter mandatory.
+   * each of the following parameters mandatory: sequenceName, generationValue, identifierColumn and table
    * 
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
-  @CliOptionMandatoryIndicator(params = {"table"}, command = "entity jpa")
-  public boolean isTableMandatory(ShellContext shellContext) {
-
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
-
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * ROO-3709: Indicator that checks if exists some project setting that makes
-   * identifierColumn parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
-  @CliOptionMandatoryIndicator(params = {"identifierColumn"}, command = "entity jpa")
-  public boolean isColumnMandatory(ShellContext shellContext) {
-
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
-
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * ROO-3709: Indicator that checks if exists some project setting that makes
-   * sequenceName parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
-  @CliOptionMandatoryIndicator(params = {"sequenceName"}, command = "entity jpa")
+  @CliOptionMandatoryIndicator(params = {"sequenceName", "generationValue", "identifierColumn",
+      "table"}, command = "entity jpa")
   public boolean isSequenceNameMandatory(ShellContext shellContext) {
 
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
@@ -333,6 +285,8 @@ public class JpaCommands implements CommandMarker {
           help = "The name used to refer to the entity in queries") final String entityName,
       @CliOption(key = "sequenceName", mandatory = true,
           help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
+      @CliOption(key = "generationType", mandatory = true, specifiedDefaultValue = "AUTO",
+          unspecifiedDefaultValue = "AUTO", help = "The generation value strategy to be used") final GenerationType generationType,
       @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Whether the generated entity should be used for read operations only.") final boolean readOnly,
@@ -387,7 +341,7 @@ public class JpaCommands implements CommandMarker {
     annotationBuilder.add(ROO_TO_STRING_BUILDER);
     annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField,
         identifierColumn, identifierType, versionField, versionColumn, versionType,
-        inheritanceType, mappedSuperclass, entityName, sequenceName, readOnly));
+        inheritanceType, mappedSuperclass, entityName, sequenceName, generationType, readOnly));
     if (equals) {
       annotationBuilder.add(ROO_EQUALS_BUILDER);
     }
@@ -434,7 +388,8 @@ public class JpaCommands implements CommandMarker {
       final String identifierColumn, final JavaType identifierType, final String versionField,
       final String versionColumn, final JavaType versionType,
       final InheritanceType inheritanceType, final boolean mappedSuperclass,
-      final String entityName, final String sequenceName, final boolean readOnly) {
+      final String entityName, final String sequenceName, final GenerationType generationType,
+      final boolean readOnly) {
     final AnnotationMetadataBuilder entityAnnotationBuilder =
         new AnnotationMetadataBuilder(ROO_JPA_ENTITY);
 
@@ -477,6 +432,11 @@ public class JpaCommands implements CommandMarker {
     }
     if (!JavaType.INT_OBJECT.equals(versionType)) {
       entityAnnotationBuilder.addClassAttribute("versionType", versionType);
+    }
+
+    // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
+    if (generationType != null) {
+      entityAnnotationBuilder.addStringAttribute("generationType", generationType.getType());
     }
 
     // ROO-3708: Generate readOnly entities

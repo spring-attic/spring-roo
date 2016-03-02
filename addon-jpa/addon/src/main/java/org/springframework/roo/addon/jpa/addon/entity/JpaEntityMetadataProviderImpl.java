@@ -261,8 +261,6 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
     // Get the governor's ID field, if any
     final Identifier identifier = getIdentifier(metadataIdentificationString);
 
-    boolean isGaeEnabled = false;
-    boolean isDatabaseDotComEnabled = false;
     final String moduleName =
         PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
     if (projectOperations.isProjectAvailable(moduleName)) {
@@ -270,9 +268,6 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
       // item
       getMetadataDependencyRegistry().registerDependency(
           ProjectMetadata.getProjectIdentifier(moduleName), metadataIdentificationString);
-      isGaeEnabled = projectOperations.isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
-      isDatabaseDotComEnabled =
-          projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.DATABASE_DOT_COM);
     }
 
     // Getting entity details
@@ -280,8 +275,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
 
     return new JpaEntityMetadata(metadataIdentificationString, aspectName, governorPhysicalType,
-        parent, governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled,
-        isDatabaseDotComEnabled, entityDetails);
+        parent, governorMemberDetails, identifier, jpaEntityAnnotationValues, entityDetails);
   }
 
   public String getProvidesType() {

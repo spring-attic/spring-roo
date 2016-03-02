@@ -67,8 +67,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private final JpaEntityAnnotationValues annotationValues;
   private final MemberDetails entityMemberDetails;
   private final Identifier identifier;
-  private final boolean isDatabaseDotComEnabled;
-  private final boolean isGaeEnabled;
   private final JpaEntityMetadata parent;
   private FieldMetadata identifierField;
   private FieldMetadata versionField;
@@ -98,8 +96,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   public JpaEntityMetadata(final String metadataIdentificationString, final JavaType itdName,
       final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parent,
       final MemberDetails entityMemberDetails, final Identifier identifier,
-      final JpaEntityAnnotationValues annotationValues, final boolean isGaeEnabled,
-      final boolean isDatabaseDotComEnabled, final ClassOrInterfaceTypeDetails entityDetails) {
+      final JpaEntityAnnotationValues annotationValues,
+      final ClassOrInterfaceTypeDetails entityDetails) {
     super(metadataIdentificationString, itdName, entityPhysicalType);
     Validate.notNull(annotationValues, "Annotation values are required");
     Validate.notNull(entityMemberDetails, "Entity MemberDetails are required");
@@ -113,8 +111,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.entityMemberDetails = entityMemberDetails;
     this.identifier = identifier;
     this.parent = parent;
-    this.isGaeEnabled = isGaeEnabled;
-    this.isDatabaseDotComEnabled = isDatabaseDotComEnabled;
     this.entityDetails = entityDetails;
 
     // Add @Entity or @MappedSuperclass annotation
@@ -330,20 +326,15 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     final JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
     annotations.add(new AnnotationMetadataBuilder(annotationType));
 
-    // Encode keys as strings on GAE to support entity group hierarchies
-    if (isGaeEnabled && identifierType.equals(JavaType.STRING)) {
-      AnnotationMetadataBuilder extensionBuilder =
-          new AnnotationMetadataBuilder(DATANUCLEUS_JPA_EXTENSION);
-      extensionBuilder.addStringAttribute("vendorName", "datanucleus");
-      extensionBuilder.addStringAttribute("key", "gae.encoded-pk");
-      extensionBuilder.addStringAttribute("value", "true");
-      annotations.add(extensionBuilder);
-    }
-
     // Compute the column name, as required
     if (!hasIdClass) {
       if (!"".equals(annotationValues.getSequenceName())) {
-        String generationType = isGaeEnabled || isDatabaseDotComEnabled ? "IDENTITY" : "AUTO";
+        String generationType = "AUTO";
+
+        // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
+        if (!"".equals(annotationValues.getGenerationType())) {
+          generationType = annotationValues.getGenerationType();
+        }
 
         // ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE)
         // If the root of the governor declares @Inheritance(strategy =
@@ -373,8 +364,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(GENERATION_TYPE,
             new JavaSymbolName(generationType)));
 
-        if (StringUtils.isNotBlank(annotationValues.getSequenceName())
-            && !(isGaeEnabled || isDatabaseDotComEnabled)) {
+        if (StringUtils.isNotBlank(annotationValues.getSequenceName())) {
           final String sequenceKey =
               StringUtils.uncapitalize(destination.getSimpleTypeName()) + "Gen";
           generatedValueBuilder.addStringAttribute("generator", sequenceKey);
@@ -508,9 +498,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @return a non-<code>null</code> type
    */
   private JavaType getIdentifierType() {
-    if (isDatabaseDotComEnabled) {
-      return JavaType.STRING;
-    }
     if (annotationValues.getIdentifierType() != null) {
       return annotationValues.getIdentifierType();
     } else if (identifier != null && identifier.getFieldType() != null) {
@@ -718,10 +705,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     JavaType versionType = annotationValues.getVersionType();
     String versionColumn =
         StringUtils.defaultIfEmpty(annotationValues.getVersionColumn(), verField.getSymbolName());
-    if (isDatabaseDotComEnabled) {
-      versionType = CALENDAR;
-      versionColumn = "lastModifiedDate";
-    }
 
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
     annotations.add(new AnnotationMetadataBuilder(VERSION));
