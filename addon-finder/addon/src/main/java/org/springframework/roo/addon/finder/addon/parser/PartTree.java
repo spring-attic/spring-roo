@@ -35,8 +35,8 @@ import org.springframework.roo.model.JavaType;
 public class PartTree {
 
   private static final String KEYWORD_TEMPLATE = "(%s)(?=(\\p{Lu}|\\z))";
-  private static final Pattern PREFIX_TEMPLATE =
-      Pattern.compile("^(" + Subject.QUERY_PATTERN + ")((\\p{Lu}.*?))??By");
+  private static final Pattern PREFIX_TEMPLATE = Pattern.compile("^(" + Subject.QUERY_PATTERN
+      + ")((\\p{Lu}.*?))??By");
 
   /**
    * Subject is delimited by the query prefix (find, read or query) and {@literal By} delimiter, for
@@ -71,8 +71,7 @@ public class PartTree {
    *            to expose them as options.
    * @param finderAutocomplete interface that provides operations to obtain useful information during autocomplete 
    */
-  public PartTree(String source, MemberDetails memberDetails,
-      FinderAutocomplete finderAutocomplete) {
+  public PartTree(String source, MemberDetails memberDetails, FinderAutocomplete finderAutocomplete) {
 
     Validate.notNull(source, "Source must not be null");
     Validate.notNull(memberDetails, "MemberDetails must not be null");
@@ -194,8 +193,9 @@ public class PartTree {
         break;
       }
       if (rawProperty.startsWith(field.getFieldName().toString())) {
-        if (tempField == null || tempField.getFieldName().toString().length() < field.getFieldName()
-            .toString().length())
+        if (tempField == null
+            || tempField.getFieldName().toString().length() < field.getFieldName().toString()
+                .length())
           tempField = field;
       }
     }
@@ -207,9 +207,10 @@ public class PartTree {
     // If extracted property is a reference to other entity, the fields of this related entity are inspected to check if extractProperty contains information about them 
     Pair<FieldMetadata, String> related = extractRelatedEntityValidProperty(rawProperty, tempField);
     if (related != null) {
-      return Pair.of(related.getLeft() == null ? tempField : related.getLeft(),
-          StringUtils.capitalize(tempField.getFieldName().toString())
-              .concat(StringUtils.capitalize(related.getRight())));
+      return Pair.of(
+          related.getLeft() == null ? tempField : related.getLeft(),
+          StringUtils.capitalize(tempField.getFieldName().toString()).concat(
+              StringUtils.capitalize(related.getRight())));
     }
 
     return Pair.of(tempField, StringUtils.capitalize(tempField.getFieldName().toString()));
@@ -350,13 +351,13 @@ public class PartTree {
     // TODO: This method should be implemented to use finder name to obtain returned JavaType
     return JavaType.STRING;
   }
-  
+
   /**
    * Method that obtains the necessary parameters of current finder
    * 
    * @return List that contains all necessary parameters
    */
-  public List<FinderParameter> getParameters(){
+  public List<FinderParameter> getParameters() {
     // TODO: This method should be implemented to use finder name to obtain necessary parameters
     List<FinderParameter> finderParameters = new ArrayList<FinderParameter>();
     return finderParameters;

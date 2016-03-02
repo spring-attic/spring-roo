@@ -10,11 +10,11 @@ import org.springframework.roo.model.JavaType;
  * @since 2.0
  */
 public class FinderParameter {
-  
+
   private JavaType type;
   private JavaSymbolName name;
-  
-  public FinderParameter(JavaType type, JavaSymbolName name){
+
+  public FinderParameter(JavaType type, JavaSymbolName name) {
     this.type = type;
     this.name = name;
   }
