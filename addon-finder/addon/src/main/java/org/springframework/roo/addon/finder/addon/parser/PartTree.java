@@ -119,13 +119,13 @@ public class PartTree {
     Pair<FieldMetadata, String> property = subject.getProperty();
     JavaType type = null;
 
-   
+
     if (property != null && property.getLeft() != null) {
       // Returns the property type if it is specified
       type = property.getLeft().getFieldType();
-      
+
     } else {
-      
+
       // By default returns entity type
       List<MemberHoldingTypeDetails> details = entityDetails.getDetails();
       for (MemberHoldingTypeDetails detail : details) {
@@ -138,7 +138,7 @@ public class PartTree {
         }
       }
     }
-   
+
 
     // Check number of results to return. 
     if (maxResults != null && maxResults == 1) {
@@ -147,12 +147,14 @@ public class PartTree {
     }
 
     //If it is not an unique result, returns a list
-    if(type.isPrimitive()){
+    if (type.isPrimitive()) {
       // Lists cannot return primitive types, so primitive types are transformed into their wrapper class
-      type = new JavaType(type.getFullyQualifiedTypeName(), type.getArray(), DataType.TYPE, type.getArgName(), type.getParameters());
+      type =
+          new JavaType(type.getFullyQualifiedTypeName(), type.getArray(), DataType.TYPE,
+              type.getArgName(), type.getParameters());
     }
     return new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(type));
-   
+
   }
 
   /**

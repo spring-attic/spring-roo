@@ -338,7 +338,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     }
     final SortedSet<FinderMetadataDetails> finderMetadataDetails =
         new TreeSet<FinderMetadataDetails>();
-    for (final MethodMetadata method : finderMetadata.getAllDynamicFinders()) {
+    /*for (final MethodMetadata method : finderMetadata.getAllDynamicFinders()) {
       final List<JavaSymbolName> parameterNames = method.getParameterNames();
       final List<JavaType> parameterTypes =
           AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
@@ -364,7 +364,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
       final FinderMetadataDetails details =
           new FinderMetadataDetails(method.getMethodName().getSymbolName(), method, fields);
       finderMetadataDetails.add(details);
-    }
+    }*/
 
     SortedSet<FinderMetadataDetails> finderMetadataDetailsWoCountMethods =
         new TreeSet<FinderMetadataDetails>();

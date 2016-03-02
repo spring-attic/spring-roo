@@ -100,7 +100,7 @@ public @interface RooJpaEntity {
    * 
    * @return the generation type strategy to use (defaults to AUTO)
    */
-  String generationType();
+  String generationType() default "AUTO";
 
   /**
    * Specifies the table name that should be used for the entity.

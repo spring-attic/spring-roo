@@ -89,7 +89,7 @@ public class Subject {
 
     if (limit != null) {
       maxResults = StringUtils.isNotBlank(grp.group(4)) ? Integer.valueOf(grp.group(4)) : null;
-      if(maxResults!=null && maxResults == 0){
+      if (maxResults != null && maxResults == 0) {
         throw new IllegalArgumentException("ERROR: Query max results cannot be 0");
       }
     }
@@ -156,10 +156,10 @@ public class Subject {
    * @return
    */
   public Integer getMaxResults() {
-    if(StringUtils.isBlank(limit)){
+    if (StringUtils.isBlank(limit)) {
       return null;
     }
-    if(maxResults== null){
+    if (maxResults == null) {
       return 1;
     }
     return maxResults;

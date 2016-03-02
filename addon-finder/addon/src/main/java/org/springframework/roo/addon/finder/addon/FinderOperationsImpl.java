@@ -85,17 +85,6 @@ public class FinderOperationsImpl implements FinderOperations {
     Validate.notNull(entityAnnotation,
         "ERROR: Provided entity must be annotated with @RooJpaEntity");
 
-    // TODO: Check that provided finderName is valid for provided entity
-    boolean isValidFinder = true;
-
-    Validate
-        .isTrue(
-            isValidFinder,
-            String
-                .format(
-                    "ERROR: Finder name '%s' is not valid for entity '%s'. Use autocomplete (TAB or CTRL + Space) to be sure that your finder name is valid.",
-                    finderName.getReadableSymbolName(), entity.getSimpleTypeName()));
-
     // Getting repository that manages current entity
     Set<ClassOrInterfaceTypeDetails> allRepositories =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
