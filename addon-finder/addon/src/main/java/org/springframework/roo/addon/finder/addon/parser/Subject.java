@@ -89,6 +89,9 @@ public class Subject {
 
     if (limit != null) {
       maxResults = StringUtils.isNotBlank(grp.group(4)) ? Integer.valueOf(grp.group(4)) : null;
+      if(maxResults!=null && maxResults == 0){
+        throw new IllegalArgumentException("ERROR: Query max results cannot be 0");
+      }
     }
 
     // Extract property
@@ -153,6 +156,12 @@ public class Subject {
    * @return
    */
   public Integer getMaxResults() {
+    if(StringUtils.isBlank(limit)){
+      return null;
+    }
+    if(maxResults== null){
+      return 1;
+    }
     return maxResults;
   }
 
@@ -164,6 +173,17 @@ public class Subject {
         .concat(limit != null ? limit : "").concat(maxResults != null ? maxResults.toString() : "")
         .concat(property != null ? property.getRight() : "").concat(isComplete ? "By" : "");
   }
+
+  /**
+   * Returns the property metadata and name of this expression. 
+   * If any property is defined, returns {@literal null}.
+   * 
+   * @return Pair of property metadata and property name
+   */
+  public Pair<FieldMetadata, String> getProperty() {
+    return property;
+  }
+
 
   /**
    * Returns true if subject expressions are well-defined (e.g. Distinct is defined before Top/First options) and the property belongs to the entity domain.
@@ -224,7 +244,7 @@ public class Subject {
           options.add(query + DISTINCT);
         }
 
-      } else if (getMaxResults() == null) {
+      } else if (maxResults == null) {
 
         // Optionally, a limiting expression can have a number as parameter
         options.add(query + "[Number]");

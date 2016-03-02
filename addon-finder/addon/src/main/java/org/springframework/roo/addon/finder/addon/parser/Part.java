@@ -119,7 +119,7 @@ public class Part {
 
   /**
    * Returns the property metadata and name of this expression. 
-   * If any property is not defined, returns {@literal null}.
+   * If any property is defined, returns {@literal null}.
    * 
    * @return Pair of property metadata and property name
    */

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsImpl;
 import org.springframework.roo.model.CustomDataImpl;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -203,6 +205,11 @@ public class PartTreeUnitTest {
   public void rejectsPredicateMultipleOrderBy() throws Exception {
     new PartTree("findByTextOrderByTextOrderByNumber", memberDetails);
   }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void rejectsMaxResultsLimit() throws Exception {
+    new PartTree("findTop0ByText", memberDetails);
+  }
 
   @Test
   public void parsesIgnoreCaseAndAllIgnoreCaseCorrectly() throws Exception {
@@ -344,10 +351,10 @@ public class PartTreeUnitTest {
   @Test
   public void identifiesFindFirstImplicit() {
     PartTree partTree = new PartTree("findFirstByText", memberDetails);
-    assertTrue(partTree.isValid() && partTree.getMaxResults() == null);
+    assertTrue(partTree.isValid() && partTree.getMaxResults() == 1);
 
     partTree = new PartTree("findTopByText", memberDetails);
-    assertTrue(partTree.isValid() && partTree.getMaxResults() == null);
+    assertTrue(partTree.isValid() && partTree.getMaxResults() == 1);
   }
 
   @Test
@@ -414,6 +421,89 @@ public class PartTreeUnitTest {
       assertTrue(partTree.isValid() && partTree.isDistinct());
 
     }
+  }
+
+  @Test
+  public void validateReturnTypeEntity() throws Exception {
+    JavaType exampleType = new JavaType("Example");
+    JavaType exampleListType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(exampleType));
+    
+    assertEquals(exampleListType,new PartTree( "findDistinctByText", memberDetails).getReturnType());
+    assertEquals(exampleListType,new PartTree("findByText", memberDetails).getReturnType());
+    assertEquals(exampleListType,new PartTree("findTop2ByText", memberDetails).getReturnType());
+    assertEquals(exampleListType,new PartTree("findDistinctTop10ByText", memberDetails).getReturnType());
+    assertEquals(exampleListType,new PartTree("findFirst2ByText", memberDetails).getReturnType());
+
+    assertEquals(exampleType, new PartTree("findTopByText", memberDetails).getReturnType());
+    assertEquals(exampleType,new PartTree("findTopFirst1ByText", memberDetails).getReturnType());
+    assertEquals(exampleType,new PartTree("findDistinctFirstByText", memberDetails).getReturnType());
+    assertEquals(exampleType,new PartTree("findDistinctTop1ByText", memberDetails).getReturnType());
+  }
+
+
+  @Test
+  public void validateReturnsTypeString() throws Exception {
+    JavaType stringListType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING));
+
+    assertEquals(stringListType, new PartTree("findDistinctTextByText", memberDetails).getReturnType());
+    assertEquals(stringListType,new PartTree("findTextByText", memberDetails).getReturnType());
+    assertEquals(stringListType,new PartTree("findTop2TextByText", memberDetails).getReturnType());
+    assertEquals(stringListType,new PartTree("findDistinctTop10TextByText", memberDetails).getReturnType());
+    assertEquals(stringListType,new PartTree("findFirst2TextByText", memberDetails).getReturnType());
+
+    assertEquals(JavaType.STRING, new PartTree("findTopTextByText", memberDetails).getReturnType());
+    assertEquals(JavaType.STRING, new PartTree("findFirst1TextByText", memberDetails).getReturnType());
+    assertEquals(JavaType.STRING, new PartTree("findDistinctFirstTextByText", memberDetails).getReturnType());
+    assertEquals(JavaType.STRING, new PartTree("findDistinctTop1TextByText", memberDetails).getReturnType());
+  }
+  
+  @Test
+  public void validateReturnsTypeDate() throws Exception {
+    JavaType dateType = new JavaType(Date.class);
+    JavaType dateListType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(dateType));
+
+    assertEquals(dateListType, new PartTree("findDistinctDateByText", memberDetails).getReturnType());
+    assertEquals(dateListType,new PartTree("findDateByText", memberDetails).getReturnType());
+    assertEquals(dateListType,new PartTree("findTop2DateByText", memberDetails).getReturnType());
+    assertEquals(dateListType,new PartTree("findDistinctTop10DateByText", memberDetails).getReturnType());
+    assertEquals(dateListType,new PartTree("findFirst2DateByText", memberDetails).getReturnType());
+
+    assertEquals(dateType, new PartTree("findTopDateByText", memberDetails).getReturnType());
+    assertEquals(dateType, new PartTree("findFirst1DateByText", memberDetails).getReturnType());
+    assertEquals(dateType, new PartTree("findDistinctFirstDateByText", memberDetails).getReturnType());
+    assertEquals(dateType, new PartTree("findDistinctTop1DateByText", memberDetails).getReturnType());
+  }
+  
+  @Test
+  public void validateReturnsTypeInteger() throws Exception {
+    JavaType intListType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(JavaType.INT_OBJECT));
+
+    assertEquals(intListType, new PartTree("findDistinctNumberByText", memberDetails).getReturnType());
+    assertEquals(intListType,new PartTree("findNumberByText", memberDetails).getReturnType());
+    assertEquals(intListType,new PartTree("findTop2NumberByText", memberDetails).getReturnType());
+    assertEquals(intListType,new PartTree("findDistinctTop10NumberByText", memberDetails).getReturnType());
+    assertEquals(intListType,new PartTree("findFirst2NumberByText", memberDetails).getReturnType());
+
+    assertEquals(JavaType.INT_OBJECT, new PartTree("findTopNumberByText", memberDetails).getReturnType());
+    assertEquals(JavaType.INT_OBJECT, new PartTree("findFirst1NumberByText", memberDetails).getReturnType());
+    assertEquals(JavaType.INT_OBJECT, new PartTree("findDistinctFirstNumberByText", memberDetails).getReturnType());
+    assertEquals(JavaType.INT_OBJECT, new PartTree("findDistinctTop1NumberByText", memberDetails).getReturnType());
+  }
+  
+  @Test
+  public void validateReturnsTypePrimitiveInteger() throws Exception {
+    JavaType intListType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(JavaType.INT_OBJECT));
+
+    assertEquals(intListType, new PartTree("findDistinctPrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(intListType,new PartTree("findPrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(intListType,new PartTree("findTop2PrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(intListType,new PartTree("findDistinctTop10PrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(intListType,new PartTree("findFirst2PrimitiveIntByText", memberDetails).getReturnType());
+
+    assertEquals(JavaType.INT_PRIMITIVE, new PartTree("findTopPrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(JavaType.INT_PRIMITIVE, new PartTree("findFirst1PrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(JavaType.INT_PRIMITIVE, new PartTree("findDistinctFirstPrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(JavaType.INT_PRIMITIVE, new PartTree("findDistinctTop1PrimitiveIntByText", memberDetails).getReturnType());
   }
 
   @Test

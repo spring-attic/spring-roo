@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.finder.addon.parser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,8 +9,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -62,6 +67,11 @@ public class PartTree {
   private final FinderAutocomplete finderAutocomplete;
 
   /**
+   * Return type of generated finder
+   */
+  private JavaType returnType;
+
+  /**
    * Creates a new {@link PartTree} by parsing the given {@link String}.
    * 
    * @param source
@@ -93,6 +103,56 @@ public class PartTree {
       this.predicate = new Predicate(this, source.substring(matcher.group().length()), fields);
     }
 
+    this.returnType = extractReturnType(memberDetails);
+
+  }
+
+  /**
+   * Extracts the java type of the results to be returned by the PartTree query 
+   * 
+   * @param entityDetails the entity details to extract the object to return by default
+   * @return
+   */
+  private JavaType extractReturnType(MemberDetails entityDetails) {
+
+    Integer maxResults = subject.getMaxResults();
+    Pair<FieldMetadata, String> property = subject.getProperty();
+    JavaType type = null;
+
+   
+    if (property != null && property.getLeft() != null) {
+      // Returns the property type if it is specified
+      type = property.getLeft().getFieldType();
+      
+    } else {
+      
+      // By default returns entity type
+      List<MemberHoldingTypeDetails> details = entityDetails.getDetails();
+      for (MemberHoldingTypeDetails detail : details) {
+        if (finderAutocomplete != null
+            && finderAutocomplete.getEntityDetails(detail.getType()).equals(entityDetails)) {
+          type = detail.getType();
+          break;
+        } else {
+          type = detail.getType();
+        }
+      }
+    }
+   
+
+    // Check number of results to return. 
+    if (maxResults != null && maxResults == 1) {
+      // Unique result
+      return type;
+    }
+
+    //If it is not an unique result, returns a list
+    if(type.isPrimitive()){
+      // Lists cannot return primitive types, so primitive types are transformed into their wrapper class
+      type = new JavaType(type.getFullyQualifiedTypeName(), type.getArray(), DataType.TYPE, type.getArgName(), type.getParameters());
+    }
+    return new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(type));
+   
   }
 
   /**
@@ -349,7 +409,7 @@ public class PartTree {
    */
   public JavaType getReturnType() {
     // TODO: This method should be implemented to use finder name to obtain returned JavaType
-    return JavaType.STRING;
+    return returnType;
   }
 
   /**
