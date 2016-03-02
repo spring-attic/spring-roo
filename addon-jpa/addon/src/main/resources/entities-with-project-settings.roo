@@ -9,7 +9,7 @@ enum type --class ~.enumerated.Enumerated
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test entity creation command with required dynamic mandatory options based on project settings.
 #
-entity jpa --class ~.domain.Entity1 --table entity1_table --identifierColumn identifier --sequenceName sequence
+entity jpa --class ~.domain.Entity1 --table ENTITY1_TABLE --identifierColumn identifier --sequenceName sequence --generationType SEQUENCE
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
@@ -119,17 +119,62 @@ field string --fieldName string_field --column string_column
 
 
 #====================================================================================================================
-# TEST 9: Create read-only entity
+# TEST 9: Create read-only entity with GenerationType.SEQUENCE for @GeneratedValue
 #--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test creation of a read-only entity with --readOnly command option.
+# Goal:   Test creation of a read-only entity with --readOnly and --generationType command options.
 #
-entity jpa --class ~.domain.ReadOnlyEntity --table readonly_table --identifierColumn id --sequenceName seq --readOnly
+entity jpa --class ~.domain.ReadOnlyEntity --table READONLY_TABLE --identifierColumn id --sequenceName seq --readOnly --generationType SEQUENCE
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity_Roo_Jpa_Entity.aj
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity_Roo_ToString.aj
 #
 # Result: Create read-only entity without errors.                                 
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 10: Create entity with GenerationType.TABLE for @GeneratedValue
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test creation of an entity with --generationType command option with TABLE value.
+#
+entity jpa --class ~.domain.TableEntity --table TABLE_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --generationType TABLE
+#      
+# Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/TableEntity.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/TableEntity_Roo_Jpa_Entity.aj
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/TableEntity_Roo_ToString.aj
+#
+# Result: Create entity without errors.                          
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 11: Create entity with GenerationType.IDENTITY for @GeneratedValue
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test creation of an entity with --generationType command option with IDENTITY value.
+#
+entity jpa --class ~.domain.IdentityEntity --table IDENTITY_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --generationType IDENTITY
+#      
+# Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/IdentityEntity.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/IdentityEntity_Roo_Jpa_Entity.aj
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/IdentityEntity_Roo_ToString.aj
+#
+# Result: Create entity without errors.                          
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 12: Create entity with GenerationType.AUTO for @GeneratedValue
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test creation of an entity with --generationType command option with AUTO value.
+#
+entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --generationType AUTO
+#      
+# Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/AutoEntity.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/AutoEntity_Roo_Jpa_Entity.aj
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/AutoEntity_Roo_ToString.aj
+#
+# Result: Create entity without errors.                          
 #====================================================================================================================
 
 
@@ -144,12 +189,12 @@ entity jpa --class ~.domain.ReadOnlyEntity --table readonly_table --identifierCo
 
 
 #====================================================================================================================
-# TEST 10: Create entity without required dynamic mandatory option "table", based by settings
+# TEST 13: Create entity without required dynamic mandatory option "table", based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "table", based on 
 #         project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --identifierColumn identifier --sequenceName sequence
+#entity jpa --class ~.domain.Entity2 --identifierColumn identifier --sequenceName sequence --generationType SEQUENCE
 #      
 # Output: You must specify option 'table' for this command
 #
@@ -158,12 +203,12 @@ entity jpa --class ~.domain.ReadOnlyEntity --table readonly_table --identifierCo
 
 
 #====================================================================================================================
-# TEST 11: Create entity without required dynamic mandatory option "identifierColumn", based by settings
+# TEST 14: Create entity without required dynamic mandatory option "identifierColumn", based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option 
 #         "identifierColumn", based on project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --sequenceName sequence
+#entity jpa --class ~.domain.Entity2 --table entity_table --sequenceName sequence --generationType SEQUENCE
 #      
 # Output: You must specify option 'identifierColumn' for this command
 #
@@ -172,12 +217,12 @@ entity jpa --class ~.domain.ReadOnlyEntity --table readonly_table --identifierCo
 
 
 #====================================================================================================================
-# TEST 12: Create entity without required dynamic mandatory option "sequenceName", based by settings
+# TEST 15: Create entity without required dynamic mandatory option "sequenceName", based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "sequenceName", 
 #         based on project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --generationType SEQUENCE
 #      
 # Output: You must specify option 'sequenceName' for this command
 #
@@ -186,7 +231,36 @@ entity jpa --class ~.domain.ReadOnlyEntity --table readonly_table --identifierCo
 
 
 #====================================================================================================================
-# TEST 13: Create string field without required dynamic mandatory options, based by settings
+# TEST 16: Create entity without required dynamic mandatory option "generationType", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "generationType", 
+#         based on project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence
+#      
+# Output: You must specify option 'generationType' for this command
+#
+# Result: Stop command execution with a message requiring "generationType" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 17: Create entity with a wrong value for "generationType"
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "generationType", 
+#         based on project settings, is provided with a wrong value.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence --generationType UNKNOWN
+#      
+# Output: java.lang.IllegalArgumentException: Failed to convert 'UNKNOWN' to type GenerationType for option 'generationType'
+#         No enum constant org.springframework.roo.addon.jpa.addon.GenerationType.UNKNOWN
+#
+# Result: Stop command execution with a message requiring "generationType" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 18: Create string field without required dynamic mandatory options, based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "field string" command execution is aborted when required dynamic mandatory option "column", based 
 #         on project settings, is not provided.
