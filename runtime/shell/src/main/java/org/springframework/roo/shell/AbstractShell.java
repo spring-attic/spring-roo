@@ -285,7 +285,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
       return true;
     } catch (final RuntimeException e) {
-      e.printStackTrace();
+      logger.warning(String.format("ERROR: Previous command cannot be executed dued to %s",
+          e.getMessage()));
       setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
       try {
         // ROO-3581: When command fails, execute command listener FAILS
