@@ -13,10 +13,20 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 
 /**
+ * This class is based on OrderBySource.java class from Spring Data commons project. 
+ * 
+ * It has some little changes to be able to work properly on Spring Roo project
+ * and make easy Spring Data query parser.
+ * 
+ * Get more information about original class on:
+ * 
+ * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/OrderBySource.java
+ * 
  * Represents an order clause, which is set after {@literal OrderBy} token. 
  * It expects the last part of the query to be given and supports order by several properties ending with its sorting {@link Direction}. 
  * 
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 2.0
  */
 public class OrderBySource {
@@ -30,19 +40,24 @@ public class OrderBySource {
   private final List<Order> orders;
   private List<FieldMetadata> fields;
 
+  private final PartTree currentPartTreeInstance;
+
 
   /**
    * Creates a new {@link OrderBySource} for the given clause, checking the property referenced exists on the given
    * entity properties.
    * 
+   * @param partTree PartTree instance where current OrderBySource will be defined
    * @param clause must not be {@literal null}.
    * @param fields entity properties must not be {@literal null}.
    */
-  public OrderBySource(String clause, List<FieldMetadata> fields) {
+  public OrderBySource(PartTree partTree, String clause, List<FieldMetadata> fields) {
 
-    Validate.notNull(clause, "Clause can not be null");
-    Validate.notNull(fields, "Entity properties can not be null");
+    Validate.notNull(partTree, "ERROR: PartTree instance is necessary to generate OrderBy");
+    Validate.notNull(clause, "ERROR: Clause can not be null");
+    Validate.notNull(fields, "ERROR: Entity properties can not be null");
 
+    this.currentPartTreeInstance = partTree;
     this.orders = new ArrayList<Order>();
     this.fields = fields;
 
@@ -70,7 +85,8 @@ public class OrderBySource {
 
       Direction direction =
           StringUtils.isNotBlank(directionString) ? Direction.fromString(directionString) : null;
-      this.orders.add(new Order(direction, PartTree.extractValidProperty(propertyString, fields)));
+      this.orders.add(new Order(direction, currentPartTreeInstance.extractValidProperty(
+          propertyString, fields)));
     }
   }
 
@@ -119,7 +135,8 @@ public class OrderBySource {
 
       // If property is a reference to other entity, related entity properties can be added
       List<FieldMetadata> fields =
-          PartTree.getValidProperties(lastOrder.getProperty().getLeft().getFieldType());
+          currentPartTreeInstance.getValidProperties(lastOrder.getProperty().getLeft()
+              .getFieldType());
 
       if (fields != null) {
         for (FieldMetadata field : fields) {

@@ -2,12 +2,14 @@ package org.springframework.roo.addon.finder.addon;
 
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -15,12 +17,14 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.finder.addon.parser.FinderAutocomplete;
 import org.springframework.roo.addon.finder.addon.parser.PartTree;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ProjectOperations;
@@ -36,12 +40,17 @@ import org.springframework.roo.support.logging.HandlerUtils;
 /**
  * Commands for the 'finder' add-on to be used by the ROO shell.
  * 
+ * These commands allow developers to generate Spring Data finders 
+ * on existing repositories.
+ * 
  * @author Stefan Schmidt
+ * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
 @Service
-public class FinderCommands implements CommandMarker {
+public class FinderCommands implements CommandMarker, FinderAutocomplete {
 
   private static final Logger LOGGER = HandlerUtils.getLogger(FinderCommands.class);
 
@@ -50,36 +59,44 @@ public class FinderCommands implements CommandMarker {
 
   @Reference
   private FinderOperations finderOperations;
-
   private TypeLocationService typeLocationService;
   private TypeManagementService typeManagementService;
   private MemberDetailsScanner memberDetailsScanner;
-  private Map<String, MemberDetails> memberDetails;
   private ProjectOperations projectOperations;
+
+  // Map where entity details will be cached
+  private Map<JavaType, MemberDetails> entitiesDetails;
+
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
-    memberDetails = new HashMap<String, MemberDetails>();
+    entitiesDetails = new HashMap<JavaType, MemberDetails>();
+  }
+
+  @CliAvailabilityIndicator({"finder add"})
+  public boolean isFinderCommandAvailable() {
+    return finderOperations.isFinderInstallationPossible();
   }
 
   @CliOptionVisibilityIndicator(command = "finder add", params = {"name"},
-      help = "name parameter is not available if class parameter is not specified.")
+      help = "You must define --class to be able to define --name parameter.")
   public boolean isNameVisible(ShellContext shellContext) {
 
+    // Getting all defined parameters on autocompleted command
     Map<String, String> params = shellContext.getParameters();
 
-    // If mandatory parameter class is not defined, name parameter is not
-    // visible
+    // If mandatory parameter class is not defined, name parameter should not
+    // be visible
     String entity = params.get("class");
     if (StringUtils.isBlank(entity)) {
       return false;
     }
-    try {
-      if (getMemberDetails(entity) == null) {
-        return false;
-      }
-    } catch (Exception e) {
-      LOGGER.warning(e.getLocalizedMessage());
+
+    // Get current entity member details to check if is a valid Spring Roo entity
+    MemberDetails entityDetails = getEntityDetails(entity);
+
+    // If not entity details, is not a valid entity, so --name parameter is not visible
+    if (entityDetails == null) {
       return false;
     }
 
@@ -90,20 +107,32 @@ public class FinderCommands implements CommandMarker {
       command = "finder add",
       includeSpaceOnFinish = false,
       param = "name",
-      help = "The option 'name' constructs a Spring Data query based on what is already defined. Please, write a right value for 'name'")
+      help = "--name parameter must follow Spring Data nomenclature. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)")
   public List<String> returnOptions(ShellContext shellContext) {
 
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Getting all defined parameters on autocompleted command
     Map<String, String> contextParameters = shellContext.getParameters();
+
+    // Getting current name value
     String name = contextParameters.get("name");
 
     try {
-      PartTree part =
-          new PartTree(name, getMemberDetails(contextParameters.get("class")),
-              getTypeLocationService());
-      return part.getOptions();
+
+      // Use PartTree class to obtain all possible values
+      PartTree part = new PartTree(name, getEntityDetails(contextParameters.get("class")), this);
+
+      // Check if part has value
+      if (part != null) {
+        allPossibleValues = part.getOptions();
+      }
+
+      return allPossibleValues;
+
     } catch (Exception e) {
       LOGGER.warning(e.getLocalizedMessage());
-      return null;
+      return allPossibleValues;
     }
 
   }
@@ -114,29 +143,28 @@ public class FinderCommands implements CommandMarker {
       unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT,
       help = "The entity for which the finders are generated") final JavaType typeName,
       @CliOption(key = "name", mandatory = true,
-          help = "The finder string defined as a Spring Data query") final String finderName) {
+          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName) {
 
-    PartTree partTree =
-        new PartTree(finderName, getMemberDetails(typeName.getFullyQualifiedTypeName()),
-            getTypeLocationService());
+    // Check if specified finderName follows Spring Data nomenclature
+    PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(typeName), this);
 
-    if (!partTree.isValid()) {
-      LOGGER.warning("Query not valid");
-    }
+    // If generated partTree is not valid, shows an exception
+    Validate
+        .isTrue(
+            partTree.isValid(),
+            "--name parameter must follow Spring Data nomenclature. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)");
+
+    finderOperations.installFinder(typeName, finderName);
 
   }
 
-  @CliAvailabilityIndicator({"finder add"})
-  public boolean isFinderCommandAvailable() {
-    return finderOperations.isFinderInstallationPossible();
-  }
-
-  public MemberDetails getMemberDetails(String entityName) {
-
-    if (memberDetails.containsKey(entityName)) {
-      return memberDetails.get(entityName);
-    }
-
+  /**
+   * Method that obtains entity details from entity name
+   * 
+   * @param entityName
+   * @return MemberDetails
+   */
+  public MemberDetails getEntityDetails(String entityName) {
     // Getting JavaType for entityName
     // Check first if contains base package (~)
     if (entityName.contains("~")) {
@@ -146,23 +174,34 @@ public class FinderCommands implements CommandMarker {
     }
     JavaType entityType = new JavaType(entityName);
 
+    return getEntityDetails(entityType);
 
-    // We know the file exists, as there's already entity metadata for it
-    final ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(entityType);
+  }
 
-    if (cid == null) {
-      throw new RuntimeException("ERROR: Cannot locate source for '" + entityType + "'");
+  @Override
+  public MemberDetails getEntityDetails(JavaType entity) {
+
+    Validate.notNull(entity, "ERROR: Entity should be provided");
+
+    if (entitiesDetails.containsKey(entity)) {
+      return entitiesDetails.get(entity);
     }
 
-    if (cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY) == null) {
-      LOGGER.warning("Unable to find the entity annotation on '" + entityType + "'");
+    // We know the file exists, as there's already entity metadata for it
+    final ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(entity);
+
+    if (cid == null) {
       return null;
     }
 
-    memberDetails.put(entityName,
-        getMemberDetailsScanner().getMemberDetails(getClass().getName(), cid));
-    return memberDetails.get(entityName);
+    if (cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY) == null) {
+      LOGGER.warning("Unable to find the entity annotation on '" + entity + "'");
+      return null;
+    }
 
+    entitiesDetails.put(entity,
+        getMemberDetailsScanner().getMemberDetails(getClass().getName(), cid));
+    return entitiesDetails.get(entity);
   }
 
   public ProjectOperations getProjectOperations() {
@@ -173,7 +212,8 @@ public class FinderCommands implements CommandMarker {
             this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 
         for (ServiceReference<?> ref : references) {
-          return (ProjectOperations) this.context.getService(ref);
+          projectOperations = (ProjectOperations) this.context.getService(ref);
+          return projectOperations;
         }
 
         return null;
@@ -195,7 +235,8 @@ public class FinderCommands implements CommandMarker {
             this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
 
         for (ServiceReference<?> ref : references) {
-          return (TypeLocationService) this.context.getService(ref);
+          typeLocationService = (TypeLocationService) this.context.getService(ref);
+          return typeLocationService;
         }
 
         return null;
@@ -217,7 +258,8 @@ public class FinderCommands implements CommandMarker {
             this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
 
         for (ServiceReference<?> ref : references) {
-          return (TypeManagementService) this.context.getService(ref);
+          typeManagementService = (TypeManagementService) this.context.getService(ref);
+          return typeManagementService;
         }
 
         return null;
@@ -240,7 +282,8 @@ public class FinderCommands implements CommandMarker {
             this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
 
         for (ServiceReference<?> ref : references) {
-          return (MemberDetailsScanner) this.context.getService(ref);
+          memberDetailsScanner = (MemberDetailsScanner) this.context.getService(ref);
+          return memberDetailsScanner;
         }
 
         return null;

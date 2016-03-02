@@ -3,27 +3,32 @@ package org.springframework.roo.addon.finder.addon.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.model.JavaType;
 
 /**
+ * This class is based on Part.java class from Spring Data commons project.
+ * 
+ * It has some little changes to be able to work properly on Spring Roo project
+ * and make easy Spring Data query parser.
+ * 
+ * Get more information about original class on:
+ * 
+ * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/Part.java
+ * 
  * Represents a single search expression (which are joined using And/Or operators).
  * This expression needs a property to define the condition. 
  * Optionally, an operator can be set after the property to perform an operation over it. 
  * Furthermore, {@literal IgnoreCase} option is available to be added to any property.
  * 
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 2.0
  */
 public class Part {
@@ -40,25 +45,31 @@ public class Part {
 
   private IgnoreCaseType ignoreCase = IgnoreCaseType.NEVER;
 
-
   // Stores which ignore case option (IgnoreCase or IgnoringCase) has been used
   private String ignoreCaseString = "";
 
-
+  private final PartTree currentPartTreeInstance;
 
   /**
    * Creates a new {@link Part} from a condition stored into source .
    * 
+   * @param partTree PartTree instance where current Part will be defined
    * @param source the search criteria
    * @param fields entity properties
    */
-  public Part(String source, List<FieldMetadata> fields) {
+  public Part(PartTree partTree, String source, List<FieldMetadata> fields) {
+
+    Validate.notNull(partTree, "ERROR: PartTree instance is necessary to generate Part.");
+    Validate.notNull(source, "ERROR: Source can not be null");
+    Validate.notNull(fields, "ERROR: Entity properties can not be null");
+
+    this.currentPartTreeInstance = partTree;
 
     // Extract and remove IgnoreCase option from source
     String partToUse = detectAndSetIgnoreCase(source);
 
     // Extract property
-    this.property = PartTree.extractValidProperty(partToUse, fields);
+    this.property = currentPartTreeInstance.extractValidProperty(partToUse, fields);
 
     // Remove property from source to process the operator
     if (property != null) {

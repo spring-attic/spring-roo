@@ -82,6 +82,19 @@
 			<artifactId>org.springframework.roo.addon.finder.annotations</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<!-- Test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+         <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>

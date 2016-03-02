@@ -8,14 +8,20 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 
 /**
+ * This class is based on PartTree.java class from Spring Data commons project.
+ * 
+ * It has some little changes to be able to work properly on Spring Roo project
+ * and make easy Spring Data query parser.
+ * 
+ * Get more information about original class on:
+ * 
+ * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/PartTree.java
+ * 
  * Class to parse a {@link String} into a {@link Subject} and a {@link Predicate}.
  * Takes a entity details to extract the
  * properties of the domain class. The {@link PartTree} can then be used to
@@ -23,13 +29,14 @@ import org.springframework.roo.model.RooJavaType;
  * query execution.
  * 
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 2.0
  */
 public class PartTree {
 
   private static final String KEYWORD_TEMPLATE = "(%s)(?=(\\p{Lu}|\\z))";
-  private static final Pattern PREFIX_TEMPLATE = Pattern.compile("^(" + Subject.QUERY_PATTERN
-      + ")((\\p{Lu}.*?))??By");
+  private static final Pattern PREFIX_TEMPLATE =
+      Pattern.compile("^(" + Subject.QUERY_PATTERN + ")((\\p{Lu}.*?))??By");
 
   /**
    * Subject is delimited by the query prefix (find, read or query) and {@literal By} delimiter, for
@@ -49,7 +56,10 @@ public class PartTree {
    */
   private final String originalQuery;
 
-  private static TypeLocationService typeLocationService;
+  /**
+   * Interface that provides operations to obtain useful information during finder autocomplete 
+   */
+  private final FinderAutocomplete finderAutocomplete;
 
   /**
    * Creates a new {@link PartTree} by parsing the given {@link String}.
@@ -59,29 +69,29 @@ public class PartTree {
    * @param memberDetails
    *            the member details of the entity class to extract the fields
    *            to expose them as options.
-   * @param typeLocationService the service used to inspect the properties of the entities that are related with the entity. If it is null, only properties which belong to entity class are shown as options
+   * @param finderAutocomplete interface that provides operations to obtain useful information during autocomplete 
    */
   public PartTree(String source, MemberDetails memberDetails,
-      TypeLocationService typeLocationService) {
+      FinderAutocomplete finderAutocomplete) {
 
     Validate.notNull(source, "Source must not be null");
     Validate.notNull(memberDetails, "MemberDetails must not be null");
+
+    this.originalQuery = source;
+    this.finderAutocomplete = finderAutocomplete;
 
     // Extracts entity fields removing persistence fields and list type
     // fields
     List<FieldMetadata> fields = getValidProperties(memberDetails.getFields());
 
-    this.originalQuery = source;
-    this.typeLocationService = typeLocationService;
-
     Matcher matcher = PREFIX_TEMPLATE.matcher(source);
 
     if (!matcher.find()) {
-      this.subject = new Subject(source, fields);
-      this.predicate = new Predicate("", fields);
+      this.subject = new Subject(this, source, fields);
+      this.predicate = new Predicate(this, "", fields);
     } else {
-      this.subject = new Subject(matcher.group(0), fields);
-      this.predicate = new Predicate(source.substring(matcher.group().length()), fields);
+      this.subject = new Subject(this, matcher.group(0), fields);
+      this.predicate = new Predicate(this, source.substring(matcher.group().length()), fields);
     }
 
   }
@@ -109,7 +119,7 @@ public class PartTree {
    * @param memberDetails
    * @return entity properties which type is supported  by SpringData
    */
-  private static List<FieldMetadata> getValidProperties(List<FieldMetadata> fields) {
+  private List<FieldMetadata> getValidProperties(List<FieldMetadata> fields) {
 
     List<FieldMetadata> validProperties = new ArrayList<FieldMetadata>();
 
@@ -138,20 +148,19 @@ public class PartTree {
    * expressions. Persistence fields are excluded, and multivalued fields
    * are removed since Spring Data does not supports operations with them.
    * 
-   * If typeLocationService is not defined or javaType does not belongs to a valid entity, returns {@literal null}
-   * 
    * @param javaType
    * @return entity properties which type is supported  by SpringData
    */
-  public static List<FieldMetadata> getValidProperties(JavaType javaType) {
+  public List<FieldMetadata> getValidProperties(JavaType javaType) {
 
-    if (typeLocationService == null || javaType == null) {
-      return null;
-    }
-    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
+    if (finderAutocomplete != null) {
 
-    if (cid != null && cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-      return getValidProperties((List<FieldMetadata>) cid.getDeclaredFields());
+      final MemberDetails entityDetails = finderAutocomplete.getEntityDetails(javaType);
+
+      if (entityDetails != null) {
+        return getValidProperties((List<FieldMetadata>) entityDetails.getFields());
+      }
+
     }
 
     return null;
@@ -168,7 +177,7 @@ public class PartTree {
    * @param fields entity properties
    * @return Pair that contains the property metadata and the property name.
    */
-  public static Pair<FieldMetadata, String> extractValidProperty(String rawProperty,
+  public Pair<FieldMetadata, String> extractValidProperty(String rawProperty,
       List<FieldMetadata> fields) {
 
     if (StringUtils.isBlank(rawProperty) || fields == null) {
@@ -185,9 +194,8 @@ public class PartTree {
         break;
       }
       if (rawProperty.startsWith(field.getFieldName().toString())) {
-        if (tempField == null
-            || tempField.getFieldName().toString().length() < field.getFieldName().toString()
-                .length())
+        if (tempField == null || tempField.getFieldName().toString().length() < field.getFieldName()
+            .toString().length())
           tempField = field;
       }
     }
@@ -199,10 +207,9 @@ public class PartTree {
     // If extracted property is a reference to other entity, the fields of this related entity are inspected to check if extractProperty contains information about them 
     Pair<FieldMetadata, String> related = extractRelatedEntityValidProperty(rawProperty, tempField);
     if (related != null) {
-      return Pair.of(
-          related.getLeft() == null ? tempField : related.getLeft(),
-          StringUtils.capitalize(tempField.getFieldName().toString()).concat(
-              StringUtils.capitalize(related.getRight())));
+      return Pair.of(related.getLeft() == null ? tempField : related.getLeft(),
+          StringUtils.capitalize(tempField.getFieldName().toString())
+              .concat(StringUtils.capitalize(related.getRight())));
     }
 
     return Pair.of(tempField, StringUtils.capitalize(tempField.getFieldName().toString()));
@@ -215,8 +222,8 @@ public class PartTree {
    * @param referenceProperty property that represents a relation with other entity.
    * @return Pair that contains a property metadata and its name.
    */
-  private static Pair<FieldMetadata, String> extractRelatedEntityValidProperty(
-      String extractProperty, FieldMetadata referenceProperty) {
+  private Pair<FieldMetadata, String> extractRelatedEntityValidProperty(String extractProperty,
+      FieldMetadata referenceProperty) {
 
     if (StringUtils.isBlank(extractProperty) || referenceProperty == null) {
       return null;
@@ -332,6 +339,27 @@ public class PartTree {
    */
   public final static boolean matches(String query, Pattern pattern) {
     return query == null ? false : pattern.matcher(query).find();
+  }
+
+  /**
+   * Method that obtains the return type of current finder 
+   * 
+   * @return JavaType with return type
+   */
+  public JavaType getReturnType() {
+    // TODO: This method should be implemented to use finder name to obtain returned JavaType
+    return JavaType.STRING;
+  }
+  
+  /**
+   * Method that obtains the necessary parameters of current finder
+   * 
+   * @return List that contains all necessary parameters
+   */
+  public List<FinderParameter> getParameters(){
+    // TODO: This method should be implemented to use finder name to obtain necessary parameters
+    List<FinderParameter> finderParameters = new ArrayList<FinderParameter>();
+    return finderParameters;
   }
 
 

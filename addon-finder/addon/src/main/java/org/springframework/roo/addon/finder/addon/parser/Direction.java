@@ -2,7 +2,6 @@ package org.springframework.roo.addon.finder.addon.parser;
 
 import java.util.Locale;
 
-
 /**
  * Order directions, which can be Ascending (from the smallest to the largest) or Descending (from the largest to the smallest).
  * 

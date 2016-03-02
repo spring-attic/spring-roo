@@ -13,11 +13,21 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 
 
 /**
+ * This class is based on Subject inner class located inside PartTree.java class from Spring Data commons project.
+ * 
+ * It has some little changes to be able to work properly on Spring Roo project
+ * and make easy Spring Data query parser.
+ * 
+ * Get more information about original class on:
+ * 
+ * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/PartTree.java
+ * 
  * Represents the subject part of the query. A query subject is enclosed between a database operation (query, read or find) and "By" token.
  *  E.g. {@code findDistinctUserByNameOrderByAge} would have the subject {@code DistinctUser}.
  *  Subject can have optional expressions like Distinct, limiting expressions such as First and Top, and a property which will be the result to return
  * 
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 2.0
  */
 public class Subject {
@@ -43,16 +53,21 @@ public class Subject {
   private Pair<FieldMetadata, String> property = null;
   private List<FieldMetadata> fields;
 
+  private final PartTree currentPartTreeInstance;
+
   /**
    * Extracts the subject expressions from a source and builds a structure which represents it.
    * 
+   * @param partTree PartTree instance where current Subject will be defined
    * @param source subject query
    * @param fields entity properties
    */
-  public Subject(String source, List<FieldMetadata> fields) {
+  public Subject(PartTree partTree, String source, List<FieldMetadata> fields) {
 
-    Validate.notNull(source, "Subject should not be null");
+    Validate.notNull(partTree, "ERROR: PartTree instance is necessary to generate Subject");
+    Validate.notNull(source, "ERROR: Subject source must not be null.");
 
+    this.currentPartTreeInstance = partTree;
     this.fields = fields;
     this.isComplete = isComplete(source);
 
@@ -86,15 +101,14 @@ public class Subject {
    * @param property
    * @return Pair of property metadata and property name
    */
-  public static Pair<FieldMetadata, String> extractValidField(String source,
-      List<FieldMetadata> fields) {
+  public Pair<FieldMetadata, String> extractValidField(String source, List<FieldMetadata> fields) {
     if (source == null) {
       return null;
     }
 
     source = StringUtils.substringBefore(source, "By");
 
-    return PartTree.extractValidProperty(source, fields);
+    return currentPartTreeInstance.extractValidProperty(source, fields);
   }
 
   /**
@@ -218,7 +232,8 @@ public class Subject {
 
     } else {
       // If the property is a reference to other entity, related entity properties are shown
-      List<FieldMetadata> fields = PartTree.getValidProperties(property.getLeft().getFieldType());
+      List<FieldMetadata> fields =
+          currentPartTreeInstance.getValidProperties(property.getLeft().getFieldType());
 
       if (fields != null) {
         for (FieldMetadata relatedEntityfield : fields) {

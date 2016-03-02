@@ -1,15 +1,24 @@
 package org.springframework.roo.addon.finder.addon.parser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 
 /**
+ * This class is based on Predicate inner class located inside PartTree.java class from Spring Data commons project.
+ * 
+ * It has some little changes to be able to work properly on Spring Roo project
+ * and make easy Spring Data query parser.
+ * 
+ * Get more information about original class on:
+ * 
+ * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/PartTree.java
+ * 
  * Represents the predicate part of a query.
  * Predicate is used to define expressions or conditions on entity properties and concatenate them with And/Or. 
  * It is composed by {@link OrPart}s consisting of simple {@link Part} instances in turn. 
@@ -17,6 +26,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
  * These conditions are properties combined with operators.  
  * 
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 2.0
  */
 
@@ -30,6 +40,7 @@ public class Predicate {
   private boolean alwaysIgnoreCase;
   private List<FieldMetadata> fields;
   private String alwaysIgnoreCaseString = "";
+  private final PartTree currentPartTreeInstance;
 
   private static final Pattern COMPLETE_QUERY_TEMPLATE =
       Pattern
@@ -39,11 +50,16 @@ public class Predicate {
   /**
    * Builds a predicate from a source by creating search expressions and the order clause.
    * 
+   * @param partTree PartTree instance where current Predicate will be defined
    * @param source
    * @param fields
    */
-  public Predicate(String source, List<FieldMetadata> fields) {
+  public Predicate(PartTree partTree, String source, List<FieldMetadata> fields) {
 
+    Validate.notNull(partTree, "ERROR: PartTree instance is necessary to generate Subject");
+    Validate.notNull(source, "ERROR: Predicate source must not be null.");
+
+    this.currentPartTreeInstance = partTree;
     this.fields = fields;
 
     // Extracts AllIgnoreCase option and splits predicate between search expressions and order clause
@@ -57,7 +73,8 @@ public class Predicate {
     buildTree(parts[0]);
 
     // Builds order clause
-    this.orderBySource = parts.length == 2 ? new OrderBySource(parts[1], fields) : null;
+    this.orderBySource =
+        parts.length == 2 ? new OrderBySource(currentPartTreeInstance, parts[1], fields) : null;
 
   }
 
@@ -146,7 +163,9 @@ public class Predicate {
           // If the condition has an operator, but it also acts as prefix of other operators, they are included
           List<String> types = lastAnd.getSupportedOperatorsByPrefix(lastAnd.getOperator());
           for (String type : types) {
-            options.add(subject.concat(type));
+            if (StringUtils.isNotBlank(type)) {
+              options.add(subject.concat(type));
+            }
           }
 
         }
@@ -159,7 +178,8 @@ public class Predicate {
         // If the property condition is a reference to other entity, the related entity fields are shown
         if (!lastAnd.hasOperator() && lastAnd.shouldIgnoreCase() != IgnoreCaseType.ALWAYS) {
           List<FieldMetadata> fields =
-              PartTree.getValidProperties(lastAnd.getProperty().getLeft().getFieldType());
+              currentPartTreeInstance.getValidProperties(lastAnd.getProperty().getLeft()
+                  .getFieldType());
 
           if (fields != null) {
             for (FieldMetadata field : fields) {
@@ -210,7 +230,7 @@ public class Predicate {
       if (i > 0 && split[i - 1].length() == 0) {
         throw new RuntimeException("ERROR: Missing expression before Or");
       }
-      nodes.add(new OrPart(split[i], fields));
+      nodes.add(new OrPart(currentPartTreeInstance, split[i], fields));
     }
   }
 

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.finder;
+package org.springframework.roo.addon.finder.addon.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -13,7 +13,6 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.roo.addon.finder.parser.PartTree;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
@@ -28,6 +27,7 @@ import org.springframework.roo.model.JavaType;
  * Unit tests for {@link PartTree}.
  * 
  * @author Paula Navarro
+ * @author Juan Carlos García
  * @since 2.0
  */
 public class PartTreeUnitTest {
@@ -584,7 +584,7 @@ public class PartTreeUnitTest {
         "findByTextIs",
         ArrayUtils.addAll(
             this.STRING_IS_OP,
-            ArrayUtils.addAll(ArrayUtils.addAll(CONJUCTIONS, ""),
+            ArrayUtils.addAll(CONJUCTIONS,
                 ArrayUtils.addAll(ArrayUtils.addAll(IGNORE_CASE, ALL_IGNORE_CASE), "OrderBy"))));
 
   }
