@@ -37,7 +37,7 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
   @AutoPopulate
   private String sequenceName = null;
   @AutoPopulate
-  private String generationType = "";
+  private String identifierStrategy = "";
   @AutoPopulate
   private String table = "";
   @AutoPopulate
@@ -96,8 +96,8 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
     return sequenceName;
   }
 
-  public String getGenerationType() {
-    return generationType;
+  public String getIdentifierStrategy() {
+    return identifierStrategy;
   }
 
   public String getTable() {

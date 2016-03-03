@@ -329,17 +329,17 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Compute the column name, as required
     if (!hasIdClass) {
       if (!"".equals(annotationValues.getSequenceName())) {
-        String generationType = "AUTO";
+        String identifierStrategy = "AUTO";
 
         // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
-        if (!"".equals(annotationValues.getGenerationType())) {
-          generationType = annotationValues.getGenerationType();
+        if (!"".equals(annotationValues.getIdentifierStrategy())) {
+          identifierStrategy = annotationValues.getIdentifierStrategy();
         }
 
         // ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE)
         // If the root of the governor declares @Inheritance(strategy =
         // InheritanceType.TABLE_PER_CLASS)
-        if ("AUTO".equals(generationType)) {
+        if ("AUTO".equals(identifierStrategy)) {
           AnnotationMetadata inheritance = governorTypeDetails.getAnnotation(INHERITANCE);
           if (inheritance == null) {
             inheritance = getInheritanceAnnotation();
@@ -352,7 +352,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
               final EnumDetails details = enumAttributeValue.getValue();
               if (details != null && details.getType().equals(INHERITANCE_TYPE)) {
                 if ("TABLE_PER_CLASS".equals(details.getField().getSymbolName())) {
-                  generationType = "TABLE";
+                  identifierStrategy = "TABLE";
                 }
               }
             }
@@ -362,7 +362,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         final AnnotationMetadataBuilder generatedValueBuilder =
             new AnnotationMetadataBuilder(GENERATED_VALUE);
         generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(GENERATION_TYPE,
-            new JavaSymbolName(generationType)));
+            new JavaSymbolName(identifierStrategy)));
 
         if (StringUtils.isNotBlank(annotationValues.getSequenceName())) {
           final String sequenceKey =

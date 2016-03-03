@@ -1,12 +1,12 @@
 package org.springframework.roo.addon.jpa.addon;
 
-public enum GenerationType {
+public enum IdentifierStrategy {
 
   SEQUENCE("SEQUENCE"), TABLE("TABLE"), IDENTITY("IDENTITY"), AUTO("AUTO");
 
   private final String type;
 
-  private GenerationType(final String type) {
+  private IdentifierStrategy(final String type) {
     this.type = type;
   }
 

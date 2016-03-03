@@ -204,15 +204,15 @@ public class JpaCommands implements CommandMarker {
 
   /**
    * ROO-3709: Indicator that checks if exists some project setting that makes
-   * each of the following parameters mandatory: sequenceName, generationType, identifierColumn and table
+   * each of the following parameters mandatory: sequenceName, identifierStrategy, identifierColumn and table
    * 
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
-  @CliOptionMandatoryIndicator(params = {"sequenceName", "generationType", "identifierColumn",
-      "table"}, command = "entity jpa")
+  @CliOptionMandatoryIndicator(params = {"sequenceName", "identifierColumn", "table"},
+      command = "entity jpa")
   public boolean areSchemaObjectNamesRequired(ShellContext shellContext) {
 
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
@@ -285,8 +285,8 @@ public class JpaCommands implements CommandMarker {
           help = "The name used to refer to the entity in queries") final String entityName,
       @CliOption(key = "sequenceName", mandatory = true,
           help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
-      @CliOption(key = "generationType", mandatory = true, specifiedDefaultValue = "AUTO",
-          help = "The generation value strategy to be used") final GenerationType generationType,
+      @CliOption(key = "identifierStrategy", mandatory = false, specifiedDefaultValue = "AUTO",
+          help = "The generation value strategy to be used") final IdentifierStrategy identifierStrategy,
       @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Whether the generated entity should be used for read operations only.") final boolean readOnly,
@@ -341,7 +341,7 @@ public class JpaCommands implements CommandMarker {
     annotationBuilder.add(ROO_TO_STRING_BUILDER);
     annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField,
         identifierColumn, identifierType, versionField, versionColumn, versionType,
-        inheritanceType, mappedSuperclass, entityName, sequenceName, generationType, readOnly));
+        inheritanceType, mappedSuperclass, entityName, sequenceName, identifierStrategy, readOnly));
     if (equals) {
       annotationBuilder.add(ROO_EQUALS_BUILDER);
     }
@@ -388,8 +388,8 @@ public class JpaCommands implements CommandMarker {
       final String identifierColumn, final JavaType identifierType, final String versionField,
       final String versionColumn, final JavaType versionType,
       final InheritanceType inheritanceType, final boolean mappedSuperclass,
-      final String entityName, final String sequenceName, final GenerationType generationType,
-      final boolean readOnly) {
+      final String entityName, final String sequenceName,
+      final IdentifierStrategy identifierStrategy, final boolean readOnly) {
     final AnnotationMetadataBuilder entityAnnotationBuilder =
         new AnnotationMetadataBuilder(ROO_JPA_ENTITY);
 
@@ -435,8 +435,9 @@ public class JpaCommands implements CommandMarker {
     }
 
     // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
-    if (generationType != null) {
-      entityAnnotationBuilder.addStringAttribute("generationType", generationType.getType());
+    if (identifierStrategy != null) {
+      entityAnnotationBuilder
+          .addStringAttribute("identifierStrategy", identifierStrategy.getType());
     }
 
     // ROO-3708: Generate readOnly entities
