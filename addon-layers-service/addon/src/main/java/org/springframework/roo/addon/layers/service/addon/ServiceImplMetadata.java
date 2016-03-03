@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
+import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.annotations.RooServiceImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -21,7 +23,6 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
@@ -38,8 +39,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private static final String PROVIDES_TYPE_STRING = ServiceImplMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
-
-  private ImportRegistrationResolver importResolver;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -73,17 +72,17 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
    * @param serviceInterface the JavaType of service interface
    * @param repository the javatype of related repository
+   * @param entity the entity that is managed by current service
    * @param readOnly boolean that specifies if related entity is readOnly or not
+   * @param finders list of finders to be included
    */
   public ServiceImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType serviceInterface,
       final ClassOrInterfaceTypeDetails repository, final JavaType entity,
-      final JavaType identifierType, final boolean readOnly) {
+      final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(serviceInterface, "ERROR: Service interface required");
-
-    this.importResolver = builder.getImportRegistrationResolver();
 
     // Get service that needs to be implemented
     ensureGovernorImplements(serviceInterface);
@@ -109,6 +108,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
               new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName("repository"),
               repository.getType());
       builder.addField(repositoryFieldMetadata);
+
     }
 
     // All services should include constructor
@@ -126,6 +126,11 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       builder.addMethod(getDeleteMethod(identifierType, repository.getType()));
       builder.addMethod(getSaveBatchMethod(entity, repository.getType()));
       builder.addMethod(getDeleteBatchMethod(entity, identifierType, repository.getType()));
+    }
+
+    // Generating finders
+    for (FinderMethod finder : finders) {
+      builder.addMethod(getFinderMethod(finder, repository.getType()));
     }
 
     // Build the ITD
@@ -441,6 +446,49 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
         new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
     transactionalAnnotation.addBooleanAttribute("readOnly", false);
     methodBuilder.addAnnotation(transactionalAnnotation);
+
+    return methodBuilder; // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Method that generates finder method on current interface
+   * 
+   * @param finderMethod
+   * @return
+   */
+  private MethodMetadataBuilder getFinderMethod(FinderMethod finderMethod, JavaType repository) {
+
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    String parameters = "";
+
+    for (FinderParameter param : finderMethod.getParameters()) {
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(param.getType()));
+      parameterNames.add(param.getName());
+      parameters = parameters.concat(param.getName().getSymbolName()).concat(", ");
+    }
+
+    // Remove last comma
+    if (parameters.length() > 0) {
+      parameters = parameters.substring(0, parameters.length() - 2);
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    if (repository != null) {
+      bodyBuilder.appendFormalLine(String.format("return repository.%s(%s);",
+          finderMethod.getMethodName(), parameters));
+    } else {
+      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethod.getMethodName(),
+            finderMethod.getReturnType(), parameterTypes, parameterNames, bodyBuilder);
 
     return methodBuilder; // Build and return a MethodMetadata
     // instance

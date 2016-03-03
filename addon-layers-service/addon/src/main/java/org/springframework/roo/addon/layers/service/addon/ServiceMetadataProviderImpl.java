@@ -2,14 +2,20 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.finder.addon.FinderMetadata;
+import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -24,6 +30,7 @@ import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadat
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -170,8 +177,55 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
       readOnly = true;
     }
 
+    // Getting associated repository
+    JavaType repository = null;
+    Set<ClassOrInterfaceTypeDetails> repositories =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA);
+    for (ClassOrInterfaceTypeDetails repo : repositories) {
+      AnnotationAttributeValue<JavaType> entityAttr =
+          repo.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
+      if (entityAttr != null && entityAttr.getValue().equals(entity)) {
+        repository = repo.getType();
+      }
+    }
+
+    // Check if we have a valid repository
+    Validate
+        .notNull(
+            repository,
+            String
+                .format(
+                    "ERROR: You must generate some @RooJpaRepository for entity '%s' to be able to generate services",
+                    entity.getSimpleTypeName()));
+
+    // Getting finders to be included on current service
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
+    final String finderMetadataKey = FinderMetadata.createIdentifier(repository, logicalPath);
+    registerDependency(finderMetadataKey, metadataIdentificationString);
+    final FinderMetadata finderMetadata =
+        (FinderMetadata) getMetadataService().get(finderMetadataKey);
+
+    List<FinderMethod> finders = new ArrayList<FinderMethod>();
+    if (finderMetadata != null) {
+      finders = finderMetadata.getFinders();
+    }
+
     return new ServiceMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, entity, identifierType, readOnly);
+        governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders);
+  }
+
+  private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
+
+    if (getMetadataDependencyRegistry() != null
+        && StringUtils.isNotBlank(upstreamDependency)
+        && StringUtils.isNotBlank(downStreamDependency)
+        && !upstreamDependency.equals(downStreamDependency)
+        && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(
+            MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
+      getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
+    }
   }
 
   public String getProvidesType() {

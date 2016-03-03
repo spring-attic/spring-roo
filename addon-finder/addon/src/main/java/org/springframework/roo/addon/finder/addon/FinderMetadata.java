@@ -32,6 +32,8 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
+  private List<FinderMethod> finders = new ArrayList<FinderMethod>();
+
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
   }
@@ -72,7 +74,11 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
       final FinderAnnotationValues annotationValues, List<FinderMethod> finders) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
+    Validate.notEmpty(finders,
+        "ERROR: You should provide a list of finders on @RooFinder annotation");
     Validate.notNull(annotationValues, "Annotation values required");
+
+    this.finders = finders;
 
     // Including finders methods
     for (FinderMethod finderMethod : finders) {
@@ -108,6 +114,10 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
     return methodBuilder; // Build and return a MethodMetadata
     // instance
+  }
+
+  public List<FinderMethod> getFinders() {
+    return this.finders;
   }
 
   @Override

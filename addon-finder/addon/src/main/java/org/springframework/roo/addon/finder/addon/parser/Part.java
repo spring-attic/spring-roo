@@ -103,8 +103,9 @@ public class Part {
     if (matcher.find()) {
       ignoreCase = IgnoreCaseType.ALWAYS;
       ignoreCaseString = matcher.group(0);
-      result = expression.substring(0, matcher.start())
-          + expression.substring(matcher.end(), expression.length());
+      result =
+          expression.substring(0, matcher.start())
+              + expression.substring(matcher.end(), expression.length());
     }
 
     return result;
@@ -307,7 +308,7 @@ public class Part {
 
     // Extract the number of operator parameters
     if (!hasOperator()) {
-      
+
       // By default, if there is not an explicit operator, Is operation is performed
       arguments = Type.SIMPLE_PROPERTY.getNumberOfArguments();
     } else {
@@ -321,9 +322,10 @@ public class Part {
     if (type == Type.IN || type == Type.NOT_IN) {
 
       name = name.concat("List");
-      JavaType listType = new JavaType("java.util.List", 0, DataType.TYPE, null,
-          Arrays.asList(new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(),
-              DataType.TYPE, javaType.getArgName(), javaType.getParameters())));
+      JavaType listType =
+          new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(new JavaType(
+              javaType.getFullyQualifiedTypeName(), javaType.getArray(), DataType.TYPE, javaType
+                  .getArgName(), javaType.getParameters())));
 
       parameters.add(new FinderParameter(listType, new JavaSymbolName(name)));
 
@@ -336,8 +338,8 @@ public class Part {
         if (type.getNumberOfArguments() > 1) {
           suffix = String.valueOf(i + 1);
         }
-        parameters.add(new FinderParameter(property.getLeft().getFieldType(),
-            new JavaSymbolName(name.concat(suffix))));
+        parameters.add(new FinderParameter(property.getLeft().getFieldType(), new JavaSymbolName(
+            name.concat(suffix))));
 
       }
     }

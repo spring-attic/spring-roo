@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
+import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -62,14 +64,16 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
-   * @param annotationValues (required)
+   * @param entity entity referenced on interface
    * @param identifierType the type of the entity's identifier field
    *            (required)
-   * @param domainType entity referenced on interface
+   * @param readOnly specifies if current entity is defined as readOnly or not
+   * @param finders list of finders added to current entity
+   * 
    */
   public ServiceMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
-      final JavaType identifierType, final boolean readOnly) {
+      final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -87,6 +91,11 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       builder.addMethod(getDeleteMethod(identifierType));
       builder.addMethod(getSaveBatchMethod(entity));
       builder.addMethod(getDeleteBatchMethod(identifierType));
+    }
+
+    // Generating finders
+    for (FinderMethod finder : finders) {
+      builder.addMethod(getFinderMethod(finder));
     }
 
     // Build the ITD
@@ -276,6 +285,33 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, new JavaSymbolName(
             "delete"), JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
+
+    return methodBuilder; // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Method that generates finder method on current interface
+   * 
+   * @param finderMethod
+   * @return
+   */
+  private MethodMetadataBuilder getFinderMethod(FinderMethod finderMethod) {
+
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    for (FinderParameter param : finderMethod.getParameters()) {
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(param.getType()));
+      parameterNames.add(param.getName());
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT,
+            finderMethod.getMethodName(), finderMethod.getReturnType(), parameterTypes,
+            parameterNames, null);
 
     return methodBuilder; // Build and return a MethodMetadata
     // instance

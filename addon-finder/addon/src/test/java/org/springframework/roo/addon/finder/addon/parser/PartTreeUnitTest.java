@@ -546,7 +546,7 @@ public class PartTreeUnitTest {
 
     assertEqualsParameters(parameters,
         new PartTree("findByTextContaining", memberDetails).getParameters());
-    
+
     parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number")));
     assertEqualsParameters(parameters, new PartTree("findByTextContainingAndNumberIsLessThan",
         memberDetails).getParameters());
@@ -565,7 +565,7 @@ public class PartTreeUnitTest {
 
     assertEqualsParameters(parameters,
         new PartTree("findByNumberBetween", memberDetails).getParameters());
-   parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number3")));
+    parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number3")));
     parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number4")));
 
     assertEqualsParameters(parameters, new PartTree("findByNumberBetweenAndNumberBetween",
@@ -578,18 +578,17 @@ public class PartTreeUnitTest {
 
 
   }
-  
+
   @Test
   public void validateEmptyOperatorParameters() throws Exception {
 
     List<FinderParameter> parameters = new ArrayList<FinderParameter>();
     parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number")));
-    
-    assertEqualsParameters(parameters,
-        new PartTree("findByNumber", memberDetails).getParameters());
+
+    assertEqualsParameters(parameters, new PartTree("findByNumber", memberDetails).getParameters());
     parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number2")));
-    assertEqualsParameters(parameters,
-        new PartTree("findByNumberAndNumberOrderByNumber", memberDetails).getParameters());
+    assertEqualsParameters(parameters, new PartTree("findByNumberAndNumberOrderByNumber",
+        memberDetails).getParameters());
   }
 
   @Test
