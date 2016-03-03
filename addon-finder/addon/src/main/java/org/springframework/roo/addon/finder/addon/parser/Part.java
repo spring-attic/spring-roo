@@ -103,9 +103,8 @@ public class Part {
     if (matcher.find()) {
       ignoreCase = IgnoreCaseType.ALWAYS;
       ignoreCaseString = matcher.group(0);
-      result =
-          expression.substring(0, matcher.start())
-              + expression.substring(matcher.end(), expression.length());
+      result = expression.substring(0, matcher.start())
+          + expression.substring(matcher.end(), expression.length());
     }
 
     return result;
@@ -300,9 +299,19 @@ public class Part {
 
     List<FinderParameter> parameters = new ArrayList<FinderParameter>();
     String suffix = "";
+    int arguments;
 
-    if (!hasOperator() || !hasProperty()) {
+    if (!hasProperty()) {
       return parameters;
+    }
+
+    // Extract the number of operator parameters
+    if (!hasOperator()) {
+      
+      // By default, if there is not an explicit operator, Is operation is performed
+      arguments = Type.SIMPLE_PROPERTY.getNumberOfArguments();
+    } else {
+      arguments = type.getNumberOfArguments();
     }
 
     JavaType javaType = property.getLeft().getFieldType();
@@ -312,24 +321,23 @@ public class Part {
     if (type == Type.IN || type == Type.NOT_IN) {
 
       name = name.concat("List");
-      JavaType listType =
-          new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(new JavaType(
-              javaType.getFullyQualifiedTypeName(), javaType.getArray(), DataType.TYPE, javaType
-                  .getArgName(), javaType.getParameters())));
+      JavaType listType = new JavaType("java.util.List", 0, DataType.TYPE, null,
+          Arrays.asList(new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(),
+              DataType.TYPE, javaType.getArgName(), javaType.getParameters())));
 
       parameters.add(new FinderParameter(listType, new JavaSymbolName(name)));
 
     } else {
 
       // Create a parameter for every argument that operator type needs
-      for (int i = 0; i < type.getNumberOfArguments(); i++) {
+      for (int i = 0; i < arguments; i++) {
 
         // If operator type needs several parameters, we have to distinguish them by adding a counter
         if (type.getNumberOfArguments() > 1) {
           suffix = String.valueOf(i + 1);
         }
-        parameters.add(new FinderParameter(property.getLeft().getFieldType(), new JavaSymbolName(
-            name.concat(suffix))));
+        parameters.add(new FinderParameter(property.getLeft().getFieldType(),
+            new JavaSymbolName(name.concat(suffix))));
 
       }
     }
