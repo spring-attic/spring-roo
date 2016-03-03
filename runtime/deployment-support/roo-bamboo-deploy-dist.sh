@@ -618,6 +618,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
         # Executing tests
 
+	# Repository test
+	load_roo repository-generation-test.roo
+
         # Project Settings tests
         load_roo script project-settings-1.roo
 	      load_roo script project-settings-2.roo

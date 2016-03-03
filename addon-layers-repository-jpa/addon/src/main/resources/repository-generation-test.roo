@@ -1,0 +1,184 @@
+# Setup initial conditions: create project and add persistence.
+project setup --topLevelPackage org.example
+jpa setup --provider HIBERNATE --database ORACLE 
+
+#======================================================================
+# TEST 1:  Create entity                          
+#----------------------------------------------------------------------
+# Goal:    Create an entity with annotation @RooJpaEntity
+#
+entity jpa --class ~.Example
+#      
+# Output:  Created SRC_MAIN_JAVA/org/example/Example.java
+#          Created SRC_MAIN_JAVA/org/example/Example_Roo_Jpa_Entity.aj
+#          Created SRC_MAIN_JAVA/org/example/Example_Roo_ToString.aj
+#
+# Result:  Creates Example class and aspects, and annotates it with 
+#          @RooJpaEntity                                                                 
+#======================================================================
+
+
+#==========================================================================================
+# TEST 2: Create readOnly entity                          
+#------------------------------------------------------------------------------------------
+# Goal:    Create a entity with readOnly option added in its @RooJpaEntity annotation
+#
+entity jpa --class ~.ExampleReadOnly --readOnly
+#      
+# Output:  Created SRC_MAIN_JAVA/org/example/ExampleReadOnly.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleReadOnly_Roo_Jpa_Entity.aj
+#          Created SRC_MAIN_JAVA/org/example/ExampleReadOnly_Roo_ToString.aj
+#
+# Result:  Creates ExampleReadOnly class and aspects, and annotates 
+#          it with @RooJpaEntity(readOnly = true)                                                                   
+#==========================================================================================
+
+#==========================================================================================
+# TEST 3:  Create entity with a sequence name                   
+#--------------------------------------------------------------------
+# Goal:    Create an entity with a specific sequence name
+#
+entity jpa --class ~.ExampleSeqName --sequenceName seq
+#      
+# Output:  Created SRC_MAIN_JAVA/org/example/ExampleSeqName.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleSeqName_Roo_Jpa_Entity.aj
+#          Created SRC_MAIN_JAVA/org/example/ExampleSeqName_Roo_ToString.aj
+#
+# Result:  Creates ExampleSeqName class and aspects. 
+#		   Its Roo_Jpa_Entity aspect is annotated with: 
+#          @SequenceGenerator(name = "exampleSeqNameGen", sequenceName = "seq")
+#		   @GeneratedValue(strategy = GenerationType.AUTO, generator = "exampleSeqNameGen")                                                               
+#==========================================================================================
+
+#==========================================================================================
+# TEST 4:  Create entity with a generation type                   
+#--------------------------------------------------------------------
+# Goal:    Create an entity with a specific generation type 
+#
+entity jpa --class ~.ExampleSeqGenType --generationType SEQUENCE
+#
+# Output:  Created SRC_MAIN_JAVA/org/example/ExampleSeqGenType.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleSeqGenType_Roo_Jpa_Entity.aj
+#          Created SRC_MAIN_JAVA/org/example/ExampleSeqGenType_Roo_ToString.aj
+#
+# Result:  Creates ExampleSeqGenType class and aspects. 
+# 		   Its Roo_Jpa_Entity aspect is annotated with: 
+#          @GeneratedValue(strategy = GenerationType.SEQUENCE)                                                        
+#==========================================================================================
+
+#==========================================================================================
+# TEST 5:  Create entity with a generation type  and sequence name                  
+#------------------------------------------------------------------------------------------
+# Goal:  Create an entity with a specific generation type and sequence name
+#
+entity jpa --class ~.ExampleTableGenTypeSeqName --generationType TABLE --sequenceName seq
+#
+# Output:  Created SRC_MAIN_JAVA/org/example/ExampleTableGenTypeSeqName.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleTableGenTypeSeqName_Roo_Jpa_Entity.aj
+#          Created SRC_MAIN_JAVA/org/example/ExampleTableGenTypeSeqName_Roo_ToString.aj
+#
+# Result:  Creates ExampleTableGenTypeSeqName class and aspects. 
+#          Its Roo_Jpa_Entity aspect is annotated with: 
+#          @SequenceGenerator(name = "exampleTableGenTypeSeqNameGen", sequenceName = "seq")
+#          @GeneratedValue(strategy = GenerationType.TABLE, generator = "exampleTableGenTypeSeqNameGen")                                                      
+#==========================================================================================
+
+
+
+#==========================================================================================
+# TEST 6:  Generate repository                              
+#------------------------------------------------------------------------------------------
+# Goal:    Create repository files
+#
+repository jpa add --entity ~.Example --interface ~.ExampleRepository 
+#      
+# Output:  Created SRC_MAIN_JAVA/org/example/ExampleRepository.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleRepositoryCustom.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleRepositoryImpl.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/ExampleRepository_Roo_Jpa_Repository.aj
+#
+# Result:  Creates repository interface and implementation files                                                                   
+#==========================================================================================
+
+
+#==========================================================================================
+# TEST 7:  Generate readOnly repository                              
+#------------------------------------------------------------------------------------------
+# Goal:    Create repository files
+#
+repository jpa add --entity ~.ExampleReadOnly --interface ~.ExampleReadOnlyRepository 
+#      
+# Output:  Created SRC_MAIN_JAVA/org/example/ExampleReadOnlyRepository.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleReadOnlyRepositoryCustom.java
+#          Created SRC_MAIN_JAVA/org/example/ReadOnlyRepository.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleReadOnlyRepositoryImpl.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleReadOnlyRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/ExampleReadOnlyRepository_Roo_Jpa_Repository.aj
+#
+# Result:  Creates repository interface and implementation files                                                                   
+#==========================================================================================
+
+#==========================================================================================
+# TEST 8:   Generate all repositories                        
+#------------------------------------------------------------------------------------------
+# Goal:  Create repository files for the entities that does not have one
+#
+repository jpa all --package ~.repository
+#      
+# Output:  INFO: Already exists a repository associated to the entity 'Example'. Only one repository per entity is allowed.
+#		   Created SRC_MAIN_JAVA/org/example/repository
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepository.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepositoryCustom.java
+#		   INFO: Already exists a repository associated to the entity 'ExampleReadOnly'. Only one repository per entity is allowed.
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepository.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryCustom.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepository.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryCustom.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepository.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryCustom.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepositoryImpl.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryImpl.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryImpl.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryImpl.java
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepository_Roo_Jpa_Repository.aj
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepository_Roo_Jpa_Repository.aj
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepository_Roo_Jpa_Repository.aj
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepository_Roo_Jpa_Repository.aj
+#
+# Result:  Creates repository interfaces and implementation files                                                                   
+#==========================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following changes must be done manually because they require       #
+# update files manually                                                  #                     
+##########################################################################
+
+#==========================================================================================
+# TEST 9:   Generate repository for a non jpa entity                        
+#------------------------------------------------------------------------------------------
+# Goal:    Generate repository files
+#
+# entity jpa --class ~.ExampleNonJpa
+# Remove @RooJpaEntity from ExampleNonJpa_Roo_Jpa_Entiti.aj 
+# repository jpa add --entity ~.ExampleNonJpa --interface ~.ExampleNonJpaRepository 
+#      
+# Output:  Created SRC_MAIN_JAVA/org/example/ExampleNonJpa.java
+#          Created SRC_MAIN_JAVA/org/example/ExampleNonJpa_Roo_Jpa_Entity.aj
+#          Created SRC_MAIN_JAVA/org/example/ExampleNonJpa_Roo_ToString.aj
+#          Deleted SRC_MAIN_JAVA/org/example/ExampleNonJpa_Roo_Jpa_Entity.aj - not required for governor org.example.ExampleNonJpa
+#          ERROR: Provided entity should be annotated with @RooJpaEntity
+#
+# Result:  A repository has to be associated to an entity annotated
+#          with @RooJpaEntity. If the entity does not have the 
+#          annotation, a message informs us to include it.                                                                 
+#==========================================================================================
+ 
