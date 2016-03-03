@@ -72,6 +72,11 @@ public class PartTree {
   private JavaType returnType;
 
   /**
+   * Parameters of generated finder
+   */
+  List<FinderParameter> finderParameters;
+
+  /**
    * Creates a new {@link PartTree} by parsing the given {@link String}.
    * 
    * @param source
@@ -105,7 +110,10 @@ public class PartTree {
 
     this.returnType = extractReturnType(memberDetails);
 
+    this.finderParameters = predicate.getParameters();
+
   }
+
 
   /**
    * Extracts the java type of the results to be returned by the PartTree query 
@@ -410,7 +418,6 @@ public class PartTree {
    * @return JavaType with return type
    */
   public JavaType getReturnType() {
-    // TODO: This method should be implemented to use finder name to obtain returned JavaType
     return returnType;
   }
 
@@ -420,8 +427,6 @@ public class PartTree {
    * @return List that contains all necessary parameters
    */
   public List<FinderParameter> getParameters() {
-    // TODO: This method should be implemented to use finder name to obtain necessary parameters
-    List<FinderParameter> finderParameters = new ArrayList<FinderParameter>();
     return finderParameters;
   }
 

@@ -35,4 +35,9 @@ public class FinderParameter {
     this.name = name;
   }
 
+  @Override
+  public String toString() {
+    return "FinderParameter [type=" + type + ", name=" + name + "]";
+  }
+
 }

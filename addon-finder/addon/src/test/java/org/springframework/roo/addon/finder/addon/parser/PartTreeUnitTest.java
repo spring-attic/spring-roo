@@ -537,6 +537,60 @@ public class PartTreeUnitTest {
         memberDetails).getReturnType());
   }
 
+
+  @Test
+  public void validateOneParameter() throws Exception {
+
+    List<FinderParameter> parameters = new ArrayList<FinderParameter>();
+    parameters.add(new FinderParameter(JavaType.STRING, new JavaSymbolName("text")));
+
+    assertEqualsParameters(parameters,
+        new PartTree("findByTextContaining", memberDetails).getParameters());
+
+    parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number")));
+    assertEqualsParameters(parameters, new PartTree("findByTextContainingAndNumberIsLessThan",
+        memberDetails).getParameters());
+
+    assertEqualsParameters(parameters, new PartTree(
+        "findByTextContainingAndNumberIsLessThanOrIsNull", memberDetails).getParameters());
+
+  }
+
+  @Test
+  public void validateSeveralParameters() throws Exception {
+
+    List<FinderParameter> parameters = new ArrayList<FinderParameter>();
+    parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number1")));
+    parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number2")));
+
+    assertEqualsParameters(parameters,
+        new PartTree("findByNumberBetween", memberDetails).getParameters());
+    parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number3")));
+    parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number4")));
+
+    assertEqualsParameters(parameters, new PartTree("findByNumberBetweenAndNumberBetween",
+        memberDetails).getParameters());
+
+    parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number5")));
+
+    assertEqualsParameters(parameters, new PartTree(
+        "findByNumberBetweenAndNumberBetweenAndNumberLessThan", memberDetails).getParameters());
+
+
+  }
+
+  @Test
+  public void validateInParameters() throws Exception {
+
+    List<FinderParameter> parameters = new ArrayList<FinderParameter>();
+    parameters.add(new FinderParameter(new JavaType(List.class.getName(), 0, DataType.TYPE, null,
+        Arrays.asList(new JavaType(Date.class.getName()))), new JavaSymbolName("dateList")));
+
+    assertEqualsParameters(parameters, new PartTree("findByDateIn", memberDetails).getParameters());
+
+  }
+
+
   @Test
   public void optionsAfterQueryPrefix() throws Exception {
     for (String prefix : PREFIXES) {
@@ -822,6 +876,21 @@ public class PartTreeUnitTest {
     assertEquals(list1, list2);
 
   }
+
+  private void assertEqualsParameters(List<FinderParameter> parameters,
+      List<FinderParameter> parameters2) {
+    List<String> list1 = new ArrayList<String>();
+    List<String> list2 = new ArrayList<String>();
+
+    for (FinderParameter parameter : parameters)
+      list1.add(parameter.toString());
+
+    for (FinderParameter parameter : parameters2)
+      list2.add(parameter.toString());
+
+    assertEqualsList(list1, list2);
+  }
+
 
 
 }

@@ -3,6 +3,7 @@ package org.springframework.roo.addon.finder.addon.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 
 /**
  * This class is based on Part.java class from Spring Data commons project.
@@ -285,6 +289,52 @@ public class Part {
    */
   public String getOperator() {
     return operator;
+  }
+
+
+  /**
+   * Builds a list of parameters based on the number of arguments that operator type needs and the property java type 
+   * @return
+   */
+  public List<FinderParameter> getParameters() {
+
+    List<FinderParameter> parameters = new ArrayList<FinderParameter>();
+    String suffix = "";
+
+    if (!hasOperator() || !hasProperty()) {
+      return parameters;
+    }
+
+    JavaType javaType = property.getLeft().getFieldType();
+    String name = property.getLeft().getFieldName().toString();
+
+    // In operator is a special case, since its parameter is a list of property java type objects
+    if (type == Type.IN || type == Type.NOT_IN) {
+
+      name = name.concat("List");
+      JavaType listType =
+          new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(new JavaType(
+              javaType.getFullyQualifiedTypeName(), javaType.getArray(), DataType.TYPE, javaType
+                  .getArgName(), javaType.getParameters())));
+
+      parameters.add(new FinderParameter(listType, new JavaSymbolName(name)));
+
+    } else {
+
+      // Create a parameter for every argument that operator type needs
+      for (int i = 0; i < type.getNumberOfArguments(); i++) {
+
+        // If operator type needs several parameters, we have to distinguish them by adding a counter
+        if (type.getNumberOfArguments() > 1) {
+          suffix = String.valueOf(i + 1);
+        }
+        parameters.add(new FinderParameter(property.getLeft().getFieldType(), new JavaSymbolName(
+            name.concat(suffix))));
+
+      }
+    }
+
+    return parameters;
   }
 
 }

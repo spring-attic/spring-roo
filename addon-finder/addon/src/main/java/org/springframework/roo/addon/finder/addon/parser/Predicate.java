@@ -1,13 +1,17 @@
 package org.springframework.roo.addon.finder.addon.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 
 /**
  * This class is based on Predicate inner class located inside PartTree.java class from Spring Data commons project.
@@ -269,6 +273,52 @@ public class Predicate {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Builds the parameters that every condition needs to perform its operation
+   * @return
+   */
+  public List<FinderParameter> getParameters() {
+    List<FinderParameter> parameters = new ArrayList<FinderParameter>();
+
+    // Tracks number of times a property name is used as parameter
+    Map<FieldMetadata, Integer> parametersCount = new HashMap<FieldMetadata, Integer>();
+    final Pattern lastIntPattern = Pattern.compile("[^0-9]+([0-9]+)$");
+
+    for (OrPart orPart : nodes) {
+      for (Part part : orPart.getChildren()) {
+
+        if (part.getProperty() == null) {
+          continue;
+        }
+
+        Integer count = parametersCount.get(part.getProperty().getLeft());
+
+        for (FinderParameter parameter : part.getParameters()) {
+
+          if (count != null) {
+
+            // If a property has already been used as parameter name, we need to include a suffix to avoid duplicates
+            String name = parameter.getName().toString();
+            Matcher matcher = lastIntPattern.matcher(name);
+            if (matcher.find()) {
+              // Removes suffix if it already has one
+              name = StringUtils.removeEnd(name, matcher.group(1));
+            }
+            count++;
+            parameter.setName(new JavaSymbolName(name.concat(count.toString())));
+          } else {
+            count = 1;
+          }
+
+          // Update number of times a property has been used as parameter name
+          parametersCount.put(part.getProperty().getLeft(), count);
+          parameters.add(parameter);
+        }
+      }
+    }
+    return parameters;
   }
 
 
