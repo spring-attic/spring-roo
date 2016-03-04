@@ -1,0 +1,446 @@
+# Setup initial conditions: create project, setup persistence and generate an entity with different fields
+
+project setup --topLevelPackage org.example
+jpa setup --provider HIBERNATE --database ORACLE 
+entity jpa --class ~.Pet
+field string --fieldName name
+entity jpa --class ~.Owner
+field string --fieldName firstName
+field boolean --fieldName active
+field number --fieldName telephone --type java.lang.Integer
+field number --fieldName age --type int
+field date --fieldName birthday --type java.util.Date
+field set --fieldName pets --type ~.Pet
+field reference --fieldName pet --type ~.Pet
+
+
+
+
+#========================================================================================
+# TEST 1: Get options when query is empty                       
+#----------------------------------------------------------------------------------------
+# Goal:    Checks autocomplete options shown when name parameter is empty
+#
+# Write finder add --class ~.Owner --name
+# Autocomplete
+#      
+# Output:  find query read
+#
+# Result:  Shows options to start a query                                                                 
+#========================================================================================
+
+
+#========================================================================================
+# TEST 2: Get options after query operation is defined                    
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after find, query or read are defined
+#
+# Write finder add --class ~.Owner --name find
+# Autocomplete
+# Write finder add --class ~.Owner --name query
+# Autocomplete
+# Write finder add --class ~.Owner --name read
+# Autocomplete
+#      
+# Output:  findActive findAge findBirthday findBy findDistinct findFirst findFirstName 
+#          findPet findTelephone findTop 
+#
+#          queryActive queryAge queryBirthday queryBy queryDistinct queryFirst 
+#          queryFirstName queryPet queryTelephone queryTop 
+#
+#          readActive readAge readBirthday readBy readDistinct readFirst readFirstName 
+#          readPet readTelephone readTop 
+#
+# Result:  Shows options to define a limitation, distinct, all entity properties 
+#          and By to end the subject                                                                
+#========================================================================================
+
+#========================================================================================
+# TEST 3: Get options after Distinct expression                    
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after Distinct option
+#
+# Write finder add --class ~.Owner --name findDistinct
+# Autocomplete
+#      
+# Output:  findDistinctActive findDistinctAge findDistinctBirthday  findDistinctBy 
+#          findDistinctFirst findDistinctFirstName findDistinctPet findDistinctTelephone 
+#          findDistinctTop 
+#
+# Result:  Shows same options than test 2, but without Distinct since it is already added                                                               
+#========================================================================================
+
+#========================================================================================
+# TEST 4: Get options after limit expression                  
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a limit expression First/Top
+#
+# Write finder add --class ~.Owner --name findTop
+# Autocomplete
+# Write finder add --class ~.Owner --name findDistinctFirst
+# Autocomplete
+#      
+# Output:  findTopActive findTopAge findTopBirthday findTopBy findTopFirstName   
+#          findTopPet findTopTelephone  findTop[Number] 
+#
+#          findDistinctFirstActive findDistinctFirstAge findDistinctFirstBirthday  
+#          findDistinctFirstBy findDistinctFirstFirstName findDistinctFirstPet   
+#          findDistinctFirstTelephone findDistinctFirst[Number]
+#
+# Result:  Shows all entity properties, [Number] to indicate that a number can be
+#          specified, and By to end the subject                                                             
+#========================================================================================
+
+
+#========================================================================================
+# TEST 5: Get options after limit expression  number                
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after limit expression number
+#
+# Write finder add --class ~.Owner --name findTop1
+# Autocomplete
+#      
+# Output:  findTop1Active findTop1Age findTop1Birthday findTop1By findTop1FirstName 
+#          findTop1Pet findTop1Telephone  
+#
+# Result:  Shows all entity properties and By to end the subject                                                             
+#========================================================================================
+
+
+#========================================================================================
+# TEST 6: Get options after subject property               
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a property
+#
+# Write finder add --class ~.Owner --name findAge
+# Autocomplete
+# Write finder add --class ~.Owner --name findDistinctAge
+# Autocomplete
+# Write finder add --class ~.Owner --name findFirstAge
+# Autocomplete
+# Write finder add --class ~.Owner --name findTop10Age
+# Autocomplete
+#      
+# Output:  findAgeBy
+#          findDistinctAgeBy
+#          findFirstAgeBy
+#          findTop10AgeBy
+#
+# Result:  After the subject property, subject has to end by adding By                                                            
+#========================================================================================
+
+
+#========================================================================================
+# TEST 7: Get options after define a subject              
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after By
+#
+# Write finder add --class ~.Owner --name findBy
+# Autocomplete
+#      
+# Output:  findByActive findByAge findByBirthday findByFirstName findByPet findByTelephone
+#
+# Result:  Shows all entity properties                                                           
+#========================================================================================
+
+#========================================================================================
+# TEST 8: Get options after a condition string property           
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a string property defined as query 
+#        search condition
+#
+# Write finder add --class ~.Owner --name findByFirstName
+# Autocomplete
+#      
+# Output:  findByFirstNameAllIgnoreCase findByFirstNameAllIgnoringCase  
+#          findByFirstNameAnd  findByFirstNameContaining  findByFirstNameContains  
+#          findByFirstNameEndingWith findByFirstNameEndsWith  findByFirstNameEquals  
+#          findByFirstNameIgnoreCase findByFirstNameIgnoringCase findByFirstNameIn 
+#          findByFirstNameIs findByFirstNameLike findByFirstNameMatches 
+#          findByFirstNameMatchesRegex findByFirstNameNot findByFirstNameNotContaining  
+#          findByFirstNameNotContains findByFirstNameNotIn findByFirstNameNotLike 
+#          findByFirstNameNotNull findByFirstNameNull findByFirstNameOr 
+#          findByFirstNameOrderBy findByFirstNameRegex findByFirstNameStartingWith 
+#          findByFirstNameStartsWith      
+#          
+# Result:  Shows string operators, conjunctions And/Or, ignore case options and orderBy                                                         
+#========================================================================================
+
+  
+#========================================================================================
+# TEST 9: Get options after a condition number property           
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a number property defined as query
+#        search condition
+#
+# Write finder add --class ~.Owner --name findByTelephone
+# Autocomplete
+#      
+# Output:  findByTelephoneAllIgnoreCase findByTelephoneAllIgnoringCase findByTelephoneAnd 
+#          findByTelephoneBetween findByTelephoneEquals findByTelephoneGreaterThan 
+#          findByTelephoneGreaterThanEqual findByTelephoneIgnoreCase 
+#          findByTelephoneIgnoringCase  findByTelephoneIn findByTelephoneIs 
+#          findByTelephoneLessThan findByTelephoneLessThanEqual findByTelephoneNot 
+#          findByTelephoneNotIn findByTelephoneNotNull findByTelephoneNull 
+#          findByTelephoneOr findByTelephoneOrderBy  
+#
+# Result:  Shows number operators, conjunctions And/Or, ignore case options and orderBy                                                         
+#========================================================================================
+
+#========================================================================================
+# TEST 10: Get options after a condition date property           
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a date property defined as query 
+#        search condition
+#
+# Write finder add --class ~.Owner --name findByBirthday
+# Autocomplete
+#      
+# Output:  findByBirthdayAfter findByBirthdayAllIgnoreCase findByBirthdayAllIgnoringCase
+#          findByBirthdayAnd findByBirthdayBefore  findByBirthdayBetween 
+#          findByBirthdayEquals findByBirthdayIgnoreCase findByBirthdayIgnoringCase 
+#          findByBirthdayIn findByBirthdayIs findByBirthdayNot  findByBirthdayNotIn  
+#          findByBirthdayNotNull findByBirthdayNull findByBirthdayOr findByBirthdayOrderBy
+#
+# Result:  Shows date operators, conjunctions And/Or, ignore case options and orderBy                                                         
+#========================================================================================
+
+
+#========================================================================================
+# TEST 11: Get options after a primitive condition number property            
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a primitive number property 
+#        defined as query search condition
+#
+# Write finder add --class ~.Owner --name findByAge
+# Autocomplete
+#      
+# Output:  findByAgeAllIgnoreCase findByAgeAllIgnoringCase findByAgeAnd findByAgeBetween 
+#          findByAgeEquals findByAgeGreaterThan findByAgeGreaterThanEqual 
+#          findByAgeIgnoreCase findByAgeIgnoringCase findByAgeIn findByAgeIs 
+#          findByAgeLessThan findByAgeLessThanEqual findByAgeNot findByAgeNotIn 
+#          findByAgeOr findByAgeOrderBy  
+#           
+# Result:  Shows primitive number operators, conjunctions And/Or, ignore case options 
+#          and orderBy                                                         
+#========================================================================================
+
+#========================================================================================
+# TEST 12: Get options after a boolean property condition           
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a boolean property defined as  query 
+#        search condition
+#
+# Write finder add --class ~.Owner --name findByActive
+# Autocomplete
+#      
+# Output:  findByActiveAllIgnoreCase findByActiveAllIgnoringCase  findByActiveAnd 
+#          findByActiveEquals findByActiveFalse findByActiveIgnoreCase  
+#          findByActiveIgnoringCasefindByActiveIn findByActiveIs  findByActiveNot 
+#          findByActiveNotNull findByActiveNull findByActiveOr findByActiveOrderBy   
+#          findByActiveTrue 
+#
+# Result:  Shows boolean operators, conjunctions And/Or, ignore case options and orderBy                                                         
+#========================================================================================
+
+
+#========================================================================================
+# TEST 13: Get options after a condition list property           
+#----------------------------------------------------------------------------------------
+# Goal:  Validate none option is shown after a list property defined as query search 
+#        condition
+#
+# Write finder add --class ~.Owner --name findByHobbies
+# Autocomplete
+#      
+# Output:  
+#
+# Result:  conditions cannot be defined using list properties                                                        
+#========================================================================================
+
+  
+#========================================================================================
+# TEST 14: Get options after a condition reference property            
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a reference property to other entity,
+#        defined as query search condition
+#
+# Write finder add --class ~.Owner --name findByPet
+# Autocomplete
+#      
+# Output:  findByPetAllIgnoreCase findByPetAllIgnoringCase findByPetAnd findByPetEquals  
+#          findByPetIgnoreCase  findByPetIgnoringCase  findByPetIn findByPetIs 
+#          findByPetName findByPetNot  findByPetNotIn findByPetNotNull findByPetNull  
+#          findByPetOr findByPetOrderBy 
+#
+# Result:  Shows object operators, related entity properties, conjunctions And/Or, 
+#          ignore case options and orderBy                                                        
+#========================================================================================
+
+  
+#========================================================================================
+# TEST 15: Get options after a string property from a related entity          
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after a string property of a related 
+#        entity, defined as query search condition
+#
+# Write finder add --class ~.Owner --name findByPetName
+# Autocomplete
+#      
+# Output:  findByPetNameAllIgnoreCase findByFirstPetNameAllIgnoringCase findByPetNameAnd 
+#          findByPetNameContaining findByPetNameContains findByPetNameEndingWith 
+#          findByPetNameEndsWith  findByPetNameEquals findByPetNameIgnoreCase 
+#          findByPetNameIgnoringCase findByPetNameIn findByPetNameIs findByPetNameLike
+#          findByPetNameMatches findByPetNameMatchesRegex findByPetNameNot
+#          findByPetNameNotContaining findByPetNameNotContains findByPetNameNotIn
+#          findByPetNameNotLike findByPetNameNotNull findByPetNameNull findByPetNameOr
+#          findByPetNameOrderBy findByPetNameRegex findByPetNameStartingWith 
+#          findByPetNameStartsWith 
+#
+# Result:  Shows string operators, conjunctions And/Or, ignore case options and orderBy                                                         
+#========================================================================================
+  
+  
+#========================================================================================
+# TEST 16: Get options after an operator         
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after an operator
+#
+# Write finder add --class ~.Owner --name findByActiveNull
+# Autocomplete
+#      
+# Output:  findByActiveNullAllIgnoreCase findByActiveNullAllIgnoringCase  
+#          findByActiveNullAnd findByActiveNullIgnoreCase findByActiveNullIgnoringCase 
+#          findByActiveNullOr findByActiveNullOrderBy 
+#
+# Result:  Shows conjunctions And/Or, ignore case options and orderBy                                                         
+#========================================================================================
+
+#========================================================================================
+# TEST 17: Get options after Is operator         
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after Is operator
+#
+# Write finder add --class ~.Owner --name findByFirstNameIs
+# Autocomplete
+#      
+# Output:  findByFirstNameIsAllIgnoreCase findByFirstNameIsAllIgnoringCase 
+#          findByFirstNameFirstNameIsAnd findByFirstNameIsContaining  
+#          findByFirstNameIsEndingWith findByFirstNameIsIgnoreCase     
+#          findByFirstNameIsIgnoringCase findByFirstNameIsIn findByFirstNameIsLike     
+#          findByFirstNameIsNot findByFirstNameIsNotContaining findByFirstNameIsNotIn   
+#          findByFirstNameIsNotLike findByFirstNameIsNotNull findByFirstNameIsNull    
+#          findByFirstNameIsOr findByFirstNameIsOrderBy findByFirstNameIsStartingWith
+#           
+# Result:  Shows string operators which prefix is Is, conjunctions And/Or, ignore case
+#          options and orderBy                                                         
+#========================================================================================
+  
+  
+#========================================================================================
+# TEST 18: Get options after Or        
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after Or conjunction
+#
+# Write finder add --class ~.Owner --name findByAgeOr
+# Autocomplete
+#      
+# Output:  findByAgeOrActive findByAgeOrAge findByAgeOrBirthday findByAgeOrFirstName    
+#          findByAgeOrPet findByAgeOrTelephone  findByAgeOrderBy
+#
+# Result:  Shows all entity properties and orderBy                                                         
+#========================================================================================
+  
+  
+
+#========================================================================================
+# TEST 19: Get options after And        
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after And conjunction
+#
+# Write finder add --class ~.Owner --name findByAgeAnd
+# Autocomplete
+#      
+# Output:  findByAgeAndActive findByAgeAndAge findByAgeAndBirthday findByAgeAndFirstName 
+#          findByAgeAndPet  findByAgeAndTelephone   
+#
+# Result:  Shows all entity properties                                                         
+#========================================================================================
+  
+#========================================================================================
+# TEST 20: Get options after IgnoreCase       
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after IgnoreCase option
+#
+# Write finder add --class ~.Owner --name findByAgeIgnoreCase
+# Autocomplete
+#      
+# Output:  findByAgeIgnoreCaseAllIgnoreCase findByAgeIgnoreCaseAllIgnoringCase    
+#          findByAgeIgnoreCaseAnd  findByAgeIgnoreCaseBetween  findByAgeIgnoreCaseEquals
+#          findByAgeIgnoreCaseGreaterThan  findByAgeIgnoreCaseGreaterThanEqual   
+#          findByAgeIgnoreCaseIn findByAgeIgnoreCaseIs findByAgeIgnoreCaseLessThan           
+#          findByAgeIgnoreCaseLessThanEqual findByAgeIgnoreCaseNot 
+#          findByAgeIgnoreCaseNotI findByAgeIgnoreCaseOr findByAgeIgnoreCaseOrderBy 
+#
+# Result:  Shows string operators, And/Or conjunctions, OrderBy and AlIgnoreCase options                                                         
+#========================================================================================
+  
+#========================================================================================
+# TEST 21: Get options after AllIgnoreCase       
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after AllIgnoreCase option
+#
+# Write finder add --class ~.Owner --name findByAgeAllIgnoreCase
+# Autocomplete
+#      
+# Output:  findByAgeAllIgnoreCaseOrderBy 
+#
+# Result:  Shows OrderBy option                                                       
+#========================================================================================
+
+
+#========================================================================================
+# TEST 22: Get options after OrderBy       
+#----------------------------------------------------------------------------------------
+# Goal:  Checks autocomplete options shown after OrderBy option
+#
+# Write finder add --class ~.Owner --name findByAgeOrderBy
+# Autocomplete
+#      
+# Output:  findByAgeOrderByActive findByAgeOrderByAge findByAgeOrderByBirthday
+#          findByAgeOrderByFirstName findByAgeOrderByPet findByAgeOrderByTelephone   
+#
+# Result:  Shows all entity properties                                                       
+#========================================================================================
+ 
+ 
+#========================================================================================
+# TEST 23: Get options after an order  property     
+#----------------------------------------------------------------------------------------
+# Goal:  Check autocomplete options shown after an order property
+#
+# Write finder add --class ~.Owner --name findByAgeOrderByAge
+# Autocomplete
+#      
+# Output:  findByAgeOrderByAgeAsc findByAgeOrderByAgeDesc  
+#
+# Result:  Shows order directions Asc and Desc                                                      
+#========================================================================================
+
+
+#========================================================================================
+# TEST 24: Get options after an order  direction     
+#----------------------------------------------------------------------------------------
+# Goal:  Check autocomplete options shown after an order direction
+#
+# Write finder add --entity ~.Owner --name findByAgeOrderByAgeDesc
+# Autocomplete
+#      
+# Output:  findByAgeOrderByAgeDescActive findByAgeOrderByAgeDescAge  
+#          findByAgeOrderByAgeDescBirthday findByAgeOrderByAgeDescFirstName 
+#          findByAgeOrderByAgeDescPet findByAgeOrderByAgeDescTelephone  
+#
+# Result:  Shows all entity properties                                                     
+#========================================================================================
+  
+ 

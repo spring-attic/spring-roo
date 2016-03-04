@@ -618,6 +618,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
         # Executing tests
 
+	# Finder test
+	load_roo finder-autocomplete-test.roo
+
 	# Repository test
 	load_roo repository-generation-test.roo
 

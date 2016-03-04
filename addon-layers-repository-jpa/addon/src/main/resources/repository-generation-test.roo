@@ -53,9 +53,9 @@ entity jpa --class ~.ExampleSeqName --sequenceName seq
 #==========================================================================================
 # TEST 4:  Create entity with a generation type                   
 #--------------------------------------------------------------------
-# Goal:    Create an entity with a specific generation type 
+# Goal:    Create an entity with a specific generation strategy 
 #
-entity jpa --class ~.ExampleSeqGenType --generationType SEQUENCE
+entity jpa --class ~.ExampleSeqGenType --identifierStrategy SEQUENCE
 #
 # Output:  Created SRC_MAIN_JAVA/org/example/ExampleSeqGenType.java
 #          Created SRC_MAIN_JAVA/org/example/ExampleSeqGenType_Roo_Jpa_Entity.aj
@@ -69,9 +69,9 @@ entity jpa --class ~.ExampleSeqGenType --generationType SEQUENCE
 #==========================================================================================
 # TEST 5:  Create entity with a generation type  and sequence name                  
 #------------------------------------------------------------------------------------------
-# Goal:  Create an entity with a specific generation type and sequence name
+# Goal:  Create an entity with a specific generation strategy and sequence name
 #
-entity jpa --class ~.ExampleTableGenTypeSeqName --generationType TABLE --sequenceName seq
+entity jpa --class ~.ExampleTableGenTypeSeqName --identifierStrategy TABLE --sequenceName seq
 #
 # Output:  Created SRC_MAIN_JAVA/org/example/ExampleTableGenTypeSeqName.java
 #          Created SRC_MAIN_JAVA/org/example/ExampleTableGenTypeSeqName_Roo_Jpa_Entity.aj
