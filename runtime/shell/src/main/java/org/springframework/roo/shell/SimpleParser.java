@@ -482,7 +482,8 @@ public class SimpleParser implements Parser {
       // always present option keys in order
       // of their declaration on the method signature, thus we can stop
       // when mandatory options are filled in
-      if ((translated.endsWith(" ") || methodTarget.getRemainingBuffer().endsWith("-"))
+      if ((translated.endsWith(" ") || (methodTarget.getRemainingBuffer().endsWith(" -") || methodTarget
+          .getRemainingBuffer().endsWith(" --")))
           && (!"".equals(lastOptionValue) || lastOptionKey == null)) {
 
         suggestOptionKey(shellContext, translated, results, methodTarget, options, unspecified,
