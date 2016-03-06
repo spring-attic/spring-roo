@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.pushin;
 
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -22,21 +24,28 @@ public interface PushInOperations {
   /**
    * Method that register push-in command on Spring Roo Shell.
    * 
-   * Push-in all methods and fields declared on project ITDs to its .java
+   * Push-in all methods, fields and annotations declared on project ITDs to its .java
    * files.
+   * 
+   * @param package 
+   *            JavaPackage with the specified package where push-in will be applied.
+   * @param klass 
+   *            JavaType with the specified class where push-in will be applied.
    */
-  void pushInAll();
+  void pushInAll(JavaPackage packageName, JavaType klass);
 
   /**
-   * Method that register "push-in class" command on Spring Roo Shell.
+   * Method that register "push-in method" command on Spring Roo Shell.
    * 
-   * Push-in all methods and fields declared on an specified class ITDs to its
-   * .java files.
+   * Push-in an specific method declared on an specified class ITDs to its .java files
    * 
    * @param klass
    *            JavaType with the specified class where developer wants to
    *            make push-in
+   * @param method
+   *            JavaSymbolName with the specified name of the method that
+   *            developer wants to push-in
    * 
    */
-  void pushInClass(JavaType klass);
+  void pushInMethod(JavaType klass, JavaSymbolName method);
 }
