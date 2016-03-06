@@ -12,6 +12,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -34,6 +35,7 @@ import org.springframework.roo.model.JdkJavaType;
  * build an ITD via the {@link ItdTypeDetailsBuilder} mechanism.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadataItem
@@ -131,6 +133,67 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
   protected final void ensureGovernorImplements(final JavaType javaType) {
     if (!governorTypeDetails.implementsType(javaType)) {
       builder.addImplementsType(javaType);
+    }
+  }
+
+  /**
+   * Ensures that the governor is annotated with the given annotation
+   * 
+   * @param AnnotationMetadataBuilder the annotation to use(required)
+   * @since 2.0
+   */
+  protected final void ensureGovernorIsAnnotated(final AnnotationMetadataBuilder annotationMetadata) {
+    if (governorTypeDetails.getAnnotation(annotationMetadata.getAnnotationType()) == null) {
+      builder.addAnnotation(annotationMetadata);
+    }
+  }
+
+  /**
+   * Ensures that the governor has provided field
+   * 
+   * @param FieldMetadataBuilder the field to include(required)
+   * @since 2.0
+   */
+  protected final void ensureGovernorHasField(final FieldMetadataBuilder fieldMetadata) {
+    if (governorTypeDetails.getField(fieldMetadata.getFieldName()) == null) {
+      builder.addField(fieldMetadata);
+    }
+  }
+
+  /**
+   * Ensures that the governor has provided method
+   * 
+   * @param MethodMetadataBuilder the method to include(required)
+   * @since 2.0
+   */
+  protected final void ensureGovernorHasMethod(final MethodMetadataBuilder methodMetadata) {
+    List<JavaType> parameterTypes = new ArrayList<JavaType>();
+
+    for (AnnotatedJavaType type : methodMetadata.getParameterTypes()) {
+      parameterTypes.add(type.getJavaType());
+    }
+
+    if (governorTypeDetails.getMethod(methodMetadata.getMethodName(), parameterTypes) == null) {
+      builder.addMethod(methodMetadata);
+    }
+  }
+
+  /**
+   * Ensures that the governor has provided constructor
+   * 
+   * @param ConstructorMetadataBuilder the constructor to include(required)
+   * @since 2.0
+   */
+  protected final void ensureGovernorHasConstructor(
+      final ConstructorMetadataBuilder constructorMetadata) {
+    List<JavaType> parameterTypes = new ArrayList<JavaType>();
+
+    for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
+      parameterTypes.add(type.getJavaType());
+    }
+
+    if (governorTypeDetails.getDeclaredConstructor(parameterTypes) == null) {
+      builder.addConstructor(constructorMetadata);
     }
   }
 
