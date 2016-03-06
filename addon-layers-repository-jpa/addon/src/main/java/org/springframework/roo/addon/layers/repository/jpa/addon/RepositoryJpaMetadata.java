@@ -94,13 +94,13 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     }
 
     // Always add @Repository annotation
-    builder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.REPOSITORY));
+    ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(SpringJavaType.REPOSITORY));
 
     // All repositories are generated with @Transactional(readOnly = true)
     AnnotationMetadataBuilder transactionalAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
     transactionalAnnotation.addBooleanAttribute("readOnly", true);
-    builder.addAnnotation(transactionalAnnotation);
+    ensureGovernorIsAnnotated(transactionalAnnotation);
 
     // Build the ITD
     itdTypeDetails = builder.build();

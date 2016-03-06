@@ -81,21 +81,21 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         "ERROR: Entity identifier type required to generate service interface");
 
     // Generating readOnly methods for every services
-    builder.addMethod(getFindAllMethod(entity));
-    builder.addMethod(getFindAllIterableMethod(entity, identifierType));
-    builder.addMethod(getFindOneMethod(entity, identifierType));
+    ensureGovernorHasMethod(getFindAllMethod(entity));
+    ensureGovernorHasMethod(getFindAllIterableMethod(entity, identifierType));
+    ensureGovernorHasMethod(getFindOneMethod(entity, identifierType));
 
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
-      builder.addMethod(getSaveMethod(entity));
-      builder.addMethod(getDeleteMethod(identifierType));
-      builder.addMethod(getSaveBatchMethod(entity));
-      builder.addMethod(getDeleteBatchMethod(identifierType));
+      ensureGovernorHasMethod(getSaveMethod(entity));
+      ensureGovernorHasMethod(getDeleteMethod(identifierType));
+      ensureGovernorHasMethod(getSaveBatchMethod(entity));
+      ensureGovernorHasMethod(getDeleteBatchMethod(identifierType));
     }
 
     // Generating finders
     for (FinderMethod finder : finders) {
-      builder.addMethod(getFinderMethod(finder));
+      ensureGovernorHasMethod(getFinderMethod(finder));
     }
 
     // Build the ITD

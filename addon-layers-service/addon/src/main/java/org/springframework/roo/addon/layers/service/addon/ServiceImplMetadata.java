@@ -13,7 +13,6 @@ import org.springframework.roo.addon.layers.service.annotations.RooServiceImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -90,7 +89,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // All services should include @Service annotation
     AnnotationMetadataBuilder serviceAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.SERVICE);
-    builder.addAnnotation(serviceAnnotation);
+    ensureGovernorIsAnnotated(serviceAnnotation);
 
     // If exists a repository related with managed entity
     if (repository != null) {
@@ -99,7 +98,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       AnnotationMetadataBuilder transactionalAnnotation =
           new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
       transactionalAnnotation.addBooleanAttribute("readOnly", true);
-      builder.addAnnotation(transactionalAnnotation);
+      ensureGovernorIsAnnotated(transactionalAnnotation);
 
       // Services should include repository field if there's
       // a repository related with managed entity
@@ -107,30 +106,30 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
           new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
               new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName("repository"),
               repository.getType());
-      builder.addField(repositoryFieldMetadata);
+      ensureGovernorHasField(repositoryFieldMetadata);
 
     }
 
     // All services should include constructor
-    builder.addConstructor(getServiceConstructor(repository));
+    ensureGovernorHasConstructor(getServiceConstructor(repository));
 
 
     // Implements readOnly methods for every services
-    builder.addMethod(getFindAllMethod(entity, repository.getType()));
-    builder.addMethod(getFindAllIterableMethod(entity, identifierType, repository.getType()));
-    builder.addMethod(getFindOneMethod(entity, identifierType, repository.getType()));
+    ensureGovernorHasMethod(getFindAllMethod(entity, repository.getType()));
+    ensureGovernorHasMethod(getFindAllIterableMethod(entity, identifierType, repository.getType()));
+    ensureGovernorHasMethod(getFindOneMethod(entity, identifierType, repository.getType()));
 
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
-      builder.addMethod(getSaveMethod(entity, repository.getType()));
-      builder.addMethod(getDeleteMethod(identifierType, repository.getType()));
-      builder.addMethod(getSaveBatchMethod(entity, repository.getType()));
-      builder.addMethod(getDeleteBatchMethod(entity, identifierType, repository.getType()));
+      ensureGovernorHasMethod(getSaveMethod(entity, repository.getType()));
+      ensureGovernorHasMethod(getDeleteMethod(identifierType, repository.getType()));
+      ensureGovernorHasMethod(getSaveBatchMethod(entity, repository.getType()));
+      ensureGovernorHasMethod(getDeleteBatchMethod(entity, identifierType, repository.getType()));
     }
 
     // Generating finders
     for (FinderMethod finder : finders) {
-      builder.addMethod(getFinderMethod(finder, repository.getType()));
+      ensureGovernorHasMethod(getFinderMethod(finder, repository.getType()));
     }
 
     // Build the ITD
@@ -144,7 +143,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
    * @param repository
    * @return
    */
-  private ConstructorMetadata getServiceConstructor(ClassOrInterfaceTypeDetails repository) {
+  private ConstructorMetadataBuilder getServiceConstructor(ClassOrInterfaceTypeDetails repository) {
 
     ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -160,7 +159,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Adding @Autowired annotation
     constructorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
 
-    return constructorBuilder.build();
+    return constructorBuilder;
   }
 
   /**
