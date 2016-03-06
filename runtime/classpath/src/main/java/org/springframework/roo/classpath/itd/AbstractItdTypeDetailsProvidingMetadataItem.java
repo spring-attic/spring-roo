@@ -167,13 +167,8 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
    * @since 2.0
    */
   protected final void ensureGovernorHasMethod(final MethodMetadataBuilder methodMetadata) {
-    List<JavaType> parameterTypes = new ArrayList<JavaType>();
-
-    for (AnnotatedJavaType type : methodMetadata.getParameterTypes()) {
-      parameterTypes.add(type.getJavaType());
-    }
-
-    if (governorTypeDetails.getMethod(methodMetadata.getMethodName(), parameterTypes) == null) {
+    if (governorTypeDetails.getMethod(methodMetadata.getMethodName(),
+        AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes())) == null) {
       builder.addMethod(methodMetadata);
     }
   }
@@ -186,13 +181,8 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
    */
   protected final void ensureGovernorHasConstructor(
       final ConstructorMetadataBuilder constructorMetadata) {
-    List<JavaType> parameterTypes = new ArrayList<JavaType>();
-
-    for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
-      parameterTypes.add(type.getJavaType());
-    }
-
-    if (governorTypeDetails.getDeclaredConstructor(parameterTypes) == null) {
+    if (governorTypeDetails.getDeclaredConstructor(AnnotatedJavaType
+        .convertFromAnnotatedJavaTypes(constructorMetadata.getParameterTypes())) == null) {
       builder.addConstructor(constructorMetadata);
     }
   }
