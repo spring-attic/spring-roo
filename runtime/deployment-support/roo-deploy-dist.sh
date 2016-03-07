@@ -646,6 +646,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
 	# Finder test
 	load_roo finder-autocomplete-test.roo
+	load_roo finder-generation-test.roo
 
 	# Repository test
 	load_roo repository-generation-test.roo

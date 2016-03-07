@@ -1,0 +1,557 @@
+# Setup initial conditions: create project, setup persistence,
+# create an entity with different fields and generate its repository
+
+project setup --topLevelPackage org.example
+jpa setup --provider HIBERNATE --database ORACLE 
+entity jpa --class ~.Pet
+field string --fieldName name
+entity jpa --class ~.Owner
+field string --fieldName firstName
+field boolean --fieldName active
+field number --fieldName telephone --type java.lang.Integer
+field number --fieldName age --type int
+field date --fieldName birthday --type java.util.Date
+field set --fieldName pets --type ~.Pet
+field reference --fieldName pet --type ~.Pet
+repository jpa all --package ~.repository
+
+
+
+#========================================================================================
+# TEST 1: Generate a simple finder              
+#----------------------------------------------------------------------------------------
+# Goal:   Create a finder in the repository that returns OwnerList and accepts an 
+#         int parameter
+#
+finder add --class ~.Owner --name findByAge
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Created SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository is annotated with @RooFinder(finders = { "findByAge" }), 
+#          and its aspect contains: 
+#          List<Owner> OwnerRepository.findByAge(int age)                                                                 
+#========================================================================================
+ 
+#========================================================================================
+# TEST 2: Generate a finder with several conditions        
+#----------------------------------------------------------------------------------------
+# Goal:   Create a finder that searches by several conditions. 
+#
+finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository is annotated with 
+#          @RooFinder(finders = { "findByFirstNameAndPetOrBirthday" }), 
+#          and its aspect contains
+#          List<Owner> OwnerRepository.findByFirstNameAndPetOrBirthday(String firstName, 
+#                                                              Pet pet, Date birthday)                                                              
+#========================================================================================
+
+#========================================================================================
+# TEST 3:  Add ignore case options       
+#----------------------------------------------------------------------------------------
+# Goal:   Create a finder that has ignore case and all ignore case options enabled
+#
+finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCase
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository is annotated with 
+#          @RooFinder(finders = { "findByAgeIgnoreCaseAllIgnoreCase" }
+#          and its aspect contains:
+#          List<Owner> OwnerRepository.findByAgeIgnoreCaseAllIgnoreCase(int age)                                                              
+#========================================================================================
+
+#========================================================================================
+# TEST 4: Define order clause  
+#----------------------------------------------------------------------------------------
+# Goal:   Create a finder that orders the results by several properties
+#
+finder add --class ~.Owner --name findByAgeOrderByAgeAscPetNameDesc
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository is annotated with 
+#          @RooFinder(finders = { "findByAgeOrderByAgeAscPetNameDesc" }), 
+#          and its aspect contains:
+#          List<Owner> OwnerRepository.findByAgeOrderByAgeAscPetNameDesc(int age)                                                          
+#========================================================================================
+ 
+#========================================================================================
+# TEST 5:  Generate a finder with an order clause and all ignore case option
+#----------------------------------------------------------------------------------------
+# Goal:    Create a finder that orders the results by several properties and all ignore
+#          case options is enabled
+#
+finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository is annotated with
+#          @RooFinder(finders = { "findByBirthdayAllIgnoreCaseOrderByFirstNameAsc" }), 
+#          and its aspect contains:  
+#          List<Owner> OwnerRepository.findByBirthdayAllIgnoreCaseOrderByFirstNameAsc(Date birthday)    
+#========================================================================================
+ 
+ 
+#========================================================================================
+# TEST 6:  Define condition operators
+#----------------------------------------------------------------------------------------
+# Goal:    Create a finder which condition properties have operators
+#
+finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository is annotated with 
+#  @RooFinder(finders = { "findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches" }), 
+#          and its aspect contains:   
+#  List<Owner> OwnerRepository.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches(
+#                                                 int age, Date birthday, String name)
+#========================================================================================
+  
+
+
+#========================================================================================
+# TEST 7:  Max results limited to one
+#----------------------------------------------------------------------------------------
+# Goal:    Create a finder with a limiting expression that returns an unique Owner
+#
+finder add --class ~.Owner --name findFirstByAge
+finder add --class ~.Owner --name findDistinctFirstByActive
+finder add --class ~.Owner --name findFirst1ByFirstName
+finder add --class ~.Owner --name findDistinctFirst1ByPet
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#          public abstract Owner OwnerRepository.findFirstByAge(int age);    
+#          public abstract Owner OwnerRepository.findDistinctFirstByActive(Boolean active);    
+#          public abstract Owner OwnerRepository.findFirst1ByFirstName(String firstName);    
+#          public abstract Owner OwnerRepository.findDistinctFirst1ByPet(Pet pet);
+#          Generated finders return Owner
+#========================================================================================
+
+#========================================================================================
+# TEST 8:  Unlimited number of results
+#----------------------------------------------------------------------------------------
+# Goal:    Check that finders return a list of Owners
+#
+finder add --class ~.Owner --name findFirst2ByAge
+finder add --class ~.Owner --name findDistinctFirst2ByAge
+finder add --class ~.Owner --name findFirst100ByAge
+finder add --class ~.Owner --name findDistinctByAge
+finder add --class ~.Owner --name findByPet
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#          public abstract List<Owner> OwnerRepository.findFirst2ByAge(int age);    
+#          public abstract List<Owner> OwnerRepository.findDistinctFirst2ByAge(int age);    
+#          public abstract List<Owner> OwnerRepository.findFirst100ByAge(int age);    
+#          public abstract List<Owner> OwnerRepository.findDistinctByAge(int age);  
+#          public abstract List<Owner> OwnerRepository.findByPet(Pet pet);      
+#          Generated finders return List<Owner>
+#========================================================================================
+  
+
+#========================================================================================
+# TEST 9:  Return an entity property list
+#----------------------------------------------------------------------------------------
+# Goal:    Check that finders return a list of subject property java type
+#
+finder add --class ~.Owner --name findDistinctActiveByAge
+finder add --class ~.Owner --name findBirthdayByAge
+finder add --class ~.Owner --name findTop100FirstNameByAge
+finder add --class ~.Owner --name findDistinctFirst100PetByAge
+finder add --class ~.Owner --name findFirst10AgeByAge
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#          public abstract List<Boolean> OwnerRepository.findDistinctActiveByAge(int age);    
+#          public abstract List<Date> OwnerRepository.findBirthdayByAge(int age);    
+#          public abstract List<String> OwnerRepository.findTop100FirstNameByAge(int age);    
+#          public abstract List<Pet> OwnerRepository.findDistinctFirst100PetByAge(int age);    
+#          public abstract List<Integer> OwnerRepository.findFirst10AgeByAge(int age);   
+#          Every finder returns a list of its subject property type. 
+#========================================================================================
+
+
+#========================================================================================
+# TEST 10:  Return an entity property result
+#----------------------------------------------------------------------------------------
+# Goal:    Check that finders return a subject property java type
+#
+finder add --class ~.Owner --name findDistinctTopPetNameByAge
+finder add --class ~.Owner --name findTop1TelephoneByAge
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#          public abstract String OwnerRepository.findDistinctTopPetNameByAge(int age);    
+#          public abstract Integer OwnerRepository.findTop1TelephoneByAge(int age);  
+#          Every finder returns the subject property type.   
+#========================================================================================
+  
+#========================================================================================
+# TEST 11: Generate a finder without parameters
+#----------------------------------------------------------------------------------------
+# Goal:   Check that any parameter is included into the finder
+#
+finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#    List<Owner> OwnerRepository.findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull()    
+#========================================================================================
+  
+
+#========================================================================================
+# TEST 12: Generate a finder without operators
+#----------------------------------------------------------------------------------------
+# Goal:    Check that for every condition a parameter is added, which type is the 
+#          condition property type
+#
+finder add --class ~.Owner --name findByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#  List<Owner> OwnerRepository.findByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains(
+#         String firstName, Boolean active, Date birthday, Pet pet, int age, String name)     
+#========================================================================================
+
+
+ 
+#========================================================================================
+# TEST 13: Generate a finder which operators need a parameter
+#----------------------------------------------------------------------------------------
+# Goal:    Check that for every condition a parameter is added, which type is the 
+#          condition property type
+#
+finder add --class ~.Owner --name findByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#  List<Owner> OwnerRepository.findByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex(
+#      Boolean active, Date birthday, String firstName, Pet pet, int age, String name) 
+#======================================================================================== 
+ 
+#========================================================================================
+# TEST 14: Generate a finder which operators need several parameter
+#----------------------------------------------------------------------------------------
+# Goal:    Check that for every condition several parameters are added, which type is the 
+#          condition property type, and a counter is added as suffix
+#
+finder add --class ~.Owner --name findByAgeBetweenAndBirthdayBetween
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#          List<Owner> OwnerRepository.findByAgeBetweenAndBirthdayBetween( int age1,
+#                                          int age2, Date birthday1, Date birthday2)
+#       Since some parameter names are repeated, a number is added to differentiate them 
+#======================================================================================== 
+  
+#========================================================================================
+# TEST 15: Generate finders with a property with several operators
+#----------------------------------------------------------------------------------------
+# Goal:    Check that for every condition a parameter is added, which type is the 
+#          condition property type, and a counter is added as suffix
+#
+finder add --class ~.Owner --name findByAgeBetweenAndAgeIsOrAgeLessThan
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+#          List<Owner> OwnerRepository.findByAgeBetweenAndAgeIsOrAgeLessThan(int age1,
+#                                                        int age2, int age3, int age4)
+#       Since some parameter names are repeated, a number is added to differentiate them  
+#======================================================================================== 
+
+
+#========================================================================================
+# TEST 16: Expression with In operator
+#----------------------------------------------------------------------------------------
+# Goal:    Check that finder parameters are a List of condition property type
+#
+finder add --class ~.Owner --name findByFirstNameInAndActiveInAndAgeInAndPetInAndPetNameInOrBirthdayNotInAndTelephoneIn
+finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository aspect contains:
+# List<Owner> OwnerRepository.findByFirstNameInAndActiveInAndAgeInAndPetInAndPetNameInOrBirthdayNotInAndTelephoneIn(
+#          List<String> firstNameList, List<Boolean> activeList, List<Integer> ageList, 
+#          List<Pet> petList, List<String> nameList, List<Date> birthdayList, List<Integer> telephoneList);    
+# List<Owner> OwnerRepository.findByBirthdayInOrBirthdayNotIn(List<Date> birthdayList, List<Date> birthdayList2);
+#       Since some parameter names are repeated, a number is added to differentiate them  
+#======================================================================================== 
+  
+#################################################################
+####				MANUAL  TESTS
+#################################################################
+
+#========================================================================================
+# TEST 17: Empty finder            
+#----------------------------------------------------------------------------------------
+# Goal:  Checks that a finder with an empty name cannot be created
+#
+#finder add --class ~.Owner --name 
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+
+#========================================================================================
+# TEST 18: Incomplete finders             
+#----------------------------------------------------------------------------------------
+# Goal:  Fail finder creation if it does not contain at least an operation+By+property
+#
+#finder add --class ~.Owner --name find
+#finder add --class ~.Owner --name findBy
+#finder add --class ~.Owner --name findAge
+#finder add --class ~.Owner --name Age
+#finder add --class ~.Owner --name AgeBy
+#finder add --class ~.Owner --name By
+#finder add --class ~.Owner --name ByAge
+#finder add --class ~.Owner --name findTByAge
+#finder add --class ~.Owner --name findTeByAge
+#finder add --class ~.Owner --name findByByAge
+#finder add --class ~.Owner --name findByAgeAge
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+
+#========================================================================================
+# TEST 19: Unsupported operation            
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if operation is not read, find or query
+#
+#finder add --class ~.Owner --name deleteByAge
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 20: Incorrect Distinct expression           
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if Distinct expression is located in an incorrect position
+#
+# finder add --class ~.Owner --name DistinctfindByAge
+# finder add --class ~.Owner --name findByDistinctAge
+# finder add --class ~.Owner --name findAgeDistinctByAge
+# finder add --class ~.Owner --name findDistinctBy
+# finder add --class ~.Owner --name DistinctBy
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 21: Incorrect limiting expression              
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if limiting expression is not placed in a correct location
+#
+#finder add --class ~.Owner --name TopfindByAge
+#finder add --class ~.Owner --name findDistinctTopBy
+#finder add --class ~.Owner --name findTopDistinctByAge
+#finder add --class ~.Owner --name findTopFirstByAge
+#finder add --class ~.Owner --name findTopAgeAgeByAge
+#finder add --class ~.Owner --name findTopaAgeByAge
+#finder add --class ~.Owner --name findTopaByAge
+#finder add --class ~.Owner --name find1TopByAge
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 22: Incorrect max results number           
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if max  results number is 0
+#
+#finder add --class ~.Owner --name findTop0ByAge
+#      
+# Output:  ERROR: Query max results cannot be 0.
+#          --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 23: Subject with several properties             
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if finder has several properties to return
+#
+#finder add --class ~.Owner --name findActiveAndAgeByAge
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 24: Several Ignore Case associated to a property              
+#----------------------------------------------------------------------------------------
+# Goal:  Fail if a finder contains several IgnoreCase options for the same property
+#
+#finder add --class ~.Owner --name findByAgeIgnoreCaseIgnoreCase
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 25: Property with an unsupported operator  
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if a property is associated to an unsupported operator 
+#
+#finder add --class ~.Owner --name findByFirstNameFalse
+#finder add --class ~.Owner --name  findByAgeNull
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 26: Empty expressions before Or           
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if finder has an empty expressions before an Or
+#
+#finder add --class ~.Owner --name findByOr
+#finder add --class ~.Owner --name findByAgeOrOr
+#      
+# Output:  ERROR: Missing expression before Or
+#          --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 27: Empty expressions before And           
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if finder has an empty expressions before an And
+#
+#finder add --class ~.Owner --name findByAnd
+#finder add --class ~.Owner --name findByAgeAndAnd
+#      
+# Output:  ERROR: Missing property in a search condition before And operator
+#          --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 28: Empty expressions after Or/And         
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if finder has an empty expressions after an Or/And
+#
+#finder add --class ~.Owner --name findByAgeOr
+#finder add --class ~.Owner --name findByAgeAnd
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 29: Empty expressions before OrderBy          
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if finder has an empty expressions before an order clause
+#
+#finder add --class ~.Owner --name findByAgeOrOrderByActiveDesc 
+#finder add --class ~.Owner --name findByAgeAndOrderByActiveDesc 
+#      
+# Output:  ERROR: Missing expression before OrderBy
+#          --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 30: Several order clauses             
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if there are several OrderBy
+#
+#finder add --class ~.Owner --name findAgeOrderBy
+#finder add --class ~.Owner --name findAgeOrderByAgeAscAndActiveDesc
+#finder add --class ~.Owner --name findAgeOrderByAgeOrderByNumber
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 31: Order expressions joined with And/Or              
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if order expressions are joined with And/Or
+#
+#finder add --class ~.Owner --name findAgeOrderByAgeAscOrActiveDesc
+#finder add --class ~.Owner --name findAgeOrderByAgeAscAndActiveDesc
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+
+#========================================================================================
+# TEST 32: Several AllIgnoreCase options         
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if AllIgnoreCase is included several times
+#
+#finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCaseAllIgnoreCase
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
