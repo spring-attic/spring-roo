@@ -645,11 +645,11 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # Executing tests
 
 	# Finder test
-	load_roo finder-autocomplete-test.roo
-	load_roo finder-generation-test.roo
+	load_roo script finder-autocomplete-test.roo
+	load_roo script finder-generation-test.roo
 
 	# Repository test
-	load_roo repository-generation-test.roo
+	load_roo script repository-generation-test.roo
 
         # Project Settings tests
         load_roo script project-settings-1.roo

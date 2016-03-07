@@ -9,7 +9,7 @@ enum type --class ~.enumerated.Enumerated
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test entity creation command with required dynamic mandatory options based on project settings.
 #
-entity jpa --class ~.domain.Entity1 --table ENTITY1_TABLE --identifierColumn identifier --sequenceName sequence --generationType SEQUENCE
+entity jpa --class ~.domain.Entity1 --table ENTITY1_TABLE --identifierColumn identifier --sequenceName sequence --identifierStrategy SEQUENCE
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
@@ -121,9 +121,9 @@ field string --fieldName string_field --column string_column
 #====================================================================================================================
 # TEST 9: Create read-only entity with GenerationType.SEQUENCE for @GeneratedValue
 #--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test creation of a read-only entity with --readOnly and --generationType command options.
+# Goal:   Test creation of a read-only entity with --readOnly and --identifierStrategy command options.
 #
-entity jpa --class ~.domain.ReadOnlyEntity --table READONLY_TABLE --identifierColumn id --sequenceName seq --readOnly --generationType SEQUENCE
+entity jpa --class ~.domain.ReadOnlyEntity --table READONLY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy SEQUENCE
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity_Roo_Jpa_Entity.aj
@@ -136,9 +136,9 @@ entity jpa --class ~.domain.ReadOnlyEntity --table READONLY_TABLE --identifierCo
 #====================================================================================================================
 # TEST 10: Create entity with GenerationType.TABLE for @GeneratedValue
 #--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test creation of an entity with --generationType command option with TABLE value.
+# Goal:   Test creation of an entity with --identifierStrategy command option with TABLE value.
 #
-entity jpa --class ~.domain.TableEntity --table TABLE_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --generationType TABLE
+entity jpa --class ~.domain.TableEntity --table TABLE_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy TABLE
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/TableEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/TableEntity_Roo_Jpa_Entity.aj
@@ -151,9 +151,9 @@ entity jpa --class ~.domain.TableEntity --table TABLE_ENTITY_TABLE --identifierC
 #====================================================================================================================
 # TEST 11: Create entity with GenerationType.IDENTITY for @GeneratedValue
 #--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test creation of an entity with --generationType command option with IDENTITY value.
+# Goal:   Test creation of an entity with --identifierStrategy command option with IDENTITY value.
 #
-entity jpa --class ~.domain.IdentityEntity --table IDENTITY_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --generationType IDENTITY
+entity jpa --class ~.domain.IdentityEntity --table IDENTITY_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy IDENTITY
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/IdentityEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/IdentityEntity_Roo_Jpa_Entity.aj
@@ -166,9 +166,9 @@ entity jpa --class ~.domain.IdentityEntity --table IDENTITY_ENTITY_TABLE --ident
 #====================================================================================================================
 # TEST 12: Create entity with GenerationType.AUTO for @GeneratedValue
 #--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test creation of an entity with --generationType command option with AUTO value.
+# Goal:   Test creation of an entity with --identifierStrategy command option with AUTO value.
 #
-entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --generationType AUTO
+entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy AUTO
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/AutoEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/AutoEntity_Roo_Jpa_Entity.aj
@@ -194,7 +194,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "table", based on 
 #         project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --identifierColumn identifier --sequenceName sequence --generationType SEQUENCE
+#entity jpa --class ~.domain.Entity2 --identifierColumn identifier --sequenceName sequence --identifierStrategy SEQUENCE
 #      
 # Output: You must specify option 'table' for this command
 #
@@ -208,7 +208,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option 
 #         "identifierColumn", based on project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --sequenceName sequence --generationType SEQUENCE
+#entity jpa --class ~.domain.Entity2 --table entity_table --sequenceName sequence --identifierStrategy SEQUENCE
 #      
 # Output: You must specify option 'identifierColumn' for this command
 #
@@ -222,7 +222,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "sequenceName", 
 #         based on project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --generationType SEQUENCE
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --identifierStrategy SEQUENCE
 #      
 # Output: You must specify option 'sequenceName' for this command
 #
@@ -231,31 +231,31 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 
 
 #====================================================================================================================
-# TEST 16: Create entity without required dynamic mandatory option "generationType", based by settings
+# TEST 16: Create entity without required dynamic mandatory option "identifierStrategy", based by settings
 #--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "generationType", 
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "identifierStrategy", 
 #         based on project settings, is not provided.
 #
 #entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence
 #      
-# Output: You must specify option 'generationType' for this command
+# Output: You must specify option 'identifierStrategy' for this command
 #
-# Result: Stop command execution with a message requiring "generationType" option.                               
+# Result: Stop command execution with a message requiring "identifierStrategy" option.                               
 #====================================================================================================================
 
 
 #====================================================================================================================
-# TEST 17: Create entity with a wrong value for "generationType"
+# TEST 17: Create entity with a wrong value for "identifierStrategy"
 #--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "generationType", 
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "identifierStrategy", 
 #         based on project settings, is provided with a wrong value.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence --generationType UNKNOWN
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence --identifierStrategy UNKNOWN
 #      
-# Output: java.lang.IllegalArgumentException: Failed to convert 'UNKNOWN' to type GenerationType for option 'generationType'
+# Output: java.lang.IllegalArgumentException: Failed to convert 'UNKNOWN' to type GenerationType for option 'identifierStrategy'
 #         No enum constant org.springframework.roo.addon.jpa.addon.GenerationType.UNKNOWN
 #
-# Result: Stop command execution with a message requiring "generationType" option.                               
+# Result: Stop command execution with a message requiring "identifierStrategy" option.                               
 #====================================================================================================================
 
 

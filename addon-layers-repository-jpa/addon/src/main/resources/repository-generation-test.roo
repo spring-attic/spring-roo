@@ -127,28 +127,23 @@ repository jpa add --entity ~.ExampleReadOnly --interface ~.ExampleReadOnlyRepos
 repository jpa all --package ~.repository
 #      
 # Output:  INFO: Already exists a repository associated to the entity 'Example'. Only one repository per entity is allowed.
-#		   Created SRC_MAIN_JAVA/org/example/repository
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepository.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepositoryCustom.java
-#		   INFO: Already exists a repository associated to the entity 'ExampleReadOnly'. Only one repository per entity is allowed.
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepository.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryCustom.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepository.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryCustom.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepository.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryCustom.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepositoryImpl.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryImpl.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryImpl.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryImpl.java
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepository_Roo_Jpa_Repository.aj
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepository_Roo_Jpa_Repository.aj
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepository_Roo_Jpa_Repository.aj
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleGenRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
-#		   Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepository_Roo_Jpa_Repository.aj
+#          INFO: Already exists a repository associated to the entity 'ExampleReadOnly'. Only one repository per entity is allowed.
+#          Created SRC_MAIN_JAVA/org/example/repository
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepository.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryCustom.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepository.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryCustom.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepository.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryCustom.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryImpl.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryImpl.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryImpl.java
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepository_Roo_Jpa_Repository.aj
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleTableGenTypeSeqNameRepository_Roo_Jpa_Repository.aj
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqNameRepositoryImpl_Roo_Jpa_Repository_Custom_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/repository/ExampleSeqGenTypeRepository_Roo_Jpa_Repository.aj
 #
 # Result:  Creates repository interfaces and implementation files                                                                   
 #==========================================================================================
