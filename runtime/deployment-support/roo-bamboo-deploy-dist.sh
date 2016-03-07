@@ -645,6 +645,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # Entity commands with project settings
         load_roo script entities-with-project-settings.roo 
 
+        # Entity and entity-field commands
+        load_roo script entities-and-entity-fields.roo 
+
         
 	      # Temporally disabled
 	    

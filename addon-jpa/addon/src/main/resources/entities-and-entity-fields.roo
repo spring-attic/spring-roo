@@ -1,0 +1,113 @@
+# Create project, entities and fields to be able to test subsequent commands.
+project setup --topLevelPackage aaa.bbb.cc
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+entity jpa --class ~.domain.Entity1
+entity jpa --class ~.domain.Entity2
+
+
+#====================================================================================================================
+# TEST 1: Create reference field with specific CascadeType.REFRESH
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field reference command with the optional parameter --cascadeType
+#
+field reference --fieldName entity1_reference --type ~.domain.Entity1 --cardinality ONE_TO_ONE --cascadeType REFRESH
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2_Roo_JavaBean.aj
+#
+# Result: Create entity1_reference without errors and with @OneToOne(cascade = CascadeType.REFRESH)                                       
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 2: Create set field with specific CascadeType.REMOVE
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command with the optional parameter --cascadeType
+#
+field set --fieldName entity1_set --type ~.domain.Entity1 --cardinality ONE_TO_MANY --cascadeType REMOVE
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2_Roo_JavaBean.aj
+#
+# Result: Create entity1_reference without errors and with @OneToMany(cascade = CascadeType.REMOVE)                                        
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 3: Create list field with specific CascadeType.PERSIST
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field list command with the optional parameter --cascadeType
+#
+field list --fieldName entity1_list --type ~.domain.Entity1 --cardinality ONE_TO_MANY --cascadeType PERSIST
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2_Roo_JavaBean.aj
+#
+# Result: Create entity1_list without errors with and with @OneToMany(cascade = CascadeType.PERSIST)                                        
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 4: Create reference field with default CascadeType (ALL)
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field reference command with the default value of optional parameter --cascadeType
+#
+field reference --fieldName entity1_reference_default --type ~.domain.Entity1 --cardinality ONE_TO_ONE --cascadeType
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2_Roo_JavaBean.aj
+#
+# Result: Create entity1_reference without errors and with @OneToOne(cascade = CascadeType.ALL)                                
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 5: Create set field with default CascadeType (ALL) without specifying it
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command without the optional parameter --cascadeType
+#
+field set --fieldName entity1_set_unspecified --type ~.domain.Entity1 --cardinality ONE_TO_MANY
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2_Roo_JavaBean.aj
+#
+# Result: Create entity1_set_unspecified without errors and with @OneToMany(cascade = CascadeType.ALL)                              
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 6: Create set field with default CascadeType (ALL)
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command with the optional parameter --cascadeType, but without value.
+#
+field set --fieldName entity1_set_default --type ~.domain.Entity1 --cardinality ONE_TO_MANY --cascadeType
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity2_Roo_JavaBean.aj
+#
+# Result: Create entity1_set_default without errors and with @OneToMany(cascade = CascadeType.ALL)                                
+#====================================================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they are      #
+# supposed to interrupt script execution.                                #
+#                                                                        #
+##########################################################################
+
+
+#====================================================================================================================
+# TEST 7: Create set field with wrong CascadeType
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command with the optional parameter --cascadeType with a wrong value.
+#
+#field set --fieldName entity1_wrong_cascade --type ~.domain.Entity1 --cardinality ONE_TO_MANY --cascadeType WRONG
+#      
+# Output: java.lang.IllegalArgumentException: Failed to convert 'WRONG' to type Cascade for option 'cascadeType'
+#         No enum constant org.springframework.roo.classpath.operations.Cascade.WRONG
+#
+# Result: Throws and exception and stops command execution because the wrong enum value.                              
+#====================================================================================================================

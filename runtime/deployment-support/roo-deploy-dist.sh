@@ -669,7 +669,10 @@ if [[ "$COMMAND" = "assembly" ]]; then
         load_roo script cli-dynamic-mandatory.roo
 
         # Entity commands with project settings
-        load_roo script entities-with-project-settings.roo        
+        load_roo script entities-with-project-settings.roo
+
+        # Entity and entity-field commands
+        load_roo script entities-and-entity-fields.roo      
 
 
         # Temporarily disabled   
