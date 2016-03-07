@@ -48,7 +48,7 @@ public class Predicate {
 
   private static final Pattern COMPLETE_QUERY_TEMPLATE =
       Pattern
-          .compile("^(\\p{Lu}.*?(\\p{Lu}.*?)?)((And|Or)(\\p{Lu}.*?(\\p{Lu}.*?)))*(AllIgnoreCase|AllIgnoringCase)?(OrderBy((\\p{Lu}.*?)(Asc|Desc))+)?\\z");
+          .compile("^(\\p{Lu}.*?)((And|Or)(\\p{Lu}.*?))*(AllIgnoreCase|AllIgnoringCase)?(OrderBy((\\p{Lu}.*?)(Asc|Desc))+)?\\z");
 
 
   /**
@@ -73,12 +73,12 @@ public class Predicate {
       throw new RuntimeException("ERROR: OrderBy must not be used more than once in a method name");
     }
 
-    // Builds search expressions
-    buildTree(parts[0]);
-
     // Builds order clause
     this.orderBySource =
         parts.length == 2 ? new OrderBySource(currentPartTreeInstance, parts[1], fields) : null;
+
+    // Builds search expressions
+    buildTree(parts[0]);
 
   }
 
@@ -231,10 +231,22 @@ public class Predicate {
     for (int i = 0; i < split.length; i++) {
 
       // Validate previous expressions are correct
-      if (i > 0 && split[i - 1].length() == 0) {
+      if (i > 0 && StringUtils.isBlank(split[i - 1])) {
         throw new RuntimeException("ERROR: Missing expression before Or");
       }
       nodes.add(new OrPart(currentPartTreeInstance, split[i], fields));
+    }
+
+    // Validate expression before order clause is correct
+    if (hasOrderClause()) {
+      if (StringUtils.isBlank(split[split.length - 1])) {
+        throw new RuntimeException("ERROR: Missing expression before OrderBy");
+      }
+
+      List<Part> parts = nodes.get(nodes.size() - 1).getChildren();
+      if (!parts.get(parts.size() - 1).hasProperty()) {
+        throw new RuntimeException("ERROR: Missing expression before OrderBy");
+      }
     }
   }
 
@@ -260,6 +272,12 @@ public class Predicate {
    * Returns true if the predicate is well-defined, which means that its structure follows the SpringData rules and its condition properties belong to the entity domain.
    */
   public boolean IsValid() {
+
+    for (OrPart orPart : nodes) {
+      if (!orPart.isValid()) {
+        return false;
+      }
+    }
     return IsValid(toString());
   }
 

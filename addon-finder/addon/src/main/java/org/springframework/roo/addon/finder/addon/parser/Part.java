@@ -43,7 +43,7 @@ public class Part {
   private final Pair<FieldMetadata, String> property;
 
   // Operator type
-  private final Type type;
+  private Type type = null;
   private String operatorGroup = "";
   private String operator = null;
 
@@ -78,13 +78,13 @@ public class Part {
     // Remove property from source to process the operator
     if (property != null) {
       partToUse = partToUse.substring(property.getRight().length());
-    }
 
-    // Extract operator information
-    Pair<Type, String> type = Type.extractOperator(partToUse);
-    this.type = type.getLeft();
-    this.operator = type.getRight();
-    this.operatorGroup = Type.extractOperatorGroup(operator);
+      // Extract operator information
+      Pair<Type, String> type = Type.extractOperator(partToUse, property.getLeft().getFieldType());
+      this.type = type.getLeft();
+      this.operator = type.getRight();
+      this.operatorGroup = Type.extractOperatorGroup(operator);
+    }
   }
 
 
@@ -118,6 +118,9 @@ public class Part {
    * @return
    */
   public int getNumberOfArguments() {
+    if (type == null) {
+      return 0;
+    }
     return type.getNumberOfArguments();
   }
 
@@ -319,7 +322,7 @@ public class Part {
     String name = property.getLeft().getFieldName().toString();
 
     // In operator is a special case, since its parameter is a list of property java type objects
-    if (type == Type.IN || type == Type.NOT_IN) {
+    if (type != null && (type == Type.IN || type == Type.NOT_IN)) {
 
       name = name.concat("List");
       JavaType listType =

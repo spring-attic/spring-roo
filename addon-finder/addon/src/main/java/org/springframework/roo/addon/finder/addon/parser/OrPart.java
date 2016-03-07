@@ -63,4 +63,16 @@ public class OrPart {
   public List<Part> getChildren() {
     return children;
   }
+
+  /**
+   * Returns true if all its {@link Part} expressions have a property.
+   */
+  public boolean isValid() {
+    for (Part part : children) {
+      if (!part.hasProperty()) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

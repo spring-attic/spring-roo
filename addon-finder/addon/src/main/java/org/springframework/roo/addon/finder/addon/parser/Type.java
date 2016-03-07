@@ -196,19 +196,23 @@ public enum Type {
 
 
   /**
-   * Returns the {@link Type} of the {@link Part} and the operator for the given operator source
+   * Returns the {@link Type} and the operator, that javaType supports, from the given operator source
    * as a Pair(Type, keyword). Since operator source can contain information that is not referred to the operator, 
-   * the operator will be the keyword that matches more letters with the raw property. 
-   * If any operator is found in raw property, returns Pair(SIMPLE_PROPERTY, null).
+   * the operator will be the keyword that matches more letters with operator source. 
+   * If any operator is found in operator source, returns Pair(SIMPLE_PROPERTY, null).
    * 
    * @param operatorSource
    * @return Pair of operator type and operator name
    */
-  public static Pair<Type, String> extractOperator(String operatorSource) {
+  public static Pair<Type, String> extractOperator(String operatorSource, JavaType javaType) {
     Type lastType = SIMPLE_PROPERTY;
     String lastKeyword = null;
 
-    for (Type type : ALL) {
+    if (javaType == null) {
+      return Pair.of(lastType, lastKeyword);
+    }
+
+    for (Type type : getOperators(javaType)) {
       for (String keyword : type.keywords) {
         if (operatorSource.equals(keyword)) {
           return Pair.of(type, keyword);

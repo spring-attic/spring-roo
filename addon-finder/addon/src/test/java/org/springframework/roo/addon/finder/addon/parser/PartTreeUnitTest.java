@@ -175,6 +175,12 @@ public class PartTreeUnitTest {
   }
 
   @Test
+  public void rejectsUnsupportedOperator() throws Exception {
+    assertFalse(new PartTree("findByTextIsFalse", memberDetails).isValid());
+    assertFalse(new PartTree("findByTextIsFalsePrimiteIntNull", memberDetails).isValid());
+  }
+
+  @Test
   public void rejectsMultipleIgnoreCase() throws Exception {
     assertFalse(new PartTree("findByTextIgnoreCaseIgnoreCase", memberDetails).isValid());
   }
@@ -192,14 +198,38 @@ public class PartTreeUnitTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void rejectsEmptyOr() throws Exception {
-    assertFalse(new PartTree("findByOr", memberDetails).isValid());
+  public void rejectsEmptyExpressionBeforeOr() throws Exception {
+    assertFalse(new PartTree("findByOrText", memberDetails).isValid());
+  }
+
+  public void rejectsEmptyExpressionAfterOr() throws Exception {
+    assertFalse(new PartTree("findByTextOr", memberDetails).isValid());
   }
 
   @Test(expected = RuntimeException.class)
-  public void rejectsEmptyAnd() throws Exception {
-    assertFalse(new PartTree("findByAnd", memberDetails).isValid());
+  public void rejectsEmptyExpressionAfterBetweenOrAndOrderBy() throws Exception {
+    assertFalse(new PartTree("findByTextOrOrderByTextDesc", memberDetails).isValid());
   }
+
+  @Test(expected = RuntimeException.class)
+  public void rejectsEmptyExpressionBeforeAnd() throws Exception {
+    assertFalse(new PartTree("findByOrAndText", memberDetails).isValid());
+  }
+
+  public void rejectsEmptyExpressionAfterOrAnd() throws Exception {
+    assertFalse(new PartTree("findByTextAnd", memberDetails).isValid());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void rejectsEmptyExpressionAfterBetweenAndAndOrderBy() throws Exception {
+    assertFalse(new PartTree("findByTextAndOrderByTextDesc", memberDetails).isValid());
+  }
+
+
+  public void rejectsSeveralOrderDirections() throws Exception {
+    assertFalse(new PartTree("findByTextOrderByTextDescAsc", memberDetails).isValid());
+  }
+
 
   @Test(expected = RuntimeException.class)
   public void rejectsPredicateMultipleOrderBy() throws Exception {
@@ -258,15 +288,15 @@ public class PartTreeUnitTest {
 
   @Test
   public void parsesLessThanEqualCorrectly() {
-    assertTrue(new PartTree("findByTextIsLessThanEqual", memberDetails).isValid());
-    assertTrue(new PartTree("findByTextLessThanEqual", memberDetails).isValid());
+    assertTrue(new PartTree("findByNumberIsLessThanEqual", memberDetails).isValid());
+    assertTrue(new PartTree("findByNumberLessThanEqual", memberDetails).isValid());
 
   }
 
   @Test
   public void parsesGreaterThanEqualCorrectly() {
-    assertTrue(new PartTree("findByTextIsGreaterThanEqual", memberDetails).isValid());
-    assertTrue(new PartTree("findByTextGreaterThanEqual", memberDetails).isValid());
+    assertTrue(new PartTree("findByNumberIsGreaterThanEqual", memberDetails).isValid());
+    assertTrue(new PartTree("findByNumberGreaterThanEqual", memberDetails).isValid());
   }
 
   @Test
@@ -750,7 +780,7 @@ public class PartTreeUnitTest {
         for (String limit : TEST_LIMIT) {
           for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
             for (String fieldPred : PROPERTIES) {
-              for (String operator : new String[] {"Null", "In", "IsIn"}) {
+              for (String operator : new String[] {"In", "IsIn"}) {
 
                 test(prefix + distinct + limit + field + "By" + fieldPred + operator,
                     ArrayUtils.addAll(CONJUCTIONS, ArrayUtils.addAll(
@@ -780,7 +810,7 @@ public class PartTreeUnitTest {
   @Test
   public void optionsAfterOrConjuction() throws Exception {
     for (String fieldPred : PROPERTIES) {
-      for (String operator : new String[] {"Null", "In", "IsIn", ""}) {
+      for (String operator : new String[] {"IsNot", "In", "IsIn", ""}) {
         test("findBy" + fieldPred + operator + "Or", ArrayUtils.addAll(PROPERTIES, "derBy"));
 
       }
@@ -790,7 +820,7 @@ public class PartTreeUnitTest {
   @Test
   public void optionsAfterAndConjuction() throws Exception {
     for (String fieldPred : PROPERTIES) {
-      for (String operator : new String[] {"Null", "In", "IsIn", ""}) {
+      for (String operator : new String[] {"IsNot", "In", "IsIn", ""}) {
         test("findBy" + fieldPred + operator + "And", PROPERTIES);
 
       }
@@ -823,7 +853,7 @@ public class PartTreeUnitTest {
   @Test
   public void optionsAfterOrderBy() throws Exception {
     for (String fieldPred : PROPERTIES) {
-      for (String operator : new String[] {"Null", "In", ""}) {
+      for (String operator : new String[] {"IsNot", "In", ""}) {
         for (String ignore : ArrayUtils.addAll(IGNORE_CASE, "")) {
           for (String allIgnore : ALL_IGNORE_CASE) {
             test("findBy" + fieldPred + operator + ignore + allIgnore + "OrderBy", PROPERTIES);
@@ -836,7 +866,7 @@ public class PartTreeUnitTest {
   @Test
   public void optionsAfterOrderField() throws Exception {
     for (String fieldPred : PROPERTIES) {
-      for (String operator : new String[] {"Null", "In", "IsIn", ""}) {
+      for (String operator : new String[] {"IsNot", "In", "IsIn", ""}) {
         for (String ignore : ArrayUtils.addAll(IGNORE_CASE, "")) {
           for (String allIgnore : ALL_IGNORE_CASE) {
             test("findBy" + fieldPred + operator + ignore + allIgnore + "OrderBy" + fieldPred,
@@ -850,7 +880,7 @@ public class PartTreeUnitTest {
   @Test
   public void optionsAfterOrderFieldDirection() throws Exception {
     for (String fieldPred : PROPERTIES) {
-      for (String operator : new String[] {"Null", "In", "IsIn", ""}) {
+      for (String operator : new String[] {"IsNot", "In", "IsIn", ""}) {
         for (String ignore : ArrayUtils.addAll(IGNORE_CASE, "")) {
           for (String allIgnore : ALL_IGNORE_CASE) {
             for (String direction : new String[] {"Asc", "Desc"}) {
