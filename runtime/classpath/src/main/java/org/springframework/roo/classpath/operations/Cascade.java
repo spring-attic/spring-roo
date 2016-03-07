@@ -3,14 +3,15 @@ package org.springframework.roo.classpath.operations;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * Provides cardinality options for "set" and "reference" relationships.
+ * This enum type represents javax.persistence.CascadeType 
+ * on Spring Roo Shell
  * 
- * @author Ben Alex
- * @author Alan Stewart
- * @since 1.0
+ * @author Sergio Clares
+ * @since 2.0
  */
-public enum Cardinality {
-  MANY_TO_MANY, MANY_TO_ONE, ONE_TO_MANY, ONE_TO_ONE;
+public enum Cascade {
+
+  ALL, DETACH, MERGE, PERSIST, REFRESH, REMOVE;
 
   @Override
   public String toString() {

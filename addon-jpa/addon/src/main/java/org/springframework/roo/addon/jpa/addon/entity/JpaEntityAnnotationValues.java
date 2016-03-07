@@ -3,9 +3,7 @@ package org.springframework.roo.addon.jpa.addon.entity;
 import static org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity.VERSION_FIELD_DEFAULT;
 
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
-import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
+import org.springframework.roo.classpath.details.annotations.populator.*;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.model.JavaType;
 
@@ -37,7 +35,7 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
   @AutoPopulate
   private String sequenceName = null;
   @AutoPopulate
-  private String identifierStrategy = "";
+  private String identifierStrategy = IdentifierStrategy.AUTO.name();
   @AutoPopulate
   private String table = "";
   @AutoPopulate

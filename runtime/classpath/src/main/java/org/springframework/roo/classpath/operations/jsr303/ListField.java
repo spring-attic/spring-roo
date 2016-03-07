@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.operations.Cardinality;
+import org.springframework.roo.classpath.operations.Cascade;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
@@ -15,8 +16,9 @@ public class ListField extends SetField {
 
   public ListField(final String physicalTypeIdentifier, final JavaType fieldType,
       final JavaSymbolName fieldName, final JavaType genericParameterTypeName,
-      final Cardinality cardinality) {
-    super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName, cardinality);
+      final Cardinality cardinality, final Cascade cascadeType) {
+    super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName, cardinality,
+        cascadeType);
   }
 
   @Override

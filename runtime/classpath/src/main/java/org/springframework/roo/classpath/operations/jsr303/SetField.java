@@ -13,8 +13,7 @@ import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
 import java.util.*;
 
 import org.springframework.roo.classpath.details.annotations.*;
-import org.springframework.roo.classpath.operations.Cardinality;
-import org.springframework.roo.classpath.operations.Fetch;
+import org.springframework.roo.classpath.operations.*;
 import org.springframework.roo.model.*;
 
 /**
@@ -40,6 +39,7 @@ public class SetField extends CollectionField {
   private final Cardinality cardinality;
   private Fetch fetch;
   private List<AnnotationAttributeValue<?>> joinTableAttributes;
+  private Cascade cascadeType;
 
   /**
    * Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be
@@ -49,9 +49,10 @@ public class SetField extends CollectionField {
 
   public SetField(final String physicalTypeIdentifier, final JavaType fieldType,
       final JavaSymbolName fieldName, final JavaType genericParameterTypeName,
-      final Cardinality cardinality) {
+      final Cardinality cardinality, final Cascade cascadeType) {
     super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName);
     this.cardinality = cardinality;
+    this.cascadeType = cascadeType;
   }
 
   @Override
@@ -65,7 +66,7 @@ public class SetField extends CollectionField {
       annotations.add(new AnnotationMetadataBuilder(ELEMENT_COLLECTION));
     } else {
       attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(
-          CASCADE_TYPE, new JavaSymbolName("ALL"))));
+          CASCADE_TYPE, new JavaSymbolName(cascadeType.name()))));
       if (fetch != null) {
         JavaSymbolName value = new JavaSymbolName("EAGER");
         if (fetch == Fetch.LAZY) {
@@ -125,7 +126,7 @@ public class SetField extends CollectionField {
   }
 
   /**
-   * Fill {@link #joinTableAttributes} for building @JoinTable annotation
+   * Fill {@link #joinTableAttributes} for building @JoinTable annotation. The annotation would have some nested @JoinColumn annotations in each of its "joinColumns" and "inverseJoinColumns" attributes
    * 
    * @param joinTableName
    * @param joinColumns

@@ -576,6 +576,11 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+      @CliOption(
+          key = "cascadeType",
+          mandatory = false,
+          specifiedDefaultValue = "ALL",
+          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
       ShellContext shellContext) {
 
     final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
@@ -606,7 +611,7 @@ public class FieldCommands implements CommandMarker {
 
     final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
     final ReferenceField fieldDetails =
-        new ReferenceField(physicalTypeIdentifier, fieldType, fieldName, cardinality);
+        new ReferenceField(physicalTypeIdentifier, fieldType, fieldName, cardinality, cascadeType);
     fieldDetails.setNotNull(notNull);
     fieldDetails.setNullRequired(nullRequired);
     if (joinColumnName != null) {
@@ -661,19 +666,25 @@ public class FieldCommands implements CommandMarker {
       @CliOption(
           key = "joinColumns",
           mandatory = false,
-          help = "Comma separated list of join table's foreign key columns which references the table of the entity owning the association") final String joinColumns,
+          help = "Comma separated list of join table's foreign key columns which references the table of the entity owning the relation") final String joinColumns,
       @CliOption(
           key = "referencedColumns",
           mandatory = false,
-          help = "Comma separated list of foreign key referenced columns in the table of the entity owning the association") final String referencedColumns,
+          help = "Comma separated list of foreign key referenced columns in the table of the entity owning the relation") final String referencedColumns,
       @CliOption(
           key = "inverseJoinColumns",
           mandatory = false,
-          help = "Comma separated list of join table's foreign key columns which references the table of the entity that does not own the association") final String inverseJoinColumns,
+          help = "Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation") final String inverseJoinColumns,
       @CliOption(
           key = "inverseReferencedColumns",
           mandatory = false,
-          help = "Comma separated list of foreign key referenced columns in the table of the entity that does not own the association") final String inverseReferencedColumns,
+          help = "Comma separated list of foreign key referenced columns in the table of the entity that does not own the relation") final String inverseReferencedColumns,
+      @CliOption(
+          key = "cascadeType",
+          mandatory = false,
+          unspecifiedDefaultValue = "ALL",
+          specifiedDefaultValue = "ALL",
+          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
       ShellContext shellContext) {
 
     final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
@@ -710,7 +721,8 @@ public class FieldCommands implements CommandMarker {
     final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
     final SetField fieldDetails =
         new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0,
-            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality);
+            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
+            cascadeType);
     fieldDetails.setNotNull(notNull);
     fieldDetails.setNullRequired(nullRequired);
     if (sizeMin != null) {
@@ -777,6 +789,30 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+      @CliOption(key = "joinTableName", mandatory = false,
+          help = "Join table name. Most usually used in @ManyToMany relations") final String joinTableName,
+      @CliOption(
+          key = "joinColumns",
+          mandatory = false,
+          help = "Comma separated list of join table's foreign key columns which references the table of the entity owning the relation") final String joinColumns,
+      @CliOption(
+          key = "referencedColumns",
+          mandatory = false,
+          help = "Comma separated list of foreign key referenced columns in the table of the entity owning the relation") final String referencedColumns,
+      @CliOption(
+          key = "inverseJoinColumns",
+          mandatory = false,
+          help = "Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation") final String inverseJoinColumns,
+      @CliOption(
+          key = "inverseReferencedColumns",
+          mandatory = false,
+          help = "Comma separated list of foreign key referenced columns in the table of the entity that does not own the relation") final String inverseReferencedColumns,
+      @CliOption(
+          key = "cascadeType",
+          mandatory = false,
+          unspecifiedDefaultValue = "ALL",
+          specifiedDefaultValue = "ALL",
+          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
       ShellContext shellContext) {
 
     final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
@@ -813,7 +849,8 @@ public class FieldCommands implements CommandMarker {
     final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
     final ListField fieldDetails =
         new ListField(physicalTypeIdentifier, new JavaType(LIST.getFullyQualifiedTypeName(), 0,
-            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality);
+            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
+            cascadeType);
     fieldDetails.setNotNull(notNull);
     fieldDetails.setNullRequired(nullRequired);
     if (sizeMin != null) {
@@ -830,6 +867,22 @@ public class FieldCommands implements CommandMarker {
     }
     if (comment != null) {
       fieldDetails.setComment(comment);
+    }
+    if (joinTableName != null) {
+      // Create strings arrays and set @JoinTable annotation
+      String[] joinColumnsArray = joinColumns.replace(" ", "").split(",");
+      String[] referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
+      String[] inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
+      String[] inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
+
+      Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
+          "--joinColumns and --referencedColumns must have same number of column values");
+      Validate
+          .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
+              "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
+
+      fieldDetails.setJoinTableAnnotation(joinTableName, joinColumnsArray, referencedColumnsArray,
+          inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
     insertField(fieldDetails, permitReservedWords, transientModifier);

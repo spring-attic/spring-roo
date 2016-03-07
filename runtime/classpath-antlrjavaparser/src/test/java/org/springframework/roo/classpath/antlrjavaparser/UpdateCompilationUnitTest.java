@@ -26,6 +26,7 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.Cardinality;
+import org.springframework.roo.classpath.operations.Cascade;
 import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.metadata.MetadataService;
@@ -172,7 +173,7 @@ public class UpdateCompilationUnitTest {
     final SetField fieldDetails =
         new SetField(SIMPLE_CLASS3_DECLARED_BY_MID, new JavaType(SET.getFullyQualifiedTypeName(),
             0, DataType.TYPE, null, Arrays.asList(SIMPLE_CLASS3_TYPE)), new JavaSymbolName(
-            "children"), SIMPLE_CLASS3_TYPE, Cardinality.ONE_TO_MANY);
+            "children"), SIMPLE_CLASS3_TYPE, Cardinality.ONE_TO_MANY, Cascade.REMOVE);
 
     final FieldMetadataBuilder fieldBuilder =
         new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE,
@@ -199,7 +200,7 @@ public class UpdateCompilationUnitTest {
 
     final ReferenceField fieldDetails2 =
         new ReferenceField(SIMPLE_CLASS3_DECLARED_BY_MID, SIMPLE_CLASS2_TYPE, new JavaSymbolName(
-            "referenceField"), Cardinality.MANY_TO_ONE);
+            "referenceField"), Cardinality.MANY_TO_ONE, Cascade.REFRESH);
 
     final FieldMetadataBuilder fieldBuilder2 =
         new FieldMetadataBuilder(fieldDetails2.getPhysicalTypeIdentifier(), Modifier.PRIVATE,

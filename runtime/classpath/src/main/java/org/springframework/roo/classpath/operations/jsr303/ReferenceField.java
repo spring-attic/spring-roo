@@ -1,11 +1,6 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
-import static org.springframework.roo.model.JpaJavaType.FETCH_TYPE;
-import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
-import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
-import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
-import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
-import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +9,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.operations.Cardinality;
-import org.springframework.roo.classpath.operations.Fetch;
+import org.springframework.roo.classpath.operations.*;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -43,11 +37,13 @@ public class ReferenceField extends FieldDetails {
   private Fetch fetch;
   private String joinColumnName;
   private String referencedColumnName;
+  private Cascade cascadeType;
 
   public ReferenceField(final String physicalTypeIdentifier, final JavaType fieldType,
-      final JavaSymbolName fieldName, final Cardinality cardinality) {
+      final JavaSymbolName fieldName, final Cardinality cardinality, Cascade cascadeType) {
     super(physicalTypeIdentifier, fieldType, fieldName);
     this.cardinality = cardinality;
+    this.cascadeType = cascadeType;
   }
 
   @Override
@@ -63,6 +59,12 @@ public class ReferenceField extends FieldDetails {
       }
       attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(
           FETCH_TYPE, value)));
+    }
+
+    // Add cascade if option exists
+    if (cascadeType != null) {
+      attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(
+          CASCADE_TYPE, new JavaSymbolName(cascadeType.name()))));
     }
 
     switch (cardinality) {

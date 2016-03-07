@@ -2,6 +2,7 @@ package org.springframework.roo.addon.jpa.addon;
 
 import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JpaJavaType.GENERATION_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
@@ -24,6 +25,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.IdentifierStrategy;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.test.addon.IntegrationTestOperations;
@@ -68,6 +70,9 @@ public class JpaCommands implements CommandMarker {
       new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
   private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER =
       new AnnotationMetadataBuilder(ROO_TO_STRING);
+
+  // Enums
+  private static final JavaType IDENTIFIER_STRATEGY = new JavaType(IdentifierStrategy.class);
 
   @Reference
   private IntegrationTestOperations integrationTestOperations;
@@ -436,8 +441,7 @@ public class JpaCommands implements CommandMarker {
 
     // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
     if (identifierStrategy != null) {
-      entityAnnotationBuilder
-          .addStringAttribute("identifierStrategy", identifierStrategy.getType());
+      entityAnnotationBuilder.addStringAttribute("identifierStrategy", identifierStrategy.name());
     }
 
     // ROO-3708: Generate readOnly entities

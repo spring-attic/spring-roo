@@ -1,28 +1,12 @@
 package org.springframework.roo.addon.jpa.addon.entity;
 
-import static org.springframework.roo.model.GoogleJavaType.DATANUCLEUS_JPA_EXTENSION;
 import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
-import static org.springframework.roo.model.JdkJavaType.CALENDAR;
-import static org.springframework.roo.model.JpaJavaType.COLUMN;
-import static org.springframework.roo.model.JpaJavaType.DISCRIMINATOR_COLUMN;
-import static org.springframework.roo.model.JpaJavaType.EMBEDDED_ID;
-import static org.springframework.roo.model.JpaJavaType.ENTITY;
-import static org.springframework.roo.model.JpaJavaType.GENERATED_VALUE;
-import static org.springframework.roo.model.JpaJavaType.GENERATION_TYPE;
-import static org.springframework.roo.model.JpaJavaType.ID;
-import static org.springframework.roo.model.JpaJavaType.INHERITANCE;
-import static org.springframework.roo.model.JpaJavaType.INHERITANCE_TYPE;
-import static org.springframework.roo.model.JpaJavaType.MAPPED_SUPERCLASS;
-import static org.springframework.roo.model.JpaJavaType.SEQUENCE_GENERATOR;
-import static org.springframework.roo.model.JpaJavaType.TABLE;
-import static org.springframework.roo.model.JpaJavaType.VERSION;
+import static org.springframework.roo.model.JpaJavaType.*;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -30,28 +14,14 @@ import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
+import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.annotations.*;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataItem;
-import org.springframework.roo.model.EnumDetails;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.*;
 
 /**
  * The metadata for a JPA entity's *_Roo_Jpa_Entity.aj ITD.
@@ -329,17 +299,26 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Compute the column name, as required
     if (!hasIdClass) {
       if (!"".equals(annotationValues.getSequenceName())) {
-        String identifierStrategy = "AUTO";
 
         // ROO-3719: Add SEQUENCE as @GeneratedValue strategy
-        if (!"".equals(annotationValues.getIdentifierStrategy())) {
-          identifierStrategy = annotationValues.getIdentifierStrategy();
+        String identifierStrategy = annotationValues.getIdentifierStrategy();
+        // Check if provided identifierStrategy is valid
+        boolean isValidIdentifierStrategy = false;
+        for (IdentifierStrategy identifierStrategyType : IdentifierStrategy.values()) {
+          if (identifierStrategyType.name().equals(identifierStrategy)) {
+            isValidIdentifierStrategy = true;
+            break;
+          }
+        }
+
+        if (!isValidIdentifierStrategy) {
+          identifierStrategy = IdentifierStrategy.AUTO.name();
         }
 
         // ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE)
         // If the root of the governor declares @Inheritance(strategy =
         // InheritanceType.TABLE_PER_CLASS)
-        if ("AUTO".equals(identifierStrategy)) {
+        if (IdentifierStrategy.AUTO.name().equals(identifierStrategy)) {
           AnnotationMetadata inheritance = governorTypeDetails.getAnnotation(INHERITANCE);
           if (inheritance == null) {
             inheritance = getInheritanceAnnotation();
@@ -352,7 +331,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
               final EnumDetails details = enumAttributeValue.getValue();
               if (details != null && details.getType().equals(INHERITANCE_TYPE)) {
                 if ("TABLE_PER_CLASS".equals(details.getField().getSymbolName())) {
-                  identifierStrategy = "TABLE";
+                  identifierStrategy = IdentifierStrategy.TABLE.name();
                 }
               }
             }
