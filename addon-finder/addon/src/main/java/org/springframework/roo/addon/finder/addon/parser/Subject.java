@@ -97,6 +97,34 @@ public class Subject {
     // Extract property
     property = extractValidField(grp.group(5), fields);
 
+    // Check If property starts with reserved words
+    if (property == null && maxResults == null) {
+
+      if (distinct) {
+        if (limit == null) {
+          property = extractValidField(DISTINCT + grp.group(5), fields);
+
+          if (property != null) {
+            distinct = false;
+          }
+
+        } else if (maxResults == null) {
+          property = extractValidField(DISTINCT + limit + grp.group(5), fields);
+
+          if (property != null) {
+            limit = null;
+            distinct = false;
+          }
+        }
+      } else if (limit != null) {
+        property = extractValidField(limit + grp.group(5), fields);
+
+        if (property != null) {
+          limit = null;
+        }
+      }
+    }
+
   }
 
   /**
@@ -242,12 +270,30 @@ public class Subject {
         // Check if subject has Distinct expression. It can only be added before the property and limiting expression
         if (!isDistinct()) {
           options.add(query + DISTINCT);
+        } else {
+          // Add properties that start with reserved words
+          for (FieldMetadata field : fields) {
+            String name = StringUtils.capitalize(field.getFieldName().toString());
+            if (name.startsWith(DISTINCT)) {
+              options.add(query.concat(StringUtils.substringAfter(name, DISTINCT)));
+            }
+          }
         }
 
       } else if (maxResults == null) {
 
         // Optionally, a limiting expression can have a number as parameter
         options.add(query + "[Number]");
+
+        // Add properties that start with reserved words
+        for (FieldMetadata field : fields) {
+          String name = StringUtils.capitalize(field.getFieldName().toString());
+          if (name.startsWith(limit)) {
+            options.add(query.concat(StringUtils.substringAfter(name, limit)));
+          } else if (isDistinct() && name.startsWith(DISTINCT.concat(limit))) {
+            options.add(query.concat(StringUtils.substringAfter(name, DISTINCT.concat(limit))));
+          }
+        }
       }
 
     } else {

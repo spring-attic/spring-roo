@@ -66,8 +66,8 @@ public class Predicate {
     this.currentPartTreeInstance = partTree;
     this.fields = fields;
 
-    // Extracts AllIgnoreCase option and splits predicate between search expressions and order clause
-    String[] parts = PartTree.split(detectAndSetAllIgnoreCase(source), ORDER_BY, -1);
+    // Splits predicate between search expressions and order clause
+    String[] parts = PartTree.split(source, ORDER_BY, -1);
 
     if (parts.length > 2) {
       throw new RuntimeException("ERROR: OrderBy must not be used more than once in a method name");
@@ -77,8 +77,8 @@ public class Predicate {
     this.orderBySource =
         parts.length == 2 ? new OrderBySource(currentPartTreeInstance, parts[1], fields) : null;
 
-    // Builds search expressions
-    buildTree(parts[0]);
+    // Extracts AllIgnoreCase option and builds search expressions
+    buildTree(detectAndSetAllIgnoreCase(parts[0]));
 
   }
 
@@ -128,8 +128,8 @@ public class Predicate {
     // Check if last condition has a property
     if (lastAnd == null || !lastAnd.hasProperty()) {
 
-      // If the options will be added after an Or expression, OrderBy keyword is added. It makes possible transform an Or into an OrderBy expression
-      if (nodes.size() > 1) {
+      // If options are added after Or, OrderBy keyword is added. It makes possible transform an Or into an OrderBy expression
+      if (subject.endsWith("Or")) {
         options.add(StringUtils.removeEnd(subject, "Or").concat(ORDER_BY));
       }
 
@@ -197,26 +197,24 @@ public class Predicate {
   }
 
   /**
-   * Detects  AllIgnoreCase option and removes it from predicate.
+   * Splits source by AllIgnoreCase option and returns information before this option.
    * 
-   * @param predicate 
-   * @return predicate predicate without AllIgnoreCase option.
+   * @param source 
+   * @return source previous to AllIgnoreCase option.
    */
-  private String detectAndSetAllIgnoreCase(String predicate) {
+  private String detectAndSetAllIgnoreCase(String source) {
 
-    Matcher matcher = ALL_IGNORE_CASE.matcher(predicate);
+    Matcher matcher = ALL_IGNORE_CASE.matcher(source);
 
     if (matcher.find()) {
       alwaysIgnoreCase = true;
 
       // Save which option has been used (AllIgnoreCase or AllIgnoringCase)
       alwaysIgnoreCaseString = matcher.group(0);
-      predicate =
-          predicate.substring(0, matcher.start())
-              + predicate.substring(matcher.end(), predicate.length());
+      source = source.substring(0, matcher.start());
     }
 
-    return predicate;
+    return source;
   }
 
   /**
