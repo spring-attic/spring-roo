@@ -27,8 +27,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.*;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.*;
 import org.springframework.roo.classpath.details.comments.CommentFormatter;
 import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
@@ -47,11 +46,7 @@ import org.springframework.roo.classpath.operations.jsr303.UploadedFileField;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.model.ReservedWords;
+import org.springframework.roo.model.*;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.*;
@@ -986,6 +981,13 @@ public class FieldCommands implements CommandMarker {
     if (lob) {
       fieldDetails.getInitedAnnotations().add(
           new AnnotationMetadataBuilder("javax.persistence.Lob"));
+
+      // ROO-3722: Add LAZY load in @Lob fields using @Basic
+      AnnotationMetadataBuilder basicAnnotation =
+          new AnnotationMetadataBuilder("javax.persistence.Basic");
+      basicAnnotation.addEnumAttribute("fetch", new EnumDetails(new JavaType(
+          "javax.persistence.FetchType"), new JavaSymbolName("LAZY")));
+      fieldDetails.getInitedAnnotations().add(basicAnnotation);
     }
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }

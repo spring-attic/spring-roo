@@ -89,6 +89,20 @@ field set --fieldName entity1_set_default --type ~.domain.Entity1 --cardinality 
 #====================================================================================================================
 
 
+#====================================================================================================================
+# TEST 7: Create String lob field
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field string command with the optional parameter --lob
+#
+field string --fieldName entity1_lob --class ~.domain.Entity1
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create entity1_lob field without errors and with @Lob and @Basic(fetch=LAZY)                       
+#====================================================================================================================
+
+
 ##########################################################################
 #######                      MANUAL TESTS                        #########
 ##########################################################################
@@ -100,7 +114,7 @@ field set --fieldName entity1_set_default --type ~.domain.Entity1 --cardinality 
 
 
 #====================================================================================================================
-# TEST 7: Create set field with wrong CascadeType
+# TEST 8: Create set field with wrong CascadeType
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with the optional parameter --cascadeType with a wrong value.
 #
