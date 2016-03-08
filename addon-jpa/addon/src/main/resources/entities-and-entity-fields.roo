@@ -103,6 +103,40 @@ field string --fieldName entity1_lob --class ~.domain.Entity1
 #====================================================================================================================
 
 
+#====================================================================================================================
+# TEST 8: Create extended entity with identifier param using --force
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test entity jpa command with the optional parameter --extends and other identifier param, which will be 
+#         overridden.
+#
+entity jpa --class ~.domain.Extended_Entity --extends ~.domain.Entity1 --identifierColumn id --force
+#      
+# Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Extended_Entity.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Extended_Entity_Roo_Jpa_Entity.aj
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Extended_Entity_Roo_ToString.aj
+#
+# Result: Create Extended_Entity entity without errors but also without identifier field (it will use superclass 
+#         identifier field).                      
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 9: Create extended entity with version param using --force
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test entity jpa command with the optional parameter --extends and other version param, which will be 
+#         overridden.
+#
+entity jpa --class ~.domain.Extended_Entity2 --extends ~.domain.Entity1 --versionField version --force
+#      
+# Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Extended_Entity2.java
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Extended_Entity2_Roo_Jpa_Entity.aj
+#         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Extended_Entity2_Roo_ToString.aj
+#
+# Result: Create Extended_Entity entity without errors but also without version field (it will use superclass 
+#         version field).                                            
+#====================================================================================================================
+
+
 ##########################################################################
 #######                      MANUAL TESTS                        #########
 ##########################################################################
@@ -114,7 +148,7 @@ field string --fieldName entity1_lob --class ~.domain.Entity1
 
 
 #====================================================================================================================
-# TEST 8: Create set field with wrong CascadeType
+# TEST 10: Create set field with wrong CascadeType
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with the optional parameter --cascadeType with a wrong value.
 #
@@ -124,4 +158,18 @@ field string --fieldName entity1_lob --class ~.domain.Entity1
 #         No enum constant org.springframework.roo.classpath.operations.Cascade.WRONG
 #
 # Result: Throws and exception and stops command execution because the wrong enum value.                              
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 11: Try to create extended entity with identifier param without using --force
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test entity jpa command with the optional parameter --extends and other identifier param.
+#
+#entity jpa --class ~.domain.Extended_Entity3 --extends ~.domain.Entity1 --identifierColumn id
+#      
+# Output: Identifier and version fields will be overwritten by superclass fields. Please, use --force to execute 
+#         the command anyway
+#
+# Result: Command execution stops and user sees a warning message about the incompatible params.                      
 #====================================================================================================================

@@ -314,6 +314,14 @@ public class JpaCommands implements CommandMarker {
       }
     }
 
+    // ROO-3723: Add warning when using --extends with incompatible parameters
+    if (!("java.lang.Object").equals(superclass.getFullyQualifiedTypeName())
+        && !shellContext.isForce()) {
+      this.checkExtendsOverride(shellContext, identifierColumn, identifierField,
+          identifierStrategy, identifierType, sequenceName, versionColumn, versionField,
+          versionType);
+    }
+
     if (!permitReservedWords) {
       ReservedWords.verifyReservedWordsNotPresent(name);
     }
@@ -369,25 +377,25 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
-   * Returns a builder for the entity-related annotation to be added to a
-   * newly created JPA entity
-   * 
-   * @param table
-   * @param schema
-   * @param catalog
-   * @param identifierField
-   * @param identifierColumn
-   * @param identifierType
-   * @param versionField
-   * @param versionColumn
-   * @param versionType
-   * @param inheritanceType
-   * @param mappedSuperclass
-   * @param entityName
-   * @param sequenceName
-   * @param readOnly
-   * @return a non-<code>null</code> builder
-   */
+     * Returns a builder for the entity-related annotation to be added to a
+     * newly created JPA entity
+     * 
+     * @param table
+     * @param schema
+     * @param catalog
+     * @param identifierField
+     * @param identifierColumn
+     * @param identifierType
+     * @param versionField
+     * @param versionColumn
+     * @param versionType
+     * @param inheritanceType
+     * @param mappedSuperclass
+     * @param entityName
+     * @param sequenceName
+     * @param readOnly
+     * @return a non-<code>null</code> builder
+     */
   private AnnotationMetadataBuilder getEntityAnnotationBuilder(final String table,
       final String schema, final String catalog, final String identifierField,
       final String identifierColumn, final JavaType identifierType, final String versionField,
@@ -416,6 +424,9 @@ public class JpaCommands implements CommandMarker {
     }
     if (!LONG_OBJECT.equals(identifierType)) {
       entityAnnotationBuilder.addClassAttribute("identifierType", identifierType);
+      /**
+      * 
+      */
     }
     if (inheritanceType != null) {
       entityAnnotationBuilder.addStringAttribute("inheritanceType", inheritanceType.name());
@@ -455,5 +466,30 @@ public class JpaCommands implements CommandMarker {
   private boolean isJdk6OrHigher() {
     final String ver = System.getProperty("java.version");
     return ver.indexOf("1.6.") > -1 || ver.indexOf("1.7.") > -1;
+  }
+
+  /**
+   * Check if superclass of the extended entity which it's going to be created will override any specified param and shows a message if so. If user uses the --force global param it will be possible to execute the command for creating the entity. 
+   * 
+   * @param shellContext 
+   * @param identifierColumn
+   * @param identifierField
+   * @param identifierStrategy
+   * @param identifierType
+   * @param sequenceName
+   * @param versionColumn
+   * @param versionField
+   * @param versionType
+   */
+  private void checkExtendsOverride(ShellContext shellContext, String identifierColumn,
+      String identifierField, IdentifierStrategy identifierStrategy, JavaType identifierType,
+      String sequenceName, String versionColumn, String versionField, JavaType versionType) {
+    if (identifierColumn != null || identifierField != null || identifierStrategy != null
+        || identifierType != null || sequenceName != null || versionColumn != null
+        || versionField != null || versionType != null) {
+      throw new IllegalArgumentException(
+          "Identifier and version fields will be overwritten by superclass fields. Please, use --force to execute the command anyway.");
+
+    }
   }
 }
