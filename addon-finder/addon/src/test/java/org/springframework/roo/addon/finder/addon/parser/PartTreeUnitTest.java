@@ -192,9 +192,15 @@ public class PartTreeUnitTest {
   }
 
 
-  @Test
+  @Test(expected = RuntimeException.class)
   public void rejectsMultipleOrderBy() throws Exception {
-    assertFalse(new PartTree("findTextOrderByTextOrderByNumber", memberDetails).isValid());
+    assertFalse(new PartTree("findByTextOrderByTextAscOrderByNumberDesc", memberDetails).isValid());
+  }
+
+
+  @Test(expected = IllegalArgumentException.class)
+  public void rejectsMultipleOrderDirections() throws Exception {
+    assertFalse(new PartTree("findByTextOrderByTextAscDesc", memberDetails).isValid());
   }
 
   @Test(expected = RuntimeException.class)

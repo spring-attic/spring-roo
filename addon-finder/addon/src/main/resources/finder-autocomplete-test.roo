@@ -84,8 +84,8 @@ field reference --fieldName pet --type ~.Pet
 #          findTopPet findTopTelephone  findTop[Number] 
 #
 #          findDistinctFirstActive findDistinctFirstAge findDistinctFirstBirthday  
-#          findDistinctFirstBy findDistinctFirstFirstName findDistinctFirstPet   
-#          findDistinctFirstTelephone findDistinctFirst[Number]
+#          findDistinctFirstBy findDistinctFirstFirstName findDistinctFirstName    
+#          findDistinctFirstPet findDistinctFirstTelephone findDistinctFirst[Number]
 #
 # Result:  Shows all entity properties, [Number] to indicate that a number can be
 #          specified, and By to end the subject                                                             

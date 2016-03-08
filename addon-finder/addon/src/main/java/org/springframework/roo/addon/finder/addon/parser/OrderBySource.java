@@ -130,8 +130,8 @@ public class OrderBySource {
     } else {
 
       // Show order directions after the property
-      options.add(query.concat(Direction.ASC.keyword));
-      options.add(query.concat(Direction.DESC.keyword));
+      options.add(query.concat(Direction.ASC.getKeyword()));
+      options.add(query.concat(Direction.DESC.getKeyword()));
 
       // If property is a reference to other entity, related entity properties can be added
       List<FieldMetadata> fields =

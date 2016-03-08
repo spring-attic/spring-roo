@@ -317,7 +317,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Checks that a finder with an empty name cannot be created
 #
-#finder add --class ~.Owner --name 
+# finder add --class ~.Owner --name 
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -331,17 +331,17 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fail finder creation if it does not contain at least an operation+By+property
 #
-#finder add --class ~.Owner --name find
-#finder add --class ~.Owner --name findBy
-#finder add --class ~.Owner --name findAge
-#finder add --class ~.Owner --name Age
-#finder add --class ~.Owner --name AgeBy
-#finder add --class ~.Owner --name By
-#finder add --class ~.Owner --name ByAge
-#finder add --class ~.Owner --name findTByAge
-#finder add --class ~.Owner --name findTeByAge
-#finder add --class ~.Owner --name findByByAge
-#finder add --class ~.Owner --name findByAgeAge
+# finder add --class ~.Owner --name find
+# finder add --class ~.Owner --name findBy
+# finder add --class ~.Owner --name findAge
+# finder add --class ~.Owner --name Age
+# finder add --class ~.Owner --name AgeBy
+# finder add --class ~.Owner --name By
+# finder add --class ~.Owner --name ByAge
+# finder add --class ~.Owner --name findTByAge
+# finder add --class ~.Owner --name findTeByAge
+# finder add --class ~.Owner --name findByByAge
+# finder add --class ~.Owner --name findByAgeAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -355,7 +355,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if operation is not read, find or query
 #
-#finder add --class ~.Owner --name deleteByAge
+# finder add --class ~.Owner --name deleteByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -385,14 +385,14 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if limiting expression is not placed in a correct location
 #
-#finder add --class ~.Owner --name TopfindByAge
-#finder add --class ~.Owner --name findDistinctTopBy
-#finder add --class ~.Owner --name findTopDistinctByAge
-#finder add --class ~.Owner --name findTopFirstByAge
-#finder add --class ~.Owner --name findTopAgeAgeByAge
-#finder add --class ~.Owner --name findTopaAgeByAge
-#finder add --class ~.Owner --name findTopaByAge
-#finder add --class ~.Owner --name find1TopByAge
+# finder add --class ~.Owner --name TopfindByAge
+# finder add --class ~.Owner --name findDistinctTopBy
+# finder add --class ~.Owner --name findTopDistinctByAge
+# finder add --class ~.Owner --name findTopFirstByAge
+# finder add --class ~.Owner --name findTopAgeAgeByAge
+# finder add --class ~.Owner --name findTopaAgeByAge
+# finder add --class ~.Owner --name findTopaByAge
+# finder add --class ~.Owner --name find1TopByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -405,7 +405,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if max  results number is 0
 #
-#finder add --class ~.Owner --name findTop0ByAge
+# finder add --class ~.Owner --name findTop0ByAge
 #      
 # Output:  ERROR: Query max results cannot be 0.
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -419,7 +419,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has several properties to return
 #
-#finder add --class ~.Owner --name findActiveAndAgeByAge
+# finder add --class ~.Owner --name findActiveAndAgeByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -432,7 +432,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fail if a finder contains several IgnoreCase options for the same property
 #
-#finder add --class ~.Owner --name findByAgeIgnoreCaseIgnoreCase
+# finder add --class ~.Owner --name findByAgeIgnoreCaseIgnoreCase
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -445,8 +445,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if a property is associated to an unsupported operator 
 #
-#finder add --class ~.Owner --name findByFirstNameFalse
-#finder add --class ~.Owner --name  findByAgeNull
+# finder add --class ~.Owner --name findByFirstNameFalse
+# finder add --class ~.Owner --name  findByAgeNull
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -459,8 +459,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an Or
 #
-#finder add --class ~.Owner --name findByOr
-#finder add --class ~.Owner --name findByAgeOrOr
+# finder add --class ~.Owner --name findByOr
+# finder add --class ~.Owner --name findByAgeOrOr
 #      
 # Output:  ERROR: Missing expression before Or
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -474,8 +474,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an And
 #
-#finder add --class ~.Owner --name findByAnd
-#finder add --class ~.Owner --name findByAgeAndAnd
+# finder add --class ~.Owner --name findByAnd
+# finder add --class ~.Owner --name findByAgeAndAnd
 #      
 # Output:  ERROR: Missing property in a search condition before And operator
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -489,8 +489,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions after an Or/And
 #
-#finder add --class ~.Owner --name findByAgeOr
-#finder add --class ~.Owner --name findByAgeAnd
+# finder add --class ~.Owner --name findByAgeOr
+# finder add --class ~.Owner --name findByAgeAnd
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -503,8 +503,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an order clause
 #
-#finder add --class ~.Owner --name findByAgeOrOrderByActiveDesc 
-#finder add --class ~.Owner --name findByAgeAndOrderByActiveDesc 
+# finder add --class ~.Owner --name findByAgeOrOrderByActiveDesc 
+# finder add --class ~.Owner --name findByAgeAndOrderByActiveDesc 
 #      
 # Output:  ERROR: Missing expression before OrderBy
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -514,27 +514,39 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 30: Several order clauses             
+# TEST 30: Empty order clause         
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if order clause is empty
+#
+# finder add --class ~.Owner --name findByAgeOrderBy
+#      
+# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 31: Several order clauses             
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if there are several OrderBy
 #
-#finder add --class ~.Owner --name findAgeOrderBy
-#finder add --class ~.Owner --name findAgeOrderByAgeAscAndActiveDesc
-#finder add --class ~.Owner --name findAgeOrderByAgeOrderByNumber
+# finder add --class ~.Owner --name findByAgeOrderByAgeOrderByNumber
 #      
-# Output:  --name parameter must follow Spring Data nomenclature. Please, 
+# Output:  ERROR: OrderBy must not be used more than once in a method name
+#          --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
 #
 # Result:  Warning message that inform us how to create a finder correctly                                                                 
 #========================================================================================
 
 #========================================================================================
-# TEST 31: Order expressions joined with And/Or              
+# TEST 32: Order expressions joined with And/Or              
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if order expressions are joined with And/Or
 #
-#finder add --class ~.Owner --name findAgeOrderByAgeAscOrActiveDesc
-#finder add --class ~.Owner --name findAgeOrderByAgeAscAndActiveDesc
+# finder add --class ~.Owner --name findByAgeOrderByAgeAscOrActiveDesc
+# finder add --class ~.Owner --name findByAgeOrderByAgeAscAndActiveDesc
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -542,13 +554,28 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 # Result:  Warning message that inform us how to create a finder correctly                                                                 
 #========================================================================================
 
+#========================================================================================
+# TEST 33: Several order directions             
+#----------------------------------------------------------------------------------------
+# Goal:  Fails if order expressions have several directions
+#
+# finder add --class ~.Owner --name findByAgeOrderByAgeAscDesc
+# finder add --class ~.Owner --name findByAgeOrderByDesc
+#      
+# Output:  ERROR: Missing property before Desc direction
+#          --name parameter must follow Spring Data nomenclature. Please, 
+#          write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Warning message that inform us how to create a finder correctly                                                                 
+#========================================================================================
+
 
 #========================================================================================
-# TEST 32: Several AllIgnoreCase options         
+# TEST 34: Several AllIgnoreCase options         
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if AllIgnoreCase is included several times
 #
-#finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCaseAllIgnoreCase
+# finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCaseAllIgnoreCase
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)

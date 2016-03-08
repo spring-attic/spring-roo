@@ -12,10 +12,14 @@ public enum Direction {
 
   ASC("Asc"), DESC("Desc");
 
-  public String keyword;
+  private String keyword;
 
   private Direction(String keyword) {
     this.keyword = keyword;
+  }
+
+  public String getKeyword() {
+    return keyword;
   }
 
   /**

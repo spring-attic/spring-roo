@@ -27,6 +27,12 @@ public class Order {
    * @param propertyInfo entity property
     */
   public Order(Direction direction, Pair<FieldMetadata, String> propertyInfo) {
+
+    // Validate order expression. If a direction is specified, property must exist
+    if (direction != null && propertyInfo == null) {
+      throw new IllegalArgumentException(String.format(
+          "ERROR: Missing property before %s direction", direction.getKeyword()));
+    }
     this.direction = direction;
     this.property = propertyInfo;
   }
@@ -74,6 +80,6 @@ public class Order {
   @Override
   public String toString() {
     return (property != null ? StringUtils.capitalize(property.getRight()) : "")
-        .concat(this.direction != null ? direction.keyword : "");
+        .concat(this.direction != null ? direction.getKeyword() : "");
   }
 }
