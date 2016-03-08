@@ -208,6 +208,27 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
+   * Indicator that checks if versionField param has been specified and makes its associate params visible
+   * 
+   * @param shellContext
+   * @return true if versionField param has been specified.
+   */
+  @CliOptionVisibilityIndicator(
+      command = "entity jpa",
+      params = {"versionType", "versionColumn"},
+      help = "Options --versionType and --versionColumn must be used with the --versionField option.")
+  public boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext) {
+
+    String versionFieldParam = shellContext.getParameters().get("versionField");
+
+    if (versionFieldParam != null) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * ROO-3709: Indicator that checks if exists some project setting that makes
    * each of the following parameters mandatory: sequenceName, identifierStrategy, identifierColumn and table
    * 
@@ -216,8 +237,8 @@ public class JpaCommands implements CommandMarker {
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
-  @CliOptionMandatoryIndicator(params = {"sequenceName", "identifierColumn", "table"},
-      command = "entity jpa")
+  @CliOptionMandatoryIndicator(params = {"sequenceName", "identifierColumn", "table",
+      "versionField", "versionColumn", "versionType"}, command = "entity jpa")
   public boolean areSchemaObjectNamesRequired(ShellContext shellContext) {
 
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
@@ -263,13 +284,13 @@ public class JpaCommands implements CommandMarker {
           unspecifiedDefaultValue = "java.lang.Long",
           specifiedDefaultValue = "java.lang.Long",
           help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType,
-      @CliOption(key = "versionField", mandatory = false,
+      @CliOption(key = "versionField", mandatory = true,
           help = "The JPA version field name to use for this entity") final String versionField,
-      @CliOption(key = "versionColumn", mandatory = false,
+      @CliOption(key = "versionColumn", mandatory = true,
           help = "The JPA version field column to use for this entity") final String versionColumn,
       @CliOption(
           key = "versionType",
-          mandatory = false,
+          mandatory = true,
           optionContext = "java-lang,project",
           unspecifiedDefaultValue = "java.lang.Integer",
           help = "The data type that will be used for the JPA version field (defaults to java.lang.Integer)") final JavaType versionType,
@@ -296,6 +317,7 @@ public class JpaCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           help = "Whether the generated entity should be used for read operations only.") final boolean readOnly,
       ShellContext shellContext) {
+
     Validate.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
 
     // Check if exists other entity with the same name
@@ -424,9 +446,6 @@ public class JpaCommands implements CommandMarker {
     }
     if (!LONG_OBJECT.equals(identifierType)) {
       entityAnnotationBuilder.addClassAttribute("identifierType", identifierType);
-      /**
-      * 
-      */
     }
     if (inheritanceType != null) {
       entityAnnotationBuilder.addStringAttribute("inheritanceType", inheritanceType.name());

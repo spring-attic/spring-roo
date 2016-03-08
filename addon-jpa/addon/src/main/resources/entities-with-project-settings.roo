@@ -9,7 +9,7 @@ enum type --class ~.enumerated.Enumerated
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test entity creation command with required dynamic mandatory options based on project settings.
 #
-entity jpa --class ~.domain.Entity1 --table ENTITY1_TABLE --identifierColumn identifier --sequenceName sequence --identifierStrategy SEQUENCE
+entity jpa --class ~.domain.Entity1 --table ENTITY1_TABLE --identifierColumn identifier --sequenceName sequence --identifierStrategy SEQUENCE --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
@@ -94,7 +94,7 @@ field number --fieldName number_field --type java.lang.Integer --column number_f
 # TEST 7: Create other field with required dynamic mandatory options, based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test other field creation command with required dynamic mandatory options based on project settings.
-#
+#ROO-3710: 
 field other --fieldName other_field --type ~.enumerated.Enumerated --column other_field
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1.java
@@ -123,7 +123,7 @@ field string --fieldName string_field --column string_column
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test creation of a read-only entity with --readOnly and --identifierStrategy command options.
 #
-entity jpa --class ~.domain.ReadOnlyEntity --table READONLY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy SEQUENCE
+entity jpa --class ~.domain.ReadOnlyEntity --table READONLY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy SEQUENCE --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/ReadOnlyEntity_Roo_Jpa_Entity.aj
@@ -138,7 +138,7 @@ entity jpa --class ~.domain.ReadOnlyEntity --table READONLY_TABLE --identifierCo
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test creation of an entity with --identifierStrategy command option with TABLE value.
 #
-entity jpa --class ~.domain.TableEntity --table TABLE_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy TABLE
+entity jpa --class ~.domain.TableEntity --table TABLE_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy TABLE --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/TableEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/TableEntity_Roo_Jpa_Entity.aj
@@ -153,7 +153,7 @@ entity jpa --class ~.domain.TableEntity --table TABLE_ENTITY_TABLE --identifierC
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test creation of an entity with --identifierStrategy command option with IDENTITY value.
 #
-entity jpa --class ~.domain.IdentityEntity --table IDENTITY_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy IDENTITY
+entity jpa --class ~.domain.IdentityEntity --table IDENTITY_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy IDENTITY --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/IdentityEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/IdentityEntity_Roo_Jpa_Entity.aj
@@ -168,7 +168,7 @@ entity jpa --class ~.domain.IdentityEntity --table IDENTITY_ENTITY_TABLE --ident
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test creation of an entity with --identifierStrategy command option with AUTO value.
 #
-entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy AUTO
+entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierColumn id --sequenceName seq --readOnly --identifierStrategy AUTO --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/AutoEntity.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/AutoEntity_Roo_Jpa_Entity.aj
@@ -194,7 +194,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "table", based on 
 #         project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --identifierColumn identifier --sequenceName sequence --identifierStrategy SEQUENCE
+#entity jpa --class ~.domain.Entity2 --identifierColumn identifier --sequenceName sequence --identifierStrategy SEQUENCE --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: You must specify option 'table' for this command
 #
@@ -208,7 +208,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option 
 #         "identifierColumn", based on project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --sequenceName sequence --identifierStrategy SEQUENCE
+#entity jpa --class ~.domain.Entity2 --table entity_table --sequenceName sequence --identifierStrategy SEQUENCE --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: You must specify option 'identifierColumn' for this command
 #
@@ -222,7 +222,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "sequenceName", 
 #         based on project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --identifierStrategy SEQUENCE
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --identifierStrategy SEQUENCE --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: You must specify option 'sequenceName' for this command
 #
@@ -236,7 +236,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "identifierStrategy", 
 #         based on project settings, is not provided.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: You must specify option 'identifierStrategy' for this command
 #
@@ -250,7 +250,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "identifierStrategy", 
 #         based on project settings, is provided with a wrong value.
 #
-#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence --identifierStrategy UNKNOWN
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence --identifierStrategy UNKNOWN --versionField version --versionColumn VERSION --versionType long
 #      
 # Output: java.lang.IllegalArgumentException: Failed to convert 'UNKNOWN' to type GenerationType for option 'identifierStrategy'
 #         No enum constant org.springframework.roo.addon.jpa.addon.GenerationType.UNKNOWN
@@ -270,4 +270,18 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Output: You must specify option 'column' for this command
 #
 # Result: Stop command execution with a message requiring "column" option.                                 
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 19: Create entity without required dynamic mandatory option "versionColumn", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "versionColumn", 
+#         based on project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --identifierStrategy SEQUENCE --sequenceName sequence --versionField version --versionType long
+#      
+# Output: You must specify option 'versionColumn' for this command
+#
+# Result: Stop command execution with a message requiring "versionColumn" option.                               
 #====================================================================================================================
