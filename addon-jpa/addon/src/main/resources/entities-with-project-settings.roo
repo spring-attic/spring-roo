@@ -316,6 +316,7 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 # Result: Stop command execution with a message requiring a specific value for --joinTable option.                               
 #====================================================================================================================
 
+
 #====================================================================================================================
 # TEST 22: Try to create field set without @JoinTable with ManyToMany cardinality
 #--------------------------------------------------------------------------------------------------------------------

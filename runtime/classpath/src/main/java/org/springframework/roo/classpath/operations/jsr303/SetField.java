@@ -127,7 +127,9 @@ public class SetField extends CollectionField {
   }
 
   /**
-   * Fill {@link #joinTableAttributes} for building @JoinTable annotation. The annotation would have some nested @JoinColumn annotations in each of its "joinColumns" and "inverseJoinColumns" attributes
+   * Fill {@link #joinTableAttributes} for building @JoinTable annotation. The annotation 
+   * would have some nested @JoinColumn annotations in each of its "joinColumns" and 
+   * "inverseJoinColumns" attributes.
    * 
    * @param joinTableName
    * @param joinColumns
