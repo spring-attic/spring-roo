@@ -137,6 +137,78 @@ entity jpa --class ~.domain.Extended_Entity2 --extends ~.domain.Entity1 --versio
 #====================================================================================================================
 
 
+#====================================================================================================================
+# TEST 10: Create field set with @JoinTable without value and without additional params
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command with --joinTable param with default value (no value and no associate params).
+#
+field set --fieldName set_field_join_table --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create field set without errors containing @JoinTable       
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 11: Create field set with OneToMany cardinality without @JoinTable
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command without --joinTable param and with --cardinality ONE_TO_MANY
+#
+field set --fieldName set_field_join_table_name --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality ONE_TO_MANY
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create field set without errors. OneToMany doesn't require @JoinTable                                         
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 12: Create field set with @JoinTable with all its attributes
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command with --joinTable param with value and all its associated attributes.
+#
+field set --fieldName set_field_complete_join_table --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create field set without errors containing @JoinTable(name = "JOIN_TABLE", joinColumns = {...} 
+#         inverseJoinColumns = {...})                                  
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 13: Create field list with @JoinTable with all its attributes and default-specified cardinality
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field list command with --joinTable param with value and all its associated attributes with default --cardinality (ONE_TO_MANY).
+#
+field list --fieldName list_field_complete_join_table --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create field list without errors containing @JoinTable(name = "JOIN_TABLE", joinColumns = {...} 
+#         inverseJoinColumns = {...})                                  
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 14: Create field list with @JoinTable without value and without additional params
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field list command with --joinTable param with default value (no value and no associate params).
+#
+field set --fieldName list_field_join_table --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create field list without errors containing @JoinTable       
+#====================================================================================================================
+
+
 ##########################################################################
 #######                      MANUAL TESTS                        #########
 ##########################################################################
@@ -148,7 +220,7 @@ entity jpa --class ~.domain.Extended_Entity2 --extends ~.domain.Entity1 --versio
 
 
 #====================================================================================================================
-# TEST 10: Create set field with wrong CascadeType
+# TEST 15: Try to create set field with wrong CascadeType
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with the optional parameter --cascadeType with a wrong value.
 #
@@ -162,7 +234,7 @@ entity jpa --class ~.domain.Extended_Entity2 --extends ~.domain.Entity1 --versio
 
 
 #====================================================================================================================
-# TEST 11: Try to create extended entity with identifier param without using --force
+# TEST 16: Try to create extended entity with identifier param without using --force
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test entity jpa command with the optional parameter --extends and other identifier param.
 #

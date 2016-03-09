@@ -12,6 +12,7 @@ import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
 
 import java.util.*;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.springframework.roo.classpath.details.annotations.*;
 import org.springframework.roo.classpath.operations.*;
 import org.springframework.roo.model.*;
@@ -137,39 +138,61 @@ public class SetField extends CollectionField {
   public void setJoinTableAnnotation(String joinTableName, String[] joinColumns,
       String[] referencedColumns, String[] inverseJoinColumns, String[] inverseReferencedColumns) {
 
-    // Build @JoinColumn annotation for owner side of the relation
     final List<AnnotationAttributeValue<?>> joinColumnsAnnotations =
         new ArrayList<AnnotationAttributeValue<?>>();
-    for (int i = 0; i < joinColumns.length; i++) {
-      final AnnotationMetadataBuilder joinColumnAnnotation =
-          new AnnotationMetadataBuilder(JOIN_COLUMN);
-      joinColumnAnnotation.addStringAttribute("name", joinColumns[i]);
-      joinColumnAnnotation.addStringAttribute("referencedColumnName", referencedColumns[i]);
-      joinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
-          "joinColumns"), joinColumnAnnotation.build()));
+    if (joinColumns != null) {
+
+      // Build joinColumns attribute
+      for (int i = 0; i < joinColumns.length; i++) {
+
+        // Build @JoinColumn annotation for owner side of the relation
+        final AnnotationMetadataBuilder joinColumnAnnotation =
+            new AnnotationMetadataBuilder(JOIN_COLUMN);
+        joinColumnAnnotation.addStringAttribute("name", joinColumns[i]);
+        joinColumnAnnotation.addStringAttribute("referencedColumnName", referencedColumns[i]);
+        joinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
+            "joinColumns"), joinColumnAnnotation.build()));
+      }
     }
 
-    // Build @JoinColumn annotation for the not owner side of the relation
     final List<AnnotationAttributeValue<?>> inverseJoinColumnsAnnotations =
         new ArrayList<AnnotationAttributeValue<?>>();
-    for (int i = 0; i < inverseJoinColumns.length; i++) {
-      final AnnotationMetadataBuilder inverseJoinColumnsAnnotation =
-          new AnnotationMetadataBuilder(JOIN_COLUMN);
-      inverseJoinColumnsAnnotation.addStringAttribute("name", inverseJoinColumns[i]);
-      inverseJoinColumnsAnnotation.addStringAttribute("referencedColumnName",
-          inverseReferencedColumns[i]);
-      inverseJoinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
-          "inverseJoinColumns"), inverseJoinColumnsAnnotation.build()));
+    if (inverseJoinColumns != null) {
+
+      // Build inverseJoinColumns attribute
+      for (int i = 0; i < inverseJoinColumns.length; i++) {
+
+        // Build @JoinColumn annotation for the not owner side of the relation
+        final AnnotationMetadataBuilder inverseJoinColumnsAnnotation =
+            new AnnotationMetadataBuilder(JOIN_COLUMN);
+        inverseJoinColumnsAnnotation.addStringAttribute("name", inverseJoinColumns[i]);
+        inverseJoinColumnsAnnotation.addStringAttribute("referencedColumnName",
+            inverseReferencedColumns[i]);
+        inverseJoinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
+            "inverseJoinColumns"), inverseJoinColumnsAnnotation.build()));
+      }
     }
 
     // Add attributes for @JoinTable annotation
     final List<AnnotationAttributeValue<?>> joinTableAttributes =
         new ArrayList<AnnotationAttributeValue<?>>();
-    joinTableAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), joinTableName));
-    joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
-        new JavaSymbolName("joinColumns"), joinColumnsAnnotations));
-    joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
-        new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnsAnnotations));
+
+    // If name not specified, use default name value
+    if (!FieldCommands.ROO_DEFAULT_JOIN_TABLE_NAME.equals(joinTableName)) {
+      joinTableAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), joinTableName));
+    }
+
+    // If joinColumns options were not specified, use default @JoinColumn values
+    if (joinColumns != null) {
+      joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+          new JavaSymbolName("joinColumns"), joinColumnsAnnotations));
+    }
+
+    // If inverseJoinColumns options were not specified, use default @JoinColumn values
+    if (inverseJoinColumns != null) {
+      joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+          new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnsAnnotations));
+    }
 
     // Fill attributes field
     this.joinTableAttributes = joinTableAttributes;

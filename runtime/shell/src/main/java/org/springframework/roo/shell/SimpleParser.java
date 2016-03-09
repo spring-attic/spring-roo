@@ -1256,10 +1256,13 @@ public class SimpleParser implements Parser {
             }
             message.append("for this command");
             LOGGER.warning(message.toString());
+            return null;
+          } else if (!NULL.equals(cliOption.specifiedDefaultValue()) && value != null) {
+            // Just continue execution
           } else {
             LOGGER.warning("You must specify option '" + cliOption.key()[0] + "' for this command");
+            return null;
           }
-          return null;
         }
 
         // Accept a default if the user specified the option, but didn't
@@ -1385,6 +1388,7 @@ public class SimpleParser implements Parser {
    */
   private void checkVisibilityAndValues(final MethodTarget methodTarget,
       Map<String, String> options, ShellContextImpl shellContext, final CliOption cliOption) {
+
     // Ensure the user didn't specified a not visible value
     if (!this.isVisibleParam(methodTarget.getKey(), cliOption, shellContext)) {
       MethodTarget optionVisibilityIndicator =

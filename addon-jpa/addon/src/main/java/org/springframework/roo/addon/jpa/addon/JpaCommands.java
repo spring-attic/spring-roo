@@ -132,7 +132,8 @@ public class JpaCommands implements CommandMarker {
   @CliOptionVisibilityIndicator(
       command = "jpa setup",
       params = {"jndiDataSource"},
-      help = "jndiDataSource parameter is not available if any of databaseName, hostName, password or userName are selected or you are using an HYPERSONIC database.")
+      help = "jndiDataSource parameter is not available if any of databaseName, "
+              + "hostName, password or userName are selected or you are using an HYPERSONIC database.")
   public boolean isJndiVisible(ShellContext shellContext) {
 
     Map<String, String> params = shellContext.getParameters();
@@ -230,7 +231,7 @@ public class JpaCommands implements CommandMarker {
 
   /**
    * ROO-3709: Indicator that checks if exists some project setting that makes
-   * each of the following parameters mandatory: sequenceName, identifierStrategy, identifierColumn and table
+   * each of the following parameters mandatory: sequenceName, identifierColumn and table
    * 
    * @param shellContext
    * @return true if exists property
@@ -331,13 +332,14 @@ public class JpaCommands implements CommandMarker {
         throw new IllegalArgumentException(
             String
                 .format(
-                    "Entity '%s' already exists and cannot be created. Try to use a different entity name on --class parameter or use --force parameter to overwrite it.",
+                    "Entity '%s' already exists and cannot be created. Try to use a "
+                    + "different entity name on --class parameter or use --force parameter to overwrite it.",
                     name));
       }
     }
 
     // ROO-3723: Add warning when using --extends with incompatible parameters
-    if (!("java.lang.Object").equals(superclass.getFullyQualifiedTypeName())
+    if (superclass != null && !("java.lang.Object").equals(superclass.getFullyQualifiedTypeName())
         && !shellContext.isForce()) {
       this.checkExtendsOverride(shellContext, identifierColumn, identifierField,
           identifierStrategy, identifierType, sequenceName, versionColumn, versionField,
@@ -351,7 +353,8 @@ public class JpaCommands implements CommandMarker {
     if (testAutomatically && createAbstract) {
       // We can't test an abstract class
       throw new IllegalArgumentException(
-          "Automatic tests cannot be created for an abstract entity; remove the --testAutomatically or --abstract option");
+          "Automatic tests cannot be created for an abstract entity; remove the "
+          + "--testAutomatically or --abstract option");
     }
 
     // Reject attempts to name the entity "Test", due to possible clashes
@@ -361,11 +364,13 @@ public class JpaCommands implements CommandMarker {
     if (!BeanInfoUtils.isEntityReasonablyNamed(name)) {
       if (permitReservedWords && testAutomatically) {
         throw new IllegalArgumentException(
-            "Entity name cannot contain 'Test' or 'TestCase' as you are requesting tests; remove --testAutomatically or rename the proposed entity");
+            "Entity name cannot contain 'Test' or 'TestCase' as you are requesting tests; "
+            + "remove --testAutomatically or rename the proposed entity");
       }
       if (!permitReservedWords) {
         throw new IllegalArgumentException(
-            "Entity name rejected as conflicts with test execution defaults; please remove 'Test' and/or 'TestCase'");
+            "Entity name rejected as conflicts with test execution defaults; please remove "
+            + "'Test' and/or 'TestCase'");
       }
     }
 
@@ -488,7 +493,9 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
-   * Check if superclass of the extended entity which it's going to be created will override any specified param and shows a message if so. If user uses the --force global param it will be possible to execute the command for creating the entity. 
+   * Check if superclass of the extended entity which it's going to be created 
+   * will override any specified param and shows a message if so. If user uses 
+   * the --force global param it will be possible to execute the command for creating the entity. 
    * 
    * @param shellContext 
    * @param identifierColumn
@@ -507,7 +514,8 @@ public class JpaCommands implements CommandMarker {
         || identifierType != null || sequenceName != null || versionColumn != null
         || versionField != null || versionType != null) {
       throw new IllegalArgumentException(
-          "Identifier and version fields will be overwritten by superclass fields. Please, use --force to execute the command anyway.");
+          "Identifier and version fields will be overwritten by superclass fields. Please, "
+          + "use --force to execute the command anyway.");
 
     }
   }

@@ -81,6 +81,7 @@ public class FieldCommands implements CommandMarker {
   // Project Settings 
   private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
       "spring.roo.jpa.require.schema-object-name";
+  public static final String ROO_DEFAULT_JOIN_TABLE_NAME = "_ROO_JOIN_TABLE_";
 
   private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
@@ -627,6 +628,81 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
+  /**
+   * ROO-3720: Indicator that checks if exists some project setting that makes table 
+   * column parameter mandatory, as well as joinTable param has been specified and 
+   * makes its associate params visible
+   * 
+   * @param shellContext
+   * @return true if joinTable param has been specified and table column names are mandatory
+   */
+  @CliOptionMandatoryIndicator(command = "field set", params = {"joinColumns", "referencedColumns",
+      "inverseJoinColumns", "inverseReferencedColumns"})
+  public boolean areJoinTableParamsMandatoryForFieldSet(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    // See if joinTable param has been specified
+    String joinTableParam = shellContext.getParameters().get("joinTable");
+
+    if (joinTableParam != null && requiredSchemaObjectName != null
+        && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * ROO-3720: Indicator that checks if --joinTable is mandatory based on --cardinality 
+   * and project setting that makes table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if --cardinality is MANY_TO_MANY, false otherwise.
+   */
+  @CliOptionMandatoryIndicator(command = "field set", params = {"joinTable"})
+  public boolean isJoinTableMandatoryForSet(ShellContext shellContext) {
+
+    String cardinality = shellContext.getParameters().get("cardinality");
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (cardinality != null && cardinality.equals("MANY_TO_MANY")
+        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * ROO-3720: Indicator that checks if joinTable param has been specified and makes 
+   * its associate params mandatory
+   * 
+   * @param shellContext
+   * @return true if joinTable param has been specified.
+   */
+  @CliOptionVisibilityIndicator(
+      command = "field set",
+      params = {"joinColumns", "referencedColumns", "inverseJoinColumns",
+          "inverseReferencedColumns"},
+      help = "Options --joinColumns, --referencedColumns, --inverseJoinColumns and "
+              + "--inverseReferencedColumns must be used with a specific --joinTable option.")
+  public boolean areJoinTableParamsVisibleForFieldSet(ShellContext shellContext) {
+
+    String joinTableParam = shellContext.getParameters().get("joinTable");
+
+    if (joinTableParam != null) {
+      return true;
+    }
+
+    return false;
+  }
+
   @CliCommand(
       value = "field set",
       help = "Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)")
@@ -646,8 +722,8 @@ public class FieldCommands implements CommandMarker {
           help = "The minimum number of elements in the collection") final Integer sizeMin,
       @CliOption(key = "sizeMax", mandatory = false,
           help = "The maximum number of elements in the collection") final Integer sizeMax,
-      @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "MANY_TO_MANY",
-          specifiedDefaultValue = "MANY_TO_MANY",
+      @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "ONE_TO_MANY",
+          specifiedDefaultValue = "ONE_TO_MANY",
           help = "The relationship cardinality at a JPA level") Cardinality cardinality,
       @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
@@ -656,24 +732,32 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
-      @CliOption(key = "joinTableName", mandatory = false,
-          help = "Join table name. Most usually used in @ManyToMany relations") final String joinTableName,
+      @CliOption(
+          key = "joinTable",
+          mandatory = true,
+          specifiedDefaultValue = ROO_DEFAULT_JOIN_TABLE_NAME,
+          help = "Join table name. Most usually used in @ManyToMany relations. If "
+                  + "name not specified it will take default @JoinTable name value.") final String joinTable,
       @CliOption(
           key = "joinColumns",
-          mandatory = false,
-          help = "Comma separated list of join table's foreign key columns which references the table of the entity owning the relation") final String joinColumns,
+          mandatory = true,
+          help = "Comma separated list of join table's foreign key columns which "
+                  + "references the table of the entity owning the relation") final String joinColumns,
       @CliOption(
           key = "referencedColumns",
-          mandatory = false,
-          help = "Comma separated list of foreign key referenced columns in the table of the entity owning the relation") final String referencedColumns,
+          mandatory = true,
+          help = "Comma separated list of foreign key referenced columns in the table "
+                  + "of the entity owning the relation") final String referencedColumns,
       @CliOption(
           key = "inverseJoinColumns",
-          mandatory = false,
-          help = "Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation") final String inverseJoinColumns,
+          mandatory = true,
+          help = "Comma separated list of join table's foreign key columns which "
+                  + "references the table of the entity that does not own the relation") final String inverseJoinColumns,
       @CliOption(
           key = "inverseReferencedColumns",
-          mandatory = false,
-          help = "Comma separated list of foreign key referenced columns in the table of the entity that does not own the relation") final String inverseReferencedColumns,
+          mandatory = true,
+          help = "Comma separated list of foreign key referenced columns in the table "
+                  + "of the entity that does not own the relation") final String inverseReferencedColumns,
       @CliOption(
           key = "cascadeType",
           mandatory = false,
@@ -681,6 +765,9 @@ public class FieldCommands implements CommandMarker {
           specifiedDefaultValue = "ALL",
           help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
       ShellContext shellContext) {
+
+    // Check if joinTable must have a specified value.
+    checkJoinTableNameMandatory(joinTable);
 
     final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
     Validate
@@ -735,24 +822,111 @@ public class FieldCommands implements CommandMarker {
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
-    if (joinTableName != null) {
+    if (joinTable != null) {
+
       // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      String[] referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      String[] inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      String[] inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
+      String[] joinColumnsArray = null;
+      String[] referencedColumnsArray = null;
+      String[] inverseJoinColumnsArray = null;
+      String[] inverseReferencedColumnsArray = null;
+      if (joinColumns != null) {
+        joinColumnsArray = joinColumns.replace(" ", "").split(",");
+      }
+      if (referencedColumns != null) {
+        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
+      }
+      if (inverseJoinColumns != null) {
+        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
+      }
+      if (inverseReferencedColumns != null) {
+        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
+      }
 
-      Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-          "--joinColumns and --referencedColumns must have same number of column values");
-      Validate
-          .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-              "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
+      // Validate same number of elements
+      if (joinColumnsArray != null && referencedColumnsArray != null) {
+        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
+            "--joinColumns and --referencedColumns must have same number of column values");
+      }
+      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
+        Validate
+            .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
+                "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
+      }
 
-      fieldDetails.setJoinTableAnnotation(joinTableName, joinColumnsArray, referencedColumnsArray,
+      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
           inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
     insertField(fieldDetails, permitReservedWords, transientModifier);
+  }
+
+  /**
+     * ROO-3720: Indicator that checks if joinTable param has been specified and 
+     * makes its associate params visible
+     * 
+     * @param shellContext
+     * @return true if joinTable param has been specified.
+     */
+  @CliOptionVisibilityIndicator(
+      command = "field list",
+      params = {"joinColumns", "referencedColumns", "inverseJoinColumns",
+          "inverseReferencedColumns"},
+      help = "Options --joinColumns, --referencedColumns, --inverseJoinColumns and "
+              + "--inverseReferencedColumns must be used with a specific --joinTable option.")
+  public boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext) {
+
+    String joinTableParam = shellContext.getParameters().get("joinTable");
+
+    if (joinTableParam != null) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * ROO-3720: Indicator that checks if --joinTable is mandatory based on --cardinality
+   * 
+   * @param shellContext
+   * @return true if --cardinality is MANY_TO_MANY, false otherwise.
+   */
+  @CliOptionMandatoryIndicator(command = "field list", params = {"joinTable"})
+  public boolean isJoinTableMandatoryForList(ShellContext shellContext) {
+
+    String cardinality = shellContext.getParameters().get("cardinality");
+
+    if (cardinality != null && cardinality.equals("MANY_TO_MANY")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * ROO-3720: Indicator that checks if exists some project setting that makes table 
+   * column parameter mandatory, as well as joinTable param has been specified and 
+   * makes its associate params visible
+   * 
+   * @param shellContext
+   * @return true if joinTable param has been specified and table column names are mandatory
+   */
+  @CliOptionMandatoryIndicator(command = "field list", params = {"joinColumns",
+      "referencedColumns", "inverseJoinColumns", "inverseReferencedColumns"})
+  public boolean areJoinTableParamsMandatoryForFieldList(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    // See if joinTable param has been specified
+    String joinTableParam = shellContext.getParameters().get("joinTable");
+
+    if (joinTableParam != null && requiredSchemaObjectName != null
+        && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
+    return false;
   }
 
   @CliCommand(
@@ -774,8 +948,8 @@ public class FieldCommands implements CommandMarker {
           help = "The minimum number of elements in the collection") final Integer sizeMin,
       @CliOption(key = "sizeMax", mandatory = false,
           help = "The maximum number of elements in the collection") final Integer sizeMax,
-      @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "MANY_TO_MANY",
-          specifiedDefaultValue = "MANY_TO_MANY",
+      @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "ONE_TO_MANY",
+          specifiedDefaultValue = "ONE_TO_MANY",
           help = "The relationship cardinality at a JPA level") Cardinality cardinality,
       @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
@@ -784,36 +958,49 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
-      @CliOption(key = "joinTableName", mandatory = false,
-          help = "Join table name. Most usually used in @ManyToMany relations") final String joinTableName,
+      @CliOption(
+          key = "joinTable",
+          mandatory = true,
+          specifiedDefaultValue = ROO_DEFAULT_JOIN_TABLE_NAME,
+          help = "Join table name. Most usually used in @ManyToMany relations. If name "
+                  + "not specified it will take default @JoinTable name value.") final String joinTable,
       @CliOption(
           key = "joinColumns",
-          mandatory = false,
-          help = "Comma separated list of join table's foreign key columns which references the table of the entity owning the relation") final String joinColumns,
+          mandatory = true,
+          help = "Comma separated list of join table's foreign key columns which "
+                  + "references the table of the entity owning the relation") final String joinColumns,
       @CliOption(
           key = "referencedColumns",
-          mandatory = false,
-          help = "Comma separated list of foreign key referenced columns in the table of the entity owning the relation") final String referencedColumns,
+          mandatory = true,
+          help = "Comma separated list of foreign key referenced columns in the table "
+                  + "of the entity owning the relation") final String referencedColumns,
       @CliOption(
           key = "inverseJoinColumns",
-          mandatory = false,
-          help = "Comma separated list of join table's foreign key columns which references the table of the entity that does not own the relation") final String inverseJoinColumns,
+          mandatory = true,
+          help = "Comma separated list of join table's foreign key columns which "
+                  + "references the table of the entity that does not own the relation") final String inverseJoinColumns,
       @CliOption(
           key = "inverseReferencedColumns",
-          mandatory = false,
-          help = "Comma separated list of foreign key referenced columns in the table of the entity that does not own the relation") final String inverseReferencedColumns,
+          mandatory = true,
+          help = "Comma separated list of foreign key referenced columns in the table "
+                  + "of the entity that does not own the relation") final String inverseReferencedColumns,
       @CliOption(
           key = "cascadeType",
           mandatory = false,
           unspecifiedDefaultValue = "ALL",
           specifiedDefaultValue = "ALL",
-          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
+          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH "
+                  + "and REMOVE.") final Cascade cascadeType,
       ShellContext shellContext) {
+
+    // Check if joinTable must have a specified value.
+    checkJoinTableNameMandatory(joinTable);
 
     final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
     Validate
         .notNull(cid,
-            "The specified target '--type' does not exist or can not be found. Please create this type first.");
+            "The specified target '--type' does not exist or can not be found. Please "
+            + "create this type first.");
 
     final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
     checkFieldExists(fieldName, shellContext, selfCid);
@@ -834,7 +1021,8 @@ public class FieldCommands implements CommandMarker {
       // Yes, we can deal with that
     } else {
       throw new IllegalStateException(
-          "The field list command is only applicable to enum, JPA @Entity or Spring Data @Persistence elements");
+          "The field list command is only applicable to enum, JPA @Entity or Spring "
+          + "Data @Persistence elements");
     }
 
     final ClassOrInterfaceTypeDetails javaTypeDetails =
@@ -863,20 +1051,39 @@ public class FieldCommands implements CommandMarker {
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
-    if (joinTableName != null) {
+    if (joinTable != null) {
+
       // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      String[] referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      String[] inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      String[] inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
+      String[] joinColumnsArray = null;
+      String[] referencedColumnsArray = null;
+      String[] inverseJoinColumnsArray = null;
+      String[] inverseReferencedColumnsArray = null;
+      if (joinColumns != null) {
+        joinColumnsArray = joinColumns.replace(" ", "").split(",");
+      }
+      if (referencedColumns != null) {
+        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
+      }
+      if (inverseJoinColumns != null) {
+        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
+      }
+      if (inverseReferencedColumns != null) {
+        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
+      }
 
-      Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-          "--joinColumns and --referencedColumns must have same number of column values");
-      Validate
-          .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-              "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
+      // Validate same number of elements
+      if (joinColumnsArray != null && referencedColumnsArray != null) {
+        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
+            "--joinColumns and --referencedColumns must have same number of column values");
+      }
+      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
+        Validate
+            .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
+                "--inverseJoinColumns and --inverseReferencedColumns must have same "
+                + "number of column values");
+      }
 
-      fieldDetails.setJoinTableAnnotation(joinTableName, joinColumnsArray, referencedColumnsArray,
+      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
           inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
@@ -910,7 +1117,8 @@ public class FieldCommands implements CommandMarker {
   @CliCommand(value = "field string",
       help = "Adds a private string field to an existing Java source file")
   public void addFieldString(
-      @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
+      @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of "
+              + "the field to add") final JavaSymbolName fieldName,
       @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
@@ -1184,7 +1392,8 @@ public class FieldCommands implements CommandMarker {
   }
 
   /**
-   * Checks if entity has already a field with the same name and throws an exception in that case.
+   * Checks if entity has already a field with the same name and throws an exception 
+   * in that case.
    * 
    * @param fieldName
    * @param shellContext
@@ -1200,8 +1409,33 @@ public class FieldCommands implements CommandMarker {
         throw new IllegalArgumentException(
             String
                 .format(
-                    "Field '%s' already exists and cannot be created. Try to use a different field name on --fieldName parameter or use --force parameter to overwrite it.",
+                    "Field '%s' already exists and cannot be created. Try to use a "
+                    + "different field name on --fieldName parameter or use --force parameter to overwrite it.",
                     fieldName));
+      }
+    }
+  }
+
+  /**
+   * Checks if exists some project setting that makes @JoinTable name mandatory. Throws 
+   * an exception with a message if exists property {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} 
+   * on project settings and its value is "true". Else, continue.
+   * 
+   * @param joinTable
+   */
+  private void checkJoinTableNameMandatory(String joinTable) {
+    if (joinTable == null) {
+      return;
+    } else if (ROO_DEFAULT_JOIN_TABLE_NAME.equals(joinTable)) {
+
+      // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
+      String requiredSchemaObjectName =
+          projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+      if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+        throw new IllegalArgumentException(
+            "It is mandatory to assign a specific table name for --joinTable. Please, "
+            + "assign it a table name.");
       }
     }
   }

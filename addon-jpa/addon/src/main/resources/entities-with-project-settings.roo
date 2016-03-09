@@ -178,6 +178,21 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 #====================================================================================================================
 
 
+#====================================================================================================================
+# TEST 13: Create field set with @JoinTable with all its attributes
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command with --joinTable param with value and all its associated attributes.
+#
+field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create field set without errors containing @JoinTable(name = "JOIN_TABLE", joinColumns = {...} 
+#         inverseJoinColumns = {...})                                  
+#====================================================================================================================
+
+
 ##########################################################################
 #######                      MANUAL TESTS                        #########
 ##########################################################################
@@ -189,7 +204,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 
 
 #====================================================================================================================
-# TEST 13: Create entity without required dynamic mandatory option "table", based by settings
+# TEST 14: Try to create entity without required dynamic mandatory option "table", based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "table", based on 
 #         project settings, is not provided.
@@ -203,7 +218,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 
 
 #====================================================================================================================
-# TEST 14: Create entity without required dynamic mandatory option "identifierColumn", based by settings
+# TEST 15: Try to create entity without required dynamic mandatory option "identifierColumn", based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option 
 #         "identifierColumn", based on project settings, is not provided.
@@ -217,7 +232,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 
 
 #====================================================================================================================
-# TEST 15: Create entity without required dynamic mandatory option "sequenceName", based by settings
+# TEST 16: Try to create entity without required dynamic mandatory option "sequenceName", based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "sequenceName", 
 #         based on project settings, is not provided.
@@ -231,24 +246,10 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 
 
 #====================================================================================================================
-# TEST 16: Create entity without required dynamic mandatory option "identifierStrategy", based by settings
+# TEST 17: Try to create entity with a wrong value for "identifierStrategy"
 #--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "identifierStrategy", 
-#         based on project settings, is not provided.
-#
-#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence --versionField version --versionColumn VERSION --versionType long
-#      
-# Output: You must specify option 'identifierStrategy' for this command
-#
-# Result: Stop command execution with a message requiring "identifierStrategy" option.                               
-#====================================================================================================================
-
-
-#====================================================================================================================
-# TEST 17: Create entity with a wrong value for "identifierStrategy"
-#--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "identifierStrategy", 
-#         based on project settings, is provided with a wrong value.
+# Goal:   Test if "entity jpa" command execution is aborted when option "identifierStrategy" is provided with a 
+#         wrong value.
 #
 #entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --sequenceName sequence --identifierStrategy UNKNOWN --versionField version --versionColumn VERSION --versionType long
 #      
@@ -260,7 +261,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 
 
 #====================================================================================================================
-# TEST 18: Create string field without required dynamic mandatory options, based by settings
+# TEST 18: Try to create string field without required dynamic mandatory options, based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "field string" command execution is aborted when required dynamic mandatory option "column", based 
 #         on project settings, is not provided.
@@ -274,7 +275,7 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 
 
 #====================================================================================================================
-# TEST 19: Create entity without required dynamic mandatory option "versionColumn", based by settings
+# TEST 19: Try to create entity without required dynamic mandatory option "versionColumn", based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "versionColumn", 
 #         based on project settings, is not provided.
@@ -284,4 +285,66 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 # Output: You must specify option 'versionColumn' for this command
 #
 # Result: Stop command execution with a message requiring "versionColumn" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 20: Try to create field set with @JoinTable without any of its related attributes
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command with --joinTable param with value and without any of its associated attributes when 
+#         schema object names are required.
+#
+#field set --fieldName set_field_join_table1 --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable JOIN_TABLE
+#
+# Output: You must specify option 'joinColumns' for this command
+#
+# Result: Stop command execution with a message requiring "joinColumns" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 21: Try to create field set with @JoinTable without value and with all of its related attributes
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command with --joinTable param without value and with all of its related attributes when 
+#         schema object names are required.
+#
+#field set --fieldName set_field_join_table2 --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
+#
+# Output: Undo manage ROOT/.roo/config/project.properties
+#         It is mandatory to assign a specific table name for --joinTable. Please, assign it a table name.
+#
+# Result: Stop command execution with a message requiring a specific value for --joinTable option.                               
+#====================================================================================================================
+
+#====================================================================================================================
+# TEST 22: Try to create field set without @JoinTable with ManyToMany cardinality
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test field set command without --joinTable and with --cardinality MANY_TO_MANY when schema object names are 
+#         required.
+#
+#field set --fieldName set_field_join_table_cardinality --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY
+#      
+# Output: You must specify option 'joinTable' for this command
+#
+# Result: Command execution stops because ManyToMany cardinality requires @JoinTable if specify schema object names 
+#         is also required.                         
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 23: Try to create field set without @JoinTable without required schema names but ManyToMany cardinality
+#--------------------------------------------------------------------------------------------------------------------
+# Preparation:
+#   
+# * settings remove --name spring.roo.jpa.require.schema-object-name  
+#
+# Goal:   Test field set command without --joinTable and with --cardinality MANY_TO_MANY when schema object names are 
+#         not required.
+#
+#field set --fieldName set_field_join_table_cardinality --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY
+#      
+# Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
+#         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
+#
+# Result: Create field set without errors and without @JoinTable
 #====================================================================================================================
