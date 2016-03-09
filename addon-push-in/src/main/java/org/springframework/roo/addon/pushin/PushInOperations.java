@@ -22,30 +22,31 @@ public interface PushInOperations {
   boolean isPushInCommandAvailable();
 
   /**
-   * Method that register push-in command on Spring Roo Shell.
+   * Method that push-in all methods, fields, annotations, imports, extends, etc.. declared 
+   * on project ITDs to its .java files.
    * 
-   * Push-in all methods, fields and annotations declared on project ITDs to its .java
-   * files.
-   * 
-   * @param package 
-   *            JavaPackage with the specified package where push-in will be applied.
-   * @param klass 
-   *            JavaType with the specified class where push-in will be applied.
+   * @param force 
+   *            boolean used to know if --force parameter has been used by developer
    */
-  void pushInAll(JavaPackage packageName, JavaType klass);
+  void pushInAll(boolean force);
 
   /**
-   * Method that register "push-in method" command on Spring Roo Shell.
+   * Method that push-in all methods, fields, annotations, imports, extends, etc.. declared on 
+   * ITDs to its .java files. You should define package, class or method where wants 
+   * to apply push-in operation.
    * 
-   * Push-in an specific method declared on an specified class ITDs to its .java files
-   * 
+   * @param package 
+   *            JavaPackage with the specified package where developers wants to make 
+   *            push-in
    * @param klass
    *            JavaType with the specified class where developer wants to
    *            make push-in
    * @param method
    *            JavaSymbolName with the specified name of the method that
    *            developer wants to push-in
-   * 
+   * @param force
+   *            boolean used to know if --force parameter has been used by developer
+   *    
    */
-  void pushInMethod(JavaType klass, JavaSymbolName method);
+  void pushIn(JavaPackage specifiedPackage, JavaType klass, JavaSymbolName method, boolean force);
 }

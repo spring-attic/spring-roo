@@ -11,6 +11,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import com.github.antlrjavaparser.api.CompilationUnit;
 import com.github.antlrjavaparser.api.ImportDeclaration;
 import com.github.antlrjavaparser.api.body.BodyDeclaration;
+import com.github.antlrjavaparser.api.body.ClassOrInterfaceDeclaration;
 import com.github.antlrjavaparser.api.body.ConstructorDeclaration;
 import com.github.antlrjavaparser.api.body.EnumConstantDeclaration;
 import com.github.antlrjavaparser.api.body.EnumDeclaration;
@@ -230,6 +231,18 @@ public class UpdateCompilationUnitUtils {
     updateMethods(originalType, newType);
 
     updateInnerTypes(originalType, newType);
+
+    // Check if TypeDeclarations are instance of ClassOrInterfaceDeclaration
+    // to be able to obtain extends and implements types
+    if (originalType instanceof ClassOrInterfaceDeclaration
+        && newType instanceof ClassOrInterfaceDeclaration) {
+
+      updateExtends((ClassOrInterfaceDeclaration) originalType,
+          (ClassOrInterfaceDeclaration) newType);
+
+      updateImplements((ClassOrInterfaceDeclaration) originalType,
+          (ClassOrInterfaceDeclaration) newType);
+    }
   }
 
   /**
@@ -938,6 +951,73 @@ public class UpdateCompilationUnitUtils {
       // AnnotationExpr
       annotations.clear();
       annotations.addAll(annotations2);
+    }
+  }
+
+  /**
+   * Update {@code extends} with {@code }
+   * 
+   * @param originalType
+   * @param newType
+   */
+  private static void updateExtends(final ClassOrInterfaceDeclaration originalType,
+      final ClassOrInterfaceDeclaration newType) {
+
+    // Getting original an new extends
+    List<ClassOrInterfaceType> originalExtends =
+        originalType.getExtends() == null ? new ArrayList<ClassOrInterfaceType>() : originalType
+            .getExtends();
+    List<ClassOrInterfaceType> newExtends =
+        newType.getExtends() == null ? new ArrayList<ClassOrInterfaceType>() : newType.getExtends();
+
+
+    // Check if has the same extends
+    if (!originalExtends.equals(newExtends)) {
+
+      // If not, merge extends and add it to original
+      List<ClassOrInterfaceType> finalExtends = originalExtends;
+
+      for (ClassOrInterfaceType x : newExtends) {
+        if (!finalExtends.contains(x)) {
+          finalExtends.add(x);
+        }
+      }
+
+      originalType.setExtends(finalExtends);
+    }
+  }
+
+  /**
+   * Update {@code implements} with {@code }
+   * 
+   * @param originalType
+   * @param newType
+   */
+  private static void updateImplements(final ClassOrInterfaceDeclaration originalType,
+      final ClassOrInterfaceDeclaration newType) {
+
+    // Getting original an new implements
+    List<ClassOrInterfaceType> originalImplements =
+        originalType.getImplements() == null ? new ArrayList<ClassOrInterfaceType>() : originalType
+            .getImplements();
+    List<ClassOrInterfaceType> newImplements =
+        newType.getImplements() == null ? new ArrayList<ClassOrInterfaceType>() : newType
+            .getImplements();
+
+
+    // Check if has the same implements
+    if (!originalImplements.equals(newImplements)) {
+
+      // If not, merge implements and add it to original
+      List<ClassOrInterfaceType> finalImplements = originalImplements;
+
+      for (ClassOrInterfaceType x : newImplements) {
+        if (!finalImplements.contains(x)) {
+          finalImplements.add(x);
+        }
+      }
+
+      originalType.setImplements(finalImplements);
     }
   }
 }

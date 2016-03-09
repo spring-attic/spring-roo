@@ -3,8 +3,6 @@ package org.springframework.roo.addon.pushin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -22,7 +20,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.ImportMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -70,21 +67,7 @@ public class PushInOperationsImpl implements PushInOperations {
   }
 
   @Override
-  public void pushInAll(JavaPackage packageName, JavaType klass) {
-
-    if (klass != null) {
-      // Check if klass exists on current project
-      Validate.notNull(getTypeLocationService().getTypeDetails(klass),
-          "ERROR: You must specify an existing class.");
-
-      // Ignoring specified package
-      if (packageName != null) {
-        packageName = null;
-        LOGGER.log(Level.INFO,
-            "INFO: Provided package will be ignored because you have specified a class.");
-      }
-
-    }
+  public void pushInAll(boolean force) {
 
     // Getting all JavaTypes on current project
     Collection<JavaType> allDeclaredTypes =
@@ -92,19 +75,14 @@ public class PushInOperationsImpl implements PushInOperations {
 
     for (JavaType declaredType : allDeclaredTypes) {
       // Push-in all content from .aj files to .java files
-      if (packageName == null && klass == null) {
-        pushInClass(declaredType);
-      } else if (klass != null && declaredType.equals(klass)) {
-        pushInClass(declaredType);
-      } else if (packageName != null && declaredType.getPackage().equals(packageName)) {
-        pushInClass(declaredType);
-      }
+      pushInClass(declaredType);
     }
 
   }
 
   @Override
-  public void pushInMethod(JavaType klass, JavaSymbolName method) {
+  public void pushIn(JavaPackage specifiedPackage, JavaType klass, JavaSymbolName method,
+      boolean force) {
     // Check if current klass exists
     /*Validate.notNull(klass,
         "ERROR: You must specify a valid class to continue with push-in action");
@@ -204,23 +182,6 @@ public class PushInOperationsImpl implements PushInOperations {
     MemberDetails memberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
-    // Getting all declared methods (including declared on ITDs
-    // and .java files)
-    List<MethodMetadata> allDeclaredMethods = memberDetails.getMethods();
-    // Getting all declared fields (including declared on ITDs
-    // and .java files)
-    List<FieldMetadata> allDeclaredFields = memberDetails.getFields();
-    // Getting all declared annotations (including declared on ITDs
-    // and .java files)
-    List<AnnotationMetadata> allDeclaredAnnotations = new ArrayList<AnnotationMetadata>();
-    for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
-      allDeclaredAnnotations.addAll(memberHoldingTypeDetails.getAnnotations());
-    }
-    // Getting all declared constructors (including declared on ITDs and .java files)
-    List<ConstructorMetadata> allDeclaredConstructors = memberDetails.getConstructors();
-    // Getting all imports registered on .aj file to move to .java file
-    Set<ImportMetadata> allDeclaredImports = classDetails.getRegisteredImports();
-
     // Getting current class .java file metadata ID
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(klass,
@@ -229,6 +190,10 @@ public class PushInOperationsImpl implements PushInOperations {
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(classDetails);
+
+    // Getting all declared methods (including declared on ITDs
+    // and .java files)
+    List<MethodMetadata> allDeclaredMethods = memberDetails.getMethods();
 
     // Checking if is necessary to make push-in for all declared methods
     for (MethodMetadata method : allDeclaredMethods) {
@@ -239,6 +204,10 @@ public class PushInOperationsImpl implements PushInOperations {
       }
     }
 
+    // Getting all declared fields (including declared on ITDs
+    // and .java files)
+    List<FieldMetadata> allDeclaredFields = memberDetails.getFields();
+
     // Checking if is necessary to make push-in for all declared fields
     for (FieldMetadata field : allDeclaredFields) {
       // If field exists on .aj file, add it!
@@ -246,6 +215,13 @@ public class PushInOperationsImpl implements PushInOperations {
         // Add field to .java file
         detailsBuilder.addField(getNewField(declaredByMetadataId, field));
       }
+    }
+
+    // Getting all declared annotations (including declared on ITDs
+    // and .java files)
+    List<AnnotationMetadata> allDeclaredAnnotations = new ArrayList<AnnotationMetadata>();
+    for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+      allDeclaredAnnotations.addAll(memberHoldingTypeDetails.getAnnotations());
     }
 
     // Checking if is necessary to make push-in for all declared annotations
@@ -269,6 +245,9 @@ public class PushInOperationsImpl implements PushInOperations {
 
     }
 
+    // Getting all declared constructors (including declared on ITDs and .java files)
+    List<ConstructorMetadata> allDeclaredConstructors = memberDetails.getConstructors();
+
     // Checking if is necessary to make push-in for all declared constructors
     for (ConstructorMetadata constructor : allDeclaredConstructors) {
       // Check if current constructor exists on .java file
@@ -291,8 +270,25 @@ public class PushInOperationsImpl implements PushInOperations {
     }
 
 
+    for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+
+      // Getting all extends registered on .aj file to move to .java file
+      for (JavaType extendsType : memberHoldingTypeDetails.getExtendsTypes()) {
+        detailsBuilder.addExtendsTypes(extendsType);
+      }
+
+      // Getting all implements registered on .aj file to move to .java file
+      for (JavaType implementsType : memberHoldingTypeDetails.getImplementsTypes()) {
+        detailsBuilder.addImplementsType(implementsType);
+      }
+
+    }
+
+
+    // Getting all imports registered on .aj file to move to .java file
+    //Set<ImportMetadata> allDeclaredImports = classDetails.getRegisteredImports();
     // Add necessary imports to prevent compilation errors
-    detailsBuilder.addImports(allDeclaredImports);
+    //detailsBuilder.addImports(allDeclaredImports);
 
     // Updating .java file
     getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());

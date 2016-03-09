@@ -71,10 +71,18 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
   }
 
   public final boolean addConstructor(final ConstructorMetadataBuilder constructorBuilder) {
-    if (constructorBuilder == null
-        || !getDeclaredByMetadataId().equals(constructorBuilder.getDeclaredByMetadataId())) {
+
+    // If received constructor builder is null, return false
+    if (constructorBuilder == null) {
       return false;
+    } else if (!getDeclaredByMetadataId().equals(constructorBuilder.getDeclaredByMetadataId())) {
+      // Generating new constructor using delcaredMetadataId
+      ConstructorMetadataBuilder updatedConstructorBuilder =
+          new ConstructorMetadataBuilder(getDeclaredByMetadataId(), constructorBuilder.build());
+      onAddConstructor(updatedConstructorBuilder);
+      return declaredConstructors.add(updatedConstructorBuilder);
     }
+
     onAddConstructor(constructorBuilder);
     return declaredConstructors.add(constructorBuilder);
   }
