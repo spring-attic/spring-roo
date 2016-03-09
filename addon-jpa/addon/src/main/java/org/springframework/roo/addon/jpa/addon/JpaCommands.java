@@ -129,11 +129,9 @@ public class JpaCommands implements CommandMarker {
     jpaOperations.newEmbeddableClass(name, serializable);
   }
 
-  @CliOptionVisibilityIndicator(
-      command = "jpa setup",
-      params = {"jndiDataSource"},
+  @CliOptionVisibilityIndicator(command = "jpa setup", params = {"jndiDataSource"},
       help = "jndiDataSource parameter is not available if any of databaseName, "
-              + "hostName, password or userName are selected or you are using an HYPERSONIC database.")
+          + "hostName, password or userName are selected or you are using an HYPERSONIC database.")
   public boolean isJndiVisible(ShellContext shellContext) {
 
     Map<String, String> params = shellContext.getParameters();
@@ -333,7 +331,7 @@ public class JpaCommands implements CommandMarker {
             String
                 .format(
                     "Entity '%s' already exists and cannot be created. Try to use a "
-                    + "different entity name on --class parameter or use --force parameter to overwrite it.",
+                        + "different entity name on --class parameter or use --force parameter to overwrite it.",
                     name));
       }
     }
@@ -354,7 +352,7 @@ public class JpaCommands implements CommandMarker {
       // We can't test an abstract class
       throw new IllegalArgumentException(
           "Automatic tests cannot be created for an abstract entity; remove the "
-          + "--testAutomatically or --abstract option");
+              + "--testAutomatically or --abstract option");
     }
 
     // Reject attempts to name the entity "Test", due to possible clashes
@@ -365,12 +363,12 @@ public class JpaCommands implements CommandMarker {
       if (permitReservedWords && testAutomatically) {
         throw new IllegalArgumentException(
             "Entity name cannot contain 'Test' or 'TestCase' as you are requesting tests; "
-            + "remove --testAutomatically or rename the proposed entity");
+                + "remove --testAutomatically or rename the proposed entity");
       }
       if (!permitReservedWords) {
         throw new IllegalArgumentException(
             "Entity name rejected as conflicts with test execution defaults; please remove "
-            + "'Test' and/or 'TestCase'");
+                + "'Test' and/or 'TestCase'");
       }
     }
 
@@ -515,7 +513,7 @@ public class JpaCommands implements CommandMarker {
         || versionField != null || versionType != null) {
       throw new IllegalArgumentException(
           "Identifier and version fields will be overwritten by superclass fields. Please, "
-          + "use --force to execute the command anyway.");
+              + "use --force to execute the command anyway.");
 
     }
   }

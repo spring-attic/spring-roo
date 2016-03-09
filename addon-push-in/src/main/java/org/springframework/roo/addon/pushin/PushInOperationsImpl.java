@@ -172,21 +172,22 @@ public class PushInOperationsImpl implements PushInOperations {
    */
   public void pushInClass(JavaType klass) {
     // Check if current klass exists
-    Validate.notNull(klass,
-        "ERROR: You must specify a valid class to continue with push-in action");
+    Validate
+        .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
 
     // Getting class details
     ClassOrInterfaceTypeDetails classDetails = getTypeLocationService().getTypeDetails(klass);
-    Validate.notNull(klass,
-        "ERROR: You must specify a valid class to continue with push-in action");
+    Validate
+        .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
 
     // Getting member details
     MemberDetails memberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
     // Getting current class .java file metadata ID
-    final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(klass,
-        getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+    final String declaredByMetadataId =
+        PhysicalTypeIdentifier.createIdentifier(klass,
+            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
@@ -314,9 +315,10 @@ public class PushInOperationsImpl implements PushInOperations {
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     // based on existing method
-    MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId,
-        method.getModifier(), method.getMethodName(), method.getReturnType(),
-        method.getParameterTypes(), method.getParameterNames(), bodyBuilder);
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(declaredByMetadataId, method.getModifier(),
+            method.getMethodName(), method.getReturnType(), method.getParameterTypes(),
+            method.getParameterNames(), bodyBuilder);
 
     return methodBuilder.build();
   }

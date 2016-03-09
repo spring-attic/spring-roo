@@ -686,12 +686,10 @@ public class FieldCommands implements CommandMarker {
    * @param shellContext
    * @return true if joinTable param has been specified.
    */
-  @CliOptionVisibilityIndicator(
-      command = "field set",
-      params = {"joinColumns", "referencedColumns", "inverseJoinColumns",
-          "inverseReferencedColumns"},
+  @CliOptionVisibilityIndicator(command = "field set", params = {"joinColumns",
+      "referencedColumns", "inverseJoinColumns", "inverseReferencedColumns"},
       help = "Options --joinColumns, --referencedColumns, --inverseJoinColumns and "
-              + "--inverseReferencedColumns must be used with a specific --joinTable option.")
+          + "--inverseReferencedColumns must be used with a specific --joinTable option.")
   public boolean areJoinTableParamsVisibleForFieldSet(ShellContext shellContext) {
 
     String joinTableParam = shellContext.getParameters().get("joinTable");
@@ -732,32 +730,22 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
-      @CliOption(
-          key = "joinTable",
-          mandatory = true,
+      @CliOption(key = "joinTable", mandatory = true,
           specifiedDefaultValue = ROO_DEFAULT_JOIN_TABLE_NAME,
           help = "Join table name. Most usually used in @ManyToMany relations. If "
-                  + "name not specified it will take default @JoinTable name value.") final String joinTable,
-      @CliOption(
-          key = "joinColumns",
-          mandatory = true,
+              + "name not specified it will take default @JoinTable name value.") final String joinTable,
+      @CliOption(key = "joinColumns", mandatory = true,
           help = "Comma separated list of join table's foreign key columns which "
-                  + "references the table of the entity owning the relation") final String joinColumns,
-      @CliOption(
-          key = "referencedColumns",
-          mandatory = true,
+              + "references the table of the entity owning the relation") final String joinColumns,
+      @CliOption(key = "referencedColumns", mandatory = true,
           help = "Comma separated list of foreign key referenced columns in the table "
-                  + "of the entity owning the relation") final String referencedColumns,
-      @CliOption(
-          key = "inverseJoinColumns",
-          mandatory = true,
+              + "of the entity owning the relation") final String referencedColumns,
+      @CliOption(key = "inverseJoinColumns", mandatory = true,
           help = "Comma separated list of join table's foreign key columns which "
-                  + "references the table of the entity that does not own the relation") final String inverseJoinColumns,
-      @CliOption(
-          key = "inverseReferencedColumns",
-          mandatory = true,
+              + "references the table of the entity that does not own the relation") final String inverseJoinColumns,
+      @CliOption(key = "inverseReferencedColumns", mandatory = true,
           help = "Comma separated list of foreign key referenced columns in the table "
-                  + "of the entity that does not own the relation") final String inverseReferencedColumns,
+              + "of the entity that does not own the relation") final String inverseReferencedColumns,
       @CliOption(
           key = "cascadeType",
           mandatory = false,
@@ -867,12 +855,10 @@ public class FieldCommands implements CommandMarker {
      * @param shellContext
      * @return true if joinTable param has been specified.
      */
-  @CliOptionVisibilityIndicator(
-      command = "field list",
-      params = {"joinColumns", "referencedColumns", "inverseJoinColumns",
-          "inverseReferencedColumns"},
+  @CliOptionVisibilityIndicator(command = "field list", params = {"joinColumns",
+      "referencedColumns", "inverseJoinColumns", "inverseReferencedColumns"},
       help = "Options --joinColumns, --referencedColumns, --inverseJoinColumns and "
-              + "--inverseReferencedColumns must be used with a specific --joinTable option.")
+          + "--inverseReferencedColumns must be used with a specific --joinTable option.")
   public boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext) {
 
     String joinTableParam = shellContext.getParameters().get("joinTable");
@@ -958,48 +944,33 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
-      @CliOption(
-          key = "joinTable",
-          mandatory = true,
+      @CliOption(key = "joinTable", mandatory = true,
           specifiedDefaultValue = ROO_DEFAULT_JOIN_TABLE_NAME,
           help = "Join table name. Most usually used in @ManyToMany relations. If name "
-                  + "not specified it will take default @JoinTable name value.") final String joinTable,
-      @CliOption(
-          key = "joinColumns",
-          mandatory = true,
+              + "not specified it will take default @JoinTable name value.") final String joinTable,
+      @CliOption(key = "joinColumns", mandatory = true,
           help = "Comma separated list of join table's foreign key columns which "
-                  + "references the table of the entity owning the relation") final String joinColumns,
-      @CliOption(
-          key = "referencedColumns",
-          mandatory = true,
+              + "references the table of the entity owning the relation") final String joinColumns,
+      @CliOption(key = "referencedColumns", mandatory = true,
           help = "Comma separated list of foreign key referenced columns in the table "
-                  + "of the entity owning the relation") final String referencedColumns,
-      @CliOption(
-          key = "inverseJoinColumns",
-          mandatory = true,
+              + "of the entity owning the relation") final String referencedColumns,
+      @CliOption(key = "inverseJoinColumns", mandatory = true,
           help = "Comma separated list of join table's foreign key columns which "
-                  + "references the table of the entity that does not own the relation") final String inverseJoinColumns,
-      @CliOption(
-          key = "inverseReferencedColumns",
-          mandatory = true,
+              + "references the table of the entity that does not own the relation") final String inverseJoinColumns,
+      @CliOption(key = "inverseReferencedColumns", mandatory = true,
           help = "Comma separated list of foreign key referenced columns in the table "
-                  + "of the entity that does not own the relation") final String inverseReferencedColumns,
-      @CliOption(
-          key = "cascadeType",
-          mandatory = false,
-          unspecifiedDefaultValue = "ALL",
+              + "of the entity that does not own the relation") final String inverseReferencedColumns,
+      @CliOption(key = "cascadeType", mandatory = false, unspecifiedDefaultValue = "ALL",
           specifiedDefaultValue = "ALL",
           help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH "
-                  + "and REMOVE.") final Cascade cascadeType,
-      ShellContext shellContext) {
+              + "and REMOVE.") final Cascade cascadeType, ShellContext shellContext) {
 
     // Check if joinTable must have a specified value.
     checkJoinTableNameMandatory(joinTable);
 
     final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
-    Validate
-        .notNull(cid,
-            "The specified target '--type' does not exist or can not be found. Please "
+    Validate.notNull(cid,
+        "The specified target '--type' does not exist or can not be found. Please "
             + "create this type first.");
 
     final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
@@ -1022,7 +993,7 @@ public class FieldCommands implements CommandMarker {
     } else {
       throw new IllegalStateException(
           "The field list command is only applicable to enum, JPA @Entity or Spring "
-          + "Data @Persistence elements");
+              + "Data @Persistence elements");
     }
 
     final ClassOrInterfaceTypeDetails javaTypeDetails =
@@ -1077,9 +1048,8 @@ public class FieldCommands implements CommandMarker {
             "--joinColumns and --referencedColumns must have same number of column values");
       }
       if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate
-            .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-                "--inverseJoinColumns and --inverseReferencedColumns must have same "
+        Validate.isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
+            "--inverseJoinColumns and --inverseReferencedColumns must have same "
                 + "number of column values");
       }
 
@@ -1118,7 +1088,7 @@ public class FieldCommands implements CommandMarker {
       help = "Adds a private string field to an existing Java source file")
   public void addFieldString(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of "
-              + "the field to add") final JavaSymbolName fieldName,
+          + "the field to add") final JavaSymbolName fieldName,
       @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
@@ -1410,7 +1380,7 @@ public class FieldCommands implements CommandMarker {
             String
                 .format(
                     "Field '%s' already exists and cannot be created. Try to use a "
-                    + "different field name on --fieldName parameter or use --force parameter to overwrite it.",
+                        + "different field name on --fieldName parameter or use --force parameter to overwrite it.",
                     fieldName));
       }
     }
@@ -1435,7 +1405,7 @@ public class FieldCommands implements CommandMarker {
       if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
         throw new IllegalArgumentException(
             "It is mandatory to assign a specific table name for --joinTable. Please, "
-            + "assign it a table name.");
+                + "assign it a table name.");
       }
     }
   }
