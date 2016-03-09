@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.details;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails implements
@@ -241,5 +243,16 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
     builder.append("innerTypes", innerTypes);
     builder.append("customData", getCustomData());
     return builder.toString();
+  }
+
+  @Override
+  public Set<ImportMetadata> getImports() {
+    Set<ImportMetadata> imports = new HashSet<ImportMetadata>();
+    for (JavaType registeredImport : registeredImports) {
+      imports.add(new ImportMetadataBuilder(getDeclaredByMetadataId(), Modifier.PUBLIC,
+          registeredImport.getPackage(), registeredImport, false, false).build());
+    }
+
+    return imports;
   }
 }

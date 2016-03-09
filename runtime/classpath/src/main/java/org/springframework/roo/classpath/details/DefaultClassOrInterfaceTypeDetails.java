@@ -25,6 +25,7 @@ import org.springframework.roo.model.JavaType;
  * Default representation of a {@link ClassOrInterfaceTypeDetails}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTypeDetails implements
@@ -171,6 +172,11 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 
   public List<JavaType> getImplementsTypes() {
     return Collections.unmodifiableList(implementsTypes);
+  }
+
+  @Override
+  public Set<ImportMetadata> getImports() {
+    return registeredImports;
   }
 
   public JavaType getName() {

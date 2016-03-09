@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.details;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -11,6 +12,7 @@ import org.springframework.roo.model.JavaType;
  * aspect.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public interface MemberHoldingTypeDetails extends PhysicalTypeDetails,
@@ -167,6 +169,14 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails,
    * @since 1.2.0
    */
   JavaSymbolName getUniqueFieldName(final String proposedName);
+
+  /**
+   * Lists the imports this class includes. Also obtains imports from ITDs. 
+   * 
+   * @return an unmodifiable representation of imports this type implements
+   *         (may be empty, but never null)
+   */
+  Set<ImportMetadata> getImports();
 
   /**
    * Indicates whether this type implements the given types. Equivalent to

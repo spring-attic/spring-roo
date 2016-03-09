@@ -3,6 +3,7 @@ package org.springframework.roo.addon.pushin;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -20,6 +21,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.ImportMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -170,22 +172,21 @@ public class PushInOperationsImpl implements PushInOperations {
    */
   public void pushInClass(JavaType klass) {
     // Check if current klass exists
-    Validate
-        .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
+    Validate.notNull(klass,
+        "ERROR: You must specify a valid class to continue with push-in action");
 
     // Getting class details
     ClassOrInterfaceTypeDetails classDetails = getTypeLocationService().getTypeDetails(klass);
-    Validate
-        .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
+    Validate.notNull(klass,
+        "ERROR: You must specify a valid class to continue with push-in action");
 
     // Getting member details
     MemberDetails memberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
     // Getting current class .java file metadata ID
-    final String declaredByMetadataId =
-        PhysicalTypeIdentifier.createIdentifier(klass,
-            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+    final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(klass,
+        getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
@@ -270,25 +271,26 @@ public class PushInOperationsImpl implements PushInOperations {
     }
 
 
+    // Getting all details 
     for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 
       // Getting all extends registered on .aj file to move to .java file
-      for (JavaType extendsType : memberHoldingTypeDetails.getExtendsTypes()) {
+      List<JavaType> allExtendsTypes = memberHoldingTypeDetails.getExtendsTypes();
+      for (JavaType extendsType : allExtendsTypes) {
         detailsBuilder.addExtendsTypes(extendsType);
       }
 
       // Getting all implements registered on .aj file to move to .java file
-      for (JavaType implementsType : memberHoldingTypeDetails.getImplementsTypes()) {
+      List<JavaType> allImplementsTypes = memberHoldingTypeDetails.getImplementsTypes();
+      for (JavaType implementsType : allImplementsTypes) {
         detailsBuilder.addImplementsType(implementsType);
       }
 
+      // Getting all imports registered on .aj file to move to .java file
+      Set<ImportMetadata> allRegisteredImports = memberHoldingTypeDetails.getImports();
+      detailsBuilder.addImports(allRegisteredImports);
+
     }
-
-
-    // Getting all imports registered on .aj file to move to .java file
-    //Set<ImportMetadata> allDeclaredImports = classDetails.getRegisteredImports();
-    // Add necessary imports to prevent compilation errors
-    //detailsBuilder.addImports(allDeclaredImports);
 
     // Updating .java file
     getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
@@ -312,10 +314,9 @@ public class PushInOperationsImpl implements PushInOperations {
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     // based on existing method
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(declaredByMetadataId, method.getModifier(),
-            method.getMethodName(), method.getReturnType(), method.getParameterTypes(),
-            method.getParameterNames(), bodyBuilder);
+    MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId,
+        method.getModifier(), method.getMethodName(), method.getReturnType(),
+        method.getParameterTypes(), method.getParameterNames(), bodyBuilder);
 
     return methodBuilder.build();
   }
