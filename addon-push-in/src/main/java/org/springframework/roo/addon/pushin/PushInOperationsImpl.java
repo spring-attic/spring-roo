@@ -219,34 +219,6 @@ public class PushInOperationsImpl implements PushInOperations {
       }
     }
 
-    // Getting all declared annotations (including declared on ITDs
-    // and .java files)
-    List<AnnotationMetadata> allDeclaredAnnotations = new ArrayList<AnnotationMetadata>();
-    for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
-      allDeclaredAnnotations.addAll(memberHoldingTypeDetails.getAnnotations());
-    }
-
-    // Checking if is necessary to make push-in for all declared annotations
-    for (AnnotationMetadata annotation : allDeclaredAnnotations) {
-      // Check if current annotation exists on .java file
-      classDetails = getTypeLocationService().getTypeDetails(detailsBuilder.build().getType());
-      List<AnnotationMetadata> javaDeclaredAnnotations = classDetails.getAnnotations();
-      boolean annotationExists = false;
-      for (AnnotationMetadata javaAnnotation : javaDeclaredAnnotations) {
-        if (javaAnnotation.getAnnotationType().getFullyQualifiedTypeName()
-            .equals(annotation.getAnnotationType().getFullyQualifiedTypeName())) {
-          annotationExists = true;
-        }
-      }
-
-      // If not exists, add it!
-      if (!annotationExists) {
-        // Add annotation to .java file
-        detailsBuilder.addAnnotation(annotation);
-      }
-
-    }
-
     // Getting all declared constructors (including declared on ITDs and .java files)
     List<ConstructorMetadata> allDeclaredConstructors = memberDetails.getConstructors();
 
@@ -271,9 +243,35 @@ public class PushInOperationsImpl implements PushInOperations {
 
     }
 
-
     // Getting all details 
     for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+
+      // Prevent that details from inheritance classes could be include on this .java file 
+      if (!memberHoldingTypeDetails.getType().equals(classDetails.getType())) {
+        continue;
+      }
+
+      // Getting all declared annotations (including declared on ITDs
+      // and .java files)
+      List<AnnotationMetadata> allDeclaredAnnotations = memberHoldingTypeDetails.getAnnotations();
+      for (AnnotationMetadata annotation : allDeclaredAnnotations) {
+        // Check if current annotation exists on .java file
+        classDetails = getTypeLocationService().getTypeDetails(detailsBuilder.build().getType());
+        List<AnnotationMetadata> javaDeclaredAnnotations = classDetails.getAnnotations();
+        boolean annotationExists = false;
+        for (AnnotationMetadata javaAnnotation : javaDeclaredAnnotations) {
+          if (javaAnnotation.getAnnotationType().getFullyQualifiedTypeName()
+              .equals(annotation.getAnnotationType().getFullyQualifiedTypeName())) {
+            annotationExists = true;
+          }
+        }
+
+        // If not exists, add it!
+        if (!annotationExists) {
+          // Add annotation to .java file
+          detailsBuilder.addAnnotation(annotation);
+        }
+      }
 
       // Getting all extends registered on .aj file to move to .java file
       List<JavaType> allExtendsTypes = memberHoldingTypeDetails.getExtendsTypes();
