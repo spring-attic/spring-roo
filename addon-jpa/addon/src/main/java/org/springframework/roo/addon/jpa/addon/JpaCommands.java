@@ -70,6 +70,8 @@ public class JpaCommands implements CommandMarker {
       new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
   private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER =
       new AnnotationMetadataBuilder(ROO_TO_STRING);
+  private static final String IDENTIFIER_DEFAULT_TYPE = "java.lang.Long";
+  private static final String VERSION_DEFAULT_TYPE = "java.lang.Integer";
 
   // Enums
   private static final JavaType IDENTIFIER_STRATEGY = new JavaType(IdentifierStrategy.class);
@@ -280,7 +282,7 @@ public class JpaCommands implements CommandMarker {
           key = "identifierType",
           mandatory = false,
           optionContext = "java-lang,project",
-          unspecifiedDefaultValue = "java.lang.Long",
+          unspecifiedDefaultValue = IDENTIFIER_DEFAULT_TYPE,
           specifiedDefaultValue = "java.lang.Long",
           help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType,
       @CliOption(key = "versionField", mandatory = true,
@@ -291,7 +293,7 @@ public class JpaCommands implements CommandMarker {
           key = "versionType",
           mandatory = true,
           optionContext = "java-lang,project",
-          unspecifiedDefaultValue = "java.lang.Integer",
+          unspecifiedDefaultValue = VERSION_DEFAULT_TYPE,
           help = "The data type that will be used for the JPA version field (defaults to java.lang.Integer)") final JavaType versionType,
       @CliOption(key = "inheritanceType", mandatory = false,
           help = "The JPA @Inheritance value (apply to base class)") final InheritanceType inheritanceType,
@@ -336,12 +338,17 @@ public class JpaCommands implements CommandMarker {
       }
     }
 
+    // Check valid value for --extends
+    if (superclass == null && shellContext.getParameters().get("extends").equals("")) {
+      throw new IllegalArgumentException(
+          "Option --extends must have a value when specified. Please, assign it a value.");
+    }
+
     // ROO-3723: Add warning when using --extends with incompatible parameters
     if (superclass != null && !("java.lang.Object").equals(superclass.getFullyQualifiedTypeName())
         && !shellContext.isForce()) {
-      this.checkExtendsOverride(shellContext, identifierColumn, identifierField,
-          identifierStrategy, identifierType, sequenceName, versionColumn, versionField,
-          versionType);
+      this.checkExtendsOverride(identifierColumn, identifierField, identifierStrategy,
+          identifierType, sequenceName, versionColumn, versionField, versionType);
     }
 
     if (!permitReservedWords) {
@@ -495,7 +502,6 @@ public class JpaCommands implements CommandMarker {
    * will override any specified param and shows a message if so. If user uses 
    * the --force global param it will be possible to execute the command for creating the entity. 
    * 
-   * @param shellContext 
    * @param identifierColumn
    * @param identifierField
    * @param identifierStrategy
@@ -505,12 +511,13 @@ public class JpaCommands implements CommandMarker {
    * @param versionField
    * @param versionType
    */
-  private void checkExtendsOverride(ShellContext shellContext, String identifierColumn,
-      String identifierField, IdentifierStrategy identifierStrategy, JavaType identifierType,
-      String sequenceName, String versionColumn, String versionField, JavaType versionType) {
+  private void checkExtendsOverride(String identifierColumn, String identifierField,
+      IdentifierStrategy identifierStrategy, JavaType identifierType, String sequenceName,
+      String versionColumn, String versionField, JavaType versionType) {
     if (identifierColumn != null || identifierField != null || identifierStrategy != null
-        || identifierType != null || sequenceName != null || versionColumn != null
-        || versionField != null || versionType != null) {
+        || !IDENTIFIER_DEFAULT_TYPE.equals(identifierType.getFullyQualifiedTypeName())
+        || sequenceName != null || versionColumn != null || versionField != null
+        || !VERSION_DEFAULT_TYPE.equals(versionType.getFullyQualifiedTypeName())) {
       throw new IllegalArgumentException(
           "Identifier and version fields will be overwritten by superclass fields. Please, "
               + "use --force to execute the command anyway.");
