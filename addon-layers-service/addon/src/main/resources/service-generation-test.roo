@@ -1,0 +1,478 @@
+# Setup initial conditions: create project, setup persistence and
+# create an entity with different fields
+
+project setup --topLevelPackage org.example
+jpa setup --provider HIBERNATE --database ORACLE 
+entity jpa --class ~.Pet --readOnly
+field string --fieldName name
+entity jpa --class ~.Owner
+field string --fieldName firstName
+field boolean --fieldName active
+field number --fieldName telephone --type java.lang.Integer
+field number --fieldName age --type int
+field date --fieldName birthday --type java.util.Date
+field set --fieldName pets --type ~.Pet
+field reference --fieldName pet --type ~.Pet
+
+#=========================================================================================================
+# TEST 1: Generate service without repository             
+#---------------------------------------------------------------------------------------------------------
+# Goal:   Fail if service entity does not have a repository generated
+#
+service add --entity ~.Pet --interface ~.PetService --class ~.PetServiceImplementation
+service all --apiPackage ~.service --implPackage ~.service.impl
+#      
+# Output:  INFO: Service 'PetService' will not be generated because you didn't generate a @RooJpaRepository for entity 'Pet'. Use 'repository' commands to generate a valid repository and then try again.
+#          INFO: Service 'OwnerService' will not be generated because you didn't generate a @RooJpaRepository for entity 'Owner'. Use 'repository' commands to generate a valid repository and then try again.
+#          INFO: Service 'PetService' will not be generated because you didn't generate a @RooJpaRepository for entity 'Pet'. Use 'repository' commands to generate a valid repository and then try again.
+#
+# Result:  Informs that entity needs a repository                                                             
+#=========================================================================================================
+
+#=========================================================================================================
+# TEST 2: Generate a service for a read only entity        
+#---------------------------------------------------------------------------------------------------------
+# Goal:   Create a service with read only operations
+#
+repository jpa all --package ~.repository
+service add --entity ~.Pet --interface ~.PetService
+#      
+# Output:  Created SRC_MAIN_JAVA/org/example/PetService.java
+#          Created SRC_MAIN_JAVA/org/example/PetServiceImpl.java
+#          Created SRC_MAIN_JAVA/org/example/PetServiceImpl_Roo_Service_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/PetService_Roo_Service.aj
+#
+# Result:  Generates service interface and implementation with the next operations:
+#          public abstract List<Pet> PetService.findAll();    
+#          public abstract List<Pet> PetService.findAll(Iterable<Long> ids);    
+#          public abstract Pet PetService.findOne(Long id);                                                                   
+#=========================================================================================================
+
+#=========================================================================================================
+# TEST 3: Generate a service for a read and write entity        
+#---------------------------------------------------------------------------------------------------------
+# Goal:   Create a service with read and write operations
+#
+service add --entity ~.Owner --interface ~.OwnerService
+#      
+# Output:  Created SRC_MAIN_JAVA/org/example/OwnerService.java
+#          Created SRC_MAIN_JAVA/org/example/OwnerServiceImpl.java
+#          Created SRC_MAIN_JAVA/org/example/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/OwnerService_Roo_Service.aj
+#
+# Result:  Generates service interface and implementation with the next operations:
+#          public abstract List<Owner> OwnerService.findAll();    
+#          public abstract List<Owner> OwnerService.findAll(Iterable<Long> ids);    
+#          public abstract Owner OwnerService.findOne(Long id);    
+#          public abstract Owner OwnerService.save(Owner entity);    
+#          public abstract void OwnerService.delete(Long id);    
+#          public abstract List<Owner> OwnerService.save(Iterable<Owner> entities);    
+#          public abstract void OwnerService.delete(Iterable<Long> ids);      
+#=========================================================================================================
+
+#=========================================================================================================
+# TEST 4: Generate all services      
+#---------------------------------------------------------------------------------------------------------
+# Goal:   Create services for all entities
+#
+service all --apiPackage ~.service --implPackage ~.service.impl
+#      
+# Output: Created SRC_MAIN_JAVA/org/example/service
+#         Created SRC_MAIN_JAVA/org/example/service/OwnerService.java
+#         Created SRC_MAIN_JAVA/org/example/service/impl
+#         Created SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl.java
+#         Created SRC_MAIN_JAVA/org/example/service/PetService.java
+#         Created SRC_MAIN_JAVA/org/example/service/impl/PetServiceImpl.java
+#         Created SRC_MAIN_JAVA/org/example/service/PetService_Roo_Service.aj
+#         Created SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#         Created SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#         Created SRC_MAIN_JAVA/org/example/service/impl/PetServiceImpl_Roo_Service_Impl.aj
+#
+# Result: Generates service interfaces and implementations for every entity                                                                 
+#=========================================================================================================
+ 
+
+#=========================================================================================================
+# TEST 5: Generate a finder with several conditions        
+#---------------------------------------------------------------------------------------------------------
+# Goal:   Create a service operation to use the generated finder 
+#
+finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Created SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  
+#   OwnerService_Roo_Service will have: 
+#   List<Owner> OwnerService.findByFirstNameAndPetOrBirthday(String firstName, Pet pet, Date birthday)
+#    
+#   OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#   public List<Owner> OwnerServiceImpl.findByFirstNameAndPetOrBirthday(String firstName, Pet pet, 
+#                                                                                    Date birthday) {
+#      return repository.findByFirstNameAndPetOrBirthday(firstName, pet, birthday);
+#   }                                                              
+#=========================================================================================================
+
+#=========================================================================================================
+# TEST 6:  Generate a finder with ignore case options       
+#---------------------------------------------------------------------------------------------------------
+# Goal:  Create a service operation to use a finder with ignore case and all ignore case options enabled
+#
+finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCase
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  OwnerService_Roo_Service will have: 
+#          public abstract List<Owner> OwnerService.findByAgeIgnoreCaseAllIgnoreCase(int age)    
+#    
+#          OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#          public List<Owner> OwnerServiceImpl.findByAgeIgnoreCaseAllIgnoreCase(int age) {
+#              return repository.findByAgeIgnoreCaseAllIgnoreCase(age);
+#          }                                                           
+#=========================================================================================================
+
+ 
+#=========================================================================================================
+# TEST 7:  Generate a finder with an order clause and all ignore case option
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder that orders the results by several 
+#          properties and all ignore case option is enabled
+#
+finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  OwnerService_Roo_Service will have: 
+#          List<Owner> OwnerService.findByBirthdayAllIgnoreCaseOrderByFirstNameAsc(Date birthday)      
+#    
+#     OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#     public List<Owner> OwnerServiceImpl.findByBirthdayAllIgnoreCaseOrderByFirstNameAsc(Date birthday) {
+#           return repository.findByBirthdayAllIgnoreCaseOrderByFirstNameAsc(birthday);
+#     }     
+#=========================================================================================================
+ 
+ 
+#=========================================================================================================
+# TEST 8:  Generate a finder with condition operators
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder with property operators
+#
+finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  
+#  OwnerService_Roo_Service will have: 
+#  OwnerService.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches(int age, Date birthday, 
+#                                                                                       String name)    
+#    
+#  OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#  public List<Owner> OwnerServiceImpl.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches(
+#                                                               int age, Date birthday, String name) {
+#    return repository.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches(age, birthday, name);
+#  }   
+#=========================================================================================================
+  
+
+
+#=========================================================================================================
+# TEST 9:  Generate a finder that returns an only result
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder with a limiting expression that returns an Owner
+#
+finder add --class ~.Owner --name findDistinctFirst1ByPet
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  OwnerService_Roo_Service will have: 
+#          public abstract Owner OwnerService.findDistinctFirst1ByPet(Pet pet);
+#    
+#          OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#          public Owner OwnerServiceImpl.findDistinctFirst1ByPet(Pet pet) {
+#             return repository.findDistinctFirst1ByPet(pet);
+#          }  
+#=========================================================================================================
+
+#=========================================================================================================
+# TEST 10: Generate a finder with unlimited number of results
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finders that returns a list of Owners
+#
+finder add --class ~.Owner --name findFirst100ByAge
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  OwnerService_Roo_Service will have: 
+#          public abstract List<Owner> OwnerService.findFirst100ByAge(int age);    
+#    
+#          OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#          public List<Owner> OwnerServiceImpl.findFirst100ByAge(int age) {
+#             return repository.findFirst100ByAge(age);
+#          }  
+#=========================================================================================================
+  
+
+#=========================================================================================================
+# TEST 11: Generate a finder that returns an entity property list
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder that returns a list of subject property java type
+#
+finder add --class ~.Owner --name findDistinctActiveByAge
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  OwnerService_Roo_Service will have: 
+#          public abstract List<Boolean> OwnerService.findDistinctActiveByAge(int age);      
+#    
+#          OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#          public List<Boolean> OwnerServiceImpl.findDistinctActiveByAge(int age) {
+#             return repository.findDistinctActiveByAge(age);
+#          } 
+#=========================================================================================================
+
+
+#=========================================================================================================
+# TEST 12: Generate a finder that returns an entity property result
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder that returns the property java type
+#
+finder add --class ~.Owner --name findTopPetNameByAge
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  OwnerService_Roo_Service will have: 
+#          public abstract String OwnerService.findTopPetNameByAge(int age);      
+#    
+#          OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#          public String OwnerServiceImpl.findTopPetNameByAge(int age) {
+#             return repository.findTopPetNameByAge(age);
+#          }   
+#=========================================================================================================
+  
+#=========================================================================================================
+# TEST 13: Generate a finder without parameters
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder that does not receive any parameter
+#
+finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  
+#   OwnerService_Roo_Service will have: 
+#   List<Owner> OwnerService.findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull();         
+#    
+#   OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#   public List<Owner> OwnerServiceImpl.findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull() {
+#     return repository.findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull();
+#   } 
+#=========================================================================================================
+  
+
+#=========================================================================================================
+# TEST 14: Generate a finder without operators
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder without condition operators
+#
+finder add --class ~.Owner --name findPetByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  
+#   OwnerService_Roo_Service will have: 
+#   List<Pet> OwnerService.findPetByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains(
+#               String firstName, Boolean active, Date birthday, Pet pet, int age, String name);
+#    
+#   OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#   public List<Pet> OwnerServiceImpl.findPetByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains(
+#                         String firstName, Boolean active, Date birthday, Pet pet, int age, String name) {
+#      return repository.findPetByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains(firstName, 
+#                                                                     active, birthday, pet, age, name);
+#   }    
+#=========================================================================================================
+
+
+ 
+#=========================================================================================================
+# TEST 15: Generate a finder which operators need a parameter
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder with condition operators
+#
+finder add --class ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  
+#   OwnerService_Roo_Service will have: 
+#   Owner OwnerService.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex(
+#                Boolean active, Date birthday, String firstName, Pet pet, int age, String name); 
+#    
+#   OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#   public Owner OwnerServiceImpl.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex(
+#                      Boolean active, Date birthday, String firstName, Pet pet, int age, String name) {
+#      return repository.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex(
+#                      active, birthday, firstName, pet, age, name);
+#   } 
+#========================================================================================================= 
+ 
+#=========================================================================================================
+# TEST 16: Generate a finder which operators need several parameter
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder which condition operators need several parameters
+#
+finder add --class ~.Owner --name findFirstAgeByAgeBetweenAndBirthdayBetween
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  
+#   OwnerService_Roo_Service will have: 
+#   int OwnerService.findFirstAgeByAgeBetweenAndBirthdayBetween(int age1, int age2, Date birthday1, 
+#                                                                                      Date birthday2)     
+#    
+#   OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#   public int OwnerServiceImpl.findFirstAgeByAgeBetweenAndBirthdayBetween(int age1, int age2, 
+#                                                                Date birthday1, Date birthday2) {
+#     return repository.findFirstAgeByAgeBetweenAndBirthdayBetween(age1, age2, birthday1, birthday2);
+#   } 
+#========================================================================================================= 
+  
+#=========================================================================================================
+# TEST 17: Generate finders with a property with several operators
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder which condition property has several operators
+#
+finder add --class ~.Owner --name findAgeByAgeBetweenAndAgeIsOrAgeLessThan
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  
+#   OwnerService_Roo_Service will have: 
+#   List<Integer> OwnerService.findAgeByAgeBetweenAndAgeIsOrAgeLessThan(int age1, int age2, int age3, 
+#                                                                                           int age4)         
+#    
+#   OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#   public List<Integer> OwnerServiceImpl.findAgeByAgeBetweenAndAgeIsOrAgeLessThan(int age1, int age2, 
+#                                                                                  int age3, int age4) {
+#      return repository.findAgeByAgeBetweenAndAgeIsOrAgeLessThan(age1, age2, age3, age4);
+#   }  
+#=========================================================================================================
+
+
+#=========================================================================================================
+# TEST 18: Generate finders with an In operator
+#---------------------------------------------------------------------------------------------------------
+# Goal:    Create a service operation to use a finder with an In operator
+#
+finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  
+#   OwnerService_Roo_Service will have: 
+#   List<Owner> OwnerService.findByBirthdayInOrBirthdayNotIn(List<Date> birthdayList, 
+#                                                           List<Date> birthdayList2)    
+#    
+#   OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#   public List<Owner> OwnerServiceImpl.findByBirthdayInOrBirthdayNotIn(List<Date> birthdayList, 
+#                                                                      List<Date> birthdayList2) {
+#       return repository.findByBirthdayInOrBirthdayNotIn(birthdayList, birthdayList2);
+#   }  
+#========================================================================================================= 
+  
+#################################################################
+####				MANUAL  TESTS
+#################################################################
+
+
+
+#=========================================================================================================
+# TEST 19: Manually remove a finder         
+#----------------------------------------------------------------------------------------
+# Goal:    Test if finder service is removed
+#
+# Remove "findByFirstNameAndPetOrBirthday" from @RooFinder in OwnerRepository.java
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  Removes from owner service the service  findByFirstNameAndPetOrBirthday and
+#          its implementation                                                          
+#=========================================================================================================
+
+#=========================================================================================================
+# TEST 20: Manually add a finder         
+#----------------------------------------------------------------------------------------
+# Goal:    Test if finder service is generated
+#
+# Add "findByFirstName" to @RooFinder in OwnerRepository.java
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  OwnerService_Roo_Service will have: 
+#          public abstract List<Owner> OwnerService.findByFirstName(String firstName);       
+#    
+#          OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
+#          public List<Owner> OwnerServiceImpl.findByFirstName(String firstName) {
+#             return repository.findByFirstName(firstName);
+#          }                                                          
+#=========================================================================================================
+
+
+#=========================================================================================================
+# TEST 21: Manually update a finder         
+#----------------------------------------------------------------------------------------
+# Goal:    Test if finder service is updated
+#
+# Change "findByFirstName" by "findFirstByFirstName" in OwnerRepository @RooFinder
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
+#
+# Result:  Finder name is updated and return type is changed into Owner                                                        
+#=========================================================================================================
+
