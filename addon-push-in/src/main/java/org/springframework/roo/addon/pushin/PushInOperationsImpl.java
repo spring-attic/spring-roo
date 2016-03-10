@@ -84,10 +84,8 @@ public class PushInOperationsImpl implements PushInOperations {
     }
 
     if (!force) {
-      LOGGER
-          .log(
-              Level.INFO,
-              "All these changes will be applied. Execute your previous push-in command using --force parameter to apply them.");
+      LOGGER.log(Level.INFO,
+          "All these changes will be applied. Execute your previous push-in command using --force parameter to apply them.");
     }
 
   }
@@ -103,8 +101,7 @@ public class PushInOperationsImpl implements PushInOperations {
     if (klass != null) {
 
       ClassOrInterfaceTypeDetails classDetails = getTypeLocationService().getTypeDetails(klass);
-      Validate.notNull(
-          classDetails,
+      Validate.notNull(classDetails,
           String.format("ERROR: Provided class '%s' doesn't exist on current project.",
               klass.getSimpleTypeName()));
 
@@ -124,9 +121,10 @@ public class PushInOperationsImpl implements PushInOperations {
           }
         }
 
-        Validate.isTrue(methodExists, String.format(
-            "ERROR: No methods found on class '%s' that matches with '%s' expression.",
-            klass.getSimpleTypeName(), method));
+        Validate.isTrue(methodExists,
+            String.format(
+                "ERROR: No methods found on class '%s' that matches with '%s' expression.",
+                klass.getSimpleTypeName(), method));
 
       } else {
         // If method is not specified, push-in entire class elements
@@ -153,9 +151,10 @@ public class PushInOperationsImpl implements PushInOperations {
         }
       }
 
-      Validate.isTrue(methodExists, String.format(
-          "ERROR: No methods found on package '%s' that matches with '%s' expression.",
-          specifiedPackage.getFullyQualifiedPackageName(), method));
+      Validate.isTrue(methodExists,
+          String.format(
+              "ERROR: No methods found on package '%s' that matches with '%s' expression.",
+              specifiedPackage.getFullyQualifiedPackageName(), method));
 
     } else if (method != null) {
       // Check that exists some method that match with provided method
@@ -189,10 +188,8 @@ public class PushInOperationsImpl implements PushInOperations {
     }
 
     if (!force) {
-      LOGGER
-          .log(
-              Level.INFO,
-              "All these changes will be applied. Execute your previous push-in command using --force parameter to apply them.");
+      LOGGER.log(Level.INFO,
+          "All these changes will be applied. Execute your previous push-in command using --force parameter to apply them.");
     }
 
   }
@@ -205,13 +202,13 @@ public class PushInOperationsImpl implements PushInOperations {
    */
   public void pushInClass(JavaType klass, boolean force) {
     // Check if current klass exists
-    Validate
-        .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
+    Validate.notNull(klass,
+        "ERROR: You must specify a valid class to continue with push-in action");
 
     // Getting class details
     ClassOrInterfaceTypeDetails classDetails = getTypeLocationService().getTypeDetails(klass);
-    Validate
-        .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
+    Validate.notNull(klass,
+        "ERROR: You must specify a valid class to continue with push-in action");
 
     // String builder where changes will be registered
     StringBuilder changesToApply = new StringBuilder();
@@ -221,9 +218,8 @@ public class PushInOperationsImpl implements PushInOperations {
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
     // Getting current class .java file metadata ID
-    final String declaredByMetadataId =
-        PhysicalTypeIdentifier.createIdentifier(klass,
-            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+    final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(klass,
+        getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
@@ -322,9 +318,9 @@ public class PushInOperationsImpl implements PushInOperations {
         if (!annotationExists) {
           // Add annotation to .java file
           detailsBuilder.addAnnotation(annotation);
-          changesToApply.append(String.format(
-              "Annotation '%s' will be pushed on '%s.java' class. \n", annotation
-                  .getAnnotationType().getSimpleTypeName(), klass.getSimpleTypeName()));
+          changesToApply
+              .append(String.format("Annotation '%s' will be pushed on '%s.java' class. \n",
+                  annotation.getAnnotationType().getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -334,9 +330,9 @@ public class PushInOperationsImpl implements PushInOperations {
         // If extends exists on .aj file, add it!
         if (!detailsBuilder.getExtendsTypes().contains(extendsType)) {
           detailsBuilder.addExtendsTypes(extendsType);
-          changesToApply.append(String.format(
-              "Extends type '%s' will be pushed on '%s.java' class. \n",
-              extendsType.getSimpleTypeName(), klass.getSimpleTypeName()));
+          changesToApply
+              .append(String.format("Extends type '%s' will be pushed on '%s.java' class. \n",
+                  extendsType.getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -345,9 +341,9 @@ public class PushInOperationsImpl implements PushInOperations {
       for (JavaType implementsType : allImplementsTypes) {
         if (!detailsBuilder.getImplementsTypes().contains(implementsType)) {
           detailsBuilder.addImplementsType(implementsType);
-          changesToApply.append(String.format(
-              "Implements type '%s' will be pushed on '%s.java' class. \n",
-              implementsType.getSimpleTypeName(), klass.getSimpleTypeName()));
+          changesToApply
+              .append(String.format("Implements type '%s' will be pushed on '%s.java' class. \n",
+                  implementsType.getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -378,13 +374,13 @@ public class PushInOperationsImpl implements PushInOperations {
    */
   public void pushInMethod(JavaType klass, MethodMetadata method, boolean force) {
     // Check if current klass exists
-    Validate
-        .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
+    Validate.notNull(klass,
+        "ERROR: You must specify a valid class to continue with push-in action");
 
     // Getting class details
     ClassOrInterfaceTypeDetails classDetails = getTypeLocationService().getTypeDetails(klass);
-    Validate
-        .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
+    Validate.notNull(klass,
+        "ERROR: You must specify a valid class to continue with push-in action");
 
     Validate.notNull(method, "ERROR: You must provide a valid method");
 
@@ -396,9 +392,8 @@ public class PushInOperationsImpl implements PushInOperations {
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
     // Getting current class .java file metadata ID
-    final String declaredByMetadataId =
-        PhysicalTypeIdentifier.createIdentifier(klass,
-            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+    final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(klass,
+        getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
@@ -463,10 +458,9 @@ public class PushInOperationsImpl implements PushInOperations {
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     // based on existing method
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(declaredByMetadataId, method.getModifier(),
-            method.getMethodName(), method.getReturnType(), method.getParameterTypes(),
-            method.getParameterNames(), bodyBuilder);
+    MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId,
+        method.getModifier(), method.getMethodName(), method.getReturnType(),
+        method.getParameterTypes(), method.getParameterNames(), bodyBuilder);
 
     return methodBuilder.build();
   }
@@ -491,6 +485,14 @@ public class PushInOperationsImpl implements PushInOperations {
     return fieldBuilder.build();
   }
 
+  /**
+   * This method checks if the provided methodName matches with 
+   * the provided regular expression
+   *  
+   * @param methodName
+   * @param regEx
+   * @return
+   */
   private boolean methodMatch(String methodName, String regEx) {
     // Create regular expression using provided text
     Pattern pattern = Pattern.compile(regEx);
