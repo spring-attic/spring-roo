@@ -644,16 +644,6 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
         # Executing tests
 
-	# Service test
-	load_roo script service-generation-test.roo
-
-	# Finder test
-	load_roo script finder-autocomplete-test.roo
-	load_roo script finder-generation-test.roo
-
-	# Repository test
-	load_roo script repository-generation-test.roo
-
         # Project Settings tests
         load_roo script project-settings-1.roo
 	      load_roo script project-settings-2.roo
@@ -676,6 +666,16 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
         # Entity and entity-field commands
         load_roo script entities-and-entity-fields.roo      
+
+	# Repository test
+	load_roo script repository-generation-test.roo
+
+	# Finder test
+	load_roo script finder-autocomplete-test.roo
+	load_roo script finder-generation-test.roo
+
+	# Service test
+	load_roo script service-generation-test.roo
 
 
         # Temporarily disabled   
