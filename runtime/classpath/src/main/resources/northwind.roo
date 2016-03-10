@@ -43,8 +43,8 @@ entity jpa --class ~.domain.UserLogin --table NORTHWIND_USERS_LOGIN --sequenceNa
 entity jpa --class ~.domain.UserLoginRole --table NORTHWIND_USER_LOGIN_ROLES --sequenceName NORTHWIND_USER_LOGIN_ROLES_USER_LOGIN_ROLE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn USER_LOGIN_ROLE_ID --versionField version --versionType long --versionColumn VERSION 
 
 // Extended entities (identifierColumn still mandatory, but overrided)
-entity jpa --class ~.domain.Customer --table NORTHWIND_CUSTOMERS --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NORTHWIND_CUSTOMERS_CUSTOMER_ID_SEQ --versionField version --versionType long --versionColumn VERSION --force
-entity jpa --class ~.domain.Employee --table NORTHWIND_EMPLOYEES --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NORTHWIND_EMPLOYEES_EMPLOYEE_ID_SEQ --versionField version --versionType long --versionColumn VERSION --force
+entity jpa --class ~.domain.Customer --table NORTHWIND_CUSTOMERS --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NORTHWIND_CUSTOMERS_CUSTOMER_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType long --versionColumn VERSION --force
+entity jpa --class ~.domain.Employee --table NORTHWIND_EMPLOYEES --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NORTHWIND_EMPLOYEES_EMPLOYEE_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType long --versionColumn VERSION --force
 
 // Create enumerated types
 enum type --class ~.domain.Period
@@ -217,3 +217,8 @@ repository jpa all --package org.springframework.roo.northwind.repository
 
 // Generate services
 service all --apiPackage org.springframework.roo.northwind.service.api --implPackage org.springframework.roo.northwind.service.impl
+
+// Create finders
+finder add --class ~.domain.UserLogin --name findByUsername
+finder add --class ~.domain.Shipper --name findByCompanyName
+

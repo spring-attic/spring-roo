@@ -231,15 +231,16 @@ public class JpaCommands implements CommandMarker {
 
   /**
    * ROO-3709: Indicator that checks if exists some project setting that makes
-   * each of the following parameters mandatory: sequenceName, identifierColumn and table
+   * each of the following parameters mandatory: sequenceName, identifierColumn, 
+   * identifierStrategy, versionField, versionColumn, versionType and table.
    * 
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
    *         and its value is "true". If not, return false.
    */
-  @CliOptionMandatoryIndicator(params = {"sequenceName", "identifierColumn", "table",
-      "versionField", "versionColumn", "versionType"}, command = "entity jpa")
+  @CliOptionMandatoryIndicator(params = {"sequenceName", "identifierStrategy", "identifierColumn",
+      "table", "versionField", "versionColumn", "versionType"}, command = "entity jpa")
   public boolean areSchemaObjectNamesRequired(ShellContext shellContext) {
 
     // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
@@ -312,7 +313,7 @@ public class JpaCommands implements CommandMarker {
           help = "The name used to refer to the entity in queries") final String entityName,
       @CliOption(key = "sequenceName", mandatory = true,
           help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
-      @CliOption(key = "identifierStrategy", mandatory = false, specifiedDefaultValue = "AUTO",
+      @CliOption(key = "identifierStrategy", mandatory = true, specifiedDefaultValue = "AUTO",
           help = "The generation value strategy to be used") final IdentifierStrategy identifierStrategy,
       @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
