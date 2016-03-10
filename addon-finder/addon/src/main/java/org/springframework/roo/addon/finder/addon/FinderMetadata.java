@@ -82,7 +82,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
     // Including finders methods
     for (FinderMethod finderMethod : finders) {
-      builder.addMethod(getFinderMethod(finderMethod));
+      ensureGovernorHasMethod(getFinderMethod(finderMethod));
     }
 
     // Build the ITD

@@ -278,13 +278,18 @@ public class PushInOperationsImpl implements PushInOperations {
       // Getting all extends registered on .aj file to move to .java file
       List<JavaType> allExtendsTypes = memberHoldingTypeDetails.getExtendsTypes();
       for (JavaType extendsType : allExtendsTypes) {
-        detailsBuilder.addExtendsTypes(extendsType);
+        // If extends exists on .aj file, add it!
+        if (!detailsBuilder.getExtendsTypes().contains(extendsType)) {
+          detailsBuilder.addExtendsTypes(extendsType);
+        }
       }
 
       // Getting all implements registered on .aj file to move to .java file
       List<JavaType> allImplementsTypes = memberHoldingTypeDetails.getImplementsTypes();
       for (JavaType implementsType : allImplementsTypes) {
-        detailsBuilder.addImplementsType(implementsType);
+        if (!detailsBuilder.getImplementsTypes().contains(implementsType)) {
+          detailsBuilder.addImplementsType(implementsType);
+        }
       }
 
       // Getting all imports registered on .aj file to move to .java file
