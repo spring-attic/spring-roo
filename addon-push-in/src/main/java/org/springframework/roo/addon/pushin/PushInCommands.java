@@ -9,7 +9,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -118,7 +117,7 @@ public class PushInCommands implements CommandMarker {
    *            JavaType with the specified class where developer wants to
    *            make push-in
    * @param method
-   *            JavaSymbolName with the specified name of the method that
+   *            String with the specified name of the method that
    *            developer wants to push-in
    * @param context
    *            ShellContext used to know if --force parameter has been used by developer
@@ -140,7 +139,7 @@ public class PushInCommands implements CommandMarker {
       @CliOption(
           key = "method",
           mandatory = false,
-          help = "JavaSymbolName with the specified name of the method that developer wants to push-in. You could use a Regular Expression to make push-in of more than one method on the same execution.") JavaSymbolName method,
+          help = "String with the specified name of the method that developer wants to push-in. You could use a Regular Expression to make push-in of more than one method on the same execution.") String method,
       ShellContext context) {
 
     // Developer must specify at least one parameter

@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.pushin;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -42,11 +41,11 @@ public interface PushInOperations {
    *            JavaType with the specified class where developer wants to
    *            make push-in
    * @param method
-   *            JavaSymbolName with the specified name of the method that
+   *            String with the specified name of the method that
    *            developer wants to push-in
    * @param force
    *            boolean used to know if --force parameter has been used by developer
    *    
    */
-  void pushIn(JavaPackage specifiedPackage, JavaType klass, JavaSymbolName method, boolean force);
+  void pushIn(JavaPackage specifiedPackage, JavaType klass, String method, boolean force);
 }
