@@ -193,62 +193,64 @@ public class PushInOperationsImpl implements PushInOperations {
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(classDetails);
 
-    // Getting all declared methods (including declared on ITDs
-    // and .java files)
-    List<MethodMetadata> allDeclaredMethods = memberDetails.getMethods();
-
-    // Checking if is necessary to make push-in for all declared methods
-    for (MethodMetadata method : allDeclaredMethods) {
-      // If method exists on .aj file, add it!
-      if (!method.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
-        // Add method to .java file
-        detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method));
-      }
-    }
-
-    // Getting all declared fields (including declared on ITDs
-    // and .java files)
-    List<FieldMetadata> allDeclaredFields = memberDetails.getFields();
-
-    // Checking if is necessary to make push-in for all declared fields
-    for (FieldMetadata field : allDeclaredFields) {
-      // If field exists on .aj file, add it!
-      if (!field.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
-        // Add field to .java file
-        detailsBuilder.addField(getNewField(declaredByMetadataId, field));
-      }
-    }
-
-    // Getting all declared constructors (including declared on ITDs and .java files)
-    List<ConstructorMetadata> allDeclaredConstructors = memberDetails.getConstructors();
-
-    // Checking if is necessary to make push-in for all declared constructors
-    for (ConstructorMetadata constructor : allDeclaredConstructors) {
-      // Check if current constructor exists on .java file
-      classDetails = getTypeLocationService().getTypeDetails(detailsBuilder.build().getType());
-
-      List<JavaType> parameterTypes = new ArrayList<JavaType>();
-      for (AnnotatedJavaType type : constructor.getParameterTypes()) {
-        parameterTypes.add(type.getJavaType());
-      }
-
-      ConstructorMetadata javaDeclaredConstructor =
-          classDetails.getDeclaredConstructor(parameterTypes);
-
-      // If not exists, add it!
-      if (javaDeclaredConstructor == null) {
-        // Add constructor to .java file
-        detailsBuilder.addConstructor(constructor);
-      }
-
-    }
-
     // Getting all details 
     for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 
       // Prevent that details from inheritance classes could be include on this .java file 
       if (!memberHoldingTypeDetails.getType().equals(classDetails.getType())) {
         continue;
+      }
+
+      // Getting all declared methods (including declared on ITDs
+      // and .java files)
+      List<MethodMetadata> allDeclaredMethods = memberHoldingTypeDetails.getMethods();
+
+      // Checking if is necessary to make push-in for all declared methods
+      for (MethodMetadata method : allDeclaredMethods) {
+        // If method exists on .aj file, add it!
+        if (!method.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
+          // Add method to .java file
+          detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method));
+        }
+      }
+
+      // Getting all declared fields (including declared on ITDs
+      // and .java files)
+      List<? extends FieldMetadata> allDeclaredFields =
+          memberHoldingTypeDetails.getDeclaredFields();
+
+      // Checking if is necessary to make push-in for all declared fields
+      for (FieldMetadata field : allDeclaredFields) {
+        // If field exists on .aj file, add it!
+        if (!field.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
+          // Add field to .java file
+          detailsBuilder.addField(getNewField(declaredByMetadataId, field));
+        }
+      }
+
+      // Getting all declared constructors (including declared on ITDs and .java files)
+      List<? extends ConstructorMetadata> allDeclaredConstructors =
+          memberHoldingTypeDetails.getDeclaredConstructors();
+
+      // Checking if is necessary to make push-in for all declared constructors
+      for (ConstructorMetadata constructor : allDeclaredConstructors) {
+        // Check if current constructor exists on .java file
+        classDetails = getTypeLocationService().getTypeDetails(detailsBuilder.build().getType());
+
+        List<JavaType> parameterTypes = new ArrayList<JavaType>();
+        for (AnnotatedJavaType type : constructor.getParameterTypes()) {
+          parameterTypes.add(type.getJavaType());
+        }
+
+        ConstructorMetadata javaDeclaredConstructor =
+            classDetails.getDeclaredConstructor(parameterTypes);
+
+        // If not exists, add it!
+        if (javaDeclaredConstructor == null) {
+          // Add constructor to .java file
+          detailsBuilder.addConstructor(constructor);
+        }
+
       }
 
       // Getting all declared annotations (including declared on ITDs
