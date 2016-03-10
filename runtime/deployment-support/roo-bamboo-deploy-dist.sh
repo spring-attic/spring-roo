@@ -616,43 +616,55 @@ if [[ "$COMMAND" = "assembly" ]]; then
         fi
 
 
-        # Executing tests
+        ###################
+        # Executing tests #
+        ###################
 
-        # Project Settings tests
-        load_roo script project-settings-1.roo
-	      load_roo script project-settings-2.roo
-	      load_roo script project-settings-3.roo
+        # GENERIC SHELL FEATURES
 
-        # Global parameter tests
-        load_roo script global-parameters.roo
+            # Project Settings tests
+            load_roo script project-settings-1.roo
+            load_roo script project-settings-2.roo
+            load_roo script project-settings-3.roo
 
-        # Application Configuration Service tests
-        load_roo script application-config-service.roo
+            # Global parameter tests
+            load_roo script global-parameters.roo
 
-        # CliOptions dependency visibility
-        load_roo script cli-dependency-visibility.roo
+            # Application Configuration Service tests
+            load_roo script application-config-service.roo
 
-        # CliOptions dynamic mandatory
-        load_roo script cli-dynamic-mandatory.roo
+            # CliOptions dependency visibility
+            load_roo script cli-dependency-visibility.roo
 
-        # Entity commands with project settings
-        load_roo script entities-with-project-settings.roo 
+            # CliOptions dynamic mandatory
+            load_roo script cli-dynamic-mandatory.roo
 
-        # Entity and entity-field commands
-        load_roo script entities-and-entity-fields.roo 
+            # Push-In Operations
+            load_roo_build_and_test script push-in.roo
 
-	# Repository test
-	load_roo script repository-generation-test.roo
+        # PROJECT GENERATION FEATURES
 
-	# Finder test
-	load_roo script finder-autocomplete-test.roo
-	load_roo script finder-generation-test.roo
+            # Entity commands with project settings
+            load_roo_build_and_test script entities-with-project-settings.roo 
 
-	# Service test
-	load_roo script service-generation-test.roo
+            # Entity and entity-field commands
+            load_roo_build_and_test script entities-and-entity-fields.roo 
+
+	        # Repository test
+	        load_roo_build_and_test script repository-generation-test.roo
+
+	        # Finder tests
+	        load_roo_build_and_test script finder-autocomplete-test.roo
+	        load_roo_build_and_test script finder-generation-test.roo
+
+	        # Service test
+	        load_roo_build_and_test script service-generation-test.roo
+
+            # Complete application
+            load_roo_build_and_test script northwind.roo
 
         
-	      # Temporally disabled
+        # Temporally disabled
 	    
         #load_roo_build_and_test script vote.roo
         #tomcat_stop_start_get_stop http://localhost:8888/vote
