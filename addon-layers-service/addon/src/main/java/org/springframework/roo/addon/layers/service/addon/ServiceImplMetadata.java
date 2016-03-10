@@ -91,28 +91,23 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
         new AnnotationMetadataBuilder(SpringJavaType.SERVICE);
     ensureGovernorIsAnnotated(serviceAnnotation);
 
-    // If exists a repository related with managed entity
-    if (repository != null) {
-      // All service related with repository should be generated with
-      // @Transactional(readOnly = true) annotation
-      AnnotationMetadataBuilder transactionalAnnotation =
-          new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-      transactionalAnnotation.addBooleanAttribute("readOnly", true);
-      ensureGovernorIsAnnotated(transactionalAnnotation);
+    // All service related with repository should be generated with
+    // @Transactional(readOnly = true) annotation
+    AnnotationMetadataBuilder transactionalAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
+    transactionalAnnotation.addBooleanAttribute("readOnly", true);
+    ensureGovernorIsAnnotated(transactionalAnnotation);
 
-      // Services should include repository field if there's
-      // a repository related with managed entity
-      FieldMetadataBuilder repositoryFieldMetadata =
-          new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
-              new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName("repository"),
-              repository.getType());
-      ensureGovernorHasField(repositoryFieldMetadata);
-
-    }
+    // Services should include repository field if there's
+    // a repository related with managed entity
+    FieldMetadataBuilder repositoryFieldMetadata =
+        new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
+            new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName("repository"),
+            repository.getType());
+    ensureGovernorHasField(repositoryFieldMetadata);
 
     // All services should include constructor
     ensureGovernorHasConstructor(getServiceConstructor(repository));
-
 
     // Implements readOnly methods for every services
     ensureGovernorHasMethod(getFindAllMethod(entity, repository.getType()));

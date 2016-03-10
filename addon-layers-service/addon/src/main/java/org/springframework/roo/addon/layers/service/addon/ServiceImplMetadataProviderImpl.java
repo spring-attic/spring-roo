@@ -212,20 +212,27 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
       }
     }
 
+    // Check if we have a valid repository
+    Validate
+        .notNull(
+            repositoryDetails,
+            String
+                .format(
+                    "ERROR: You must generate some @RooJpaRepository for entity '%s' to be able to generate services",
+                    entity.getSimpleTypeName()));
+
     // Getting finders to be included on current service
     List<FinderMethod> finders = new ArrayList<FinderMethod>();
-    if (repositoryDetails != null) {
-      final LogicalPath logicalPath =
-          PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
-      final String finderMetadataKey =
-          FinderMetadata.createIdentifier(repositoryDetails.getType(), logicalPath);
-      registerDependency(finderMetadataKey, metadataIdentificationString);
-      final FinderMetadata finderMetadata =
-          (FinderMetadata) getMetadataService().get(finderMetadataKey);
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
+    final String finderMetadataKey =
+        FinderMetadata.createIdentifier(repositoryDetails.getType(), logicalPath);
+    registerDependency(finderMetadataKey, metadataIdentificationString);
+    final FinderMetadata finderMetadata =
+        (FinderMetadata) getMetadataService().get(finderMetadataKey);
 
-      if (finderMetadata != null) {
-        finders = finderMetadata.getFinders();
-      }
+    if (finderMetadata != null) {
+      finders = finderMetadata.getFinders();
     }
 
     return new ServiceImplMetadata(metadataIdentificationString, aspectName,

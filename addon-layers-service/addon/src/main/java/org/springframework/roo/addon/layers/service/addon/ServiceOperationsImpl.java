@@ -6,6 +6,8 @@ import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -17,6 +19,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.model.JavaPackage;
@@ -27,6 +30,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Class that implements {@link ServiceOperations}.
@@ -38,6 +42,8 @@ import org.springframework.roo.project.ProjectOperations;
 @Component
 @Service
 public class ServiceOperationsImpl implements ServiceOperations {
+
+  private static final Logger LOGGER = HandlerUtils.getLogger(ServiceOperationsImpl.class);
 
   @Reference
   private FileManager fileManager;
@@ -84,6 +90,33 @@ public class ServiceOperationsImpl implements ServiceOperations {
     Validate.notNull(interfaceType,
         "ERROR: Interface type required to be able to generate service.");
     Validate.notNull(domainType, "ERROR: Domain type required to be able to generate service.");
+
+    // Check if current entity has valid repository
+    Set<ClassOrInterfaceTypeDetails> repositories =
+        typeLocationService
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+
+    ClassOrInterfaceTypeDetails repositoryDetails = null;
+    for (ClassOrInterfaceTypeDetails repository : repositories) {
+      AnnotationAttributeValue<JavaType> entityAttr =
+          repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
+
+      if (entityAttr != null && entityAttr.getValue().equals(domainType)) {
+        repositoryDetails = repository;
+        break;
+      }
+    }
+
+    if (repositoryDetails == null) {
+      LOGGER
+          .log(
+              Level.INFO,
+              String
+                  .format(
+                      "INFO: Service '%s' will not be generated because you didn't generate a @RooJpaRepository for entity '%s'. Use 'repository' commands to generate a valid repository and then try again.",
+                      interfaceType.getSimpleTypeName(), domainType.getSimpleTypeName()));
+      return;
+    }
 
     // Generating service interface
     createServiceInterface(domainType, interfaceType);
