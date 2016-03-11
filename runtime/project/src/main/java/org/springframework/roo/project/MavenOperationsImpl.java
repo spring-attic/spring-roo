@@ -252,11 +252,20 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
    * @return a non-blank string
    */
   private String getJavaVersion(final Integer majorJavaVersion) {
-    if (majorJavaVersion != null && majorJavaVersion >= 6 && majorJavaVersion <= 7) {
-      return String.valueOf(majorJavaVersion);
+    if (majorJavaVersion != null && majorJavaVersion >= 6 && majorJavaVersion <= 8) {
+      switch (majorJavaVersion) {
+        case 6:
+          return "1.6";
+        case 7:
+          return "1.7";
+        case 8:
+          return "1.8";
+        default:
+          break;
+      }
     }
-    // To be running Roo they must be on Java 6 or above
-    return "1.6";
+    // By default, Spring Roo projects will be generated on Java 1.8
+    return "1.8";
   }
 
   private PackagingProvider getPackagingProvider(final PackagingProvider selectedPackagingProvider) {

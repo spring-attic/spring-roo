@@ -11,7 +11,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ApplicationContextOperations;
@@ -26,11 +29,6 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.springframework.roo.support.logging.HandlerUtils;
-import org.osgi.service.component.ComponentContext;
 
 /**
  * Convenient superclass for core or third-party addons to implement a
@@ -51,6 +49,8 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 
   private static final String DEFAULT_VERSION = "0.1.0.BUILD-SNAPSHOT";
   private static final String JAVA_VERSION_PLACEHOLDER = "JAVA_VERSION";
+  private static final String ASPECTJ_VERSION_PLACEHOLDER = "ASPECTJ_VERSION";
+  private static final String ASPECTJ_PLUGIN_VERSION_PLACEHOLDER = "ASPECTJ_PLUGIN_VERSION";
   protected static final Logger LOGGER = HandlerUtils.getLogger(PackagingProvider.class);
   /**
    * The name of the POM property that stores the packaging provider's ID.
@@ -193,6 +193,32 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
         XmlUtils.findElements("//*[.='" + JAVA_VERSION_PLACEHOLDER + "']", root);
     for (final Element versionElement : versionElements) {
       versionElement.setTextContent(javaVersion);
+    }
+
+    // AspectJ versions
+    final List<Element> aspectJVersionElements =
+        XmlUtils.findElements("//*[.='" + ASPECTJ_VERSION_PLACEHOLDER + "']", root);
+    for (final Element aspectJVersion : aspectJVersionElements) {
+      if ("1.8".equals(javaVersion)) {
+        aspectJVersion.setTextContent("1.8.8");
+      } else if ("1.7".equals(javaVersion)) {
+        aspectJVersion.setTextContent("1.7.4");
+      } else if ("1.6".equals(javaVersion)) {
+        aspectJVersion.setTextContent("1.6.12");
+      }
+    }
+
+    // AspectJ Plugin Versions
+    final List<Element> aspectJPluginVersionElements =
+        XmlUtils.findElements("//*[.='" + ASPECTJ_PLUGIN_VERSION_PLACEHOLDER + "']", root);
+    for (final Element aspectJPluginVersion : aspectJPluginVersionElements) {
+      if ("1.8".equals(javaVersion)) {
+        aspectJPluginVersion.setTextContent("1.8");
+      } else if ("1.7".equals(javaVersion)) {
+        aspectJPluginVersion.setTextContent("1.7");
+      } else if ("1.6".equals(javaVersion)) {
+        aspectJPluginVersion.setTextContent("1.6");
+      }
     }
 
     // Write the new POM to disk
