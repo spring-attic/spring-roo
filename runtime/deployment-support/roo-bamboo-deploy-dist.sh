@@ -645,7 +645,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # PROJECT GENERATION FEATURES
 
             # Entity commands with project settings
-            load_roo_build_and_test script entities-with-project-settings.roo 
+            load_roo script entities-with-project-settings.roo 
 
             # Entity and entity-field commands
             load_roo script entities-and-entity-fields.roo 
