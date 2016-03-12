@@ -5,6 +5,9 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,13 +22,18 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.ImportMetadata;
+import org.springframework.roo.classpath.details.ImportMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -122,9 +130,15 @@ public class ServiceOperationsImpl implements ServiceOperations {
     createServiceInterface(domainType, interfaceType);
 
     // Generating service implementation
-    createServiceImplementation(interfaceType, implType);
+    createServiceImplementation(interfaceType, implType, repositoryDetails);
   }
 
+  /**
+   * Method that creates the service interface
+   * 
+   * @param domainType
+   * @param interfaceType
+   */
   private void createServiceInterface(final JavaType domainType, final JavaType interfaceType) {
 
     // Checks if new service interface already exists.
@@ -160,7 +174,14 @@ public class ServiceOperationsImpl implements ServiceOperations {
     typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
   }
 
-  private void createServiceImplementation(final JavaType interfaceType, JavaType implType) {
+  /**
+   * Method that creates the service implementation
+   * 
+   * @param interfaceType
+   * @param implType
+   */
+  private void createServiceImplementation(final JavaType interfaceType, JavaType implType,
+      ClassOrInterfaceTypeDetails repository) {
     Validate.notNull(interfaceType,
         "ERROR: Interface should be provided to be able to generate its implementation");
 
@@ -191,8 +212,50 @@ public class ServiceOperationsImpl implements ServiceOperations {
     // Adding @RooService annotation to current interface
     implTypeBuilder.addAnnotation(implAnnotationMetadata.build());
 
+    final String declaredByMetadataId =
+        PhysicalTypeIdentifier.createIdentifier(implTypeBuilder.build().getType(),
+            pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+
+    // Add constructor
+    implTypeBuilder.addConstructor(getServiceConstructor(declaredByMetadataId, repository));
+
+    // Add necessary imports
+    List<ImportMetadata> imports = new ArrayList<ImportMetadata>();
+    imports.add(new ImportMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, repository
+        .getType().getPackage(), repository.getType(), false, false).build());
+    implTypeBuilder.addImports(imports);
+
     // Write service implementation on disk
     typeManagementService.createOrUpdateTypeOnDisk(implTypeBuilder.build());
+  }
+
+  /**
+   * Method that generates Service implementation constructor. If exists a
+   * repository, it will be included as constructor parameter
+   * 
+   * @param declaredByMetadataId
+   * @param repository
+   * @return
+   */
+  private ConstructorMetadataBuilder getServiceConstructor(String declaredByMetadataId,
+      ClassOrInterfaceTypeDetails repository) {
+
+    ConstructorMetadataBuilder constructorBuilder =
+        new ConstructorMetadataBuilder(declaredByMetadataId);
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Append repository parameter if needed
+    if (repository != null) {
+      constructorBuilder.addParameter("repository", repository.getType());
+      bodyBuilder.appendFormalLine("this.repository = repository;");
+    }
+
+    constructorBuilder.setBodyBuilder(bodyBuilder);
+
+    // Adding @Autowired annotation
+    constructorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+
+    return constructorBuilder;
   }
 
 }
