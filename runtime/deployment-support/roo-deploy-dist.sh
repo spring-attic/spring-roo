@@ -674,17 +674,17 @@ if [[ "$COMMAND" = "assembly" ]]; then
             load_roo_build_and_test script entities-with-project-settings.roo 
 
             # Entity and entity-field commands
-            load_roo_build_and_test script entities-and-entity-fields.roo 
+            load_roo script entities-and-entity-fields.roo 
 
-	        # Repository test
-	        load_roo_build_and_test script repository-generation-test.roo
+	    	# Repository test
+	    	load_roo_build_and_test script repository-generation-test.roo
 
-	        # Finder tests
-	        load_roo_build_and_test script finder-autocomplete-test.roo
-	        load_roo_build_and_test script finder-generation-test.roo
+	    	# Finder tests
+	    	load_roo_build_and_test script finder-autocomplete-test.roo
+	    	load_roo_build_and_test script finder-generation-test.roo
 
-	        # Service test
-	        load_roo_build_and_test script service-generation-test.roo
+	    	# Service test
+	    	load_roo_build_and_test script service-generation-test.roo
 
             # Complete application
             load_roo_build_and_test script northwind.roo
