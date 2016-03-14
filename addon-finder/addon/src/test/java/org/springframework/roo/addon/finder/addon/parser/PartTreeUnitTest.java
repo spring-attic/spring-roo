@@ -231,6 +231,27 @@ public class PartTreeUnitTest {
     assertFalse(new PartTree("findByTextAndOrderByTextDesc", memberDetails).isValid());
   }
 
+  @Test(expected=IllegalArgumentException.class)
+  public void rejectsIgnoreCaseNumberProperty() throws Exception {
+    assertFalse(new PartTree("findByNumberIgnoreCase", memberDetails).isValid());
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void rejectsIgnoreCaseForNumberOperator() throws Exception {
+    assertFalse(new PartTree("findByNumberLessThanIgnoreCase", memberDetails).isValid());
+  }
+  
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void rejectsIgnoreCaseForDateProperty() throws Exception {
+    assertFalse(new PartTree("findByDateIgnoreCase", memberDetails).isValid());
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void rejectsIgnoreCaseForPrimiteNumberProperty() throws Exception {
+    assertFalse(new PartTree("findByPrimitiveIntIgnoreCase", memberDetails).isValid());
+  }
+
 
   public void rejectsSeveralOrderDirections() throws Exception {
     assertFalse(new PartTree("findByTextOrderByTextDescAsc", memberDetails).isValid());
@@ -740,7 +761,7 @@ public class PartTreeUnitTest {
                 prefix + distinct + limit + field + "ByNumber",
                 (String[]) ArrayUtils.addAll(
                     ArrayUtils.addAll(NUMBER_OP, ArrayUtils.addAll(CONJUCTIONS, "")),
-                    ArrayUtils.addAll(ArrayUtils.addAll(IGNORE_CASE, ALL_IGNORE_CASE), "OrderBy")));
+                    ArrayUtils.addAll( ALL_IGNORE_CASE, "OrderBy")));
           }
         }
       }
@@ -756,7 +777,7 @@ public class PartTreeUnitTest {
 
             test(prefix + distinct + limit + field + "ByDate", ArrayUtils.addAll(
                 ArrayUtils.addAll(DATE_OP, ArrayUtils.addAll(CONJUCTIONS, "")),
-                ArrayUtils.addAll(ArrayUtils.addAll(IGNORE_CASE, ALL_IGNORE_CASE), "OrderBy")));
+                ArrayUtils.addAll(ALL_IGNORE_CASE, "OrderBy")));
           }
         }
       }
@@ -772,7 +793,7 @@ public class PartTreeUnitTest {
 
             test(prefix + distinct + limit + field + "ByPrimitiveInt", ArrayUtils.addAll(
                 ArrayUtils.addAll(PRIMITE_NUMBER_OP, ArrayUtils.addAll(CONJUCTIONS, "")),
-                ArrayUtils.addAll(ArrayUtils.addAll(IGNORE_CASE, ALL_IGNORE_CASE), "OrderBy")));
+                ArrayUtils.addAll( ALL_IGNORE_CASE, "OrderBy")));
           }
         }
       }
@@ -787,11 +808,15 @@ public class PartTreeUnitTest {
           for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
             for (String fieldPred : PROPERTIES) {
               for (String operator : new String[] {"In", "IsIn"}) {
-
+                
+               String[] options = ArrayUtils.addAll(CONJUCTIONS, ArrayUtils.addAll(
+                    ArrayUtils.addAll(ALL_IGNORE_CASE, ""), "OrderBy"));
+                if(fieldPred.equals("Text")){
+                  options =ArrayUtils.addAll(options, IGNORE_CASE);
+                }
+                
                 test(prefix + distinct + limit + field + "By" + fieldPred + operator,
-                    ArrayUtils.addAll(CONJUCTIONS, ArrayUtils.addAll(
-                        ArrayUtils.addAll(IGNORE_CASE, ArrayUtils.addAll(ALL_IGNORE_CASE, "")),
-                        "OrderBy")));
+                  options );
               }
             }
           }
@@ -848,23 +873,28 @@ public class PartTreeUnitTest {
   @Test
   public void optionsAfterAllIgnore() throws Exception {
     for (String fieldPred : PROPERTIES) {
-      for (String ignore : ArrayUtils.addAll(IGNORE_CASE, "")) {
         for (String allIgnore : ALL_IGNORE_CASE) {
-          test("findBy" + fieldPred + ignore + allIgnore, new String[] {"", "OrderBy"});
+          test("findBy" + fieldPred +  allIgnore, new String[] {"", "OrderBy"});
+        }
+      
+    }
+    
+      for (String ignore : ArrayUtils.addAll(IGNORE_CASE)) {
+        for (String allIgnore : ALL_IGNORE_CASE) {
+          test("findByText" + ignore + allIgnore, new String[] {"", "OrderBy"});
         }
       }
-    }
+    
   }
 
   @Test
   public void optionsAfterOrderBy() throws Exception {
     for (String fieldPred : PROPERTIES) {
       for (String operator : new String[] {"IsNot", "In", ""}) {
-        for (String ignore : ArrayUtils.addAll(IGNORE_CASE, "")) {
           for (String allIgnore : ALL_IGNORE_CASE) {
-            test("findBy" + fieldPred + operator + ignore + allIgnore + "OrderBy", PROPERTIES);
+            test("findBy" + fieldPred + operator + allIgnore + "OrderBy", PROPERTIES);
           }
-        }
+        
       }
     }
   }
@@ -873,12 +903,11 @@ public class PartTreeUnitTest {
   public void optionsAfterOrderField() throws Exception {
     for (String fieldPred : PROPERTIES) {
       for (String operator : new String[] {"IsNot", "In", "IsIn", ""}) {
-        for (String ignore : ArrayUtils.addAll(IGNORE_CASE, "")) {
           for (String allIgnore : ALL_IGNORE_CASE) {
-            test("findBy" + fieldPred + operator + ignore + allIgnore + "OrderBy" + fieldPred,
+            test("findBy" + fieldPred + operator + allIgnore + "OrderBy" + fieldPred,
                 new String[] {"Asc", "Desc"});
           }
-        }
+        
       }
     }
   }
@@ -887,14 +916,13 @@ public class PartTreeUnitTest {
   public void optionsAfterOrderFieldDirection() throws Exception {
     for (String fieldPred : PROPERTIES) {
       for (String operator : new String[] {"IsNot", "In", "IsIn", ""}) {
-        for (String ignore : ArrayUtils.addAll(IGNORE_CASE, "")) {
           for (String allIgnore : ALL_IGNORE_CASE) {
             for (String direction : new String[] {"Asc", "Desc"}) {
 
-              test("findBy" + fieldPred + operator + ignore + allIgnore + "OrderBy" + fieldPred
+              test("findBy" + fieldPred + operator +  allIgnore + "OrderBy" + fieldPred
                   + direction, ArrayUtils.addAll(PROPERTIES, ""));
             }
-          }
+          
         }
       }
     }

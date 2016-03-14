@@ -84,6 +84,11 @@ public class Part {
       this.type = type.getLeft();
       this.operator = type.getRight();
       this.operatorGroup = Type.extractOperatorGroup(operator);
+      
+      //Validates that ignore case option is only available for string property type 
+      if(ignoreCase==IgnoreCaseType.ALWAYS && !property.getKey().getFieldType().equals(JavaType.STRING)){
+        throw new IllegalArgumentException("ERROR: IgnoseCase option is only available for String properties");
+      }
     }
   }
 
