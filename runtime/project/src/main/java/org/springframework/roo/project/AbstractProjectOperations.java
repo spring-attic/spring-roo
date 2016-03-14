@@ -43,6 +43,7 @@ import org.w3c.dom.NodeList;
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 1.0
  */
 //@SuppressWarnings("deprecation")
@@ -134,8 +135,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
             // It's the same artifact, but might have a different
             // version, exclusions, etc.
             if (!inserted) {
+              Element newPluginElement = removeVersionIfBlank(newPlugin.getElement(document));
               // We haven't added the new one yet; do so now
-              pluginsElement.insertBefore(newPlugin.getElement(document), existingPluginElement);
+              pluginsElement.insertBefore(newPluginElement, existingPluginElement);
               inserted = true;
               if (!newPlugin.getVersion().equals(existingPlugin.getVersion())) {
                 // It's a genuine version change => mention the
@@ -153,7 +155,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         if (!inserted) {
           // We didn't encounter any existing dependencies with the
           // same coordinates; add it now
-          pluginsElement.appendChild(newPlugin.getElement(document));
+          pluginsElement.appendChild(removeVersionIfBlank(newPlugin.getElement(document)));
           addedPlugins.add(newPlugin.getSimpleDescription());
         }
       }
@@ -243,24 +245,25 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   }
 
   /**
-   * Method that removes version from dependency element if blank
+   * Method that removes version from element if blank or "-"
    * 
-   * @param dependency
-   * @return Element that contains dependency without version if blank
+   * @param element
+   * @return Element without version if blank
    */
-  private Element removeVersionIfBlank(Element dependency) {
-    NodeList dependencyAttributes = dependency.getChildNodes();
-    for (int i = 0; i < dependencyAttributes.getLength(); i++) {
-      Element dependencyAttribute = (Element) dependencyAttributes.item(i);
-      if (dependencyAttribute != null
-          && dependencyAttribute.getTagName().equals("version")
-          && (dependencyAttribute.getTextContent() == null || "".equals(dependencyAttribute
+  private Element removeVersionIfBlank(Element element) {
+    NodeList elementAttributes = element.getChildNodes();
+    for (int i = 0; i < elementAttributes.getLength(); i++) {
+      Element elementAttribute = (Element) elementAttributes.item(i);
+      if (elementAttribute != null
+          && elementAttribute.getTagName().equals("version")
+          && (elementAttribute.getTextContent() == null
+              || "-".equals(elementAttribute.getTextContent()) || "".equals(elementAttribute
               .getTextContent()))) {
-        dependency.removeChild(dependencyAttributes.item(i));
+        element.removeChild(elementAttributes.item(i));
         break;
       }
     }
-    return dependency;
+    return element;
   }
 
   public Dependency addDependency(final String moduleName, final Dependency dependency) {

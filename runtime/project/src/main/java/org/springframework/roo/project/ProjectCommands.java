@@ -2,6 +2,7 @@ package org.springframework.roo.project;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -19,6 +20,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
+import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.ShellContext;
@@ -61,6 +63,24 @@ public class ProjectCommands implements CommandMarker {
     return getMavenOperations().isCreateProjectAvailable();
   }
 
+  @CliOptionVisibilityIndicator(command = PROJECT_SETUP_COMMAND, params = {"packaging"},
+      help = "Packaging parameter is not available if multimodule is specified.")
+  public boolean isPackagingVisible(ShellContext shellContext) {
+
+    // Getting all defined parameters
+    Map<String, String> params = shellContext.getParameters();
+
+    // If multimodule is enabled, packaging parameter should not
+    // be visible
+    String multimodule = params.get("multimodule");
+
+    if (multimodule == null) {
+      return true;
+    }
+
+    return false;
+  }
+
   @CliOptionAutocompleteIndicator(param = "java", command = PROJECT_SETUP_COMMAND,
       help = "Java version 6, 7 and 8 available.")
   public List<String> getJavaVersions(ShellContext context) {
@@ -75,12 +95,14 @@ public class ProjectCommands implements CommandMarker {
   @CliCommand(value = PROJECT_SETUP_COMMAND, help = "Creates a new Maven project")
   public void createProject(
       @CliOption(
-          key = {"", "topLevelPackage"},
+          key = {"topLevelPackage"},
           mandatory = true,
           optionContext = "update",
           help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
       @CliOption(key = "projectName",
           help = "The name of the project (last segment of package name used as default)") final String projectName,
+      @CliOption(key = "multimodule", mandatory = false, specifiedDefaultValue = "STANDARD",
+          help = "Option to use a multmodule architecture") final Multimodule multimodule,
       @CliOption(key = "java",
           help = "Forces a particular major version of Java to be used (DEFAULT: 8)") final Integer majorJavaVersion,
       @CliOption(
@@ -89,8 +111,13 @@ public class ProjectCommands implements CommandMarker {
       @CliOption(key = "packaging", help = "The Maven packaging of this project",
           unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
-    getMavenOperations().createProject(topLevelPackage, projectName, majorJavaVersion, parentPom,
-        packaging);
+    if (multimodule != null) {
+      getMavenOperations().createMultimoduleProject(topLevelPackage, projectName, majorJavaVersion,
+          parentPom, multimodule);
+    } else {
+      getMavenOperations().createProject(topLevelPackage, projectName, majorJavaVersion, parentPom,
+          packaging);
+    }
   }
 
   @CliAvailabilityIndicator({PROJECT_SCAN_SPEED_COMMAND, PROJECT_SCAN_STATUS_COMMAND,

@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
  * {@link PackagingProvider}. Uses the "Template Method" GoF pattern.
  * 
  * @author Andrew Swan
+ * @author Paula Navarro
  * @since 1.2.0
  */
 @Component(componentAbstract = true)
@@ -65,6 +66,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
   private final String id;
   private final String name;
   private final String pomTemplate;
+  private final String pomModuleTemplate;
 
   /**
    * Constructor
@@ -81,12 +83,37 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
    *            removed if not required
    */
   protected AbstractPackagingProvider(final String id, final String name, final String pomTemplate) {
+    this(id, name, pomTemplate, pomTemplate);
+  }
+
+  /**
+   * Constructor
+   * 
+   * @param id the unique ID of this packaging type, see
+   *            {@link PackagingProvider#getId()}
+   * @param name the name of this type of packaging as used in the POM
+   *            (required)
+   * @param pomTemplate the path of this packaging type's POM template,
+   *            relative to its own package, as per
+   *            {@link Class#getResourceAsStream(String)}; this template
+   *            should contain a "parent" element with its own groupId,
+   *            artifactId, and version elements; this parent element will be
+   *            removed if not required
+   * @param pomModuleTemplate the path of this packaging type's POM module template,
+   *            relative to its own package, as per
+   *            {@link Class#getResourceAsStream(String)}; this template
+   *            should contain a "parent" element with its own groupId,
+   *            artifactId, and version elements; can be <code>null</code>
+   */
+  protected AbstractPackagingProvider(final String id, final String name, final String pomTemplate,
+      final String pomModuleTemplate) {
     Validate.notBlank(id, "ID is required");
     Validate.notBlank(name, "Name is required");
     Validate.notBlank(pomTemplate, "POM template path is required");
     this.id = id;
     this.name = name;
     this.pomTemplate = pomTemplate;
+    this.pomModuleTemplate = pomModuleTemplate;
   }
 
   public String createArtifacts(final JavaPackage topLevelPackage,
@@ -155,9 +182,16 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
       final ProjectOperations projectOperations) {
     Validate.notBlank(javaVersion, "Java version required");
     Validate.notNull(topLevelPackage, "Top level package required");
+    final Document pom;
+    final boolean isModule =
+        StringUtils.isNotBlank(module) && StringUtils.isNotBlank(pomModuleTemplate);
 
     // Read the POM template from the classpath
-    final Document pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), pomTemplate));
+    if (!isModule) {
+      pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), pomTemplate));
+    } else {
+      pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), pomModuleTemplate));
+    }
     final Element root = pom.getDocumentElement();
 
     // name
@@ -180,7 +214,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
 
     // version
     final Element existingVersionElement = DomUtils.getChildElementByTagName(root, VERSION_ELEMENT);
-    if (existingVersionElement == null) {
+    if (!isModule && existingVersionElement == null) {
       DomUtils.createChildElement(VERSION_ELEMENT, root, pom).setTextContent(DEFAULT_VERSION);
     }
 
@@ -292,6 +326,16 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
    */
   String getPomTemplate() {
     return pomTemplate;
+  }
+
+  /**
+   * Returns the package-relative path to this {@link PackagingProvider}'s POM
+   * module template.
+   * 
+   * @return a non-blank path
+   */
+  String getPomModuleTemplate() {
+    return pomModuleTemplate;
   }
 
   /**

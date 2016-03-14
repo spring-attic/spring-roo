@@ -20,6 +20,7 @@ import org.springframework.roo.project.ProjectOperations;
  * The core {@link PackagingProvider} for web modules.
  * 
  * @author Andrew Swan
+ * @author Paula Navarro
  * @since 1.2.0
  */
 @Component
@@ -27,7 +28,7 @@ import org.springframework.roo.project.ProjectOperations;
 public class WarPackaging extends AbstractCorePackagingProvider {
 
   public WarPackaging() {
-    super("war", "war-pom-template.xml");
+    super("war", "war-pom-template.xml", "child-war-pom-template.xml");
   }
 
   @Override

@@ -20,6 +20,7 @@ import org.springframework.roo.project.ProjectOperations;
  * The {@link PackagingProvider} that creates a JAR file.
  * 
  * @author Andrew Swan
+ * @author Paula Navarro
  * @since 1.2.0
  */
 @Component
@@ -32,7 +33,7 @@ public class JarPackaging extends AbstractCorePackagingProvider {
    * Constructor invoked by the OSGi container
    */
   public JarPackaging() {
-    super(NAME, "jar-pom-template.xml");
+    super(NAME, "jar-pom-template.xml", "child-jar-pom-template.xml");
   }
 
   @Override

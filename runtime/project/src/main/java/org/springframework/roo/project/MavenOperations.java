@@ -9,6 +9,7 @@ import org.springframework.roo.project.packaging.PackagingProvider;
  * Provides Maven project operations.
  * 
  * @author Ben Alex
+ * @author Paula Navarro
  * @since 1.1
  */
 public interface MavenOperations extends ProjectOperations {
@@ -44,6 +45,22 @@ public interface MavenOperations extends ProjectOperations {
    */
   void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion,
       GAV parentPom, PackagingProvider packagingType);
+
+  /**
+   * Creates a multimodule Maven-based project
+   * 
+   * @param topLevelPackage the top-level Java package (required)
+   * @param projectName the name of the project (can be blank to generate it
+   *            from the top-level package)
+   * @param majorJavaVersion the major Java version to which this project is
+   *            targetted (can be <code>null</code> to autodetect)
+   * @param parentPom the Maven coordinates of the parent POM (can be
+   *            <code>null</code> for none)
+   * @param multimodule the multimodule architecture (required).
+   */
+  void createMultimoduleProject(JavaPackage topLevelPackage, String projectName,
+      Integer majorJavaVersion, GAV parentPom, Multimodule multimodule);
+
 
   /**
    * Executes the given Maven command

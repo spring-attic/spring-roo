@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+
+	<dependencies>
+	
+		<!-- Common Dependencies -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+		<!-- Spring Boot starters -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Spring Roo annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.annotations</artifactId>
+			<version>${roo.version}</version>
+			<type>pom</type>
+		</dependency>
+
+		<!-- AspectJ dependencies -->
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjtools</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
+	</dependencies>
+
+
+	<plugins>
+		<!-- Spring Boot plugins -->
+		<plugin>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-maven-plugin</artifactId>
+		</plugin>
+
+		<!-- Compiler plugin -->
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>2.5.1</version>
+			<configuration>
+				<source>${java.version}</source>
+				<target>${java.version}</target>
+				<encoding>${project.build.sourceEncoding}</encoding>
+			</configuration>
+		</plugin>
+
+		<!-- AspectJ plugins -->
+		<plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>aspectj-maven-plugin</artifactId>
+			<version>${aspectj.plugin.version}</version>
+			<configuration>
+				<source>${java.version}</source>
+				<target>${java.version}</target>
+				<Xlint>ignore</Xlint>
+				<complianceLevel>${java.version}</complianceLevel>
+				<encoding>UTF-8</encoding>
+			</configuration>
+			<executions>
+				<execution>
+					<phase>process-sources</phase>
+					<goals>
+						<goal>compile</goal>
+						<goal>test-compile</goal>
+					</goals>
+				</execution>
+			</executions>
+			<dependencies>
+				<dependency>
+					<groupId>org.aspectj</groupId>
+					<artifactId>aspectjtools</artifactId>
+					<version>${aspectj.version}</version>
+				</dependency>
+			</dependencies>
+		</plugin>
+
+	</plugins>
+
+
+</configuration>

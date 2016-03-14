@@ -3,11 +3,14 @@ package org.springframework.roo.project;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -20,6 +23,8 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.ProcessManager;
+import org.springframework.roo.project.maven.Pom;
+import org.springframework.roo.project.maven.PomFactory;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -35,6 +40,7 @@ import org.w3c.dom.Element;
  * @author Ben Alex
  * @author Alan Stewart
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 1.0
  */
 @Component
@@ -45,6 +51,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
   private PackagingProviderRegistry packagingProviderRegistry;
   private ProcessManager processManager;
+  private ProjectOperations projectOperations;
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
@@ -125,6 +132,86 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     return modulesElement;
   }
 
+  public void createMultimoduleProject(final JavaPackage topLevelPackage, final String projectName,
+      final Integer majorJavaVersion, final GAV parentPom, final Multimodule multimodule) {
+    Validate.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
+    Validate.notNull(multimodule, "Multimodule must not be null");
+
+    final PackagingProvider parentPackagingProvider =
+        getPackagingProvider(getPackagingProviderRegistry().getPackagingProvider("pom"));
+    final PackagingProvider warPackagingProvider =
+        getPackagingProvider(getPackagingProviderRegistry().getPackagingProvider("war"));
+    final PackagingProvider jarPackagingProvider =
+        getPackagingProvider(getPackagingProviderRegistry().getPackagingProvider("jar"));
+
+    // Create parent pom
+    String pathToParentPom =
+        parentPackagingProvider.createArtifacts(topLevelPackage, projectName,
+            getJavaVersion(majorJavaVersion), parentPom, "", this);
+
+
+    Pom pom = getProjectOperations().getPomFromModuleName("");
+    GAV modelParentPom = new GAV(pom.getGroupId(), pom.getArtifactId(), pom.getVersion());
+
+    // Create the modules as root pom children
+    if (multimodule == Multimodule.STANDARD) {
+      createModule(topLevelPackage, modelParentPom, "model", jarPackagingProvider,
+          majorJavaVersion, "model");
+      createFolder(topLevelPackage, "model");
+
+      setModule(pomManagementService.getPomFromPath(pathToParentPom));
+      createModule(topLevelPackage, modelParentPom, "repository", jarPackagingProvider,
+          majorJavaVersion, "repository");
+      createFolder(topLevelPackage, "repository");
+
+      setModule(pomManagementService.getPomFromPath(pathToParentPom));
+      createModule(topLevelPackage, modelParentPom, "service-api", jarPackagingProvider,
+          majorJavaVersion, "service-api");
+      createFolder(topLevelPackage, "service/api");
+
+      setModule(pomManagementService.getPomFromPath(pathToParentPom));
+      createModule(topLevelPackage, modelParentPom, "service-impl", jarPackagingProvider,
+          majorJavaVersion, "service-impl");
+      createFolder(topLevelPackage, "service/impl");
+      setModule(pomManagementService.getPomFromPath(pathToParentPom));
+    }
+
+    // Multimodule architectures have an application module where Spring Boot artifacts are created 
+    createModule(topLevelPackage, modelParentPom, "application", warPackagingProvider,
+        majorJavaVersion, "application");
+
+    installApplicationConfiguration("application");
+
+    // ROO-3687: Generates necessary Spring Boot artifacts into application module.
+    createSpringBootApplicationClass(topLevelPackage, projectName);
+    createApplicationTestsClass(topLevelPackage, projectName);
+
+
+  }
+
+  private void installApplicationConfiguration(String moduleName) {
+
+    // Add Spring Boot dependences
+    final Element configuration = XmlUtils.getConfiguration(getClass());
+    final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
+
+    final List<Element> dependencies =
+        XmlUtils.findElements("/configuration/dependencies/dependency", configuration);
+    for (final Element dependencyElement : dependencies) {
+      requiredDependencies.add(new Dependency(dependencyElement));
+    }
+    getProjectOperations().addDependencies(moduleName, requiredDependencies);
+
+
+    // Add Plugins
+    List<Element> plugins = XmlUtils.findElements("/configuration/plugins/plugin", configuration);
+    for (Element element : plugins) {
+      Plugin plugin = new Plugin(element);
+      getProjectOperations().addBuildPlugin(moduleName, plugin);
+    }
+
+  }
+
   public void createProject(final JavaPackage topLevelPackage, final String projectName,
       final Integer majorJavaVersion, final GAV parentPom,
       final PackagingProvider selectedPackagingProvider) {
@@ -137,6 +224,25 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     createSpringBootApplicationClass(topLevelPackage, projectName);
     createApplicationTestsClass(topLevelPackage, projectName);
   }
+
+
+  private void createFolder(JavaPackage topLevelPackage, String folder) {
+
+    if (folder == null) {
+      return;
+    }
+
+    folder = StringUtils.join(folder.split("/"), File.separatorChar);
+    final String physicalPath =
+        getPathResolver().getFocusedIdentifier(
+            Path.SRC_MAIN_JAVA,
+            topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar)
+                + File.separatorChar + folder);
+
+    getFileManager().createDirectory(physicalPath);
+
+  }
+
 
   public void createSpringBootApplicationClass(JavaPackage topLevelPackage, String projectName) {
     // Set projectName if null
@@ -368,6 +474,31 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
       }
     } else {
       return fileManager;
+    }
+  }
+
+
+  public ProjectOperations getProjectOperations() {
+
+    if (projectOperations == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          projectOperations = (ProjectOperations) this.context.getService(ref);
+          return projectOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on MavenOperationsImpl.");
+        return null;
+      }
+    } else {
+      return projectOperations;
     }
   }
 }
