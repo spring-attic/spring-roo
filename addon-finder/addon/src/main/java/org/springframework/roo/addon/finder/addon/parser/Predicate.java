@@ -175,7 +175,8 @@ public class Predicate {
         }
 
         // IgnoreCase option is available only for string properties
-        if (lastAnd.shouldIgnoreCase() != IgnoreCaseType.ALWAYS && lastAnd.getProperty().getKey().getFieldType().equals(JavaType.STRING)) {
+        if (lastAnd.shouldIgnoreCase() != IgnoreCaseType.ALWAYS
+            && lastAnd.getProperty().getKey().getFieldType().equals(JavaType.STRING)) {
           options.add(subject.concat("IgnoreCase"));
           options.add(subject.concat("IgnoringCase"));
         }
