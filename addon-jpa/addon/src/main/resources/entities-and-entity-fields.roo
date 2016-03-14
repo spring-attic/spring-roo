@@ -1,5 +1,5 @@
 # Create project, entities and fields to be able to test subsequent commands.
-project setup --topLevelPackage aaa.bbb.cc
+project setup --topLevelPackage aaa.bb.c.test
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 entity jpa --class ~.domain.Entity1
 entity jpa --class ~.domain.Entity2

@@ -246,7 +246,63 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 
 
 #====================================================================================================================
-# TEST 17: Try to create entity with a wrong value for "identifierStrategy"
+# TEST 17: Try to create entity without required dynamic mandatory option "identifierStrategy", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option 
+#         "identifierStrategy", based on project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --versionField version --versionColumn VERSION --versionType long --sequenceName sequence
+#      
+# Output: You must specify option 'identifierStrategy' for this command
+#
+# Result: Stop command execution with a message requiring "identifierStrategy" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 18: Try to create entity without required dynamic mandatory option "versionField", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "versionField", 
+#         based on project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --versionColumn VERSION --versionType long --sequenceName sequence --identifierStrategy SEQUENCE
+#      
+# Output: You must specify option 'versionField' for this command
+#
+# Result: Stop command execution with a message requiring "versionField" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 19: Try to create entity without required dynamic mandatory option "versionColumn", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "versionColumn", 
+#         based on project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --versionType long --versionField version --sequenceName sequence --identifierStrategy SEQUENCE
+#      
+# Output: You must specify option 'versionColumn' for this command
+#
+# Result: Stop command execution with a message requiring "versionColumn" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 20: Try to create entity without required dynamic mandatory option "versionType", based by settings
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "versionType", 
+#         based on project settings, is not provided.
+#
+#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --versionColumn VERSION --versionField version --sequenceName sequence --identifierStrategy SEQUENCE
+#      
+# Output: You must specify option 'versionType' for this command
+#
+# Result: Stop command execution with a message requiring "versionType" option.                               
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 21: Try to create entity with a wrong value for "identifierStrategy"
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "entity jpa" command execution is aborted when option "identifierStrategy" is provided with a 
 #         wrong value.
@@ -256,12 +312,12 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 # Output: java.lang.IllegalArgumentException: Failed to convert 'UNKNOWN' to type GenerationType for option 'identifierStrategy'
 #         No enum constant org.springframework.roo.addon.jpa.addon.GenerationType.UNKNOWN
 #
-# Result: Stop command execution with a message requiring "identifierStrategy" option.                               
+# Result: Stop command execution with a message requiring "identifierStrategy" option with a correct value.                               
 #====================================================================================================================
 
 
 #====================================================================================================================
-# TEST 18: Try to create string field without required dynamic mandatory options, based by settings
+# TEST 22: Try to create string field without required dynamic mandatory options, based by settings
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test if "field string" command execution is aborted when required dynamic mandatory option "column", based 
 #         on project settings, is not provided.
@@ -275,21 +331,7 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 
 
 #====================================================================================================================
-# TEST 19: Try to create entity without required dynamic mandatory option "versionColumn", based by settings
-#--------------------------------------------------------------------------------------------------------------------
-# Goal:   Test if "entity jpa" command execution is aborted when required dynamic mandatory option "versionColumn", 
-#         based on project settings, is not provided.
-#
-#entity jpa --class ~.domain.Entity2 --table entity_table --identifierColumn identifier --identifierStrategy SEQUENCE --sequenceName sequence --versionField version --versionType long
-#      
-# Output: You must specify option 'versionColumn' for this command
-#
-# Result: Stop command execution with a message requiring "versionColumn" option.                               
-#====================================================================================================================
-
-
-#====================================================================================================================
-# TEST 20: Try to create field set with @JoinTable without any of its related attributes
+# TEST 23: Try to create field set with @JoinTable without any of its related attributes
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with --joinTable param with value and without any of its associated attributes when 
 #         schema object names are required.
@@ -303,7 +345,7 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 
 
 #====================================================================================================================
-# TEST 21: Try to create field set with @JoinTable without value and with all of its related attributes
+# TEST 24: Try to create field set with @JoinTable without value and with all of its related attributes
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with --joinTable param without value and with all of its related attributes when 
 #         schema object names are required.
@@ -318,7 +360,7 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 
 
 #====================================================================================================================
-# TEST 22: Try to create field set without @JoinTable with ManyToMany cardinality
+# TEST 25: Try to create field set without @JoinTable with ManyToMany cardinality
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command without --joinTable and with --cardinality MANY_TO_MANY when schema object names are 
 #         required.
@@ -333,7 +375,7 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 
 
 #====================================================================================================================
-# TEST 23: Try to create field set without @JoinTable without required schema names but ManyToMany cardinality
+# TEST 26: Try to create field set without @JoinTable without required schema names but ManyToMany cardinality
 #--------------------------------------------------------------------------------------------------------------------
 # Preparation:
 #   
