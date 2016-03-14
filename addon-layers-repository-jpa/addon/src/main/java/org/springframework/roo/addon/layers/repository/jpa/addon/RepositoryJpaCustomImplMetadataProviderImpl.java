@@ -117,7 +117,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "Jpa_Repository_Custom_Impl";
+    return "Jpa_Repository_Impl";
   }
 
   @Override

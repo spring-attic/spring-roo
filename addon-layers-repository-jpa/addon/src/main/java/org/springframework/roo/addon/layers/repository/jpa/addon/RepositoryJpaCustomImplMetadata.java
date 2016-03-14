@@ -6,10 +6,12 @@ import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRep
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -72,6 +74,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // Get repository that needs to be implemented
     ensureGovernorImplements(annotationValues.getRepository());
+
+    // All repositories should be generated with @Transactional(readOnly = true)
+    AnnotationMetadataBuilder transactionalAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
+    transactionalAnnotation.addBooleanAttribute("readOnly", true);
+    ensureGovernorIsAnnotated(transactionalAnnotation);
 
     // Build the ITD
     itdTypeDetails = builder.build();
