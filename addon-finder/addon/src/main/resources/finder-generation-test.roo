@@ -2,7 +2,7 @@
 # create an entity with different fields and generate its repository
 
 project setup --topLevelPackage org.example
-jpa setup --provider HIBERNATE --database ORACLE 
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT 
 entity jpa --class ~.Pet
 field string --fieldName name
 entity jpa --class ~.Owner
@@ -55,15 +55,15 @@ finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
 #----------------------------------------------------------------------------------------
 # Goal:   Create a finder that has ignore case and all ignore case options enabled
 #
-finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCase
+finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
 #
 # Result:  OwnerRepository is annotated with 
-#          @RooFinder(finders = { "findByAgeIgnoreCaseAllIgnoreCase" }
+#          @RooFinder(finders = { "findByFirstNameIgnoreCaseAllIgnoreCase" }
 #          and its aspect contains:
-#          List<Owner> OwnerRepository.findByAgeIgnoreCaseAllIgnoreCase(int age)                                                              
+#          List<Owner> OwnerRepository.findByFirstNameIgnoreCaseAllIgnoreCase(String firstName)                                                              
 #========================================================================================
 
 #========================================================================================
@@ -105,15 +105,15 @@ finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
 #----------------------------------------------------------------------------------------
 # Goal:    Create a finder which condition properties have operators
 #
-finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches
+finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
 #
 # Result:  OwnerRepository is annotated with 
-#  @RooFinder(finders = { "findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches" }), 
+#  @RooFinder(finders = { "findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith" }), 
 #          and its aspect contains:   
-#  List<Owner> OwnerRepository.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches(
+#  List<Owner> OwnerRepository.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith(
 #                                                 int age, Date birthday, String name)
 #========================================================================================
   
@@ -244,13 +244,13 @@ finder add --class ~.Owner --name findByFirstNameAndActiveAndBirthdayAndPetOrAge
 # Goal:    Check that for every condition a parameter is added, which type is the 
 #          condition property type
 #
-finder add --class ~.Owner --name findByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex
+finder add --class ~.Owner --name findByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
 #
 # Result:  OwnerRepository aspect contains:
-#  List<Owner> OwnerRepository.findByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex(
+#  List<Owner> OwnerRepository.findByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains(
 #      Boolean active, Date birthday, String firstName, Pet pet, int age, String name) 
 #======================================================================================== 
  

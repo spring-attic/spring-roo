@@ -1,6 +1,6 @@
 # Setup initial conditions: create project and add persistence.
 project setup --topLevelPackage org.example
-jpa setup --provider HIBERNATE --database ORACLE 
+jpa setup --provider HIBERNATE --database  HYPERSONIC_PERSISTENT
 
 #======================================================================
 # TEST 1:  Create entity                          

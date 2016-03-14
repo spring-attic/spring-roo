@@ -1,7 +1,7 @@
 # Setup initial conditions: create project, setup persistence and generate an entity with different fields
 
 project setup --topLevelPackage org.example
-jpa setup --provider HIBERNATE --database ORACLE 
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT 
 entity jpa --class ~.Pet
 field string --fieldName name
 entity jpa --class ~.Owner

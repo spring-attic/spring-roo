@@ -2,7 +2,7 @@
 # create an entity with different fields
 
 project setup --topLevelPackage org.example
-jpa setup --provider HIBERNATE --database ORACLE 
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT 
 entity jpa --class ~.Pet --readOnly
 field string --fieldName name
 entity jpa --class ~.Owner
@@ -35,17 +35,17 @@ service all --apiPackage ~.service --implPackage ~.service.impl
 # Goal:   Create a service with read only operations
 #
 repository jpa all --package ~.repository
-service add --entity ~.Pet --interface ~.PetService
+service add --entity ~.Pet --interface ~.PetServiceExample
 #      
-# Output:  Created SRC_MAIN_JAVA/org/example/PetService.java
-#          Created SRC_MAIN_JAVA/org/example/PetServiceImpl.java
-#          Created SRC_MAIN_JAVA/org/example/PetServiceImpl_Roo_Service_Impl.aj
-#          Created SRC_MAIN_JAVA/org/example/PetService_Roo_Service.aj
+# Output:  Created SRC_MAIN_JAVA/org/example/PetServiceExample.java
+#          Created SRC_MAIN_JAVA/org/example/PetServiceExampleImpl.java
+#          Created SRC_MAIN_JAVA/org/example/PetServiceExampleImpl_Roo_Service_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/PetServiceExample_Roo_Service.aj
 #
 # Result:  Generates service interface and implementation with the next operations:
-#          public abstract List<Pet> PetService.findAll();    
-#          public abstract List<Pet> PetService.findAll(Iterable<Long> ids);    
-#          public abstract Pet PetService.findOne(Long id);                                                                   
+#          public abstract List<Pet> PetServiceExample.findAll();    
+#          public abstract List<Pet> PetServiceExample.findAll(Iterable<Long> ids);    
+#          public abstract Pet PetServiceExample.findOne(Long id);                                                                   
 #=========================================================================================================
 
 #=========================================================================================================
@@ -53,21 +53,21 @@ service add --entity ~.Pet --interface ~.PetService
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create a service with read and write operations
 #
-service add --entity ~.Owner --interface ~.OwnerService
+service add --entity ~.Owner --interface ~.OwnerServiceExample
 #      
-# Output:  Created SRC_MAIN_JAVA/org/example/OwnerService.java
-#          Created SRC_MAIN_JAVA/org/example/OwnerServiceImpl.java
-#          Created SRC_MAIN_JAVA/org/example/OwnerServiceImpl_Roo_Service_Impl.aj
-#          Created SRC_MAIN_JAVA/org/example/OwnerService_Roo_Service.aj
+# Output:  Created SRC_MAIN_JAVA/org/example/OwnerServiceExample.java
+#          Created SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl.java
+#          Created SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
+#          Created SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
 #
 # Result:  Generates service interface and implementation with the next operations:
-#          public abstract List<Owner> OwnerService.findAll();    
-#          public abstract List<Owner> OwnerService.findAll(Iterable<Long> ids);    
-#          public abstract Owner OwnerService.findOne(Long id);    
-#          public abstract Owner OwnerService.save(Owner entity);    
-#          public abstract void OwnerService.delete(Long id);    
-#          public abstract List<Owner> OwnerService.save(Iterable<Owner> entities);    
-#          public abstract void OwnerService.delete(Iterable<Long> ids);      
+#          public abstract List<Owner> OwnerServiceExample.findAll();    
+#          public abstract List<Owner> OwnerServiceExample.findAll(Iterable<Long> ids);    
+#          public abstract Owner OwnerServiceExample.findOne(Long id);    
+#          public abstract Owner OwnerServiceExample.save(Owner entity);    
+#          public abstract void OwnerServiceExample.delete(Long id);    
+#          public abstract List<Owner> OwnerServiceExample.save(Iterable<Owner> entities);    
+#          public abstract void OwnerServiceExample.delete(Iterable<Long> ids);      
 #=========================================================================================================
 
 #=========================================================================================================
@@ -120,7 +120,7 @@ finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
 #---------------------------------------------------------------------------------------------------------
 # Goal:  Create a service operation to use a finder with ignore case and all ignore case options enabled
 #
-finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCase
+finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -128,11 +128,11 @@ finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCase
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
 # Result:  OwnerService_Roo_Service will have: 
-#          public abstract List<Owner> OwnerService.findByAgeIgnoreCaseAllIgnoreCase(int age)    
+#          public abstract List<Owner> OwnerService.findByFirstNameIgnoreCaseAllIgnoreCase(String firstName)    
 #    
 #          OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
-#          public List<Owner> OwnerServiceImpl.findByAgeIgnoreCaseAllIgnoreCase(int age) {
-#              return repository.findByAgeIgnoreCaseAllIgnoreCase(age);
+#          public List<Owner> OwnerServiceImpl.findByFirstNameIgnoreCaseAllIgnoreCase(String firstName) {
+#              return repository.findByFirstNameIgnoreCaseAllIgnoreCase(firstName);
 #          }                                                           
 #=========================================================================================================
 
@@ -165,7 +165,7 @@ finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with property operators
 #
-finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches
+finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -174,13 +174,13 @@ finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPe
 #
 # Result:  
 #  OwnerService_Roo_Service will have: 
-#  OwnerService.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches(int age, Date birthday, 
+#  OwnerService.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith(int age, Date birthday, 
 #                                                                                       String name)    
 #    
 #  OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
-#  public List<Owner> OwnerServiceImpl.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches(
+#  public List<Owner> OwnerServiceImpl.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetStartsWith(
 #                                                               int age, Date birthday, String name) {
-#    return repository.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameMatches(age, birthday, name);
+#    return repository.findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetStartsWith(age, birthday, name);
 #  }   
 #=========================================================================================================
   
@@ -327,7 +327,7 @@ finder add --class ~.Owner --name findPetByFirstNameAndActiveAndBirthdayAndPetOr
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with condition operators
 #
-finder add --class ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex
+finder add --class ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -336,13 +336,13 @@ finder add --class ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstN
 #
 # Result:  
 #   OwnerService_Roo_Service will have: 
-#   Owner OwnerService.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex(
+#   Owner OwnerService.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains(
 #                Boolean active, Date birthday, String firstName, Pet pet, int age, String name); 
 #    
 #   OwnerServiceImpl_Roo_Service_Impl implements that method using the repository:
-#   public Owner OwnerServiceImpl.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex(
+#   public Owner OwnerServiceImpl.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains(
 #                      Boolean active, Date birthday, String firstName, Pet pet, int age, String name) {
-#      return repository.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameRegex(
+#      return repository.findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains(
 #                      active, birthday, firstName, pet, age, name);
 #   } 
 #========================================================================================================= 
