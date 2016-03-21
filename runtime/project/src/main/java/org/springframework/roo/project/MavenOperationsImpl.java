@@ -24,7 +24,6 @@ import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.project.maven.PomFactory;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -110,16 +109,50 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     }
   }
 
-  public void createModule(final JavaPackage topLevelPackage, final GAV parentPom,
-      final String moduleName, final PackagingProvider selectedPackagingProvider,
-      final Integer majorJavaVersion, final String artifactId) {
+  public void createModule(Pom parentPom, final String moduleName,
+      final PackagingProvider selectedPackagingProvider, final String artifactId) {
+    createModule(parentPom, moduleName, selectedPackagingProvider, artifactId, null);
+  }
+
+
+  private void createModule(Pom parentPom, final String moduleName,
+      final PackagingProvider selectedPackagingProvider, final String artifactId,
+      final String folder) {
+
     Validate.isTrue(isCreateModuleAvailable(), "Cannot create modules at this time");
+
+    if (getProjectOperations().getPomFromModuleName(moduleName) != null) {
+      throw new IllegalArgumentException(String.format("Module %s already exists", moduleName));
+    }
+
+    if (parentPom == null) {
+      // Get current module as parent
+      parentPom = getProjectOperations().getFocusedModule();
+    } else {
+      // Set changes into the parent module
+      setModule(parentPom);
+    }
+
+    // Validate parent has POM packaging
+    if (!parentPom.getPackaging().equals("pom")) {
+      throw new IllegalArgumentException("ERROR: Parent module packaging is not POM");
+    }
+
     final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
     final String pathToNewPom =
-        packagingProvider.createArtifacts(topLevelPackage, artifactId,
-            getJavaVersion(majorJavaVersion), parentPom, moduleName, this);
+        packagingProvider.createArtifacts(
+            getProjectOperations().getTopLevelPackage(parentPom.getModuleName()), artifactId, "",
+            new GAV(parentPom.getGroupId(), parentPom.getArtifactId(), parentPom.getVersion()),
+            moduleName, this);
+
     updateParentModulePom(moduleName);
     setModule(pomManagementService.getPomFromPath(pathToNewPom));
+
+    if (folder == null) {
+      createFolder(getProjectOperations().getTopLevelPackage(moduleName), null);
+    } else {
+      createFolder(getProjectOperations().getTopLevelPackage(parentPom.getModuleName()), folder);
+    }
   }
 
   private Element createModulesElementIfNecessary(final Document pomDocument, final Element root) {
@@ -133,7 +166,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
   }
 
   public void createMultimoduleProject(final JavaPackage topLevelPackage, final String projectName,
-      final Integer majorJavaVersion, final GAV parentPom, final Multimodule multimodule) {
+      final Integer majorJavaVersion, final Multimodule multimodule) {
     Validate.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
     Validate.notNull(multimodule, "Multimodule must not be null");
 
@@ -145,40 +178,14 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
         getPackagingProvider(getPackagingProviderRegistry().getPackagingProvider("jar"));
 
     // Create parent pom
-    String pathToParentPom =
-        parentPackagingProvider.createArtifacts(topLevelPackage, projectName,
-            getJavaVersion(majorJavaVersion), parentPom, "", this);
+    parentPackagingProvider.createArtifacts(topLevelPackage, projectName,
+        getJavaVersion(majorJavaVersion), null, "", this);
 
 
     Pom pom = getProjectOperations().getPomFromModuleName("");
-    GAV modelParentPom = new GAV(pom.getGroupId(), pom.getArtifactId(), pom.getVersion());
-
-    // Create the modules as root pom children
-    if (multimodule == Multimodule.STANDARD) {
-      createModule(topLevelPackage, modelParentPom, "model", jarPackagingProvider,
-          majorJavaVersion, "model");
-      createFolder(topLevelPackage, "model");
-
-      setModule(pomManagementService.getPomFromPath(pathToParentPom));
-      createModule(topLevelPackage, modelParentPom, "repository", jarPackagingProvider,
-          majorJavaVersion, "repository");
-      createFolder(topLevelPackage, "repository");
-
-      setModule(pomManagementService.getPomFromPath(pathToParentPom));
-      createModule(topLevelPackage, modelParentPom, "service-api", jarPackagingProvider,
-          majorJavaVersion, "service-api");
-      createFolder(topLevelPackage, "service/api");
-
-      setModule(pomManagementService.getPomFromPath(pathToParentPom));
-      createModule(topLevelPackage, modelParentPom, "service-impl", jarPackagingProvider,
-          majorJavaVersion, "service-impl");
-      createFolder(topLevelPackage, "service/impl");
-      setModule(pomManagementService.getPomFromPath(pathToParentPom));
-    }
 
     // Multimodule architectures have an application module where Spring Boot artifacts are created 
-    createModule(topLevelPackage, modelParentPom, "application", warPackagingProvider,
-        majorJavaVersion, "application");
+    createModule(pom, "application", warPackagingProvider, "application", "");
 
     installApplicationConfiguration("application");
 
@@ -186,6 +193,33 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     createSpringBootApplicationClass(topLevelPackage, projectName);
     createApplicationTestsClass(topLevelPackage, projectName);
 
+    // Create standard project modules
+    if (multimodule == Multimodule.STANDARD) {
+      createModule(pom, "model", jarPackagingProvider, "model");
+      createModule(pom, "repository", jarPackagingProvider, "repository");
+      createModule(pom, "service-api", jarPackagingProvider, "service.api");
+      createModule(pom, "service-impl", jarPackagingProvider, "service.impl");
+
+      // Add dependencies between modules
+      getProjectOperations().addDependency("repository", pom.getGroupId(), "model",
+          "${project.version}");
+      getProjectOperations().addDependency("service-api", pom.getGroupId(), "model",
+          "${project.version}");
+      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "repository",
+          "${project.version}");
+      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "service.api",
+          "${project.version}");
+      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "model",
+          "${project.version}");
+      getProjectOperations().addDependency("application", pom.getGroupId(), "service.impl",
+          "${project.version}");
+      getProjectOperations().addDependency("application", pom.getGroupId(), "service.api",
+          "${project.version}");
+      getProjectOperations().addDependency("application", pom.getGroupId(), "repository",
+          "${project.version}");
+      getProjectOperations().addDependency("application", pom.getGroupId(), "model",
+          "${project.version}");
+    }
 
   }
 
@@ -213,19 +247,24 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
   }
 
   public void createProject(final JavaPackage topLevelPackage, final String projectName,
-      final Integer majorJavaVersion, final GAV parentPom,
-      final PackagingProvider selectedPackagingProvider) {
+      final Integer majorJavaVersion, final PackagingProvider selectedPackagingProvider) {
     Validate.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
     final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
     packagingProvider.createArtifacts(topLevelPackage, projectName,
-        getJavaVersion(majorJavaVersion), parentPom, "", this);
+        getJavaVersion(majorJavaVersion), null, "", this);
 
     // ROO-3687: Generates necessary Spring Boot artifacts
     createSpringBootApplicationClass(topLevelPackage, projectName);
     createApplicationTestsClass(topLevelPackage, projectName);
   }
 
-
+  /**
+   * Creates topLevelPackage folder structure inside the focused module.
+   * If folder is not null, adds this new folder inside topLevelPackage folders
+   * 
+   * @param topLevelPackage folder structure represented as a package
+   * @param folder the folder to add inside topLevelPackage. It can be null.
+   */
   private void createFolder(JavaPackage topLevelPackage, String folder) {
 
     if (folder == null) {
@@ -238,7 +277,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
             Path.SRC_MAIN_JAVA,
             topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar)
                 + File.separatorChar + folder);
-
     getFileManager().createDirectory(physicalPath);
 
   }

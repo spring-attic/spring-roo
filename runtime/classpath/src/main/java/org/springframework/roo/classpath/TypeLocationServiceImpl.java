@@ -428,7 +428,14 @@ public class TypeLocationServiceImpl implements TypeLocationService {
   }
 
   public String getTopLevelPackageForModule(final Pom module) {
-    return module.getGroupId();
+
+    if (StringUtils.isBlank(module.getModuleName())) {
+      // Parent module or project package
+      return module.getGroupId();
+    } else {
+      //Module package
+      return module.getGroupId().concat(".").concat(module.getArtifactId());
+    }
   }
 
   /**

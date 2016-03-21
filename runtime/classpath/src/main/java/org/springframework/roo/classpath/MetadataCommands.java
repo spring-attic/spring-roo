@@ -19,12 +19,12 @@ import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.converter.PomConverter;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.Converter;
 
 @Component
 @Service
@@ -36,6 +36,12 @@ public class MetadataCommands implements CommandMarker {
   private static final String METADATA_FOR_TYPE_COMMAND = "metadata for type";
   private static final String METADATA_STATUS_COMMAND = "metadata status";
   private static final String METADATA_TRACE_COMMAND = "metadata trace";
+
+  /**
+   * An option context value indicating that the currently focused module
+   * should be included when this {@link Converter} generates completions.
+   */
+  public static final String INCLUDE_CURRENT_MODULE = "includeCurrent";
 
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
@@ -115,8 +121,7 @@ public class MetadataCommands implements CommandMarker {
   @CliCommand(value = METADATA_FOR_MODULE_COMMAND,
       help = "Shows the ProjectMetadata for the indicated project module")
   public String metadataForModule(
-      @CliOption(key = {"", "module"}, mandatory = false,
-          optionContext = PomConverter.INCLUDE_CURRENT_MODULE,
+      @CliOption(key = {"", "module"}, mandatory = false, optionContext = INCLUDE_CURRENT_MODULE,
           help = "The module for which to retrieve the metadata (defaults to the focused module)") final Pom pom) {
     final Pom targetPom = ObjectUtils.defaultIfNull(pom, projectOperations.getFocusedModule());
     if (targetPom == null) {

@@ -18,7 +18,8 @@ public class PhysicalTypeIdentifierNamingUtilsTest {
   private static final String METADATA_CLASS_ID =
       "MID:org.springframework.roo.addon.plural.addon.PluralMetadata";
   private static final String METADATA_INSTANCE_ID =
-      "MID:org.springframework.roo.addon.plural.addon.PluralMetadata#core|SRC_MAIN_JAVA?com.example.domain.Thing";
+      "MID:org.springframework.roo.addon.plural.addon.PluralMetadata#core"
+          + LogicalPath.MODULE_PATH_SEPARATOR + "SRC_MAIN_JAVA?com.example.domain.Thing";
   private static final String MODULE = "core"; // Same as in the above
                                                // instance ID
   private static final Path PATH = Path.SRC_MAIN_JAVA; // Same as in the below

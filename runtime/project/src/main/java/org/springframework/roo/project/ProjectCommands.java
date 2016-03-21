@@ -105,18 +105,14 @@ public class ProjectCommands implements CommandMarker {
           help = "Option to use a multmodule architecture") final Multimodule multimodule,
       @CliOption(key = "java",
           help = "Forces a particular major version of Java to be used (DEFAULT: 8)") final Integer majorJavaVersion,
-      @CliOption(
-          key = "parent",
-          help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
       @CliOption(key = "packaging", help = "The Maven packaging of this project",
           unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
     if (multimodule != null) {
       getMavenOperations().createMultimoduleProject(topLevelPackage, projectName, majorJavaVersion,
-          parentPom, multimodule);
+          multimodule);
     } else {
-      getMavenOperations().createProject(topLevelPackage, projectName, majorJavaVersion, parentPom,
-          packaging);
+      getMavenOperations().createProject(topLevelPackage, projectName, majorJavaVersion, packaging);
     }
   }
 

@@ -591,7 +591,13 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   public JavaPackage getTopLevelPackage(final String moduleName) {
     final Pom pom = getPomFromModuleName(moduleName);
     if (pom != null) {
-      return new JavaPackage(pom.getGroupId());
+      if (StringUtils.isBlank(moduleName)) {
+        return new JavaPackage(pom.getGroupId());
+      } else {
+        // Module package
+        return new JavaPackage(pom.getGroupId().concat(".")
+            .concat(pom.getArtifactId().replace("-", ".")));
+      }
     }
     return null;
   }
@@ -635,7 +641,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   }
 
   public boolean isModuleCreationAllowed() {
-    return isProjectAvailable("");
+    return isProjectAvailable("") && isModuleFocusAllowed();
   }
 
   public boolean isModuleFocusAllowed() {
@@ -981,7 +987,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     // Update window title with project name
     shell.flash(Level.FINE, "Spring Roo: " + getTopLevelPackage(module.getModuleName()),
         Shell.WINDOW_TITLE_SLOT);
-    shell.setPromptPath(module.getModuleName());
     pomManagementService.setFocusedModule(module);
   }
 

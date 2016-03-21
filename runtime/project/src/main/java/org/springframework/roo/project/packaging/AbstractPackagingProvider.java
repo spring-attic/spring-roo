@@ -180,11 +180,13 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
   protected String createPom(final JavaPackage topLevelPackage, final String projectName,
       final String javaVersion, final GAV parentPom, final String module,
       final ProjectOperations projectOperations) {
-    Validate.notBlank(javaVersion, "Java version required");
-    Validate.notNull(topLevelPackage, "Top level package required");
+
     final Document pom;
     final boolean isModule =
         StringUtils.isNotBlank(module) && StringUtils.isNotBlank(pomModuleTemplate);
+
+    Validate.isTrue(isModule || StringUtils.isNotBlank(javaVersion), "Java version required");
+    Validate.notNull(topLevelPackage, "Top level package required");
 
     // Read the POM template from the classpath
     if (!isModule) {
@@ -212,48 +214,53 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     Validate.notBlank(artifactId, "Maven artifactIds cannot be blank");
     DomUtils.createChildIfNotExists("artifactId", root, pom).setTextContent(artifactId.trim());
 
-    // version
-    final Element existingVersionElement = DomUtils.getChildElementByTagName(root, VERSION_ELEMENT);
-    if (!isModule && existingVersionElement == null) {
-      DomUtils.createChildElement(VERSION_ELEMENT, root, pom).setTextContent(DEFAULT_VERSION);
+    if (!isModule) {
+
+      // version
+      final Element existingVersionElement =
+          DomUtils.getChildElementByTagName(root, VERSION_ELEMENT);
+      if (existingVersionElement == null) {
+        DomUtils.createChildElement(VERSION_ELEMENT, root, pom).setTextContent(DEFAULT_VERSION);
+      }
+
+      // Java versions
+      final List<Element> versionElements =
+          XmlUtils.findElements("//*[.='" + JAVA_VERSION_PLACEHOLDER + "']", root);
+      for (final Element versionElement : versionElements) {
+        versionElement.setTextContent(javaVersion);
+      }
+
+      // AspectJ versions
+      final List<Element> aspectJVersionElements =
+          XmlUtils.findElements("//*[.='" + ASPECTJ_VERSION_PLACEHOLDER + "']", root);
+      for (final Element aspectJVersion : aspectJVersionElements) {
+        if ("1.8".equals(javaVersion)) {
+          aspectJVersion.setTextContent("1.8.8");
+        } else if ("1.7".equals(javaVersion)) {
+          aspectJVersion.setTextContent("1.7.4");
+        } else if ("1.6".equals(javaVersion)) {
+          aspectJVersion.setTextContent("1.6.12");
+        }
+      }
+
+      // AspectJ Plugin Versions
+      final List<Element> aspectJPluginVersionElements =
+          XmlUtils.findElements("//*[.='" + ASPECTJ_PLUGIN_VERSION_PLACEHOLDER + "']", root);
+      for (final Element aspectJPluginVersion : aspectJPluginVersionElements) {
+        if ("1.8".equals(javaVersion)) {
+          aspectJPluginVersion.setTextContent("1.8");
+        } else if ("1.7".equals(javaVersion)) {
+          aspectJPluginVersion.setTextContent("1.7");
+        } else if ("1.6".equals(javaVersion)) {
+          aspectJPluginVersion.setTextContent("1.6");
+        }
+      }
     }
 
     // packaging
     DomUtils.createChildIfNotExists("packaging", root, pom).setTextContent(name);
     setPackagingProviderId(pom);
 
-    // Java versions
-    final List<Element> versionElements =
-        XmlUtils.findElements("//*[.='" + JAVA_VERSION_PLACEHOLDER + "']", root);
-    for (final Element versionElement : versionElements) {
-      versionElement.setTextContent(javaVersion);
-    }
-
-    // AspectJ versions
-    final List<Element> aspectJVersionElements =
-        XmlUtils.findElements("//*[.='" + ASPECTJ_VERSION_PLACEHOLDER + "']", root);
-    for (final Element aspectJVersion : aspectJVersionElements) {
-      if ("1.8".equals(javaVersion)) {
-        aspectJVersion.setTextContent("1.8.8");
-      } else if ("1.7".equals(javaVersion)) {
-        aspectJVersion.setTextContent("1.7.4");
-      } else if ("1.6".equals(javaVersion)) {
-        aspectJVersion.setTextContent("1.6.12");
-      }
-    }
-
-    // AspectJ Plugin Versions
-    final List<Element> aspectJPluginVersionElements =
-        XmlUtils.findElements("//*[.='" + ASPECTJ_PLUGIN_VERSION_PLACEHOLDER + "']", root);
-    for (final Element aspectJPluginVersion : aspectJPluginVersionElements) {
-      if ("1.8".equals(javaVersion)) {
-        aspectJPluginVersion.setTextContent("1.8");
-      } else if ("1.7".equals(javaVersion)) {
-        aspectJPluginVersion.setTextContent("1.7");
-      } else if ("1.6".equals(javaVersion)) {
-        aspectJPluginVersion.setTextContent("1.6");
-      }
-    }
 
     // Write the new POM to disk
     final String pomPath =

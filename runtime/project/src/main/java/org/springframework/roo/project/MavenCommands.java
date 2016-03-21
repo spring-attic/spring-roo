@@ -19,6 +19,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
+import static org.springframework.roo.shell.OptionContexts.UPDATE;
+
 
 
 /**
@@ -83,28 +85,18 @@ public class MavenCommands implements CommandMarker {
   @CliCommand(value = MODULE_CREATE_COMMAND, help = "Creates a new Maven module")
   public void createModule(
       @CliOption(key = "moduleName", mandatory = true, help = "The name of the module") final String moduleName,
-      @CliOption(
-          key = "topLevelPackage",
-          mandatory = true,
-          optionContext = "update",
-          help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
-      @CliOption(
-          key = "java",
-          help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 6 or 7 only)") final Integer majorJavaVersion,
-      @CliOption(
-          key = "parent",
-          help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parentPom,
+      @CliOption(key = "parent", optionContext = UPDATE,
+          help = "The parent module name. By default is the current module") final Pom parentPom,
       @CliOption(key = "packaging", help = "The Maven packaging of this module",
           unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging,
       @CliOption(key = "artifactId",
           help = "The artifact ID of this module (defaults to moduleName if not specified)") final String artifactId) {
 
-    getMavenOperations().createModule(topLevelPackage, parentPom, moduleName, packaging,
-        majorJavaVersion, artifactId);
+    getMavenOperations().createModule(parentPom, moduleName, packaging, artifactId);
   }
 
   @CliCommand(value = MODULE_FOCUS_COMMAND, help = "Changes focus to a different project module")
-  public void focusModule(@CliOption(key = "moduleName", mandatory = true,
+  public void focusModule(@CliOption(key = "moduleName", mandatory = true, optionContext = UPDATE,
       help = "The module to focus on") final Pom module) {
 
     getMavenOperations().setModule(module);

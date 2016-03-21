@@ -9,7 +9,6 @@
         <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
         <version>TO_BE_CHANGED_BY_LISTENER</version>
     </parent>
-    <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
     <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
     <packaging>war</packaging>
     <name>TO_BE_CHANGED_BY_LISTENER</name>

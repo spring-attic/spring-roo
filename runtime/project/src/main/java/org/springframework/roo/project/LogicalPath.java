@@ -21,7 +21,7 @@ public class LogicalPath {
    * character that could feasibly occur in a module name or {@link Path}
    * name.
    */
-  public static final String MODULE_PATH_SEPARATOR = "|";
+  public static final String MODULE_PATH_SEPARATOR = ":";
 
   /**
    * Creates an instance with the given path in the given module
