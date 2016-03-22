@@ -145,7 +145,7 @@ public class JpaCommands implements CommandMarker {
     }
 
     // If uses some HYPERSONIC database, jndiDataSource should not be visible.
-    if (database.startsWith("HYPERSONIC")) {
+    if (database.startsWith("HYPERSONIC") || database.equals("H2_IN_MEMORY")) {
       return false;
     }
 
@@ -173,8 +173,8 @@ public class JpaCommands implements CommandMarker {
       return false;
     }
 
-    // If uses some HYPERSONIC database, jndiDataSource parameter should not be visible.
-    if (database.startsWith("HYPERSONIC")) {
+    // If uses some memory databases or file databases, jndiDataSource parameter should not be visible.
+    if (database.startsWith("HYPERSONIC") || database.equals("H2_IN_MEMORY")) {
       return false;
     }
 
