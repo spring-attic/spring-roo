@@ -3,6 +3,7 @@ package org.springframework.roo.project;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -150,8 +152,9 @@ public class PomManagementServiceImpl implements PomManagementService {
   private String getModuleName(final String pomDirectory) {
     final String normalisedRootPath = FileUtils.ensureTrailingSeparator(projectRootDirectory);
     final String normalisedPomDirectory = FileUtils.ensureTrailingSeparator(pomDirectory);
-    final String moduleName = StringUtils.removeStart(normalisedPomDirectory, normalisedRootPath);
-    return StringUtils.stripEnd(moduleName, SEPARATOR);
+    final String moduleDirectory =
+        StringUtils.removeStart(normalisedPomDirectory, normalisedRootPath);
+    return FilenameUtils.getBaseName(StringUtils.stripEnd(moduleDirectory, SEPARATOR));
   }
 
   public Collection<String> getModuleNames() {

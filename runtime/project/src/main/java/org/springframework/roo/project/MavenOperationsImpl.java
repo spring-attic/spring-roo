@@ -262,21 +262,20 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
    * Creates topLevelPackage folder structure inside the focused module.
    * If folder is not null, adds this new folder inside topLevelPackage folders
    * 
-   * @param topLevelPackage folder structure represented as a package
-   * @param folder the folder to add inside topLevelPackage. It can be null.
+   * @param topLevelPackage folder structure represented as a package (required)
+   * @param folder the folder to add inside topLevelPackage (can be null)
    */
   private void createFolder(JavaPackage topLevelPackage, String folder) {
 
-    if (folder == null) {
-      return;
-    }
+    Validate.notNull(topLevelPackage, "Cannot create topLevelPackage folders");
+    String filename =
+        topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar);
 
-    folder = StringUtils.join(folder.split("/"), File.separatorChar);
+    if (StringUtils.isNotBlank(folder)) {
+      filename += File.separatorChar + folder;
+    }
     final String physicalPath =
-        getPathResolver().getFocusedIdentifier(
-            Path.SRC_MAIN_JAVA,
-            topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar)
-                + File.separatorChar + folder);
+        getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_JAVA, filename);
     getFileManager().createDirectory(physicalPath);
 
   }

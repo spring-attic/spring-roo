@@ -1,27 +1,25 @@
 package org.springframework.roo.converters;
 
+import static org.springframework.roo.classpath.MetadataCommands.INCLUDE_CURRENT_MODULE;
+import static org.springframework.roo.project.maven.Pom.ROOT_MODULE_SYMBOL;
+import static org.springframework.roo.shell.OptionContexts.UPDATE;
+
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Completion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import static org.springframework.roo.classpath.MetadataCommands.INCLUDE_CURRENT_MODULE;
-import static org.springframework.roo.shell.OptionContexts.UPDATE;
 
 @Component
 @Service
 public class PomConverter implements Converter<Pom> {
-
-
-
-  static final String ROOT_MODULE_SYMBOL = "~";
 
   /**
    * The value that converts to the most recently used {@link Pom}.
@@ -58,6 +56,9 @@ public class PomConverter implements Converter<Pom> {
       moduleName = value;
     }
     result = projectOperations.getPomFromModuleName(moduleName);
+
+    Validate.notNull(result, String.format("Module %s not found", moduleName));
+
     if (StringUtils.contains(optionContext, UPDATE)) {
       lastUsed.setTypeNotVerified(null, result);
     }

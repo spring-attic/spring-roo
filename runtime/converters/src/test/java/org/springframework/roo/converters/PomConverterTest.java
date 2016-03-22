@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.roo.classpath.MetadataCommands.INCLUDE_CURRENT_MODULE;
-import static org.springframework.roo.converters.PomConverter.ROOT_MODULE_SYMBOL;
+import static org.springframework.roo.project.maven.Pom.ROOT_MODULE_SYMBOL;
 
 import java.io.File;
 import java.util.ArrayList;

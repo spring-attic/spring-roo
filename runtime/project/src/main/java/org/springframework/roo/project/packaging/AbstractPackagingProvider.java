@@ -182,6 +182,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
       final ProjectOperations projectOperations) {
 
     final Document pom;
+    final String groupId;
     final boolean isModule =
         StringUtils.isNotBlank(module) && StringUtils.isNotBlank(pomModuleTemplate);
 
@@ -191,8 +192,10 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     // Read the POM template from the classpath
     if (!isModule) {
       pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), pomTemplate));
+      groupId = getGroupId(topLevelPackage);
     } else {
       pom = XmlUtils.readXml(FileUtils.getInputStream(getClass(), pomModuleTemplate));
+      groupId = parentPom.getGroupId();
     }
     final Element root = pom.getDocumentElement();
 
@@ -207,7 +210,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
     }
 
     // groupId and parent
-    setGroupIdAndParent(getGroupId(topLevelPackage), parentPom, root, pom);
+    setGroupIdAndParent(groupId, parentPom, root, pom);
 
     // artifactId
     final String artifactId = getArtifactId(projectName, module, topLevelPackage);

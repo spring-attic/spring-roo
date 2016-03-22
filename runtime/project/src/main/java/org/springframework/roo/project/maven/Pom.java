@@ -38,6 +38,7 @@ import org.springframework.roo.support.util.FileUtils;
 public class Pom {
 
   static final String DEFAULT_PACKAGING = "jar"; // Maven behaviour
+  public static final String ROOT_MODULE_SYMBOL = "~";
 
   private final Set<Plugin> buildPlugins = new LinkedHashSet<Plugin>();
   private final Set<Dependency> dependencies = new LinkedHashSet<Dependency>();

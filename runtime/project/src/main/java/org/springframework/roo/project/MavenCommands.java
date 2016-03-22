@@ -1,25 +1,31 @@
 package org.springframework.roo.project;
 
+import static org.springframework.roo.project.maven.Pom.ROOT_MODULE_SYMBOL;
+import static org.springframework.roo.shell.OptionContexts.UPDATE;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.model.JavaPackage;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.packaging.JarPackaging;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CommandMarker;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
-import static org.springframework.roo.shell.OptionContexts.UPDATE;
 
 
 
@@ -53,6 +59,7 @@ public class MavenCommands implements CommandMarker {
   private static final String REPOSITORY_REMOVE_COMMAND = "maven repository remove";
 
   private MavenOperations mavenOperations;
+  private ProjectOperations projectOperations;
 
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
@@ -82,10 +89,36 @@ public class MavenCommands implements CommandMarker {
         new Repository(id, name, url));
   }
 
+  @CliOptionMandatoryIndicator(params = "parent", command = MODULE_CREATE_COMMAND)
+  public boolean isParentRequired(ShellContext shellContext) {
+
+    // A parent is required is focused module is not POM
+    if (getProjectOperations().getFocusedModule().getPackaging().equals("pom")) {
+      return false;
+    }
+
+    return true;
+  }
+
+  @CliOptionAutocompleteIndicator(command = MODULE_CREATE_COMMAND, param = "parent",
+      help = "--parent parameter must be a POM module")
+  public List<String> returnPomModules(ShellContext shellContext) {
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    for (final Pom module : getProjectOperations().getPoms()) {
+      if (module.getPackaging().equals("pom")) {
+        allPossibleValues
+            .add(StringUtils.defaultIfEmpty(module.getModuleName(), ROOT_MODULE_SYMBOL));
+      }
+    }
+    return allPossibleValues;
+  }
+
   @CliCommand(value = MODULE_CREATE_COMMAND, help = "Creates a new Maven module")
   public void createModule(
       @CliOption(key = "moduleName", mandatory = true, help = "The name of the module") final String moduleName,
-      @CliOption(key = "parent", optionContext = UPDATE,
+      @CliOption(key = "parent", optionContext = UPDATE, mandatory = true,
           help = "The parent module name. By default is the current module") final Pom parentPom,
       @CliOption(key = "packaging", help = "The Maven packaging of this module",
           unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging,
@@ -213,6 +246,30 @@ public class MavenCommands implements CommandMarker {
       }
     } else {
       return mavenOperations;
+    }
+
+  }
+
+  public ProjectOperations getProjectOperations() {
+    if (projectOperations == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          projectOperations = (ProjectOperations) this.context.getService(ref);
+          return projectOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on MavenCommands.");
+        return null;
+      }
+    } else {
+      return projectOperations;
     }
 
   }
