@@ -1,0 +1,349 @@
+#====================================================================
+# TEST 1:  Create multimodule project                              
+#--------------------------------------------------------------------
+# Goal:    Test if multimodule basic structure is generated
+#
+project setup --topLevelPackage org.example --multimodule BASIC
+#      
+# Output:  Created ROOT/pom.xml
+#          Created ROOT/application
+#          Created ROOT/application/pom.xml
+#          Created application:SRC_MAIN_JAVA/org/example
+#          Updated ROOT/pom.xml [added module application]
+#          Updated application:ROOT/pom.xml [added dependencies org.apache.commons:commons-lang3:, org.springframework.boot:spring-boot-starter:, org.springframework.boot:spring-boot-starter-test:, org.aspectj:aspectjrt:${aspectj.version}, org.aspectj:aspectjweaver:${aspectj.version}, org.aspectj:aspectjtools:${aspectj.version}; skipped dependency org.springframework.roo:org.springframework.roo.annotations:${roo.version}; added plugin org.springframework.boot:spring-boot-maven-plugin:-; added plugin org.apache.maven.plugins:maven-compiler-plugin:2.5.1; added plugin org.codehaus.mojo:aspectj-maven-plugin:${aspectj.plugin.version}]
+#          Created application:SRC_MAIN_JAVA/org/example/ExampleApplication.java
+#          Created application:SRC_TEST_JAVA/org/example
+#          Created application:SRC_TEST_JAVA/org/example/ExampleApplicationTests.java
+#
+# Result:  Creates the next structure:  
+#          .
+#          ├── application
+#          │   ├── pom.xml
+#          │   └── src
+#          │       ├── main/java/org/example/ExampleApplication.java
+#          │       └── test/java/org/example/ExampleApplicationTests.java
+#          ├── log.roo
+#          └── pom.xml
+#
+#     	   where pom.xml contains the modules:
+#			<modules>
+#			  <module>application</module>
+#			</modules>
+#       
+#          and application module points towards its parent:
+#			<parent>
+#			  <groupId>org.example</groupId>
+#			  <artifactId>example</artifactId>
+#			  <version>0.1.0.BUILD-SNAPSHOT</version>
+#			</parent>
+#			<artifactId>application</artifactId>
+#			<packaging>war</packaging>
+#			<name>application</name>
+#====================================================================
+
+
+
+#====================================================================
+# TEST 2:  Create a module inside parent pom                         
+#--------------------------------------------------------------------
+# Goal:    Create a module inside parent pom using parent parameter
+#
+module create --moduleName model 
+#       
+# Output:  module create --moduleName model --parent ~ 
+#          Created ROOT/model
+#          Created ROOT/model/pom.xml
+#          Created monitoring/org/example/model
+#          Updated ROOT/pom.xml [added module model]
+#          model roo>
+# Result:  Creates the next module structure:
+#            .
+#            ├── ...
+#            ├── model
+#            │   ├── pom.xml
+#            │   └── src/main/java/org/example/model
+#            ├── log.roo
+#            └── pom.xml
+#
+#          and adds the new module inside parent pom:
+#            <modules>
+#			   ...
+#			   <module>model</module>
+#			 </modules>                                                            
+#====================================================================
+
+#====================================================================
+# TEST 3:  Create a module inside focused module                         
+#--------------------------------------------------------------------
+# Goal:    Create a new module inside parent pom without using parent
+#          parameter
+#
+module focus --moduleName ~
+module create --moduleName repository 
+#       
+# Output:  module create --moduleName repository 
+#          Created ROOT/repository
+#          Created ROOT/repository/pom.xml
+#          Created integration:SRC_MAIN_JAVA/org/example/repository
+#          Updated ROOT/pom.xml [added module repository]
+#          repository roo>
+# Result:  Creates the next module structure:
+#            .
+#            ├── ...
+#            ├── repository
+#            │   ├── pom.xml
+#            │   └── src/main/java/org/example/repository
+#            ├── log.roo
+#            └── pom.xml
+#
+#          and adds the new module inside parent pom:
+#            <modules>
+#			   ...
+#			   <module>repository</module>
+#			 </modules>                                                            
+#====================================================================
+
+
+
+
+#====================================================================
+# TEST 4: Create a POM module inside parent module                          
+#--------------------------------------------------------------------
+# Goal:    Add a POM module inside parent module
+#
+module create --moduleName service --parent ~ --packaging POM
+#       
+# Output:  Created ROOT/service
+#          Created ROOT/service/pom.xml
+#          Created pomparent:ROOT/src/main/java/org/example/service
+#          Updated ROOT/pom.xml [added module service]
+#
+# Result:  Creates the next module structure:
+#            .
+#            ├── ...
+#            ├── service
+#            │   ├── pom.xml
+#            │   └── src/main/java/org/example/service
+#            ├── log.roo
+#            └── pom.xml
+#
+#          and adds the new module inside parent pom:
+#            <modules>
+#			   ...
+#			   <module>service</module>
+#			 </modules>                                                           
+#====================================================================
+
+#====================================================================
+# TEST 5: Create a POM module inside focused POM module                          
+#--------------------------------------------------------------------
+# Goal:    Add a POM module inside the focused POM module 
+#
+module create --moduleName api 
+#       
+# Output:  Created service:ROOT/api
+#          Created service:ROOT/api/pom.xml
+#          Created api:SRC_MAIN_JAVA/org/example/api
+#          Updated service:ROOT/pom.xml [added module api]
+#          api roo>
+#
+# Result:  Creates the next module structure:
+#            .
+#            ├── ...
+#            ├── service
+#            │   ├── api
+#            │   │   ├── pom.xml
+#            │   │   └── src/main/java/org/example/api
+#            │   ├── pom.xml
+#            │   └── src/main/java/org/example/service
+#            ├── log.roo
+#            └── pom.xml
+#
+#          and adds the new module inside pomparent pom:
+#            <modules>
+#			   <module>api</module>
+#			 </modules>                                                           
+#====================================================================
+
+
+#====================================================================
+# TEST 6: Create a POM module inside a POM module                          
+#--------------------------------------------------------------------
+# Goal:    Add a POM module into a POM module using parent option
+#
+module create --moduleName impl --parent service
+#       
+# Output:  Created service:ROOT/impl
+#          Created service:ROOT/impl/pom.xml
+#          Created impl:SRC_MAIN_JAVA/org/example/impl
+#          Updated service:ROOT/pom.xml [added module impl]
+#          impl roo>
+#
+# Result:  Creates the next module structure:
+#            .
+#            ├── ...
+#            ├── service
+#            │   ├── api
+#            │   │   ├── ...
+#            │   ├── impl
+#            │   │   ├── pom.xml
+#            │   │   └── src/main/java/org/example/impl
+#            │   ├── pom.xml
+#            │   └── src/main/java/org/example/service
+#            ├── log.roo
+#            └── pom.xml
+#
+#          and adds the new module inside service pom:
+#            <modules>
+#			   <module>api</module>
+#			   <module>impl</module>
+#			 </modules>                                                           
+#====================================================================
+
+#====================================================================
+# TEST 7: Create a WAR module with an artefactId inside parent POM                          
+#--------------------------------------------------------------------
+# Goal:    Add a WAR module inside parent module with an artefactId
+#
+module focus --moduleName ~
+module create --moduleName integration-impl --packaging WAR --artifactId integration.impl
+#       
+# Output:  Created ROOT/integration-impl
+#          Created ROOT/integration-impl/pom.xml
+#          Created someparent:SRC_MAIN_JAVA/org/example/some/integration/impl
+#          Updated ROOT/pom.xml [added module integration-impl]
+#          integration-impl roo>
+#
+# Result:  Creates the next module structure:
+#            .
+#            ├── ...
+#            ├── integration-impl
+#            │   ├── pom.xml
+#            │   └── src/main/java/org/example/some/integration/impl
+#            ├── log.roo
+#            └── pom.xml
+#
+#          which pom.xml is defined as:
+#            <parent>
+#              <groupId>org.example</groupId>
+#              <artifactId>example</artifactId>
+#              <version>0.1.0.BUILD-SNAPSHOT</version>
+#            </parent>
+#            <artifactId>integration.impl</artifactId>
+#            <packaging>war</packaging>
+#            <name>integration.impl</name>
+#
+#          and adds the new module inside parent pom:
+#            <modules>
+#              ...
+#			   <module>integration-impl</module>
+#			 </modules>                                                           
+#====================================================================
+
+
+####################################################################
+#					MANUAL TEST
+####################################################################
+
+#====================================================================
+# TEST 8:  Focus on a module                                
+#--------------------------------------------------------------------
+# Goal:    Set the focus on a module
+#
+module focus --moduleName application
+#       
+# Output:  application roo> 
+#
+# Result:  Shell prompt changes with the focused module name                                                               
+#====================================================================
+
+#====================================================================
+# TEST 9:  Focus on parent project                                
+#--------------------------------------------------------------------
+# Goal:    Set the focus on parent pom
+#
+module focus --moduleName ~
+#       
+# Output:  roo> 
+#
+# Result:  Shell prompt removes any module name                                                               
+#====================================================================
+
+#====================================================================
+# TEST 10:  Create a module that is already defined                            
+#--------------------------------------------------------------------
+# Goal:    Avoid to create a module with a name that already is used 
+#          to refer other module
+#
+# module create --moduleName model 
+#       
+# Output:  Module model already exists
+#
+# Result:  Informs us that this module already exists                                                            
+#====================================================================
+
+#====================================================================
+# TEST 11:  Focus on an incorrect module                                
+#--------------------------------------------------------------------
+# Goal:    Fails if module does not exist
+#
+# module focus --moduleName other
+#       
+# Output:  java.lang.NullPointerException: Failed to convert 'other' to type Pom for option 'moduleName'
+#          Module other not found
+#
+# Result:  Informs us that module pom does not exist                                                                
+#====================================================================
+
+#====================================================================
+# TEST 12:  Create a module inside a JAR/WAR module without using  
+#          parent option                         
+#--------------------------------------------------------------------
+# Goal:    Fails to create a module inside a JAR/WAR module if parent 
+#          option is not specified
+#
+# module focus --moduleName application
+# module create --moduleName other 
+#       
+# Output:  You must specify option 'parent' for this command
+#
+# Result:  Informs us that parent option is necessary since focused 
+#          module is not a POM module                                                          
+#====================================================================
+
+
+#====================================================================
+# TEST 13:  Create a module inside a JAR module                          
+#--------------------------------------------------------------------
+# Goal:    Fails to create a module inside a JAR module
+#
+# module create --moduleName other --parent model
+#       
+# Output:  --parent parameter must be a POM module
+#
+# Result:  Informs us that parent option must be a POM module                                                          
+#====================================================================
+
+#====================================================================
+# TEST 14:  Create a module inside a WAR module                          
+#--------------------------------------------------------------------
+# Goal:    Fails to create a module inside a WAR module
+#
+# module create --moduleName other --parent application
+#       
+# Output:  --parent parameter must be a POM module
+#
+# Result:  Informs us that parent option must be a POM module                                                          
+#====================================================================
+
+#====================================================================
+# TEST 15:  Create a module with incorrect parent                         
+#--------------------------------------------------------------------
+# Goal:    Fails to create a module if parent does not exist
+#
+# module create --moduleName other --parent other
+#       
+# Output:  --parent parameter must be a POM module
+#
+# Result:  Informs us that parent option must be a POM module                                                          
+#====================================================================
