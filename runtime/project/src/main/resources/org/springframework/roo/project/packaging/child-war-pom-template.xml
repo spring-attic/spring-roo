@@ -32,6 +32,11 @@
     
     <build>
     	<plugins>
+    		<!-- Compiler plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
 			<!-- AspectJ plugins -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
