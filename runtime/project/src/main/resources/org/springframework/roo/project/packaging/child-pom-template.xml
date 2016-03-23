@@ -9,13 +9,6 @@
     <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
     <packaging>pom</packaging>
     <name>TO_BE_CHANGED_BY_LISTENER</name>
-    
-    <dependencies>
-        <!-- Dependencies added by Spring Roo -->
-    </dependencies>
-    
-    <build>
-    	<plugins>
-    	</plugins>
-    </build>
+   
+   
 </project>
