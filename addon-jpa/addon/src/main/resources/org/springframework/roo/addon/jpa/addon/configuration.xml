@@ -111,37 +111,37 @@
 	</databases>
 	<ormProviders>
 		<provider id="HIBERNATE">
-			<dependencies>
-				<dependency>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-data-jpa</artifactId>
-				</dependency>
-				<dependency>
-					<groupId>com.mysema.querydsl</groupId>
-					<artifactId>querydsl-jpa</artifactId>
-				</dependency>
-			</dependencies>
 		</provider>
 		<provider id="ECLIPSELINK">
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-data-jpa</artifactId>
-				<exclusions>
-					<exclusion>
-						<artifactId>hibernate-entitymanager</artifactId>
-						<groupId>org.hibernate</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>eclipselink</artifactId>
 				<version>2.6.1</version>
 			</dependency>
-			<dependency>
-				<groupId>com.mysema.querydsl</groupId>
-				<artifactId>querydsl-jpa</artifactId>
-			</dependency>
 		</provider>
 	</ormProviders>
+	<starter>
+		<provider id="HIBERNATE">
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-data-jpa</artifactId>
+				</dependency>
+			</dependencies>
+		</provider>
+		<provider id="ECLIPSELINK">
+			<dependencies>
+				<dependency>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-data-jpa</artifactId>
+					<exclusions>
+						<exclusion>
+							<artifactId>hibernate-entitymanager</artifactId>
+							<groupId>org.hibernate</groupId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+			</dependencies>
+		</provider>
+	</starter>
 </configuration>

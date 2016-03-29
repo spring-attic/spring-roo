@@ -43,7 +43,6 @@ import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -58,6 +57,7 @@ import org.w3c.dom.Element;
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 1.0
  */
 @Component
@@ -93,12 +93,7 @@ public class JpaOperationsImpl implements JpaOperations {
   @Override
   public void configureJpa(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
       final String jndi, final String hostName, final String databaseName, final String userName,
-      final String password, final String moduleName, final String profile, final boolean force) {
-
-    if (projectOperations == null) {
-      projectOperations = getProjectOperations();
-    }
-    Validate.notNull(projectOperations, "ProjectOperations is required");
+      final String password, final String profile, final boolean force) {
 
     Validate.notNull(ormProvider, "ORM provider required");
     Validate.notNull(jdbcDatabase, "JDBC database required");
@@ -110,46 +105,31 @@ public class JpaOperationsImpl implements JpaOperations {
     // and ORM providers
     final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
     final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
+    final String stratersXPath = getStarterXPath(getUnwantedOrmProviders(ormProvider));
 
     // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
-    updateDependencies(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath,
-        moduleName);
+    updateDependencies(configuration, ormProvider, jdbcDatabase, stratersXPath, providersXPath,
+        databaseXPath);
 
     // Update Spring Config File with spring.datasource.* domain properties
     updateApplicationProperties(ormProvider, jdbcDatabase, hostName, databaseName, userName,
-        password, moduleName, jndi, profile, force);
+        password, jndi, profile, force);
 
   }
 
   @Override
   public boolean isJpaInstallationPossible() {
-
-    if (projectOperations == null) {
-      projectOperations = getProjectOperations();
-    }
-    Validate.notNull(projectOperations, "ProjectOperations is required");
-
-    return projectOperations.isFocusedProjectAvailable();
+    return getProjectOperations().isFocusedProjectAvailable();
   }
 
   @Override
   public void newEmbeddableClass(final JavaType name, final boolean serializable) {
 
-    if (pathResolver == null) {
-      pathResolver = getPathResolver();
-    }
-    Validate.notNull(pathResolver, "PathResolver is required");
-
-    if (typeManagementService == null) {
-      typeManagementService = getTypeManagementService();
-    }
-    Validate.notNull(typeManagementService, "TypeManagementService is required");
-
     Validate.notNull(name, "Embeddable name required");
 
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(name,
-            pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
 
     final List<AnnotationMetadataBuilder> annotations =
         new ArrayList<AnnotationMetadataBuilder>(Arrays.asList(new AnnotationMetadataBuilder(
@@ -166,28 +146,13 @@ public class JpaOperationsImpl implements JpaOperations {
             PhysicalTypeCategory.CLASS);
     cidBuilder.setAnnotations(annotations);
 
-    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 
   @Override
   public void newEntity(final JavaType name, final boolean createAbstract,
       final JavaType superclass, final JavaType implementsType,
       final List<AnnotationMetadataBuilder> annotations) {
-
-    if (pathResolver == null) {
-      pathResolver = getPathResolver();
-    }
-    Validate.notNull(pathResolver, "PathResolver is required");
-
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
-    Validate.notNull(typeLocationService, "TypeLocationService is required");
-
-    if (typeManagementService == null) {
-      typeManagementService = getTypeManagementService();
-    }
-    Validate.notNull(typeManagementService, "TypeManagementService is required");
 
     Validate.notNull(name, "Entity name required");
     Validate.isTrue(!JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
@@ -200,14 +165,14 @@ public class JpaOperationsImpl implements JpaOperations {
 
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(name,
-            pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
     final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name,
             PhysicalTypeCategory.CLASS);
 
     if (!superclass.equals(OBJECT)) {
       final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails =
-          typeLocationService.getTypeDetails(superclass);
+          getTypeLocationService().getTypeDetails(superclass);
       if (superclassClassOrInterfaceTypeDetails != null) {
         cidBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(
             superclassClassOrInterfaceTypeDetails));
@@ -219,7 +184,7 @@ public class JpaOperationsImpl implements JpaOperations {
     if (implementsType != null) {
       final Set<JavaType> implementsTypes = new LinkedHashSet<JavaType>();
       final ClassOrInterfaceTypeDetails typeDetails =
-          typeLocationService.getTypeDetails(declaredByMetadataId);
+          getTypeLocationService().getTypeDetails(declaredByMetadataId);
       if (typeDetails != null) {
         implementsTypes.addAll(typeDetails.getImplementsTypes());
       }
@@ -229,28 +194,18 @@ public class JpaOperationsImpl implements JpaOperations {
 
     cidBuilder.setAnnotations(annotations);
 
-    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 
   @Override
   public void newIdentifier(final JavaType identifierType, final String identifierField,
       final String identifierColumn) {
 
-    if (pathResolver == null) {
-      pathResolver = getPathResolver();
-    }
-    Validate.notNull(pathResolver, "PathResolver is required");
-
-    if (typeManagementService == null) {
-      typeManagementService = getTypeManagementService();
-    }
-    Validate.notNull(typeManagementService, "TypeManagementService is required");
-
     Validate.notNull(identifierType, "Identifier type required");
 
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(identifierType,
-            pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
     final List<AnnotationMetadataBuilder> identifierAnnotations =
         Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(
             ROO_EQUALS), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
@@ -259,50 +214,30 @@ public class JpaOperationsImpl implements JpaOperations {
             | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
     cidBuilder.setAnnotations(identifierAnnotations);
 
-    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 
 
   @Override
   public SortedSet<String> getDatabaseProperties(String profile) {
-
-    if (projectOperations == null) {
-      projectOperations = getProjectOperations();
-    }
-    Validate.notNull(projectOperations, "ProjectOperations is required");
-
     return applicationConfigService.getPropertyKeys(DATASOURCE_PREFIX, true, profile);
   }
 
   @Override
-  public boolean hasSpringDataDependency() {
-    Pom pom = projectOperations.getFocusedModule();
-    Dependency springDataDependency =
-        new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", "");
-    for (Dependency dependency : pom.getDependencies()) {
-      if (dependency.equals(springDataDependency)) {
-        return true;
-      }
-    }
-    return false;
+  public boolean isJpaInstalled() {
+    return projectOperations.isFeatureInstalled(FeatureNames.JPA);
   }
 
 
   private String getConnectionString(final JdbcDatabase jdbcDatabase, String hostName,
-      final String databaseName, final String moduleName) {
-
-    if (projectOperations == null) {
-      projectOperations = getProjectOperations();
-    }
-    Validate.notNull(projectOperations, "ProjectOperations is required");
+      final String databaseName) {
 
     String connectionString = jdbcDatabase.getConnectionString();
     if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
       connectionString =
-          connectionString.replace(
-              "TO_BE_CHANGED_BY_ADDON",
-              StringUtils.isNotBlank(databaseName) ? databaseName : projectOperations
-                  .getProjectName(moduleName));
+          connectionString.replace("TO_BE_CHANGED_BY_ADDON",
+              StringUtils.isNotBlank(databaseName) ? databaseName : getProjectOperations()
+                  .getProjectName(""));
     } else {
       if (StringUtils.isNotBlank(databaseName)) {
         // Oracle uses a different connection URL - see ROO-1203
@@ -344,6 +279,19 @@ public class JpaOperationsImpl implements JpaOperations {
     return builder.toString();
   }
 
+  private String getStarterXPath(final List<OrmProvider> ormProviders) {
+    final StringBuilder builder = new StringBuilder("/configuration/starter/provider[");
+    for (int i = 0; i < ormProviders.size(); i++) {
+      if (i > 0) {
+        builder.append(" or ");
+      }
+      builder.append("@id = '");
+      builder.append(ormProviders.get(i).name());
+      builder.append("'");
+    }
+    builder.append("]");
+    return builder.toString();
+  }
 
   private List<JdbcDatabase> getUnwantedDatabases(final JdbcDatabase jdbcDatabase) {
     final List<JdbcDatabase> unwantedDatabases = new ArrayList<JdbcDatabase>();
@@ -372,15 +320,13 @@ public class JpaOperationsImpl implements JpaOperations {
 
   private void updateApplicationProperties(final OrmProvider ormProvider,
       final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName,
-      String userName, final String password, final String moduleName, String jndi, String profile,
-      boolean force) {
+      String userName, final String password, String jndi, String profile, boolean force) {
 
     // Check if jndi is blank. If is blank, include database properties on 
     // application.properties file
     if (StringUtils.isBlank(jndi)) {
 
-      final String connectionString =
-          getConnectionString(jdbcDatabase, hostName, databaseName, moduleName);
+      final String connectionString = getConnectionString(jdbcDatabase, hostName, databaseName);
 
       // Getting current properties
       final String driver =
@@ -407,12 +353,12 @@ public class JpaOperationsImpl implements JpaOperations {
       props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
       if (userName != null) {
         props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
-      } else if (applicationConfigService.existsSpringConfigFile()) {
+      } else {
         applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
       }
       if (password != null) {
         props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
-      } else if (applicationConfigService.existsSpringConfigFile()) {
+      } else {
         applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
       }
 
@@ -455,19 +401,20 @@ public class JpaOperationsImpl implements JpaOperations {
    * @param configuration
    * @param ormProvider
    * @param jdbcDatabase
-   * @param databaseXPath
-   * @param providersXPath
+   * @param startersXPath
    */
   private void updateDependencies(final Element configuration, final OrmProvider ormProvider,
-      final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath,
-      final String moduleName) {
-
-    if (projectOperations == null) {
-      projectOperations = getProjectOperations();
-    }
-    Validate.notNull(projectOperations, "ProjectOperations is required");
+      final JdbcDatabase jdbcDatabase, final String startersXPath, final String providersXPath,
+      final String databaseXPath) {
 
     final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
+
+    final List<Element> starterDependencies =
+        XmlUtils.findElements("/configuration/starter/provider[@id = '" + ormProvider.name()
+            + "']/dependencies/dependency", configuration);
+    for (final Element dependencyElement : starterDependencies) {
+      requiredDependencies.add(new Dependency(dependencyElement));
+    }
 
     final List<Element> databaseDependencies =
         XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/dependencies/dependency",
@@ -498,35 +445,27 @@ public class JpaOperationsImpl implements JpaOperations {
       requiredDependencies.add(new Dependency(dependencyElement));
     }
 
+
     // Remove redundant dependencies
     final List<Dependency> redundantDependencies = new ArrayList<Dependency>();
-    redundantDependencies.addAll(getDependencies(databaseXPath, configuration, moduleName));
-    redundantDependencies.addAll(getDependencies(providersXPath, configuration, moduleName));
+    redundantDependencies.addAll(getDependencies(databaseXPath, configuration));
+    redundantDependencies.addAll(getDependencies(startersXPath, configuration));
+    redundantDependencies.addAll(getDependencies(providersXPath, configuration));
+
     // Don't remove any we actually need
     redundantDependencies.removeAll(requiredDependencies);
 
     // Update the POM
-    projectOperations.addDependencies(moduleName, requiredDependencies);
-    projectOperations.removeDependencies(moduleName, redundantDependencies);
+    getTypeLocationService().removeStarterDependencies(redundantDependencies);
+    getTypeLocationService().addStarterDependencies(requiredDependencies);
   }
 
-  private List<Dependency> getDependencies(final String xPathExpression,
-      final Element configuration, final String moduleName) {
-
-    if (projectOperations == null) {
-      projectOperations = getProjectOperations();
-    }
-    Validate.notNull(projectOperations, "ProjectOperations is required");
+  private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {
 
     final List<Dependency> dependencies = new ArrayList<Dependency>();
     for (final Element dependencyElement : XmlUtils.findElements(xPathExpression
         + "/dependencies/dependency", configuration)) {
       final Dependency dependency = new Dependency(dependencyElement);
-      if (dependency.getGroupId().equals("com.google.appengine")
-          && dependency.getArtifactId().equals("appengine-api-1.0-sdk")
-          && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GWT)) {
-        continue;
-      }
       dependencies.add(dependency);
     }
     return dependencies;
@@ -539,7 +478,8 @@ public class JpaOperationsImpl implements JpaOperations {
           this.context.getAllServiceReferences(FileManager.class.getName(), null);
 
       for (ServiceReference<?> ref : references) {
-        return (FileManager) this.context.getService(ref);
+        fileManager = (FileManager) this.context.getService(ref);
+        return fileManager;
       }
 
       return null;
@@ -551,13 +491,18 @@ public class JpaOperationsImpl implements JpaOperations {
   }
 
   public PathResolver getPathResolver() {
+
+    if (pathResolver != null) {
+      return pathResolver;
+    }
     // Get all Services implement PathResolver interface
     try {
       ServiceReference<?>[] references =
           this.context.getAllServiceReferences(PathResolver.class.getName(), null);
 
       for (ServiceReference<?> ref : references) {
-        return (PathResolver) this.context.getService(ref);
+        pathResolver = (PathResolver) this.context.getService(ref);
+        return pathResolver;
       }
 
       return null;
@@ -569,13 +514,17 @@ public class JpaOperationsImpl implements JpaOperations {
   }
 
   public ProjectOperations getProjectOperations() {
+    if (projectOperations != null) {
+      return projectOperations;
+    }
     // Get all Services implement ProjectOperations interface
     try {
       ServiceReference<?>[] references =
           this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
 
       for (ServiceReference<?> ref : references) {
-        return (ProjectOperations) this.context.getService(ref);
+        projectOperations = (ProjectOperations) this.context.getService(ref);
+        return projectOperations;
       }
 
       return null;
@@ -587,13 +536,18 @@ public class JpaOperationsImpl implements JpaOperations {
   }
 
   public TypeLocationService getTypeLocationService() {
+
+    if (typeLocationService != null) {
+      return typeLocationService;
+    }
     // Get all Services implement TypeLocationService interface
     try {
       ServiceReference<?>[] references =
           this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
 
       for (ServiceReference<?> ref : references) {
-        return (TypeLocationService) this.context.getService(ref);
+        typeLocationService = (TypeLocationService) this.context.getService(ref);
+        return typeLocationService;
       }
 
       return null;
@@ -605,13 +559,17 @@ public class JpaOperationsImpl implements JpaOperations {
   }
 
   public TypeManagementService getTypeManagementService() {
+    if (typeManagementService != null) {
+      return typeManagementService;
+    }
     // Get all Services implement TypeManagementService interface
     try {
       ServiceReference<?>[] references =
           this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
 
       for (ServiceReference<?> ref : references) {
-        return (TypeManagementService) this.context.getService(ref);
+        typeManagementService = (TypeManagementService) this.context.getService(ref);
+        return typeManagementService;
       }
 
       return null;
@@ -628,23 +586,19 @@ public class JpaOperationsImpl implements JpaOperations {
 
   public boolean isInstalledInModule(final String moduleName) {
 
-    if (fileManager == null) {
-      fileManager = getFileManager();
+    Pom pom = getProjectOperations().getPomFromModuleName(moduleName);
+    if (pom == null) {
+      return false;
     }
-    Validate.notNull(fileManager, "FileManager is required");
 
-    if (pathResolver == null) {
-      pathResolver = getPathResolver();
-    }
-    Validate.notNull(pathResolver, "PathResolver is required");
+    // Check if spring-boot-starter-data-jpa has been included
+    Set<Dependency> dependencies = pom.getDependencies();
+    Dependency starter =
+        new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", "");
 
-    if (projectOperations == null) {
-      projectOperations = getProjectOperations();
-    }
-    Validate.notNull(projectOperations, "ProjectOperations is required");
+    boolean hasStarter = dependencies.contains(starter);
 
-    final LogicalPath resourcesPath = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
-    return isJpaInstallationPossible();
+    return applicationConfigService.existsSpringConfigFile(moduleName) && hasStarter;
   }
 
 

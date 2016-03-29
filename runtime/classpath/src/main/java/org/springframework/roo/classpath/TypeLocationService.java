@@ -6,7 +6,9 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.maven.Pom;
 
 /**
@@ -14,9 +16,38 @@ import org.springframework.roo.project.maven.Pom;
  * 
  * @author Alan Stewart
  * @author James Tyrrell
+ * @author Paula Navarro
  * @since 1.1
  */
 public interface TypeLocationService {
+
+  /**
+   * Attempts to add the specified dependencies into modules that contain a class annotation with @SpringRootApplication. If the dependency already
+   * exists according to to
+   * {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}
+   * , the method silently returns. Otherwise the dependency is added.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param dependencies the dependencies to add (required)
+   */
+  void addStarterDependencies(Collection<? extends Dependency> dependencies);
+
+  /**
+   * Attempts to remove the specified dependencies from modules with a class annotated with @SpringRootApplication. If all the dependencies do
+   * not exist according to
+   * {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method
+   * silently returns. Otherwise each located dependency is removed.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param dependencies the dependencies to remove (required)
+   */
+  void removeStarterDependencies(Collection<? extends Dependency> dependencies);
 
   /**
    * Returns a set of {@link ClassOrInterfaceTypeDetails}s that possess the
@@ -119,6 +150,14 @@ public interface TypeLocationService {
    * @return
    */
   String getTopLevelPackageForModule(Pom module);
+
+  /**
+   * Returns the module names of the modules that contain a class annotated with @SpringBootApplication
+   * 
+   * @return a non-<code>null</code> collection
+   */
+  Collection<String> getApplicationModules();
+
 
   /**
    * Returns the details of the given Java type from within the user project.

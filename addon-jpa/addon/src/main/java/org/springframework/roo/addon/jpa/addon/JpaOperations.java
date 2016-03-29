@@ -20,7 +20,7 @@ public interface JpaOperations extends Feature {
   /**
    * This method is responsible for managing all JPA related artifacts
    * (META-INF/persistence.xml, applicationContext.xml, database.properties
-   * and the project pom.xml)
+   * and the project pom.xml) for all modules that have a class annotated with @SpringBootApplication
    * 
    * @param ormProvider the ORM provider selected (Hibernate, OpenJPA,
    *            EclipseLink)
@@ -30,13 +30,11 @@ public interface JpaOperations extends Feature {
    * @param databaseName the name of the database
    * @param userName the username to connect to the database
    * @param password the password to connect to the database
-   * @param moduleName
    * @param profile string with profile where current jpa persistence will be applied.
    * @param force boolean that forces configuration if exists some previous configuration
    */
   void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String hostName,
-      String databaseName, String userName, String password, String moduleName, String profile,
-      boolean force);
+      String databaseName, String userName, String password, String profile, boolean force);
 
   /**
    * Indicates whether JPA can be installed in the currently focused module.
@@ -44,6 +42,13 @@ public interface JpaOperations extends Feature {
    * @return <code>false</code> if no module has the focus
    */
   boolean isJpaInstallationPossible();
+
+  /**
+   * Check if jpa is installed
+   * 
+   * @return
+   */
+  boolean isJpaInstalled();
 
   /**
    * Creates a new JPA embeddable class.
@@ -76,12 +81,6 @@ public interface JpaOperations extends Feature {
    */
   void newIdentifier(JavaType identifierType, String identifierField, String identifierColumn);
 
-  /**
-   * Check if project has Spring Data dependency installed
-   * 
-   * @return
-   */
-  boolean hasSpringDataDependency();
 
   SortedSet<String> getDatabaseProperties(String profile);
 }

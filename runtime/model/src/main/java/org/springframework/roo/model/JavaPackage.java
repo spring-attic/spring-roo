@@ -17,6 +17,7 @@ import org.apache.commons.lang3.Validate;
 public class JavaPackage implements Comparable<JavaPackage> {
 
   private final String fullyQualifiedPackageName;
+  private String module;
 
   /**
    * Construct a JavaPackage.
@@ -34,6 +35,24 @@ public class JavaPackage implements Comparable<JavaPackage> {
     Validate.notNull(fullyQualifiedPackageName, "Fully qualified package name required");
     JavaSymbolName.assertJavaNameLegal(fullyQualifiedPackageName);
     this.fullyQualifiedPackageName = fullyQualifiedPackageName;
+  }
+
+  /**
+   * Construct a JavaPackage.
+   * <p>
+   * The fully qualified package name will be enforced as follows:
+   * <ul>
+   * <li>The rules listed in
+   * {@link JavaSymbolName#assertJavaNameLegal(String)}
+   * </ul>
+   * 
+   * @param fullyQualifiedPackageName the name (as per the above rules;
+   *            mandatory)
+   * @param module the module where is created (optional)
+   */
+  public JavaPackage(final String fullyQualifiedPackageName, final String module) {
+    this(fullyQualifiedPackageName);
+    this.module = module;
   }
 
   public int compareTo(final JavaPackage o) {
@@ -63,6 +82,13 @@ public class JavaPackage implements Comparable<JavaPackage> {
    */
   public String getFullyQualifiedPackageName() {
     return fullyQualifiedPackageName;
+  }
+
+  /**
+    * @return the module name where the javaPackage is located 
+    */
+  public String getModule() {
+    return module;
   }
 
   /**

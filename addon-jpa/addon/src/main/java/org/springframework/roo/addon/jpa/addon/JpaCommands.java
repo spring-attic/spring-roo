@@ -108,7 +108,7 @@ public class JpaCommands implements CommandMarker {
 
   @CliAvailabilityIndicator({"entity jpa", "embeddable"})
   public boolean isClassGenerationAvailable() {
-    return jpaOperations.hasSpringDataDependency();
+    return jpaOperations.isJpaInstalled();
   }
 
   @CliCommand(
@@ -204,8 +204,7 @@ public class JpaCommands implements CommandMarker {
     }
 
     jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, hostName, databaseName, userName,
-        password, projectOperations.getFocusedModuleName(), shellContext.getProfile(),
-        shellContext.isForce());
+        password, shellContext.getProfile(), shellContext.isForce());
   }
 
   /**

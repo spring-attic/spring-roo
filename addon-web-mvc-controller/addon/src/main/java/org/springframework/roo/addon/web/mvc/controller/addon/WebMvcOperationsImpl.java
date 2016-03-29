@@ -342,8 +342,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
     }
 
     // Add MVC dependencies.
-    final boolean isGaeEnabled =
-        projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.GAE);
+    final boolean isGaeEnabled = projectOperations.isFeatureInstalled(FeatureNames.GAE);
     final Element configuration = XmlUtils.getConfiguration(getClass());
 
     final List<Dependency> dependencies = new ArrayList<Dependency>();

@@ -71,7 +71,7 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 
   public boolean isEmbeddedInstallationPossible() {
     return projectOperations.isFocusedProjectAvailable()
-        && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+        && !projectOperations.isFeatureInstalled(FeatureNames.JSF);
   }
 
   protected void unbindEmbeddedProvider(final EmbeddedProvider provider) {

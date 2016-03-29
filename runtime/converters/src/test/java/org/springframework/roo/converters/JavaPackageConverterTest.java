@@ -11,6 +11,7 @@ import static org.springframework.roo.converters.JavaPackageConverter.TOP_LEVEL_
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.junit.Before;
@@ -76,6 +77,14 @@ public class JavaPackageConverterTest {
     // Set up
     when(mockProjectOperations.isFocusedProjectAvailable()).thenReturn(projectAvailable);
     final List<Completion> completions = new ArrayList<Completion>();
+
+    final Pom mockPom1 =
+        setUpMockPom("/path/to/pom/1", new JavaType("com.example.domain.Choice"), new JavaType(
+            "com.example.web.ChoiceController"));
+
+    when(mockProjectOperations.getFocusedModule()).thenReturn(mockPom1);
+    when(mockTypeLocationService.getTopLevelPackageForModule(mockPom1)).thenReturn(
+        TOP_LEVEL_PACKAGE);
 
     // Invoke
     final boolean allComplete =
@@ -173,8 +182,8 @@ public class JavaPackageConverterTest {
     when(mockProjectOperations.getPoms()).thenReturn(Arrays.asList(mockPom1, mockPom2));
 
     // Invoke and check
-    assertGetAllPossibleValues(true, new Completion("com.example.domain"), new Completion(
-        "com.example.web"));
+    assertGetAllPossibleValues(true, new Completion("com.example"), new Completion(
+        "com.example.domain"), new Completion("com.example.web"));
   }
 
   @Test

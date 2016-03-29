@@ -1,6 +1,10 @@
 package org.springframework.roo.converters;
 
+import static org.springframework.roo.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
+import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
 import static org.springframework.roo.shell.OptionContexts.UPDATE;
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
+import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -25,6 +29,7 @@ import org.springframework.roo.shell.MethodTarget;
  * {@value #TOP_LEVEL_PACKAGE_SYMBOL} to denote the user's top-level package.
  * 
  * @author Ben Alex
+ * @author Paula Navarro
  * @since 1.0
  */
 @Component
@@ -46,12 +51,26 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
   @Reference
   TypeLocationService typeLocationService;
 
-  public JavaPackage convertFromText(final String value, final Class<?> requiredType,
+  public JavaPackage convertFromText(String value, final Class<?> requiredType,
       final String optionContext) {
     if (StringUtils.isBlank(value)) {
       return null;
     }
-    final JavaPackage result = new JavaPackage(convertToFullyQualifiedPackageName(value));
+
+    Pom module = projectOperations.getFocusedModule();
+
+    if (value.contains(MODULE_PATH_SEPARATOR)) {
+      final String moduleName = value.substring(0, value.indexOf(MODULE_PATH_SEPARATOR));
+      module = projectOperations.getPomFromModuleName(moduleName);
+      value = value.substring(value.indexOf(MODULE_PATH_SEPARATOR) + 1, value.length()).trim();
+      if (StringUtils.contains(optionContext, UPDATE)) {
+        projectOperations.setModule(module);
+      }
+    }
+
+    String moduleName = module == null ? null : module.getModuleName();
+
+    JavaPackage result = new JavaPackage(convertToFullyQualifiedPackageName(value), moduleName);
     if (optionContext != null && optionContext.contains(UPDATE)) {
       lastUsed.setPackage(result);
     }
@@ -69,21 +88,63 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
   public boolean getAllPossibleValues(final List<Completion> completions,
       final Class<?> requiredType, final String existingData, final String optionContext,
       final MethodTarget target) {
-    if (projectOperations.isFocusedProjectAvailable()) {
-      completions.addAll(getCompletionsForAllKnownPackages());
+    if (!projectOperations.isFocusedProjectAvailable()) {
+      return false;
+    }
+
+    final Pom targetModule;
+    final String heading;
+    final String prefix;
+    final String formattedPrefix;
+    if (existingData != null && existingData.contains(MODULE_PATH_SEPARATOR)) {
+      // Looking for a type in another module
+      final String targetModuleName =
+          existingData.substring(0, existingData.indexOf(MODULE_PATH_SEPARATOR));
+      targetModule = projectOperations.getPomFromModuleName(targetModuleName);
+      heading = "";
+      prefix = targetModuleName + MODULE_PATH_SEPARATOR;
+      formattedPrefix = decorate(targetModuleName + MODULE_PATH_SEPARATOR, FG_CYAN);
+    } else {
+      // Looking for a type in the currently focused module
+      targetModule = projectOperations.getFocusedModule();
+      heading = targetModule.getModuleName();
+      prefix = "";
+      formattedPrefix = "";
+    }
+
+    addCompletionsForOtherModuleNames(completions, targetModule);
+
+    if (!"pom".equals(targetModule.getPackaging())) {
+      addCompletionsForPackagesInTargetModule(completions, targetModule, heading, prefix,
+          formattedPrefix);
     }
     return false;
   }
 
-  private Collection<Completion> getCompletionsForAllKnownPackages() {
-    final Collection<Completion> completions = new LinkedHashSet<Completion>();
+  private void addCompletionsForPackagesInTargetModule(final Collection<Completion> completions,
+      final Pom targetModule, final String heading, final String prefix,
+      final String formattedPrefix) {
+
+    final String topLevelPackage = typeLocationService.getTopLevelPackageForModule(targetModule);
+    completions.add(new Completion(prefix + topLevelPackage, formattedPrefix + topLevelPackage,
+        heading, 1));
+
+    for (final JavaType javaType : typeLocationService.getTypesForModule(targetModule)) {
+      String type = javaType.getFullyQualifiedTypeName();
+      completions.add(new Completion(prefix + type.substring(0, type.lastIndexOf('.')),
+          formattedPrefix + type.substring(0, type.lastIndexOf('.')), heading, 1));
+    }
+  }
+
+  private void addCompletionsForOtherModuleNames(final Collection<Completion> completions,
+      final Pom targetModule) {
     for (final Pom pom : projectOperations.getPoms()) {
-      for (final JavaType javaType : typeLocationService.getTypesForModule(pom)) {
-        final String type = javaType.getFullyQualifiedTypeName();
-        completions.add(new Completion(type.substring(0, type.lastIndexOf('.'))));
+      if (StringUtils.isNotBlank(pom.getModuleName())
+          && !pom.getModuleName().equals(targetModule.getModuleName())) {
+        completions.add(new Completion(pom.getModuleName() + MODULE_PATH_SEPARATOR, decorate(
+            pom.getModuleName() + MODULE_PATH_SEPARATOR, FG_CYAN), "Modules", 0));
       }
     }
-    return completions;
   }
 
   private String getTopLevelPackage() {

@@ -169,6 +169,7 @@ public class JavaType implements Comparable<JavaType> {
   private final String fullyQualifiedTypeName;
   private final List<JavaType> parameters;
   private final String simpleTypeName;
+  private String module;
 
   /**
    * Constructor equivalent to {@link #JavaType(String)}, but takes a Class
@@ -198,6 +199,27 @@ public class JavaType implements Comparable<JavaType> {
    */
   public JavaType(final String fullyQualifiedTypeName) {
     this(fullyQualifiedTypeName, 0, DataType.TYPE, null, null);
+  }
+
+  /**
+   * Constructs a {@link JavaType}.
+   * <p>
+   * The fully qualified type name will be enforced as follows:
+   * <ul>
+   * <li>The rules listed in
+   * {@link JavaSymbolName#assertJavaNameLegal(String)}
+   * <li>First letter of simple type name must be upper-case</li>
+   * </ul>
+   * <p>
+   * A fully qualified type name may include or exclude a package designator.
+   * 
+   * @param fullyQualifiedTypeName the name (as per the above rules;
+   *            mandatory)
+   * @param module the module where is created (optional)
+   */
+  public JavaType(final String fullyQualifiedTypeName, String module) {
+    this(fullyQualifiedTypeName, 0, DataType.TYPE, null, null);
+    this.module = module;
   }
 
   /**
@@ -561,6 +583,13 @@ public class JavaType implements Comparable<JavaType> {
    */
   public String getSimpleTypeName() {
     return simpleTypeName;
+  }
+
+  /**
+    * @return the module name where the javaType 
+    */
+  public String getModule() {
+    return module;
   }
 
   @Override

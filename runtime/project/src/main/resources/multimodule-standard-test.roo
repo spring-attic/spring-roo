@@ -80,10 +80,9 @@ project setup --topLevelPackage org.example --multimodule
 #--------------------------------------------------------------------
 # Goal:    Create a module inside parent pom using parent parameter
 #
-module create --moduleName monitoring 
+module create --moduleName monitoring --parent ~ 
 #       
-# Output:  module create --moduleName monitoring --parent ~ 
-#          Created ROOT/monitoring
+# Output:  Created ROOT/monitoring
 #          Created ROOT/monitoring/pom.xml
 #          Created monitoring/org/example/monitoring
 #          Updated ROOT/pom.xml [added module monitoring]

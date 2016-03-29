@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -31,7 +32,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -270,7 +270,12 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     Validate.isTrue(isProjectAvailable(moduleName),
         "Dependency modification prohibited at this time");
     Validate.notNull(dependency, "Dependency required");
-    return addDependencies(moduleName, Collections.singletonList(dependency)).get(0);
+    List<Dependency> result = addDependencies(moduleName, Collections.singletonList(dependency));
+
+    if (result.isEmpty()) {
+      return null;
+    }
+    return result.get(0);
   }
 
   public final Dependency addDependency(final String moduleName, final String groupId,
@@ -615,25 +620,13 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     return false;
   }
 
-  public boolean isFeatureInstalledInModule(String featureName, String moduleName) {
-    final Feature feature = features.get(featureName);
-    if (feature == null) {
-      return false;
-    }
-    if (feature.isInstalledInModule(moduleName)) {
-      return true;
-    }
-    return false;
-  }
-
-  public boolean isFeatureInstalledInFocusedModule(final String... featureNames) {
+  public boolean isFeatureInstalled(final String... featureNames) {
     for (final String featureName : featureNames) {
-      final Feature feature = features.get(featureName);
-      if (feature != null && feature.isInstalledInModule(getFocusedModuleName())) {
-        return true;
+      if (!isFeatureInstalled(featureName)) {
+        return false;
       }
     }
-    return false;
+    return true;
   }
 
   public boolean isFocusedProjectAvailable() {
@@ -646,6 +639,10 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
   public boolean isModuleFocusAllowed() {
     return getModuleNames().size() > 1;
+  }
+
+  public boolean isMultimoduleProject() {
+    return isModuleFocusAllowed();
   }
 
   public final boolean isProjectAvailable(final String moduleName) {

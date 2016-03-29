@@ -9,12 +9,15 @@ import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTO
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -43,9 +46,13 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Element;
 
 /**
  * The {@link RepositoryJpaOperations} implementation.
@@ -77,8 +84,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
   @Override
   public boolean isRepositoryInstallationPossible() {
-    return isInstalledInModule(getProjectOperations().getFocusedModuleName())
-        && !getProjectOperations().isFeatureInstalledInFocusedModule(FeatureNames.MONGO);
+    return getProjectOperations().isFeatureInstalled(FeatureNames.JPA);
   }
 
   @Override
@@ -90,10 +96,15 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     while (it.hasNext()) {
       ClassOrInterfaceTypeDetails entity = it.next();
 
+      getProjectOperations().setModule(
+          getProjectOperations().getPomFromModuleName(
+              StringUtils.substringBetween(entity.getDeclaredByMetadataId(), "#", ":")));
+
       // Generating new interface type using entity
       JavaType interfaceType =
           new JavaType(repositoriesPackage.getFullyQualifiedPackageName().concat(".")
-              .concat(entity.getType().getSimpleTypeName()).concat("Repository"));
+              .concat(entity.getType().getSimpleTypeName()).concat("Repository"),
+              repositoriesPackage.getModule());
 
       // Delegate on simple add repository method
       addRepository(interfaceType, entity.getType());
@@ -115,6 +126,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // @RooJpaEntity
     Validate.notNull(entityAnnotation,
         "ERROR: Provided entity should be annotated with @RooJpaEntity");
+
+    // Set module where generate the artefacts
+    getProjectOperations().setModule(
+        getProjectOperations().getPomFromModuleName(interfaceType.getModule()));
 
     // Check if the new interface to be created exists yet
     final String interfaceIdentifier =
@@ -164,6 +179,22 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // implementation that allow developers to include its dynamic queries
     // using QueryDSL
     addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage());
+
+    // Add querydsl dependency
+    final Element configuration = XmlUtils.getConfiguration(getClass());
+    final List<Element> dependencies =
+        XmlUtils.findElements("/configuration/dependencies/dependency", configuration);
+    for (final Element dependencyElement : dependencies) {
+      getProjectOperations().addDependency(getProjectOperations().getFocusedModuleName(),
+          new Dependency(dependencyElement));
+    }
+
+    // Add querydsl Plugin
+    List<Element> elements = XmlUtils.findElements("/configuration/plugins/plugin", configuration);
+    for (final Element element : elements) {
+      getProjectOperations().addBuildPlugin(getProjectOperations().getFocusedModuleName(),
+          new Plugin(element));
+    }
 
   }
 
@@ -547,15 +578,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   }
 
   public boolean isInstalledInModule(final String moduleName) {
-    // Check if spring-boot-starter-data-jpa has been included
-    Set<Dependency> dependencies =
-        getProjectOperations().getFocusedProjectMetadata().getPom().getDependencies();
-
-    Dependency starter =
-        new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", "");
-
-    boolean hasStarter = dependencies.contains(starter);
-
-    return getProjectOperations().isFocusedProjectAvailable() && hasStarter;
+    return getProjectOperations().isFeatureInstalled(FeatureNames.JPA);
   }
 }

@@ -521,7 +521,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
   public boolean isControllerAvailable() {
     return fileManager.exists(getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP,
         "WEB-INF/views"))
-        && !getProjectOperations().isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+        && !getProjectOperations().isFeatureInstalled(FeatureNames.JSF);
   }
 
   public boolean isInstalledInModule(final String moduleName) {
@@ -538,7 +538,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 
   public boolean isMvcInstallationPossible() {
     return isProjectAvailable() && !isControllerAvailable()
-        && !getProjectOperations().isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+        && !getProjectOperations().isFeatureInstalled(FeatureNames.JSF);
   }
 
   private boolean isProjectAvailable() {

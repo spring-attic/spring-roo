@@ -167,7 +167,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
   public boolean isFinderInstallationPossible() {
     return getProjectOperations().isFocusedProjectAvailable()
-        && getProjectOperations().isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+        && getProjectOperations().isFeatureInstalled(FeatureNames.JPA);
   }
 
   public SortedSet<String> listFindersFor(final JavaType typeName, final Integer depth) {

@@ -48,10 +48,9 @@ project setup --topLevelPackage org.example --multimodule BASIC
 #--------------------------------------------------------------------
 # Goal:    Create a module inside parent pom using parent parameter
 #
-module create --moduleName model 
+module create --moduleName model --parent ~ 
 #       
-# Output:  module create --moduleName model --parent ~ 
-#          Created ROOT/model
+# Output:  Created ROOT/model
 #          Created ROOT/model/pom.xml
 #          Created monitoring/org/example/model
 #          Updated ROOT/pom.xml [added module model]

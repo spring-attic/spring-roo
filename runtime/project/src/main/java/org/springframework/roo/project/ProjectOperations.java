@@ -10,6 +10,7 @@ import org.springframework.roo.project.maven.Pom;
  * Methods for various project-related operations.
  * 
  * @author Ben Alex
+ * @author Paula Navarro
  * @since 1.0
  */
 public interface ProjectOperations {
@@ -356,26 +357,15 @@ public interface ProjectOperations {
   boolean isFeatureInstalled(String featureName);
 
   /**
-   * Indicates whether the supplied feature is installed in the module with
-   * the supplied name.
-   * 
-   * @param featureName the name of the feature (see {@link FeatureNames} for
-   *            available features)
-   * @param moduleName the name of the module to be checked
-   * @return true if the feature is installed the module, otherwise false
-   */
-  boolean isFeatureInstalledInModule(String featureName, String moduleName);
-
-  /**
-   * Indicates whether any of the supplied features are installed in the
-   * focused module.
+   * Indicates whether any of the supplied features are installed in any module of a
+   * project.
    * 
    * @param featureNames the names of the features (see {@link FeatureNames}
    *            for available features)
    * @return true if any of the supplied features are installed in the focused
    *         module, otherwise false
    */
-  boolean isFeatureInstalledInFocusedModule(String... featureNames);
+  boolean isFeatureInstalled(String... featureNames);
 
   /**
    * Indicates whether the module whose name has the focus, if any, is
@@ -398,6 +388,14 @@ public interface ProjectOperations {
    * @return see above
    */
   boolean isModuleFocusAllowed();
+
+  /**
+   * Indicates whether the project is multimodule
+   * 
+   * @return see above
+   */
+  boolean isMultimoduleProject();
+
 
   /**
    * Indicates whether a module with the given name is available.

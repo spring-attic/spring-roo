@@ -231,7 +231,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
             getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))
         && !getProjectOperations().getFocusedModule()
             .hasDependencyExcludingVersion(SPRING_SECURITY)
-        && !getProjectOperations().isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+        && !getProjectOperations().isFeatureInstalled(FeatureNames.JSF);
   }
 
   @Override

@@ -66,7 +66,7 @@ public class DbreOperationsImpl implements DbreOperations {
 
   public boolean isDbreInstallationPossible() {
     return projectOperations.isFocusedProjectAvailable()
-        && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JPA);
+        && projectOperations.isFeatureInstalled(FeatureNames.JPA);
   }
 
   private void outputSchemaXml(final Database database, final Set<Schema> schemas, final File file,

@@ -66,8 +66,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 
   public boolean isDataOnDemandInstallationPossible() {
     return projectOperations.isFocusedProjectAvailable()
-        && projectOperations
-            .isFeatureInstalledInFocusedModule(FeatureNames.JPA, FeatureNames.MONGO);
+        && projectOperations.isFeatureInstalled(FeatureNames.JPA, FeatureNames.MONGO);
   }
 
   public void newDod(final JavaType entity, final JavaType name) {

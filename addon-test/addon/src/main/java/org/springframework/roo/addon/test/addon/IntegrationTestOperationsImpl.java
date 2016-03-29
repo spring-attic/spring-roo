@@ -79,8 +79,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 
   public boolean isIntegrationTestInstallationPossible() {
     return projectOperations.isFocusedProjectAvailable()
-        && projectOperations
-            .isFeatureInstalledInFocusedModule(FeatureNames.JPA, FeatureNames.MONGO);
+        && projectOperations.isFeatureInstalled(FeatureNames.JPA, FeatureNames.MONGO);
   }
 
   public void newIntegrationTest(final JavaType entity) {

@@ -9,7 +9,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.application.config.ApplicationConfigService;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -29,6 +31,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
   private ProjectOperations projectOperations;
   @Reference
   private ApplicationConfigService applicationConfigService;
+  @Reference
+  private TypeLocationService typeLocationService;
 
   @Override
   public boolean arePropertiesCommandAvailable() {
@@ -49,20 +53,28 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
   @Override
   public void listProperties(String profile) {
-    Map<String, String> properties = applicationConfigService.getProperties(profile);
+    boolean printedHeader = false;
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      Map<String, String> properties = applicationConfigService.getProperties(profile, moduleName);
 
-    if (properties.size() > 0) {
+      if (properties.size() > 0) {
+        if (!printedHeader) {
+          printHeader();
+          printedHeader = true;
+        }
+        LOGGER.log(Level.INFO, moduleName + "\n");
+        LOGGER.log(Level.INFO, "#-----------------------------------------------#\n");
+        for (Entry<String, String> property : properties.entrySet()) {
+          LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
+        }
 
-      printHeader();
-
-      for (Entry<String, String> property : properties.entrySet()) {
-        LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
+      } else {
+        LOGGER.log(Level.INFO, moduleName + "\n");
+        LOGGER.log(Level.INFO, "#-----------------------------------------------#\n");
+        LOGGER.log(Level.INFO, String.format(
+            "WARNING: No properties found on '%s' application config properties file.",
+            applicationConfigService.getSpringConfigLocation(profile)));
       }
-
-    } else {
-      LOGGER.log(Level.INFO, String.format(
-          "WARNING: No properties found on '%s' application config properties file.",
-          applicationConfigService.getSpringConfigLocation(profile)));
     }
 
   }

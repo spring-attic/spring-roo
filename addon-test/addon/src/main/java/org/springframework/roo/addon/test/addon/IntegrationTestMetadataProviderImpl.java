@@ -319,7 +319,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
         PhysicalTypeIdentifierNamingUtils.getPath(metadataIdentificationString).getModule();
     final boolean isGaeEnabled =
         projectOperations.isProjectAvailable(moduleName)
-            && projectOperations.isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
+            && projectOperations.isFeatureInstalled(FeatureNames.GAE);
 
     return new IntegrationTestMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, dataOnDemandMetadata,
@@ -376,8 +376,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 
     final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata(moduleName);
     if (projectMetadata != null && projectMetadata.isValid()) {
-      final boolean isGaeEnabled =
-          projectOperations.isFeatureInstalledInModule(FeatureNames.GAE, moduleName);
+      final boolean isGaeEnabled = projectOperations.isFeatureInstalled(FeatureNames.GAE);
       // We need to determine if the persistence state has changed, we do
       // this by comparing the last known state to the current state
       final boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;

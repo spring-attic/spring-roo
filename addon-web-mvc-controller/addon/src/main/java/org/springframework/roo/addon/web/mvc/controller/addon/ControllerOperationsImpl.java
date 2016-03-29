@@ -163,8 +163,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   public boolean isControllerInstallationPossible() {
     return projectOperations.isFocusedProjectAvailable()
-        && projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.MVC)
-        && !projectOperations.isFeatureInstalledInFocusedModule(FeatureNames.JSF);
+        && projectOperations.isFeatureInstalled(FeatureNames.MVC)
+        && !projectOperations.isFeatureInstalled(FeatureNames.JSF);
   }
 
   public boolean isNewControllerAvailable() {

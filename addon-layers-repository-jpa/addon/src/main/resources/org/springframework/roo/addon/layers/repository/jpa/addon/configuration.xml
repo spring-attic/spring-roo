@@ -8,4 +8,42 @@
 			</dependency>
 		</dependencies>
 	</spring-data-jpa>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.mysema.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+		</dependency>
+	</dependencies>
+	<plugins>
+		<plugin>
+			<groupId>com.mysema.querydsl</groupId>
+			<artifactId>querydsl-maven-plugin</artifactId>
+			<version>${querydsl.version}</version>
+			<executions>
+				<execution>
+					<id>generate-qtypes</id>
+					<phase>generate-sources</phase>
+					<goals>
+						<goal>jpa-export</goal>
+					</goals>
+					<configuration>
+						<targetFolder>target/generated-sources/java</targetFolder>
+						<packages>
+							<package>org.springframework.data.jpa.domain.support</package>
+						</packages>
+					</configuration>
+				</execution>
+				<execution>
+					<id>compile-qtypes</id>
+					<goals>
+						<goal>compile</goal>
+					</goals>
+					<configuration>
+						<sourceFolder>target/generated-sources/java</sourceFolder>
+					</configuration>
+				</execution>
+			</executions>
+		</plugin>
+	</plugins>
 </configuration>

@@ -32,6 +32,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.PhysicalPath;
 import org.springframework.roo.project.ProjectOperations;
@@ -55,6 +56,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author James Tyrrell
+ * @author Paula Navarro
  * @since 1.1
  */
 @Component
@@ -810,6 +812,29 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     } else {
       return typeResolutionService;
     }
+  }
+
+  public void addStarterDependencies(final Collection<? extends Dependency> newDependencies) {
+    for (String moduleName : getApplicationModules()) {
+      getProjectOperations().addDependencies(moduleName, newDependencies);
+    }
+  }
+
+  public void removeStarterDependencies(final Collection<? extends Dependency> newDependencies) {
+    for (String moduleName : getApplicationModules()) {
+      getProjectOperations().removeDependencies(moduleName, newDependencies);
+    }
+  }
+
+  @Override
+  public Collection<String> getApplicationModules() {
+    List<String> moduleNames = new ArrayList<String>();
+    for (ClassOrInterfaceTypeDetails cid : findClassesOrInterfaceDetailsWithAnnotation(new JavaType(
+        "org.springframework.boot.autoconfigure.SpringBootApplication"))) {
+
+      moduleNames.add(StringUtils.substringBetween(cid.getDeclaredByMetadataId(), "#", ":"));
+    }
+    return moduleNames;
   }
 
 }

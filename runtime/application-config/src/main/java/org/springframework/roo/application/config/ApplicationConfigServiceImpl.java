@@ -3,11 +3,13 @@ package org.springframework.roo.application.config;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
@@ -20,6 +22,7 @@ import org.springframework.roo.settings.project.ProjectSettingsService;
  * configuration files.
  * 
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 2.0
  */
 @Component
@@ -43,135 +46,193 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   private FileManager fileManager;
   @Reference
   private ProjectSettingsService settingsService;
+  @Reference
+  private TypeLocationService typeLocationService;
 
   @Override
   public void addProperty(final String key, final String value, String profile, boolean force) {
 
-    propFilesManager.addPropertyIfNotExists(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), key, value, true, force);
+    // Get application modules
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      propFilesManager.addPropertyIfNotExists(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), key, value, true, force);
+    }
   }
 
   @Override
   public void addProperty(final String prefix, final String key, final String value,
       String profile, boolean force) {
-    propFilesManager.addPropertyIfNotExists(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), prefix, key, value, true, force);
+    // Get application modules
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      propFilesManager.addPropertyIfNotExists(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), prefix, key, value, true, force);
+    }
   }
 
   @Override
   public void addProperties(final Map<String, String> properties, String profile, boolean force) {
-    propFilesManager.addProperties(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), properties, true, force);
+    // Get application modules
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      propFilesManager.addProperties(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), properties, true, force);
+    }
   }
 
   @Override
   public void addProperties(final String prefix, final Map<String, String> properties,
       String profile, boolean force) {
-    propFilesManager.addProperties(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), prefix, properties, true, force);
+    // Get application modules
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      propFilesManager.addProperties(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), prefix, properties, true, force);
+    }
   }
 
   @Override
   public void updateProperty(final String key, final String value, String profile, boolean force) {
-    propFilesManager.changeProperty(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), key, value, true, force);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      propFilesManager.changeProperty(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), key, value, true, force);
+    }
   }
 
   @Override
   public void updateProperty(final String prefix, final String key, final String value,
       String profile, boolean force) {
-    propFilesManager.changeProperty(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), prefix, key, value, true, force);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      propFilesManager.changeProperty(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), prefix, key, value, true, force);
+    }
   }
 
   @Override
   public void updateProperties(final Map<String, String> properties, String profile, boolean force) {
-    propFilesManager.changeProperties(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), properties, true, force);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      propFilesManager.changeProperties(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), properties, true, force);
+    }
   }
 
   @Override
   public void updateProperties(final String prefix, final Map<String, String> properties,
       String profile, boolean force) {
-    propFilesManager.changeProperties(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), prefix, properties, true, force);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      propFilesManager.changeProperties(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), prefix, properties, true, force);
+    }
   }
 
   @Override
-  public Map<String, String> getProperties(String profile) {
-    return propFilesManager.getProperties(getApplicationConfigFileLocation(),
+  public Map<String, String> getProperties(String profile, String moduleName) {
+    return propFilesManager.getProperties(getApplicationConfigFileLocation(moduleName),
         getAppliCationConfigFileName(profile));
   }
 
   @Override
   public SortedSet<String> getPropertyKeys(boolean includeValues, String profile) {
-    return propFilesManager.getPropertyKeys(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), includeValues);
+    SortedSet<String> keys = new TreeSet<String>();
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      keys.addAll(propFilesManager.getPropertyKeys(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), includeValues));
+    }
+    return keys;
   }
 
   @Override
   public SortedSet<String> getPropertyKeys(String prefix, boolean includeValues, String profile) {
-    return propFilesManager.getPropertyKeys(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), prefix, includeValues);
+    SortedSet<String> keys = new TreeSet<String>();
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      keys.addAll(propFilesManager.getPropertyKeys(getApplicationConfigFileLocation(moduleName),
+          getAppliCationConfigFileName(profile), prefix, includeValues));
+    }
+    return keys;
   }
 
   @Override
   public String getProperty(final String key, String profile) {
-    return propFilesManager.getProperty(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), key);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      String property =
+          propFilesManager.getProperty(getApplicationConfigFileLocation(moduleName),
+              getAppliCationConfigFileName(profile), key);
+      if (property != null) {
+        return property;
+      }
+    }
+    return null;
   }
 
   @Override
   public String getProperty(final String prefix, final String key, String profile) {
-    return propFilesManager.getProperty(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), prefix, key);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      String property =
+          propFilesManager.getProperty(getApplicationConfigFileLocation(moduleName),
+              getAppliCationConfigFileName(profile), prefix, key);
+      if (property != null) {
+        return property;
+      }
+    }
+    return null;
   }
 
   @Override
   public void removeProperty(final String key, String profile) {
-    propFilesManager.removeProperty(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), key);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      if (existsSpringConfigFile(profile, moduleName)) {
+        propFilesManager.removeProperty(getApplicationConfigFileLocation(moduleName),
+            getAppliCationConfigFileName(profile), key);
+      }
+    }
   }
 
   @Override
   public void removeProperty(final String prefix, String key, String profile) {
-    propFilesManager.removeProperty(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), prefix, key);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      if (existsSpringConfigFile(profile, profile)) {
+        propFilesManager.removeProperty(getApplicationConfigFileLocation(moduleName),
+            getAppliCationConfigFileName(profile), prefix, key);
+      }
+    }
   }
 
   @Override
   public void removeProperties(List<String> keys, String profile) {
-    for (String key : keys) {
-      removeProperty(key, profile);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      for (String key : keys) {
+        removeProperty(key, profile, moduleName);
+      }
     }
   }
 
   @Override
   public void removePropertiesByPrefix(String prefix, String profile) {
-    propFilesManager.removePropertiesByPrefix(getApplicationConfigFileLocation(),
-        getAppliCationConfigFileName(profile), prefix);
+    for (String moduleName : typeLocationService.getApplicationModules()) {
+      if (existsSpringConfigFile(profile, moduleName)) {
+        propFilesManager.removePropertiesByPrefix(getApplicationConfigFileLocation(moduleName),
+            getAppliCationConfigFileName(profile), prefix);
+      }
+    }
   }
 
   @Override
-  public String getSpringConfigLocation() {
-    return pathResolver.getIdentifier(getApplicationConfigFileLocation(),
+  public String getSpringConfigLocation(String moduleName) {
+    return pathResolver.getIdentifier(getApplicationConfigFileLocation(moduleName),
         getAppliCationConfigFileName(null));
   }
 
   @Override
-  public String getSpringConfigLocation(String profile) {
-    return pathResolver.getIdentifier(getApplicationConfigFileLocation(),
+  public String getSpringConfigLocation(String profile, String moduleName) {
+    return pathResolver.getIdentifier(getApplicationConfigFileLocation(moduleName),
         getAppliCationConfigFileName(profile));
   }
 
   @Override
-  public boolean existsSpringConfigFile() {
-    return fileManager.exists(getSpringConfigLocation());
+  public boolean existsSpringConfigFile(String moduleName) {
+    return fileManager.exists(getSpringConfigLocation(moduleName));
   }
 
   @Override
-  public boolean existsSpringConfigFile(String profile) {
-    return fileManager.exists(getSpringConfigLocation(profile));
+  public boolean existsSpringConfigFile(String profile, String moduleName) {
+    return fileManager.exists(getSpringConfigLocation(profile, moduleName));
   }
 
   /**
@@ -204,8 +265,10 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
    * 
    * @return Path where application config file is located
    */
-  private LogicalPath getApplicationConfigFileLocation() {
-    LogicalPath location = LogicalPath.getInstance(DEFAULT_APPLICATION_CONFIG_FILE_LOCATION, "");
+  private LogicalPath getApplicationConfigFileLocation(String moduleName) {
+
+    LogicalPath location =
+        LogicalPath.getInstance(DEFAULT_APPLICATION_CONFIG_FILE_LOCATION, moduleName);
 
     // ROO-3706: Check if exists some specific configuration to the
     // location of application config properties file

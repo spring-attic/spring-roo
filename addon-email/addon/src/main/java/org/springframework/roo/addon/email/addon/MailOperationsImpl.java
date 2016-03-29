@@ -81,7 +81,7 @@ public class MailOperationsImpl implements MailOperations {
   @Override
   public boolean isManageEmailAvailable() {
     return getProjectOperations().isFocusedProjectAvailable()
-        && getProjectOperations().isFeatureInstalledInFocusedModule("email");
+        && getProjectOperations().isFeatureInstalled("email");
   }
 
   @Override

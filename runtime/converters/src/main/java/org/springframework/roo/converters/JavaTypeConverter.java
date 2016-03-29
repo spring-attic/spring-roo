@@ -143,7 +143,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
       typeName = StringUtils.capitalize(typeName);
       newValue = newValue.substring(0, index).toLowerCase() + "." + typeName;
     }
-    final JavaType result = new JavaType(newValue);
+    final JavaType result = new JavaType(newValue, module.getModuleName());
 
     // ROO-3581: On this time we don't know if current result 
     // exists as type on generated project. We need to save as 

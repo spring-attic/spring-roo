@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
+import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class RepositoryJpaCommands implements CommandMarker {
   @CliCommand(value = "repository jpa add",
       help = "Generates new Spring Data repository for specified entity.")
   public void repository(
-      @CliOption(key = "interface", mandatory = true,
+      @CliOption(key = "interface", mandatory = true, optionContext = INTERFACE,
           help = "The java Spring Data repository to generate.") final JavaType interfaceType,
       @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = PROJECT, help = "The domain entity this repository should expose") final JavaType domainType) {
