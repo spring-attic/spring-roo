@@ -222,3 +222,13 @@ service all --apiPackage org.springframework.roo.northwind.service.api --implPac
 finder add --class ~.domain.UserLogin --name findByUsername
 finder add --class ~.domain.Shipper --name findByCompanyName
 
+
+finder add --class ~.domain.Supplier --name findAllByOrderByCompanyNameAsc
+finder add --class ~.domain.Store --name findAllByOrderByNameAsc
+finder add --class ~.domain.Shipper --name findAllByOrderByCompanyNameAsc
+finder add --class ~.domain.Region --name findByCountryIdOrderByDescriptionAsc
+finder add --class ~.domain.Product --name findByDiscontinuedOrderByNameAsc
+finder add --class ~.domain.Employee --name findAllByOrderByFirstNameAscLastNameAsc
+finder add --class ~.domain.Country --name findAllByOrderByDescriptionAsc
+finder add --class ~.domain.City --name findByRegionIdOrderByDescriptionAsc
+finder add --class ~.domain.Category --name findAllByOrderByNameAsc

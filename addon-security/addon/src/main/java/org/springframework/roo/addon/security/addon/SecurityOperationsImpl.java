@@ -1,54 +1,27 @@
 package org.springframework.roo.addon.security.addon;
 
-import static java.lang.reflect.Modifier.PUBLIC;
-import static org.springframework.roo.classpath.PhysicalTypeCategory.CLASS;
-import static org.springframework.roo.model.RooJavaType.ROO_PERMISSION_EVALUATOR;
-import static org.springframework.roo.model.SpringJavaType.PERMISSION_EVALUATOR;
-import static org.springframework.roo.project.Path.SRC_MAIN_JAVA;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.web.mvc.controller.addon.WebMvcOperations;
+import org.osgi.framework.*;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.*;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.Property;
+import org.springframework.roo.project.*;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileUtils;
-import org.springframework.roo.support.util.WebXmlUtils;
-import org.springframework.roo.support.util.XmlElementBuilder;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Element;
 
 /**
  * Provides security installation services.
@@ -56,6 +29,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Sergio Clares
  * @since 1.0
  */
 @Component
@@ -67,8 +41,8 @@ public class SecurityOperationsImpl implements SecurityOperations {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
-  private static final Dependency SPRING_SECURITY = new Dependency("org.springframework.security",
-      "spring-security-core", "3.1.0.RELEASE");
+  private static final JavaType ROO_SECURITY_CONFIGURATION = new JavaType(
+      "org.springframework.roo.addon.security.annotations.RooSecurityConfiguration");
 
   private FileManager fileManager;
   private PathResolver pathResolver;
@@ -76,6 +50,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
   private TilesOperations tilesOperations;
   private TypeManagementService typeManagementService;
   private MetadataService metadataService;
+  private TypeLocationService typeLocationService;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -86,158 +61,23 @@ public class SecurityOperationsImpl implements SecurityOperations {
     // Parse the configuration.xml file
     final Element configuration = XmlUtils.getConfiguration(getClass());
 
-    // Add POM properties
-    updatePomProperties(configuration, getProjectOperations().getFocusedModuleName());
+    Collection<String> applicationModules = getTypeLocationService().getApplicationModules();
 
-    // Add dependencies to POM
-    updateDependencies(configuration, getProjectOperations().getFocusedModuleName());
+    // Add dependency for each application module
+    for (String applicationModule : applicationModules) {
 
-    // Copy the template across
-    final String destination =
-        getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
-            "applicationContext-security.xml");
-    if (!getFileManager().exists(destination)) {
-      InputStream inputStream = null;
-      OutputStream outputStream = null;
-      try {
-        inputStream =
-            FileUtils.getInputStream(getClass(), "applicationContext-security-template.xml");
-        outputStream = getFileManager().createFile(destination).getOutputStream();
-        IOUtils.copy(inputStream, outputStream);
-      } catch (final IOException ioe) {
-        throw new IllegalStateException(ioe);
-      } finally {
-        IOUtils.closeQuietly(inputStream);
-        IOUtils.closeQuietly(outputStream);
-      }
+      // Add dependencies to POM
+      updateDependencies(configuration, applicationModule);
+
+      // Create security config class
+      createSecurityConfigClass(getProjectOperations().getPomFromModuleName(applicationModule));
     }
-
-    // Copy the template across
-    final String loginPage =
-        getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/login.jspx");
-    if (!getFileManager().exists(loginPage)) {
-      InputStream inputStream = null;
-      OutputStream outputStream = null;
-      try {
-        inputStream = FileUtils.getInputStream(getClass(), "login.jspx");
-        outputStream = getFileManager().createFile(loginPage).getOutputStream();
-        IOUtils.copy(inputStream, outputStream);
-      } catch (final IOException ioe) {
-        throw new IllegalStateException(ioe);
-      } finally {
-        IOUtils.closeQuietly(inputStream);
-        IOUtils.closeQuietly(outputStream);
-      }
-    }
-
-    if (getFileManager().exists(
-        getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/views.xml"))) {
-      getTilesOperations().addViewDefinition("",
-          getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP), "login",
-          getTilesOperations().PUBLIC_TEMPLATE, "/WEB-INF/views/login.jspx");
-    }
-
-    final String webXmlPath =
-        getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-    final Document webXmlDocument = XmlUtils.readXml(getFileManager().getInputStream(webXmlPath));
-
-    WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.LAST, null, null,
-        SecurityOperations.SECURITY_FILTER_NAME,
-        "org.springframework.web.filter.DelegatingFilterProxy", "/*", webXmlDocument, null);
-    getFileManager().createOrUpdateTextFileIfRequired(webXmlPath,
-        XmlUtils.nodeToString(webXmlDocument), false);
-
-    // Include static view controller handler to webmvc-config.xml
-    final String webConfigPath =
-        getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP,
-            "WEB-INF/spring/webmvc-config.xml");
-    final Document webConfigDocument =
-        XmlUtils.readXml(getFileManager().getInputStream(webConfigPath));
-    final Element webConfig = webConfigDocument.getDocumentElement();
-    final Element viewController =
-        DomUtils.findFirstElementByName("mvc:view-controller", webConfig);
-    Validate.notNull(viewController, "Could not find mvc:view-controller in %s", webConfig);
-    viewController.getParentNode().insertBefore(
-        new XmlElementBuilder("mvc:view-controller", webConfigDocument).addAttribute("path",
-            "/login").build(), viewController);
-    getFileManager().createOrUpdateTextFileIfRequired(webConfigPath,
-        XmlUtils.nodeToString(webConfigDocument), false);
-  }
-
-  private void createPermissionEvaluator(final JavaPackage permissionEvaluatorPackage) {
-    installPermissionEvaluatorTemplate(permissionEvaluatorPackage);
-    final LogicalPath focusedSrcMainJava =
-        LogicalPath.getInstance(SRC_MAIN_JAVA, getProjectOperations().getFocusedModuleName());
-    JavaType permissionEvaluatorClass =
-        new JavaType(permissionEvaluatorPackage.getFullyQualifiedPackageName()
-            + ".ApplicationPermissionEvaluator");
-    final String identifier =
-        getPathResolver().getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, permissionEvaluatorClass);
-    if (getFileManager().exists(identifier)) {
-      return; // Type already exists - nothing to do
-    }
-
-    final AnnotationMetadataBuilder classAnnotationMetadata =
-        new AnnotationMetadataBuilder(ROO_PERMISSION_EVALUATOR);
-    final String classMid =
-        PhysicalTypeIdentifier.createIdentifier(permissionEvaluatorClass, getPathResolver()
-            .getPath(identifier));
-    final ClassOrInterfaceTypeDetailsBuilder classBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(classMid, PUBLIC, permissionEvaluatorClass, CLASS);
-    classBuilder.addAnnotation(classAnnotationMetadata.build());
-    classBuilder.addImplementsType(PERMISSION_EVALUATOR);
-    getTypeManagementService().createOrUpdateTypeOnDisk(classBuilder.build());
-
-    getMetadataService().get(
-        PermissionEvaluatorMetadata.createIdentifier(permissionEvaluatorClass, focusedSrcMainJava));
-  }
-
-  private void installPermissionEvaluatorTemplate(JavaPackage permissionEvaluatorPackage) {
-    // Copy the template across
-    final String destination =
-        getPathResolver().getFocusedIdentifier(Path.SPRING_CONFIG_ROOT,
-            "applicationContext-security-permissionEvaluator.xml");
-    if (!getFileManager().exists(destination)) {
-      try {
-        InputStream inputStream =
-            FileUtils.getInputStream(getClass(),
-                "applicationContext-security-permissionEvaluator-template.xml");
-        String content = IOUtils.toString(inputStream);
-        content =
-            content.replace("__PERMISSION_EVALUATOR_PACKAGE__",
-                permissionEvaluatorPackage.getFullyQualifiedPackageName());
-
-        getFileManager().createOrUpdateTextFileIfRequired(destination, content, true);
-      } catch (final IOException ioe) {
-        throw new IllegalStateException(ioe);
-      }
-    }
-  }
-
-  @Override
-  public void installPermissionEvaluator(final JavaPackage permissionEvaluatorPackage) {
-    Validate.isTrue(getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY),
-        "Security must first be setup before securing a method");
-    Validate.notNull(permissionEvaluatorPackage, "Package required");
-    createPermissionEvaluator(permissionEvaluatorPackage);
   }
 
   @Override
   public boolean isSecurityInstallationPossible() {
-    // Permit installation if they have a web project (as per ROO-342) and
-    // no version of Spring Security is already installed.
     return getProjectOperations().isFocusedProjectAvailable()
-        && getFileManager().exists(
-            getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))
-        && !getProjectOperations().getFocusedModule()
-            .hasDependencyExcludingVersion(SPRING_SECURITY)
-        && !getProjectOperations().isFeatureInstalled(FeatureNames.JSF);
-  }
-
-  @Override
-  public boolean isServicePermissionEvaluatorInstallationPossible() {
-    return getProjectOperations().isFocusedProjectAvailable()
-        && getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY);
+        && !getProjectOperations().isFeatureInstalled(SECURITY_FEATURE_NAME);
   }
 
   private void updateDependencies(final Element configuration, final String moduleName) {
@@ -251,31 +91,55 @@ public class SecurityOperationsImpl implements SecurityOperations {
     getProjectOperations().addDependencies(moduleName, dependencies);
   }
 
-  private void updatePomProperties(final Element configuration, final String moduleName) {
-    final List<Element> databaseProperties =
-        XmlUtils.findElements("/configuration/spring-security/properties/*", configuration);
-    for (final Element property : databaseProperties) {
-      getProjectOperations().addProperty(moduleName, new Property(property));
-    }
-  }
-
   @Override
   public String getName() {
-    return FeatureNames.SECURITY;
+    return SECURITY_FEATURE_NAME;
   }
 
   @Override
   public boolean isInstalledInModule(String moduleName) {
-    final Pom pom = getProjectOperations().getPomFromModuleName(moduleName);
+    Pom pom = getProjectOperations().getPomFromModuleName(moduleName);
     if (pom == null) {
       return false;
     }
-    for (final Dependency dependency : pom.getDependencies()) {
-      if ("spring-security-core".equals(dependency.getArtifactId())) {
-        return true;
-      }
-    }
-    return false;
+
+    // Check if spring-boot-starter-data-jpa has been included
+    Set<Dependency> dependencies = pom.getDependencies();
+    Dependency starter =
+        new Dependency("org.springframework.boot", "spring-boot-starter-security", "");
+
+    boolean hasStarter = dependencies.contains(starter);
+
+    return hasStarter;
+  }
+
+  /**
+   * Creates config class for managing security with @RooSecurityConfiguration
+   * 
+   * @param module where security config file should be installed
+   */
+  public void createSecurityConfigClass(Pom module) {
+
+    // Create class
+    JavaType fileName =
+        new JavaType(module.getGroupId().concat(".config.SecurityConfiguration"),
+            module.getModuleName());
+
+    final String fileIdentifier =
+        PhysicalTypeIdentifier.createIdentifier(
+            fileName,
+            getPathResolver().getPath(
+                FileUtils.getFirstDirectory(module.getPath())
+                    .concat(AntPathMatcher.DEFAULT_PATH_SEPARATOR)
+                    .concat(Path.SRC_MAIN_JAVA.getDefaultLocation())));
+
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(fileIdentifier, Modifier.PUBLIC, fileName,
+            PhysicalTypeCategory.CLASS);
+
+    cidBuilder.addAnnotation(new AnnotationMetadataBuilder(ROO_SECURITY_CONFIGURATION));
+
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 
   public FileManager getFileManager() {
@@ -409,4 +273,27 @@ public class SecurityOperationsImpl implements SecurityOperations {
       return metadataService;
     }
   }
+
+  public TypeLocationService getTypeLocationService() {
+    if (typeLocationService == null) {
+      // Get all Services implement TypeLocationService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          return (TypeLocationService) this.context.getService(ref);
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load TypeLocationService on SecurityOperationsImpl.");
+        return null;
+      }
+    } else {
+      return typeLocationService;
+    }
+  }
+
 }
