@@ -105,9 +105,23 @@ public class LastUsedImpl implements LastUsed, CommandListener {
       return;
     }
     javaType = null;
+    module = null;
     this.javaPackage = javaPackage;
     setPromptPath(javaPackage.getFullyQualifiedPackageName());
   }
+
+  public void setPackage(final JavaPackage javaPackage, final Pom module) {
+    Validate.notNull(javaPackage, "JavaPackage required");
+    if (javaPackage.getFullyQualifiedPackageName().startsWith("java.")) {
+      return;
+    }
+    javaType = javaTypeNotVerified = null;
+    this.module = moduleNotVerified = module;
+    this.javaPackage = this.javaPackageNotVerified = javaPackage;
+    setPromptPath(javaPackage.getFullyQualifiedPackageName());
+  }
+
+
 
   private void setPromptPath(final String fullyQualifiedName) {
     if (topLevelPackage == null) {
@@ -140,6 +154,7 @@ public class LastUsedImpl implements LastUsed, CommandListener {
     if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
       return;
     }
+    module = null;
     this.javaType = javaType;
     javaPackage = javaType.getPackage();
     setPromptPath(javaType.getFullyQualifiedTypeName());
@@ -154,6 +169,7 @@ public class LastUsedImpl implements LastUsed, CommandListener {
     this.javaTypeNotVerified = javaType;
     javaPackageNotVerified = javaType.getPackage();
     this.isVerified = false;
+    module = null;
   }
 
   private void registerListener() {

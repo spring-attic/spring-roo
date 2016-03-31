@@ -1,13 +1,12 @@
 package org.springframework.roo.converters;
 
-import static org.springframework.roo.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
 import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
 import static org.springframework.roo.shell.OptionContexts.UPDATE;
+import static org.springframework.roo.shell.OptionContexts.UPDATELAST;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -71,8 +70,9 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
     String moduleName = module == null ? null : module.getModuleName();
 
     JavaPackage result = new JavaPackage(convertToFullyQualifiedPackageName(value), moduleName);
-    if (optionContext != null && optionContext.contains(UPDATE)) {
-      lastUsed.setPackage(result);
+    if (optionContext != null
+        && (optionContext.contains(UPDATE) || optionContext.contains(UPDATELAST))) {
+      lastUsed.setPackage(result, module);
     }
     return result;
   }

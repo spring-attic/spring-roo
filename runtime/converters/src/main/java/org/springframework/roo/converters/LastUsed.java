@@ -36,6 +36,12 @@ public interface LastUsed {
    */
   void setPackage(JavaPackage javaPackage);
 
+  /**
+   * Sets the package, its module, and clears the type field. Ignores attempts to set to
+   * java.*.
+   */
+  void setPackage(JavaPackage javaPackage, Pom module);
+
   void setTopLevelPackage(JavaPackage topLevelPackage);
 
   /**

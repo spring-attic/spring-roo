@@ -44,6 +44,8 @@ public class JavaPackageConverterTest {
   private @Mock
   TypeLocationService mockTypeLocationService;
 
+  Pom mockPom;
+
   /**
    * Asserts that converting the given text in the given option context
    * results in the expected package name
@@ -56,7 +58,6 @@ public class JavaPackageConverterTest {
       final String expectedPackage) {
     // Set up
     when(mockProjectOperations.isFocusedProjectAvailable()).thenReturn(true);
-    final Pom mockPom = mock(Pom.class);
     when(mockProjectOperations.getFocusedModule()).thenReturn(mockPom);
     when(mockTypeLocationService.getTopLevelPackageForModule(mockPom))
         .thenReturn(TOP_LEVEL_PACKAGE);
@@ -98,6 +99,7 @@ public class JavaPackageConverterTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
+    mockPom = mock(Pom.class);
     converter = new JavaPackageConverter();
     converter.lastUsed = mockLastUsed;
     converter.projectOperations = mockProjectOperations;
@@ -105,7 +107,6 @@ public class JavaPackageConverterTest {
   }
 
   private Pom setUpMockPom(final String path, final JavaType... types) {
-    final Pom mockPom = mock(Pom.class);
     when(mockPom.getPath()).thenReturn(path);
     when(mockTypeLocationService.getTypesForModule(mockPom)).thenReturn(Arrays.asList(types));
     return mockPom;
@@ -119,7 +120,7 @@ public class JavaPackageConverterTest {
   @Test
   public void testConvertFromCompoundPackageNameInUpdateContext() {
     assertConvertFromValidText("COM.example", "update", TOP_LEVEL_PACKAGE);
-    verify(mockLastUsed).setPackage(new JavaPackage(TOP_LEVEL_PACKAGE));
+    verify(mockLastUsed).setPackage(new JavaPackage(TOP_LEVEL_PACKAGE), mockPom);
   }
 
   @Test

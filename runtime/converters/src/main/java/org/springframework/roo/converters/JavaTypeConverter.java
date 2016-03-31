@@ -6,6 +6,7 @@ import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATE;
+import static org.springframework.roo.shell.OptionContexts.UPDATELAST;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
@@ -148,7 +149,8 @@ public class JavaTypeConverter implements Converter<JavaType> {
     // ROO-3581: On this time we don't know if current result 
     // exists as type on generated project. We need to save as 
     // not verified
-    if (StringUtils.contains(optionContext, UPDATE)) {
+    if (StringUtils.contains(optionContext, UPDATE)
+        || StringUtils.contains(optionContext, UPDATELAST)) {
       lastUsed.setTypeNotVerified(result, module);
     }
     return result;

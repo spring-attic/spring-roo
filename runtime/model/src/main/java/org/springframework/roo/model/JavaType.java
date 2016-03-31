@@ -586,7 +586,7 @@ public class JavaType implements Comparable<JavaType> {
   }
 
   /**
-    * @return the module name where the javaType 
+    * @return the module name where javaType is located
     */
   public String getModule() {
     return module;

@@ -3,6 +3,7 @@ package org.springframework.roo.converters;
 import static org.springframework.roo.classpath.MetadataCommands.INCLUDE_CURRENT_MODULE;
 import static org.springframework.roo.project.maven.Pom.ROOT_MODULE_SYMBOL;
 import static org.springframework.roo.shell.OptionContexts.UPDATE;
+import static org.springframework.roo.shell.OptionContexts.UPDATELAST;
 
 import java.util.List;
 
@@ -59,7 +60,8 @@ public class PomConverter implements Converter<Pom> {
 
     Validate.notNull(result, String.format("Module %s not found", moduleName));
 
-    if (StringUtils.contains(optionContext, UPDATE)) {
+    if (StringUtils.contains(optionContext, UPDATE)
+        || StringUtils.contains(optionContext, UPDATELAST)) {
       lastUsed.setTypeNotVerified(null, result);
     }
     return result;

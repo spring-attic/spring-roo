@@ -32,7 +32,16 @@ public final class OptionContexts {
    */
   public static final String UPDATE = "update";
 
+  /**
+   * If this string appears in an option context, this converter will update
+   * the last used type.
+   */
+  public static final String UPDATELAST = "lastused";
+
   public static final String UPDATE_PROJECT = "update,project";
+
+  public static final String UPDATELAST_INTERFACE = "lastused,interface";
+
 
   private OptionContexts() {}
 }
