@@ -28,6 +28,13 @@
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjtools</artifactId>
 		</dependency>
+		
+		<!-- Spring Roo annotations -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.annotations</artifactId>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
     
     <build>
