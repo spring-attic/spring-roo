@@ -195,6 +195,9 @@ public class JpaOperationsImpl implements JpaOperations {
     cidBuilder.setAnnotations(annotations);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+    getProjectOperations().addDependency(getProjectOperations().getFocusedModuleName(),
+        new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", null));
   }
 
   @Override
