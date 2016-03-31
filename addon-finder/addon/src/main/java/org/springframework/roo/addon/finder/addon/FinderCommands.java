@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.finder.addon;
 
-import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,7 +141,7 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
   @CliCommand(value = "finder add",
       help = "Install a finder in the given target (must be an entity)")
   public void installFinders(@CliOption(key = "class", mandatory = true,
-      unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT,
+      unspecifiedDefaultValue = "*", optionContext = PROJECT,
       help = "The entity for which the finders are generated") final JavaType typeName,
       @CliOption(key = "name", mandatory = true,
           help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName) {

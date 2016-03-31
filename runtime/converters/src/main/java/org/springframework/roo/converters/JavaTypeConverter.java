@@ -151,7 +151,12 @@ public class JavaTypeConverter implements Converter<JavaType> {
     // not verified
     if (StringUtils.contains(optionContext, UPDATE)
         || StringUtils.contains(optionContext, UPDATELAST)) {
-      lastUsed.setTypeNotVerified(result, module);
+
+      if (StringUtils.contains(optionContext, INTERFACE)) {
+        lastUsed.setTypeNotVerified(null, module);
+      } else {
+        lastUsed.setTypeNotVerified(result, module);
+      }
     }
     return result;
   }
