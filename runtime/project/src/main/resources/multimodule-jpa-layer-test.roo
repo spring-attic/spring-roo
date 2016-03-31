@@ -1,0 +1,258 @@
+project setup --topLevelPackage org.example --multimodule
+
+#====================================================================
+# TEST 1:  Configure persistence                            
+#--------------------------------------------------------------------
+# Goal:    Install persistence in application module
+#
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+#      
+# Output:  Created application:ROOT/src/main/resources
+#          Created application:ROOT/src/main/resources/application.properties
+#          Updated application:ROOT/pom.xml [added dependencies org.springframework.boot:spring-boot-starter-data-jpa:, org.hsqldb:hsqldb:]
+#
+# Result:  Adds spring-boot-starter and database dependencies into 
+#          application module, and creates application.properties file
+#====================================================================
+
+#====================================================================
+# TEST 2:  Create an entity in other module                         
+#--------------------------------------------------------------------
+# Goal:    Create a new entity in a module from other module
+#
+entity jpa --class model:~.Owner
+#       
+# Output:  Created model:SRC_MAIN_JAVA/org/example/model/Owner.java
+#          Updated model:ROOT/pom.xml [added dependency org.springframework.boot:spring-boot-starter-data-jpa:null]
+#          Created model:SRC_MAIN_JAVA/org/example/model/Owner_Roo_Jpa_Entity.aj
+#          Created model:SRC_MAIN_JAVA/org/example/model/Owner_Roo_ToString.aj
+#          model:~.Owner roo> 
+#
+# Result:  Creates Owner entity inside model module and sets the 
+#          focus on that module                                                           
+#====================================================================
+
+#====================================================================
+# TEST 3:  Create an entity in the focused module                          
+#--------------------------------------------------------------------
+# Goal:    Create a new entity in the focused module
+#
+entity jpa --class ~.Pet
+#       
+# Output:  Created model:SRC_MAIN_JAVA/org/example/model/Pet.java
+#          Created model:SRC_MAIN_JAVA/org/example/model/Pet_Roo_Jpa_Entity.aj
+#          Created model:SRC_MAIN_JAVA/org/example/model/Pet_Roo_ToString.aj
+#
+# Result:  Creates Pet entity inside model module                                                        
+#====================================================================
+
+
+
+#====================================================================
+# TEST 4:  Create an entity extending other entity                     
+#--------------------------------------------------------------------
+# Goal:    Create an entity that extends an entity from other module
+#
+module focus --moduleName service-api
+entity jpa --class model:~.NewOwner --extends model:~.Owner
+#       
+# Output:  Created model:SRC_MAIN_JAVA/org/example/model/NewOwner.java
+#          Created model:SRC_MAIN_JAVA/org/example/model/NewOwner_Roo_Jpa_Entity.aj
+#          Created model:SRC_MAIN_JAVA/org/example/model/NewOwner_Roo_ToString.aj
+#          model:~.NewOwner roo>
+#
+# Result:  Creates NewOwner entity extending other                                                     
+#====================================================================
+
+
+#====================================================================
+# TEST 5:  Add fields to an entity in other module                       
+#--------------------------------------------------------------------
+# Goal:    Create fields for an entity in other module
+#
+field string --fieldName name --class model:~.Owner
+#       
+# Output:  Updated model:SRC_MAIN_JAVA/org/example/model/Owner.java
+#          Created model:SRC_MAIN_JAVA/org/example/model/Owner_Roo_JavaBean.aj
+#          model:~.Owner roo>
+#
+# Result:  Adds name field into Owner entity and sets the focus on
+#          the model module                                             
+#====================================================================
+
+#====================================================================
+# TEST 6:  Add fields to an entity in the focused module                       
+#--------------------------------------------------------------------
+# Goal:    Create fields for an entity in the focused module
+#
+field number --fieldName age --type int
+#       
+# Output:  Updated model:SRC_MAIN_JAVA/org/example/model/Owner.java
+#          Updated model:SRC_MAIN_JAVA/org/example/model/Owner_Roo_JavaBean.aj
+#
+# Result:  Adds age field into Owner entity                                           
+#====================================================================
+
+#====================================================================
+# TEST 7:  Add a relation with an entity in other module                     
+#--------------------------------------------------------------------
+# Goal:    Create a relation with an entity located in a different 
+#          module
+#
+field reference --fieldName pet --type ~.Pet
+#       
+# Output:  Updated model:SRC_MAIN_JAVA/org/example/model/Owner.java
+#          Updated model:SRC_MAIN_JAVA/org/example/model/Owner_Roo_JavaBean.aj
+#
+# Result:  Adds pet field into Owner entity                                           
+#====================================================================
+
+#====================================================================
+# TEST 8:  Generate a repository                         
+#--------------------------------------------------------------------
+# Goal:    Create repository files in a module
+#
+repository jpa add --entity ~.Pet --interface repository:~.PetRep
+#       
+# Output:  Created repository:SRC_MAIN_JAVA/org/example/repository/PetRep.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepCustom.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepImpl.java
+#          Updated repository:ROOT/pom.xml [added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRep_Roo_Jpa_Repository.aj
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepImpl_Roo_Jpa_Repository_Impl.aj
+#          repository roo> 
+#
+# Result:  Creates repository classes related to Pet into 
+#          repository module                                           
+#====================================================================
+
+#====================================================================
+# TEST 9:  Generate all repositories                        
+#--------------------------------------------------------------------
+# Goal:    Create repository files in a module for all domain classes 
+#
+module focus --moduleName ~
+repository jpa all --package repository:org.example.repository
+#       
+# Output:  Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepository.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepositoryCustom.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepositoryCustom.java
+#          INFO: Already exists a repository associated to the entity 'Pet'. Only one repository per entity is allowed.
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepositoryImpl.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepositoryImpl.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepository_Roo_Jpa_Repository.aj
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Jpa_Repository.aj
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepositoryImpl_Roo_Jpa_Repository_Impl.aj
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepositoryImpl_Roo_Jpa_Repository_Impl.aj
+#          repository roo> 
+#
+# Result:  Creates repository classes related to all domain classes
+#          into repository module and sets the focus to this module                                            
+#====================================================================
+
+#====================================================================
+# TEST 10: Generate finders for an entity in other module                  
+#--------------------------------------------------------------------
+# Goal:    Add finders to an entity in other module
+#
+finder add --class model:~.Owner --name findPetByName
+#       
+# Output:  Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  Adds a finder to Owner repository and creates its 
+#          finder file into repository module                                        
+#====================================================================
+
+#====================================================================
+# TEST 11: Generate finders for an entity in the focused module                  
+#--------------------------------------------------------------------
+# Goal:    Add finders to an entity in the focused module
+#
+module focus --moduleName model
+finder add --class ~.Owner --name findByAge
+#       
+# Output:  Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  Adds a finder to Owner repository and creates its 
+#          finder file into repository module                                           
+#====================================================================
+
+#====================================================================
+# TEST 12: Querydsl dependency                  
+#--------------------------------------------------------------------
+# Goal:    Test if querydsl dependency is added to all modules that 
+#          contain a repository class
+#
+entity jpa --class model:~.City
+entity jpa --class ~.Address
+repository jpa add --entity ~.City --interface service-impl:~.CityRep
+repository jpa add --entity model:~.Address --interface service-api:~.AddressRep 
+#       
+# Output:  Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityRep.java
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityRepCustom.java
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityRepImpl.java
+#          Updated service-impl:ROOT/pom.xml [added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityRepImpl_Roo_Jpa_Repository_Impl.aj
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityRep_Roo_Jpa_Repository.aj
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressRep.java
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressRepCustom.java
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressRepImpl.java
+#          Updated service-api:ROOT/pom.xml [added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressRepImpl_Roo_Jpa_Repository_Impl.aj
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressRep_Roo_Jpa_Repository.aj
+#
+# Result:  Adds querydsl dependency to service-impl and service-api 
+#          modules                                          
+#====================================================================
+
+
+
+####################################################################
+#					MANUAL TEST
+####################################################################
+
+#====================================================================
+# TEST 13: Configure persistence for several application modules                  
+#--------------------------------------------------------------------
+# Goal:    Test if database properties are added into the
+#          application.properties file of all modules that include 
+#          a class annotated with @SpringBootAPplication
+#
+module create --moduleName otherapplication --parent ~
+# Copy ExampleApplication class from application module into the new module
+# jpa setup --provider HIBERNATE --database ORACLE --force
+#       
+# Output:  Created otherapplication:SRC_MAIN_RESOURCES
+#          Created otherapplication:SRC_MAIN_RESOURCES/application.properties
+#          Updated application:ROOT/src/main/resources/application.properties
+#          Updated application:ROOT/pom.xml [removed dependency org.hsqldb:hsqldb:; added dependency com.oracle:ojdbc14:10.2.0.5; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
+#          Updated otherapplication:ROOT/pom.xml [added dependencies org.springframework.boot:spring-boot-starter-data-jpa:, com.oracle:ojdbc14:10.2.0.5]
+#
+# Result:  Creates an application.properties file into the new module,
+#          and adds database properties in the application.properties 
+#          file of application and otherapplication modules                                        
+#====================================================================
+
+
+#====================================================================
+# TEST 14: Configure new persistence profile for several application
+#          modules                  
+#--------------------------------------------------------------------
+# Goal:    Test if database properties are added into a new
+#          application.properties profile for all modules that include 
+#          a class annotated with @SpringBootAPplication
+#
+# jpa setup --provider HIBERNATE --database POSTGRES --force --profile dev
+#       
+# Output:  Created otherapplication:SRC_MAIN_RESOURCES/application-dev.properties
+#          Created application:ROOT/src/main/resources/application-dev.properties
+#          Updated otherapplication:ROOT/pom.xml [removed dependency com.oracle:ojdbc14:10.2.0.5; added dependency org.postgresql:postgresql:; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
+#          Updated application:ROOT/pom.xml [removed dependency com.oracle:ojdbc14:10.2.0.5; added dependency org.postgresql:postgresql:; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
+#
+# Result:  Creates the application-dev.properties file in application 
+#          and otherapplication modules, and adds the database 
+#          properties to them                             
+#====================================================================
