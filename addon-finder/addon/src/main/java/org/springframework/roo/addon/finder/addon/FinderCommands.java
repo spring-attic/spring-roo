@@ -103,60 +103,6 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     return true;
   }
 
-  @CliOptionVisibilityIndicator(command = "finder add", params = {"annotation"},
-      help = "--annotation parameter cannot be enabled  if --querydsl parameter is enabled.")
-  public boolean isAnnotationVisible(ShellContext shellContext) {
-
-    // Getting all defined parameters on autocompleted command
-    Map<String, String> params = shellContext.getParameters();
-
-    // If querydsl is enabled, annotation parameter should not
-    // be visible
-    String querydsl = params.get("querydsl");
-    String annotation = params.get("annotation");
-
-    if (querydsl == null || "false".equalsIgnoreCase(querydsl) || "0".equals(querydsl)
-        || "no".equalsIgnoreCase(querydsl)) {
-      return true;
-    }
-
-    // If querydsl is enabled, check if annotation is enabled
-    if (annotation == null || "false".equalsIgnoreCase(annotation) || "0".equals(annotation)
-        || "no".equalsIgnoreCase(annotation)) {
-      return true;
-    }
-
-    return false;
-
-  }
-
-  @CliOptionVisibilityIndicator(command = "finder add", params = {"querydsl"},
-      help = "--querydsl parameter cannot be enabled if --annotation parameter is enabled.")
-  public boolean isQueryDslVisible(ShellContext shellContext) {
-
-    // Getting all defined parameters on autocompleted command
-    Map<String, String> params = shellContext.getParameters();
-
-    // If annotation is enabled, querydsl parameter should not
-    // be visible
-    String annotation = params.get("annotation");
-    String querydsl = params.get("querydsl");
-
-    if (annotation == null || "false".equalsIgnoreCase(annotation) || "0".equals(annotation)
-        || "no".equalsIgnoreCase(annotation)) {
-      return true;
-    }
-
-    // If annotation is enabled, check if querydsl is enabled
-    if (querydsl == null || "false".equalsIgnoreCase(querydsl) || "0".equals(querydsl)
-        || "no".equalsIgnoreCase(querydsl)) {
-      return true;
-    }
-
-    return false;
-  }
-
-
 
   @CliOptionAutocompleteIndicator(
       command = "finder add",
@@ -194,15 +140,11 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
 
   @CliCommand(value = "finder add",
       help = "Install a finder in the given target (must be an entity)")
-  public void installFinders(
-      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
-          optionContext = UPDATE_PROJECT, help = "The entity for which the finders are generated") final JavaType typeName,
+  public void installFinders(@CliOption(key = "class", mandatory = true,
+      unspecifiedDefaultValue = "*", optionContext = UPDATE_PROJECT,
+      help = "The entity for which the finders are generated") final JavaType typeName,
       @CliOption(key = "name", mandatory = true,
-          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName,
-      @CliOption(key = "annotation", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true", help = "Whether the finder must be annotated with @Query") final boolean annotation,
-      @CliOption(key = "querydsl", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true", help = "Whether the finder must use QueryDsl") final boolean querydsl) {
+          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName) {
 
     // Check if specified finderName follows Spring Data nomenclature
     PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(typeName), this);
