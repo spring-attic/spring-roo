@@ -56,8 +56,6 @@ public final class RooJavaType {
       "org.springframework.roo.addon.layers.repository.neo4j.RooNeo4jEntity");
   public static final JavaType ROO_OP4J =
       new JavaType("org.springframework.roo.addon.op4j.RooOp4j");
-  public static final JavaType ROO_PERMISSION_EVALUATOR = new JavaType(
-      "org.springframework.roo.addon.security.annotations.RooPermissionEvaluator");
   public static final JavaType ROO_PLURAL = new JavaType(
       "org.springframework.roo.addon.plural.annotations.RooPlural");
   public static final JavaType ROO_READ_ONLY_REPOSITORY = new JavaType(
@@ -92,6 +90,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.controller.annotations.json.RooWebJson");
   public static final JavaType ROO_WEB_SCAFFOLD = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.scaffold.RooWebScaffold");
+  public static final JavaType ROO_SECURITY_CONFIGURATION = new JavaType(
+      "org.springframework.roo.addon.security.annotations.RooSecurityConfiguration");
 
   /**
    * Constructor is private to prevent instantiation

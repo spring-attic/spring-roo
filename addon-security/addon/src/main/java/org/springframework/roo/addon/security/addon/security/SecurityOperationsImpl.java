@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.security.addon;
+package org.springframework.roo.addon.security.addon.security;
 
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -17,9 +17,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.*;
 import org.springframework.roo.project.maven.Pom;
-import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
@@ -41,7 +39,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
-  private static final JavaType ROO_SECURITY_CONFIGURATION = new JavaType(
+  public static final JavaType ROO_SECURITY_CONFIGURATION = new JavaType(
       "org.springframework.roo.addon.security.annotations.RooSecurityConfiguration");
 
   private FileManager fileManager;
@@ -58,6 +56,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 
   @Override
   public void installSecurity() {
+
     // Parse the configuration.xml file
     final Element configuration = XmlUtils.getConfiguration(getClass());
 
@@ -120,25 +119,25 @@ public class SecurityOperationsImpl implements SecurityOperations {
    */
   public void createSecurityConfigClass(Pom module) {
 
-    // Create class
+    // Create JavaType
     JavaType fileName =
         new JavaType(module.getGroupId().concat(".config.SecurityConfiguration"),
             module.getModuleName());
 
+    // Create file identifier
     final String fileIdentifier =
-        PhysicalTypeIdentifier.createIdentifier(
-            fileName,
-            getPathResolver().getPath(
-                FileUtils.getFirstDirectory(module.getPath())
-                    .concat(AntPathMatcher.DEFAULT_PATH_SEPARATOR)
-                    .concat(Path.SRC_MAIN_JAVA.getDefaultLocation())));
+        PhysicalTypeIdentifier.createIdentifier(fileName,
+            LogicalPath.getInstance(Path.SRC_MAIN_JAVA, fileName.getModule()));
 
+    // Create physical type
     final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(fileIdentifier, Modifier.PUBLIC, fileName,
             PhysicalTypeCategory.CLASS);
 
+    // Add annotation @RooSecurityConfiguration
     cidBuilder.addAnnotation(new AnnotationMetadataBuilder(ROO_SECURITY_CONFIGURATION));
 
+    // Write changes to disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 

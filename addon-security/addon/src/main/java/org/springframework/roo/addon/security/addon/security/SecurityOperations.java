@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.security.addon;
+package org.springframework.roo.addon.security.addon.security;
 
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;
@@ -14,8 +14,7 @@ public interface SecurityOperations extends Feature {
 
   String SECURITY_FEATURE_NAME = FeatureNames.SECURITY;
 
-  void installSecurity();
-
   boolean isSecurityInstallationPossible();
 
+  void installSecurity();
 }
