@@ -216,6 +216,9 @@ field reference --fieldName loginRole --type ~.domain.LoginRole --joinColumnName
 // Generate repositories
 repository jpa all --package repository:org.springframework.roo.northwind.repository
 
+// Generate services
+service all --apiPackage service-api:org.springframework.roo.northwind.service.api --implPackage service-impl:org.springframework.roo.northwind.service.impl
+
 // Create finders
 finder add --class model:~.domain.UserLogin --name findByUsername
 finder add --class model:~.domain.Shipper --name findByCompanyName

@@ -694,6 +694,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
             load_roo_build_and_test script multimodule-standard-test.roo
             load_roo_build_and_test script multimodule-basic-test.roo
  	    load_roo_build_and_test script multimodule-jpa-layer-test.roo
+ 	    load_roo_build_and_test script multimodule-service-layer-test.roo
 
         
         # Temporally disabled

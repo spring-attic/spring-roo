@@ -1,0 +1,141 @@
+#====================================================================
+#			 Setup initial conditions     
+#====================================================================
+project setup --topLevelPackage org.example --multimodule
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+entity jpa --class model:~.Owner
+entity jpa --class ~.Pet
+entity jpa --class model:~.City --readOnly
+field string --fieldName name --class model:~.Owner
+field number --fieldName age --type int
+field reference --fieldName pet --type ~.Pet
+repository jpa all --package repository:org.example.repository
+#finder add --class model:~.Owner --name findByName
+
+#====================================================================
+# TEST 1:  Generate service using implPackage option         
+#--------------------------------------------------------------------
+# Goal:    Test if service interface class is generated in apiPackage 
+#          module and service implementation class is generated in 
+#          implPackage module
+#
+service add --entity ~.Owner --interface service-api:~.OwnerService --class service-impl:~.OwnerServiceImpl
+#       
+# Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService.java
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl.java
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService_Roo_Service.aj
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#
+# Result:  Creates service interface and its aspect in service-api 
+#          module, and service implementation and its aspect in the
+#          focused module (service-impl )                                        
+#====================================================================
+
+#====================================================================
+# TEST 2:  Generate all services
+#--------------------------------------------------------------------
+# Goal:    Test if service interface classes are created in 
+#          apiPackage module and service implementation classes are 
+#          created in implPackage module
+#
+service all ---apiPackage service-api:~ --implPackage service-impl:~
+#       
+# Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/CityService.java
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityServiceImpl.java
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/PetService.java
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/PetServiceImpl.java
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/PetService_Roo_Service.aj
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/PetServiceImpl_Roo_Service_Impl.aj
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/CityService_Roo_Service.aj
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityServiceImpl_Roo_Service_Impl.aj
+#
+# Result:  Creates service interfaces and their aspects 
+#          in service-api module, and service implementations and 
+#          their aspects in service-impl module                                           
+#====================================================================
+
+#====================================================================
+# TEST 3:  Generate all services in the focused module
+#--------------------------------------------------------------------
+# Goal:    Test if service interface classes are created in 
+#          apiPackage focused module and service implementation
+#          classes are created in implPackage module
+#
+entity jpa --class ~.Visit
+repository jpa all --package repository:~
+module focus --moduleName service-api
+service all --apiPackage ~ --implPackage service-impl:~
+#       
+# Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/VisitService.java
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/VisitServiceImpl.java
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/VisitService_Roo_Service.aj
+#          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/VisitServiceImpl_Roo_Service_Impl.aj
+#
+# Result:  Creates service interfaces and their aspects in the 
+#          focused module (service-api), and service implementations 
+#          and their aspects in service-impl module                                             
+#====================================================================
+
+#====================================================================
+# TEST 4:  Add finders to services
+#--------------------------------------------------------------------
+# Goal:    Test if finder are added to the services
+#
+module focus --moduleName repository
+finder add --class model:~.Owner --name findPetByName
+module focus --moduleName model
+finder add --class ~.Owner --name findByAge
+module focus --moduleName service-api
+finder add --class model:~.Owner --name findFirstByAge
+module focus --moduleName service-impl
+finder add --class model:~.Owner --name findTopByAge
+#       
+# Output:  Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService_Roo_Service.aj
+#          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService_Roo_Service.aj
+#          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService_Roo_Service.aj
+#          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Updated service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService_Roo_Service.aj      
+#
+# Result:  Creates service interfaces and their aspects in the 
+#          focused module (service-api), and service implementations 
+#          and their aspects in service-impl module                                             
+#====================================================================
+
+
+
+#####################################################################
+#########  MANUAL TEST 
+#####################################################################
+
+#====================================================================
+# TEST 5:  Generate a service       
+#--------------------------------------------------------------------
+# Goal:    Test if service interface and implementation classes are 
+#          created in apiPackage module 
+#
+# 
+entity jpa --class model:~.Adress --readOnly
+repository jpa all --package repository:org.example.repository
+# service add --entity ~.Adress --interface service-api:~.AdreesService
+# Add repository dependency in service-api
+#       
+# Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressService.java
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressServiceImpl.java
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressServiceImpl_Roo_Service_Impl.aj
+#          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressService_Roo_Service.aj
+#
+# Result:  Creates service interface, its implementation and aspects
+#          in service-api module                                          
+#====================================================================
+

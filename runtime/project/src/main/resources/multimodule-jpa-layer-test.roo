@@ -42,6 +42,7 @@ entity jpa --class ~.Pet
 # Output:  Created model:SRC_MAIN_JAVA/org/example/model/Pet.java
 #          Created model:SRC_MAIN_JAVA/org/example/model/Pet_Roo_Jpa_Entity.aj
 #          Created model:SRC_MAIN_JAVA/org/example/model/Pet_Roo_ToString.aj
+#          model:~.Pet roo>
 #
 # Result:  Creates Pet entity inside model module                                                        
 #====================================================================
@@ -56,12 +57,13 @@ entity jpa --class ~.Pet
 module focus --moduleName service-api
 entity jpa --class model:~.NewOwner --extends model:~.Owner
 #       
-# Output:  Created model:SRC_MAIN_JAVA/org/example/model/NewOwner.java
+# Output:  service-api roo>
+#          Created model:SRC_MAIN_JAVA/org/example/model/NewOwner.java
 #          Created model:SRC_MAIN_JAVA/org/example/model/NewOwner_Roo_Jpa_Entity.aj
 #          Created model:SRC_MAIN_JAVA/org/example/model/NewOwner_Roo_ToString.aj
 #          model:~.NewOwner roo>
 #
-# Result:  Creates NewOwner entity extending other                                                     
+# Result:  Creates NewOwner entity extending other entity                                                     
 #====================================================================
 
 
@@ -120,21 +122,41 @@ repository jpa add --entity ~.Pet --interface repository:~.PetRep
 #          Updated repository:ROOT/pom.xml [added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRep_Roo_Jpa_Repository.aj
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepImpl_Roo_Jpa_Repository_Impl.aj
-#          repository roo> 
 #
 # Result:  Creates repository classes related to Pet into 
 #          repository module                                           
 #====================================================================
 
 #====================================================================
-# TEST 9:  Generate all repositories                        
+# TEST 9:  Generate a read only repository                         
+#--------------------------------------------------------------------
+# Goal:    Create repository files in a module
+#
+entity jpa --class model:~.Code --readOnly
+module focus --moduleName repository
+repository jpa add --entity model:~.Code --interface ~.CodeRep
+#       
+# Output:  Created repository:SRC_MAIN_JAVA/org/example/repository/CodeRep.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/CodeRepCustom.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/ReadOnlyRepository.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/CodeRepImpl.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/CodeRep_Roo_Jpa_Repository.aj
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/CodeRepImpl_Roo_Jpa_Repository_Impl.aj
+#
+# Result:  Creates repository classes related to Code into 
+#          repository module                                           
+#====================================================================
+
+#====================================================================
+# TEST 10: Generate all repositories                       
 #--------------------------------------------------------------------
 # Goal:    Create repository files in a module for all domain classes 
 #
 module focus --moduleName ~
 repository jpa all --package repository:org.example.repository
 #       
-# Output:  Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepository.java
+# Output:  roo>
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepository.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepositoryCustom.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepositoryCustom.java
@@ -145,14 +167,13 @@ repository jpa all --package repository:org.example.repository
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Jpa_Repository.aj
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/NewOwnerRepositoryImpl_Roo_Jpa_Repository_Impl.aj
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepositoryImpl_Roo_Jpa_Repository_Impl.aj
-#          repository roo> 
 #
 # Result:  Creates repository classes related to all domain classes
-#          into repository module and sets the focus to this module                                            
+#          into repository module                                             
 #====================================================================
 
 #====================================================================
-# TEST 10: Generate finders for an entity in other module                  
+# TEST 11: Generate finders for an entity in other module                  
 #--------------------------------------------------------------------
 # Goal:    Add finders to an entity in other module
 #
@@ -166,7 +187,7 @@ finder add --class model:~.Owner --name findPetByName
 #====================================================================
 
 #====================================================================
-# TEST 11: Generate finders for an entity in the focused module                  
+# TEST 12: Generate finders for an entity in the focused module                  
 #--------------------------------------------------------------------
 # Goal:    Add finders to an entity in the focused module
 #
@@ -181,7 +202,7 @@ finder add --class ~.Owner --name findByAge
 #====================================================================
 
 #====================================================================
-# TEST 12: Querydsl dependency                  
+# TEST 13: Querydsl dependency                  
 #--------------------------------------------------------------------
 # Goal:    Test if querydsl dependency is added to all modules that 
 #          contain a repository class
@@ -215,7 +236,7 @@ repository jpa add --entity model:~.Address --interface service-api:~.AddressRep
 ####################################################################
 
 #====================================================================
-# TEST 13: Configure persistence for several application modules                  
+# TEST 14: Configure persistence for several application modules                  
 #--------------------------------------------------------------------
 # Goal:    Test if database properties are added into the
 #          application.properties file of all modules that include 
@@ -238,7 +259,7 @@ module create --moduleName otherapplication --parent ~
 
 
 #====================================================================
-# TEST 14: Configure new persistence profile for several application
+# TEST 15: Configure new persistence profile for several application
 #          modules                  
 #--------------------------------------------------------------------
 # Goal:    Test if database properties are added into a new
