@@ -224,7 +224,7 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
     // Getting finders to be included on current service
     List<FinderMethod> finders = new ArrayList<FinderMethod>();
     final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
+        PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
     final String finderMetadataKey =
         FinderMetadata.createIdentifier(repositoryDetails.getType(), logicalPath);
     registerDependency(finderMetadataKey, metadataIdentificationString);

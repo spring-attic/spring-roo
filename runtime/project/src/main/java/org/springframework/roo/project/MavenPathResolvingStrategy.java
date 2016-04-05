@@ -56,9 +56,13 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     return getIdentifier(path, javaType.getRelativeFileName());
   }
 
+  public String getCanonicalPath(final String moduleName, final Path path, final JavaType javaType) {
+    Validate.notNull(moduleName, "Module name is null");
+    return getCanonicalPath(path.getModulePathId(moduleName), javaType);
+  }
+
   public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
-    return getCanonicalPath(path.getModulePathId(pomManagementService.getFocusedModuleName()),
-        javaType);
+    return getCanonicalPath(pomManagementService.getFocusedModuleName(), path, javaType);
   }
 
   public String getFocusedIdentifier(final Path path, final String relativePath) {
@@ -93,6 +97,16 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     // This is a known module; use its known root path
     return new File(pom.getRoot());
   }
+
+  public LogicalPath getPath(final String moduleName, final Path path) {
+    Validate.notNull(moduleName, "ModuleName required");
+
+    final PhysicalPath physicalPath =
+        pomManagementService.getPomFromModuleName(moduleName).getPhysicalPath(path);
+    Validate.notNull(physicalPath, "Physical path for '%s' not found", path.name());
+    return physicalPath.getLogicalPath();
+  }
+
 
   private File getPath(final LogicalPath logicalPath) {
     final Pom pom = pomManagementService.getPomFromModuleName(logicalPath.getModule());

@@ -69,7 +69,8 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 
     String moduleName = module == null ? null : module.getModuleName();
 
-    JavaPackage result = new JavaPackage(convertToFullyQualifiedPackageName(value), moduleName);
+    JavaPackage result =
+        new JavaPackage(convertToFullyQualifiedPackageName(module, value), moduleName);
     if (optionContext != null
         && (optionContext.contains(UPDATE) || optionContext.contains(UPDATELAST))) {
       lastUsed.setPackage(result, module);
@@ -77,10 +78,10 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
     return result;
   }
 
-  private String convertToFullyQualifiedPackageName(final String text) {
+  private String convertToFullyQualifiedPackageName(final Pom module, final String text) {
     final String normalisedText = StringUtils.removeEnd(text, ".").toLowerCase();
     if (normalisedText.startsWith(TOP_LEVEL_PACKAGE_SYMBOL)) {
-      return replaceTopLevelPackageSymbol(normalisedText);
+      return replaceTopLevelPackageSymbol(module, normalisedText);
     }
     return normalisedText;
   }
@@ -147,9 +148,9 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
     }
   }
 
-  private String getTopLevelPackage() {
-    if (projectOperations.isFocusedProjectAvailable()) {
-      return typeLocationService.getTopLevelPackageForModule(projectOperations.getFocusedModule());
+  private String getTopLevelPackage(final Pom module) {
+    if (projectOperations.isProjectAvailable(module.getModuleName())) {
+      return typeLocationService.getTopLevelPackageForModule(module);
     }
     // Shouldn't happen if there's a project, i.e. most of the time
     return "";
@@ -157,13 +158,14 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 
   /**
    * Replaces the {@link #TOP_LEVEL_PACKAGE_SYMBOL} at the beginning of the
-   * given text with the current project/module's top-level package
+   * given text with the module's top-level package
    * 
+   * @param moduleName
    * @param text
    * @return a well-formed Java package name (might have a trailing dot)
    */
-  private String replaceTopLevelPackageSymbol(final String text) {
-    final String topLevelPackage = getTopLevelPackage();
+  private String replaceTopLevelPackageSymbol(final Pom module, final String text) {
+    final String topLevelPackage = getTopLevelPackage(module);
     if (TOP_LEVEL_PACKAGE_SYMBOL.equals(text)) {
       return topLevelPackage;
     }

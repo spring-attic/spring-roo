@@ -33,6 +33,18 @@ public interface PathResolver {
 
   /**
    * Returns the canonical path of the given {@link JavaType} in the given
+   * {@link Path} of the module.
+   * 
+   * @param moduleName
+   * @param path
+   * @param javaType
+   * @return
+   * @since 2.0
+   */
+  String getCanonicalPath(String moduleName, Path path, JavaType javaType);
+
+  /**
+   * Returns the canonical path of the given {@link JavaType} in the given
    * {@link Path} of the currently focused module.
    * 
    * @param path
@@ -98,6 +110,18 @@ public interface PathResolver {
    *         not under a know path.
    */
   LogicalPath getPath(String identifier);
+
+  /**
+   * Returns the {@link LogicalPath} for the given {@link Path} within the
+   * specified module.
+   * 
+   * @param moduleName the specified module (required)
+   * @param path the path within the specified module (required)
+   * @return a non-<code>null</code> instance
+   * @since 2.0
+   */
+  LogicalPath getPath(String modelName, Path path);
+
 
   /**
    * Returns all known paths within the user project.

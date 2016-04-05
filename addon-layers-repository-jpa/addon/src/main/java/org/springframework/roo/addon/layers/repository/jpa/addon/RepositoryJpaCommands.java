@@ -41,7 +41,7 @@ public class RepositoryJpaCommands implements CommandMarker {
   @CliCommand(value = "repository jpa all",
       help = "Generates new Spring Data repository for all entities.")
   public void all(
-      @CliOption(key = "package", mandatory = true, optionContext = UPDATE,
+      @CliOption(key = "package", mandatory = true,
           help = "The package where repositories will be generated") final JavaPackage repositoriesPackage) {
 
     repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
@@ -64,7 +64,7 @@ public class RepositoryJpaCommands implements CommandMarker {
   @CliCommand(value = "repository jpa add",
       help = "Generates new Spring Data repository for specified entity.")
   public void repository(
-      @CliOption(key = "interface", mandatory = true, optionContext = UPDATELAST_INTERFACE,
+      @CliOption(key = "interface", mandatory = true,
           help = "The java Spring Data repository to generate.") final JavaType interfaceType,
       @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = PROJECT, help = "The domain entity this repository should expose") final JavaType domainType) {

@@ -21,6 +21,14 @@ public interface PathResolvingStrategy {
   String getCanonicalPath(LogicalPath path, JavaType javaType);
 
   /**
+   * @param moduleName
+   * @param path
+   * @param javaType
+   * @return
+   */
+  String getCanonicalPath(String moduleName, Path path, JavaType javaType);
+
+  /**
    * @param path
    * @param javaType
    * @return
@@ -73,6 +81,11 @@ public interface PathResolvingStrategy {
    *         not under a know path.
    */
   LogicalPath getPath(String identifier);
+
+  /**
+   * @see PathResolver#getPath(String, Path)
+   */
+  LogicalPath getPath(String moduleName, Path path);
 
   /**
    * @see PathResolver#getPaths()

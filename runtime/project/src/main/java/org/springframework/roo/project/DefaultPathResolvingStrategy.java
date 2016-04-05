@@ -67,6 +67,10 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
     return null;
   }
 
+  public String getCanonicalPath(final String moduleName, final Path path, final JavaType javaType) {
+    return null;
+  }
+
   public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
     return null;
   }
@@ -97,6 +101,10 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
   public String getIdentifier(final LogicalPath path, final String relativePath) {
     return FileUtils.ensureTrailingSeparator(rootModulePaths.get(path.getPath()).getLocationPath())
         + relativePath;
+  }
+
+  public LogicalPath getPath(final String moduleName, final Path path) {
+    return null;
   }
 
   @Override

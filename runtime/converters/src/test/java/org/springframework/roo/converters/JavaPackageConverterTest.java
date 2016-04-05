@@ -57,7 +57,7 @@ public class JavaPackageConverterTest {
   private void assertConvertFromValidText(final String text, final String optionContext,
       final String expectedPackage) {
     // Set up
-    when(mockProjectOperations.isFocusedProjectAvailable()).thenReturn(true);
+    when(mockProjectOperations.isProjectAvailable(mockPom.getModuleName())).thenReturn(true);
     when(mockProjectOperations.getFocusedModule()).thenReturn(mockPom);
     when(mockTypeLocationService.getTopLevelPackageForModule(mockPom))
         .thenReturn(TOP_LEVEL_PACKAGE);
@@ -135,8 +135,7 @@ public class JavaPackageConverterTest {
 
   @Test
   public void testConvertFromSimplePackageNameInNoContext() {
-    assertEquals("foo", converter.convertFromText("FOO", JavaPackage.class, null)
-        .getFullyQualifiedPackageName());
+    assertConvertFromValidText("FOO", null, "foo");
     verifyNoMoreInteractions(mockLastUsed);
   }
 

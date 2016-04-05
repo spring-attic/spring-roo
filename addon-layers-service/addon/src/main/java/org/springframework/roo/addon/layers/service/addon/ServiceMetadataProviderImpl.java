@@ -178,7 +178,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     }
 
     // Getting associated repository
-    JavaType repository = null;
+    ClassOrInterfaceTypeDetails repositoryDetails = null;
     Set<ClassOrInterfaceTypeDetails> repositories =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_REPOSITORY_JPA);
@@ -186,14 +186,14 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
       AnnotationAttributeValue<JavaType> entityAttr =
           repo.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
       if (entityAttr != null && entityAttr.getValue().equals(entity)) {
-        repository = repo.getType();
+        repositoryDetails = repo;
       }
     }
 
     // Check if we have a valid repository
     Validate
         .notNull(
-            repository,
+            repositoryDetails,
             String
                 .format(
                     "ERROR: You must generate some @RooJpaRepository for entity '%s' to be able to generate services",
@@ -201,8 +201,9 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 
     // Getting finders to be included on current service
     final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
-    final String finderMetadataKey = FinderMetadata.createIdentifier(repository, logicalPath);
+        PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
+    final String finderMetadataKey =
+        FinderMetadata.createIdentifier(repositoryDetails.getType(), logicalPath);
     registerDependency(finderMetadataKey, metadataIdentificationString);
     final FinderMetadata finderMetadata =
         (FinderMetadata) getMetadataService().get(finderMetadataKey);

@@ -542,7 +542,7 @@ public class JavaType implements Comparable<JavaType> {
    */
   public JavaPackage getPackage() {
     if (isDefaultPackage() && !Character.isUpperCase(fullyQualifiedTypeName.charAt(0))) {
-      return new JavaPackage("");
+      return new JavaPackage("", module);
     }
 
     if (enclosingType != null) {
@@ -552,14 +552,14 @@ public class JavaType implements Comparable<JavaType> {
       // with a capital letter.
       if (offset > -1
           && Character.isUpperCase(enclosingTypeFullyQualifiedTypeName.charAt(offset + 1))) {
-        return new JavaPackage(enclosingTypeFullyQualifiedTypeName);
+        return new JavaPackage(enclosingTypeFullyQualifiedTypeName, module);
       }
       return enclosingType.getPackage();
     }
 
     final int offset = fullyQualifiedTypeName.lastIndexOf(".");
     return offset == -1 ? new JavaPackage("") : new JavaPackage(fullyQualifiedTypeName.substring(0,
-        offset));
+        offset), module);
   }
 
   public List<JavaType> getParameters() {

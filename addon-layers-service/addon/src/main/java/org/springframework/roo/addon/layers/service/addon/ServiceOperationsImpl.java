@@ -71,6 +71,8 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
   @Override
   public void addAllServices(JavaPackage apiPackage, JavaPackage implPackage) {
+    Validate.notNull(apiPackage.getModule(), "ApiPackage module is required");
+    Validate.notNull(implPackage.getModule(), "ImplPackage module is required");
 
     // Getting all generated entities
     Set<ClassOrInterfaceTypeDetails> entities =
@@ -80,12 +82,13 @@ public class ServiceOperationsImpl implements ServiceOperations {
       // Creating service interfaces for every entity
       JavaType interfaceType =
           new JavaType(String.format("%s.%sService", apiPackage.getFullyQualifiedPackageName(),
-              domainType.getName().getSimpleTypeName()));
+              domainType.getName().getSimpleTypeName()), apiPackage.getModule());
 
       // Creating service implementation for every entity
       JavaType implType =
-          new JavaType(String.format("%s.%sServiceImpl",
-              implPackage.getFullyQualifiedPackageName(), domainType.getName().getSimpleTypeName()));
+          new JavaType(
+              String.format("%s.%sServiceImpl", implPackage.getFullyQualifiedPackageName(),
+                  domainType.getName().getSimpleTypeName()), implPackage.getModule());
 
       // Delegates on individual service creator
       addService(domainType.getType(), interfaceType, implType);
@@ -141,9 +144,11 @@ public class ServiceOperationsImpl implements ServiceOperations {
    */
   private void createServiceInterface(final JavaType domainType, final JavaType interfaceType) {
 
+    Validate.notNull(interfaceType.getModule(), "JavaType %s does not have a module", domainType);
+
     // Checks if new service interface already exists.
     final String interfaceIdentifier =
-        pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
+        pathResolver.getCanonicalPath(interfaceType.getModule(), Path.SRC_MAIN_JAVA, interfaceType);
     if (fileManager.exists(interfaceIdentifier)) {
       return; // Type already exists - nothing to do
     }
@@ -184,15 +189,20 @@ public class ServiceOperationsImpl implements ServiceOperations {
       ClassOrInterfaceTypeDetails repository) {
     Validate.notNull(interfaceType,
         "ERROR: Interface should be provided to be able to generate its implementation");
+    Validate.notNull(interfaceType.getModule(), "ERROR: Interface module is required");
 
     // Generating implementation JavaType if needed
     if (implType == null) {
-      implType = new JavaType(String.format("%sImpl", interfaceType.getFullyQualifiedTypeName()));
+      implType =
+          new JavaType(String.format("%sImpl", interfaceType.getFullyQualifiedTypeName()),
+              interfaceType.getModule());
     }
+
+    Validate.notNull(implType.getModule(), "ERROR: Implementation module is required");
 
     // Checks if new service interface already exists.
     final String implIdentifier =
-        pathResolver.getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, implType);
+        pathResolver.getCanonicalPath(implType.getModule(), Path.SRC_MAIN_JAVA, implType);
     if (fileManager.exists(implIdentifier)) {
       return; // Type already exists - nothing to do
     }
@@ -214,7 +224,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(implTypeBuilder.build().getType(),
-            pathResolver.getFocusedPath(Path.SRC_MAIN_JAVA));
+            pathResolver.getPath(implType.getModule(), Path.SRC_MAIN_JAVA));
 
     // Add constructor
     implTypeBuilder.addConstructor(getServiceConstructor(declaredByMetadataId, repository));

@@ -96,10 +96,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     while (it.hasNext()) {
       ClassOrInterfaceTypeDetails entity = it.next();
 
-      getProjectOperations().setModule(
-          getProjectOperations().getPomFromModuleName(
-              StringUtils.substringBetween(entity.getDeclaredByMetadataId(), "#", ":")));
-
       // Generating new interface type using entity
       JavaType interfaceType =
           new JavaType(repositoriesPackage.getFullyQualifiedPackageName().concat(".")
@@ -116,6 +112,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   @Override
   public void addRepository(final JavaType interfaceType, final JavaType domainType) {
     Validate.notNull(interfaceType, "ERROR: You must specify an interface repository type.");
+    Validate.notNull(interfaceType.getModule(), "ERROR: interfaceType module is required.");
     Validate.notNull(domainType, "ERROR: You must specify a valid Entity. ");
 
     // Check if entity provided type is annotated with @RooJpaEntity
@@ -127,13 +124,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     Validate.notNull(entityAnnotation,
         "ERROR: Provided entity should be annotated with @RooJpaEntity");
 
-    // Set module where generate the artefacts
-    getProjectOperations().setModule(
-        getProjectOperations().getPomFromModuleName(interfaceType.getModule()));
-
     // Check if the new interface to be created exists yet
     final String interfaceIdentifier =
-        getPathResolver().getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
+        getPathResolver().getCanonicalPath(interfaceType.getModule(), Path.SRC_MAIN_JAVA,
+            interfaceType);
 
     if (getFileManager().exists(interfaceIdentifier)) {
       // Type already exists - return.
@@ -185,15 +179,14 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     final List<Element> dependencies =
         XmlUtils.findElements("/configuration/dependencies/dependency", configuration);
     for (final Element dependencyElement : dependencies) {
-      getProjectOperations().addDependency(getProjectOperations().getFocusedModuleName(),
+      getProjectOperations().addDependency(interfaceType.getModule(),
           new Dependency(dependencyElement));
     }
 
     // Add querydsl Plugin
     List<Element> elements = XmlUtils.findElements("/configuration/plugins/plugin", configuration);
     for (final Element element : elements) {
-      getProjectOperations().addBuildPlugin(getProjectOperations().getFocusedModuleName(),
-          new Plugin(element));
+      getProjectOperations().addBuildPlugin(interfaceType.getModule(), new Plugin(element));
     }
 
   }
@@ -255,9 +248,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     }
 
     final JavaType javaType =
-        new JavaType(String.format("%s.ReadOnlyRepository", repositoryPackage));
+        new JavaType(String.format("%s.ReadOnlyRepository", repositoryPackage),
+            repositoryPackage.getModule());
     final String physicalPath =
-        getPathResolver().getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, javaType);
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
 
     // Including ReadOnlyRepository interface
     InputStream inputStream = null;
@@ -294,11 +288,12 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       JavaType entity) {
 
     // Getting RepositoryCustomImpl JavaType
-    JavaType implType = new JavaType(repository.getFullyQualifiedTypeName().concat("Impl"));
+    JavaType implType =
+        new JavaType(repository.getFullyQualifiedTypeName().concat("Impl"), repository.getModule());
 
     // Check if new class exists yet
     final String implIdentifier =
-        getPathResolver().getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, implType);
+        getPathResolver().getCanonicalPath(implType.getModule(), Path.SRC_MAIN_JAVA, implType);
 
     if (getFileManager().exists(implIdentifier)) {
       // Type already exists - return
@@ -375,11 +370,13 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // Getting RepositoryCustom interface JavaTYpe
     JavaType interfaceType =
         new JavaType(repositoryPackage.getFullyQualifiedPackageName().concat(".")
-            .concat(repositoryType.getSimpleTypeName()).concat("Custom"));
+            .concat(repositoryType.getSimpleTypeName()).concat("Custom"),
+            repositoryType.getModule());
 
     // Check if new interface exists yet
     final String interfaceIdentifier =
-        getPathResolver().getFocusedCanonicalPath(Path.SRC_MAIN_JAVA, interfaceType);
+        getPathResolver().getCanonicalPath(interfaceType.getModule(), Path.SRC_MAIN_JAVA,
+            interfaceType);
 
     if (getFileManager().exists(interfaceIdentifier)) {
       // Type already exists - return

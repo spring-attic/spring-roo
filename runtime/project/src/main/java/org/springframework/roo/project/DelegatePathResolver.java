@@ -43,6 +43,10 @@ public class DelegatePathResolver implements PathResolver {
     return getStrategy().getCanonicalPath(path, javaType);
   }
 
+  public String getCanonicalPath(final String moduleName, final Path path, final JavaType javaType) {
+    return getStrategy().getCanonicalPath(moduleName, path, javaType);
+  }
+
   public String getFocusedCanonicalPath(final Path path, final JavaType javaType) {
     return getStrategy().getFocusedCanonicalPath(path, javaType);
   }
@@ -65,6 +69,11 @@ public class DelegatePathResolver implements PathResolver {
 
   public String getIdentifier(final LogicalPath path, final String relativePath) {
     return getStrategy().getIdentifier(path, relativePath);
+  }
+
+
+  public LogicalPath getPath(final String moduleName, final Path path) {
+    return getStrategy().getPath(moduleName, path);
   }
 
   public LogicalPath getPath(final String identifier) {
