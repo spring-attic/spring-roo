@@ -89,14 +89,20 @@ public class AuditOperationsImpl implements AuditOperations {
   @Override
   public void setupAudit(JavaPackage javaPackage) {
 
-    // Add dependencies to selected pom.xml
-    updateDependenciesToSpecifiedModule(javaPackage.getModule());
+    Collection<String> applicationModules = getTypeLocationService().getApplicationModules();
 
-    // Create class for being aware of changes to entities
-    createAuditorAware(javaPackage);
+    // Add dependency for each application module
+    for (String applicationModule : applicationModules) {
 
-    // Update @RooSecurityConfiguration with enableJpaAuditing
-    updateRooSecurityAnnotation();
+      // Add dependencies to selected pom.xml
+      updateDependenciesToSpecifiedModule(applicationModule);
+
+      // Create class for being aware of changes to entities
+      createAuditorAware(javaPackage, applicationModule);
+
+      // Update @RooSecurityConfiguration with enableJpaAuditing
+      updateRooSecurityAnnotation();
+    }
   }
 
   /**
@@ -122,15 +128,23 @@ public class AuditOperationsImpl implements AuditOperations {
        * of the user who make changes to entities.
        * 
        * @param javaPackage
+  * @param applicationModule 
        */
-  private void createAuditorAware(JavaPackage javaPackage) {
+  private void createAuditorAware(JavaPackage javaPackage, String applicationModule) {
+
+    String packageName = null;
+
+    if (javaPackage == null) {
+      packageName = getProjectOperations().getPomFromModuleName(applicationModule).getGroupId();
+    } else {
+      packageName = javaPackage.getFullyQualifiedPackageName();
+    }
 
     final JavaType authenticationAuditorType =
-        new JavaType(String.format("%s.AuthenticationAuditorAware",
-            javaPackage.getFullyQualifiedPackageName()), javaPackage.getModule());
+        new JavaType(String.format("%s.AuthenticationAuditorAware", packageName), applicationModule);
     final String physicalPath =
         getTypeLocationService().getPhysicalTypeCanonicalPath(authenticationAuditorType,
-            LogicalPath.getInstance(Path.SRC_MAIN_JAVA, javaPackage.getModule()));
+            LogicalPath.getInstance(Path.SRC_MAIN_JAVA, applicationModule));
 
     // Include implementation for AuditionAware from template
     InputStream inputStream = null;
@@ -142,7 +156,7 @@ public class AuditOperationsImpl implements AuditOperations {
       String input = IOUtils.toString(inputStream);
 
       // Replacing package
-      input = input.replace("__PACKAGE__", javaPackage.getFullyQualifiedPackageName());
+      input = input.replace("__PACKAGE__", packageName);
 
       // Creating AuthenticationAuditorAware implementation
       getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, false);

@@ -29,7 +29,7 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
     implements SecurityMetadataProvider {
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
-  private final JavaType ROO_AUTHENTICATION_AUDITOR_AWARE = new JavaType(
+  private static final JavaType ROO_AUTHENTICATION_AUDITOR_AWARE = new JavaType(
       "org.springframework.roo.addon.security.annotations.RooAuthenticationAuditorAware");
 
   /**

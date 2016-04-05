@@ -92,6 +92,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.controller.annotations.scaffold.RooWebScaffold");
   public static final JavaType ROO_SECURITY_CONFIGURATION = new JavaType(
       "org.springframework.roo.addon.security.annotations.RooSecurityConfiguration");
+  public static final JavaType ROO_AUDIT = new JavaType(
+      "org.springframework.roo.addon.security.annotations.RooAudit");
 
   /**
    * Constructor is private to prevent instantiation

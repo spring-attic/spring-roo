@@ -26,8 +26,10 @@ public class AuditCommands implements CommandMarker {
 
   @CliCommand(value = "audit setup", help = "Install audit support into your project")
   public void setupAudit(
-      @CliOption(key = "package", mandatory = true,
-          help = "The package in which new classes needed for audit will be placed") final JavaPackage javaPackage) {
+      @CliOption(
+          key = "package",
+          mandatory = false,
+          help = "The package in which new classes needed for audit will be placed. Note that module will be ignored as new classes will be installed in app's config module/s.") final JavaPackage javaPackage) {
     auditOperations.setupAudit(javaPackage);
   }
 }
