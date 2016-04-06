@@ -87,6 +87,12 @@ public class AuditOperationsImpl implements AuditOperations {
   }
 
   @Override
+  public boolean isAuditAddPossible() {
+    return getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY)
+        && getProjectOperations().isFeatureInstalled(FeatureNames.AUDIT);
+  }
+
+  @Override
   public void setupAudit(JavaPackage javaPackage) {
 
     Collection<String> applicationModules = getTypeLocationService().getApplicationModules();
@@ -103,6 +109,35 @@ public class AuditOperationsImpl implements AuditOperations {
       // Update @RooSecurityConfiguration with enableJpaAuditing
       updateRooSecurityAnnotation();
     }
+  }
+
+  @Override
+  public void auditAdd(JavaType entity, String createdDateColumn, String modifiedDateColumn,
+      String createdByColumn, String modifiedByColumn) {
+
+    // Create @RooAudit
+    AnnotationMetadataBuilder rooAudit = new AnnotationMetadataBuilder(RooJavaType.ROO_AUDIT);
+
+    // Add parameters if required
+    if (createdDateColumn != null) {
+      rooAudit.addStringAttribute("createdDateColumn", createdDateColumn);
+    }
+    if (modifiedDateColumn != null) {
+      rooAudit.addStringAttribute("modifiedDateColumn", modifiedDateColumn);
+    }
+    if (createdByColumn != null) {
+      rooAudit.addStringAttribute("createdByColumn", createdByColumn);
+    }
+    if (modifiedByColumn != null) {
+      rooAudit.addStringAttribute("modifiedByColumn", modifiedByColumn);
+    }
+
+    // Add annotation
+    ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(entity);
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(cid);
+    cidBuilder.addAnnotation(rooAudit.build());
+
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 
   /**
@@ -135,7 +170,9 @@ public class AuditOperationsImpl implements AuditOperations {
     String packageName = null;
 
     if (javaPackage == null) {
-      packageName = getProjectOperations().getPomFromModuleName(applicationModule).getGroupId();
+      packageName =
+          getProjectOperations().getTopLevelPackage(applicationModule)
+              .getFullyQualifiedPackageName();
     } else {
       packageName = javaPackage.getFullyQualifiedPackageName();
     }
@@ -159,7 +196,7 @@ public class AuditOperationsImpl implements AuditOperations {
       input = input.replace("__PACKAGE__", packageName);
 
       // Creating AuthenticationAuditorAware implementation
-      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, false);
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
     } catch (final IOException e) {
       throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
     } finally {

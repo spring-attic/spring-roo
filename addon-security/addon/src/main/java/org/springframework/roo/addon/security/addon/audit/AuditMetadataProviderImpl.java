@@ -1,7 +1,7 @@
-package org.springframework.roo.addon.security.addon.security;
+package org.springframework.roo.addon.security.addon.audit;
 
 import static org.springframework.roo.model.RooJavaType.*;
-import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.InvalidSyntaxException;
@@ -16,7 +16,7 @@ import org.springframework.roo.model.*;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Implementation of {@link SecurityMetadataProvider}.
+ * Implementation of {@link AuditMetadataProvider}.
  * <p/>
  * 
  * @author Sergio Clares
@@ -24,18 +24,16 @@ import org.springframework.roo.project.LogicalPath;
  */
 @Component
 @Service
-public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
-    implements SecurityMetadataProvider {
+public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
+    implements AuditMetadataProvider {
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
-  private static final JavaType ROO_AUTHENTICATION_AUDITOR_AWARE = new JavaType(
-      "org.springframework.roo.addon.security.annotations.RooAuthenticationAuditorAware");
 
   /**
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_SECURITY_CONFIGURATION} as additional 
+   * <li>Registers {@link RooJavaType#ROO_AUDIT} as additional 
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -49,7 +47,7 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_SECURITY_CONFIGURATION);
+    addMetadataTrigger(ROO_AUDIT);
   }
 
   /**
@@ -65,18 +63,18 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_SECURITY_CONFIGURATION);
+    removeMetadataTrigger(ROO_AUDIT);
   }
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return SecurityMetadata.createIdentifier(javaType, path);
+    return AuditMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType = SecurityMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = SecurityMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = AuditMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = AuditMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
@@ -87,7 +85,7 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
 
   @Override
   public String getItdUniquenessFilenameSuffix() {
-    return "SecurityConfiguration";
+    return "Audit";
   }
 
   @Override
@@ -95,31 +93,15 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    final SecurityConfigurationAnnotationValues annotationValues =
-        new SecurityConfigurationAnnotationValues(governorPhysicalTypeMetadata);
+    final AuditAnnotationValues annotationValues =
+        new AuditAnnotationValues(governorPhysicalTypeMetadata);
 
-    // Get AuthenticationAuditorAware JavaType if exists
-    Set<JavaType> authenticationClasses =
-        getTypeLocationService().findTypesWithAnnotation(ROO_AUTHENTICATION_AUDITOR_AWARE);
-
-    JavaType authenticationType = null;
-    if (authenticationClasses.size() > 0) {
-      for (JavaType authenticationClass : authenticationClasses) {
-        if (authenticationClass.getModule() != null
-            && authenticationClass.getModule().equals(
-                governorPhysicalTypeMetadata.getType().getModule())) {
-          authenticationType = authenticationClass;
-          break;
-        }
-      }
-    }
-
-    return new SecurityMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, authenticationType, annotationValues);
+    return new AuditMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, annotationValues);
   }
 
   public String getProvidesType() {
-    return SecurityMetadata.getMetadataIdentiferType();
+    return AuditMetadata.getMetadataIdentiferType();
   }
 
   public TypeLocationService getTypeLocationService() {

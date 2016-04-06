@@ -21,6 +21,7 @@ public final class JpaJavaType {
   public static final JavaType EMBEDDED_ID = new JavaType("javax.persistence.EmbeddedId");
   public static final JavaType ENTITY = new JavaType("javax.persistence.Entity");
   public static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
+  public static final JavaType ENTITY_LISTENERS = new JavaType("javax.persistence.EntityListeners");
   public static final JavaType ENUM_TYPE = new JavaType("javax.persistence.EnumType");
   public static final JavaType ENUMERATED = new JavaType("javax.persistence.Enumerated");
   public static final JavaType FETCH_TYPE = new JavaType("javax.persistence.FetchType");

@@ -112,6 +112,16 @@ public final class SpringJavaType {
   public static final JavaType VALUE = new JavaType(
       "org.springframework.beans.factory.annotation.Value");
   public static final JavaType WEB_UTILS = new JavaType("org.springframework.web.util.WebUtils");
+  public static final JavaType CREATED_DATE = new JavaType(
+      "org.springframework.data.annotation.CreatedDate");
+  public static final JavaType LAST_MODIFIED_DATE = new JavaType(
+      "org.springframework.data.annotation.LastModifiedDate");
+  public static final JavaType CREATED_BY = new JavaType(
+      "org.springframework.data.annotation.CreatedBy");
+  public static final JavaType LAST_MODIFIED_BY = new JavaType(
+      "org.springframework.data.annotation.LastModifiedBy");
+  public static final JavaType AUDITING_ENTITY_LISTENER = new JavaType(
+      "org.springframework.data.jpa.domain.support.AuditingEntityListener");
 
   /**
    * Returns the {@link JavaType} for a Spring converter
