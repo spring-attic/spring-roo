@@ -3,11 +3,14 @@ package org.springframework.roo.addon.security.addon.security;
 import static org.springframework.roo.model.RooJavaType.*;
 
 import java.util.Set;
+import java.util.logging.Level;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.finder.addon.FinderAnnotationValues;
 import org.springframework.roo.classpath.*;
 import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.itd.*;
@@ -96,18 +99,27 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
+    final SecurityConfigurationAnnotationValues annotationValues =
+        new SecurityConfigurationAnnotationValues(governorPhysicalTypeMetadata);
+
     // Get AuthenticationAuditorAware JavaType if exists
     Set<JavaType> authenticationClasses =
         getTypeLocationService().findTypesWithAnnotation(ROO_AUTHENTICATION_AUDITOR_AWARE);
+
     JavaType authenticationType = null;
     if (authenticationClasses.size() > 0) {
       for (JavaType authenticationClass : authenticationClasses) {
-        authenticationType = authenticationClass;
+        if (authenticationClass.getModule() != null
+            && authenticationClass.getModule().equals(
+                governorPhysicalTypeMetadata.getType().getModule())) {
+          authenticationType = authenticationClass;
+          break;
+        }
       }
     }
 
     return new SecurityMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, authenticationType);
+        governorPhysicalTypeMetadata, authenticationType, annotationValues);
   }
 
   public String getProvidesType() {

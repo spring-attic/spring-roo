@@ -36,6 +36,7 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       "org.springframework.context.annotation.Configuration");
 
   private final JavaType authenticationAuditorAware;
+  private final SecurityConfigurationAnnotationValues annnotationValues;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -66,10 +67,12 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    * @param identifier
    * @param aspectName
    * @param governorPhysicalTypeMetadata
+   * @param annotationValues 
    */
   public SecurityMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final JavaType authenticationAuditorAware) {
+      final JavaType authenticationAuditorAware,
+      SecurityConfigurationAnnotationValues annotationValues) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate
         .isTrue(
@@ -78,18 +81,22 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
             identifier);
 
     this.authenticationAuditorAware = authenticationAuditorAware;
+    this.annnotationValues = annotationValues;
 
-    // Generate the auditorProvider method
-    builder.addMethod(getAuditorProviderMethod());
+    if (annotationValues.getEnableJpaAuditing()) {
 
-    // Add @EnableJpaAuditing
-    builder.addAnnotation(new AnnotationMetadataBuilder(ENABLE_JPA_AUDITING).build());
+      // Generate the auditorProvider method
+      builder.addMethod(getAuditorProviderMethod());
 
-    // Add @Configuration
-    builder.addAnnotation(new AnnotationMetadataBuilder(CONFIGURATION).build());
+      // Add @EnableJpaAuditing
+      builder.addAnnotation(new AnnotationMetadataBuilder(ENABLE_JPA_AUDITING).build());
 
-    // Create a representation of the desired output ITD
-    itdTypeDetails = builder.build();
+      // Add @Configuration
+      builder.addAnnotation(new AnnotationMetadataBuilder(CONFIGURATION).build());
+
+      // Create a representation of the desired output ITD
+      itdTypeDetails = builder.build();
+    }
   }
 
   /**
