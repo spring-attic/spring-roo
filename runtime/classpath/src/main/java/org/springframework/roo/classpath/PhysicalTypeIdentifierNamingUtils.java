@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
@@ -65,7 +66,8 @@ public final class PhysicalTypeIdentifierNamingUtils {
     final String instance =
         MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
     final int index = instance.indexOf("?");
-    return new JavaType(instance.substring(index + 1));
+    return new JavaType(instance.substring(index + 1),
+        getModuleFromIdentificationString(metadataIdentificationString));
   }
 
   /**
@@ -80,7 +82,8 @@ public final class PhysicalTypeIdentifierNamingUtils {
    */
   public static JavaType getJavaType(final String metadataClass, final String metadataId) {
     final String instanceKey = getInstanceKey(metadataClass, metadataId);
-    return new JavaType(instanceKey.substring(instanceKey.indexOf(PATH_SUFFIX) + 1));
+    return new JavaType(instanceKey.substring(instanceKey.indexOf(PATH_SUFFIX) + 1),
+        getModuleFromIdentificationString(metadataId));
   }
 
   /**
@@ -153,4 +156,14 @@ public final class PhysicalTypeIdentifierNamingUtils {
    * @since 1.2.0
    */
   private PhysicalTypeIdentifierNamingUtils() {}
+
+  /**
+   * Extracts module name from a metadata identification string
+   * 
+   * @param metadataId
+   * @return module name or null if metadataId is not a valid metadata identification string
+   */
+  public static final String getModuleFromIdentificationString(String metadataId) {
+    return StringUtils.substringBetween(metadataId, "#", ":");
+  }
 }

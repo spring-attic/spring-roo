@@ -144,7 +144,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
     name =
         new JavaType(newName.getFullyQualifiedTypeName(), newName.getEnclosingType(),
             newName.getArray(), newName.getDataType(), newName.getArgName(),
-            newName.getParameters());
+            newName.getParameters(), name.getModule());
 
     final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);

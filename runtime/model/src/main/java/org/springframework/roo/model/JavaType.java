@@ -147,7 +147,7 @@ public class JavaType implements Comparable<JavaType> {
       final JavaType enclosingType, final int arrayDimensions, final DataType dataType,
       final JavaSymbolName argName, final JavaType... parameters) {
     return new JavaType(fullyQualifiedTypeName, enclosingType, arrayDimensions, dataType, argName,
-        Arrays.asList(parameters));
+        Arrays.asList(parameters), null);
   }
 
   /**
@@ -238,7 +238,7 @@ public class JavaType implements Comparable<JavaType> {
    */
   public JavaType(final String fullyQualifiedTypeName, final int arrayDimensions,
       final DataType dataType, final JavaSymbolName argName, final List<JavaType> parameters) {
-    this(fullyQualifiedTypeName, null, arrayDimensions, dataType, argName, parameters);
+    this(fullyQualifiedTypeName, null, arrayDimensions, dataType, argName, parameters, null);
   }
 
   /**
@@ -258,7 +258,7 @@ public class JavaType implements Comparable<JavaType> {
    * @param enclosingType the type's enclosing type
    */
   public JavaType(final String fullyQualifiedTypeName, final JavaType enclosingType) {
-    this(fullyQualifiedTypeName, enclosingType, 0, DataType.TYPE, null, null);
+    this(fullyQualifiedTypeName, enclosingType, 0, DataType.TYPE, null, null, null);
   }
 
   /**
@@ -275,10 +275,11 @@ public class JavaType implements Comparable<JavaType> {
    *            be null if unassigned)
    * @param parameters the type parameters applicable (can be null if there
    *            aren't any)
+   * @param module the module where is created (optional)
    */
   public JavaType(final String fullyQualifiedTypeName, final JavaType enclosingType,
       final int arrayDimensions, final DataType dataType, final JavaSymbolName argName,
-      final List<JavaType> parameters) {
+      final List<JavaType> parameters, final String module) {
     Validate.notBlank(fullyQualifiedTypeName, "Fully qualified type name required");
     Validate.notNull(dataType, "Data type required");
     JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
@@ -303,6 +304,7 @@ public class JavaType implements Comparable<JavaType> {
     if (parameters != null) {
       this.parameters.addAll(parameters);
     }
+    this.module = module;
   }
 
   @Override

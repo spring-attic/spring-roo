@@ -329,9 +329,10 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     if (javaPackage == null) {
       return null;
     }
-    final JavaType javaType =
-        new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + simpleTypeName);
     final Pom module = getProjectOperations().getModuleForFileIdentifier(fileCanonicalPath);
+    final JavaType javaType =
+        new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + simpleTypeName,
+            module.getModuleName());
     Validate.notNull(module, "The module for the file '" + fileCanonicalPath
         + "' could not be located");
     getTypeCache().cacheTypeAgainstModule(module, javaType);
@@ -508,7 +509,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     final Set<String> typeNames = getTypesForModule(module.getPath());
     final Collection<JavaType> javaTypes = new ArrayList<JavaType>();
     for (final String typeName : typeNames) {
-      javaTypes.add(new JavaType(typeName));
+      javaTypes.add(new JavaType(typeName, module.getModuleName()));
     }
     return javaTypes;
   }
