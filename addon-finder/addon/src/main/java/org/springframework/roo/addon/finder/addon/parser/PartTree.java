@@ -182,7 +182,7 @@ public class PartTree {
 
   /**
    * Filters the entity properties that can be used to build Spring Data
-   * expressions. Persistence properties are excluded as well as multivalued properties 
+   * expressions. Persistence version property is excluded as well as multivalued properties 
    * since Spring Data does not support operations with them
    * 
    * @param memberDetails
@@ -198,10 +198,6 @@ public class PartTree {
       if (fieldMetadata.getFieldType().isMultiValued())
         continue;
 
-      // Check if it is annotated with @Id
-      if (fieldMetadata.getAnnotation(new JavaType("javax.persistence.Id")) != null)
-        continue;
-
       // Check if it is annotated with @Version
       if (fieldMetadata.getAnnotation(new JavaType("javax.persistence.Version")) != null)
         continue;
@@ -214,7 +210,7 @@ public class PartTree {
 
   /**
    * Filters the entity properties of a javaType that can be used to build Spring Data
-   * expressions. Persistence fields are excluded, and multivalued fields
+   * expressions. Persistence version field is excluded, and multivalued fields
    * are removed since Spring Data does not supports operations with them.
    * 
    * @param javaType

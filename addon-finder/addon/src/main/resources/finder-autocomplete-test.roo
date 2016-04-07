@@ -43,13 +43,13 @@ field reference --fieldName pet --type ~.Pet
 # Autocomplete
 #      
 # Output:  findActive findAge findBirthday findBy findDistinct findFirst findFirstName 
-#          findPet findTelephone findTop 
+#          findId findPet findTelephone findTop 
 #
 #          queryActive queryAge queryBirthday queryBy queryDistinct queryFirst 
-#          queryFirstName queryPet queryTelephone queryTop 
+#          queryFirstName queryId queryPet queryTelephone queryTop 
 #
 #          readActive readAge readBirthday readBy readDistinct readFirst readFirstName 
-#          readPet readTelephone readTop 
+#          readId readPet readTelephone readTop 
 #
 # Result:  Shows options to define a limitation, distinct, all entity properties 
 #          and By to end the subject                                                                
@@ -64,8 +64,8 @@ field reference --fieldName pet --type ~.Pet
 # Autocomplete
 #      
 # Output:  findDistinctActive findDistinctAge findDistinctBirthday  findDistinctBy 
-#          findDistinctFirst findDistinctFirstName findDistinctPet findDistinctTelephone 
-#          findDistinctTop 
+#          findDistinctFirst findDistinctFirstName findDistinctId findDistinctPet  
+#          findDistinctTelephone findDistinctTop 
 #
 # Result:  Shows same options than test 2, but without Distinct since it is already added                                                               
 #========================================================================================
@@ -81,11 +81,12 @@ field reference --fieldName pet --type ~.Pet
 # Autocomplete
 #      
 # Output:  findTopActive findTopAge findTopBirthday findTopBy findTopFirstName   
-#          findTopPet findTopTelephone  findTop[Number] 
+#          findTopId findTopPet findTopTelephone  findTop[Number] 
 #
 #          findDistinctFirstActive findDistinctFirstAge findDistinctFirstBirthday  
 #          findDistinctFirstBy findDistinctFirstFirstName findDistinctFirstName    
-#          findDistinctFirstPet findDistinctFirstTelephone findDistinctFirst[Number]
+#          findDistinctFirstId findDistinctFirstPet findDistinctFirstTelephone 
+#          findDistinctFirst[Number]
 #
 # Result:  Shows all entity properties, [Number] to indicate that a number can be
 #          specified, and By to end the subject                                                             
@@ -101,7 +102,7 @@ field reference --fieldName pet --type ~.Pet
 # Autocomplete
 #      
 # Output:  findTop1Active findTop1Age findTop1Birthday findTop1By findTop1FirstName 
-#          findTop1Pet findTop1Telephone  
+#          findTop1FirstId findTop1Pet findTop1Telephone  
 #
 # Result:  Shows all entity properties and By to end the subject                                                             
 #========================================================================================
@@ -138,7 +139,8 @@ field reference --fieldName pet --type ~.Pet
 # Write finder add --class ~.Owner --name findBy
 # Autocomplete
 #      
-# Output:  findByActive findByAge findByBirthday findByFirstName findByPet findByTelephone
+# Output:  findByActive findByAge findByBirthday findByFirstName findById findByPet 
+#          findByTelephone
 #
 # Result:  Shows all entity properties                                                           
 #========================================================================================
@@ -362,7 +364,7 @@ field reference --fieldName pet --type ~.Pet
 # Autocomplete
 #      
 # Output:  findByAgeAndActive findByAgeAndAge findByAgeAndBirthday findByAgeAndFirstName 
-#          findByAgeAndPet  findByAgeAndTelephone   
+#          findByAgeAndId findByAgeAndPet  findByAgeAndTelephone   
 #
 # Result:  Shows all entity properties                                                         
 #========================================================================================
@@ -408,7 +410,8 @@ field reference --fieldName pet --type ~.Pet
 # Autocomplete
 #      
 # Output:  findByAgeOrderByActive findByAgeOrderByAge findByAgeOrderByBirthday
-#          findByAgeOrderByFirstName findByAgeOrderByPet findByAgeOrderByTelephone   
+#          findByAgeOrderByFirstName findByAgeOrderById findByAgeOrderByPet 
+#          findByAgeOrderByTelephone   
 #
 # Result:  Shows all entity properties                                                       
 #========================================================================================
@@ -438,7 +441,7 @@ field reference --fieldName pet --type ~.Pet
 #      
 # Output:  findByAgeOrderByAgeDescActive findByAgeOrderByAgeDescAge  
 #          findByAgeOrderByAgeDescBirthday findByAgeOrderByAgeDescFirstName 
-#          findByAgeOrderByAgeDescPet findByAgeOrderByAgeDescTelephone  
+#          findByAgeOrderByAgeDescId findByAgeOrderByAgeDescPet findByAgeOrderByAgeDescTelephone  
 #
 # Result:  Shows all entity properties                                                     
 #========================================================================================
