@@ -83,7 +83,8 @@ public class AuditOperationsImpl implements AuditOperations {
   @Override
   public boolean isAuditSetupPossible() {
     return getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY)
-        && getProjectOperations().isFeatureInstalled(FeatureNames.JPA);
+        && getProjectOperations().isFeatureInstalled(FeatureNames.JPA)
+        && !getProjectOperations().isFeatureInstalled(AUDIT_FEATURE_NAME);
   }
 
   @Override

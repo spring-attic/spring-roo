@@ -110,6 +110,10 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
                 governorPhysicalTypeMetadata.getType().getModule())) {
           authenticationType = authenticationClass;
           break;
+        } else if (authenticationClasses.size() == 1) {
+
+          // Project is single module. Pick single authentication class
+          authenticationType = authenticationClass;
         }
       }
     }
