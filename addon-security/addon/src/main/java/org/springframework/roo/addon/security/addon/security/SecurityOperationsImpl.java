@@ -60,7 +60,8 @@ public class SecurityOperationsImpl implements SecurityOperations {
     // Parse the configuration.xml file
     final Element configuration = XmlUtils.getConfiguration(getClass());
 
-    Collection<String> applicationModules = getTypeLocationService().getApplicationModules();
+    Collection<String> applicationModules =
+        getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION);
 
     // Add dependency for each application module
     for (String applicationModule : applicationModules) {

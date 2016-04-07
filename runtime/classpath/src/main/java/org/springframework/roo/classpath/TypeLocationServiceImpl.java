@@ -67,6 +67,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
+  private Map<ModuleFeatureName, ModuleFeature> moduleFeatures =
+      new HashMap<ModuleFeatureName, ModuleFeature>();
 
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
@@ -330,11 +332,11 @@ public class TypeLocationServiceImpl implements TypeLocationService {
       return null;
     }
     final Pom module = getProjectOperations().getModuleForFileIdentifier(fileCanonicalPath);
+    Validate.notNull(module, "The module for the file '" + fileCanonicalPath
+        + "' could not be located");
     final JavaType javaType =
         new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + simpleTypeName,
             module.getModuleName());
-    Validate.notNull(module, "The module for the file '" + fileCanonicalPath
-        + "' could not be located");
     getTypeCache().cacheTypeAgainstModule(module, javaType);
 
     String reducedPath = fileCanonicalPath.replace(javaType.getRelativeFileName(), "");
@@ -683,6 +685,53 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     dirtyFiles.clear();
   }
 
+  public void addDependencies(ModuleFeatureName moduleFeatureName,
+      final Collection<? extends Dependency> newDependencies) {
+    for (String moduleName : getModuleNames(moduleFeatureName)) {
+      getProjectOperations().addDependencies(moduleName, newDependencies);
+    }
+  }
+
+  public void removeDependencies(ModuleFeatureName moduleFeatureName,
+      final Collection<? extends Dependency> newDependencies) {
+    for (String moduleName : getModuleNames(moduleFeatureName)) {
+      getProjectOperations().removeDependencies(moduleName, newDependencies);
+    }
+  }
+
+  @Override
+  public Collection<Pom> getModules(ModuleFeatureName moduleFeatureName) {
+    Validate.notNull(moduleFeatureName, "Module featured required");
+    List<Pom> modules = new ArrayList<Pom>();
+    ModuleFeature moduleFeature = getModuleFeature(moduleFeatureName);
+    if (moduleFeature != null) {
+      modules = moduleFeature.getModules();
+    }
+    return modules;
+  }
+
+  @Override
+  public Collection<String> getModuleNames(ModuleFeatureName moduleFeatureName) {
+    Validate.notNull(moduleFeatureName, "Module featured required");
+    List<String> moduleNames = new ArrayList<String>();
+    ModuleFeature moduleFeature = getModuleFeature(moduleFeatureName);
+    if (moduleFeature != null) {
+      moduleNames = moduleFeature.getModuleNames();
+    }
+    return moduleNames;
+  }
+
+  public boolean hasModuleFeature(Pom module, ModuleFeatureName moduleFeatureName) {
+    Validate.notNull(moduleFeatureName, "Module featured required");
+    Validate.notNull(module, "Module required");
+    ModuleFeature moduleFeature = getModuleFeature(moduleFeatureName);
+    if (moduleFeature != null) {
+      return moduleFeature.hasModuleFeature(module);
+    }
+    return false;
+  }
+
+
   public FileManager getFileManager() {
     if (fileManager == null) {
       // Get all Services implement FileManager interface
@@ -815,27 +864,29 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
   }
 
-  public void addStarterDependencies(final Collection<? extends Dependency> newDependencies) {
-    for (String moduleName : getApplicationModules()) {
-      getProjectOperations().addDependencies(moduleName, newDependencies);
-    }
-  }
+  private ModuleFeature getModuleFeature(ModuleFeatureName moduleFeatureName) {
 
-  public void removeStarterDependencies(final Collection<? extends Dependency> newDependencies) {
-    for (String moduleName : getApplicationModules()) {
-      getProjectOperations().removeDependencies(moduleName, newDependencies);
+    if (moduleFeatures.containsKey(moduleFeatureName)) {
+      return moduleFeatures.get(moduleFeatureName);
     }
-  }
 
-  @Override
-  public Collection<String> getApplicationModules() {
-    List<String> moduleNames = new ArrayList<String>();
-    for (ClassOrInterfaceTypeDetails cid : findClassesOrInterfaceDetailsWithAnnotation(new JavaType(
-        "org.springframework.boot.autoconfigure.SpringBootApplication"))) {
+    try {
+      ServiceReference<?>[] references =
+          context.getAllServiceReferences(ModuleFeature.class.getName(), null);
 
-      moduleNames.add(StringUtils.substringBetween(cid.getDeclaredByMetadataId(), "#", ":"));
+      for (ServiceReference<?> ref : references) {
+        ModuleFeature moduleFeature = (ModuleFeature) context.getService(ref);
+        if (moduleFeature.getName().equals(moduleFeatureName)) {
+          moduleFeatures.put(moduleFeatureName, moduleFeature);
+          return moduleFeature;
+        }
+      }
+      return null;
+
+    } catch (InvalidSyntaxException e) {
+      LOGGER.warning("Cannot load ModuleFeature on TypeLocationServiceImpl.");
+      return null;
     }
-    return moduleNames;
   }
 
 }

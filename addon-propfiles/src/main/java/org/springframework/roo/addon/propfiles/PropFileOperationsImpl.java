@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.application.config.ApplicationConfigService;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
@@ -54,7 +55,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
   @Override
   public void listProperties(String profile) {
     boolean printedHeader = false;
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       Map<String, String> properties = applicationConfigService.getProperties(profile, moduleName);
 
       if (properties.size() > 0) {

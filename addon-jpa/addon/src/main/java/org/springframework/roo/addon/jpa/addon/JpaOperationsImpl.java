@@ -31,6 +31,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.application.config.ApplicationConfigService;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -459,8 +460,9 @@ public class JpaOperationsImpl implements JpaOperations {
     redundantDependencies.removeAll(requiredDependencies);
 
     // Update the POM
-    getTypeLocationService().removeStarterDependencies(redundantDependencies);
-    getTypeLocationService().addStarterDependencies(requiredDependencies);
+    getTypeLocationService().removeDependencies(ModuleFeatureName.APPLICATION,
+        redundantDependencies);
+    getTypeLocationService().addDependencies(ModuleFeatureName.APPLICATION, requiredDependencies);
   }
 
   private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {

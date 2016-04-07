@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
@@ -53,7 +54,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   public void addProperty(final String key, final String value, String profile, boolean force) {
 
     // Get application modules
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       propFilesManager.addPropertyIfNotExists(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), key, value, true, force);
     }
@@ -63,7 +64,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   public void addProperty(final String prefix, final String key, final String value,
       String profile, boolean force) {
     // Get application modules
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       propFilesManager.addPropertyIfNotExists(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), prefix, key, value, true, force);
     }
@@ -72,7 +73,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   @Override
   public void addProperties(final Map<String, String> properties, String profile, boolean force) {
     // Get application modules
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       propFilesManager.addProperties(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), properties, true, force);
     }
@@ -82,7 +83,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   public void addProperties(final String prefix, final Map<String, String> properties,
       String profile, boolean force) {
     // Get application modules
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       propFilesManager.addProperties(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), prefix, properties, true, force);
     }
@@ -90,7 +91,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
   @Override
   public void updateProperty(final String key, final String value, String profile, boolean force) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       propFilesManager.changeProperty(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), key, value, true, force);
     }
@@ -99,7 +100,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   @Override
   public void updateProperty(final String prefix, final String key, final String value,
       String profile, boolean force) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       propFilesManager.changeProperty(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), prefix, key, value, true, force);
     }
@@ -107,7 +108,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
   @Override
   public void updateProperties(final Map<String, String> properties, String profile, boolean force) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       propFilesManager.changeProperties(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), properties, true, force);
     }
@@ -116,7 +117,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   @Override
   public void updateProperties(final String prefix, final Map<String, String> properties,
       String profile, boolean force) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       propFilesManager.changeProperties(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), prefix, properties, true, force);
     }
@@ -131,7 +132,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   @Override
   public SortedSet<String> getPropertyKeys(boolean includeValues, String profile) {
     SortedSet<String> keys = new TreeSet<String>();
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       keys.addAll(propFilesManager.getPropertyKeys(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), includeValues));
     }
@@ -141,7 +142,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   @Override
   public SortedSet<String> getPropertyKeys(String prefix, boolean includeValues, String profile) {
     SortedSet<String> keys = new TreeSet<String>();
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       keys.addAll(propFilesManager.getPropertyKeys(getApplicationConfigFileLocation(moduleName),
           getAppliCationConfigFileName(profile), prefix, includeValues));
     }
@@ -150,7 +151,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
   @Override
   public String getProperty(final String key, String profile) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       String property =
           propFilesManager.getProperty(getApplicationConfigFileLocation(moduleName),
               getAppliCationConfigFileName(profile), key);
@@ -163,7 +164,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
   @Override
   public String getProperty(final String prefix, final String key, String profile) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       String property =
           propFilesManager.getProperty(getApplicationConfigFileLocation(moduleName),
               getAppliCationConfigFileName(profile), prefix, key);
@@ -176,7 +177,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
   @Override
   public void removeProperty(final String key, String profile) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       if (existsSpringConfigFile(profile, moduleName)) {
         propFilesManager.removeProperty(getApplicationConfigFileLocation(moduleName),
             getAppliCationConfigFileName(profile), key);
@@ -186,7 +187,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
   @Override
   public void removeProperty(final String prefix, String key, String profile) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       if (existsSpringConfigFile(profile, profile)) {
         propFilesManager.removeProperty(getApplicationConfigFileLocation(moduleName),
             getAppliCationConfigFileName(profile), prefix, key);
@@ -196,7 +197,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
   @Override
   public void removeProperties(List<String> keys, String profile) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       for (String key : keys) {
         removeProperty(key, profile, moduleName);
       }
@@ -205,7 +206,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
 
   @Override
   public void removePropertiesByPrefix(String prefix, String profile) {
-    for (String moduleName : typeLocationService.getApplicationModules()) {
+    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
       if (existsSpringConfigFile(profile, moduleName)) {
         propFilesManager.removePropertiesByPrefix(getApplicationConfigFileLocation(moduleName),
             getAppliCationConfigFileName(profile), prefix);

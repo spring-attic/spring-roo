@@ -95,7 +95,8 @@ public class AuditOperationsImpl implements AuditOperations {
   @Override
   public void setupAudit(JavaPackage javaPackage) {
 
-    Collection<String> applicationModules = getTypeLocationService().getApplicationModules();
+    Collection<String> applicationModules =
+        getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION);
 
     // Add dependency for each application module
     for (String applicationModule : applicationModules) {

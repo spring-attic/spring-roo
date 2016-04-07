@@ -22,7 +22,7 @@ import org.springframework.roo.project.maven.Pom;
 public interface TypeLocationService {
 
   /**
-   * Attempts to add the specified dependencies into modules that contain a class annotation with @SpringRootApplication. If the dependency already
+   * Attempts to add the specified dependencies into modules that have installed a module feature. If the dependency already
    * exists according to to
    * {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}
    * , the method silently returns. Otherwise the dependency is added.
@@ -31,12 +31,14 @@ public interface TypeLocationService {
    * {@link ProjectMetadata} available, or if the on-disk representation
    * cannot be modified for any reason.
    * 
+   * @param moduleFeatureName the module feature (required)
    * @param dependencies the dependencies to add (required)
    */
-  void addStarterDependencies(Collection<? extends Dependency> dependencies);
+  void addDependencies(ModuleFeatureName moduleFeatureName,
+      Collection<? extends Dependency> dependencies);
 
   /**
-   * Attempts to remove the specified dependencies from modules with a class annotated with @SpringRootApplication. If all the dependencies do
+   * Attempts to remove the specified dependencies from modules that have installed a module feature. If all the dependencies do
    * not exist according to
    * {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method
    * silently returns. Otherwise each located dependency is removed.
@@ -45,9 +47,11 @@ public interface TypeLocationService {
    * {@link ProjectMetadata} available, or if the on-disk representation
    * cannot be modified for any reason.
    * 
+   * @param moduleFeatureName the module feature (required)
    * @param dependencies the dependencies to remove (required)
    */
-  void removeStarterDependencies(Collection<? extends Dependency> dependencies);
+  void removeDependencies(ModuleFeatureName moduleFeatureName,
+      Collection<? extends Dependency> dependencies);
 
   /**
    * Returns a set of {@link ClassOrInterfaceTypeDetails}s that possess the
@@ -152,12 +156,20 @@ public interface TypeLocationService {
   String getTopLevelPackageForModule(Pom module);
 
   /**
-   * Returns the module names of the modules that contain a class annotated with @SpringBootApplication
+   * Returns the modules that have installed a module feature.
    * 
+   * @param moduleFeatureName the module feature (required)
    * @return a non-<code>null</code> collection
    */
-  Collection<String> getApplicationModules();
+  Collection<Pom> getModules(ModuleFeatureName moduleFeatureName);
 
+  /**
+   * Returns the list of module names that have installed a module feature.
+   * 
+   * @param moduleFeatureName the module feature (required)
+   * @return a non-<code>null</code> collection 
+   */
+  Collection<String> getModuleNames(ModuleFeatureName moduleFeatureName);
 
   /**
    * Returns the details of the given Java type from within the user project.
@@ -219,6 +231,16 @@ public interface TypeLocationService {
    * @return a collection of MIDs which represent changed types
    */
   boolean hasTypeChanged(String requestingClass, JavaType javaType);
+
+  /**
+   * Indicates whether the specified module in has installed the module feature.
+   * 
+   * @param module the module to inspect its installed features (required)
+   * @param moduleFeatureName the module feature (required)
+   * @return 
+   */
+  boolean hasModuleFeature(Pom module, ModuleFeatureName moduleFeatureName);
+
 
   /**
    * Indicates whether the given type exists anywhere in the user project
