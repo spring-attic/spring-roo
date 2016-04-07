@@ -1,0 +1,95 @@
+# Create project to be able to test subsequent commands.
+project setup --topLevelPackage aaaa.bbb.cc --multimodule
+
+
+#===================================================================================================================
+# TEST 1: Install security into the project
+#-------------------------------------------------------------------------------------------------------------------
+# Goal:   Test 'security setup' command with a multimodule project
+#
+security setup
+#      
+# Output: Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/config
+#         Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
+#         Updated application:ROOT/pom.xml [added dependency org.springframework.boot:spring-boot-starter-security:]
+#
+# Result: Create SecurityConfiguration.java in package ~.config in the "application" module and add 
+#         spring-boot-starter-security to "application" pom.xml dependencies.                 
+#===================================================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they are      #
+# supposed to interrupt script execution.                                #
+#                                                                        #
+##########################################################################
+
+
+#====================================================================================================================
+# TEST 2: Try to install security again in multimodule project
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if 'security setup' is not available when already installed in the multimodule project.
+#
+#security setup
+#      
+# Output: Command 'security setup' was found but is not currently available (type 'help' then ENTER to 
+#         learn about this command)
+#
+# Result: Stops command execution and shows a message which says command isn't available.                               
+#====================================================================================================================
+
+#====================================================================================================================
+# TEST 3: Try to compile generated project
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if generated SecurityConfiguration has not compilation problems, like bad imports.
+#
+# $ mvn clean compile 
+#      
+# Output: [INFO] BUILD SUCCESS ...
+#
+# Result: Project successfully compiled.                             
+#====================================================================================================================
+
+#====================================================================================================================
+# TEST 4: Try to install multiple security configurations
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test generation of multiple security configurations, one for each application module. That is,
+#         those modules which have a class annotated with @SpringBootApplication.
+#
+# Preparation:
+#
+#     * Generate a new project:
+#
+#       project setup --topLevelPackage aaaa.bbb.cc --multimodule
+#
+#     * Clone aaaa.bbb.cc.CcApplication.java to "service-impl" module, package "aaaa.bbb.cc.service.impl". 
+#       Change file package declaration.
+#
+#     * Install security:
+#
+#       security setup
+#
+# Output: Created service-impl:SRC_MAIN_JAVA/aaaa/bbb/cc/config
+#         Created service-impl:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
+#         Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/config
+#         Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
+#         Updated service-impl:ROOT/pom.xml [added dependency org.springframework.boot:spring-boot-starter-security:]
+#         Updated application:ROOT/pom.xml [added dependency org.springframework.boot:spring-boot-starter-security:]
+#
+# Result: Generates two security configuration classes, one for each application module.                             
+#====================================================================================================================
+
+#====================================================================================================================
+# TEST 5: Try to compile generated project with multiple security configurations
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if generated SecurityConfiguration's has not compilation problems, like bad imports.
+#
+# $ mvn clean compile 
+#      
+# Output: [INFO] BUILD SUCCESS ...
+#
+# Result: Multimodule project successfully compiled with multiple security configurations.                            
+#====================================================================================================================

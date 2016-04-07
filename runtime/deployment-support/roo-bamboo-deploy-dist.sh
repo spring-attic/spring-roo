@@ -650,26 +650,32 @@ if [[ "$COMMAND" = "assembly" ]]; then
             # Entity and entity-field commands
             load_roo script entities-and-entity-fields.roo 
 
-	    	# Repository test
-	    	load_roo_build_and_test script repository-generation-test.roo
+	    	    # Repository test
+	    	    load_roo_build_and_test script repository-generation-test.roo
 
-	    	# Finder tests
-	    	load_roo_build_and_test script finder-autocomplete-test.roo
-	    	load_roo_build_and_test script finder-generation-test.roo
+	    	    # Finder tests
+	    	    load_roo_build_and_test script finder-autocomplete-test.roo
+	    	    load_roo_build_and_test script finder-generation-test.roo
 
-	    	# Service test
-	    	load_roo_build_and_test script service-generation-test.roo
+	    	    # Service test
+	    	    load_roo_build_and_test script service-generation-test.roo
 
             # Complete application
             load_roo_build_and_test script northwind.roo
-	    load_roo_build_and_test script northwind_multimodule.roo
+	          load_roo_build_and_test script northwind_multimodule.roo
 
-	    # Multimodule tests
+	          # Multimodule tests
             load_roo_build_and_test script multimodule-standard-test.roo
             load_roo_build_and_test script multimodule-basic-test.roo
- 	    load_roo_build_and_test script multimodule-jpa-layer-test.roo
- 	    load_roo_build_and_test script multimodule-service-layer-test.roo
+ 	          load_roo_build_and_test script multimodule-jpa-layer-test.roo
+ 	          load_roo_build_and_test script multimodule-service-layer-test.roo
         
+            # Security and audit tests
+            load_roo_build_and_test script security.roo
+            load_roo_build_and_test script security-multimodule.roo
+            load_roo_build_and_test script audit.roo            
+            load_roo_build_and_test script audit-multimodule.roo
+
         # Temporally disabled
 	    
         #load_roo_build_and_test script vote.roo

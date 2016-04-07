@@ -1,0 +1,54 @@
+# Create project to be able to test subsequent commands.
+project setup --topLevelPackage aaaa.bbb.cc
+
+
+#=======================================================================================================
+# TEST 1: Install security into the project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'security setup' command
+#
+security setup
+#      
+# Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/config
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
+#         Updated ROOT/pom.xml [added dependency org.springframework.boot:spring-boot-starter-security:]
+#
+# Result: Create SecurityConfiguration.java in package ~.config and add spring-boot-starter-security to 
+#         pom.xml dependencies.                       
+#=======================================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they are      #
+# supposed to interrupt script execution.                                #
+#                                                                        #
+##########################################################################
+
+
+#=======================================================================================================
+# TEST 2: Try to install security again
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if 'security setup' is not available when already installed in the project.
+#
+#security setup
+#      
+# Output: Command 'security setup' was found but is not currently available (type 'help' then ENTER to 
+#         learn about this command)
+#
+# Result: Stops command execution and shows a message which says command isn't available.                               
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 3: Try to compile generated project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if generated SecurityConfiguration has not compilation problems, like bad imports.
+#
+# $ mvn clean compile 
+#      
+# Output: [INFO] BUILD SUCCESS ...
+#
+# Result: Project successfully compiled.                             
+#=======================================================================================================
