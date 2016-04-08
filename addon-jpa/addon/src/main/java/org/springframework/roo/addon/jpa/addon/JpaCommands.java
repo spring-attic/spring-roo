@@ -2,18 +2,17 @@ package org.springframework.roo.addon.jpa.addon;
 
 import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
-import static org.springframework.roo.model.JpaJavaType.GENERATION_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+import static org.springframework.roo.shell.OptionContexts.FEATURE;
 import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,18 +28,26 @@ import org.springframework.roo.addon.jpa.addon.entity.IdentifierStrategy;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.test.addon.IntegrationTestOperations;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
-import org.springframework.roo.model.*;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.settings.project.ProjectSettingsService;
-import org.springframework.roo.shell.*;
+import org.springframework.roo.shell.CliAvailabilityIndicator;
+import org.springframework.roo.shell.CliCommand;
+import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
+import org.springframework.roo.shell.CliOptionVisibilityIndicator;
+import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.ReflectionUtils;
 
 /**
  * Commands for the JPA add-on to be used by the ROO shell.
@@ -186,11 +193,33 @@ public class JpaCommands implements CommandMarker {
     return true;
   }
 
+  @CliOptionVisibilityIndicator(command = "jpa setup", params = {"module"},
+      help = "Module parameter is not available if there is only one application module")
+  public boolean isModuleVisible(ShellContext shellContext) {
+    if (typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION).size() > 1) {
+      return true;
+    }
+    return false;
+  }
+
+  @CliOptionMandatoryIndicator(params = "module", command = "jpa setup")
+  public boolean isModuleRequired(ShellContext shellContext) {
+    Pom module = projectOperations.getFocusedModule();
+    if (!isModuleVisible(shellContext)
+        || typeLocationService.hasModuleFeature(module, ModuleFeatureName.APPLICATION)) {
+      return false;
+    }
+    return true;
+  }
+
   @CliCommand(value = "jpa setup",
       help = "Install or updates a JPA persistence provider in your project")
   public void installJpa(
       @CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") final OrmProvider ormProvider,
       @CliOption(key = "database", mandatory = true, help = "The database to support") final JdbcDatabase jdbcDatabase,
+      @CliOption(key = "module", mandatory = true,
+          help = "The application module where to install the persistence",
+          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE) Pom module,
       @CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use") final String jndi,
       @CliOption(key = "hostName", mandatory = false, help = "The host name to use") final String hostName,
       @CliOption(key = "databaseName", mandatory = false, help = "The database name to use") final String databaseName,
@@ -203,8 +232,8 @@ public class JpaCommands implements CommandMarker {
       return;
     }
 
-    jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, hostName, databaseName, userName,
-        password, shellContext.getProfile(), shellContext.isForce());
+    jpaOperations.configureJpa(ormProvider, jdbcDatabase, module, jndi, hostName, databaseName,
+        userName, password, shellContext.getProfile(), shellContext.isForce());
   }
 
   /**

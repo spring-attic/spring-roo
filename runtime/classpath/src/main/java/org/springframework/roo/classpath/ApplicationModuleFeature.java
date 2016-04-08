@@ -66,7 +66,8 @@ public class ApplicationModuleFeature implements ModuleFeature {
     for (ClassOrInterfaceTypeDetails cid : getTypeLocationService()
         .findClassesOrInterfaceDetailsWithAnnotation(
             new JavaType("org.springframework.boot.autoconfigure.SpringBootApplication"))) {
-      moduleNames.add(StringUtils.substringBetween(cid.getDeclaredByMetadataId(), "#", ":"));
+      moduleNames.add(StringUtils.defaultString(
+          StringUtils.substringBetween(cid.getDeclaredByMetadataId(), "#", ":"), ""));
     }
     return moduleNames;
   }

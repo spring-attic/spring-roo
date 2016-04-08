@@ -93,9 +93,10 @@ public class JpaOperationsImpl implements JpaOperations {
 
   @Override
   public void configureJpa(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase,
-      final String jndi, final String hostName, final String databaseName, final String userName,
-      final String password, final String profile, final boolean force) {
+      final Pom module, final String jndi, final String hostName, final String databaseName,
+      final String userName, final String password, final String profile, final boolean force) {
 
+    Validate.notNull(module, "Module required");
     Validate.notNull(ormProvider, "ORM provider required");
     Validate.notNull(jdbcDatabase, "JDBC database required");
 
@@ -109,12 +110,12 @@ public class JpaOperationsImpl implements JpaOperations {
     final String stratersXPath = getStarterXPath(getUnwantedOrmProviders(ormProvider));
 
     // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
-    updateDependencies(configuration, ormProvider, jdbcDatabase, stratersXPath, providersXPath,
-        databaseXPath);
+    updateDependencies(module, configuration, ormProvider, jdbcDatabase, stratersXPath,
+        providersXPath, databaseXPath);
 
     // Update Spring Config File with spring.datasource.* domain properties
-    updateApplicationProperties(ormProvider, jdbcDatabase, hostName, databaseName, userName,
-        password, jndi, profile, force);
+    updateApplicationProperties(module.getModuleName(), ormProvider, jdbcDatabase, hostName,
+        databaseName, userName, password, jndi, profile, force);
 
   }
 
@@ -322,7 +323,7 @@ public class JpaOperationsImpl implements JpaOperations {
     return !databaseProperties.isEmpty();
   }
 
-  private void updateApplicationProperties(final OrmProvider ormProvider,
+  private void updateApplicationProperties(final String moduleName, final OrmProvider ormProvider,
       final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName,
       String userName, final String password, String jndi, String profile, boolean force) {
 
@@ -334,13 +335,17 @@ public class JpaOperationsImpl implements JpaOperations {
 
       // Getting current properties
       final String driver =
-          applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_DRIVER, profile);
+          applicationConfigService.getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_DRIVER,
+              profile);
       final String url =
-          applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_URL, profile);
+          applicationConfigService
+              .getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL, profile);
       final String uname =
-          applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
+          applicationConfigService.getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_USERNAME,
+              profile);
       final String pwd =
-          applicationConfigService.getProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
+          applicationConfigService.getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_PASSWORD,
+              profile);
 
       boolean hasChanged = !jdbcDatabase.getDriverClassName().equals(driver);
       hasChanged |= !connectionString.equals(url);
@@ -358,23 +363,25 @@ public class JpaOperationsImpl implements JpaOperations {
       if (userName != null) {
         props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
       } else {
-        applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
+        applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_USERNAME,
+            profile);
       }
       if (password != null) {
         props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
       } else {
-        applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
+        applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_PASSWORD,
+            profile);
       }
 
-      applicationConfigService.addProperties(DATASOURCE_PREFIX, props, profile, force);
+      applicationConfigService.addProperties(moduleName, DATASOURCE_PREFIX, props, profile, force);
 
       // Remove jndi property
-      applicationConfigService.removeProperty(DATASOURCE_PREFIX, JNDI_NAME, profile);
+      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, JNDI_NAME, profile);
 
     } else {
 
       final String jndiProperty =
-          applicationConfigService.getProperty(DATASOURCE_PREFIX, JNDI_NAME);
+          applicationConfigService.getProperty(moduleName, DATASOURCE_PREFIX, JNDI_NAME);
 
       boolean hasChanged =
           jndiProperty == null || !jndiProperty.equals(StringUtils.stripToEmpty(jndi));
@@ -387,13 +394,16 @@ public class JpaOperationsImpl implements JpaOperations {
       Map<String, String> props = new HashMap<String, String>();
       props.put(JNDI_NAME, jndi);
 
-      applicationConfigService.addProperties(DATASOURCE_PREFIX, props, profile, force);
+      applicationConfigService.addProperties(moduleName, DATASOURCE_PREFIX, props, profile, force);
 
       // Remove old properties
-      applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_URL, profile);
-      applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_DRIVER, profile);
-      applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_USERNAME, profile);
-      applicationConfigService.removeProperty(DATASOURCE_PREFIX, DATABASE_PASSWORD, profile);
+      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL, profile);
+      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_DRIVER,
+          profile);
+      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_USERNAME,
+          profile);
+      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_PASSWORD,
+          profile);
 
     }
   }
@@ -407,9 +417,9 @@ public class JpaOperationsImpl implements JpaOperations {
    * @param jdbcDatabase
    * @param startersXPath
    */
-  private void updateDependencies(final Element configuration, final OrmProvider ormProvider,
-      final JdbcDatabase jdbcDatabase, final String startersXPath, final String providersXPath,
-      final String databaseXPath) {
+  private void updateDependencies(final Pom module, final Element configuration,
+      final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String startersXPath,
+      final String providersXPath, final String databaseXPath) {
 
     final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
@@ -460,9 +470,8 @@ public class JpaOperationsImpl implements JpaOperations {
     redundantDependencies.removeAll(requiredDependencies);
 
     // Update the POM
-    getTypeLocationService().removeDependencies(ModuleFeatureName.APPLICATION,
-        redundantDependencies);
-    getTypeLocationService().addDependencies(ModuleFeatureName.APPLICATION, requiredDependencies);
+    getProjectOperations().removeDependencies(module.getModuleName(), redundantDependencies);
+    getProjectOperations().addDependencies(module.getModuleName(), requiredDependencies);
   }
 
   private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {

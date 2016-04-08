@@ -41,41 +41,33 @@ public class PropFileOperationsImpl implements PropFileOperations {
   }
 
   @Override
-  public void addProperty(final String key, final String value, final String profile,
-      final boolean force) {
-    applicationConfigService.addProperty(key, value, profile, force);
+  public void addProperty(final String moduleName, final String key, final String value,
+      final String profile, final boolean force) {
+    applicationConfigService.addProperty(moduleName, key, value, profile, force);
   }
 
   @Override
-  public void removeProperty(String key, String profile) {
-    applicationConfigService.removeProperty(key, profile);
+  public void removeProperty(final String moduleName, String key, String profile) {
+    applicationConfigService.removeProperty(moduleName, key, profile);
 
   }
 
   @Override
-  public void listProperties(String profile) {
-    boolean printedHeader = false;
-    for (String moduleName : typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION)) {
-      Map<String, String> properties = applicationConfigService.getProperties(profile, moduleName);
+  public void listProperties(final String moduleName, String profile) {
+    Map<String, String> properties = applicationConfigService.getProperties(moduleName, profile);
 
-      if (properties.size() > 0) {
-        if (!printedHeader) {
-          printHeader();
-          printedHeader = true;
-        }
-        LOGGER.log(Level.INFO, moduleName + "\n");
-        LOGGER.log(Level.INFO, "#-----------------------------------------------#\n");
-        for (Entry<String, String> property : properties.entrySet()) {
-          LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
-        }
+    if (properties.size() > 0) {
+      printHeader();
 
-      } else {
-        LOGGER.log(Level.INFO, moduleName + "\n");
-        LOGGER.log(Level.INFO, "#-----------------------------------------------#\n");
-        LOGGER.log(Level.INFO, String.format(
-            "WARNING: No properties found on '%s' application config properties file.",
-            applicationConfigService.getSpringConfigLocation(profile)));
+      LOGGER.log(Level.INFO, "#-----------------------------------------------#\n");
+      for (Entry<String, String> property : properties.entrySet()) {
+        LOGGER.log(Level.INFO, property.getKey().concat("=").concat(property.getValue()));
       }
+    } else {
+      LOGGER.log(Level.INFO, "#-----------------------------------------------#\n");
+      LOGGER.log(Level.INFO, String.format(
+          "WARNING: No properties found on '%s' application config properties file.",
+          applicationConfigService.getSpringConfigLocation(profile)));
     }
 
   }

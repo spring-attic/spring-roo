@@ -33,6 +33,11 @@ public final class OptionContexts {
   public static final String UPDATE = "update";
 
   /**
+   * If this string appears in an option context, this converter will return values that have the specified feature, e.g. feature[APPLICATION]
+   */
+  public static final String FEATURE = "feature";
+
+  /**
    * If this string appears in an option context, this converter will update
    * the last used type.
    */
@@ -41,6 +46,8 @@ public final class OptionContexts {
   public static final String UPDATE_PROJECT = "update,project";
 
   public static final String UPDATELAST_INTERFACE = "lastused,interface";
+
+  public static final String APPLICATION_FEATURE = FEATURE + "[APPLICATION]";
 
 
   private OptionContexts() {}

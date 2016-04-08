@@ -6,6 +6,7 @@ import java.util.SortedSet;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Provides JPA configuration and entity operations.
@@ -20,11 +21,12 @@ public interface JpaOperations extends Feature {
   /**
    * This method is responsible for managing all JPA related artifacts
    * (META-INF/persistence.xml, applicationContext.xml, database.properties
-   * and the project pom.xml) for all modules that have a class annotated with @SpringBootApplication
+   * and the project pom.xml) for the specified module
    * 
    * @param ormProvider the ORM provider selected (Hibernate, OpenJPA,
    *            EclipseLink)
    * @param database the database (HSQL, H2, MySql, etc)
+   * @param module the module where to install the persistence
    * @param jndi the JNDI datasource
    * @param hostName the host name where the database is
    * @param databaseName the name of the database
@@ -33,8 +35,9 @@ public interface JpaOperations extends Feature {
    * @param profile string with profile where current jpa persistence will be applied.
    * @param force boolean that forces configuration if exists some previous configuration
    */
-  void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String hostName,
-      String databaseName, String userName, String password, String profile, boolean force);
+  void configureJpa(OrmProvider ormProvider, JdbcDatabase database, Pom module, String jndi,
+      String hostName, String databaseName, String userName, String password, String profile,
+      boolean force);
 
   /**
    * Indicates whether JPA can be installed in the currently focused module.
