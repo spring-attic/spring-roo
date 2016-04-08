@@ -86,13 +86,13 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     if (annotationValues.getEnableJpaAuditing()) {
 
       // Generate the auditorProvider method
-      builder.addMethod(getAuditorProviderMethod());
+      ensureGovernorHasMethod(getAuditorProviderMethod());
 
       // Add @EnableJpaAuditing
-      builder.addAnnotation(new AnnotationMetadataBuilder(ENABLE_JPA_AUDITING).build());
+      ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(ENABLE_JPA_AUDITING));
 
       // Add @Configuration
-      builder.addAnnotation(new AnnotationMetadataBuilder(CONFIGURATION).build());
+      ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONFIGURATION));
 
       // Create a representation of the desired output ITD
       itdTypeDetails = builder.build();

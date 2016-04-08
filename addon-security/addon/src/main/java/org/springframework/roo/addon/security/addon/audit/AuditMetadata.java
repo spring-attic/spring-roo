@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.security.annotations.RooSecurityConfiguration;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -74,23 +75,35 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     this.annotationValues = annotationValues;
 
     // Add audit fields
-    FieldMetadata createdDateField = getCreatedDateField();
-    builder.addField(createdDateField);
-    FieldMetadata modifiedDateField = getModifiedDateField();
-    builder.addField(modifiedDateField);
-    FieldMetadata createdByField = getCreatedByField();
-    builder.addField(createdByField);
-    FieldMetadata modifiedByField = getModifiedByField();
-    builder.addField(modifiedByField);
+    FieldMetadataBuilder createdDateField = getCreatedDateField();
+    ensureGovernorHasField(createdDateField);
+    FieldMetadataBuilder modifiedDateField = getModifiedDateField();
+    ensureGovernorHasField(modifiedDateField);
+    FieldMetadataBuilder createdByField = getCreatedByField();
+    ensureGovernorHasField(createdByField);
+    FieldMetadataBuilder modifiedByField = getModifiedByField();
+    ensureGovernorHasField(modifiedByField);
 
     // Add getters for audit fields
-    builder.addMethod(getDeclaredGetter(createdDateField));
-    builder.addMethod(getDeclaredGetter(modifiedDateField));
-    builder.addMethod(getDeclaredGetter(createdByField));
-    builder.addMethod(getDeclaredGetter(modifiedByField));
+    MethodMetadataBuilder createdDateGetter = getDeclaredGetter(createdDateField);
+    if (createdDateGetter != null) {
+      ensureGovernorHasMethod(getDeclaredGetter(createdDateField));
+    }
+    MethodMetadataBuilder modifiedDateGetter = getDeclaredGetter(modifiedDateField);
+    if (modifiedDateGetter != null) {
+      ensureGovernorHasMethod(getDeclaredGetter(modifiedDateField));
+    }
+    MethodMetadataBuilder createdByGetter = getDeclaredGetter(createdByField);
+    if (createdByGetter != null) {
+      ensureGovernorHasMethod(getDeclaredGetter(createdByField));
+    }
+    MethodMetadataBuilder modifiedByGetter = getDeclaredGetter(modifiedByField);
+    if (modifiedByGetter != null) {
+      ensureGovernorHasMethod(getDeclaredGetter(modifiedByField));
+    }
 
     // Add @EntityListeners annotation
-    builder.addAnnotation(getEntityListenersAnnotation());
+    ensureGovernorIsAnnotated(getEntityListenersAnnotation());
 
     // Build ITD
     itdTypeDetails = builder.build();
@@ -101,7 +114,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
      * 
      * @return FieldMetadataBuilder for building field in ITD
      */
-  private FieldMetadata getCreatedDateField() {
+  private FieldMetadataBuilder getCreatedDateField() {
 
     // Create field annotations
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -134,7 +147,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
             "createdDate"), JdkJavaType.CALENDAR);
 
-    return fieldBuilder.build();
+    return fieldBuilder;
   }
 
   /**
@@ -142,7 +155,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * 
    * @return FieldMetadataBuilder for building field in ITD
    */
-  private FieldMetadata getModifiedDateField() {
+  private FieldMetadataBuilder getModifiedDateField() {
 
     // Create field annotations
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -175,7 +188,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
             "modifiedDate"), JdkJavaType.CALENDAR);
 
-    return fieldBuilder.build();
+    return fieldBuilder;
   }
 
   /**
@@ -183,7 +196,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * 
    * @return FieldMetadataBuilder for building field in ITD
    */
-  private FieldMetadata getCreatedByField() {
+  private FieldMetadataBuilder getCreatedByField() {
 
     // Create field annotations
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -209,7 +222,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
             "createdBy"), JavaType.STRING);
 
-    return fieldBuilder.build();
+    return fieldBuilder;
   }
 
   /**
@@ -217,7 +230,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * 
    * @return FieldMetadataBuilder for building field in ITD
    */
-  private FieldMetadata getModifiedByField() {
+  private FieldMetadataBuilder getModifiedByField() {
 
     // Create field annotations
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -243,7 +256,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
             "modifiedBy"), JavaType.STRING);
 
-    return fieldBuilder.build();
+    return fieldBuilder;
   }
 
   /**
@@ -272,16 +285,11 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    *            located)
    * @return the method corresponding to an accessor, or null if not found
    */
-  private MethodMetadataBuilder getDeclaredGetter(final FieldMetadata field) {
+  private MethodMetadataBuilder getDeclaredGetter(final FieldMetadataBuilder field) {
     Validate.notNull(field, "Field required");
 
     // Compute the mutator method name
-    final JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(field);
-
-    // See if the type itself declared the accessor
-    if (governorHasMethod(methodName)) {
-      return null;
-    }
+    final JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(field.build());
 
     // Decide whether we need to produce the accessor method
     if (!Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier())) {
