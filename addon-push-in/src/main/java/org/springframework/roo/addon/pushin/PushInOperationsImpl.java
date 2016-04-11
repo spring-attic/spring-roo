@@ -75,12 +75,15 @@ public class PushInOperationsImpl implements PushInOperations {
   public void pushInAll(boolean force) {
 
     // Getting all JavaTypes on current project
-    Collection<JavaType> allDeclaredTypes =
-        getTypeLocationService().getTypesForModule(getProjectOperations().getFocusedModule());
+    for (String moduleName : getProjectOperations().getModuleNames()) {
+      Collection<JavaType> allDeclaredTypes =
+          getTypeLocationService().getTypesForModule(
+              getProjectOperations().getPomFromModuleName(moduleName));
 
-    for (JavaType declaredType : allDeclaredTypes) {
-      // Push-in all content from .aj files to .java files
-      pushInClass(declaredType, force);
+      for (JavaType declaredType : allDeclaredTypes) {
+        // Push-in all content from .aj files to .java files
+        pushInClass(declaredType, force);
+      }
     }
 
     if (!force) {
@@ -96,8 +99,12 @@ public class PushInOperationsImpl implements PushInOperations {
   public void pushIn(JavaPackage specifiedPackage, JavaType klass, String method, boolean force) {
 
     // Getting all JavaTypes on current project
-    Collection<JavaType> allDeclaredTypes =
-        getTypeLocationService().getTypesForModule(getProjectOperations().getFocusedModule());
+    Collection<JavaType> allDeclaredTypes = new ArrayList<JavaType>();
+
+    for (String moduleName : getProjectOperations().getModuleNames()) {
+      allDeclaredTypes.addAll(getTypeLocationService().getTypesForModule(
+          getProjectOperations().getPomFromModuleName(moduleName)));
+    }
 
     // Checking current class
     if (klass != null) {
@@ -223,7 +230,7 @@ public class PushInOperationsImpl implements PushInOperations {
     // Getting current class .java file metadata ID
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(klass,
-            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+            getPathResolver().getPath(klass.getModule(), Path.SRC_MAIN_JAVA));
 
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
@@ -398,7 +405,7 @@ public class PushInOperationsImpl implements PushInOperations {
     // Getting current class .java file metadata ID
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(klass,
-            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+            getPathResolver().getPath(klass.getModule(), Path.SRC_MAIN_JAVA));
 
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
