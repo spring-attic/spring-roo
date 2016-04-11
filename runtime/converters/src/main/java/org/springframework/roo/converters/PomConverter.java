@@ -38,7 +38,7 @@ public class PomConverter implements Converter<Pom> {
    */
   static final String FOCUSED_INDICATOR = ".";
 
-  final Pattern pattern = Pattern.compile(FEATURE + "[(.+?)]");
+  final Pattern pattern = Pattern.compile(FEATURE + "\\[(.+?)\\]");
 
   @Reference
   ProjectOperations projectOperations;
@@ -79,39 +79,32 @@ public class PomConverter implements Converter<Pom> {
       Validate.notNull(result, String.format("Module %s not found", moduleName));
     }
 
+    // Validate feature
     if (optionContext != null) {
       final Matcher matcher = pattern.matcher(optionContext);
       if (matcher.find()) {
         ModuleFeatureName moduleFeatureName = ModuleFeatureName.valueOf(matcher.group(1));
 
-        // Validate selected module matches the module feature specified in option context.
-        // If it does not match, gets the module that has installed the feature
-        result = getValidModule(result, moduleFeatureName);
+        if (!typeLocationService.hasModuleFeature(result, moduleFeatureName)) {
 
-        if (result == null) {
-          throw new IllegalStateException(String.format(
-              "Not exists a module with %s feature installed", matcher.group(1)));
+          // Get valid module
+          List<Pom> modules = (List<Pom>) typeLocationService.getModules(moduleFeatureName);
+          if (modules.size() == 0) {
+            throw new RuntimeException(String.format("ERROR: Not exists a module with %s feature",
+                moduleFeatureName));
+          } else {
+            result = modules.get(0);
+          }
         }
       }
+    }
 
-      if (StringUtils.contains(optionContext, UPDATE)
-          || StringUtils.contains(optionContext, UPDATELAST)) {
-        lastUsed.setTypeNotVerified(null, result);
-      }
+    if (StringUtils.contains(optionContext, UPDATE)
+        || StringUtils.contains(optionContext, UPDATELAST)) {
+      lastUsed.setTypeNotVerified(null, result);
     }
     return result;
-  }
 
-  private Pom getValidModule(Pom module, ModuleFeatureName moduleFeatureName) {
-
-    if (typeLocationService.hasModuleFeature(module, moduleFeatureName)) {
-      return module;
-    }
-    List<Pom> modules = (List) typeLocationService.getModules(moduleFeatureName);
-    if (modules.size() >= 1) {
-      return modules.get(0);
-    }
-    return null;
   }
 
 

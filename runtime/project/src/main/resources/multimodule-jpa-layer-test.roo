@@ -236,44 +236,37 @@ repository jpa add --entity model:~.Address --interface service-api:~.AddressRep
 ####################################################################
 
 #====================================================================
-# TEST 14: Configure persistence for several application modules                  
+# TEST 14: Configure persistence for an application module                  
 #--------------------------------------------------------------------
 # Goal:    Test if database properties are added into the
-#          application.properties file of all modules that include 
-#          a class annotated with @SpringBootAPplication
+#          application.properties file of the module specified
 #
 module create --moduleName otherapplication --parent ~
 # Copy ExampleApplication class from application module into the new module
-# jpa setup --provider HIBERNATE --database ORACLE --force
+# jpa setup --provider HIBERNATE --database ORACLE --force --module otherapplication
 #       
-# Output:  Created otherapplication:SRC_MAIN_RESOURCES
-#          Created otherapplication:SRC_MAIN_RESOURCES/application.properties
-#          Updated application:ROOT/src/main/resources/application.properties
-#          Updated application:ROOT/pom.xml [removed dependency org.hsqldb:hsqldb:; added dependency com.oracle:ojdbc14:10.2.0.5; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
+# Output:  Updated otherapplication/src/main/resources/application.properties
+#          Updated otherapplication/pom.xml [removed dependency org.hsqldb:hsqldb:; added dependency com.oracle:ojdbc14:10.2.0.5; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
 #          Updated otherapplication:ROOT/pom.xml [added dependencies org.springframework.boot:spring-boot-starter-data-jpa:, com.oracle:ojdbc14:10.2.0.5]
 #
 # Result:  Creates an application.properties file into the new module,
 #          and adds database properties in the application.properties 
-#          file of application and otherapplication modules                                        
+#          file of otherapplication module                                       
 #====================================================================
 
 
 #====================================================================
-# TEST 15: Configure new persistence profile for several application
-#          modules                  
+# TEST 15: Configure new persistence profile for an application
+#          module                 
 #--------------------------------------------------------------------
 # Goal:    Test if database properties are added into a new
-#          application.properties profile for all modules that include 
-#          a class annotated with @SpringBootAPplication
+#          application.properties profile for application module
 #
-# jpa setup --provider HIBERNATE --database POSTGRES --force --profile dev
+# jpa setup --provider HIBERNATE --database POSTGRES --module application --force --profile dev 
 #       
-# Output:  Created otherapplication:SRC_MAIN_RESOURCES/application-dev.properties
-#          Created application:ROOT/src/main/resources/application-dev.properties
-#          Updated otherapplication:ROOT/pom.xml [removed dependency com.oracle:ojdbc14:10.2.0.5; added dependency org.postgresql:postgresql:; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
+# Output:  Created application:ROOT/src/main/resources/application-dev.properties
 #          Updated application:ROOT/pom.xml [removed dependency com.oracle:ojdbc14:10.2.0.5; added dependency org.postgresql:postgresql:; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
 #
 # Result:  Creates the application-dev.properties file in application 
-#          and otherapplication modules, and adds the database 
-#          properties to them                             
+#          module, and adds the database properties                             
 #====================================================================

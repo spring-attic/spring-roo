@@ -21,6 +21,18 @@ public interface ServiceOperations {
 
   /**
    * Generates new service interface and its implementation for some specific
+   * domain entity and repository.
+   * 
+   * @param domainType entity related with service
+   * @param repositoryType repository related with service
+   * @param interfaceType service interface to generate
+   * @param implType service implementation to generate. 
+   */
+  void addService(JavaType domainType, JavaType repositoryType, JavaType interfaceType,
+      JavaType implType);
+
+  /**
+   * Generates new service interface and its implementation for some specific
    * domain entity.
    * 
    * @param domainType entity related with service

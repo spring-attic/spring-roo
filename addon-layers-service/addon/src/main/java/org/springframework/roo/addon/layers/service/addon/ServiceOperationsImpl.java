@@ -4,6 +4,7 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
+import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -98,34 +99,57 @@ public class ServiceOperationsImpl implements ServiceOperations {
   @Override
   public void addService(final JavaType domainType, final JavaType interfaceType,
       final JavaType implType) {
-    Validate.notNull(interfaceType,
-        "ERROR: Interface type required to be able to generate service.");
-    Validate.notNull(domainType, "ERROR: Domain type required to be able to generate service.");
 
-    // Check if current entity has valid repository
+    JavaType repositoryType = null;
+
+    // Getting all repositories
     Set<ClassOrInterfaceTypeDetails> repositories =
         typeLocationService
             .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
 
-    ClassOrInterfaceTypeDetails repositoryDetails = null;
+    // Find repository related to entity
     for (ClassOrInterfaceTypeDetails repository : repositories) {
       AnnotationAttributeValue<JavaType> entityAttr =
           repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
 
       if (entityAttr != null && entityAttr.getValue().equals(domainType)) {
-        repositoryDetails = repository;
-        break;
+        repositoryType = repository.getType();
       }
     }
 
-    if (repositoryDetails == null) {
+    if (repositoryType == null) {
       LOGGER
           .log(
               Level.INFO,
               String
                   .format(
-                      "INFO: Service '%s' will not be generated because you didn't generate a @RooJpaRepository for entity '%s'. Use 'repository' commands to generate a valid repository and then try again.",
-                      interfaceType.getSimpleTypeName(), domainType.getSimpleTypeName()));
+                      "ERROR: Entity '%s' does not have any repository generated. Use 'repository' commands to generate a valid repository and then try again.",
+                      domainType.getSimpleTypeName()));
+      return;
+    }
+
+    addService(domainType, repositoryType, interfaceType, implType);
+  }
+
+  @Override
+  public void addService(final JavaType domainType, final JavaType repositoryType,
+      final JavaType interfaceType, final JavaType implType) {
+    Validate.notNull(interfaceType,
+        "ERROR: Interface type required to be able to generate service.");
+    Validate.notNull(domainType, "ERROR: Domain type required to be able to generate service.");
+
+    // Check if current entity is related with the repository
+    ClassOrInterfaceTypeDetails repository = typeLocationService.getTypeDetails(repositoryType);
+
+
+    if (repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA) == null) {
+      LOGGER
+          .log(
+              Level.INFO,
+              String
+                  .format(
+                      "INFO: Repository '%s' is not annotated with @RooJpaRepository. Use 'repository' commands to generate a valid repository and then try again.",
+                      repositoryType.getSimpleTypeName()));
       return;
     }
 
@@ -133,7 +157,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
     createServiceInterface(domainType, interfaceType);
 
     // Generating service implementation
-    createServiceImplementation(interfaceType, implType, repositoryDetails);
+    createServiceImplementation(interfaceType, implType, repository);
   }
 
   /**

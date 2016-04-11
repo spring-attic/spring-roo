@@ -164,6 +164,6 @@ public final class PhysicalTypeIdentifierNamingUtils {
    * @return module name or null if metadataId is not a valid metadata identification string
    */
   public static final String getModuleFromIdentificationString(String metadataId) {
-    return StringUtils.substringBetween(metadataId, "#", ":");
+    return StringUtils.defaultString(StringUtils.substringBetween(metadataId, "#", ":"), "");
   }
 }

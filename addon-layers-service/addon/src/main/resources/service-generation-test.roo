@@ -13,29 +13,15 @@ field number --fieldName age --type int
 field date --fieldName birthday --type java.util.Date
 field set --fieldName pets --type ~.Pet
 field reference --fieldName pet --type ~.Pet
+repository jpa all --package ~.repository
+
 
 #=========================================================================================================
-# TEST 1: Generate service without repository             
-#---------------------------------------------------------------------------------------------------------
-# Goal:   Fail if service entity does not have a repository generated
-#
-service add --entity ~.Pet --interface ~.PetService --class ~.PetServiceImplementation
-service all --apiPackage ~.service --implPackage ~.service.impl
-#      
-# Output:  INFO: Service 'PetService' will not be generated because you didn't generate a @RooJpaRepository for entity 'Pet'. Use 'repository' commands to generate a valid repository and then try again.
-#          INFO: Service 'OwnerService' will not be generated because you didn't generate a @RooJpaRepository for entity 'Owner'. Use 'repository' commands to generate a valid repository and then try again.
-#          INFO: Service 'PetService' will not be generated because you didn't generate a @RooJpaRepository for entity 'Pet'. Use 'repository' commands to generate a valid repository and then try again.
-#
-# Result:  Informs that entity needs a repository                                                             
-#=========================================================================================================
-
-#=========================================================================================================
-# TEST 2: Generate a service for a read only entity        
+# TEST 1: Generate a service for a read only entity        
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create a service with read only operations
 #
-repository jpa all --package ~.repository
-service add --entity ~.Pet --interface ~.PetServiceExample
+service add --entity ~.Pet --repository org.example.repository.PetRepository --interface ~.PetServiceExample
 #      
 # Output:  Created SRC_MAIN_JAVA/org/example/PetServiceExample.java
 #          Created SRC_MAIN_JAVA/org/example/PetServiceExampleImpl.java
@@ -49,11 +35,11 @@ service add --entity ~.Pet --interface ~.PetServiceExample
 #=========================================================================================================
 
 #=========================================================================================================
-# TEST 3: Generate a service for a read and write entity        
+# TEST 2: Generate a service for a read and write entity        
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create a service with read and write operations
 #
-service add --entity ~.Owner --interface ~.OwnerServiceExample
+service add --entity ~.Owner --repository org.example.repository.OwnerRepository --interface ~.OwnerServiceExample
 #      
 # Output:  Created SRC_MAIN_JAVA/org/example/OwnerServiceExample.java
 #          Created SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl.java
@@ -71,7 +57,7 @@ service add --entity ~.Owner --interface ~.OwnerServiceExample
 #=========================================================================================================
 
 #=========================================================================================================
-# TEST 4: Generate all services      
+# TEST 3: Generate all services      
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create services for all entities
 #
@@ -93,7 +79,7 @@ service all --apiPackage ~.service --implPackage ~.service.impl
  
 
 #=========================================================================================================
-# TEST 5: Generate a finder with several conditions        
+# TEST 4: Generate a finder with several conditions        
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create a service operation to use the generated finder 
 #
@@ -116,7 +102,7 @@ finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
 #=========================================================================================================
 
 #=========================================================================================================
-# TEST 6:  Generate a finder with ignore case options       
+# TEST 5:  Generate a finder with ignore case options       
 #---------------------------------------------------------------------------------------------------------
 # Goal:  Create a service operation to use a finder with ignore case and all ignore case options enabled
 #
@@ -124,6 +110,8 @@ finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -138,7 +126,7 @@ finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 
  
 #=========================================================================================================
-# TEST 7:  Generate a finder with an order clause and all ignore case option
+# TEST 6:  Generate a finder with an order clause and all ignore case option
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder that orders the results by several 
 #          properties and all ignore case option is enabled
@@ -147,6 +135,8 @@ finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -161,7 +151,7 @@ finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
  
  
 #=========================================================================================================
-# TEST 8:  Generate a finder with condition operators
+# TEST 7:  Generate a finder with condition operators
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with property operators
 #
@@ -169,6 +159,8 @@ finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPe
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -187,7 +179,7 @@ finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPe
 
 
 #=========================================================================================================
-# TEST 9:  Generate a finder that returns an only result
+# TEST 8:  Generate a finder that returns an only result
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with a limiting expression that returns an Owner
 #
@@ -195,6 +187,8 @@ finder add --class ~.Owner --name findDistinctFirst1ByPet
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -208,7 +202,7 @@ finder add --class ~.Owner --name findDistinctFirst1ByPet
 #=========================================================================================================
 
 #=========================================================================================================
-# TEST 10: Generate a finder with unlimited number of results
+# TEST 9: Generate a finder with unlimited number of results
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finders that returns a list of Owners
 #
@@ -216,6 +210,8 @@ finder add --class ~.Owner --name findFirst100ByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -230,7 +226,7 @@ finder add --class ~.Owner --name findFirst100ByAge
   
 
 #=========================================================================================================
-# TEST 11: Generate a finder that returns an entity property list
+# TEST 10: Generate a finder that returns an entity property list
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder that returns a list of subject property java type
 #
@@ -238,6 +234,8 @@ finder add --class ~.Owner --name findDistinctActiveByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -252,7 +250,7 @@ finder add --class ~.Owner --name findDistinctActiveByAge
 
 
 #=========================================================================================================
-# TEST 12: Generate a finder that returns an entity property result
+# TEST 11: Generate a finder that returns an entity property result
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder that returns the property java type
 #
@@ -260,6 +258,8 @@ finder add --class ~.Owner --name findTopPetNameByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -273,7 +273,7 @@ finder add --class ~.Owner --name findTopPetNameByAge
 #=========================================================================================================
   
 #=========================================================================================================
-# TEST 13: Generate a finder without parameters
+# TEST 12: Generate a finder without parameters
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder that does not receive any parameter
 #
@@ -281,6 +281,8 @@ finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsN
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -296,7 +298,7 @@ finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsN
   
 
 #=========================================================================================================
-# TEST 14: Generate a finder without operators
+# TEST 13: Generate a finder without operators
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder without condition operators
 #
@@ -304,6 +306,8 @@ finder add --class ~.Owner --name findPetByFirstNameAndActiveAndBirthdayAndPetOr
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -323,7 +327,7 @@ finder add --class ~.Owner --name findPetByFirstNameAndActiveAndBirthdayAndPetOr
 
  
 #=========================================================================================================
-# TEST 15: Generate a finder which operators need a parameter
+# TEST 14: Generate a finder which operators need a parameter
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with condition operators
 #
@@ -331,6 +335,8 @@ finder add --class ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstN
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -348,7 +354,7 @@ finder add --class ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstN
 #========================================================================================================= 
  
 #=========================================================================================================
-# TEST 16: Generate a finder which operators need several parameter
+# TEST 15: Generate a finder which operators need several parameter
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder which condition operators need several parameters
 #
@@ -356,6 +362,8 @@ finder add --class ~.Owner --name findFirstAgeByAgeBetweenAndBirthdayBetween
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -372,7 +380,7 @@ finder add --class ~.Owner --name findFirstAgeByAgeBetweenAndBirthdayBetween
 #========================================================================================================= 
   
 #=========================================================================================================
-# TEST 17: Generate finders with a property with several operators
+# TEST 16: Generate finders with a property with several operators
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder which condition property has several operators
 #
@@ -380,6 +388,8 @@ finder add --class ~.Owner --name findAgeByAgeBetweenAndAgeIsOrAgeLessThan
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -397,7 +407,7 @@ finder add --class ~.Owner --name findAgeByAgeBetweenAndAgeIsOrAgeLessThan
 
 
 #=========================================================================================================
-# TEST 18: Generate finders with an In operator
+# TEST 17: Generate finders with an In operator
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with an In operator
 #
@@ -405,6 +415,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExample_Roo_Service.aj
+#          Updated SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/service/OwnerService_Roo_Service.aj
 #
@@ -424,6 +436,17 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 ####				MANUAL  TESTS
 #################################################################
 
+#=========================================================================================================
+# TEST 18: Generate service for an entity which repository does not match repository parameter         
+#---------------------------------------------------------------------------------------------------------
+# Goal:   Fail if repository entity does not match with the specified repository
+#
+#service add --entity ~.Pet --repository org.example.repository.OwnerRepository --interface ~.PetService --class ~.PetServiceImplementation
+#      
+# Output:  --repository parameter must  be the repository associated to the entity specified in --entity parameter. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)
+#
+# Result:  Informs that repository is not valid                                                           
+#=========================================================================================================
 
 
 #=========================================================================================================

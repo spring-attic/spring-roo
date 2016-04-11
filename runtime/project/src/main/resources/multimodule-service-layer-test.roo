@@ -19,7 +19,7 @@ repository jpa all --package repository:org.example.repository
 #          module and service implementation class is generated in 
 #          implPackage module
 #
-service add --entity ~.Owner --interface service-api:~.OwnerService --class service-impl:~.OwnerServiceImpl
+service add --entity ~.Owner --repository repository:org.example.repository.OwnerRepository --interface service-api:~.OwnerService --class service-impl:~.OwnerServiceImpl
 #       
 # Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService.java
 #          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl.java
@@ -127,7 +127,7 @@ finder add --class model:~.Owner --name findTopByAge
 # 
 entity jpa --class model:~.Adress --readOnly
 repository jpa all --package repository:org.example.repository
-# service add --entity ~.Adress --interface service-api:~.AdreesService
+# service add --entity ~.Adress --repository repository:org.example.repository.AddressRepository --interface service-api:~.AddressService
 # Add repository dependency in service-api
 #       
 # Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressService.java
