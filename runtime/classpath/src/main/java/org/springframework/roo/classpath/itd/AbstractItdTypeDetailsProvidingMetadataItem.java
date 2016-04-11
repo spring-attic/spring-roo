@@ -155,8 +155,12 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
    * @since 2.0
    */
   protected final void ensureGovernorHasField(final FieldMetadataBuilder fieldMetadata) {
-    if (governorTypeDetails.getField(fieldMetadata.getFieldName()) == null) {
-      builder.addField(fieldMetadata);
+    try {
+      if (governorTypeDetails.getField(fieldMetadata.getFieldName()) == null) {
+        builder.addField(fieldMetadata);
+      }
+    } catch (NullPointerException e) {
+      throw new NullPointerException(e.getLocalizedMessage());
     }
   }
 
@@ -167,9 +171,14 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
    * @since 2.0
    */
   protected final void ensureGovernorHasMethod(final MethodMetadataBuilder methodMetadata) {
-    if (governorTypeDetails.getMethod(methodMetadata.getMethodName(),
-        AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes())) == null) {
-      builder.addMethod(methodMetadata);
+
+    try {
+      if (governorTypeDetails.getMethod(methodMetadata.getMethodName(),
+          AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes())) == null) {
+        builder.addMethod(methodMetadata);
+      }
+    } catch (NullPointerException e) {
+      throw new NullPointerException(e.getLocalizedMessage());
     }
   }
 

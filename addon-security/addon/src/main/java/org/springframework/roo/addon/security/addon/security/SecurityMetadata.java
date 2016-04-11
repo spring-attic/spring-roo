@@ -1,18 +1,24 @@
 package org.springframework.roo.addon.security.addon.security;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.security.annotations.RooSecurityConfiguration;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.*;
+import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.ImportRegistrationResolver;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -37,6 +43,7 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   private final JavaType authenticationAuditorAware;
   private final SecurityConfigurationAnnotationValues annnotationValues;
+  private final ImportRegistrationResolver importResolver;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -82,6 +89,7 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
     this.authenticationAuditorAware = authenticationAuditorAware;
     this.annnotationValues = annotationValues;
+    this.importResolver = builder.getImportRegistrationResolver();
 
     if (annotationValues.getEnableJpaAuditing()) {
 
@@ -106,29 +114,25 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    *         introduced (or null if undeclared and not introduced)
    */
   private MethodMetadataBuilder getAuditorProviderMethod() {
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
     // Compute the relevant auditorProvider method name
-    final JavaSymbolName methodName = new JavaSymbolName("auditorProvider");
-
-    // See if the type itself declared the method
-    if (governorHasMethod(methodName)) {
-      return null;
-    }
-
-    builder.getImportRegistrationResolver().addImports(authenticationAuditorAware, AUDITOR_AWARE);
-
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
     bodyBuilder.appendFormalLine("return new " + "AuthenticationAuditorAware();");
 
-    MethodMetadataBuilder method = new MethodMetadataBuilder(getId());
-    method.setModifier(Modifier.PUBLIC);
-    method.setMethodName(methodName);
-    method.setBodyBuilder(bodyBuilder);
-    method.setReturnType(new JavaType(AUDITOR_AWARE.getFullyQualifiedTypeName(), 0, DataType.TYPE,
-        null, Arrays.asList(JavaType.STRING)));
-    method.addAnnotation(new AnnotationMetadataBuilder(BEAN).build());
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("auditorProvider"),
+            new JavaType(AUDITOR_AWARE.getNameIncludingTypeParameters(false, importResolver), 0,
+                DataType.TYPE, null, Arrays.asList(JavaType.STRING)),
+            parameterTypes, parameterNames, bodyBuilder);
 
-    return method;
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(BEAN).build());
+
+    return methodBuilder;
   }
 }
