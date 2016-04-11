@@ -128,9 +128,8 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("auditorProvider"),
-            new JavaType(AUDITOR_AWARE.getNameIncludingTypeParameters(false, importResolver), 0,
-                DataType.TYPE, null, Arrays.asList(JavaType.STRING)), parameterTypes,
-            parameterNames, bodyBuilder);
+            new JavaType(AUDITOR_AWARE.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+                Arrays.asList(JavaType.STRING)), parameterTypes, parameterNames, bodyBuilder);
 
     methodBuilder.addAnnotation(new AnnotationMetadataBuilder(BEAN).build());
 

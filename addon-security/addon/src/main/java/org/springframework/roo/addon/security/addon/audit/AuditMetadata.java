@@ -29,8 +29,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private AuditAnnotationValues annotationValues;
-  private final ImportRegistrationResolver importResolver;
+  private final AuditAnnotationValues annotationValues;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -73,7 +72,6 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
             identifier);
 
     this.annotationValues = annotationValues;
-    this.importResolver = builder.getImportRegistrationResolver();
 
     // Add audit fields
     FieldMetadataBuilder createdDateField = getCreatedDateField();
@@ -126,7 +124,6 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
           new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
       columnAnnotation.addStringAttribute("name", this.annotationValues.getCreatedDateColumn());
       annotations.add(columnAnnotation);
-      builder.getImportRegistrationResolver().addImports(JpaJavaType.COLUMN);
     }
 
     AnnotationMetadataBuilder createdDateAnnotation =
@@ -141,8 +138,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Create field
     FieldMetadataBuilder fieldBuilder =
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
-            "createdDate"), new JavaType(JdkJavaType.CALENDAR.getNameIncludingTypeParameters(false,
-            importResolver)));
+            "createdDate"), JdkJavaType.CALENDAR);
 
     return fieldBuilder;
   }
@@ -163,7 +159,6 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
           new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
       columnAnnotation.addStringAttribute("name", this.annotationValues.getModifiedDateColumn());
       annotations.add(columnAnnotation);
-      builder.getImportRegistrationResolver().addImports(JpaJavaType.COLUMN);
     }
 
     AnnotationMetadataBuilder createdDateAnnotation =
@@ -178,8 +173,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Create field
     FieldMetadataBuilder fieldBuilder =
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
-            "modifiedDate"), new JavaType(JdkJavaType.CALENDAR.getNameIncludingTypeParameters(
-            false, importResolver)));
+            "modifiedDate"), JdkJavaType.CALENDAR);
 
     return fieldBuilder;
   }
@@ -199,7 +193,6 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       AnnotationMetadataBuilder columnAnnotation =
           new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
       columnAnnotation.addStringAttribute("name", this.annotationValues.getCreatedByColumn());
-      builder.getImportRegistrationResolver().addImports(JpaJavaType.COLUMN);
       annotations.add(columnAnnotation);
     }
 
@@ -210,8 +203,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Create field
     FieldMetadataBuilder fieldBuilder =
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
-            "createdBy"), new JavaType(JavaType.STRING.getNameIncludingTypeParameters(false,
-            importResolver)));
+            "createdBy"), JavaType.STRING);
 
     return fieldBuilder;
   }
@@ -231,7 +223,6 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       AnnotationMetadataBuilder columnAnnotation =
           new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
       columnAnnotation.addStringAttribute("name", this.annotationValues.getModifiedByColumn());
-      builder.getImportRegistrationResolver().addImports(JpaJavaType.COLUMN);
       annotations.add(columnAnnotation);
     }
 
@@ -242,8 +233,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Create field
     FieldMetadataBuilder fieldBuilder =
         new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
-            "modifiedBy"), new JavaType(JavaType.STRING.getNameIncludingTypeParameters(false,
-            importResolver)));
+            "modifiedBy"), JavaType.STRING);
 
     return fieldBuilder;
   }
