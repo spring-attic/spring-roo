@@ -4,8 +4,6 @@ import static org.springframework.roo.model.RooJavaType.*;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.*;
 import org.springframework.roo.classpath.details.*;
@@ -41,7 +39,7 @@ public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetad
   @Override
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
-    super.setDependsOnGovernorBeingAClass(false);
+    super.setDependsOnGovernorBeingAClass(true);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -102,27 +100,5 @@ public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetad
 
   public String getProvidesType() {
     return AuditMetadata.getMetadataIdentiferType();
-  }
-
-  public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (TypeLocationService) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on SecurityOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
   }
 }

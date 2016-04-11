@@ -122,14 +122,15 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
     // Compute the relevant auditorProvider method name
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("return new " + "AuthenticationAuditorAware();");
+    bodyBuilder.appendFormalLine(String.format("return new %s();",
+        authenticationAuditorAware.getNameIncludingTypeParameters(false, importResolver)));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("auditorProvider"),
             new JavaType(AUDITOR_AWARE.getNameIncludingTypeParameters(false, importResolver), 0,
-                DataType.TYPE, null, Arrays.asList(JavaType.STRING)),
-            parameterTypes, parameterNames, bodyBuilder);
+                DataType.TYPE, null, Arrays.asList(JavaType.STRING)), parameterTypes,
+            parameterNames, bodyBuilder);
 
     methodBuilder.addAnnotation(new AnnotationMetadataBuilder(BEAN).build());
 

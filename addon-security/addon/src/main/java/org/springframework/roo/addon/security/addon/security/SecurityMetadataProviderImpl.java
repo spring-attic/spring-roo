@@ -4,8 +4,6 @@ import static org.springframework.roo.model.RooJavaType.*;
 import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.*;
 import org.springframework.roo.classpath.details.*;
@@ -126,25 +124,4 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
     return SecurityMetadata.getMetadataIdentiferType();
   }
 
-  public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (TypeLocationService) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on SecurityOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
-  }
 }
