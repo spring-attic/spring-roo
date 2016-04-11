@@ -146,9 +146,18 @@ public interface ProjectOperations {
   /**
    * Adds the given module as a dependency of the currently focused module.
    * 
-   * @param moduleName the name of the module to act upon (required)
+   * @param moduleToDependUpon the name of the module to act upon (required)
    */
-  void addModuleDependency(String moduleName);
+  void addModuleDependency(String moduleToDependUpon);
+
+  /**
+   * Adds to the given module the dependency with a module.
+   * 
+   * @param moduleName the name of the module where to install the dependency (required)
+   * @param moduleToDependUpon the name of the module to act upon (required)
+   */
+  void addModuleDependency(String moduleName, String moduleToDependUpon);
+
 
   /**
    * Attempts to add the specified plugin repositories. If all the

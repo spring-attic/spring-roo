@@ -157,7 +157,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
     createServiceInterface(domainType, interfaceType);
 
     // Generating service implementation
-    createServiceImplementation(interfaceType, implType, repository);
+    createServiceImplementation(interfaceType, implType, repository, domainType);
   }
 
   /**
@@ -201,6 +201,9 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     // Write service interface on disk
     typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
+
+    // Add dependencies between modules
+    projectOperations.addModuleDependency(interfaceType.getModule(), domainType.getModule());
   }
 
   /**
@@ -208,12 +211,14 @@ public class ServiceOperationsImpl implements ServiceOperations {
    * 
    * @param interfaceType
    * @param implType
+   * @param domainType 
    */
   private void createServiceImplementation(final JavaType interfaceType, JavaType implType,
-      ClassOrInterfaceTypeDetails repository) {
+      ClassOrInterfaceTypeDetails repository, JavaType domainType) {
     Validate.notNull(interfaceType,
         "ERROR: Interface should be provided to be able to generate its implementation");
     Validate.notNull(interfaceType.getModule(), "ERROR: Interface module is required");
+    Validate.notNull(domainType, "ERROR: Domain type required to generate service");
 
     // Generating implementation JavaType if needed
     if (implType == null) {
@@ -261,6 +266,11 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     // Write service implementation on disk
     typeManagementService.createOrUpdateTypeOnDisk(implTypeBuilder.build());
+
+    // Add dependencies between modules
+    projectOperations.addModuleDependency(implType.getModule(), interfaceType.getModule());
+    projectOperations.addModuleDependency(implType.getModule(), repository.getName().getModule());
+    projectOperations.addModuleDependency(implType.getModule(), domainType.getModule());
   }
 
   /**

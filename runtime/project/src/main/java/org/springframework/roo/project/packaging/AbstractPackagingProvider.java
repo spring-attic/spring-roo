@@ -364,7 +364,8 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
    */
   protected String getProjectName(final String nullableProjectName, final String module,
       final JavaPackage topLevelPackage) {
-    String packageName = StringUtils.defaultIfEmpty(nullableProjectName, module);
+    String packageName =
+        StringUtils.defaultIfEmpty(nullableProjectName, StringUtils.replace(module, "-", "."));
     return StringUtils.defaultIfEmpty(packageName, topLevelPackage.getLastElement());
   }
 

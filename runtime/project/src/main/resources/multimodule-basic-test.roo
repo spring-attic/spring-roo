@@ -239,11 +239,6 @@ module create --moduleName integration-impl --packaging WAR --artifactId integra
 #			 </modules>                                                           
 #====================================================================
 
-
-####################################################################
-#					MANUAL TEST
-####################################################################
-
 #====================================================================
 # TEST 8:  Focus on a module                                
 #--------------------------------------------------------------------
@@ -269,7 +264,106 @@ module focus --moduleName ~
 #====================================================================
 
 #====================================================================
-# TEST 10:  Create a module that is already defined                            
+# TEST 10: Generate a repository                            
+#--------------------------------------------------------------------
+# Goal:    Test if model dependency is added to repository module pom
+#
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+entity jpa --class model:~.Owner
+repository jpa add --entity model:~.Owner --interface repository:org.example.repository.OwnerRep
+#       
+# Output:  ...
+#          Updated repository:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT; added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
+#          ...
+#
+# Result:  Adds model module as a dependency in repository pom.xml                                                            
+#====================================================================
+
+#====================================================================
+# TEST 11:  Generate all repositories                              
+#--------------------------------------------------------------------
+# Goal:    Validate that model dependency is not added again to  
+#          repository module pom
+#
+entity jpa --class model:~.Pet
+repository jpa all --package repository:org.example.repository
+#       
+# Output:  INFO: Already exists a repository associated to the entity 'Owner'. Only one repository per entity is allowed.
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepository.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepositoryCustom.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepositoryImpl.java
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepository_Roo_Jpa_Repository.aj
+#          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepositoryImpl_Roo_Jpa_Repository_Impl.aj
+#
+# Result:  Since model dependency is already in repository, it is 
+#          not included again                                                          
+#====================================================================
+
+#====================================================================
+# TEST 12: Create a repository in model module                            
+#--------------------------------------------------------------------
+# Goal:    Validates that a module can have a dependency with itself
+#
+entity jpa --class model:~.City 
+repository jpa add --entity ~.City --interface ~.repository.CityRep
+#       
+# Output:  Created model:SRC_MAIN_JAVA/org/example/model/repository
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep.java
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepCustom.java
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepImpl.java
+#          Updated model:ROOT/pom.xml [added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepImpl_Roo_Jpa_Repository_Impl.aj
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep_Roo_Jpa_Repository.aj
+#
+# Result:  Since the dependency would be with itself, it is not added                                                          
+#====================================================================
+
+
+#====================================================================
+# TEST 13: Create a service                            
+#--------------------------------------------------------------------
+# Goal:    Test if module dependencies are added to service interface 
+#          and implementation modules 
+#
+service add --entity model:~.Owner --repository repository:org.example.repository.OwnerRep --interface api:~.OwnerService --class impl:~.OwnerServiceImpl
+#       
+# Output:  Created api:SRC_MAIN_JAVA/org/example/api/OwnerService.java
+#          Created impl:SRC_MAIN_JAVA/org/example/impl/OwnerServiceImpl.java
+#          Updated api:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT]
+#          Updated impl:ROOT/pom.xml [added dependency org.example:api:0.1.0.BUILD-SNAPSHOT; added dependency org.example:repository:0.1.0.BUILD-SNAPSHOT; added dependency org.example:model:0.1.0.BUILD-SNAPSHOT]
+#          Created impl:SRC_MAIN_JAVA/org/example/impl/OwnerServiceImpl_Roo_Service_Impl.aj
+#          Created api:SRC_MAIN_JAVA/org/example/api/OwnerService_Roo_Service.aj
+#
+# Result:  Model dependency is added to service-api and service-impl 
+#          modules. Repository and service-api are included as 
+#          dependencies into service-impl module                                                              
+#====================================================================
+
+
+#====================================================================
+# TEST 14:  Generate service in the same module                             
+#--------------------------------------------------------------------
+# Goal:    Test if module dependencies are added to service module 
+#
+module create --moduleName otherservice --parent ~
+service all --apiPackage otherservice:~ --implPackage otherservice:~
+#       
+# Output:  ...
+#          Updated otherservice:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT; added dependency org.example:repository:0.1.0.BUILD-SNAPSHOT;]
+#          ... 
+#
+# Result:  Model and repository dependencies are added to otherservice
+#          module. Since api and implementation are in the same 
+#          module a dependency between them is not added                                                               
+#====================================================================
+
+####################################################################
+#					MANUAL TEST
+####################################################################
+
+
+#====================================================================
+# TEST 15:  Create a module that is already defined                            
 #--------------------------------------------------------------------
 # Goal:    Avoid to create a module with a name that already is used 
 #          to refer other module
@@ -282,7 +376,7 @@ module focus --moduleName ~
 #====================================================================
 
 #====================================================================
-# TEST 11:  Focus on an incorrect module                                
+# TEST 16:  Focus on an incorrect module                                
 #--------------------------------------------------------------------
 # Goal:    Fails if module does not exist
 #
@@ -295,7 +389,7 @@ module focus --moduleName ~
 #====================================================================
 
 #====================================================================
-# TEST 12:  Create a module inside a JAR/WAR module without using  
+# TEST 17:  Create a module inside a JAR/WAR module without using  
 #          parent option                         
 #--------------------------------------------------------------------
 # Goal:    Fails to create a module inside a JAR/WAR module if parent 
@@ -312,7 +406,7 @@ module focus --moduleName ~
 
 
 #====================================================================
-# TEST 13:  Create a module inside a JAR module                          
+# TEST 18:  Create a module inside a JAR module                          
 #--------------------------------------------------------------------
 # Goal:    Fails to create a module inside a JAR module
 #
@@ -324,7 +418,7 @@ module focus --moduleName ~
 #====================================================================
 
 #====================================================================
-# TEST 14:  Create a module inside a WAR module                          
+# TEST 19:  Create a module inside a WAR module                          
 #--------------------------------------------------------------------
 # Goal:    Fails to create a module inside a WAR module
 #
@@ -336,7 +430,7 @@ module focus --moduleName ~
 #====================================================================
 
 #====================================================================
-# TEST 15:  Create a module with incorrect parent                         
+# TEST 20:  Create a module with incorrect parent                         
 #--------------------------------------------------------------------
 # Goal:    Fails to create a module if parent does not exist
 #
@@ -345,4 +439,30 @@ module focus --moduleName ~
 # Output:  --parent parameter must be a POM module
 #
 # Result:  Informs us that parent option must be a POM module                                                          
+#====================================================================
+
+
+#====================================================================
+# TEST 21: Create a service in the same module as its entity                       
+#--------------------------------------------------------------------
+# Goal:    Validate that a circular dependency between modules is 
+#          not allowed 
+# 
+entity jpa --class model:~.Address
+repository jpa all --package repository:~
+# service add --entity model:~.Pet --repository repository:org.example.repository.PetRepository  --interface model:~.api.PetService --class model:~.impl.PetServiceImpl
+#       
+# Output:  Created model:SRC_MAIN_JAVA/org/example/model/api
+#          Created model:SRC_MAIN_JAVA/org/example/model/api/PetService.java
+#          Created model:SRC_MAIN_JAVA/org/example/model/impl
+#          Created model:SRC_MAIN_JAVA/org/example/model/impl/PetServiceImpl.java
+#          Undo create model:SRC_MAIN_JAVA/org/example/model/impl/PetServiceImpl.java
+#          Undo create model:SRC_MAIN_JAVA/org/example/model/impl
+#          Undo create model:SRC_MAIN_JAVA/org/example/model/api/PetService.java
+#          Undo create model:SRC_MAIN_JAVA/org/example/model/api
+#          Undo manage ROOT/.roo/config/project.properties
+#          ERROR: Circular dependency detected, 'repository' already depends on 'model'.
+#
+# Result:  Informs that since repository has a dependency with 
+#          module, module can not have a dependency with repository                                                              
 #====================================================================

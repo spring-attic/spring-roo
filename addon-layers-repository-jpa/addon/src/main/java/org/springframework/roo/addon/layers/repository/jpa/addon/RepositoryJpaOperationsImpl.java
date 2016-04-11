@@ -174,6 +174,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // using QueryDSL
     addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage());
 
+    // Add dependencies between modules
+    getProjectOperations().addModuleDependency(interfaceType.getModule(), domainType.getModule());
+
     // Add querydsl dependency
     final Element configuration = XmlUtils.getConfiguration(getClass());
     final List<Element> dependencies =

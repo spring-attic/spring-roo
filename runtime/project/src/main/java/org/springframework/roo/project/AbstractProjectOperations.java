@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -334,20 +333,28 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   }
 
   public void addModuleDependency(final String moduleToDependUpon) {
+    addModuleDependency(getFocusedModuleName(), moduleToDependUpon);
+  }
+
+  public void addModuleDependency(final String moduleName, final String moduleToDependUpon) {
+    Validate.isTrue(isProjectAvailable(moduleName),
+        "Dependency modification prohibited at this time");
+    Validate.notNull(moduleToDependUpon, "Dependency required");
+
     if (StringUtils.isBlank(moduleToDependUpon)) {
       return; // No need to ever add a dependency upon the root POM
     }
-    final Pom focusedModule = getFocusedModule();
-    if (focusedModule != null && StringUtils.isNotBlank(focusedModule.getModuleName())
-        && !moduleToDependUpon.equals(focusedModule.getModuleName())) {
+    final Pom module = getPomFromModuleName(moduleName);
+    if (module != null && StringUtils.isNotBlank(module.getModuleName())
+        && !moduleToDependUpon.equals(module.getModuleName())) {
       final ProjectMetadata dependencyProject = getProjectMetadata(moduleToDependUpon);
       if (dependencyProject != null) {
         final Pom dependencyPom = dependencyProject.getPom();
-        if (!dependencyPom.getPath().equals(focusedModule.getPath())) {
+        if (!dependencyPom.getPath().equals(module.getPath())) {
           final Dependency dependency = dependencyPom.asDependency(COMPILE);
-          if (!focusedModule.hasDependencyExcludingVersion(dependency)) {
-            addDependency(focusedModule.getModuleName(), dependency);
-            detectCircularDependency(focusedModule, dependencyPom);
+          if (!module.hasDependencyExcludingVersion(dependency)) {
+            detectCircularDependency(module, dependencyPom);
+            addDependency(module.getModuleName(), dependency);
           }
         }
       }
@@ -502,12 +509,12 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     updateBuildPlugin(moduleName, plugin);
   }
 
-  // TODO doesn't seem to work
-  private void detectCircularDependency(final Pom module1, final Pom module2) {
-    if (module1.isDependencyRegistered(module2.asDependency(COMPILE), false)
-        && module2.isDependencyRegistered(module1.asDependency(COMPILE), false)) {
-      throw new IllegalStateException("Circular dependency detected, '" + module1.getModuleName()
-          + "' depends on '" + module2.getModuleName() + "' and vice versa");
+
+  private void detectCircularDependency(final Pom module, final Pom dependencyModule) {
+    if (dependencyModule.isDependencyRegistered(module.asDependency(COMPILE), false)) {
+      throw new IllegalStateException("ERROR: Circular dependency detected, '"
+          + dependencyModule.getModuleName() + "' already depends on '" + module.getModuleName()
+          + "'.");
     }
   }
 
