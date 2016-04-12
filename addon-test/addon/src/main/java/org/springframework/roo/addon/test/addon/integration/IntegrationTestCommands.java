@@ -29,7 +29,7 @@ public class IntegrationTestCommands implements CommandMarker {
   @Reference
   private TypeLocationService typeLocationService;
 
-  @CliAvailabilityIndicator({"test integration", "test unit"})
+  @CliAvailabilityIndicator({"test integration"})
   public boolean isPersistentClassAvailable() {
     return integrationTestOperations.isIntegrationTestInstallationPossible();
   }
@@ -60,29 +60,6 @@ public class IntegrationTestCommands implements CommandMarker {
             "Cannot create an integration test for an entity named 'Test' or 'TestCase' under any circumstances");
 
     integrationTestOperations.newIntegrationTest(entity, transactional);
-  }
-
-  @CliCommand(value = "test unit", help = "Creates a unit test class for the specified class")
-  public void newMockTest(
-      @CliOption(key = "class", mandatory = true, optionContext = UPDATE_PROJECT,
-          help = "The name of the project class which this unit test class is targeting") final JavaType projectType,
-      @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true",
-          help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
-
-    // Check if specified type exists in the project
-    String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(projectType);
-    if (physicalTypeIdentifier == null) {
-      throw new IllegalArgumentException(String.format(
-          "The class '%s' doesn't exists in the project. Please, specify an existing class",
-          projectType));
-    }
-
-    if (!permitReservedWords) {
-      ReservedWords.verifyReservedWordsNotPresent(projectType);
-    }
-
-    integrationTestOperations.newUnitTest(projectType);
   }
 
 }
