@@ -14,7 +14,7 @@ import java.util.SortedSet;
 public interface ApplicationConfigService {
 
   /**
-   * Adds some property to the application config file in all application modules.
+   * Adds some property to the application config file of the specified module.
    * 
    * @param moduleName module where configuration will be located. 
    * @param key string that identifies the property
@@ -25,7 +25,7 @@ public interface ApplicationConfigService {
   void addProperty(String moduleName, String key, String value, String profile, boolean force);
 
   /**
-   * Adds some property to application config file in all application modules including given prefix
+   * Adds some property to application config file of the specified module including given prefix
    * 
    * @param moduleName module where configuration will be located. 
    * @param prefix string that will be included as property prefix
@@ -38,7 +38,7 @@ public interface ApplicationConfigService {
       boolean force);
 
   /**
-   * Adds the contents of the properties map to application config file in all application modules.
+   * Adds the contents of the properties map to application config file of the specified module.
    * 
    * @param moduleName module where configuration will be located. 
    * @param properties the map of properties to add
@@ -49,7 +49,7 @@ public interface ApplicationConfigService {
       boolean force);
 
   /**
-   * Adds the contents of the properties map to application config file in all application modules using
+   * Adds the contents of the properties map to application config file of the specified module using
    * the same prefix to every properties included on map.
    * 
    * @param moduleName module where configuration will be located. 
@@ -62,7 +62,7 @@ public interface ApplicationConfigService {
       String profile, boolean force);
 
   /**
-   * Changes the specified property in all application modules.
+   * Changes the specified property in the application config file of the specified module.
    * 
    * @param moduleName module where configuration will be located. 
    * @param key the property key to update (required)
@@ -73,7 +73,7 @@ public interface ApplicationConfigService {
   void updateProperty(String moduleName, String key, String value, String profile, boolean force);
 
   /**
-   * Changes the specified property in all application modules including prefix.
+   * Changes the specified property in the application config file of the specified module including prefix.
    * 
    * @param moduleName module where configuration will be located. 
    * @param prefix included on given property
@@ -86,7 +86,7 @@ public interface ApplicationConfigService {
       boolean force);
 
   /**
-   * Update the contents of the properties map to application config file in all application modules.
+   * Update the contents of the properties map to application config file of the specified module.
    * 
    * @param moduleName module where configuration will be located. 
    * @param properties the map of properties to update
@@ -97,13 +97,13 @@ public interface ApplicationConfigService {
       boolean force);
 
   /**
-   * Adds the contents of the properties map to application config file in all application modules using
+   * Adds the contents of the properties map to application config file of the specified module using
    * the same prefix to every properties included on map.
    * 
    * @param moduleName module where configuration will be located. 
    * @param prefix included for every properties
-   * @param properties the map of properties to update
-   * @param profile string with profile where configuration will be located.
+   *of properties to update
+   * @param profile string with profile where configur @param properties the map ation will be located.
    * @param force boolean that indicates if is necessary to force operation
    */
   void updateProperties(String moduleName, String prefix, Map<String, String> properties,
@@ -111,7 +111,7 @@ public interface ApplicationConfigService {
 
 
   /**
-   * Retrieves all property key/value pairs from the specified property file in a module,
+   * Retrieves all property key/value pairs from the application config file of the specified module,
    * throwing an exception if the file does not exist.
    * 
    * @param moduleName module where configuration will be located. 
@@ -123,7 +123,7 @@ public interface ApplicationConfigService {
   Map<String, String> getProperties(String moduleName, String profile);
 
   /**
-   * Retrieves all property keys from the specified property in all application modules, throwing an
+   * Retrieves all property keys from the application config file of the specified module, throwing an
    * exception if the file does not exist.
    * 
    * @param moduleName module where configuration will be located. 
@@ -136,7 +136,7 @@ public interface ApplicationConfigService {
   SortedSet<String> getPropertyKeys(String moduleName, boolean includeValues, String profile);
 
   /**
-   * Retrieves all property keys from the specified property in all application modules, throwing an
+   * Retrieves all property keys from the application config file of the specified module, throwing an
    * exception if the file does not exist.
    * 
    * @param moduleName module where configuration will be located. 
@@ -152,8 +152,8 @@ public interface ApplicationConfigService {
       String profile);
 
   /**
-   * Retrieves the specified property, returning null if the property or file
-   * does not exist. This property is the first instance found in any application module.
+   * Retrieves the specified property from the application config file of the module, returning null if the property or file
+   * does not exist. 
    *
    * @param moduleName module where configuration will be located. 
    * @param key the property key to retrieve (required)
@@ -165,8 +165,8 @@ public interface ApplicationConfigService {
   String getProperty(String moduleName, String key, String profile);
 
   /**
-   * Retrieves the specified property, returning null if the property
-   * does not exist. This property is the first instance found in any application module.
+   * Retrieves the specified property from the application config file of the module, returning null if the property
+   * does not exist. 
    * 
    * @param moduleName module where configuration will be located. 
    * @param prefix included on given property
@@ -179,7 +179,7 @@ public interface ApplicationConfigService {
   String getProperty(String moduleName, String prefix, String key, String profile);
 
   /**
-   * Removes the specified property in all application modules.
+   * Removes the specified property from the application config file of the module.
    * 
    * @param moduleName module where configuration will be located. 
    * @param profile string with profile where configuration will be located.
@@ -188,7 +188,7 @@ public interface ApplicationConfigService {
   void removeProperty(String moduleName, String key, String profile);
 
   /**
-   * Removes the specified property in all application modules including prefix.
+   * Removes the specified property from the application config file of the module, including prefix.
    * 
    * @param moduleName module where configuration will be located. 
    * @param prefix included on given property key
@@ -198,7 +198,7 @@ public interface ApplicationConfigService {
   void removeProperty(String moduleName, String prefix, String key, String profile);
 
   /**
-   * Removes the specified properties in all application modules.
+   * Removes the specified properties from the application config file of the module.
    * 
    * @param moduleName module where configuration will be located. 
    * @param keys list of property keys to remove (required)
@@ -207,7 +207,7 @@ public interface ApplicationConfigService {
   void removeProperties(String moduleName, List<String> keys, String profile);
 
   /**
-   * Removes the specified properties in all application modules.
+   * Removes the specified properties from the application config file of the module.
    * 
    * @param moduleName module where configuration will be located. 
    * @param prefix that identifies property to be removed
@@ -216,7 +216,7 @@ public interface ApplicationConfigService {
   void removePropertiesByPrefix(String moduleName, String prefix, String profile);
 
   /**
-   * Method that returns current location of Spring Config file of a module
+   * Method that returns current location of Spring Config file of the specified module
    * (if user has not modified it should return src/main/resources/application.properties)
    * 
    * @param moduleName module where configuration will be located. 
@@ -226,7 +226,7 @@ public interface ApplicationConfigService {
   String getSpringConfigLocation(String moduleName);
 
   /**
-   * Method that returns current location of Spring Config file of a module
+   * Method that returns current location of Spring Config file of the specified module
    * (if user has not modified it should return src/main/resources/application-profile.properties)
    * 
    * @param moduleName module where configuration will be located. 
@@ -237,7 +237,7 @@ public interface ApplicationConfigService {
   String getSpringConfigLocation(String moduleName, String profile);
 
   /**
-   * Method that checks if Spring config file exists in a module. Uses getSpringConfigLocation method to
+   * Method that checks if Spring config file exists in the specified module. Uses getSpringConfigLocation method to
    * obtain location.
    * 
    * @param moduleName module where configuration will be located. 
@@ -247,7 +247,7 @@ public interface ApplicationConfigService {
   boolean existsSpringConfigFile(String moduleName);
 
   /**
-   * Method that checks if Spring config file exists for an existing profile in a module. Uses 
+   * Method that checks if Spring config file exists for an existing profile in the specified module. Uses 
    * getSpringConfigLocation method to obtain location.
    * 
    * @param moduleName module where configuration will be located. 
