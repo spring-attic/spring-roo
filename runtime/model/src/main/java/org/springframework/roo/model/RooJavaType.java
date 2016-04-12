@@ -94,6 +94,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.security.annotations.RooSecurityConfiguration");
   public static final JavaType ROO_AUDIT = new JavaType(
       "org.springframework.roo.addon.security.annotations.RooAudit");
+  public static final JavaType ROO_UNIT_TEST = new JavaType(
+      "org.springframework.roo.addon.test.annotations.RooUnitTest");
 
   /**
    * Constructor is private to prevent instantiation

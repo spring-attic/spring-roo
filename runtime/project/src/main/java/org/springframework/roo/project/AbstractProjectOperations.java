@@ -629,11 +629,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
   public boolean isFeatureInstalled(final String... featureNames) {
     for (final String featureName : featureNames) {
-      if (!isFeatureInstalled(featureName)) {
-        return false;
+      if (isFeatureInstalled(featureName)) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
   public boolean isFocusedProjectAvailable() {

@@ -14,6 +14,7 @@ import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -89,6 +90,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   private MemberDetailsScanner memberDetailsScanner;
 
+  private List<MethodMetadata> accesorMethods;
+
+  private List<MethodMetadata> mutatorMethods;
+
   /**
    * Constructor
    * 
@@ -127,6 +132,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     this.declaredFields = declaredFields;
     this.interfaceMethods = interfaceMethods;
     this.memberDetailsScanner = memberDetailsScanner;
+    this.accesorMethods = new ArrayList<MethodMetadata>();
+    this.mutatorMethods = new ArrayList<MethodMetadata>();
 
     // Add getters and setters
     for (final Entry<FieldMetadata, JavaSymbolName> entry : declaredFields.entrySet()) {
@@ -153,6 +160,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
         accessorMethod.setBodyBuilder(getGaeAccessorBody(field, hiddenIdFieldName));
         mutatorMethod.setBodyBuilder(getGaeMutatorBody(field, hiddenIdFieldName));
       }
+
+      // Add to mutators and accesors list
+      this.accesorMethods.add(accessorMethod.build());
+      this.mutatorMethods.add(mutatorMethod.build());
 
       builder.addMethod(accessorMethod);
       builder.addMethod(mutatorMethod);
@@ -564,6 +575,24 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     }
 
     return false;
+  }
+
+  /**
+   * Returns a list with the mutator methods of the class requesting the metadata
+   * 
+   * @return List<MethodMetadata> with mutator methods of the class
+   */
+  public List<MethodMetadata> getMutatorMethods() {
+    return this.mutatorMethods;
+  }
+
+  /**
+   * Returns a list with the accesor methods of the class requesting the metadata
+   * 
+   * @return List<MethodMetadata> with accesor methods of the class
+   */
+  public List<MethodMetadata> getAccesorMethods() {
+    return this.accesorMethods;
   }
 
   @Override
