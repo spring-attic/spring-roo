@@ -1,6 +1,7 @@
 package org.springframework.roo.converters;
 
 import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
+import static org.springframework.roo.shell.OptionContexts.FEATURE;
 import static org.springframework.roo.shell.OptionContexts.UPDATE;
 import static org.springframework.roo.shell.OptionContexts.UPDATELAST;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
@@ -8,11 +9,14 @@ import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -40,6 +44,9 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
    * level Java package.
    */
   public static final String TOP_LEVEL_PACKAGE_SYMBOL = "~";
+
+  final Pattern pattern = Pattern.compile(FEATURE + "\\[(.+?)\\]");
+
 
   @Reference
   FileManager fileManager;
@@ -93,33 +100,53 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
       return false;
     }
 
-    final Pom targetModule;
-    final String heading;
-    final String prefix;
-    final String formattedPrefix;
+    Pom targetModule = null;
+    String heading = "";
+    String prefix = "";
+    String formattedPrefix = "";
     if (existingData != null && existingData.contains(MODULE_PATH_SEPARATOR)) {
       // Looking for a type in another module
       final String targetModuleName =
           existingData.substring(0, existingData.indexOf(MODULE_PATH_SEPARATOR));
-      targetModule = projectOperations.getPomFromModuleName(targetModuleName);
-      heading = "";
-      prefix = targetModuleName + MODULE_PATH_SEPARATOR;
-      formattedPrefix = decorate(targetModuleName + MODULE_PATH_SEPARATOR, FG_CYAN);
+
+      // Validate feature
+      if (validateModule(projectOperations.getPomFromModuleName(targetModuleName), optionContext)) {
+        targetModule = projectOperations.getPomFromModuleName(targetModuleName);
+        heading = "";
+        prefix = targetModuleName + MODULE_PATH_SEPARATOR;
+        formattedPrefix = decorate(targetModuleName + MODULE_PATH_SEPARATOR, FG_CYAN);
+      }
     } else {
-      // Looking for a type in the currently focused module
-      targetModule = projectOperations.getFocusedModule();
-      heading = targetModule.getModuleName();
-      prefix = "";
-      formattedPrefix = "";
+
+      // Validate module has installed the features required
+      if (validateModule(projectOperations.getFocusedModule(), optionContext)) {
+
+        // Looking for a type in the currently focused module
+        targetModule = projectOperations.getFocusedModule();
+        heading = targetModule.getModuleName();
+        prefix = "";
+        formattedPrefix = "";
+      }
     }
 
-    addCompletionsForOtherModuleNames(completions, targetModule);
+    addCompletionsForOtherModuleNames(completions, targetModule, optionContext);
 
-    if (!"pom".equals(targetModule.getPackaging())) {
+    if (targetModule != null && !"pom".equals(targetModule.getPackaging())) {
       addCompletionsForPackagesInTargetModule(completions, targetModule, heading, prefix,
           formattedPrefix);
     }
     return false;
+  }
+
+  private boolean validateModule(Pom module, String optionContext) {
+    if (optionContext != null) {
+      final Matcher matcher = pattern.matcher(optionContext);
+      if (matcher.find()) {
+        ModuleFeatureName moduleFeatureName = ModuleFeatureName.valueOf(matcher.group(1));
+        return typeLocationService.hasModuleFeature(module, moduleFeatureName);
+      }
+    }
+    return true;
   }
 
   private void addCompletionsForPackagesInTargetModule(final Collection<Completion> completions,
@@ -138,14 +165,26 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
   }
 
   private void addCompletionsForOtherModuleNames(final Collection<Completion> completions,
-      final Pom targetModule) {
-    for (final Pom pom : projectOperations.getPoms()) {
+      final Pom targetModule, String optionContext) {
+
+    for (final Pom pom : getValidModules(optionContext)) {
       if (StringUtils.isNotBlank(pom.getModuleName())
-          && !pom.getModuleName().equals(targetModule.getModuleName())) {
+          && (targetModule == null || !pom.getModuleName().equals(targetModule.getModuleName()))) {
         completions.add(new Completion(pom.getModuleName() + MODULE_PATH_SEPARATOR, decorate(
             pom.getModuleName() + MODULE_PATH_SEPARATOR, FG_CYAN), "Modules", 0));
       }
     }
+  }
+
+  private Collection<Pom> getValidModules(String optionContext) {
+    if (optionContext != null) {
+      final Matcher matcher = pattern.matcher(optionContext);
+      if (matcher.find()) {
+        ModuleFeatureName moduleFeatureName = ModuleFeatureName.valueOf(matcher.group(1));
+        return typeLocationService.getModules(moduleFeatureName);
+      }
+    }
+    return projectOperations.getPoms();
   }
 
   private String getTopLevelPackage(final Pom module) {

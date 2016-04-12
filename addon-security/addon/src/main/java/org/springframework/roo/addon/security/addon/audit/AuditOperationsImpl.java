@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.*;
@@ -96,21 +97,31 @@ public class AuditOperationsImpl implements AuditOperations {
   @Override
   public void setupAudit(JavaPackage javaPackage) {
 
-    Collection<String> applicationModules =
-        getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION);
+    // If package is not defined, get the top level package of the application module
+    if (javaPackage == null) {
+      Pom module = getProjectOperations().getFocusedModule();
 
-    // Add dependency for each application module
-    for (String applicationModule : applicationModules) {
-
-      // Add dependencies to selected pom.xml
-      updateDependenciesToSpecifiedModule(applicationModule);
-
-      // Create class for being aware of changes to entities
-      createAuditorAware(javaPackage, applicationModule);
-
-      // Update @RooSecurityConfiguration with enableJpaAuditing
-      updateRooSecurityAnnotation();
+      if (!getTypeLocationService().hasModuleFeature(module, ModuleFeatureName.APPLICATION)) {
+        List<Pom> modules =
+            (List<Pom>) getTypeLocationService().getModules(ModuleFeatureName.APPLICATION);
+        if (modules.size() == 0) {
+          throw new RuntimeException(String.format("ERROR: Not found a module with %s feature",
+              ModuleFeatureName.APPLICATION));
+        }
+        module = modules.get(0);
+      }
+      javaPackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
     }
+
+    // Add dependencies to selected pom.xml
+    updateDependenciesToSpecifiedModule(javaPackage.getModule());
+
+    // Create class for being aware of changes to entities
+    createAuditorAware(javaPackage);
+
+    // Update @RooSecurityConfiguration with enableJpaAuditing
+    updateRooSecurityAnnotation();
+
   }
 
   @Override
@@ -149,6 +160,8 @@ public class AuditOperationsImpl implements AuditOperations {
    */
   private void updateDependenciesToSpecifiedModule(String moduleName) {
 
+    Validate.notNull(moduleName, "Module required");
+
     // Parse the configuration.xml file
     final Element configuration = XmlUtils.getConfiguration(getClass());
     final List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -165,25 +178,19 @@ public class AuditOperationsImpl implements AuditOperations {
        * of the user who make changes to entities.
        * 
        * @param javaPackage
-  * @param applicationModule 
        */
-  private void createAuditorAware(JavaPackage javaPackage, String applicationModule) {
+  private void createAuditorAware(JavaPackage javaPackage) {
 
-    String packageName = null;
+    Validate.notNull(javaPackage, "JavaPackage required");
 
-    if (javaPackage == null) {
-      packageName =
-          getProjectOperations().getTopLevelPackage(applicationModule)
-              .getFullyQualifiedPackageName();
-    } else {
-      packageName = javaPackage.getFullyQualifiedPackageName();
-    }
+    String packageName = javaPackage.getFullyQualifiedPackageName();
 
     final JavaType authenticationAuditorType =
-        new JavaType(String.format("%s.AuthenticationAuditorAware", packageName), applicationModule);
+        new JavaType(String.format("%s.AuthenticationAuditorAware", packageName),
+            javaPackage.getModule());
     final String physicalPath =
         getTypeLocationService().getPhysicalTypeCanonicalPath(authenticationAuditorType,
-            LogicalPath.getInstance(Path.SRC_MAIN_JAVA, applicationModule));
+            LogicalPath.getInstance(Path.SRC_MAIN_JAVA, javaPackage.getModule()));
 
     // Include implementation for AuditionAware from template
     InputStream inputStream = null;

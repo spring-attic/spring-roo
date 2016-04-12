@@ -604,11 +604,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     final Pom pom = getPomFromModuleName(moduleName);
     if (pom != null) {
       if (StringUtils.isBlank(moduleName)) {
-        return new JavaPackage(pom.getGroupId());
+        return new JavaPackage(pom.getGroupId(), moduleName);
       } else {
         // Module package
         return new JavaPackage(pom.getGroupId().concat(".")
-            .concat(pom.getArtifactId().replace("-", ".")));
+            .concat(pom.getArtifactId().replace("-", ".")), moduleName);
       }
     }
     return null;

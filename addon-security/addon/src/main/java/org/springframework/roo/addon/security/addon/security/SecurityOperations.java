@@ -2,6 +2,7 @@ package org.springframework.roo.addon.security.addon.security;
 
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.maven.Pom;
 
 /**
  * Interface for {@link SecurityOperationsImpl}.
@@ -16,5 +17,5 @@ public interface SecurityOperations extends Feature {
 
   boolean isSecurityInstallationPossible();
 
-  void installSecurity();
+  void installSecurity(Pom module);
 }

@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.*;
@@ -55,23 +56,19 @@ public class SecurityOperationsImpl implements SecurityOperations {
   }
 
   @Override
-  public void installSecurity() {
+  public void installSecurity(Pom module) {
+
+    Validate.notNull(module, "Module required");
 
     // Parse the configuration.xml file
     final Element configuration = XmlUtils.getConfiguration(getClass());
 
-    Collection<String> applicationModules =
-        getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION);
+    // Add dependencies to POM
+    updateDependencies(configuration, module.getModuleName());
 
-    // Add dependency for each application module
-    for (String applicationModule : applicationModules) {
+    // Create security config class
+    createSecurityConfigClass(getProjectOperations().getPomFromModuleName(module.getModuleName()));
 
-      // Add dependencies to POM
-      updateDependencies(configuration, applicationModule);
-
-      // Create security config class
-      createSecurityConfigClass(getProjectOperations().getPomFromModuleName(applicationModule));
-    }
   }
 
   @Override
