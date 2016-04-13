@@ -232,3 +232,10 @@ audit setup
 
 // Add audit to Category entity
 audit add --entity ~.domain.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
+
+// Add tests
+test unit --class ~.domain.CustomerOrder
+test unit --class ~.domain.Category
+test unit --class ~.repository.CustomerOrderRepository
+test unit --class ~.service.api.CustomerOrderService
+test unit --class ~.service.impl.CustomerServiceImpl
