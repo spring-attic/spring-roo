@@ -17,7 +17,7 @@ import org.springframework.roo.model.*;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Metadata for {@link RooSecurityConfiguration}.
+ * Metadata for {@link RooAudit}.
  * <p>
  * 
  * @author Sergio Clares
@@ -111,7 +111,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
      * Builds createdDate field for storing entity's created date 
      * 
-     * @return FieldMetadataBuilder for building field in ITD
+     * @return FieldMetadataBuilder for building field into ITD
      */
   private FieldMetadataBuilder getCreatedDateField() {
 
@@ -146,7 +146,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Builds modifiedDate field for storing entity's last modified date 
    * 
-   * @return FieldMetadataBuilder for building field in ITD
+   * @return FieldMetadataBuilder for building field into ITD
    */
   private FieldMetadataBuilder getModifiedDateField() {
 
@@ -181,7 +181,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Builds createdBy field for storing user who creates entity registers
    * 
-   * @return FieldMetadataBuilder for building field in ITD
+   * @return FieldMetadataBuilder for building field into ITD
    */
   private FieldMetadataBuilder getCreatedByField() {
 
@@ -211,7 +211,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Builds modifiedBy field for storing user who last modifies entity registers
    * 
-   * @return FieldMetadataBuilder for building field in ITD
+   * @return FieldMetadataBuilder for building field into ITD
    */
   private FieldMetadataBuilder getModifiedByField() {
 
