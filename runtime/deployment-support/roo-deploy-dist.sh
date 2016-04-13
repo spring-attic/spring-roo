@@ -702,6 +702,10 @@ if [[ "$COMMAND" = "assembly" ]]; then
             load_roo_build_and_test script audit.roo            
             load_roo_build_and_test script audit-multimodule.roo
 
+            # Addon-test tests
+            load_roo_build_and_test script tests.roo
+            load_roo_build_and_test script tests-multimodule.roo
+
         # Temporally disabled
 	    
         #load_roo_build_and_test script vote.roo

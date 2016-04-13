@@ -1,0 +1,110 @@
+# Create project, add persistence, entities, repositories and services to be able to test subsequent commands.
+project setup --topLevelPackage aaaa.bbb.cc --multimodule
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY 
+entity jpa --class model:aaaa.bbb.cc.model.Entity1
+field string --fieldName string_field
+field number --fieldName number_field --type int
+repository jpa all --package repository:aaaa.bbb.cc.repository
+service all --apiPackage service-api:aaaa.bbb.cc.service.api --implPackage service-impl:aaaa.bbb.cc.service.impl
+
+
+#=======================================================================================================
+# TEST 1: Create unit test for one entity for multimodule project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'test unit' command with an entity class for multimodule project.
+#
+test unit --class ~.Entity1
+#      
+# Output: Created model:SRC_TEST_JAVA/aaaa/bbb/cc/model
+#         Created model:SRC_TEST_JAVA/aaaa/bbb/cc/model/Entity1Test.java
+#         Updated model:ROOT/pom.xml [added dependencies junit:junit:, org.assertj:assertj-core:, 
+#           org.mockito:mockito-core:, org.springframework:spring-test:; 
+#           added plugin org.apache.maven.plugins:maven-surefire-plugin:-]
+#         Created model:SRC_TEST_JAVA/aaaa/bbb/cc/model/Entity1Test_Roo_UnitTest.aj
+#
+# Result: Creates test class in test package in the same module, creates associated ITD and add test 
+#         dependencies. Also add maven-surefire-plugin, which is configured in parent module.             
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 2: Create unit test for one repository class for multimodule project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'test unit' command with a repository class for multimodule project.
+#
+test unit --class repository:~.Entity1Repository
+#      
+# Output: Created repository:SRC_TEST_JAVA/aaaa/bbb/cc/repository
+#         Created repository:SRC_TEST_JAVA/aaaa/bbb/cc/repository/Entity1RepositoryTest.java
+#         Updated repository:ROOT/pom.xml [added dependencies junit:junit:, org.assertj:assertj-core:, 
+#           org.mockito:mockito-core:, org.springframework:spring-test:; 
+#           added plugin org.apache.maven.plugins:maven-surefire-plugin:-]
+#         Created repository:SRC_TEST_JAVA/aaaa/bbb/cc/repository/Entity1RepositoryTest_Roo_UnitTest.aj
+#
+# Result: Creates test class in test package in the same module and creates associated ITD. Also add 
+#         maven-surefire-plugin, which is configured in parent module.     
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 3: Create unit test for one service class for multimodule project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'test unit' command with a service class for multimodule project.
+#
+test unit --class service-api:~.Entity1Service
+#      
+# Output: Created service-api:SRC_TEST_JAVA/aaaa/bbb/cc/service/api
+#         Created service-api:SRC_TEST_JAVA/aaaa/bbb/cc/service/api/Entity1ServiceTest.java
+#         Updated service-api:ROOT/pom.xml [added dependencies junit:junit:, org.assertj:assertj-core:, 
+#           org.mockito:mockito-core:, org.springframework:spring-test:; 
+#           added plugin org.apache.maven.plugins:maven-surefire-plugin:-]
+#         Created service-api:SRC_TEST_JAVA/aaaa/bbb/cc/service/api/Entity1ServiceTest_Roo_UnitTest.aj
+#
+# Result: Creates test class in test package in the same module and creates associated ITD. Also add 
+#         maven-surefire-plugin, which is configured in parent module.     
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 4: Execute same command again
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test same 'test unit' command and check if it return silently.
+#
+test unit --class service-api:~.Entity1Service
+#      
+# Output: service-api:~.Entity1Service roo>
+#
+# Result: Nothing occurs.
+#=======================================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they are      #
+# supposed to interrupt script execution.                                #
+#                                                                        #
+##########################################################################
+
+#=======================================================================================================
+# TEST 5: Try to compile generated project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if generated project has not compilation problems, like bad imports, etc.
+#
+# $ mvn clean compile 
+#      
+# Output: [INFO] BUILD SUCCESS ...
+#
+# Result: Project successfully compiled.                             
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 6: Try to pass the generated tests
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if generated project ignore the methods annotated with @Test (which are commented) and 
+#         there aren't additional problems.
+#
+# $ mvn clean compile 
+#      
+# Output: [INFO] BUILD SUCCESS ...
+#
+# Result: Project successfully installed and tests passed.                             
+#=======================================================================================================
