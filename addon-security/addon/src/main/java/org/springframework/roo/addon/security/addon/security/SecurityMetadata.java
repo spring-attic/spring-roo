@@ -114,11 +114,6 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    *         introduced (or null if undeclared and not introduced)
    */
   private MethodMetadataBuilder getAuditorProviderMethod() {
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
     // Compute the relevant auditorProvider method name
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -129,7 +124,7 @@ public class SecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("auditorProvider"),
             new JavaType(AUDITOR_AWARE.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
-                Arrays.asList(JavaType.STRING)), parameterTypes, parameterNames, bodyBuilder);
+                Arrays.asList(JavaType.STRING)), bodyBuilder);
 
     methodBuilder.addAnnotation(new AnnotationMetadataBuilder(BEAN).build());
 
