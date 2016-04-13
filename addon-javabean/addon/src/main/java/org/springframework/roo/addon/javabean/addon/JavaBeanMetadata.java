@@ -161,12 +161,15 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
         mutatorMethod.setBodyBuilder(getGaeMutatorBody(field, hiddenIdFieldName));
       }
 
-      // Add to mutators and accesors list
-      this.accesorMethods.add(accessorMethod.build());
-      this.mutatorMethods.add(mutatorMethod.build());
-
-      builder.addMethod(accessorMethod);
-      builder.addMethod(mutatorMethod);
+      // Add to mutators and accesors list and build
+      if (accessorMethod != null) {
+        this.accesorMethods.add(accessorMethod.build());
+        builder.addMethod(accessorMethod);
+      }
+      if (mutatorMethod != null) {
+        this.mutatorMethods.add(mutatorMethod.build());
+        builder.addMethod(mutatorMethod);
+      }
     }
 
     // Implements interface methods if exists
