@@ -9,7 +9,7 @@
     </parent>
     <artifactId>org.springframework.roo.addon.test.annotations</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Annotations - Automated Integration Testing</name>
+    <name>Spring Roo - Annotations - Automated Testing</name>
     <description>Integration of JUnit integration tests in the target project.</description>
     <dependencies>
         <!-- Apache Felix -->

@@ -4,26 +4,19 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.test.annotations.RooIntegrationTest;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AbstractAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.comments.AbstractComment;
 import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.classpath.details.comments.CommentStructure.CommentLocation;
 import org.springframework.roo.classpath.details.comments.JavadocComment;
@@ -85,8 +78,7 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       new ArrayList<AnnotationMetadataBuilder>();
   private final AnnotationMetadata ignoreAnnotation;
   private ClassOrInterfaceTypeDetails targetTypeDetails;
-  private List<JavaSymbolName> itdExistingMetods;
-  private int methodNameCount;
+  private List<String> methodNames;
 
   public UnitTestMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
@@ -100,8 +92,7 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     this.targetType = annotationValues.getTargetClass();
     this.targetTypeDetails = targetTypeDetails;
     this.importResolver = builder.getImportRegistrationResolver();
-    this.itdExistingMetods = new ArrayList<JavaSymbolName>();
-    this.methodNameCount = 2;
+    this.methodNames = new ArrayList<String>();
 
     // Build @Ignore
     AnnotationMetadataBuilder ignoreAnnotationBuilder = new AnnotationMetadataBuilder(IGNORE);
@@ -130,7 +121,18 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
     // Build one test method for each targetClass method
     for (MethodMetadata method : methods) {
-      ensureGovernorHasMethod(getTestMethod(method));
+
+      // Add method names and avoid name repetition
+      int counter = 2;
+      String candidateName = method.getMethodName().getSymbolName();
+      while (this.methodNames.contains(candidateName)) {
+        candidateName = candidateName.concat(String.valueOf(counter));
+        counter++;
+      }
+      this.methodNames.add(candidateName);
+
+      // Add method
+      ensureGovernorHasMethod(getTestMethod(method, candidateName));
     }
 
     itdTypeDetails = builder.build();
@@ -142,7 +144,7 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    * 
    * @return {@link MethodMetadataBuilder}
    */
-  private MethodMetadataBuilder getTestMethod(MethodMetadata method) {
+  private MethodMetadataBuilder getTestMethod(MethodMetadata method, String candidateName) {
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     bodyBuilder.newLine();
 
@@ -177,14 +179,7 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     bodyBuilder.appendFormalLine("// Implement assertions");
 
     // Check if method alread exists
-    JavaSymbolName methodName = new JavaSymbolName(String.format("%sTest", method.getMethodName()));
-    if (itdExistingMetods.contains(methodName)) {
-      methodName =
-          new JavaSymbolName(String.format("%s%sTest", method.getMethodName(),
-              String.valueOf(methodNameCount)));
-      methodNameCount++;
-    }
-    itdExistingMetods.add(methodName);
+    JavaSymbolName methodName = new JavaSymbolName(String.format("%sTest", candidateName));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =

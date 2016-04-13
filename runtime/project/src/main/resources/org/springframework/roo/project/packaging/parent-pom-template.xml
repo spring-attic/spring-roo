@@ -61,6 +61,7 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+			
 				<!-- Compiler plugin -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -72,6 +73,7 @@
 						<encoding>${project.build.sourceEncoding}</encoding>
 					</configuration>
 				</plugin>
+				
 				<!-- AspectJ plugins -->
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -101,6 +103,17 @@
 						</dependency>
 					</dependencies>
 				</plugin>
+				
+				<!-- Surefire plugin configuration -->
+				<plugin>
+        			<groupId>org.apache.maven.plugins</groupId>
+        			<artifactId>maven-surefire-plugin</artifactId>
+        			<configuration>
+          			<excludes>
+            			<exclude>**/*_Roo_*</exclude>
+          			</excludes>
+        			</configuration>
+      			</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>

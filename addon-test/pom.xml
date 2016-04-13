@@ -9,7 +9,7 @@
     </parent>
     <artifactId>org.springframework.roo.addon.test</artifactId>
     <packaging>pom</packaging>
-    <name>Spring Roo - Automated Integration Testing</name>
+    <name>Spring Roo - Automated Testing</name>
     <description>Integration of JUnit integration tests in the target project.</description>
     
     <modules>

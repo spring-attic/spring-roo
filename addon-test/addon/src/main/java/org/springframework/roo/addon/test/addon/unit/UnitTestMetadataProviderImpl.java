@@ -4,13 +4,10 @@ import static org.springframework.roo.model.RooJavaType.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.classpath.*;
 import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.itd.*;
@@ -115,29 +112,11 @@ public class UnitTestMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
 
     // Obtain all governor external field dependencies
     List<FieldMetadata> fields = targetTypeDetails.getFields();
-    List<FieldMetadata> idAndVersionFields = new ArrayList<FieldMetadata>();
     for (FieldMetadata field : fields) {
       if (field.getAnnotation(JpaJavaType.ONE_TO_ONE) != null
           || field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null) {
         fieldDependencies.add(field);
       }
-      if (field.getAnnotation(JpaJavaType.ID) != null
-          || field.getAnnotation(JpaJavaType.VERSION) != null) {
-        idAndVersionFields.add(field);
-      }
-    }
-
-    // Obtain all JavaBean methods
-    final LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-    final String javaBeanMetadataKey =
-        JavaBeanMetadata.createIdentifier(cid.getType(), logicalPath);
-    final JavaBeanMetadata javaBeanMetadata =
-        (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
-    List<MethodMetadata> accesorMethods = new ArrayList<MethodMetadata>();
-    List<MethodMetadata> mutatorMethods = new ArrayList<MethodMetadata>();
-    if (javaBeanMetadata != null) {
-      accesorMethods = javaBeanMetadata.getAccesorMethods();
-      mutatorMethods = javaBeanMetadata.getMutatorMethods();
     }
 
     // Obtain all methods of target type
@@ -145,38 +124,20 @@ public class UnitTestMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
     final List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
     for (MethodMetadata method : targetTypeMethods) {
 
-      // Check if method is accesor or mutator
+      // Check if method is an accesor or mutator
       boolean isAccesorOrMutator = false;
-      for (MethodMetadata accesorMethod : accesorMethods) {
-        if (accesorMethod.getMethodName().equals(method.getMethodName())
-            && accesorMethod.getParameterTypes().equals(method.getParameterTypes())) {
-          isAccesorOrMutator = true;
-          break;
-        }
-      }
-      for (MethodMetadata mutatorMethod : mutatorMethods) {
-        if (mutatorMethod.getMethodName().equals(method.getMethodName())
-            && mutatorMethod.getParameterTypes().equals(method.getParameterTypes())) {
-          isAccesorOrMutator = true;
-          break;
-        }
-      }
-
-      // Check also version and id methods (not included in JavaBean)
-      boolean isIdOrVersionMethod = false;
-      for (FieldMetadata field : idAndVersionFields) {
+      for (FieldMetadata field : fields) {
         JavaSymbolName accesorName = BeanInfoUtils.getAccessorMethodName(field);
         JavaSymbolName mutatorName = BeanInfoUtils.getMutatorMethodName(field);
         if (method.getMethodName().equals(accesorName)
             || method.getMethodName().equals(mutatorName)) {
-          isIdOrVersionMethod = true;
-          break;
+          isAccesorOrMutator = true;
         }
       }
 
       // Only add "custom" methods. Avoid adding accesors, mutators, toString and hashCode
       if (!method.getMethodName().equals(TO_STRING) && !method.getMethodName().equals(HASH_CODE)
-          && !isAccesorOrMutator && !isIdOrVersionMethod) {
+          && !isAccesorOrMutator) {
         methods.add(method);
       }
     }

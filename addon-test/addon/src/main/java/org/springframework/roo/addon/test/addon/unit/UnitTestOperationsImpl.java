@@ -12,10 +12,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.springframework.roo.addon.dod.addon.DataOnDemandOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -26,6 +24,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -84,53 +83,18 @@ public class UnitTestOperationsImpl implements UnitTestOperations {
     }
     getProjectOperations().addDependencies(projectType.getModule(), dependencies);
 
+    // Add plugins from configuration file if needed. Need to check if already exists, 
+    // otherwise it can overwrite plugin configuration in single module projects
+    final List<Element> unitTestPlugins =
+        XmlUtils.findElements("/configuration/plugins/plugin", configuration);
+    for (final Element pluginElement : unitTestPlugins) {
+      getProjectOperations().updateBuildPlugin(projectType.getModule(), new Plugin(pluginElement));
+    }
+
     // Add @RooUnitTest to source file
     AnnotationMetadataBuilder rooUnitTestAnnotation =
         new AnnotationMetadataBuilder(RooJavaType.ROO_UNIT_TEST);
     rooUnitTestAnnotation.addClassAttribute("targetClass", projectType);
-
-
-    //    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    //    final List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
-    //    config.add(new ClassAttributeValue(new JavaSymbolName("value"), JUNIT_4));
-    //    annotations.add(new AnnotationMetadataBuilder(RUN_WITH, config));
-    //    annotations.add(new AnnotationMetadataBuilder(MOCK_STATIC_ENTITY_METHODS));
-    //
-    //    final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-    //    final List<AnnotationMetadataBuilder> methodAnnotations =
-    //        new ArrayList<AnnotationMetadataBuilder>();
-    //    methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
-
-    //     Get the entity so we can hopefully make a demo method that will be
-    //     usable
-    //    final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    //
-    //    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(projectType);
-    //    if (cid != null) {
-    //      final MemberDetails memberDetails =
-    //          memberDetailsScanner.getMemberDetails(UnitTestOperationsImpl.class.getName(), cid);
-    //      final List<MethodMetadata> countMethods =
-    //          memberDetails.getMethodsWithTag(CustomDataKeys.COUNT_ALL_METHOD);
-    //      if (countMethods.size() == 1) {
-    //        final String countMethod =
-    //            projectType.getSimpleTypeName() + "."
-    //                + countMethods.get(0).getMethodName().getSymbolName() + "()";
-    //        bodyBuilder.appendFormalLine("int expectedCount = 13;");
-    //        bodyBuilder.appendFormalLine(countMethod + ";");
-    //        bodyBuilder
-    //            .appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.expectReturn(expectedCount);");
-    //        bodyBuilder
-    //            .appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.playback();");
-    //        bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(expectedCount, " + countMethod
-    //            + ");");
-    //      }
-    //    }
-    //
-    //    final MethodMetadataBuilder methodBuilder =
-    //        new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName(
-    //            "testMethod"), JavaType.VOID_PRIMITIVE, bodyBuilder);
-    //    methodBuilder.setAnnotations(methodAnnotations);
-    //    methods.add(methodBuilder);
 
     final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name,

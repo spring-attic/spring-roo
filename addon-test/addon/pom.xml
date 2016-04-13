@@ -10,7 +10,7 @@
     </parent>
     <artifactId>org.springframework.roo.addon.test.addon</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Addon - Automated Integration Testing</name>
+    <name>Spring Roo - Addon - Automated Testing</name>
     <description>Integration of JUnit integration tests in the target project.</description>
 
     <dependencies>
