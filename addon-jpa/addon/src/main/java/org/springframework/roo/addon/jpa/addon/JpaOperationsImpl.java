@@ -160,6 +160,8 @@ public class JpaOperationsImpl implements JpaOperations {
     Validate.isTrue(!JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
         "Entity name '%s' must not be part of java.lang", name.getSimpleTypeName());
 
+    getProjectOperations().setModule(getProjectOperations().getPomFromModuleName(name.getModule()));
+
     int modifier = Modifier.PUBLIC;
     if (createAbstract) {
       modifier |= Modifier.ABSTRACT;
@@ -178,6 +180,9 @@ public class JpaOperationsImpl implements JpaOperations {
       if (superclassClassOrInterfaceTypeDetails != null) {
         cidBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(
             superclassClassOrInterfaceTypeDetails));
+
+        //Add dependency with superclass module
+        getProjectOperations().addModuleDependency(superclass.getModule());
       }
     }
 
@@ -192,6 +197,9 @@ public class JpaOperationsImpl implements JpaOperations {
       }
       implementsTypes.add(implementsType);
       cidBuilder.setImplementsTypes(implementsTypes);
+
+      //Add dependency with implementsType modules
+      getProjectOperations().addModuleDependency(implementsType.getModule());
     }
 
     cidBuilder.setAnnotations(annotations);

@@ -108,15 +108,15 @@ audit add --entity model:~.Entity2 --createdByColumn AAAAA --createdDateColumn B
 #
 #     * Install security:
 #
-#       security setup
+#       security setup --module application
 #
 #     * Install persistence
 #
-#       jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY     
+#       jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY --module application    
 #
 #     * Install audit:
 #
-#       audit setup --package aaaa.bbb.cc.audit
+#       audit setup --package service-impl:aaaa.bbb.cc.audit
 #
 # Output: Created service-impl:SRC_MAIN_JAVA/aaaa/bbb/cc/audit
 #         Created service-impl:SRC_MAIN_JAVA/aaaa/bbb/cc/audit/AuthenticationAuditorAware.java

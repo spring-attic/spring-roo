@@ -56,6 +56,15 @@ public class PomConverter implements Converter<Pom> {
       final String optionContext) {
     final String moduleName;
     Pom result;
+    ModuleFeatureName moduleFeatureName = null;
+
+    // Get module feature
+    if (optionContext != null) {
+      final Matcher matcher = pattern.matcher(optionContext);
+      if (matcher.find()) {
+        moduleFeatureName = ModuleFeatureName.valueOf(matcher.group(1));
+      }
+    }
 
     if (LAST_USED_INDICATOR.equals(value)) {
       result = lastUsed.getModule();
@@ -65,9 +74,18 @@ public class PomConverter implements Converter<Pom> {
       }
     } else if (FOCUSED_INDICATOR.equals(value)) {
       result = projectOperations.getFocusedModule();
-      if (result == null) {
-        throw new IllegalStateException(
-            "Unknown pom; please indicate the module as a command option (ie --xxxx)");
+
+      if (moduleFeatureName != null
+          && !typeLocationService.hasModuleFeature(result, moduleFeatureName)) {
+
+        // Get valid module
+        List<Pom> modules = (List<Pom>) typeLocationService.getModules(moduleFeatureName);
+        if (modules.size() == 0) {
+          throw new RuntimeException(String.format("ERROR: Not exists a module with %s feature",
+              moduleFeatureName));
+        } else {
+          result = modules.get(0);
+        }
       }
     } else {
       if (ROOT_MODULE_SYMBOL.equals(value)) {
@@ -80,23 +98,9 @@ public class PomConverter implements Converter<Pom> {
     }
 
     // Validate feature
-    if (optionContext != null) {
-      final Matcher matcher = pattern.matcher(optionContext);
-      if (matcher.find()) {
-        ModuleFeatureName moduleFeatureName = ModuleFeatureName.valueOf(matcher.group(1));
-
-        if (!typeLocationService.hasModuleFeature(result, moduleFeatureName)) {
-
-          // Get valid module
-          List<Pom> modules = (List<Pom>) typeLocationService.getModules(moduleFeatureName);
-          if (modules.size() == 0) {
-            throw new RuntimeException(String.format("ERROR: Not exists a module with %s feature",
-                moduleFeatureName));
-          } else {
-            result = modules.get(0);
-          }
-        }
-      }
+    if (moduleFeatureName != null
+        && !typeLocationService.hasModuleFeature(result, moduleFeatureName)) {
+      return null;
     }
 
     if (StringUtils.contains(optionContext, UPDATE)

@@ -511,11 +511,27 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 
   private void detectCircularDependency(final Pom module, final Pom dependencyModule) {
-    if (dependencyModule.isDependencyRegistered(module.asDependency(COMPILE), false)) {
+    if (hasModuleDependency(dependencyModule, module)) {
       throw new IllegalStateException("ERROR: Circular dependency detected, '"
           + dependencyModule.getModuleName() + "' already depends on '" + module.getModuleName()
           + "'.");
     }
+  }
+
+  private boolean hasModuleDependency(Pom module, Pom dependencyModule) {
+    if (module.isDependencyRegistered(dependencyModule.asDependency(COMPILE), false)) {
+      return true;
+    }
+
+    for (String moduleName : getModuleNames()) {
+      Pom relatedModule = getPomFromModuleName(moduleName);
+
+      if (module.isDependencyRegistered(relatedModule.asDependency(COMPILE), false)
+          && hasModuleDependency(relatedModule, dependencyModule)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public Pom getFocusedModule() {

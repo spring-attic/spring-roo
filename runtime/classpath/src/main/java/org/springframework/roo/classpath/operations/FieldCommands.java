@@ -626,6 +626,8 @@ public class FieldCommands implements CommandMarker {
     }
 
     insertField(fieldDetails, permitReservedWords, transientModifier);
+
+    projectOperations.addModuleDependency(fieldType.getModule());
   }
 
   /**

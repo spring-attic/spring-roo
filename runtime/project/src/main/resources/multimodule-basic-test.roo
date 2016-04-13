@@ -52,7 +52,7 @@ module create --moduleName model --parent ~
 #       
 # Output:  Created ROOT/model
 #          Created ROOT/model/pom.xml
-#          Created monitoring/org/example/model
+#          Created model/org/example/model
 #          Updated ROOT/pom.xml [added module model]
 #          model roo>
 # Result:  Creates the next module structure:
@@ -83,7 +83,7 @@ module create --moduleName repository
 # Output:  module create --moduleName repository 
 #          Created ROOT/repository
 #          Created ROOT/repository/pom.xml
-#          Created integration:SRC_MAIN_JAVA/org/example/repository
+#          Created repository:SRC_MAIN_JAVA/org/example/repository
 #          Updated ROOT/pom.xml [added module repository]
 #          repository roo>
 # Result:  Creates the next module structure:
@@ -134,9 +134,9 @@ module create --moduleName service --parent ~ --packaging POM
 #====================================================================
 
 #====================================================================
-# TEST 5: Create a POM module inside focused POM module                          
+# TEST 5: Create a module inside focused POM module                          
 #--------------------------------------------------------------------
-# Goal:    Add a POM module inside the focused POM module 
+# Goal:    Add a module inside the focused POM module 
 #
 module create --moduleName api 
 #       
@@ -166,9 +166,9 @@ module create --moduleName api
 
 
 #====================================================================
-# TEST 6: Create a POM module inside a POM module                          
+# TEST 6: Create a module inside a POM module                          
 #--------------------------------------------------------------------
-# Goal:    Add a POM module into a POM module using parent option
+# Goal:    Add a module into a POM module using parent option
 #
 module create --moduleName impl --parent service
 #       
@@ -302,7 +302,7 @@ repository jpa all --package repository:org.example.repository
 #====================================================================
 # TEST 12: Create a repository in model module                            
 #--------------------------------------------------------------------
-# Goal:    Validates that a module can have a dependency with itself
+# Goal:    Validates that a module cannot have a dependency with itself
 #
 entity jpa --class model:~.City 
 repository jpa add --entity ~.City --interface ~.repository.CityRep

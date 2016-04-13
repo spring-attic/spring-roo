@@ -7,11 +7,11 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
-import static org.springframework.roo.shell.OptionContexts.FEATURE;
+import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
+import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
-import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -285,7 +285,7 @@ public class JpaCommands implements CommandMarker {
 
   @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
   public void newPersistenceClassJpa(
-      @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true,
+      @CliOption(key = "class", optionContext = UPDATELAST_PROJECT, mandatory = true,
           help = "Name of the entity to create") final JavaType name,
       @CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object",
           optionContext = SUPERCLASS, help = "The superclass (defaults to java.lang.Object)") final JavaType superclass,

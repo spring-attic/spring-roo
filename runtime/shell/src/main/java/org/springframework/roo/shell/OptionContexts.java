@@ -47,6 +47,8 @@ public final class OptionContexts {
 
   public static final String UPDATELAST_INTERFACE = "lastused,interface";
 
+  public static final String UPDATELAST_PROJECT = "lastused,project";
+
   public static final String APPLICATION_FEATURE = FEATURE + "[APPLICATION]";
 
 

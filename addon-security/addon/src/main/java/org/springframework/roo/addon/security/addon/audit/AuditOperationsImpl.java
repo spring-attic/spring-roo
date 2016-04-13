@@ -111,6 +111,13 @@ public class AuditOperationsImpl implements AuditOperations {
         module = modules.get(0);
       }
       javaPackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+
+    } else if (!getTypeLocationService().hasModuleFeature(
+        getProjectOperations().getPomFromModuleName(javaPackage.getModule()),
+        ModuleFeatureName.APPLICATION)) {
+      throw new IllegalArgumentException(String.format(
+          "ERROR: Module %s does not have installed the %s feature", javaPackage.getModule(),
+          ModuleFeatureName.APPLICATION));
     }
 
     // Add dependencies to selected pom.xml
