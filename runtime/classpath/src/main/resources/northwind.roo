@@ -1,6 +1,5 @@
 // Creating Northwind project
-project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind --multimodule --java 8
-module create --moduleName integration --parent ~
+project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind
 
 // Configuring settings
 settings add --name spring.roo.jpa.require.schema-object-name --value true
@@ -9,90 +8,90 @@ settings add --name spring.roo.jpa.require.schema-object-name --value true
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 
 // Create domain entities
-entity jpa --class model:~.AttachedFile --table NORTHWIND_ATTACHED_FILES --sequenceName NORTHWIND_ATTACHED_FILES_ATTACHED_FILE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ATTACHED_FILE_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.AttachedFile --table NORTHWIND_ATTACHED_FILES --sequenceName NORTHWIND_ATTACHED_FILES_ATTACHED_FILE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ATTACHED_FILE_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.Category --table NORTHWIND_CATEGORIES --sequenceName NORTHWIND_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.Category --table NORTHWIND_CATEGORIES --sequenceName NORTHWIND_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.City --table NORTHWIND_CITIES --sequenceName NORTHWIND_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
+entity jpa --class ~.domain.City --table NORTHWIND_CITIES --sequenceName NORTHWIND_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.Country --table NORTHWIND_COUNTRIES --sequenceName NORTHWIND_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
+entity jpa --class ~.domain.Country --table NORTHWIND_COUNTRIES --sequenceName NORTHWIND_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.CustomerOrder --table NORTHWIND_CUSTOMER_ORDERS --sequenceName NORTHWIND_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.CustomerOrder --table NORTHWIND_CUSTOMER_ORDERS --sequenceName NORTHWIND_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.LoginRole --table NORTHWIND_LOGIN_ROLES --sequenceName NORTHWIND_LOGIN_ROLES_LOGIN_ROLE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn LOGIN_ROLE_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.LoginRole --table NORTHWIND_LOGIN_ROLES --sequenceName NORTHWIND_LOGIN_ROLES_LOGIN_ROLE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn LOGIN_ROLE_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.OrderDetail --table NORTHWIND_ORDER_DETAILS --sequenceName NORTHWIND_ORDER_DETAILS_ORDER_DETAIL_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ORDER_DETAIL_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.OrderDetail --table NORTHWIND_ORDER_DETAILS --sequenceName NORTHWIND_ORDER_DETAILS_ORDER_DETAIL_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ORDER_DETAIL_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.Party --table NORTHWIND_PARTIES --sequenceName NORTHWIND_PARTIES_PARTY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PARTY_ID --versionField version --versionType long --versionColumn VERSION --inheritanceType JOINED
+entity jpa --class ~.domain.Party --table NORTHWIND_PARTIES --sequenceName NORTHWIND_PARTIES_PARTY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PARTY_ID --versionField version --versionType long --versionColumn VERSION --inheritanceType JOINED
 
-entity jpa --class model:~.Product --table NORTHWIND_PRODUCTS --sequenceName NORTHWIND_PRODUCTS_PRODUCT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PRODUCT_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.Product --table NORTHWIND_PRODUCTS --sequenceName NORTHWIND_PRODUCTS_PRODUCT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PRODUCT_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.PurchaseOrder --table NORTHWIND_PURCHASE_ORDERS --sequenceName NORTHWIND_PURCHASE_ORDERS_PURCHASE_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PURCHASE_ORDER_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.PurchaseOrder --table NORTHWIND_PURCHASE_ORDERS --sequenceName NORTHWIND_PURCHASE_ORDERS_PURCHASE_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PURCHASE_ORDER_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.Region --table NORTHWIND_REGIONS --sequenceName NORTHWIND_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType long --versionColumn VERSION --readOnly
+entity jpa --class ~.domain.Region --table NORTHWIND_REGIONS --sequenceName NORTHWIND_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.Report --table NORTHWIND_REPORTS --sequenceName NORTHWIND_REPORTS_REPORT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REPORT_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.Report --table NORTHWIND_REPORTS --sequenceName NORTHWIND_REPORTS_REPORT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REPORT_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.Shipper --table NORTHWIND_SHIPPERS --sequenceName NORTHWIND_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SHIPPER_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.Shipper --table NORTHWIND_SHIPPERS --sequenceName NORTHWIND_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SHIPPER_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.Store --table NORTHWIND_STORES --sequenceName NORTHWIND_STORES_STORE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn STORE_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.Store --table NORTHWIND_STORES --sequenceName NORTHWIND_STORES_STORE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn STORE_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.Supplier --table NORTHWIND_SUPPLIERS --sequenceName NORTHWIND_SUPPLIERS_SUPPLIER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SUPPLIER_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.Supplier --table NORTHWIND_SUPPLIERS --sequenceName NORTHWIND_SUPPLIERS_SUPPLIER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SUPPLIER_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.UserLogin --table NORTHWIND_USERS_LOGIN --sequenceName NORTHWIND_USERS_LOGIN_USER_LOGIN_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn USER_LOGIN_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.UserLogin --table NORTHWIND_USERS_LOGIN --sequenceName NORTHWIND_USERS_LOGIN_USER_LOGIN_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn USER_LOGIN_ID --versionField version --versionType long --versionColumn VERSION 
 
-entity jpa --class model:~.UserLoginRole --table NORTHWIND_USER_LOGIN_ROLES --sequenceName NORTHWIND_USER_LOGIN_ROLES_USER_LOGIN_ROLE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn USER_LOGIN_ROLE_ID --versionField version --versionType long --versionColumn VERSION 
+entity jpa --class ~.domain.UserLoginRole --table NORTHWIND_USER_LOGIN_ROLES --sequenceName NORTHWIND_USER_LOGIN_ROLES_USER_LOGIN_ROLE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn USER_LOGIN_ROLE_ID --versionField version --versionType long --versionColumn VERSION 
 
 // Extended entities (identifierColumn still mandatory, but overrided)
-entity jpa --class model:~.Customer --table NORTHWIND_CUSTOMERS --extends model:~.Party --identifierColumn PARTY_ID --sequenceName NORTHWIND_CUSTOMERS_CUSTOMER_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType long --versionColumn VERSION --force
-entity jpa --class model:~.Employee --table NORTHWIND_EMPLOYEES --extends model:~.Party --identifierColumn PARTY_ID --sequenceName NORTHWIND_EMPLOYEES_EMPLOYEE_ID_SEQ --identifierStrategy SEQUENCE --versionField version --versionType long --versionColumn VERSION --force
+entity jpa --class ~.domain.Customer --table NORTHWIND_CUSTOMERS --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NORTHWIND_CUSTOMERS_CUSTOMER_ID_SEQ --versionField version --versionType long --versionColumn VERSION --identifierStrategy SEQUENCE --force
+entity jpa --class ~.domain.Employee --table NORTHWIND_EMPLOYEES --extends ~.domain.Party --identifierColumn PARTY_ID --sequenceName NORTHWIND_EMPLOYEES_EMPLOYEE_ID_SEQ --versionField version --versionType long --versionColumn VERSION --identifierStrategy SEQUENCE --force
 
 // Create enumerated types
-enum type --class model:~.Period
-enum constant --name QUARTERLY --class model:~.Period
-enum constant --name ANNUAL --class model:~.Period
+enum type --class ~.domain.Period
+enum constant --name QUARTERLY --class ~.domain.Period
+enum constant --name ANNUAL --class ~.domain.Period
 
-enum type --class model:~.Status
-enum constant --name NEWLY --class model:~.Status
-enum constant --name SEND_BILL --class model:~.Status
-enum constant --name SENT --class model:~.Status
-enum constant --name CLOSED --class model:~.Status
-enum constant --name CANCELED --class model:~.Status
+enum type --class ~.domain.Status
+enum constant --name NEWLY --class ~.domain.Status
+enum constant --name SEND_BILL --class ~.domain.Status
+enum constant --name SENT --class ~.domain.Status
+enum constant --name CLOSED --class ~.domain.Status
+enum constant --name CANCELED --class ~.domain.Status
 
-enum type --class model:~.Trimester
-enum constant --name FIRST_TRIM --class model:~.Trimester
-enum constant --name SECOND_TRIM --class model:~.Trimester
-enum constant --name THIRD_TRIM --class model:~.Trimester
-enum constant --name FOURTH_TRIM --class model:~.Trimester
+enum type --class ~.domain.Trimester
+enum constant --name FIRST_TRIM --class ~.domain.Trimester
+enum constant --name SECOND_TRIM --class ~.domain.Trimester
+enum constant --name THIRD_TRIM --class ~.domain.Trimester
+enum constant --name FOURTH_TRIM --class ~.domain.Trimester
 
 
 // Create fields
-focus --class model:~.AttachedFile
+focus --class ~.domain.AttachedFile
 field string --fieldName name --column NAME
 field string --fieldName src --column SRC
 field number --fieldName sizeFile --type long --column SIZE_FILE
 field string --fieldName mimetype --column MIMETYPE
 
-focus --class model:~.Category
+focus --class ~.domain.Category
 field string --fieldName name --column NAME
 field string --fieldName description --column DESCRIPTION
-field set --fieldName products --type model:~.Product --cardinality ONE_TO_MANY --mappedBy category
+field set --fieldName products --type ~.domain.Product --cardinality ONE_TO_MANY --mappedBy category
 
-focus --class model:~.City
+focus --class ~.domain.City
 field string --fieldName description --column DESCRIPTION
-field reference --fieldName region --type model:~.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName region --type ~.domain.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
 
-focus --class model:~.Country
+focus --class ~.domain.Country
 field string --fieldName description --column DESCRIPTION
 
-focus --class model:~.Customer
+focus --class ~.domain.Customer
 field string --fieldName companyName --column COMPANY_NAME
 field string --fieldName contactName --column CONTACT_NAME
 field string --fieldName contactTitle --column CONTACT_TITLE
 field string --fieldName fax --column FAX
 field string --fieldName email --column EMAIL
 
-focus --class model:~.CustomerOrder
+focus --class ~.domain.CustomerOrder
 field date --fieldName orderDate --type java.util.Calendar --column ORDER_DATE --persistenceType JPA_TIMESTAMP
 field date --fieldName requiredDate --type java.util.Calendar --column REQUIRED_DATE --persistenceType JPA_TIMESTAMP
 field date --fieldName shippedDate --type java.util.Calendar --column SHIPPED_DATE --persistenceType JPA_TIMESTAMP
@@ -100,20 +99,20 @@ field number --fieldName freight --type java.math.BigDecimal --column FREIGHT
 field string --fieldName shipName --column SHIP_NAME
 field string --fieldName shipAddress --column SHIP_ADDRESS
 field string --fieldName shipPostalCode --column SHIP_POSTAL_CODE
-field enum --fieldName status --type model:~.Status --column STATUS --enumType STRING
+field enum --fieldName status --type ~.domain.Status --column STATUS --enumType STRING
 field string --fieldName shipPhone --column SHIP_PHONE
 field date --fieldName invoiceDate --type java.util.Calendar --column INVOICE_DATE --persistenceType JPA_TIMESTAMP
 field date --fieldName closeDate --type java.util.Calendar --column CLOSE_DATE --persistenceType JPA_TIMESTAMP
-field reference --fieldName employee --type model:~.Employee --joinColumnName EMPLOYEE --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName customer --type model:~.Customer --joinColumnName CUSTOMER --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName shipVia --type model:~.Shipper --joinColumnName SHIP_VIA --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName shipCity --type model:~.City --joinColumnName SHIP_CITY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName shipRegion --type model:~.Region --joinColumnName SHIP_REGION --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName shipCountry --type model:~.Country --joinColumnName SHIP_COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName invoiceFile --type model:~.AttachedFile --joinColumnName INVOICE_FILE --cardinality MANY_TO_ONE --fetch LAZY
-field set --fieldName orderDetails --type model:~.OrderDetail --cardinality ONE_TO_MANY --mappedBy customerOrder
+field reference --fieldName employee --type ~.domain.Employee --joinColumnName EMPLOYEE --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName customer --type ~.domain.Customer --joinColumnName CUSTOMER --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName shipVia --type ~.domain.Shipper --joinColumnName SHIP_VIA --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName shipCity --type ~.domain.City --joinColumnName SHIP_CITY --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName shipRegion --type ~.domain.Region --joinColumnName SHIP_REGION --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName shipCountry --type ~.domain.Country --joinColumnName SHIP_COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName invoiceFile --type ~.domain.AttachedFile --joinColumnName INVOICE_FILE --cardinality MANY_TO_ONE --fetch LAZY
+field set --fieldName orderDetails --type ~.domain.OrderDetail --cardinality ONE_TO_MANY --mappedBy customerOrder
 
-focus --class model:~.Employee
+focus --class ~.domain.Employee
 field string --fieldName firstName --column FIRST_NAME
 field string --fieldName lastName --column LAST_NAME
 field string --fieldName title --column TITLE
@@ -122,29 +121,29 @@ field date --fieldName hireDate --type java.util.Calendar --column HIRE_DATE --p
 field string --fieldName extension --column EXTENSION
 field string --fieldName photo --column PHOTO --lob
 field string --fieldName notes --column NOTES
-field reference --fieldName supervisor --type model:~.Employee --joinColumnName SUPERVISOR --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName supervisor --type ~.domain.Employee --joinColumnName SUPERVISOR --cardinality MANY_TO_ONE --fetch LAZY
 
-focus --class model:~.LoginRole
+focus --class ~.domain.LoginRole
 field string --fieldName name --column NAME
 field string --fieldName description --column DESCRIPTION
 
-focus --class model:~.OrderDetail
+focus --class ~.domain.OrderDetail
 field number --fieldName unitPrice --type java.math.BigDecimal --column UNIT_PRICE
 field number --fieldName quantity --type java.lang.Integer --column QUANTITY
 field number --fieldName discount --type java.math.BigDecimal --column DISCOUNT
-field reference --fieldName customerOrder --type model:~.CustomerOrder --joinColumnName CUSTOMER_ORDER --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName product --type model:~.Product --joinColumnName PRODUCT --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName customerOrder --type ~.domain.CustomerOrder --joinColumnName CUSTOMER_ORDER --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName product --type ~.domain.Product --joinColumnName PRODUCT --cardinality MANY_TO_ONE --fetch LAZY
 
-focus --class model:~.Party
+focus --class ~.domain.Party
 field string --fieldName address --column ADDRESS
 field string --fieldName postalCode --column POSTAL_CODE
 field string --fieldName phone --column PHONE
-field reference --fieldName city --type model:~.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName region --type model:~.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName country --type model:~.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
-field set --fieldName usersLogin --type model:~.UserLogin --cardinality ONE_TO_MANY --mappedBy party
+field reference --fieldName city --type ~.domain.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName region --type ~.domain.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName country --type ~.domain.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
+field set --fieldName usersLogin --type ~.domain.UserLogin --cardinality ONE_TO_MANY --mappedBy party
 
-focus --class model:~.Product
+focus --class ~.domain.Product
 field string --fieldName name --column NAME
 field string --fieldName code --column CODE
 field string --fieldName quantityPerUnit --column QUANTITY_PER_UNIT
@@ -153,39 +152,39 @@ field number --fieldName unitPrice --type java.math.BigDecimal --column UNIT_PRI
 field number --fieldName unitsInStock --type java.lang.Integer --column UNITS_IN_STOCK
 field number --fieldName reorderLevel --type java.lang.Integer --column REORDER_LEVEL
 field other --fieldName discontinued --type java.lang.Boolean --column DISCONTINUED
-field reference --fieldName supplier --type model:~.Supplier --joinColumnName SUPPLIER --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName category --type model:~.Category --joinColumnName CATEGORY --cardinality MANY_TO_ONE --fetch LAZY
-field set --fieldName purchaseOrders --type model:~.PurchaseOrder --cardinality ONE_TO_MANY --mappedBy product
-field set --fieldName orderDetails --type model:~.OrderDetail --cardinality ONE_TO_MANY --mappedBy product
+field reference --fieldName supplier --type ~.domain.Supplier --joinColumnName SUPPLIER --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName category --type ~.domain.Category --joinColumnName CATEGORY --cardinality MANY_TO_ONE --fetch LAZY
+field set --fieldName purchaseOrders --type ~.domain.PurchaseOrder --cardinality ONE_TO_MANY --mappedBy product
+field set --fieldName orderDetails --type ~.domain.OrderDetail --cardinality ONE_TO_MANY --mappedBy product
 
-focus --class model:~.PurchaseOrder
+focus --class ~.domain.PurchaseOrder
 field number --fieldName unitCost --type java.math.BigDecimal --column UNIT_COST
 field number --fieldName quantity --type java.lang.Integer --column QUANTITY
 field date --fieldName orderDate --type java.util.Calendar --column ORDER_DATE --persistenceType JPA_TIMESTAMP
-field reference --fieldName employee --type model:~.Employee --joinColumnName EMPLOYEE --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName product --type model:~.Product --joinColumnName PRODUCT --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName employee --type ~.domain.Employee --joinColumnName EMPLOYEE --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName product --type ~.domain.Product --joinColumnName PRODUCT --cardinality MANY_TO_ONE --fetch LAZY
 
-focus --class model:~.Region
+focus --class ~.domain.Region
 field string --fieldName description --column DESCRIPTION
-field reference --fieldName country --type model:~.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName country --type ~.domain.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
 
-focus --class model:~.Report
+focus --class ~.domain.Report
 field string --fieldName type --column TYPE
 
-focus --class model:~.Shipper
+focus --class ~.domain.Shipper
 field string --fieldName companyName --column COMPANY_NAME
 field string --fieldName phone --column PHONE
 
-focus --class model:~.Store
+focus --class ~.domain.Store
 field string --fieldName name --column NAME
 field string --fieldName address --column ADDRESS
 field string --fieldName postalCode --column POSTAL_CODE
 field string --fieldName phone --column PHONE
-field reference --fieldName city --type model:~.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName region --type model:~.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName country --type model:~.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName city --type ~.domain.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName region --type ~.domain.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName country --type ~.domain.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
 
-focus --class model:~.Supplier
+focus --class ~.domain.Supplier
 field string --fieldName companyName --column COMPANY_NAME
 field string --fieldName contactName --column CONTACT_NAME
 field string --fieldName contactTitle --column CONTACT_TITLE
@@ -194,42 +193,42 @@ field string --fieldName postalCode --column POSTAL_CODE
 field string --fieldName phone --column PHONE
 field string --fieldName fax --column FAX
 field string --fieldName web --column WEB
-field reference --fieldName city --type model:~.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName region --type model:~.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName country --type model:~.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName city --type ~.domain.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName region --type ~.domain.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName country --type ~.domain.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
 // Field with --joinTable and associated params
-field set --fieldName stores --type model:~.Store --cardinality MANY_TO_MANY --joinTable NORTHWIND_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
+field set --fieldName stores --type ~.domain.Store --cardinality MANY_TO_MANY --joinTable NORTHWIND_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
 
-focus --class model:~.UserLogin
+focus --class ~.domain.UserLogin
 field string --fieldName username --column USERNAME --unique
 field string --fieldName password --column PASSWORD
 field date --fieldName fromDate --type java.util.Calendar --column FROM_DATE --persistenceType JPA_TIMESTAMP
 field date --fieldName thruDate --type java.util.Calendar --column THRU_DATE --persistenceType JPA_TIMESTAMP
-field reference --fieldName party --type model:~.Party --joinColumnName PARTY --cardinality MANY_TO_ONE --fetch LAZY
-field set --fieldName userLoginRoles --type model:~.UserLoginRole --cardinality ONE_TO_MANY --mappedBy userLogin
+field reference --fieldName party --type ~.domain.Party --joinColumnName PARTY --cardinality MANY_TO_ONE --fetch LAZY
+field set --fieldName userLoginRoles --type ~.domain.UserLoginRole --cardinality ONE_TO_MANY --mappedBy userLogin
 
-focus --class model:~.UserLoginRole
-field reference --fieldName userLogin --type model:~.UserLogin --joinColumnName USER_LOGIN --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName loginRole --type model:~.LoginRole --joinColumnName LOGIN_ROLE --cardinality MANY_TO_ONE --fetch LAZY
+focus --class ~.domain.UserLoginRole
+field reference --fieldName userLogin --type ~.domain.UserLogin --joinColumnName USER_LOGIN --cardinality MANY_TO_ONE --fetch LAZY
+field reference --fieldName loginRole --type ~.domain.LoginRole --joinColumnName LOGIN_ROLE --cardinality MANY_TO_ONE --fetch LAZY
 
 // Generate repositories
-repository jpa all --package repository:org.springframework.roo.northwind.repository
+repository jpa all --package org.springframework.roo.northwind.repository
 
 // Generate services
-service all --apiPackage service-api:org.springframework.roo.northwind.service.api --implPackage service-impl:org.springframework.roo.northwind.service.impl
+service all --apiPackage org.springframework.roo.northwind.service.api --implPackage org.springframework.roo.northwind.service.impl
 
 // Create finders
-finder add --class model:~.UserLogin --name findByUsername
-finder add --class model:~.Shipper --name findByCompanyName
-finder add --class model:~.Region --name findByCountryIdOrderByDescriptionAsc
-finder add --class model:~.City --name findByRegionIdOrderByDescriptionAsc
-finder add --class model:~.Product --name findByDiscontinuedOrderByNameAsc
+finder add --class ~.domain.UserLogin --name findByUsername
+finder add --class ~.domain.Shipper --name findByCompanyName
+finder add --class ~.domain.Region --name findByCountryIdOrderByDescriptionAsc
+finder add --class ~.domain.City --name findByRegionIdOrderByDescriptionAsc
+finder add --class ~.domain.Product --name findByDiscontinuedOrderByNameAsc
 
 // Install security
 security setup
 
 // Install audit
-audit setup --package org.springframework.roo.northwind.security
+audit setup
 
 // Add audit to Category entity
-audit add --entity ~.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
+audit add --entity ~.domain.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
