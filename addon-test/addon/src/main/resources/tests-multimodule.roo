@@ -85,19 +85,7 @@ test unit --class service-api:~.Entity1Service
 ##########################################################################
 
 #=======================================================================================================
-# TEST 5: Try to compile generated project
-#-------------------------------------------------------------------------------------------------------
-# Goal:   Test if generated project has not compilation problems, like bad imports, etc.
-#
-# $ mvn clean compile 
-#      
-# Output: [INFO] BUILD SUCCESS ...
-#
-# Result: Project successfully compiled.                             
-#=======================================================================================================
-
-#=======================================================================================================
-# TEST 6: Try to pass the generated tests
+# TEST 5: Try to pass the generated tests
 #-------------------------------------------------------------------------------------------------------
 # Goal:   Test if generated project ignore the methods annotated with @Test (which are commented) and 
 #         there aren't additional problems.
