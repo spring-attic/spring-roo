@@ -1,47 +1,33 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
-import java.util.Set;
-
-import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Feature;
+import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.maven.Pom;
 
 /**
- * Provides Controller configuration operations.
+ * Provides an API with the available Operations to include Spring MVC on generated
+ * project and generate new controllers.
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  */
-public interface ControllerOperations {
+public interface ControllerOperations extends Feature {
+
+  public static final String FEATURE_NAME = FeatureNames.MVC;
 
   /**
-   * Creates a new Spring MVC controller which will be automatically
-   * scaffolded.
-   * <p>
-   * Request mappings assigned by this method will always commence with "/"
-   * and end with "/**". You may present this prefix and/or this suffix if you
-   * wish, although it will automatically be added should it not be provided.
+   * This operation will check if setup operation is available
    * 
-   * @param controller the controller class to create (required)
-   * @param entity the entity this controller should edit (required)
-   * @param disallowedOperations specify a set of disallowed operation names
-   *            (required, but can be empty)
-   * @param path the path which the controller should be accessible via REST
-   *            requests
+   * @return true if setup operation is available. false if not.
    */
-  void createAutomaticController(JavaType controller, JavaType entity,
-      Set<String> disallowedOperations, String path);
+  boolean isSetupAvailable();
 
   /**
-   * Creates Spring MVC controllers for all JPA entities in the project.
+   * This operation will setup Spring MVC on generated project.
    * 
-   * @param javaPackage The package where the new controllers are scaffolded.
+   * @param module 
+   *            Pom module where Spring MVC should be included
    */
-  void generateAll(JavaPackage javaPackage);
-
-  boolean isControllerInstallationPossible();
-
-  @Deprecated
-  boolean isNewControllerAvailable();
-
-  void setup();
+  void setup(Pom module);
 }

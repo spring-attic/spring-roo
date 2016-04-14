@@ -66,6 +66,7 @@ import org.w3c.dom.Node;
  * 
  * @author Stefan Schmidt
  * @author Jeremy Grelle
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -253,10 +254,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
             new ArrayList<JavaSymbolName>(), bodyBuilder);
     indexMethodBuilder.setAnnotations(indexMethodAnnotations);
     return indexMethodBuilder;
-  }
-
-  public String getName() {
-    return FeatureNames.MVC;
   }
 
   public void installCommonViewArtefacts() {
@@ -524,21 +521,10 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
         && !getProjectOperations().isFeatureInstalled(FeatureNames.JSF);
   }
 
-  public boolean isInstalledInModule(final String moduleName) {
-    final LogicalPath webAppPath = LogicalPath.getInstance(Path.SRC_MAIN_WEBAPP, moduleName);
-    return fileManager.exists(getProjectOperations().getPathResolver().getIdentifier(webAppPath,
-        "WEB-INF/spring/webmvc-config.xml"));
-  }
-
   public boolean isInstallLanguageCommandAvailable() {
     return isProjectAvailable()
         && fileManager.exists(getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP,
             "WEB-INF/views/footer.jspx"));
-  }
-
-  public boolean isMvcInstallationPossible() {
-    return isProjectAvailable() && !isControllerAvailable()
-        && !getProjectOperations().isFeatureInstalled(FeatureNames.JSF);
   }
 
   private boolean isProjectAvailable() {

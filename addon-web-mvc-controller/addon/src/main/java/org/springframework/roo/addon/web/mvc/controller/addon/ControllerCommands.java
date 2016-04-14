@@ -1,37 +1,35 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
-import static org.springframework.roo.shell.OptionContexts.PROJECT;
-import static org.springframework.roo.shell.OptionContexts.UPDATE;
+import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.text.StrTokenizer;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.plural.addon.PluralMetadata;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
+import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+
 /**
- * Commands for the 'mvc controller' add-on to be used by the ROO shell.
+ * This class provides necessary commands to be able to include Spring MVC on generated
+ * project and generate new controllers.
  * 
  * @author Stefan Schmidt
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -40,142 +38,149 @@ public class ControllerCommands implements CommandMarker {
 
   private static Logger LOGGER = HandlerUtils.getLogger(ControllerCommands.class);
 
-  @Reference
+  // ------------ OSGi component attributes ----------------
+  private BundleContext context;
+
   private ControllerOperations controllerOperations;
-  @Reference
-  private MetadataService metadataService;
-  @Reference
   private ProjectOperations projectOperations;
-  @Reference
   private TypeLocationService typeLocationService;
 
-  @Deprecated
-  @CliCommand(
-      value = "controller all",
-      help = "Scaffold controllers for all project entities without an existing controller - deprecated, use 'web mvc setup' + 'web mvc all' instead")
-  public void generateAll(@CliOption(key = "package", mandatory = true, optionContext = UPDATE,
-      help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
-
-    LOGGER
-        .warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc all --package ' instead.");
-    controllerOperations.setup();
-    webMvcAll(javaPackage);
+  protected void activate(final ComponentContext context) {
+    this.context = context.getBundleContext();
   }
 
-  @Deprecated
-  @CliAvailabilityIndicator({"controller scaffold", "controller all"})
-  public boolean isNewControllerAvailable() {
-    return controllerOperations.isNewControllerAvailable();
-  }
-
-  @CliAvailabilityIndicator({"web mvc all", "web mvc scaffold"})
-  public boolean isScaffoldAvailable() {
-    return controllerOperations.isControllerInstallationPossible();
-  }
-
-  @Deprecated
-  @CliCommand(
-      value = "controller scaffold",
-      help = "Create a new scaffold Controller (ie where we maintain CRUD automatically) - deprecated, use 'web mvc scaffold' instead")
-  public void newController(
-      @CliOption(key = {"class", ""}, mandatory = true,
-          help = "The path and name of the controller object to be created") final JavaType controller,
-      @CliOption(key = "entity", mandatory = false, optionContext = PROJECT,
-          unspecifiedDefaultValue = "*",
-          help = "The name of the entity object which the controller exposes to the web tier") final JavaType entity,
-      @CliOption(
-          key = "path",
-          mandatory = false,
-          help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") final String path,
-      @CliOption(
-          key = "disallowedOperations",
-          mandatory = false,
-          help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
-
-    LOGGER
-        .warning("This command has been deprecated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc scaffold' instead.");
-    controllerOperations.setup();
-    webMvcScaffold(controller, entity, path, disallowedOperations);
-  }
-
-  @CliCommand(
-      value = "web mvc all",
-      help = "Scaffold Spring MVC controllers for all project entities without an existing controller")
-  public void webMvcAll(@CliOption(key = "package", mandatory = true, optionContext = UPDATE,
-      help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
-
-    if (!javaPackage.getFullyQualifiedPackageName().startsWith(
-        projectOperations.getTopLevelPackage(projectOperations.getFocusedModuleName())
-            .getFullyQualifiedPackageName())) {
-      LOGGER
-          .warning("Your controller was created outside of the project's top level package and is therefore not included in the preconfigured component scanning. Please adjust your component scanning manually in webmvc-config.xml");
+  /**
+   * This indicator checks if --module parameter should be visible or not.
+   * 
+   * If exists more than one module that match with the properties of ModuleFeature APPLICATION,
+   * --module parameter should be mandatory.
+   * 
+   * @param shellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(command = "web mvc setup", params = {"module"},
+      help = "Module parameter is not available if there is only one application module")
+  public boolean isModuleVisible(ShellContext shellContext) {
+    if (getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION).size() > 1) {
+      return true;
     }
-    controllerOperations.generateAll(javaPackage);
+    return false;
   }
 
-  @CliCommand(
-      value = "web mvc scaffold",
-      help = "Create a new scaffold Controller (ie where Roo maintains CRUD functionality automatically)")
-  public void webMvcScaffold(
-      @CliOption(key = {"class", ""}, mandatory = true,
-          help = "The path and name of the controller object to be created") final JavaType controller,
-      @CliOption(key = "backingType", mandatory = false, optionContext = PROJECT,
-          unspecifiedDefaultValue = "*",
-          help = "The name of the form backing type which the controller exposes to the web tier") final JavaType backingType,
-      @CliOption(
-          key = "path",
-          mandatory = false,
-          help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path,
-      @CliOption(
-          key = "disallowedOperations",
-          mandatory = false,
-          help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") final String disallowedOperations) {
-
-    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(backingType);
-    if (cid == null) {
-      LOGGER.warning("The specified entity can not be resolved to a type in your project");
-      return;
+  /**
+   * This indicator checks if --module parameter should be mandatory or not. 
+   * 
+   * If focused module doesn't match with the properties of ModuleFeature APPLICATION,
+   * --module parameter should be mandatory.
+   * 
+   * @param shellContext
+   * @return
+   */
+  @CliOptionMandatoryIndicator(command = "web mvc setup", params = {"module"})
+  public boolean isModuleRequired(ShellContext shellContext) {
+    Pom module = getProjectOperations().getFocusedModule();
+    if (!isModuleVisible(shellContext)
+        || getTypeLocationService().hasModuleFeature(module, ModuleFeatureName.APPLICATION)) {
+      return false;
     }
+    return true;
+  }
 
-    if (controller.getSimpleTypeName().equalsIgnoreCase(backingType.getSimpleTypeName())) {
-      LOGGER
-          .warning("Controller class name needs to be different from the class name of the form backing object (suggestion: '"
-              + backingType.getSimpleTypeName() + "Controller')");
-      return;
-    }
+  /**
+   * This indicator checks if Spring MVC setup is available
+   *
+   * If a valid project has been generated and Spring MVC has not been installed yet, 
+   * this command will be available.
+   * 
+   * @return
+   */
+  @CliAvailabilityIndicator(value = "web mvc setup")
+  public boolean isSetupAvailable() {
+    return getControllerOperations().isSetupAvailable();
+  }
 
-    final Set<String> disallowedOperationSet = new HashSet<String>();
-    if (!"".equals(disallowedOperations)) {
-      final String[] disallowedOperationsTokens =
-          new StrTokenizer(disallowedOperations, ",").getTokenArray();
-      for (final String operation : disallowedOperationsTokens) {
-        if (!("create".equals(operation) || "update".equals(operation) || "delete"
-            .equals(operation))) {
-          LOGGER
-              .warning("-disallowedOperations options can only contain 'create', 'update', 'delete': -disallowedOperations update,delete");
-          return;
+  /**
+   * This method provides the Command definition to be able to include
+   * Spring MVC on generated project.
+   * 
+   * @param module
+   */
+  @CliCommand(value = "web mvc setup", help = "Includes Spring MVC on generated project")
+  public void setup(
+      @CliOption(key = "module", mandatory = true,
+          help = "The application module where to install the persistence",
+          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
+    getControllerOperations().setup(module);
+  }
+
+  public TypeLocationService getTypeLocationService() {
+    if (typeLocationService == null) {
+      // Get all Services implement TypeLocationService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          typeLocationService = (TypeLocationService) this.context.getService(ref);
+          return typeLocationService;
         }
-        disallowedOperationSet.add(operation.toLowerCase());
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load TypeLocationService on ControllerCommands.");
+        return null;
       }
+    } else {
+      return typeLocationService;
     }
-
-    if (StringUtils.isBlank(path)) {
-      final LogicalPath targetPath = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-      final PluralMetadata pluralMetadata =
-          (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(backingType,
-              targetPath));
-      Validate.notNull(pluralMetadata, "Could not determine plural for '%s'",
-          backingType.getSimpleTypeName());
-      path = pluralMetadata.getPlural().toLowerCase();
-    } else if (path.equals("/") || path.equals("/*")) {
-      LOGGER
-          .warning("Your application already contains a mapping to '/' or '/*' by default. Please provide a different path.");
-      return;
-    } else if (path.startsWith("/")) {
-      path = path.substring(1);
-    }
-
-    controllerOperations.createAutomaticController(controller, backingType, disallowedOperationSet,
-        path);
   }
+
+  public ProjectOperations getProjectOperations() {
+    if (projectOperations == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          projectOperations = (ProjectOperations) this.context.getService(ref);
+          return projectOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on ControllerCommands.");
+        return null;
+      }
+    } else {
+      return projectOperations;
+    }
+  }
+
+  public ControllerOperations getControllerOperations() {
+    if (controllerOperations == null) {
+      // Get all Services implement ControllerOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ControllerOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          controllerOperations = (ControllerOperations) this.context.getService(ref);
+          return controllerOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ControllerOperations on ControllerCommands.");
+        return null;
+      }
+    } else {
+      return controllerOperations;
+    }
+  }
+
+
 }

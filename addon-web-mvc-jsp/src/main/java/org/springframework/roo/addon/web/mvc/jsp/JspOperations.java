@@ -2,7 +2,6 @@ package org.springframework.roo.addon.web.mvc.jsp;
 
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.LogicalPath;
 import org.w3c.dom.Document;
 
@@ -11,8 +10,9 @@ import org.w3c.dom.Document;
  * 
  * @author Stefan Schmidt
  * @author Ben Alex
+ * @author Juan Carlos García
  */
-public interface JspOperations extends Feature {
+public interface JspOperations {
 
   /**
    * Creates a new Spring MVC controller.
@@ -80,8 +80,6 @@ public interface JspOperations extends Feature {
   boolean isControllerAvailable();
 
   boolean isInstallLanguageCommandAvailable();
-
-  boolean isMvcInstallationPossible();
 
   /**
    * Replaces an existing tag library with the latest version (set backup flag

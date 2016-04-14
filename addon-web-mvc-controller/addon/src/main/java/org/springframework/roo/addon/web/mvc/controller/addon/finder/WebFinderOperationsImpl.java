@@ -101,6 +101,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
   }
 
   public boolean isWebFinderInstallationPossible() {
-    return controllerOperations.isControllerInstallationPossible();
+    return false;
+    //return controllerOperations.isControllerInstallationPossible();
   }
 }
