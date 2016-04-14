@@ -43,6 +43,12 @@ public final class OptionContexts {
    */
   public static final String UPDATELAST = "lastused";
 
+  /**
+   * An option context value indicating that the currently focused module
+   * should be included when this {@link Converter} generates completions.
+   */
+  public static final String INCLUDE_CURRENT_MODULE = "includeCurrent";
+
   public static final String UPDATE_PROJECT = "update,project";
 
   public static final String UPDATELAST_INTERFACE = "lastused,interface";
@@ -50,6 +56,9 @@ public final class OptionContexts {
   public static final String UPDATELAST_PROJECT = "lastused,project";
 
   public static final String APPLICATION_FEATURE = FEATURE + "[APPLICATION]";
+
+  public static final String APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE = APPLICATION_FEATURE + ","
+      + INCLUDE_CURRENT_MODULE;
 
 
   private OptionContexts() {}

@@ -626,8 +626,6 @@ public class FieldCommands implements CommandMarker {
     }
 
     insertField(fieldDetails, permitReservedWords, transientModifier);
-
-    projectOperations.addModuleDependency(fieldType.getModule());
   }
 
   /**
@@ -1235,6 +1233,8 @@ public class FieldCommands implements CommandMarker {
 
   private void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords,
       final boolean transientModifier) {
+
+    String module = null;
     if (!permitReservedWords) {
       ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
       if (fieldDetails.getColumn() != null) {
@@ -1246,9 +1246,14 @@ public class FieldCommands implements CommandMarker {
     fieldDetails.decorateAnnotationsList(annotations);
     fieldDetails.setAnnotations(annotations);
 
+    if (fieldDetails.getFieldType() != null) {
+      module = fieldDetails.getFieldType().getModule();
+    }
+
     String initializer = null;
     if (fieldDetails instanceof CollectionField) {
       final CollectionField collectionField = (CollectionField) fieldDetails;
+      module = collectionField.getGenericParameterTypeName().getModule();
       initializer = "new " + collectionField.getInitializer() + "()";
     } else if (fieldDetails instanceof DateField
         && fieldDetails.getFieldName().getSymbolName().equals("created")) {
@@ -1266,6 +1271,10 @@ public class FieldCommands implements CommandMarker {
     final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails);
     fieldBuilder.setFieldInitializer(initializer);
     typeManagementService.addField(fieldBuilder.build());
+
+    if (module != null) {
+      projectOperations.addModuleDependency(module);
+    }
   }
 
   private void formatFieldComment(FieldDetails fieldDetails) {

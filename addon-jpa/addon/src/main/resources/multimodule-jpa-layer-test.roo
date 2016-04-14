@@ -349,13 +349,13 @@ repository jpa add --entity model:~.Address --interface service-api:~.AddressRep
 # Goal:    Test if database properties are added into the
 #          application.properties file of the module specified
 #
-module create --moduleName otherapplication --parent ~
+module create --moduleName app2 --parent ~
 # Copy ExampleApplication class from application module into the new module
-# jpa setup --provider HIBERNATE --database ORACLE --force --module otherapplication
+# jpa setup --provider HIBERNATE --database ORACLE --force --module app2
 #       
-# Output:  Updated otherapplication/src/main/resources/application.properties
-#          Updated otherapplication/pom.xml [removed dependency org.hsqldb:hsqldb:; added dependency com.oracle:ojdbc14:10.2.0.5; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
-#          Updated otherapplication:ROOT/pom.xml [added dependencies org.springframework.boot:spring-boot-starter-data-jpa:, com.oracle:ojdbc14:10.2.0.5]
+# Output:  Updated app2/src/main/resources/application.properties
+#          Updated app2/pom.xml [removed dependency org.hsqldb:hsqldb:; added dependency com.oracle:ojdbc14:10.2.0.5; skipped dependency org.springframework.boot:spring-boot-starter-data-jpa:]
+#          Updated app2:ROOT/pom.xml [added dependencies org.springframework.boot:spring-boot-starter-data-jpa:, com.oracle:ojdbc14:10.2.0.5]
 #
 # Result:  Creates an application.properties file into the new module,
 #          and adds database properties in the application.properties 

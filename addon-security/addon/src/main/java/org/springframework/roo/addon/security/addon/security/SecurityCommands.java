@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.security.addon.security;
 
-import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
+import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -54,9 +54,10 @@ public class SecurityCommands implements CommandMarker {
   }
 
   @CliCommand(value = "security setup", help = "Install Spring Security into your project")
-  public void installSecurity(@CliOption(key = "module", mandatory = true,
-      help = "The application module where to install the persistence",
-      unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE) Pom module) {
+  public void installSecurity(
+      @CliOption(key = "module", mandatory = true,
+          help = "The application module where to install the persistence",
+          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
     securityOperations.installSecurity(module);
   }
 

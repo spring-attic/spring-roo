@@ -1,8 +1,8 @@
 package org.springframework.roo.converters;
 
-import static org.springframework.roo.classpath.MetadataCommands.INCLUDE_CURRENT_MODULE;
 import static org.springframework.roo.project.maven.Pom.ROOT_MODULE_SYMBOL;
 import static org.springframework.roo.shell.OptionContexts.FEATURE;
+import static org.springframework.roo.shell.OptionContexts.INCLUDE_CURRENT_MODULE;
 import static org.springframework.roo.shell.OptionContexts.UPDATE;
 import static org.springframework.roo.shell.OptionContexts.UPDATELAST;
 

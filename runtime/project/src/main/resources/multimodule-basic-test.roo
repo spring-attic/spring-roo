@@ -368,7 +368,8 @@ service all --apiPackage otherservice:~ --implPackage otherservice:~
 # Goal:    Avoid to create a module with a name that already is used 
 #          to refer other module
 #
-# module create --moduleName model 
+# module focus --moduleName ~
+# module create --moduleName model
 #       
 # Output:  Module model already exists
 #
@@ -448,8 +449,6 @@ service all --apiPackage otherservice:~ --implPackage otherservice:~
 # Goal:    Validate that a circular dependency between modules is 
 #          not allowed 
 # 
-entity jpa --class model:~.Address
-repository jpa all --package repository:~
 # service add --entity model:~.Pet --repository repository:org.example.repository.PetRepository  --interface model:~.api.PetService --class model:~.impl.PetServiceImpl
 #       
 # Output:  Created model:SRC_MAIN_JAVA/org/example/model/api

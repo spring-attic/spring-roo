@@ -7,7 +7,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
-import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
+import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
@@ -219,7 +219,7 @@ public class JpaCommands implements CommandMarker {
       @CliOption(key = "database", mandatory = true, help = "The database to support") final JdbcDatabase jdbcDatabase,
       @CliOption(key = "module", mandatory = true,
           help = "The application module where to install the persistence",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE) Pom module,
+          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
       @CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use") final String jndi,
       @CliOption(key = "hostName", mandatory = false, help = "The host name to use") final String hostName,
       @CliOption(key = "databaseName", mandatory = false, help = "The database name to use") final String databaseName,

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.roo.classpath.MetadataCommands.INCLUDE_CURRENT_MODULE;
+import static org.springframework.roo.shell.OptionContexts.INCLUDE_CURRENT_MODULE;
 import static org.springframework.roo.project.maven.Pom.ROOT_MODULE_SYMBOL;
 
 import java.io.File;

@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath;
 
 import static org.apache.commons.io.IOUtils.LINE_SEPARATOR;
+import static org.springframework.roo.shell.OptionContexts.INCLUDE_CURRENT_MODULE;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -24,7 +25,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.Converter;
+
 
 @Component
 @Service
@@ -36,12 +37,6 @@ public class MetadataCommands implements CommandMarker {
   private static final String METADATA_FOR_TYPE_COMMAND = "metadata for type";
   private static final String METADATA_STATUS_COMMAND = "metadata status";
   private static final String METADATA_TRACE_COMMAND = "metadata trace";
-
-  /**
-   * An option context value indicating that the currently focused module
-   * should be included when this {@link Converter} generates completions.
-   */
-  public static final String INCLUDE_CURRENT_MODULE = "includeCurrent";
 
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
