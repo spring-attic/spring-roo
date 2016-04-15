@@ -3,6 +3,8 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_MVC_CONFIGURATION;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
@@ -13,6 +15,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.application.config.ApplicationConfigService;
+import org.springframework.roo.classpath.ModuleFeature;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -36,6 +39,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * 
  * @author Stefan Schmidt
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 1.0
  */
 @Component
@@ -77,9 +81,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * 
    * @param module 
    *            Pom module where Spring MVC should be included
+   * @param appServer
+   *            Server where application should be deployed
    */
   @Override
-  public void setup(Pom module) {
+  public void setup(Pom module, ServerProvider appServer) {
+
+    Validate.notNull(appServer, "Application server required");
 
     // Checks that provided module matches with Application properties
     // modules
@@ -129,6 +137,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
     getApplicationConfigService().addProperty(module.getModuleName(),
         "spring.jackson.serialization.indent_output", "true", "", true);
 
+    // Add server configuration
+    appServer.setup(module);
   }
 
   public TypeLocationService getTypeLocationService() {
@@ -277,9 +287,16 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   @Override
   public boolean isInstalledInModule(String moduleName) {
-    Pom module = projectOperations.getPomFromModuleName(moduleName);
-    return module.hasDependencyExcludingVersion(new Dependency("org.springframework.boot",
-        "spring-boot-starter-web", null));
+    Pom module = getProjectOperations().getPomFromModuleName(moduleName);
+    for (JavaType javaType : getTypeLocationService().findTypesWithAnnotation(
+        ROO_WEB_MVC_CONFIGURATION)) {
+      if (javaType.getModule().equals(moduleName)
+          && module.hasDependencyExcludingVersion(new Dependency("org.springframework.boot",
+              "spring-boot-starter-web", null))) {
+        return true;
+      }
+    }
+    return false;
   }
 
 

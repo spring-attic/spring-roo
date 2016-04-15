@@ -89,6 +89,10 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
     return initialPath + StringUtils.strip(relativePath, File.separator);
   }
 
+  public String getIdentifier(final String moduleName, final Path path, final String relativePath) {
+    return getIdentifier(LogicalPath.getInstance(path, moduleName), relativePath);
+  }
+
   private File getModuleRoot(final String module, final Pom pom) {
     if (pom == null) {
       // No POM exists for this module; we must be creating it

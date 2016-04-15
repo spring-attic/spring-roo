@@ -72,6 +72,12 @@ public interface PathResolvingStrategy {
    */
   String getIdentifier(LogicalPath path, String relativePath);
 
+
+  /**
+   * @see PathResolver#getIdentifier(String, Path, String)
+   */
+  String getIdentifier(String moduleName, Path path, String relativePath);
+
   /**
    * Attempts to determine which {@link Path} the specified canonical path
    * falls under.
@@ -129,4 +135,6 @@ public interface PathResolvingStrategy {
    * @return see above
    */
   boolean isActive();
+
+
 }

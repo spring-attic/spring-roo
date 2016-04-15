@@ -11,6 +11,7 @@ import org.springframework.roo.project.maven.Pom;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Juan Carlos García
+ * @author Paula Navarro
  */
 public interface ControllerOperations extends Feature {
 
@@ -28,6 +29,9 @@ public interface ControllerOperations extends Feature {
    * 
    * @param module 
    *            Pom module where Spring MVC should be included
+   * @param appServer
+   *            Server where application should be deployed
    */
-  void setup(Pom module);
+  void setup(Pom module, ServerProvider appServer);
+
 }

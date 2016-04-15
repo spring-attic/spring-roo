@@ -2,6 +2,11 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
@@ -17,6 +22,7 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
@@ -30,6 +36,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * 
  * @author Stefan Schmidt
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 1.0
  */
 @Component
@@ -40,6 +47,8 @@ public class ControllerCommands implements CommandMarker {
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
+
+  private Map<String, ServerProvider> serverProviders = new HashMap<String, ServerProvider>();
 
   private ControllerOperations controllerOperations;
   private ProjectOperations projectOperations;
@@ -87,6 +96,35 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
+   * This indicator returns the servers where the application can be deployed
+   * @param context
+   * @return
+   */
+  @CliOptionAutocompleteIndicator(command = "web mvc setup", param = "appServer",
+      help = "Only valid application servers are available")
+  public List<String> getAllAppServers(ShellContext context) {
+    if (serverProviders.isEmpty()) {
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ServerProvider.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          ServerProvider serverProvider = (ServerProvider) this.context.getService(ref);
+          serverProviders.put(serverProvider.getName(), serverProvider);
+        }
+        return new ArrayList<String>(serverProviders.keySet());
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ServerProviders on ControllerCommands.");
+        return null;
+      }
+    } else {
+      return new ArrayList<String>(serverProviders.keySet());
+    }
+  }
+
+
+  /**
    * This indicator checks if Spring MVC setup is available
    *
    * If a valid project has been generated and Spring MVC has not been installed yet, 
@@ -104,13 +142,21 @@ public class ControllerCommands implements CommandMarker {
    * Spring MVC on generated project.
    * 
    * @param module
+   * @param appServer
    */
   @CliCommand(value = "web mvc setup", help = "Includes Spring MVC on generated project")
   public void setup(
       @CliOption(key = "module", mandatory = true,
           help = "The application module where to install the persistence",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
-    getControllerOperations().setup(module);
+          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
+      @CliOption(key = "appServer", mandatory = false,
+          help = "The server where deploy the application", unspecifiedDefaultValue = "EMBEDDED") String appServer) {
+
+    if (!serverProviders.containsKey(appServer)) {
+      throw new IllegalArgumentException("ERROR: Invalid server provider");
+    }
+
+    getControllerOperations().setup(module, serverProviders.get(appServer));
   }
 
   public TypeLocationService getTypeLocationService() {

@@ -67,6 +67,10 @@ public class DelegatePathResolver implements PathResolver {
     return getStrategy().getFriendlyName(identifier);
   }
 
+  public String getIdentifier(final String moduleName, final Path path, final String relativePath) {
+    return getStrategy().getIdentifier(moduleName, path, relativePath);
+  }
+
   public String getIdentifier(final LogicalPath path, final String relativePath) {
     return getStrategy().getIdentifier(path, relativePath);
   }

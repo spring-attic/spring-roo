@@ -103,6 +103,10 @@ public class DefaultPathResolvingStrategy extends AbstractPathResolvingStrategy 
         + relativePath;
   }
 
+  public String getIdentifier(final String modelName, final Path path, final String relativePath) {
+    return null;
+  }
+
   public LogicalPath getPath(final String moduleName, final Path path) {
     return null;
   }

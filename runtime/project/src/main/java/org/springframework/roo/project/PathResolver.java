@@ -102,6 +102,18 @@ public interface PathResolver {
   String getIdentifier(LogicalPath path, String relativePath);
 
   /**
+   * Returns the canonical path of the given path relative to the given
+   * {@link Path} of the specified module.
+   * 
+   * @param moduleName
+   * @param path
+   * @param relativePath
+   * @return a canonical path
+   * @since 2.0
+   */
+  String getIdentifier(String moduleName, Path path, String relativePath);
+
+  /**
    * Attempts to determine which {@link Path} the specified canonical path
    * falls under.
    * 
