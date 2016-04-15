@@ -33,6 +33,7 @@
         <module>addon-plural</module>
         <module>addon-test</module>
         <module>addon-jpa</module>
+        <module>addon-dto</module>
         <module>addon-dod</module>
         <module>addon-finder</module>
         <module>addon-logging</module>
@@ -613,6 +614,16 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.dto.addon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.dto.annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- /Roo Addons -->
