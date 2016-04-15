@@ -12,7 +12,6 @@ import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
 
 import java.util.*;
 
-import org.apache.commons.codec.binary.StringUtils;
 import org.springframework.roo.classpath.details.annotations.*;
 import org.springframework.roo.classpath.operations.*;
 import org.springframework.roo.model.*;

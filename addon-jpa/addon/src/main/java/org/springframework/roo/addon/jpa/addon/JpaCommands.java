@@ -80,9 +80,6 @@ public class JpaCommands implements CommandMarker {
   private static final String IDENTIFIER_DEFAULT_TYPE = "java.lang.Long";
   private static final String VERSION_DEFAULT_TYPE = "java.lang.Integer";
 
-  // Enums
-  private static final JavaType IDENTIFIER_STRATEGY = new JavaType(IdentifierStrategy.class);
-
   @Reference
   private IntegrationTestOperations integrationTestOperations;
   @Reference
