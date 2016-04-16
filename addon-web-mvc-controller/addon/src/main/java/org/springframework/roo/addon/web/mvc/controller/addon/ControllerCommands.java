@@ -103,24 +103,7 @@ public class ControllerCommands implements CommandMarker {
   @CliOptionAutocompleteIndicator(command = "web mvc setup", param = "appServer",
       help = "Only valid application servers are available")
   public List<String> getAllAppServers(ShellContext context) {
-    if (serverProviders.isEmpty()) {
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ServerProvider.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          ServerProvider serverProvider = (ServerProvider) this.context.getService(ref);
-          serverProviders.put(serverProvider.getName(), serverProvider);
-        }
-        return new ArrayList<String>(serverProviders.keySet());
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ServerProviders on ControllerCommands.");
-        return null;
-      }
-    } else {
-      return new ArrayList<String>(serverProviders.keySet());
-    }
+    return new ArrayList<String>(getServerProviders().keySet());
   }
 
 
@@ -152,11 +135,38 @@ public class ControllerCommands implements CommandMarker {
       @CliOption(key = "appServer", mandatory = false,
           help = "The server where deploy the application", unspecifiedDefaultValue = "EMBEDDED") String appServer) {
 
-    if (!serverProviders.containsKey(appServer)) {
+    if (!getServerProviders().containsKey(appServer)) {
       throw new IllegalArgumentException("ERROR: Invalid server provider");
     }
 
     getControllerOperations().setup(module, serverProviders.get(appServer));
+  }
+
+  /**
+   * This method gets all implementations of ServerProvider interface to be able
+   * to locate all availbale appServers
+   * 
+   * @return Map with appServer identifier and the ServerProvider implementation
+   */
+  public Map<String, ServerProvider> getServerProviders() {
+    if (serverProviders.isEmpty()) {
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ServerProvider.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          ServerProvider serverProvider = (ServerProvider) this.context.getService(ref);
+          serverProviders.put(serverProvider.getName(), serverProvider);
+        }
+        return serverProviders;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ServerProviders on ControllerCommands.");
+        return null;
+      }
+    } else {
+      return serverProviders;
+    }
   }
 
   public TypeLocationService getTypeLocationService() {
@@ -227,6 +237,5 @@ public class ControllerCommands implements CommandMarker {
       return controllerOperations;
     }
   }
-
 
 }
