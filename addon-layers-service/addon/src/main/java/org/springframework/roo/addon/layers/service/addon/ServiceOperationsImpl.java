@@ -80,19 +80,22 @@ public class ServiceOperationsImpl implements ServiceOperations {
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY);
     for (final ClassOrInterfaceTypeDetails domainType : entities) {
 
-      // Creating service interfaces for every entity
-      JavaType interfaceType =
-          new JavaType(String.format("%s.%sService", apiPackage.getFullyQualifiedPackageName(),
-              domainType.getName().getSimpleTypeName()), apiPackage.getModule());
+      // Ignore abstract entities
+      if (!domainType.isAbstract()) {
+        // Creating service interfaces for every entity
+        JavaType interfaceType =
+            new JavaType(String.format("%s.%sService", apiPackage.getFullyQualifiedPackageName(),
+                domainType.getName().getSimpleTypeName()), apiPackage.getModule());
 
-      // Creating service implementation for every entity
-      JavaType implType =
-          new JavaType(
-              String.format("%s.%sServiceImpl", implPackage.getFullyQualifiedPackageName(),
-                  domainType.getName().getSimpleTypeName()), implPackage.getModule());
+        // Creating service implementation for every entity
+        JavaType implType =
+            new JavaType(String.format("%s.%sServiceImpl", implPackage
+                .getFullyQualifiedPackageName(), domainType.getName().getSimpleTypeName()),
+                implPackage.getModule());
 
-      // Delegates on individual service creator
-      addService(domainType.getType(), interfaceType, implType);
+        // Delegates on individual service creator
+        addService(domainType.getType(), interfaceType, implType);
+      }
     }
   }
 

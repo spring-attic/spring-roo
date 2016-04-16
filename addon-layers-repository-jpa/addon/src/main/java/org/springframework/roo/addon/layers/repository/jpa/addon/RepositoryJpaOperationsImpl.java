@@ -96,15 +96,17 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     while (it.hasNext()) {
       ClassOrInterfaceTypeDetails entity = it.next();
 
-      // Generating new interface type using entity
-      JavaType interfaceType =
-          new JavaType(repositoriesPackage.getFullyQualifiedPackageName().concat(".")
-              .concat(entity.getType().getSimpleTypeName()).concat("Repository"),
-              repositoriesPackage.getModule());
+      // Ignore abstract classes
+      if (!entity.isAbstract()) {
+        // Generating new interface type using entity
+        JavaType interfaceType =
+            new JavaType(repositoriesPackage.getFullyQualifiedPackageName().concat(".")
+                .concat(entity.getType().getSimpleTypeName()).concat("Repository"),
+                repositoriesPackage.getModule());
 
-      // Delegate on simple add repository method
-      addRepository(interfaceType, entity.getType());
-
+        // Delegate on simple add repository method
+        addRepository(interfaceType, entity.getType());
+      }
     }
 
   }
