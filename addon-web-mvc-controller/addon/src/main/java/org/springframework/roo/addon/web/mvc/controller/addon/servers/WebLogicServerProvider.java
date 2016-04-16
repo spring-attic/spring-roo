@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller.addon;
+package org.springframework.roo.addon.web.mvc.controller.addon.servers;
 
 import java.io.InputStream;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller.addon;
+package org.springframework.roo.addon.web.mvc.controller.addon.servers;
 
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.maven.Pom;
