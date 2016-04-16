@@ -43,30 +43,34 @@ field enum --fieldName specialty --type ~.reference.Specialty --notNull false
 
 field set --class ~.domain.Owner --fieldName pets --type ~.domain.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
 
-finder add --finderName findPetsByNameAndWeight --class ~.domain.Pet
-finder add --finderName findPetsByOwner
-finder add --finderName findPetsBySendRemindersAndWeightLessThan
-finder add --finderName findPetsByTypeAndNameLike
+repository jpa all --package ~.repository
+service all --apiPackage ~.service.api --implPackage ~.service.impl
 
-finder add --finderName findVisitsByDescriptionAndVisitDate --class ~.domain.Visit
-finder add --finderName findVisitsByVisitDateBetween
-finder add --finderName findVisitsByDescriptionLike
+finder add --class ~.domain.Pet --name findByNameAndWeight
+finder add --class ~.domain.Pet --name findByOwner
+finder add --class ~.domain.Pet --name findBySendRemindersAndWeightLessThan
+finder add --class ~.domain.Pet --name findByTypeAndNameLike
 
-test integration --entity ~.domain.Vet
-test integration --entity ~.domain.Owner
-test integration --entity ~.domain.Pet
-test integration --entity ~.domain.Visit
+finder add --class ~.domain.Visit --name findByDescriptionAndVisitDate 
+finder add --class ~.domain.Visit --name findByVisitDateBetween
+finder add --class ~.domain.Visit --name findByDescriptionLike
 
 web mvc setup
-web mvc all --package ~.web
-web mvc finder all
+web mvc controller --all --package ~.web
 
-web mvc language --code de
-web mvc language --code es
+// web mvc finder all
 
-selenium test --controller ~.web.OwnerController
-selenium test --controller ~.web.PetController
-selenium test --controller ~.web.VetController
-selenium test --controller ~.web.VisitController
+// web mvc language --code de
+// web mvc language --code es
 
-logging setup --level INFO
+// test integration --entity ~.domain.Vet
+// test integration --entity ~.domain.Owner
+// test integration --entity ~.domain.Pet
+// test integration --entity ~.domain.Visit
+
+// selenium test --controller ~.web.OwnerController
+// selenium test --controller ~.web.PetController
+// selenium test --controller ~.web.VetController
+// selenium test --controller ~.web.VisitController
+
+// logging setup --level INFO

@@ -226,3 +226,12 @@ test unit --class ~.service.impl.CustomerServiceImpl
 
 // Add Spring MVC
 web mvc setup
+
+// Add necessary controllers
+web mvc controller --controller ~.web.CategoriesController --entity ~.domain.Category --service ~.service.api.CategoryService
+web mvc controller --controller ~.web.CustomerOrdersController --entity ~.domain.CustomerOrder --service ~.service.api.CustomerOrderService 
+web mvc controller --controller ~.web.CustomersController --entity ~.domain.Customer --service ~.service.api.CustomerService 
+web mvc controller --controller ~.web.EmployeesController --entity ~.domain.Employee --service ~.service.api.EmployeeService 
+web mvc controller --controller ~.web.ShippersController --entity ~.domain.Shipper --service ~.service.api.ShipperService
+web mvc controller --controller ~.web.StoresController --entity ~.domain.Store --service ~.service.api.StoreService
+web mvc controller --controller ~.web.SuppliersController --entity ~.domain.Supplier --service ~.service.api.SupplierService 

@@ -263,10 +263,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
   public void installCommonViewArtefacts(final String moduleName) {
     Validate.isTrue(isProjectAvailable(), "Project metadata required");
     final LogicalPath webappPath = Path.SRC_MAIN_WEBAPP.getModulePathId(moduleName);
-    if (!isControllerAvailable()) {
-      getWebMvcOperations().installAllWebMvcArtifacts();
-    }
-
     // Install servers maven plugin
     installMavenPlugins(moduleName);
 
@@ -513,12 +509,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
   public void installView(final String path, final String viewName, final String title,
       final String category, final LogicalPath webappPath) {
     installView(path, viewName, title, category, null, true, webappPath);
-  }
-
-  public boolean isControllerAvailable() {
-    return fileManager.exists(getPathResolver().getFocusedIdentifier(Path.SRC_MAIN_WEBAPP,
-        "WEB-INF/views"))
-        && !getProjectOperations().isFeatureInstalled(FeatureNames.JSF);
   }
 
   public boolean isInstallLanguageCommandAvailable() {

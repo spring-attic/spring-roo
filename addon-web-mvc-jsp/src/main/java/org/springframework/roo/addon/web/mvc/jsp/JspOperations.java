@@ -15,21 +15,6 @@ import org.w3c.dom.Document;
 public interface JspOperations {
 
   /**
-   * Creates a new Spring MVC controller.
-   * <p>
-   * Request mappings assigned by this method will always commence with "/"
-   * and end with "/**". You may present this prefix and/or this suffix if you
-   * wish, although it will automatically be added should it not be provided.
-   * 
-   * @param controller the controller class to create (required)
-   * @param preferredMapping the mapping this controller should adopt
-   *            (optional; if unspecified it will be based on the controller
-   *            name)
-   * @param webappPath
-   */
-  void createManualController(JavaType controller, String preferredMapping, LogicalPath webappPath);
-
-  /**
    * Installs the common view artifacts needed for MVC scaffolding into the
    * currently focused module.
    */
@@ -76,8 +61,6 @@ public interface JspOperations {
    */
   void installView(String path, String viewName, String title, String category,
       LogicalPath webappPath);
-
-  boolean isControllerAvailable();
 
   boolean isInstallLanguageCommandAvailable();
 

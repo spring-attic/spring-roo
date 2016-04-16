@@ -112,7 +112,7 @@ public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringIt
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "Controller";
+    return "WebScaffold_Controller";
   }
 
   @Override

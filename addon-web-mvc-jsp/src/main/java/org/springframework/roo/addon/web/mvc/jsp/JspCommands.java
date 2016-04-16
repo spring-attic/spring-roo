@@ -41,10 +41,10 @@ public class JspCommands implements CommandMarker {
     context = cContext.getBundleContext();
   }
 
-  @CliAvailabilityIndicator({"web mvc controller", "controller class", "web mvc install view",
-      "web mvc view", "web mvc update tags"})
+  @CliAvailabilityIndicator({"web mvc install view", "web mvc view", "web mvc update tags"})
   public boolean isControllerClassAvailable() {
-    return getJspOperations().isControllerAvailable();
+    //return getJspOperations().isControllerAvailable();
+    return false;
   }
 
   @CliAvailabilityIndicator({"web mvc install language", "web mvc language"})
@@ -62,18 +62,6 @@ public class JspCommands implements CommandMarker {
       return;
     }
     getJspOperations().installI18n(i18n, getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP));
-  }
-
-  @CliCommand(value = "web mvc controller",
-      help = "Create a new manual Controller (ie where you write the methods)")
-  public void newMvcArtifact(
-      @CliOption(key = {"class", ""}, mandatory = true,
-          help = "The path and name of the controller object to be created") final JavaType controller,
-      @CliOption(key = "preferredMapping", mandatory = false,
-          help = "Indicates a specific request mapping path for this controller (eg /foo/)") final String preferredMapping) {
-
-    getJspOperations().createManualController(controller, preferredMapping,
-        getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP));
   }
 
   @CliCommand(

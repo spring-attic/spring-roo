@@ -100,6 +100,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.controller.annotations.RooWebMvcConfiguration");
   public static final JavaType ROO_DTO = new JavaType(
       "org.springframework.roo.addon.dto.annotations.RooDTO");
+  public static final JavaType ROO_CONTROLLER = new JavaType(
+      "org.springframework.roo.addon.web.mvc.controller.annotations.RooController");
 
   /**
    * Constructor is private to prevent instantiation

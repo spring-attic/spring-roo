@@ -20,7 +20,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Metadata for {@link RooService}.
+ * Metadata for {@link RooWebMVCConfiguration}.
  * 
  * @author Juan Carlos García
  * @since 2.0

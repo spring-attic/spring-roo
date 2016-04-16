@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
+import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.maven.Pom;
@@ -33,5 +36,39 @@ public interface ControllerOperations extends Feature {
    *            Server where application should be deployed
    */
   void setup(Pom module, ServerProvider appServer);
+
+  /**
+   * This operation will check if add controllers operation is 
+   * available
+   * 
+   * @return true if add controller operation is available. 
+   * false if not.
+   */
+  boolean isAddControllerAvailable();
+
+  /**
+   * This operation will generate a new controller for every class annotated
+   * with @RooJpaEntity on current project.
+   * 
+   * @param controllersPackage
+   * @param responseType
+   * @param formattersPackage
+   * @param module
+   */
+  void createControllerForAllEntities(JavaPackage controllersPackage, String responseType,
+      JavaPackage formattersPackage, Pom module);
+
+  /**
+   * This operation will generate a new controller with the specified information 
+   * 
+   * @param controller
+   * @param entity
+   * @param service
+   * @param path
+   * @param responseType
+   * @param formattersPackage
+   */
+  void createController(JavaType controller, JavaType entity, JavaType service, String path,
+      String responseType, JavaPackage formattersPackage);
 
 }
