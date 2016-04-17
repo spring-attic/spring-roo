@@ -30,7 +30,7 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Metadata for {@link RooController}.
+ * Metadata for {@link RooFormatter}.
  * 
  * @author Juan Carlos García
  * @since 2.0
