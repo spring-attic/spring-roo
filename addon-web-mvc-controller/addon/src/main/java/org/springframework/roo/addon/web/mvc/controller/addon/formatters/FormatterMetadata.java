@@ -107,9 +107,6 @@ public class FormatterMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.conversionServiceField = getConversionServiceField();
     ensureGovernorHasField(new FieldMetadataBuilder(conversionServiceField));
 
-    // Adding constructor
-    ensureGovernorHasConstructor(new ConstructorMetadataBuilder(getConstructor()));
-
     // Add parse() method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getParseMethod()));
 
@@ -249,42 +246,6 @@ public class FormatterMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
-  }
-
-  /**
-   * This method returns the formatter constructor
-   * @return
-   */
-  private ConstructorMetadata getConstructor() {
-
-    // Check if constructor to generate already exists
-    ConstructorMetadata existingConstructor =
-        governorTypeDetails.getDeclaredConstructor(Arrays.asList(this.serviceField.getFieldType(),
-            this.conversionServiceField.getFieldType()));
-    if (existingConstructor != null) {
-      return existingConstructor;
-    }
-
-    ConstructorMetadataBuilder constructor = new ConstructorMetadataBuilder(getId());
-    constructor.addParameter(this.serviceField.getFieldName().getSymbolName(),
-        this.serviceField.getFieldType());
-    constructor.addParameter(this.conversionServiceField.getFieldName().getSymbolName(),
-        this.conversionServiceField.getFieldType());
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // this.serviceField = serviceField;
-    bodyBuilder.appendFormalLine(String.format("this.%s = %s;", this.serviceField.getFieldName(),
-        this.serviceField.getFieldName()));
-
-    // this.conversionServiceField = conversionServiceField;
-    bodyBuilder.appendFormalLine(String.format("this.%s = %s;",
-        this.conversionServiceField.getFieldName(), this.conversionServiceField.getFieldName()));
-
-    constructor.setBodyBuilder(bodyBuilder);
-
-    return constructor.build();
   }
 
   /**

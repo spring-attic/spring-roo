@@ -1,9 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
-import static org.springframework.roo.model.RooJavaType.ROO_WEB_MVC_CONFIGURATION;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +13,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
@@ -66,7 +66,7 @@ public class WebMvcConfigurationMetadataProviderImpl extends
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_WEB_MVC_CONFIGURATION);
+    addMetadataTrigger(RooJavaType.ROO_WEB_MVC_CONFIGURATION);
   }
 
   /**
@@ -82,7 +82,7 @@ public class WebMvcConfigurationMetadataProviderImpl extends
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_WEB_MVC_CONFIGURATION);
+    removeMetadataTrigger(RooJavaType.ROO_WEB_MVC_CONFIGURATION);
 
     CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
     keyDecorator.unregisterMatchers(getClass());
@@ -133,8 +133,13 @@ public class WebMvcConfigurationMetadataProviderImpl extends
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
+    // Get all registered formatters
+    Set<ClassOrInterfaceTypeDetails> formatters =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_FORMATTER);
+
     return new WebMvcConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata);
+        governorPhysicalTypeMetadata, formatters);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

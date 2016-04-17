@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.config.WebMvcConfigurationMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -153,6 +155,18 @@ public class FormatterMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // Getting service
     JavaType service = (JavaType) formatterAnnotation.getAttribute("service").getValue();
 
+    // Register dependency with WebMvcConfiguration
+    Set<ClassOrInterfaceTypeDetails> webMvcConfigurations =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_WEB_MVC_CONFIGURATION);
+    for (ClassOrInterfaceTypeDetails webMvcConfigurationDetails : webMvcConfigurations) {
+      final LogicalPath logicalPath =
+          PhysicalTypeIdentifier.getPath(webMvcConfigurationDetails.getDeclaredByMetadataId());
+      final String webMvcConfigurationMetadataKey =
+          WebMvcConfigurationMetadata.createIdentifier(webMvcConfigurationDetails.getType(),
+              logicalPath);
+      registerDependency(metadataIdentificationString, webMvcConfigurationMetadataKey);
+    }
     return new FormatterMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, accessors, service);
   }
