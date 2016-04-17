@@ -184,6 +184,14 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
     return StringUtils.capitalize(symbolName);
   }
 
+  /**
+   * @return the symbol name, uncapitalising the first letter (never null or
+   *         empty)
+   */
+  public String getSymbolNameUnCapitalisedFirstLetter() {
+    return StringUtils.uncapitalize(symbolName);
+  }
+
   @Override
   public int hashCode() {
     return symbolName.hashCode();

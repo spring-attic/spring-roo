@@ -44,6 +44,7 @@ public final class SpringJavaType {
       "org.springframework.web.servlet.DispatcherServlet");
   public static final JavaType FLOW_HANDLER_MAPPING = new JavaType(
       "org.springframework.webflow.mvc.servlet.FlowHandlerMapping");
+  public static final JavaType FORMATTER = new JavaType("org.springframework.format.Formatter");
   public static final JavaType FORMATTER_REGISTRY = new JavaType(
       "org.springframework.format.FormatterRegistry");
   public static final JavaType HIDDEN_HTTP_METHOD_FILTER = new JavaType(

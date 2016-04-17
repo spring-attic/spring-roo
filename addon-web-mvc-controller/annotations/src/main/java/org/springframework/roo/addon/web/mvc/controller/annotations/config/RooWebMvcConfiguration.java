@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller.annotations;
+package org.springframework.roo.addon.web.mvc.controller.annotations.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

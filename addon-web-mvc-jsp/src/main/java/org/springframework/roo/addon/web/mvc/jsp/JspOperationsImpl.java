@@ -26,7 +26,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.backup.BackupOperations;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.addon.web.mvc.controller.addon.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18nSupport;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
@@ -83,7 +82,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
   private PropFileOperations propFileOperations;
   private TilesOperations tilesOperations;
   private TypeManagementService typeManagementService;
-  private WebMvcOperations webMvcOperations;
 
   protected void activate(final ComponentContext cContext) {
     this.context = cContext.getBundleContext();
@@ -776,26 +774,4 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
       return typeManagementService;
     }
   }
-
-  public WebMvcOperations getWebMvcOperations() {
-    if (webMvcOperations == null) {
-      // Get all Services implement WebMvcOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(WebMvcOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          webMvcOperations = (WebMvcOperations) context.getService(ref);
-          return webMvcOperations;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load WebMvcOperations on JspOperationsImpl.");
-        return null;
-      }
-    } else {
-      return webMvcOperations;
-    }
-  }
-
 }

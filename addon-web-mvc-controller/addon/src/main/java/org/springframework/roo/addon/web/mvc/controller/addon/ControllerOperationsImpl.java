@@ -70,7 +70,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
   private BundleContext context;
 
   private static final JavaSymbolName PATH = new JavaSymbolName("path");
-  private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 
   private ProjectOperations projectOperations;
   private TypeLocationService typeLocationService;
@@ -336,7 +335,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
           "ERROR: You are trying to generate formatters inside a module that doesn't match with "
               + "ModuleFeature.APPLICATION");
 
-      addRooFormatter(entity, formattersPackage);
+      addRooFormatter(entity, service, formattersPackage);
     }
   }
 
@@ -373,9 +372,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * with some existing entity.
    * 
    * @param entity
+   * @param service
    * @param formattersPackage
    */
-  private void addRooFormatter(JavaType entity, JavaPackage formattersPackage) {
+  private void addRooFormatter(JavaType entity, JavaType service, JavaPackage formattersPackage) {
 
     JavaType formatter =
         new JavaType(String.format("%s.%sFormatter",
@@ -390,9 +390,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
         PhysicalTypeIdentifier.createIdentifier(formatter,
             getPathResolver().getPath(resourceIdentifier));
 
-    // Create annotation @RooFormatter(entity = MyEntity.class)
+    // Create annotation @RooFormatter(entity = MyEntity.class, service = MyService.class)
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    annotations.add(getRooFormatterAnnotation(entity));
+    annotations.add(getRooFormatterAnnotation(entity, service));
     cidBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, formatter,
             PhysicalTypeCategory.CLASS);
@@ -524,12 +524,15 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * Method that returns @RooFormatter annotation
    * 
    * @param entity
+   * @param service
    * @return
    */
-  private AnnotationMetadataBuilder getRooFormatterAnnotation(final JavaType entity) {
+  private AnnotationMetadataBuilder getRooFormatterAnnotation(final JavaType entity,
+      final JavaType service) {
     final List<AnnotationAttributeValue<?>> rooFormatterAttributes =
         new ArrayList<AnnotationAttributeValue<?>>();
     rooFormatterAttributes.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
+    rooFormatterAttributes.add(new ClassAttributeValue(new JavaSymbolName("service"), service));
     return new AnnotationMetadataBuilder(RooJavaType.ROO_FORMATTER, rooFormatterAttributes);
   }
 

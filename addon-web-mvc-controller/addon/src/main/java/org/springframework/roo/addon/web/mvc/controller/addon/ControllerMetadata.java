@@ -107,8 +107,8 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
     // Generating service field name
     String fieldName =
-        this.service.getSimpleTypeName().substring(0, 1).toLowerCase()
-            .concat(this.service.getSimpleTypeName().substring(1));
+        new JavaSymbolName(this.service.getSimpleTypeName())
+            .getSymbolNameUnCapitalisedFirstLetter();
 
     return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
         new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.service)

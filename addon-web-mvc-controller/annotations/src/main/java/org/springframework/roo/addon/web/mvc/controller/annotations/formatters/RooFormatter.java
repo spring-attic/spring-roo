@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller.annotations;
+package org.springframework.roo.addon.web.mvc.controller.annotations.formatters;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -24,5 +24,10 @@ public @interface RooFormatter {
    * Every formatter is responsible for a single entity. 
    */
   Class<?> entity();
+
+  /**
+   * Every formatter uses a single service.
+   */
+  Class<?> service();
 
 }

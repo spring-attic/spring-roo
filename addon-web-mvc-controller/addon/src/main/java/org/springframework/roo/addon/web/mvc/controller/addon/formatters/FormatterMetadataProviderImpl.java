@@ -1,8 +1,8 @@
-package org.springframework.roo.addon.web.mvc.controller.addon;
+package org.springframework.roo.addon.web.mvc.controller.addon.formatters;
 
-import static org.springframework.roo.model.RooJavaType.ROO_WEB_MVC_CONFIGURATION;
-
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -10,12 +10,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -27,18 +31,18 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * Implementation of {@link WebMvcConfigurationMetadataProvider}.
+ * Implementation of {@link FormatterMetadataProvider}.
  * 
  * @author Juan Carlos García
  * @since 2.0
  */
 @Component
 @Service
-public class WebMvcConfigurationMetadataProviderImpl extends
-    AbstractMemberDiscoveringItdMetadataProvider implements WebMvcConfigurationMetadataProvider {
+public class FormatterMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
+    implements FormatterMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
-      .getLogger(WebMvcConfigurationMetadataProviderImpl.class);
+      .getLogger(FormatterMetadataProviderImpl.class);
 
   private final Map<JavaType, String> domainTypeToServiceMidMap =
       new LinkedHashMap<JavaType, String>();
@@ -51,7 +55,7 @@ public class WebMvcConfigurationMetadataProviderImpl extends
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_WEB_MVC_CONFIGURATION} as additional 
+   * <li>Registers {@link RooJavaType#ROO_FORMATTER} as additional 
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -66,7 +70,7 @@ public class WebMvcConfigurationMetadataProviderImpl extends
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_WEB_MVC_CONFIGURATION);
+    addMetadataTrigger(RooJavaType.ROO_FORMATTER);
   }
 
   /**
@@ -82,7 +86,7 @@ public class WebMvcConfigurationMetadataProviderImpl extends
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_WEB_MVC_CONFIGURATION);
+    removeMetadataTrigger(RooJavaType.ROO_FORMATTER);
 
     CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
     keyDecorator.unregisterMatchers(getClass());
@@ -91,18 +95,18 @@ public class WebMvcConfigurationMetadataProviderImpl extends
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return WebMvcConfigurationMetadata.createIdentifier(javaType, path);
+    return FormatterMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType = WebMvcConfigurationMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = WebMvcConfigurationMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = FormatterMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = FormatterMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "WebMvcConfiguration";
+    return "Formatter";
   }
 
   @Override
@@ -133,8 +137,64 @@ public class WebMvcConfigurationMetadataProviderImpl extends
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    return new WebMvcConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata);
+    AnnotationMetadata formatterAnnotation =
+        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getAnnotation(
+            RooJavaType.ROO_FORMATTER);
+
+    // Getting entity
+    JavaType entity = (JavaType) formatterAnnotation.getAttribute("entity").getValue();
+
+    // Getting identifierType
+    JavaType identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
+
+    // Getting entity accessors
+    List<MethodMetadata> accessors = getEntityAccessors(metadataIdentificationString, entity);
+
+    // Getting service
+    JavaType service = (JavaType) formatterAnnotation.getAttribute("service").getValue();
+
+    return new FormatterMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, entity, identifierType, accessors, service);
+  }
+
+  /**
+   * This method obtain accessors of a provided entity and all its superclasses
+   * 
+   * @param metadataIdentificationString
+   * @param entity
+   * @return
+   */
+  public List<MethodMetadata> getEntityAccessors(String metadataIdentificationString,
+      JavaType entity) {
+    List<MethodMetadata> accessors = new ArrayList<MethodMetadata>();
+
+    // Getting entity details
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+
+    LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
+    String javaBeanMetadataKey =
+        JavaBeanMetadata.createIdentifier(entityDetails.getType(), logicalPath);
+    JavaBeanMetadata javaBeanMetadata =
+        (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
+
+    accessors.addAll(javaBeanMetadata.getAccesorMethods());
+
+    // Check if entity has superclass, to get accessors
+    while (entityDetails.getSuperclass() != null) {
+
+      entityDetails = entityDetails.getSuperclass();
+
+      logicalPath = PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
+      javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails.getType(), logicalPath);
+      javaBeanMetadata = (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
+
+      if (javaBeanMetadata != null) {
+        accessors.addAll(javaBeanMetadata.getAccesorMethods());
+      }
+    }
+
+    return accessors;
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
@@ -150,6 +210,6 @@ public class WebMvcConfigurationMetadataProviderImpl extends
   }
 
   public String getProvidesType() {
-    return WebMvcConfigurationMetadata.getMetadataIdentiferType();
+    return FormatterMetadata.getMetadataIdentiferType();
   }
 }
