@@ -241,3 +241,15 @@ test unit --class model:~.Category
 test unit --class repository:~.CustomerOrderRepository
 test unit --class service-api:~.CustomerOrderService
 test unit --class service-impl:~.CustomerServiceImpl
+
+// Add Spring MVC
+web mvc setup
+
+// Add necessary controllers
+web mvc controller --controller application:~.web.CategoriesController --entity model:~.Category --service service-api:~.CategoryService --formattersPackage application:~.format
+web mvc controller --controller application:~.web.CustomerOrdersController --entity model:~.CustomerOrder --service service-api:~.CustomerOrderService --formattersPackage application:~.format
+web mvc controller --controller application:~.web.CustomersController --entity model:~.Customer --service service-api:~.CustomerService --formattersPackage application:~.format
+web mvc controller --controller application:~.web.EmployeesController --entity model:~.Employee --service service-api:~.EmployeeService --formattersPackage application:~.format
+web mvc controller --controller application:~.web.ShippersController --entity model:~.Shipper --service service-api:~.ShipperService --formattersPackage application:~.format
+web mvc controller --controller application:~.web.StoresController --entity model:~.Store --service service-api:~.StoreService --formattersPackage application:~.format
+web mvc controller --controller application:~.web.SuppliersController --entity model:~.Supplier --service service-api:~.SupplierService --formattersPackage application:~.format
