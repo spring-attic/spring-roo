@@ -7,12 +7,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.roo.addon.web.mvc.controller.annotations.RooController;
+import org.springframework.roo.addon.web.mvc.controller.annotations.formatters.RooFormatter;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -216,7 +214,6 @@ public class FormatterMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     String accessors = "";
     int count = 0;
     for (MethodMetadata accessor : entityAccessors) {
-
       accessors =
           accessors.concat(entityFieldName.getSymbolName()).concat(".")
               .concat(accessor.getMethodName().getSymbolName()).concat("()")
@@ -226,7 +223,6 @@ public class FormatterMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       if (count == 4) {
         break;
       }
-
       count++;
     }
     // Removing extra .concat()
@@ -234,10 +230,12 @@ public class FormatterMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       accessors =
           "new StringBuilder().append(".concat(accessors.substring(0, accessors.length() - 22))
               .concat(".toString()");
+      bodyBuilder.appendFormalLine(String.format("return %s == null ? null : %s;", entityFieldName,
+          accessors));
+    } else {
+      bodyBuilder.appendFormalLine(String.format("return %s.toString();", entityFieldName));
     }
 
-    bodyBuilder.appendFormalLine(String.format("return %s == null ? null : %s;", entityFieldName,
-        accessors));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =

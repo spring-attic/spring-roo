@@ -167,6 +167,19 @@ public class FormatterMetadataProviderImpl extends AbstractMemberDiscoveringItdM
               logicalPath);
       registerDependency(metadataIdentificationString, webMvcConfigurationMetadataKey);
     }
+
+    // Register dependency with RooJavaBean
+    Set<ClassOrInterfaceTypeDetails> rooJavabeans =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JAVA_BEAN);
+    for (ClassOrInterfaceTypeDetails rooJavaBean : rooJavabeans) {
+      final LogicalPath logicalPath =
+          PhysicalTypeIdentifier.getPath(rooJavaBean.getDeclaredByMetadataId());
+      final String rooJavaBeanMetadataKey =
+          JavaBeanMetadata.createIdentifier(rooJavaBean.getType(), logicalPath);
+      registerDependency(rooJavaBeanMetadataKey, metadataIdentificationString);
+    }
+
     return new FormatterMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, accessors, service);
   }

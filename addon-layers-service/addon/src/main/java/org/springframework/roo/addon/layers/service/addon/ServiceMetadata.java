@@ -13,6 +13,7 @@ import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -33,6 +34,10 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private static final String PROVIDES_TYPE_STRING = ServiceMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
+
+  private JavaType entity;
+  private JavaType identifierType;
+  private List<FinderMethod> finders;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -80,22 +85,26 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     Validate.notNull(identifierType,
         "ERROR: Entity identifier type required to generate service interface");
 
+    this.entity = entity;
+    this.identifierType = identifierType;
+    this.finders = finders;
+
     // Generating readOnly methods for every services
-    ensureGovernorHasMethod(getFindAllMethod(entity));
-    ensureGovernorHasMethod(getFindAllIterableMethod(entity, identifierType));
-    ensureGovernorHasMethod(getFindOneMethod(entity, identifierType));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllMethod()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllIterableMethod()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindOneMethod()));
 
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
-      ensureGovernorHasMethod(getSaveMethod(entity));
-      ensureGovernorHasMethod(getDeleteMethod(identifierType));
-      ensureGovernorHasMethod(getSaveBatchMethod(entity));
-      ensureGovernorHasMethod(getDeleteBatchMethod(identifierType));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getSaveMethod()));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getDeleteMethod()));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getSaveBatchMethod()));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getDeleteBatchMethod()));
     }
 
     // Generating finders
     for (FinderMethod finder : finders) {
-      ensureGovernorHasMethod(getFinderMethod(finder));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getFinderMethod(finder)));
     }
 
     // Build the ITD
@@ -105,38 +114,48 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   /**
    * Method that generates method "findAll" method.
    * 
-   * @param entity
    * @return MethodMetadataBuilder with public List <Entity> findAll();
    *         structure
    */
-  private MethodMetadataBuilder getFindAllMethod(JavaType entity) {
+  public MethodMetadata getFindAllMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("findAll");
+
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
     JavaType listEntityJavaType =
         new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, new JavaSymbolName(
-            "findAll"), listEntityJavaType, parameterTypes, parameterNames, null);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            listEntityJavaType, parameterTypes, parameterNames, null);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 
   /**
    * Method that generates method "findAll" with iterable parameter.
    * 
-   * @param entity
-   * @param identifierType
    * @return MethodMetadataBuilder with public List <Entity> findAll(Iterable
    *         <Long> ids) structure
    */
-  private MethodMetadataBuilder getFindAllIterableMethod(JavaType entity, JavaType identifierType) {
+  public MethodMetadata getFindAllIterableMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("findAll");
+
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
@@ -146,16 +165,23 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("ids"));
 
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
 
     JavaType listEntityJavaType =
         new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, new JavaSymbolName(
-            "findAll"), listEntityJavaType, parameterTypes, parameterNames, null);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            listEntityJavaType, parameterTypes, parameterNames, null);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 
@@ -163,12 +189,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   /**
    * Method that generates method "findOne".
    * 
-   * @param entity
-   * @param identifierType
    * @return MethodMetadataBuilder with public Entity findOne(Long id);
    *         structure
    */
-  private MethodMetadataBuilder getFindOneMethod(JavaType entity, JavaType identifierType) {
+  public MethodMetadata getFindOneMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("findOne");
+
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType));
@@ -177,47 +204,65 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("id"));
 
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, new JavaSymbolName(
-            "findOne"), entity, parameterTypes, parameterNames, null);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName, entity,
+            parameterTypes, parameterNames, null);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 
   /**
    * Method that generates "save" method.
    * 
-   * @param entity
    * @return MethodMetadataBuilder with public Entity save(Entity entity);
    *         structure
    */
-  private MethodMetadataBuilder getSaveMethod(JavaType entity) {
+  public MethodMetadata getSaveMethod() {
+    // Define save method
+    JavaSymbolName methodName = new JavaSymbolName("save");
+
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(entity));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.entity));
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("entity"));
 
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, new JavaSymbolName(
-            "save"), entity, parameterTypes, parameterNames, null);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            this.entity, parameterTypes, parameterNames, null);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 
   /**
    * Method that generates "delete" method.
    * 
-   * @param identifierType
    * @return MethodMetadataBuilder with public void delete(Long id); structure
    */
-  private MethodMetadataBuilder getDeleteMethod(JavaType identifierType) {
+  public MethodMetadata getDeleteMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("delete");
+
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType));
@@ -226,23 +271,32 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("id"));
 
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, new JavaSymbolName(
-            "delete"), JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 
   /**
    * Method that generates "save" batch method.
    * 
-   * @param entity
    * @return MethodMetadataBuilder with public List<Entity> save(Iterable
    *         <Entity> entities); structure
    */
-  private MethodMetadataBuilder getSaveBatchMethod(JavaType entity) {
+  public MethodMetadata getSaveBatchMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("save");
+
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
@@ -255,23 +309,32 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     JavaType listEntityJavaType =
         new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
 
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, new JavaSymbolName(
-            "save"), listEntityJavaType, parameterTypes, parameterNames, null);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            listEntityJavaType, parameterTypes, parameterNames, null);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 
   /**
    * Method that generates "delete" batch method
    * 
-   * @param identifierType
    * @return MethodMetadataBuilder with public void delete(Iterable
    *         <Long> ids); structure
    */
-  private MethodMetadataBuilder getDeleteBatchMethod(JavaType identifierType) {
+  public MethodMetadata getDeleteBatchMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("delete");
+
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
@@ -281,12 +344,19 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("ids"));
 
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, new JavaSymbolName(
-            "delete"), JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 
@@ -296,7 +366,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @param finderMethod
    * @return
    */
-  private MethodMetadataBuilder getFinderMethod(FinderMethod finderMethod) {
+  private MethodMetadata getFinderMethod(FinderMethod finderMethod) {
 
     // Define method parameter types and parameter names
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -313,7 +383,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
             finderMethod.getMethodName(), finderMethod.getReturnType(), parameterTypes,
             parameterNames, null);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 

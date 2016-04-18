@@ -1,22 +1,32 @@
 package org.springframework.roo.addon.security.addon.security;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
-import org.springframework.roo.classpath.*;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.*;
+import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -46,7 +56,6 @@ public class SecurityOperationsImpl implements SecurityOperations {
   private FileManager fileManager;
   private PathResolver pathResolver;
   private ProjectOperations projectOperations;
-  private TilesOperations tilesOperations;
   private TypeManagementService typeManagementService;
   private MetadataService metadataService;
   private TypeLocationService typeLocationService;
@@ -202,28 +211,6 @@ public class SecurityOperationsImpl implements SecurityOperations {
       }
     } else {
       return projectOperations;
-    }
-  }
-
-  public TilesOperations getTilesOperations() {
-    if (tilesOperations == null) {
-      // Get all Services implement TilesOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TilesOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (TilesOperations) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TilesOperations on SecurityOperationsImpl.");
-        return null;
-      }
-    } else {
-      return tilesOperations;
     }
   }
 
