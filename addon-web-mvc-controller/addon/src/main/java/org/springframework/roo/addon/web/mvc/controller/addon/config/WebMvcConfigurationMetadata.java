@@ -100,22 +100,22 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
       ensureGovernorHasField(getServiceField(service));
     }
 
-    // Add getFormatters method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getGetFormattersMethod()));
+    // Add addFormatters method
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getAddFormattersMethod()));
 
     // Build the ITD
     itdTypeDetails = builder.build();
   }
 
   /**
-   * Method that generates "getFormatters" method.
+   * Method that generates "addFormatters" method.
    * 
    * @return MethodMetadataBuilder
    */
-  public MethodMetadata getGetFormattersMethod() {
+  public MethodMetadata getAddFormattersMethod() {
 
     // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("getFormatters");
+    JavaSymbolName methodName = new JavaSymbolName("addFormatters");
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -174,6 +174,9 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
+
+    // Add Override annotation
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("java.lang.Override")));
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
