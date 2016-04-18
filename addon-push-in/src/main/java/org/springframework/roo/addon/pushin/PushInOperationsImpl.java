@@ -474,6 +474,7 @@ public class PushInOperationsImpl implements PushInOperations {
         new MethodMetadataBuilder(declaredByMetadataId, method.getModifier(),
             method.getMethodName(), method.getReturnType(), method.getParameterTypes(),
             method.getParameterNames(), bodyBuilder);
+    methodBuilder.setAnnotations(method.getAnnotations());
 
     return methodBuilder.build();
   }

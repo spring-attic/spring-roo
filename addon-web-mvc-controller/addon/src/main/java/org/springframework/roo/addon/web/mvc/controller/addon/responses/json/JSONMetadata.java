@@ -25,7 +25,11 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       .create(PROVIDES_TYPE_STRING);
 
   private boolean readOnly;
+  private MethodMetadata listMethod;
+  private MethodMetadata showMethod;
   private MethodMetadata createMethod;
+  private MethodMetadata updateMethod;
+  private MethodMetadata deleteMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -57,23 +61,47 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
+   * @param listMethod MethodMetadata 
    * @param createMethod MethodMetadata 
+   * @param updateMethod MethodMetadata 
+   * @param deleteMethod MethodMetadata 
+   * @param showMethod MethodMetadata 
+   * @param readOnly boolean 
    */
   public JSONMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, MethodMetadata createMethod,
-      boolean readOnly) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listMethod,
+      final MethodMetadata createMethod, final MethodMetadata updateMethod,
+      final MethodMetadata deleteMethod, final MethodMetadata showMethod, boolean readOnly) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = readOnly;
+    this.listMethod = listMethod;
     this.createMethod = createMethod;
+    this.updateMethod = updateMethod;
+    this.deleteMethod = deleteMethod;
+    this.showMethod = showMethod;
 
+    ensureGovernorHasMethod(new MethodMetadataBuilder(listMethod));
     if (!readOnly) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(createMethod));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(updateMethod));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
     }
+    ensureGovernorHasMethod(new MethodMetadataBuilder(showMethod));
 
     // Build the ITD
     itdTypeDetails = builder.build();
   }
+
+  /**
+   * Method that returns list JSON method
+   * 
+   * @return
+   */
+  public MethodMetadata getListMethod() {
+    return this.listMethod;
+  }
+
 
   /**
    * Method that returns create JSON method
@@ -82,6 +110,33 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    */
   public MethodMetadata getCreateMethod() {
     return this.createMethod;
+  }
+
+  /**
+   * Method that returns update JSON method
+   * 
+   * @return
+   */
+  public MethodMetadata getUpdateMethod() {
+    return this.updateMethod;
+  }
+
+  /**
+   * Method that returns delete JSON method
+   * 
+   * @return
+   */
+  public MethodMetadata getDeleteMethod() {
+    return this.deleteMethod;
+  }
+
+  /**
+   * Method that returns show JSON method
+   * 
+   * @return
+   */
+  public MethodMetadata getShowMethod() {
+    return this.showMethod;
   }
 
   /**

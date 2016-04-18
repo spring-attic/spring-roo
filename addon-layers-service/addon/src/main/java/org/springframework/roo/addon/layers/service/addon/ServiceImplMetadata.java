@@ -106,6 +106,9 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
             repository.getType());
     ensureGovernorHasField(repositoryFieldMetadata);
 
+    // Add constructor
+    ensureGovernorHasConstructor(getConstructor(repository));
+
     // Implements readOnly methods for every services
     ensureGovernorHasMethod(getFindAllMethod(entity, repository.getType()));
     ensureGovernorHasMethod(getFindAllIterableMethod(entity, identifierType, repository.getType()));
@@ -126,6 +129,33 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * Method that generates Service implementation constructor. If exists a
+   * repository, it will be included as constructor parameter
+   * 
+   * @param repository
+   * @return
+   */
+  public ConstructorMetadataBuilder getConstructor(ClassOrInterfaceTypeDetails repository) {
+
+    ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Append repository parameter if needed
+    if (repository != null) {
+      constructorBuilder.addParameter("repository", repository.getType());
+      bodyBuilder.appendFormalLine("this.repository = repository;");
+    }
+
+    constructorBuilder.setBodyBuilder(bodyBuilder);
+    constructorBuilder.setModifier(Modifier.PUBLIC);
+
+    // Adding @Autowired annotation
+    constructorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+
+    return constructorBuilder;
   }
 
   /**

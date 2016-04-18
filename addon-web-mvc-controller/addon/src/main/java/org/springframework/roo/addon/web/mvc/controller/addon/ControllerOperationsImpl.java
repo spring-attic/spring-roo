@@ -32,10 +32,6 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ImportMetadata;
 import org.springframework.roo.classpath.details.ImportMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -43,7 +39,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -359,9 +354,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
             PhysicalTypeCategory.CLASS);
     cidBuilder.setAnnotations(annotations);
 
-    // Adding constructor
-    cidBuilder.addConstructor(getControllerConstructor(declaredByMetadataId, service));
-
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
     // Generate formatter if needed
@@ -451,9 +443,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
             PhysicalTypeCategory.CLASS);
     cidBuilder.setAnnotations(annotations);
 
-    // Adding constructor
-    cidBuilder.addConstructor(getFormatterConstructor(declaredByMetadataId, service));
-
     // Adding necessary imports
     List<ImportMetadata> imports = new ArrayList<ImportMetadata>();
 
@@ -469,99 +458,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     getProjectOperations().addModuleDependency(formattersPackage.getModule(), service.getModule());
     getProjectOperations().addModuleDependency(formattersPackage.getModule(), entity.getModule());
 
-  }
-
-  /**
-   * This method returns the formatter constructor
-   * @return
-   */
-  private ConstructorMetadata getFormatterConstructor(String declaredByMetadataId, JavaType service) {
-
-    FieldMetadata serviceField = getServiceField(declaredByMetadataId, service);
-    FieldMetadata conversionServiceField = getConversionServiceField(declaredByMetadataId);
-
-    ConstructorMetadataBuilder constructor = new ConstructorMetadataBuilder(declaredByMetadataId);
-    constructor.addParameter(serviceField.getFieldName().getSymbolName(),
-        serviceField.getFieldType());
-    constructor.addParameter(conversionServiceField.getFieldName().getSymbolName(),
-        conversionServiceField.getFieldType());
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // this.serviceField = serviceField;
-    bodyBuilder.appendFormalLine(String.format("this.%s = %s;", serviceField.getFieldName(),
-        serviceField.getFieldName()));
-
-    // this.conversionServiceField = conversionServiceField;
-    bodyBuilder.appendFormalLine(String.format("this.%s = %s;",
-        conversionServiceField.getFieldName(), conversionServiceField.getFieldName()));
-
-    constructor.setBodyBuilder(bodyBuilder);
-
-    return constructor.build();
-  }
-
-  /**
-   * This method returns conversionSevice field included on controller
-   * 
-   * @param declaredByMetadataId
-   * 
-   * @return
-   */
-  public FieldMetadata getConversionServiceField(String declaredByMetadataId) {
-
-    return new FieldMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC,
-        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName("conversionService"),
-        SpringJavaType.CONVERSION_SERVICE).build();
-  }
-
-  /**
-   * This method returns service field included on controller
-   * 
-   * @param declaredByMetadataId
-   * @param service
-   * 
-   * @return
-   */
-  public FieldMetadata getServiceField(String declaredByMetadataId, JavaType service) {
-
-    // Generating service field name
-    String fieldName =
-        new JavaSymbolName(service.getSimpleTypeName()).getSymbolNameUnCapitalisedFirstLetter();
-
-    return new FieldMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC,
-        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), service).build();
-  }
-
-  /**
-   * This method returns the controller constructor 
-   * 
-   * @param declaredByMetadataId
-   * @param service
-   * @return
-   */
-  public ConstructorMetadataBuilder getControllerConstructor(String declaredByMetadataId,
-      JavaType service) {
-
-    // Generating service field name
-    String serviceFieldName =
-        service.getSimpleTypeName().substring(0, 1).toLowerCase()
-            .concat(service.getSimpleTypeName().substring(1));
-
-
-    // Generating constructor
-    ConstructorMetadataBuilder constructor = new ConstructorMetadataBuilder(declaredByMetadataId);
-    constructor.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
-    constructor.addParameter(serviceFieldName, service);
-
-    // Adding body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder
-        .appendFormalLine(String.format("this.%s = %s;", serviceFieldName, serviceFieldName));
-    constructor.setBodyBuilder(bodyBuilder);
-
-    return constructor;
   }
 
   /**

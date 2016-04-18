@@ -8,14 +8,18 @@ import org.springframework.roo.addon.web.mvc.controller.annotations.RooControlle
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -93,8 +97,39 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     FieldMetadata serviceField = getServiceField();
     ensureGovernorHasField(new FieldMetadataBuilder(serviceField));
 
+    // Adding constructor
+    ConstructorMetadata constructor = getConstructor();
+    ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
+
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * This method returns the controller constructor 
+   * 
+   * @return
+   */
+  public ConstructorMetadata getConstructor() {
+
+    // Generating service field name
+    String serviceFieldName =
+        service.getSimpleTypeName().substring(0, 1).toLowerCase()
+            .concat(service.getSimpleTypeName().substring(1));
+
+    // Generating constructor
+    ConstructorMetadataBuilder constructor = new ConstructorMetadataBuilder(getId());
+    constructor.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+    constructor.addParameter(serviceFieldName, service);
+    constructor.setModifier(Modifier.PUBLIC);
+
+    // Adding body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    bodyBuilder
+        .appendFormalLine(String.format("this.%s = %s;", serviceFieldName, serviceFieldName));
+    constructor.setBodyBuilder(bodyBuilder);
+
+    return constructor.build();
   }
 
   /**

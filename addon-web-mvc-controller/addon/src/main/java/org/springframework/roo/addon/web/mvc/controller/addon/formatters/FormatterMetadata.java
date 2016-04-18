@@ -11,6 +11,8 @@ import org.springframework.roo.addon.web.mvc.controller.annotations.formatters.R
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -105,6 +107,9 @@ public class FormatterMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.conversionServiceField = getConversionServiceField();
     ensureGovernorHasField(new FieldMetadataBuilder(conversionServiceField));
 
+    // Adding formatter constructor
+    ensureGovernorHasConstructor(new ConstructorMetadataBuilder(getConstructor()));
+
     // Add parse() method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getParseMethod()));
 
@@ -113,6 +118,39 @@ public class FormatterMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+
+  /**
+   * This method returns the formatter constructor
+   * @return
+   */
+  public ConstructorMetadata getConstructor() {
+
+    FieldMetadata serviceField = getServiceField();
+    FieldMetadata conversionServiceField = getConversionServiceField();
+
+    ConstructorMetadataBuilder constructor = new ConstructorMetadataBuilder(getId());
+    constructor.addParameter(serviceField.getFieldName().getSymbolName(),
+        serviceField.getFieldType());
+    constructor.addParameter(conversionServiceField.getFieldName().getSymbolName(),
+        conversionServiceField.getFieldType());
+    constructor.setModifier(Modifier.PUBLIC);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // this.serviceField = serviceField;
+    bodyBuilder.appendFormalLine(String.format("this.%s = %s;", serviceField.getFieldName(),
+        serviceField.getFieldName()));
+
+    // this.conversionServiceField = conversionServiceField;
+    bodyBuilder.appendFormalLine(String.format("this.%s = %s;",
+        conversionServiceField.getFieldName(), conversionServiceField.getFieldName()));
+
+    constructor.setBodyBuilder(bodyBuilder);
+
+    return constructor.build();
   }
 
   /**

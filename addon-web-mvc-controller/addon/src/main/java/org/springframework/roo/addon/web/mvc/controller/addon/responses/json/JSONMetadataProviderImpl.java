@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -65,6 +67,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
   private boolean readOnly;
   private JavaType entity;
+  private JavaType identifierType;
   private JavaType service;
   private String path;
   private String metadataIdentificationString;
@@ -125,7 +128,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "Response_Type_JSON";
+    return "JSON";
   }
 
   @Override
@@ -175,6 +178,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       this.readOnly = (Boolean) entityAnnotation.getAttribute("readOnly").getValue();
     }
 
+    // Getting identifierType
+    this.identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
+
     // Getting service and its metadata
     this.service = (JavaType) controllerAnnotation.getAttribute("service").getValue();
     ClassOrInterfaceTypeDetails serviceDetails =
@@ -191,11 +197,16 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Getting path
     this.path = (String) controllerAnnotation.getAttribute("path").getValue();
 
-    // Getting save method from related service
+    // Getting methods from related service
     MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
+    MethodMetadata serviceDeleteMethod = serviceMetadata.getDeleteMethod();
+    MethodMetadata serviceFindAllMethod = serviceMetadata.getFindAllMethod();
+    MethodMetadata serviceFindOneMethod = serviceMetadata.getFindOneMethod();
 
     return new JSONMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata,
-        getCreateMethod(serviceSaveMethod), this.readOnly);
+        getListMethod(serviceFindAllMethod), getCreateMethod(serviceSaveMethod),
+        getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod),
+        getShowMethod(serviceFindOneMethod), this.readOnly);
   }
 
   /**
@@ -217,7 +228,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("create");
 
-
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
         SpringJavaType.REQUEST_BODY).build()));
@@ -232,10 +242,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     annotations.add(getRequestMappingAnnotation("POST", "", null, "", "application/json",
         "application/json", ""));
 
-    // Adding @RequestBody annotation
-    AnnotationMetadataBuilder requestBodyAnnotation =
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
-    annotations.add(requestBodyAnnotation);
+    annotations.add(responseBodyAnnotation);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -243,6 +253,201 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // return entityService.SAVE_METHOD(entityField);
     bodyBuilder.appendFormalLine(String.format("return %s.%s(%s);", getServiceField()
         .getFieldName(), serviceSaveMethod.getMethodName(), getEntityField().getFieldName()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            this.entity, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "update" method  using JSON 
+   * response type
+   * 
+   * @param serviceSaveMethod
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getUpdateMethod(MethodMetadata serviceSaveMethod) {
+
+    // If provided entity is readOnly, create method is not
+    // available
+    if (this.readOnly) {
+      return null;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("update");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
+        SpringJavaType.REQUEST_BODY).build()));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(getEntityField().getFieldName());
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getRequestMappingAnnotation("PUT", "", null, "", "application/json",
+        "application/json", ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return entityService.SAVE_METHOD(entityField);
+    bodyBuilder.appendFormalLine(String.format("return %s.%s(%s);", getServiceField()
+        .getFieldName(), serviceSaveMethod.getMethodName(), getEntityField().getFieldName()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            this.entity, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "delete" method  using JSON 
+   * response type
+   * 
+   * @param serviceDeleteMethod
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getDeleteMethod(MethodMetadata serviceDeleteMethod) {
+
+    // If provided entity is readOnly, create method is not
+    // available
+    if (this.readOnly) {
+      return null;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("delete");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(this.identifierType, new AnnotationMetadataBuilder(
+        SpringJavaType.PATH_VARIABLE).build()));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("id"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getRequestMappingAnnotation("DELETE", "/{id}", null, "", "", "", ""));
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // entityService.DELETE_METHOD(id);
+    bodyBuilder.appendFormalLine(String.format("%s.%s(id);", getServiceField().getFieldName(),
+        serviceDeleteMethod.getMethodName()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "list" method  using JSON 
+   * response type
+   * 
+   * @param serviceFindAllMethod
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getListMethod(MethodMetadata serviceFindAllMethod) {
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("list");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getRequestMappingAnnotation("GET", "", null, "", "", "application/json", ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return entityService.FIND_ALL_METHOD();
+    bodyBuilder.appendFormalLine(String.format("return %s.%s();", getServiceField().getFieldName(),
+        serviceFindAllMethod.getMethodName()));
+
+    // Generating returnType
+    JavaType returnType =
+        new JavaType(new JavaType("java.util.List").getFullyQualifiedTypeName(), 0, DataType.TYPE,
+            null, Arrays.asList(this.entity));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            returnType, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "show" method  using JSON 
+   * response type
+   * 
+   * @param serviceFindOneMethod
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getShowMethod(MethodMetadata serviceFindOneMethod) {
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("show");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(this.identifierType, new AnnotationMetadataBuilder(
+        SpringJavaType.PATH_VARIABLE).build()));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("id"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getRequestMappingAnnotation("GET", "/{id}", null, "", "", "application/json",
+        ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return entityService.FIND_ONE_METHOD(id);
+    bodyBuilder.appendFormalLine(String.format("return %s.%s(id);", getServiceField()
+        .getFieldName(), serviceFindOneMethod.getMethodName()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,

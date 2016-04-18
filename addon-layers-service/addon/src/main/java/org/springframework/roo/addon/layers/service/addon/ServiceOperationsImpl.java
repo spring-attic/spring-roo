@@ -4,7 +4,6 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
-import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -23,18 +22,15 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.ImportMetadata;
 import org.springframework.roo.classpath.details.ImportMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -258,9 +254,6 @@ public class ServiceOperationsImpl implements ServiceOperations {
         PhysicalTypeIdentifier.createIdentifier(implTypeBuilder.build().getType(),
             pathResolver.getPath(implType.getModule(), Path.SRC_MAIN_JAVA));
 
-    // Add constructor
-    implTypeBuilder.addConstructor(getServiceConstructor(declaredByMetadataId, repository));
-
     // Add necessary imports
     List<ImportMetadata> imports = new ArrayList<ImportMetadata>();
     imports.add(new ImportMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, repository
@@ -275,34 +268,4 @@ public class ServiceOperationsImpl implements ServiceOperations {
     projectOperations.addModuleDependency(implType.getModule(), repository.getName().getModule());
     projectOperations.addModuleDependency(implType.getModule(), domainType.getModule());
   }
-
-  /**
-   * Method that generates Service implementation constructor. If exists a
-   * repository, it will be included as constructor parameter
-   * 
-   * @param declaredByMetadataId
-   * @param repository
-   * @return
-   */
-  private ConstructorMetadataBuilder getServiceConstructor(String declaredByMetadataId,
-      ClassOrInterfaceTypeDetails repository) {
-
-    ConstructorMetadataBuilder constructorBuilder =
-        new ConstructorMetadataBuilder(declaredByMetadataId);
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // Append repository parameter if needed
-    if (repository != null) {
-      constructorBuilder.addParameter("repository", repository.getType());
-      bodyBuilder.appendFormalLine("this.repository = repository;");
-    }
-
-    constructorBuilder.setBodyBuilder(bodyBuilder);
-
-    // Adding @Autowired annotation
-    constructorBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
-
-    return constructorBuilder;
-  }
-
 }
