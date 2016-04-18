@@ -12,8 +12,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -71,6 +74,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   private JavaType service;
   private String path;
   private String metadataIdentificationString;
+  private ClassOrInterfaceTypeDetails controller;
+
+  private ControllerMVCService controllerMVCService;
 
   /**
    * This service is being activated so setup it:
@@ -159,11 +165,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
+    this.controller = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     this.metadataIdentificationString = metadataIdentificationString;
 
-    AnnotationMetadata controllerAnnotation =
-        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getAnnotation(
-            RooJavaType.ROO_CONTROLLER);
+    AnnotationMetadata controllerAnnotation = controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
 
     // Getting entity and check if is a readOnly entity or not
     this.entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
@@ -225,6 +230,14 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       return null;
     }
 
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(), "POST", "",
+            null, "", "application/json", "application/json", "");
+    if (existingMVCMethod != null) {
+      return existingMVCMethod;
+    }
+
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("create");
 
@@ -276,6 +289,14 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // available
     if (this.readOnly) {
       return null;
+    }
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(), "PUT", "",
+            null, "", "application/json", "application/json", "");
+    if (existingMVCMethod != null) {
+      return existingMVCMethod;
     }
 
     // Define methodName
@@ -331,6 +352,14 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       return null;
     }
 
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(), "DELETE",
+            "/{id}", null, "", "", "", "");
+    if (existingMVCMethod != null) {
+      return existingMVCMethod;
+    }
+
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("delete");
 
@@ -371,6 +400,14 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
    * @return MethodMetadata
    */
   private MethodMetadata getListMethod(MethodMetadata serviceFindAllMethod) {
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(), "GET", "",
+            null, "", "", "application/json", "");
+    if (existingMVCMethod != null) {
+      return existingMVCMethod;
+    }
 
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("list");
@@ -419,6 +456,14 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
    * @return MethodMetadata
    */
   private MethodMetadata getShowMethod(MethodMetadata serviceFindOneMethod) {
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(), "GET",
+            "/{id}", null, "", "", "application/json", "");
+    if (existingMVCMethod != null) {
+      return existingMVCMethod;
+    }
 
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("show");
@@ -565,5 +610,28 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
   public String getProvidesType() {
     return JSONMetadata.getMetadataIdentiferType();
+  }
+
+  public ControllerMVCService getControllerMVCService() {
+    if (controllerMVCService == null) {
+      // Get all Services implement ControllerMVCService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ControllerMVCService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          controllerMVCService = (ControllerMVCService) this.context.getService(ref);
+          return controllerMVCService;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ControllerMVCService on JSONMetadataProviderImpl.");
+        return null;
+      }
+    } else {
+      return controllerMVCService;
+    }
   }
 }
