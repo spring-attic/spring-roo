@@ -6,16 +6,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -57,6 +61,8 @@ public class ControllerCommands implements CommandMarker {
   private BundleContext context;
 
   private Map<String, ServerProvider> serverProviders = new HashMap<String, ServerProvider>();
+  private Map<String, ControllerMVCResponseService> responseTypes =
+      new HashMap<String, ControllerMVCResponseService>();
 
   private ControllerOperations controllerOperations;
   private ProjectOperations projectOperations;
@@ -393,7 +399,42 @@ public class ControllerCommands implements CommandMarker {
     return false;
   }
 
-  // TODO: Add autocomplete inidicator to responseType parameter
+  /**
+   * This indicator returns all possible values for --responseType parameter.
+   * 
+   * Depends of the specified --controller, responseTypes will be filtered to provide only that
+   * responseTypes that doesn't exists on current controller. Also, only installed response types
+   * will be provided.
+   * 
+   * @param context
+   * @return
+   */
+  @CliOptionAutocompleteIndicator(param = "responseType", command = "web mvc controller",
+      help = "--responseType parameter should be completed with the provided response types.")
+  public List<String> getAllResponseTypeValues(ShellContext context) {
+    // Getting the specified controller
+    JavaType specifiedController =
+        getJavaTypeConverter().convertFromText(context.getParameters().get("controller"),
+            JavaType.class, "");
+
+    // Getting all installed services that implements ControllerMVCResponseService
+    Map<String, ControllerMVCResponseService> installedResponseTypes =
+        getInstalledControllerMVCResponseTypes();
+
+    // Generating all possible values
+    List<String> responseTypes = new ArrayList<String>();
+
+    for (Entry<String, ControllerMVCResponseService> responseType : installedResponseTypes
+        .entrySet()) {
+      // If specified controller doesn't have this response type installed. Add to responseTypes
+      // possible values
+      if (!responseType.getValue().hasResponseType(specifiedController)) {
+        responseTypes.add(responseType.getKey());
+      }
+    }
+
+    return responseTypes;
+  }
 
   /**
    * This indicator says if --formattersPackage parameter should be visible or not
@@ -540,13 +581,26 @@ public class ControllerCommands implements CommandMarker {
           help = "The application module where controllers should be generated if --all parameter has been specified",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
+    // Getting --responseType service
+    Map<String, ControllerMVCResponseService> responseTypeServices =
+        getInstalledControllerMVCResponseTypes();
+
+    // Validate that provided responseType is a valid provided
+    if (!responseTypeServices.containsKey(responseType)) {
+      LOGGER
+          .log(
+              Level.SEVERE,
+              "ERROR: Provided responseType is not valid. Use autocomplete feature to obtain valid responseTypes.");
+      return;
+    }
+
     // Check --all parameter
     if (all.equals("*") || !StringUtils.isEmpty(all)) {
-      getControllerOperations().createControllerForAllEntities(controllersPackage, responseType,
-          formattersPackage, module);
+      getControllerOperations().createControllerForAllEntities(controllersPackage,
+          responseTypeServices.get(responseType), formattersPackage, module);
     } else if (all.equals("")) {
-      getControllerOperations().createController(controller, entity, service, path, responseType,
-          formattersPackage);
+      getControllerOperations().createController(controller, entity, service, path,
+          responseTypeServices.get(responseType), formattersPackage);
     }
   }
 
@@ -576,6 +630,46 @@ public class ControllerCommands implements CommandMarker {
       return serverProviders;
     }
   }
+
+  /**
+   * This method gets all implementations of ControllerMVCResponseService interface to be able
+   * to locate all installed ControllerMVCResponseService
+   * 
+   * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
+   */
+  public Map<String, ControllerMVCResponseService> getInstalledControllerMVCResponseTypes() {
+    if (responseTypes.isEmpty()) {
+      try {
+        ServiceReference<?>[] references =
+            this.context
+                .getAllServiceReferences(ControllerMVCResponseService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          ControllerMVCResponseService responseTypeService =
+              (ControllerMVCResponseService) this.context.getService(ref);
+          boolean isInstalled = false;
+          for (Pom module : getProjectOperations().getPoms()) {
+            if (responseTypeService.isInstalledInModule(module.getModuleName())) {
+              isInstalled = true;
+              break;
+            }
+          }
+          if (isInstalled) {
+            responseTypes.put(responseTypeService.getResponseType(), responseTypeService);
+          }
+        }
+        return responseTypes;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ControllerMVCResponseService on ControllerCommands.");
+        return null;
+      }
+    } else {
+      return responseTypes;
+    }
+  }
+
+  // Gets OSGi Services
 
   public TypeLocationService getTypeLocationService() {
     if (typeLocationService == null) {

@@ -5,8 +5,10 @@ import static org.springframework.roo.model.RooJavaType.ROO_WEB_MVC_CONFIGURATIO
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +22,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
@@ -41,7 +44,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -76,6 +78,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
   private BundleContext context;
 
   private static final JavaSymbolName PATH = new JavaSymbolName("path");
+
+  private Map<String, ControllerMVCResponseService> responseTypes =
+      new HashMap<String, ControllerMVCResponseService>();
+
 
   private ProjectOperations projectOperations;
   private TypeLocationService typeLocationService;
@@ -187,8 +193,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * @param module
    */
   @Override
-  public void createControllerForAllEntities(JavaPackage controllersPackage, String responseType,
-      JavaPackage formattersPackage, Pom module) {
+  public void createControllerForAllEntities(JavaPackage controllersPackage,
+      ControllerMVCResponseService responseType, JavaPackage formattersPackage, Pom module) {
 
     // Getting all entities annotated with @RooJpaEntity
     Set<ClassOrInterfaceTypeDetails> allEntities =
@@ -232,13 +238,17 @@ public class ControllerOperationsImpl implements ControllerOperations {
    */
   @Override
   public void createController(JavaType controller, JavaType entity, JavaType service, String path,
-      String responseType, JavaPackage formattersPackage) {
+      ControllerMVCResponseService responseType, JavaPackage formattersPackage) {
     Validate.notNull(controller,
         "ERROR: Controller class is required to be able to generate new controller");
     Validate.notNull(entity,
         "ERROR: Entity class is required to be able to generate new controller");
     Validate.notNull(service,
         "ERROR: Service class is required to be able to generate new controller.");
+
+    // Validate that provided responseType exists and is installed
+    Validate.isTrue(getInstalledControllerMVCResponseTypes().containsValue(responseType),
+        "ERROR: Specified responseType is not valid or is not installed on current project. ");
 
     // Validate that new controller doesn't exists
     ClassOrInterfaceTypeDetails controllerDetails =
@@ -316,6 +326,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
     // Create annotation @RooController(path = "/test", entity = MyEntity.class, service = MyService.class)
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
     annotations.add(getRooControllerAnnotation(entity, service, path, PATH));
+
+    // Add responseType annotation. Don't use responseTypeService annotate to prevent multiple 
+    // updates of the .java file. Annotate operation will be used during controller update.
+    annotations.add(new AnnotationMetadataBuilder(responseType.getAnnotation()));
+
     cidBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller,
             PhysicalTypeCategory.CLASS);
@@ -811,6 +826,44 @@ public class ControllerOperationsImpl implements ControllerOperations {
       }
     } else {
       return pomConverter;
+    }
+  }
+
+  /**
+   * This method gets all implementations of ControllerMVCResponseService interface to be able
+   * to locate all installed ControllerMVCResponseService
+   * 
+   * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
+   */
+  public Map<String, ControllerMVCResponseService> getInstalledControllerMVCResponseTypes() {
+    if (responseTypes.isEmpty()) {
+      try {
+        ServiceReference<?>[] references =
+            this.context
+                .getAllServiceReferences(ControllerMVCResponseService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          ControllerMVCResponseService responseTypeService =
+              (ControllerMVCResponseService) this.context.getService(ref);
+          boolean isInstalled = false;
+          for (Pom module : getProjectOperations().getPoms()) {
+            if (responseTypeService.isInstalledInModule(module.getModuleName())) {
+              isInstalled = true;
+              break;
+            }
+          }
+          if (isInstalled) {
+            responseTypes.put(responseTypeService.getResponseType(), responseTypeService);
+          }
+        }
+        return responseTypes;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ControllerMVCResponseService on ControllerOperationsImpl.");
+        return null;
+      }
+    } else {
+      return responseTypes;
     }
   }
 

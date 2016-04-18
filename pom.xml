@@ -46,7 +46,6 @@
         <module>addon-jdbc</module>
         <module>addon-dbre</module>
         <module>addon-creator</module>
-        <module>addon-json</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository-jpa</module>
         <module>addon-oscommands</module>

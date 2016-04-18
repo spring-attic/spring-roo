@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
+import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -55,8 +56,8 @@ public interface ControllerOperations extends Feature {
    * @param formattersPackage
    * @param module
    */
-  void createControllerForAllEntities(JavaPackage controllersPackage, String responseType,
-      JavaPackage formattersPackage, Pom module);
+  void createControllerForAllEntities(JavaPackage controllersPackage,
+      ControllerMVCResponseService responseType, JavaPackage formattersPackage, Pom module);
 
   /**
    * This operation will generate a new controller with the specified information 
@@ -69,6 +70,6 @@ public interface ControllerOperations extends Feature {
    * @param formattersPackage
    */
   void createController(JavaType controller, JavaType entity, JavaType service, String path,
-      String responseType, JavaPackage formattersPackage);
+      ControllerMVCResponseService responseType, JavaPackage formattersPackage);
 
 }

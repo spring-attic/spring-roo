@@ -192,7 +192,9 @@ public class FormatterMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     JavaBeanMetadata javaBeanMetadata =
         (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
 
-    accessors.addAll(javaBeanMetadata.getAccesorMethods());
+    if (javaBeanMetadata.getAccesorMethods() != null) {
+      accessors.addAll(javaBeanMetadata.getAccesorMethods());
+    }
 
     // Check if entity has superclass, to get accessors
     while (entityDetails.getSuperclass() != null) {
@@ -203,7 +205,7 @@ public class FormatterMetadataProviderImpl extends AbstractMemberDiscoveringItdM
       javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails.getType(), logicalPath);
       javaBeanMetadata = (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
 
-      if (javaBeanMetadata != null) {
+      if (javaBeanMetadata != null && javaBeanMetadata.getAccesorMethods() != null) {
         accessors.addAll(javaBeanMetadata.getAccesorMethods());
       }
     }
