@@ -54,10 +54,9 @@ public interface ControllerOperations extends Feature {
    * @param controllersPackage
    * @param responseType
    * @param formattersPackage
-   * @param module
    */
   void createControllerForAllEntities(JavaPackage controllersPackage,
-      ControllerMVCResponseService responseType, JavaPackage formattersPackage, Pom module);
+      ControllerMVCResponseService responseType, JavaPackage formattersPackage);
 
   /**
    * This operation will generate a new controller with the specified information 

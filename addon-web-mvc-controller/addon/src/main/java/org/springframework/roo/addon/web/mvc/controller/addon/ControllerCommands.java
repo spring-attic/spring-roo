@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
+import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
 import java.util.ArrayList;
@@ -471,46 +472,6 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * This indicator checks if --module parameter should be visible or not.
-   * 
-   * If --all parameter has been specified and exists more than one module that match with 
-   * the properties of ModuleFeature APPLICATION, --module parameter should be mandatory.
-   * 
-   * @param shellContext
-   * @return
-   */
-  @CliOptionVisibilityIndicator(
-      params = "module",
-      command = "web mvc controller",
-      help = "--module parameter is not available if there is only one application module and --all parameter has not been specified")
-  public boolean isModuleParameterVisible(ShellContext shellContext) {
-    if (shellContext.getParameters().containsKey("all")
-        && getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION).size() > 1) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * This indicator checks if --module parameter should be mandatory or not. 
-   * 
-   * If focused module doesn't match with the properties of ModuleFeature APPLICATION and
-   * --all parameter has been specified, --module parameter should be mandatory.
-   * 
-   * @param shellContext
-   * @return
-   */
-  @CliOptionMandatoryIndicator(params = "module", command = "web mvc controller")
-  public boolean isModuleParameterRequired(ShellContext shellContext) {
-    Pom module = getProjectOperations().getFocusedModule();
-    if (shellContext.getParameters().containsKey("all")
-        && !getTypeLocationService().hasModuleFeature(module, ModuleFeatureName.APPLICATION)) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * This indicator checks if is possible to add new controllers.
    *
    * If a valid project has been generated and Spring MVC has been installed, 
@@ -548,6 +509,7 @@ public class ControllerCommands implements CommandMarker {
       @CliOption(
           key = "package",
           mandatory = true,
+          optionContext = APPLICATION_FEATURE,
           help = "This param will be mandatory if --all parameter has been specified. Indicates which package should be used to include generated controllers") JavaPackage controllersPackage,
       @CliOption(
           key = "controller",
@@ -574,12 +536,7 @@ public class ControllerCommands implements CommandMarker {
       @CliOption(
           key = "formattersPackage",
           mandatory = false,
-          help = "Indicates project package where formatters should be generated. By default they will be generated inside the same controllers package.") JavaPackage formattersPackage,
-      @CliOption(
-          key = "module",
-          mandatory = true,
-          help = "The application module where controllers should be generated if --all parameter has been specified",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
+          help = "Indicates project package where formatters should be generated. By default they will be generated inside the same controllers package.") JavaPackage formattersPackage) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =
@@ -597,7 +554,7 @@ public class ControllerCommands implements CommandMarker {
     // Check --all parameter
     if (all.equals("*") || !StringUtils.isEmpty(all)) {
       getControllerOperations().createControllerForAllEntities(controllersPackage,
-          responseTypeServices.get(responseType), formattersPackage, module);
+          responseTypeServices.get(responseType), formattersPackage);
     } else if (all.equals("")) {
       getControllerOperations().createController(controller, entity, service, path,
           responseTypeServices.get(responseType), formattersPackage);

@@ -190,11 +190,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * @param controllersPackage
    * @param responseType
    * @param formattersPackage
-   * @param module
    */
   @Override
   public void createControllerForAllEntities(JavaPackage controllersPackage,
-      ControllerMVCResponseService responseType, JavaPackage formattersPackage, Pom module) {
+      ControllerMVCResponseService responseType, JavaPackage formattersPackage) {
 
     // Getting all entities annotated with @RooJpaEntity
     Set<ClassOrInterfaceTypeDetails> allEntities =
@@ -209,7 +208,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
         JavaType controller =
             new JavaType(String.format("%s.%sController", controllersPackage
                 .getFullyQualifiedPackageName(), entity.getType().getSimpleTypeName()),
-                module.getModuleName());
+                controllersPackage.getModule());
 
         // Generate path
         String path = getNotRepeatedControllerPathFromEntity(entity.getType());
@@ -239,6 +238,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   @Override
   public void createController(JavaType controller, JavaType entity, JavaType service, String path,
       ControllerMVCResponseService responseType, JavaPackage formattersPackage) {
+    JavaType serviceImplType = null;
+
     Validate.notNull(controller,
         "ERROR: Controller class is required to be able to generate new controller");
     Validate.notNull(entity,
@@ -315,8 +316,30 @@ public class ControllerOperationsImpl implements ControllerOperations {
         "ERROR: Provided service '%s' is not related with provided entity '%s' class.",
         service.getFullyQualifiedTypeName(), entity.getFullyQualifiedTypeName()));
 
+
+    // Find service implementation related to service api
+    for (ClassOrInterfaceTypeDetails serviceImpl : typeLocationService
+        .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE_IMPL)) {
+      AnnotationAttributeValue<JavaType> serviceAttr =
+          serviceImpl.getAnnotation(RooJavaType.ROO_SERVICE_IMPL).getAttribute("service");
+
+      if (serviceAttr != null && serviceAttr.getValue().equals(service)) {
+        serviceImplType = serviceImpl.getType();
+        break;
+      }
+    }
+
+    Validate
+        .notNull(
+            serviceImplType,
+            String
+                .format(
+                    "ERROR: Provided service '%s' does not have a implementation generated. Use 'service' commands to generate a valid service and then try again.",
+                    service.getFullyQualifiedTypeName()));
+
     ClassOrInterfaceTypeDetailsBuilder cidBuilder = null;
-    final LogicalPath controllerPath = getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
+    final LogicalPath controllerPath =
+        getPathResolver().getPath(controller.getModule(), Path.SRC_MAIN_JAVA);
     final String resourceIdentifier =
         getTypeLocationService().getPhysicalTypeCanonicalPath(controller, controllerPath);
     final String declaredByMetadataId =
@@ -357,7 +380,15 @@ public class ControllerOperationsImpl implements ControllerOperations {
               + "ModuleFeature.APPLICATION");
 
       addRooFormatter(entity, service, formattersPackage);
+
+      getProjectOperations().addModuleDependency(controller.getModule(),
+          formattersPackage.getModule());
     }
+
+
+    // Add dependencies between modules
+    getProjectOperations().addModuleDependency(controller.getModule(), serviceImplType.getModule());
+    getProjectOperations().addModuleDependency(controller.getModule(), service.getModule());
   }
 
   /**
@@ -404,7 +435,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
             formattersPackage.getModule());
 
     ClassOrInterfaceTypeDetailsBuilder cidBuilder = null;
-    final LogicalPath fomatterPath = getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA);
+    final LogicalPath fomatterPath =
+        getPathResolver().getPath(formattersPackage.getModule(), Path.SRC_MAIN_JAVA);
     final String resourceIdentifier =
         getTypeLocationService().getPhysicalTypeCanonicalPath(formatter, fomatterPath);
     final String declaredByMetadataId =
@@ -432,6 +464,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
     cidBuilder.addImports(imports);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+    // Add dependencies between module
+    getProjectOperations().addModuleDependency(formattersPackage.getModule(), service.getModule());
+    getProjectOperations().addModuleDependency(formattersPackage.getModule(), entity.getModule());
 
   }
 

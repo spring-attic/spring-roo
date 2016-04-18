@@ -65,7 +65,7 @@ public class WebLogicServerProvider implements ServerProvider {
         getPathResolver().getIdentifier(module.getModuleName(), Path.SRC_MAIN_WEBAPP, WEBLOGIC_XML);
 
     final InputStream templateInputStream =
-        FileUtils.getInputStream(getClass(), "servers/weblogic/weblogic-template.xml");
+        FileUtils.getInputStream(getClass(), "weblogic/weblogic-template.xml");
     Validate.notNull(templateInputStream, "Could not acquire weblogic.xml template");
     final Document document = XmlUtils.readXml(templateInputStream);
 
@@ -78,7 +78,7 @@ public class WebLogicServerProvider implements ServerProvider {
         getPathResolver().getIdentifier(module.getModuleName(), Path.SRC_MAIN_WEBAPP, WEB_XML);
 
     final InputStream templateInputStream =
-        FileUtils.getInputStream(getClass(), "servers/weblogic/web-template.xml");
+        FileUtils.getInputStream(getClass(), "weblogic/web-template.xml");
     Validate.notNull(templateInputStream, "Could not acquire web.xml template");
     final Document document = XmlUtils.readXml(templateInputStream);
 
