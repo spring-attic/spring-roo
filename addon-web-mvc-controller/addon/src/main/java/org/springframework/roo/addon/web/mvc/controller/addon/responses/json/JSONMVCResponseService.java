@@ -126,12 +126,26 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
 
   }
 
+  /**
+   * This operation adds finders to the @RooJSON annotation.
+   * 
+   * @param controller JavaType with the controller to be updated with
+   *                   the finders.
+   * @param finders List with finder names to be added.
+   */
   @Override
   public void addFinders(JavaType controller, List<String> finders) {
     // TODO Auto-generated method stub
 
   }
 
+  /**
+   * This operation will check if some controller has the @RooJSON annotation
+   * 
+   * @param controller JavaType with controller to check
+   * @return true if provided controller has the JSON responseType.
+   *        If not, return false.
+   */
   @Override
   public boolean hasResponseType(JavaType controller) {
     Validate.notNull(controller, "ERROR: You must provide a valid controller");
@@ -146,9 +160,30 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
     return controllerDetails.getAnnotation(getAnnotation()) != null;
   }
 
+  /**
+   * This operation will install all the necessary items to be able to use
+   * JSON response type.
+   * 
+   * @param module Pom with the module where this response type should
+   *        be installed.
+   */
   @Override
   public void install(Pom module) {
     // Nothing to do here. JSON doesn't need extra configurations
+  }
+
+
+  @Override
+  public JavaType getMainControllerAnnotation() {
+    // JSON Response Service doesn't provide main controller
+    // annotation
+    return null;
+  }
+
+  @Override
+  public JavaType getMainController() {
+    // JSON Response Service doesn't provide main controller
+    return null;
   }
 
   // Getting OSGi services
@@ -191,7 +226,7 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
         return null;
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on ControllerOperationsImpl.");
+        LOGGER.warning("Cannot load TypeLocationService on JSONMVCResponseService.");
         return null;
       }
     } else {
@@ -214,7 +249,7 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
         return null;
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeManagementService on ControllerOperationsImpl.");
+        LOGGER.warning("Cannot load TypeManagementService on JSONMVCResponseService.");
         return null;
       }
     } else {

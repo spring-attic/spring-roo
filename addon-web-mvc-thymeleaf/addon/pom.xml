@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.roo</groupId>
+        <artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
+        <version>2.0.0.BUILD-SNAPSHOT</version>
+        <relativePath>../../addon-web-mvc-controller</relativePath>
+    </parent>
+    <artifactId>org.springframework.roo.addon.web.mvc.thymeleaf.addon</artifactId>
+    <packaging>bundle</packaging>
+    <name>Spring Roo - Addon - Thymeleaf</name>
+    <description>Provides all necessary components to include Thymeleaf on generated projects</description>
+
+    <dependencies>
+        <!-- Annotations dependency -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.mvc.thymeleaf.annotations</artifactId>
+        </dependency>
+        <!-- Test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+        </dependency>
+        <!-- OSGi -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
+        </dependency>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+        <!-- Roo -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.mvc.controller.addon</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+                <artifactId>maven-java-formatter-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <target.jar.directory>${basedir}/../../target/all</target.jar.directory>
+        <main.basedir>${basedir}/../..</main.basedir>
+    </properties>
+
+</project>

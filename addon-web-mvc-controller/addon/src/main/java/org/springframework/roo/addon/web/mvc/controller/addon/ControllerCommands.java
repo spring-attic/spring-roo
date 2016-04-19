@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -413,14 +412,17 @@ public class ControllerCommands implements CommandMarker {
   @CliOptionAutocompleteIndicator(param = "responseType", command = "web mvc controller",
       help = "--responseType parameter should be completed with the provided response types.")
   public List<String> getAllResponseTypeValues(ShellContext context) {
-    // Getting the specified controller
-    JavaType specifiedController =
-        getJavaTypeConverter().convertFromText(context.getParameters().get("controller"),
-            JavaType.class, "");
-
     // Getting all installed services that implements ControllerMVCResponseService
     Map<String, ControllerMVCResponseService> installedResponseTypes =
         getInstalledControllerMVCResponseTypes();
+
+    // Getting the specified controller
+    String controllerParam = context.getParameters().get("controller");
+    JavaType specifiedController = null;
+    if (controllerParam != null) {
+      specifiedController =
+          getJavaTypeConverter().convertFromText(controllerParam, JavaType.class, "");
+    }
 
     // Generating all possible values
     List<String> responseTypes = new ArrayList<String>();
@@ -429,7 +431,9 @@ public class ControllerCommands implements CommandMarker {
         .entrySet()) {
       // If specified controller doesn't have this response type installed. Add to responseTypes
       // possible values
-      if (!responseType.getValue().hasResponseType(specifiedController)) {
+      if (specifiedController == null) {
+        responseTypes.add(responseType.getKey());
+      } else if (!responseType.getValue().hasResponseType(specifiedController)) {
         responseTypes.add(responseType.getKey());
       }
     }
@@ -595,34 +599,29 @@ public class ControllerCommands implements CommandMarker {
    * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
    */
   public Map<String, ControllerMVCResponseService> getInstalledControllerMVCResponseTypes() {
-    if (responseTypes.isEmpty()) {
-      try {
-        ServiceReference<?>[] references =
-            this.context
-                .getAllServiceReferences(ControllerMVCResponseService.class.getName(), null);
+    try {
+      ServiceReference<?>[] references =
+          this.context.getAllServiceReferences(ControllerMVCResponseService.class.getName(), null);
 
-        for (ServiceReference<?> ref : references) {
-          ControllerMVCResponseService responseTypeService =
-              (ControllerMVCResponseService) this.context.getService(ref);
-          boolean isInstalled = false;
-          for (Pom module : getProjectOperations().getPoms()) {
-            if (responseTypeService.isInstalledInModule(module.getModuleName())) {
-              isInstalled = true;
-              break;
-            }
-          }
-          if (isInstalled) {
-            responseTypes.put(responseTypeService.getResponseType(), responseTypeService);
+      for (ServiceReference<?> ref : references) {
+        ControllerMVCResponseService responseTypeService =
+            (ControllerMVCResponseService) this.context.getService(ref);
+        boolean isInstalled = false;
+        for (Pom module : getProjectOperations().getPoms()) {
+          if (responseTypeService.isInstalledInModule(module.getModuleName())) {
+            isInstalled = true;
+            break;
           }
         }
-        return responseTypes;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ControllerMVCResponseService on ControllerCommands.");
-        return null;
+        if (isInstalled) {
+          responseTypes.put(responseTypeService.getResponseType(), responseTypeService);
+        }
       }
-    } else {
       return responseTypes;
+
+    } catch (InvalidSyntaxException e) {
+      LOGGER.warning("Cannot load ControllerMVCResponseService on ControllerCommands.");
+      return null;
     }
   }
 
