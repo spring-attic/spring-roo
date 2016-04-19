@@ -43,11 +43,6 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.finder.annotations</artifactId>
         </dependency>
-        <!-- Roo JSON Annotations -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.json.annotations</artifactId>
-        </dependency>
         <!-- Roo Layers Repository JPA Annotations -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
