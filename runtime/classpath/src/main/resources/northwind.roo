@@ -227,11 +227,14 @@ test unit --class ~.service.impl.CustomerServiceImpl
 // Add Spring MVC
 web mvc setup
 
+// Setup Thymeleaf view
+web mvc view setup --type THYMELEAF
+
 // Add necessary controllers
-web mvc controller --controller ~.web.CategoriesController --entity ~.domain.Category --service ~.service.api.CategoryService --formattersPackage ~.format
-web mvc controller --controller ~.web.CustomerOrdersController --entity ~.domain.CustomerOrder --service ~.service.api.CustomerOrderService --formattersPackage ~.format
-web mvc controller --controller ~.web.CustomersController --entity ~.domain.Customer --service ~.service.api.CustomerService --formattersPackage ~.format
-web mvc controller --controller ~.web.EmployeesController --entity ~.domain.Employee --service ~.service.api.EmployeeService --formattersPackage ~.format
-web mvc controller --controller ~.web.ShippersController --entity ~.domain.Shipper --service ~.service.api.ShipperService --formattersPackage ~.format
-web mvc controller --controller ~.web.StoresController --entity ~.domain.Store --service ~.service.api.StoreService --formattersPackage ~.format
-web mvc controller --controller ~.web.SuppliersController --entity ~.domain.Supplier --service ~.service.api.SupplierService --formattersPackage ~.format
+web mvc controller --controller ~.web.CategoriesController --entity ~.domain.Category --service ~.service.api.CategoryService --formattersPackage ~.format --responseType THYMELEAF
+web mvc controller --controller ~.web.CustomerOrdersController --entity ~.domain.CustomerOrder --service ~.service.api.CustomerOrderService --formattersPackage ~.format --responseType THYMELEAF
+web mvc controller --controller ~.web.CustomersController --entity ~.domain.Customer --service ~.service.api.CustomerService --formattersPackage ~.format --responseType THYMELEAF
+web mvc controller --controller ~.web.EmployeesController --entity ~.domain.Employee --service ~.service.api.EmployeeService --formattersPackage ~.format --responseType THYMELEAF
+web mvc controller --controller ~.web.ShippersController --entity ~.domain.Shipper --service ~.service.api.ShipperService --formattersPackage ~.format --responseType THYMELEAF
+web mvc controller --controller ~.web.StoresController --entity ~.domain.Store --service ~.service.api.StoreService --formattersPackage ~.format --responseType THYMELEAF
+web mvc controller --controller ~.web.SuppliersController --entity ~.domain.Supplier --service ~.service.api.SupplierService --formattersPackage ~.format --responseType THYMELEAF

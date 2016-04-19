@@ -263,7 +263,7 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
     // If not, define new JavaType
     JavaType mainController =
         new JavaType(String.format("%s.web.MainController", getProjectOperations()
-            .getTopLevelPackage(module.getModuleName())));
+            .getTopLevelPackage(module.getModuleName())), module.getModuleName());
 
     // Check that new JavaType doesn't exists
     ClassOrInterfaceTypeDetails mainControllerDetails =
@@ -308,7 +308,7 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
    * @param module
    */
   private void copyStaticResources(Pom module) {
-    // TODO
+    // TODO: Copy all necessary static resources
   }
 
   /**
@@ -319,7 +319,7 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
    * @param module
    */
   private void addDatatablesResources(Pom module) {
-    // TODO Auto-generated method stub
+    // TODO: Install all necessary Datatables components
 
   }
 

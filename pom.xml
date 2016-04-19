@@ -39,6 +39,7 @@
         <module>addon-logging</module>
         <module>addon-backup</module>
         <module>addon-web-mvc-controller</module>
+        <module>addon-web-mvc-views</module>
         <module>addon-web-mvc-embedded</module>
         <module>addon-web-mvc-jsp</module>
         <module>addon-web-mvc-thymeleaf</module>
@@ -565,6 +566,11 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.web.mvc.views</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
