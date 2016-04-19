@@ -189,7 +189,7 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
     copyStaticResources(module);
     // Thymeleaf needs Datatables component to list
     // data, so is necessary to install Datatables resources
-    addDatatablesResources(module);
+    addThymeleafDatatablesResources(module);
   }
 
   /**
@@ -312,15 +312,16 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
   }
 
   /**
-   * This method install Datatables resources and Datatables support. This
-   * is necessary because THYMELEAF response type uses Datatables components to
+   * This method install Datatables resources and Datatables support for thymeleaf 
+   * implementation
+   * 
+   * This is necessary because THYMELEAF response type uses Datatables components to
    * list results on generated views.
    * 
    * @param module
    */
-  private void addDatatablesResources(Pom module) {
-    // TODO: Install all necessary Datatables components
-
+  private void addThymeleafDatatablesResources(Pom module) {
+    // TODO: Add thymeleaf datatables resources
   }
 
   /**

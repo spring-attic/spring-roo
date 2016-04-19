@@ -109,11 +109,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Add constructor
     ensureGovernorHasConstructor(getConstructor(repository));
 
-    // Implements readOnly methods for every services
-    ensureGovernorHasMethod(getFindAllMethod(entity, repository.getType()));
-    ensureGovernorHasMethod(getFindAllIterableMethod(entity, identifierType, repository.getType()));
-    ensureGovernorHasMethod(getFindOneMethod(entity, identifierType, repository.getType()));
-
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
       ensureGovernorHasMethod(getSaveMethod(entity, repository.getType()));
@@ -121,6 +116,12 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       ensureGovernorHasMethod(getSaveBatchMethod(entity, repository.getType()));
       ensureGovernorHasMethod(getDeleteBatchMethod(entity, identifierType, repository.getType()));
     }
+
+    // Implements readOnly methods for every services
+    ensureGovernorHasMethod(getFindAllMethod(entity, repository.getType()));
+    ensureGovernorHasMethod(getFindAllIterableMethod(entity, identifierType, repository.getType()));
+    ensureGovernorHasMethod(getFindOneMethod(entity, identifierType, repository.getType()));
+    ensureGovernorHasMethod(getCountMethod(repository.getType()));
 
     // Generating finders
     for (FinderMethod finder : finders) {
@@ -268,6 +269,42 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("findOne"), entity,
+            parameterTypes, parameterNames, bodyBuilder);
+
+    return methodBuilder; // Build and return a MethodMetadata
+    // instance
+  }
+
+
+  /**
+   * Method that generates method "count".
+   * 
+   * @param repository
+   * @return MethodMetadataBuilder with public long count();
+   *         structure
+   */
+  private MethodMetadataBuilder getCountMethod(JavaType repository) {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("count");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    if (repository != null) {
+      bodyBuilder.appendFormalLine("return repository.count();");
+    } else {
+      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.LONG_PRIMITIVE,
             parameterTypes, parameterNames, bodyBuilder);
 
     return methodBuilder; // Build and return a MethodMetadata

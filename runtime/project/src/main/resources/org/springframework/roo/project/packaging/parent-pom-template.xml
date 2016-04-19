@@ -47,7 +47,7 @@
 				<artifactId>assertj-core</artifactId>
 				<version>${assertj.version}</version>
 	  		</dependency>
-				
+	  		
 			<!-- Spring Roo annotations -->
 			<dependency>
 				<groupId>org.springframework.roo</groupId>

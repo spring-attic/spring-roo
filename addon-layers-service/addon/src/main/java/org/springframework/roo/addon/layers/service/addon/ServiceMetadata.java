@@ -89,11 +89,6 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.identifierType = identifierType;
     this.finders = finders;
 
-    // Generating readOnly methods for every services
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllMethod()));
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllIterableMethod()));
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindOneMethod()));
-
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getSaveMethod()));
@@ -101,6 +96,12 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       ensureGovernorHasMethod(new MethodMetadataBuilder(getSaveBatchMethod()));
       ensureGovernorHasMethod(new MethodMetadataBuilder(getDeleteBatchMethod()));
     }
+
+    // Generating readOnly methods for every services
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllMethod()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllIterableMethod()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindOneMethod()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getCountMethod()));
 
     // Generating finders
     for (FinderMethod finder : finders) {
@@ -215,6 +216,38 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName, entity,
             parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Method that generates method "count".
+   * 
+   * @return MethodMetadataBuilder with public long count();
+   *         structure
+   */
+  public MethodMetadata getCountMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("count");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            JavaType.LONG_PRIMITIVE, parameterTypes, parameterNames, null);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance

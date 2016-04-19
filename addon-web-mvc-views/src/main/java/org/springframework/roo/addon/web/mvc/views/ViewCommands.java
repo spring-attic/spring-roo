@@ -176,7 +176,7 @@ public class ViewCommands implements CommandMarker {
         return null;
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on ControllerCommands.");
+        LOGGER.warning("Cannot load TypeLocationService on ViewCommands.");
         return null;
       }
     } else {

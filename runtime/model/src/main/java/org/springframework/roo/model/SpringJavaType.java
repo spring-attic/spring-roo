@@ -123,6 +123,8 @@ public final class SpringJavaType {
       "org.springframework.data.annotation.LastModifiedBy");
   public static final JavaType AUDITING_ENTITY_LISTENER = new JavaType(
       "org.springframework.data.jpa.domain.support.AuditingEntityListener");
+  public static final JavaType PAGE = new JavaType("org.springframework.data.domain.Page");
+  public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
 
   /**
    * Returns the {@link JavaType} for a Spring converter
