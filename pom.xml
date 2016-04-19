@@ -54,6 +54,7 @@
         <module>addon-jms</module>
         <module>addon-email</module>
 	    <module>addon-push-in</module>
+	    <module>addon-field</module>
         <module>annotations</module>
         <!-- Web UI -->
         <module>web-ui</module>
@@ -518,6 +519,11 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.javabean.annotations</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.field.addon</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

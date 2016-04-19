@@ -1,41 +1,54 @@
-package org.springframework.roo.classpath.operations;
+package org.springframework.roo.addon.field.addon;
 
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.details.*;
-import org.springframework.roo.classpath.details.annotations.*;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.comments.CommentFormatter;
+import org.springframework.roo.classpath.operations.Cardinality;
+import org.springframework.roo.classpath.operations.Cascade;
+import org.springframework.roo.classpath.operations.DateTime;
+import org.springframework.roo.classpath.operations.EnumType;
+import org.springframework.roo.classpath.operations.Fetch;
 import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
 import org.springframework.roo.classpath.operations.jsr303.DateField;
 import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
 import org.springframework.roo.classpath.operations.jsr303.EmbeddedField;
 import org.springframework.roo.classpath.operations.jsr303.EnumField;
-import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
 import org.springframework.roo.classpath.operations.jsr303.ListField;
 import org.springframework.roo.classpath.operations.jsr303.NumericField;
 import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
@@ -45,12 +58,26 @@ import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentTy
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileField;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.*;
+import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.settings.project.ProjectSettingsService;
-import org.springframework.roo.shell.*;
+import org.springframework.roo.shell.CliAvailabilityIndicator;
+import org.springframework.roo.shell.CliCommand;
+import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
+import org.springframework.roo.shell.CliOptionVisibilityIndicator;
+import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.Converter;
+import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Additional shell commands for the purpose of creating fields.
@@ -62,6 +89,11 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Component
 @Service
 public class FieldCommands implements CommandMarker {
+
+  protected final static Logger LOGGER = HandlerUtils.getLogger(FieldCommands.class);
+
+  //------------ OSGi component attributes ----------------
+  private BundleContext context;
 
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
@@ -77,6 +109,12 @@ public class FieldCommands implements CommandMarker {
   private TypeManagementService typeManagementService;
   @Reference
   private ProjectSettingsService projectSettings;
+  @Reference
+  private LastUsed lastUsed;
+  private Converter<JavaType> javaTypeConverter;
+
+  // FieldCreatorProvider implementations
+  private List<FieldCreatorProvider> fieldCreatorProviders = new ArrayList<FieldCreatorProvider>();
 
   // Project Settings 
   private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
@@ -86,6 +124,7 @@ public class FieldCommands implements CommandMarker {
   private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
   protected void activate(final ComponentContext context) {
+    this.context = context.getBundleContext();
     legalNumericPrimitives.add(Short.class.getName());
     legalNumericPrimitives.add(Byte.class.getName());
     legalNumericPrimitives.add(Integer.class.getName());
@@ -103,29 +142,59 @@ public class FieldCommands implements CommandMarker {
     staticFieldConverter.remove(Fetch.class);
     staticFieldConverter.remove(EnumType.class);
     staticFieldConverter.remove(DateTime.class);
+    legalNumericPrimitives.add(Short.class.getName());
+    legalNumericPrimitives.add(Byte.class.getName());
+    legalNumericPrimitives.add(Integer.class.getName());
+    legalNumericPrimitives.add(Long.class.getName());
+    legalNumericPrimitives.add(Float.class.getName());
+    legalNumericPrimitives.add(Double.class.getName());
+    this.context = null;
   }
 
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
   @CliOptionMandatoryIndicator(command = "field boolean", params = {"column"})
   public boolean isColumnMandatoryForFieldBoolean(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnMandatoryForFieldBoolean(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field boolean", params = {"column"},
+      help = "Option 'column' is not available for this type of class")
+  public boolean isColumnVisibleForFieldBoolean(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnVisibleForFieldBoolean(shellContext);
+    }
+    return false;
+  }
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field boolean", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldBoolean(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldBoolean(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field boolean", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldBoolean(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field boolean", params = {"class"})
+  public boolean isClassMandatoryForFieldBoolean() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -133,7 +202,7 @@ public class FieldCommands implements CommandMarker {
       help = "Adds a private boolean field to an existing Java source file")
   public void addFieldBoolean(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
@@ -183,27 +252,60 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
   @CliOptionMandatoryIndicator(command = "field date", params = {"column"})
   public boolean isColumnMandatoryForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnMandatoryForFieldDate(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field date", params = {"column"},
+      help = "Option 'column' is not available for this type of class")
+  public boolean isColumnVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field date", params = {"persistenceType"},
+      help = "Option 'persistenceType' is not available for this type of class")
+  public boolean isPersistenceTypeVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isPersistenceTypeVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field date", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldDate(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldDate(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field date", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldDate(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field date", params = {"class"})
+  public boolean isClassMandatoryForFieldDate() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -215,7 +317,7 @@ public class FieldCommands implements CommandMarker {
           help = "The Java type of the entity") final JavaType fieldType,
       @CliOption(key = "persistenceType", mandatory = false,
           help = "The type of persistent storage to be used") final DateFieldPersistenceType persistenceType,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
@@ -288,13 +390,31 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
+  @CliOptionVisibilityIndicator(command = "field embedded", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldEmbedded(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
+    return false;
+  }
+
+  @CliOptionMandatoryIndicator(command = "field embedded", params = {"class"})
+  public boolean isClassMandatoryForFieldEmbedded() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
+    return false;
+  }
+
   @CliCommand(value = "field embedded",
       help = "Adds a private @Embedded field to an existing Java source file ")
   public void addFieldEmbeddedJpa(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, optionContext = PROJECT,
           help = "The Java type of the @Embeddable class") final JavaType fieldType,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT,
           help = "The name of the @Entity class to receive this field") final JavaType typeName,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
@@ -341,27 +461,60 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, false);
   }
 
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
   @CliOptionMandatoryIndicator(command = "field enum", params = {"column"})
   public boolean isColumnMandatoryForFieldEnum(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnMandatoryForFieldEnum(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field enum", params = {"column"},
+      help = "Option 'column' is not available for this type of class")
+  public boolean isColumnVisibleForFieldEnum(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnVisibleForFieldEnum(shellContext);
+    }
+    return false;
+  }
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field enum", params = {"enumType"},
+      help = "Option 'enumType' is not available for this type of class")
+  public boolean isEnumTypeVisibleForFieldEnum(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isEnumTypeVisibleForFieldEnum(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field enum", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldEnum(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldEnum(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field enum", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldEnum(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field enum", params = {"class"})
+  public boolean isClassMandatoryForFieldEnum() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -370,7 +523,7 @@ public class FieldCommands implements CommandMarker {
   public void addFieldEnum(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, help = "The enum type of this field") final JavaType fieldType,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
@@ -408,27 +561,60 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
   @CliOptionMandatoryIndicator(command = "field number", params = {"column"})
   public boolean isColumnMandatoryForFieldNumber(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnMandatoryForFieldNumber(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field number", params = {"column"},
+      help = "Option 'column' is not available for this type of class")
+  public boolean isColumnVisibleForFieldNumber(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnVisibleForFieldNumber(shellContext);
+    }
+    return false;
+  }
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field number", params = {"unique"},
+      help = "Option 'unique' is not available for this type of class")
+  public boolean isUniqueVisibleForFieldNumber(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isUniqueVisibleForFieldNumber(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field number", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldNumber(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldNumber(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field number", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldNumber(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field number", params = {"class"})
+  public boolean isClassMandatoryForFieldNumber() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -438,7 +624,7 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, optionContext = "java-number",
           help = "The Java type of the entity") JavaType fieldType,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
@@ -522,27 +708,91 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
   @CliOptionMandatoryIndicator(command = "field reference", params = {"joinColumnName"})
   public boolean isColumnMandatoryForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnMandatoryForFieldReference(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"joinColumnName"},
+      help = "Option 'joinColumnName' is not available for this type of class")
+  public boolean isJoinColumnNameVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinColumnNameVisibleForFieldReference(shellContext);
+    }
+    return false;
+  }
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"referencedColumnName"},
+      help = "Option 'referencedColumnName' is not available for this type of class")
+  public boolean isReferencedColumnNameVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isReferencedColumnNameVisibleForFieldReference(
+          shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"cardinality"},
+      help = "Option 'cardinality' is not available for this type of class")
+  public boolean isCardinalityVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isCardinalityVisibleForFieldReference(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"fetch"},
+      help = "Option 'fetch' is not available for this type of class")
+  public boolean isFetchVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isFetchVisibleForFieldReference(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldReference(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"cascadeType"},
+      help = "Option 'cascadeType' is not available for this type of class")
+  public boolean isCascadeTypeVisibleForFieldReference(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isCascadeTypeVisibleForFieldReference(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field reference", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldReference(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field reference", params = {"class"})
+  public boolean isClassMandatoryForFieldReference() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -553,7 +803,7 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, optionContext = PROJECT,
           help = "The Java type of the entity to reference") final JavaType fieldType,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
@@ -628,76 +878,102 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
-  /**
-   * ROO-3720: Indicator that checks if exists some project setting that makes table 
-   * column parameter mandatory, as well as joinTable param has been specified and 
-   * makes its associate params visible
-   * 
-   * @param shellContext
-   * @return true if joinTable param has been specified and table column names are mandatory
-   */
   @CliOptionMandatoryIndicator(command = "field set", params = {"joinColumns", "referencedColumns",
       "inverseJoinColumns", "inverseReferencedColumns"})
   public boolean areJoinTableParamsMandatoryForFieldSet(ShellContext shellContext) {
-
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
-
-    // See if joinTable param has been specified
-    String joinTableParam = shellContext.getParameters().get("joinTable");
-
-    if (joinTableParam != null && requiredSchemaObjectName != null
-        && requiredSchemaObjectName.equals("true")) {
-      return true;
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).areJoinTableParamsMandatoryForFieldSet(shellContext);
     }
-
     return false;
   }
 
-  /**
-   * ROO-3720: Indicator that checks if --joinTable is mandatory based on --cardinality 
-   * and project setting that makes table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if --cardinality is MANY_TO_MANY, false otherwise.
-   */
   @CliOptionMandatoryIndicator(command = "field set", params = {"joinTable"})
-  public boolean isJoinTableMandatoryForSet(ShellContext shellContext) {
-
-    String cardinality = shellContext.getParameters().get("cardinality");
-
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
-
-    if (cardinality != null && cardinality.equals("MANY_TO_MANY")
-        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
-      return true;
+  public boolean isJoinTableMandatoryForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinTableMandatoryForFieldSet(shellContext);
     }
-
     return false;
   }
 
-  /**
-   * ROO-3720: Indicator that checks if joinTable param has been specified and makes 
-   * its associate params mandatory
-   * 
-   * @param shellContext
-   * @return true if joinTable param has been specified.
-   */
   @CliOptionVisibilityIndicator(command = "field set", params = {"joinColumns",
       "referencedColumns", "inverseJoinColumns", "inverseReferencedColumns"},
       help = "Options --joinColumns, --referencedColumns, --inverseJoinColumns and "
           + "--inverseReferencedColumns must be used with a specific --joinTable option.")
   public boolean areJoinTableParamsVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).areJoinTableParamsVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
 
-    String joinTableParam = shellContext.getParameters().get("joinTable");
+  @CliOptionVisibilityIndicator(command = "field set", params = {"mappedBy"},
+      help = "Option 'mappedBy' is not available for this type of class")
+  public boolean isMappedByVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isMappedByVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
 
-    if (joinTableParam != null) {
+  @CliOptionVisibilityIndicator(command = "field set", params = {"cardinality"},
+      help = "Option 'cardinality' is not available for this type of class")
+  public boolean isCardinalityVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isCardinalityVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field set", params = {"fetch"},
+      help = "Option 'fetch' is not available for this type of class")
+  public boolean isFetchVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isFetchVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field set", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field set", params = {"joinTable"},
+      help = "Option 'joinTable' is not available for this type of class")
+  public boolean isJoinTableVisibleForFieldSet(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinTableVisibleForFieldSet(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field set", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldSet(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field set", params = {"class"})
+  public boolean isClassMandatoryForFieldSet() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -708,7 +984,7 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true,
           help = "The entity which will be contained within the Set") final JavaType fieldType,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "mappedBy", mandatory = false,
           help = "The field name on the referenced type which owns the relationship") final JavaSymbolName mappedBy,
@@ -848,70 +1124,102 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
-  /**
-     * ROO-3720: Indicator that checks if joinTable param has been specified and 
-     * makes its associate params visible
-     * 
-     * @param shellContext
-     * @return true if joinTable param has been specified.
-     */
   @CliOptionVisibilityIndicator(command = "field list", params = {"joinColumns",
       "referencedColumns", "inverseJoinColumns", "inverseReferencedColumns"},
       help = "Options --joinColumns, --referencedColumns, --inverseJoinColumns and "
           + "--inverseReferencedColumns must be used with a specific --joinTable option.")
   public boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext) {
-
-    String joinTableParam = shellContext.getParameters().get("joinTable");
-
-    if (joinTableParam != null) {
-      return true;
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).areJoinTableParamsVisibleForFieldList(shellContext);
     }
-
     return false;
   }
 
-  /**
-   * ROO-3720: Indicator that checks if --joinTable is mandatory based on --cardinality
-   * 
-   * @param shellContext
-   * @return true if --cardinality is MANY_TO_MANY, false otherwise.
-   */
   @CliOptionMandatoryIndicator(command = "field list", params = {"joinTable"})
-  public boolean isJoinTableMandatoryForList(ShellContext shellContext) {
-
-    String cardinality = shellContext.getParameters().get("cardinality");
-
-    if (cardinality != null && cardinality.equals("MANY_TO_MANY")) {
-      return true;
+  public boolean isJoinTableMandatoryForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinTableMandatoryForFieldList(shellContext);
     }
-
     return false;
   }
 
-  /**
-   * ROO-3720: Indicator that checks if exists some project setting that makes table 
-   * column parameter mandatory, as well as joinTable param has been specified and 
-   * makes its associate params visible
-   * 
-   * @param shellContext
-   * @return true if joinTable param has been specified and table column names are mandatory
-   */
   @CliOptionMandatoryIndicator(command = "field list", params = {"joinColumns",
       "referencedColumns", "inverseJoinColumns", "inverseReferencedColumns"})
   public boolean areJoinTableParamsMandatoryForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).areJoinTableParamsMandatoryForFieldList(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field list", params = {"mappedBy"},
+      help = "Option 'mappedBy' is not available for this type of class")
+  public boolean isMappedByVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isMappedByVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
 
-    // See if joinTable param has been specified
-    String joinTableParam = shellContext.getParameters().get("joinTable");
+  @CliOptionVisibilityIndicator(command = "field list", params = {"cardinality"},
+      help = "Option 'cardinality' is not available for this type of class")
+  public boolean isCardinalityVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isCardinalityVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
 
-    if (joinTableParam != null && requiredSchemaObjectName != null
-        && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field list", params = {"fetch"},
+      help = "Option 'fetch' is not available for this type of class")
+  public boolean isFetchVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isFetchVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field list", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field list", params = {"joinTable"},
+      help = "Option 'joinTable' is not available for this type of class")
+  public boolean isJoinTableVisibleForFieldList(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isJoinTableVisibleForFieldList(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field list", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldList(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field list", params = {"class"})
+  public boolean isClassMandatoryForFieldList() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -922,7 +1230,7 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true,
           help = "The entity which will be contained within the Set") final JavaType fieldType,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "mappedBy", mandatory = false,
           help = "The field name on the referenced type which owns the relationship") final JavaSymbolName mappedBy,
@@ -1060,27 +1368,70 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
   @CliOptionMandatoryIndicator(command = "field string", params = {"column"})
   public boolean isColumnMandatoryForFieldString(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnMandatoryForFieldString(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field string", params = {"column"},
+      help = "Option 'column' is not available for this type of class")
+  public boolean isColumnVisibleForFieldString(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnVisibleForFieldString(shellContext);
+    }
+    return false;
+  }
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field string", params = {"unique"},
+      help = "Option 'unique' is not available for this type of class")
+  public boolean isUniqueVisibleForFieldString(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isUniqueVisibleForFieldString(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field string", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldString(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldString(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field string", params = {"lob"},
+      help = "Option 'lob' is not available for this type of class")
+  public boolean isLobVisibleForFieldString(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isLobVisibleForFieldString(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field string", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldString(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field string", params = {"class"})
+  public boolean isClassMandatoryForFieldString() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -1089,7 +1440,7 @@ public class FieldCommands implements CommandMarker {
   public void addFieldString(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of "
           + "the field to add") final JavaSymbolName fieldName,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
@@ -1170,27 +1521,40 @@ public class FieldCommands implements CommandMarker {
     insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
   @CliOptionMandatoryIndicator(command = "field file", params = {"column"})
   public boolean isColumnMandatoryForFieldFile(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnMandatoryForFieldFile(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field file", params = {"column"},
+      help = "Option 'column' is not available for this type of class")
+  public boolean isColumnVisibleForFieldFile(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnVisibleForFieldFile(shellContext);
+    }
+    return false;
+  }
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field file", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldFile(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field file", params = {"class"})
+  public boolean isClassMandatoryForFieldFile() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -1199,7 +1563,7 @@ public class FieldCommands implements CommandMarker {
   public void addFileUploadField(
       @CliOption(key = {"", "fieldName"}, mandatory = true,
           help = "The name of the file upload field to add") final JavaSymbolName fieldName,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "contentType", mandatory = true, help = "The content type of the file") final UploadedFileContentType contentType,
       @CliOption(key = "autoUpload", mandatory = false, specifiedDefaultValue = "true",
@@ -1294,27 +1658,50 @@ public class FieldCommands implements CommandMarker {
     }
   }
 
-  /**
-   * ROO-3710: Indicator that checks if exists some project setting that makes
-   * table column parameter mandatory.
-   * 
-   * @param shellContext
-   * @return true if exists property
-   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
-   *         and its value is "true". If not, return false.
-   */
   @CliOptionMandatoryIndicator(command = "field other", params = {"column"})
   public boolean isColumnMandatoryForFieldOther(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnMandatoryForFieldOther(shellContext);
+    }
+    return false;
+  }
 
-    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on
-    // project settings
-    String requiredSchemaObjectName =
-        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+  @CliOptionVisibilityIndicator(command = "field other", params = {"column"},
+      help = "Option 'column' is not available for this type of class")
+  public boolean isColumnVisibleForFieldOther(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isColumnVisibleForFieldOther(shellContext);
+    }
+    return false;
+  }
 
-    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+  @CliOptionVisibilityIndicator(command = "field other", params = {"transient"},
+      help = "Option 'transient' is not available for this type of class")
+  public boolean isTransientVisibleForFieldOther(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).isTransientVisibleForFieldOther(shellContext);
+    }
+    return false;
+  }
+
+  @CliOptionVisibilityIndicator(command = "field other", params = {"class"},
+      help = "Option 'class' is not available "
+          + "for this command when the focus is set to one class.")
+  public boolean isClassVisibleForFieldOther(ShellContext shellContext) {
+    if (lastUsed.getJavaType() == null) {
       return true;
     }
+    return false;
+  }
 
+  @CliOptionMandatoryIndicator(command = "field other", params = {"class"})
+  public boolean isClassMandatoryForFieldOther() {
+    if (lastUsed.getJavaType() == null) {
+      return true;
+    }
     return false;
   }
 
@@ -1322,7 +1709,7 @@ public class FieldCommands implements CommandMarker {
   public void insertField(
       @CliOption(key = "fieldName", mandatory = true, help = "The name of the field") final JavaSymbolName fieldName,
       @CliOption(key = "type", mandatory = true, help = "The Java type of this field") final JavaType fieldType,
-      @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
@@ -1360,16 +1747,10 @@ public class FieldCommands implements CommandMarker {
   }
 
   @CliAvailabilityIndicator({"field other", "field number", "field string", "field date",
-      "field boolean", "field enum", "field embedded", "field file"})
-  public boolean isJdkFieldManagementAvailable() {
-    return projectOperations.isFocusedProjectAvailable();
-  }
-
-  @CliAvailabilityIndicator({"field reference", "field set", "field list"})
-  public boolean isJpaFieldManagementAvailable() {
-    // In a separate method in case we decide to check for JPA registration
-    // in the future
-    return projectOperations.isFocusedProjectAvailable();
+      "field boolean", "field enum", "field embedded", "field file", "field reference",
+      "field set", "field list"})
+  public boolean isFieldManagementAvailable() {
+    return getFieldCreatorAvailable();
   }
 
   /**
@@ -1418,6 +1799,124 @@ public class FieldCommands implements CommandMarker {
             "It is mandatory to assign a specific table name for --joinTable. Please, "
                 + "assign it a table name.");
       }
+    }
+  }
+
+  /**
+   * Tries to obtain JavaType indicated in command or which has the focus 
+   * in the Shell
+   * 
+   * @param shellContext the Roo Shell context
+   * @return JavaType or null if no class has the focus or no class is 
+   * specified in the command
+   */
+  private JavaType getTypeFromCommand(ShellContext shellContext) {
+    // Try to get 'class' from ShellContext
+    String typeString = shellContext.getParameters().get("class");
+    JavaType type = null;
+    if (typeString != null) {
+      type = getJavaTypeConverter().convertFromText(typeString, JavaType.class, PROJECT);
+    } else {
+      type = lastUsed.getJavaType();
+    }
+    return type;
+  }
+
+  /**
+   * Gets the right implementation of FieldCreatorProvider for a JavaType
+   * 
+   * @param type the JavaType to get the implementation
+   * @return FieldCreatorProvider implementation
+   */
+  public FieldCreatorProvider getFieldCreatorProvider(JavaType type) {
+
+    // Get all Services implement FieldCreatorProvider interface
+    if (fieldCreatorProviders.isEmpty()) {
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(FieldCreatorProvider.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          FieldCreatorProvider fieldCreatorProvider =
+              (FieldCreatorProvider) this.context.getService(ref);
+          fieldCreatorProviders.add(fieldCreatorProvider);
+        }
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load FieldCreatorProvider on FieldCommands.");
+        return null;
+      }
+    }
+
+    for (FieldCreatorProvider provider : fieldCreatorProviders) {
+      if (provider.isValid(type)) {
+        return provider;
+      }
+    }
+
+    return null;
+
+  }
+
+  /**
+   * Checks all FieldCreator implementations looking for any available 
+   * 
+   * @return <code>true</code> if any of the implementations is available or 
+   * <code>false</code> if none of the implementations are available.
+   */
+  private boolean getFieldCreatorAvailable() {
+    // Get all Services implement FieldCreatorProvider interface
+    if (fieldCreatorProviders.isEmpty()) {
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(FieldCreatorProvider.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          FieldCreatorProvider fieldCreatorProvider =
+              (FieldCreatorProvider) this.context.getService(ref);
+          fieldCreatorProviders.add(fieldCreatorProvider);
+        }
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load FieldCreatorProvider on FieldCommands.");
+        return false;
+      }
+    }
+
+    for (FieldCreatorProvider provider : fieldCreatorProviders) {
+      if (provider.isFieldManagementAvailable()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  @SuppressWarnings("unchecked")
+  public Converter<JavaType> getJavaTypeConverter() {
+    if (javaTypeConverter == null) {
+
+      // Get all Services implement JavaTypeConverter interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(Converter.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          Converter<?> converter = (Converter<?>) this.context.getService(ref);
+          if (converter.supports(JavaType.class, PROJECT)) {
+            javaTypeConverter = (Converter<JavaType>) converter;
+            return javaTypeConverter;
+          }
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("ERROR: Cannot load JavaTypeConverter on FieldCommands.");
+        return null;
+      }
+    } else {
+      return javaTypeConverter;
     }
   }
 }

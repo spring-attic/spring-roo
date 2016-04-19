@@ -9,6 +9,7 @@ import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;

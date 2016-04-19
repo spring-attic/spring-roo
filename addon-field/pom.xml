@@ -8,14 +8,13 @@
         <version>2.0.0.BUILD-SNAPSHOT</version>
         <relativePath>../runtime/osgi-bundle</relativePath>
     </parent>
-    <artifactId>org.springframework.roo.addon.dto</artifactId>
+    <artifactId>org.springframework.roo.addon.field</artifactId>
     <packaging>pom</packaging>
-    <name>Spring Roo - DTO</name>
-    <description>Support for DTO's creation in the targeted project</description>
+    <name>Spring Roo - Field</name>
+    <description>Support for field creation in the classes of the targeted project</description>
 
     <modules>
         <module>addon</module>
-        <module>annotations</module>
     </modules>
 
     <properties>
@@ -23,3 +22,4 @@
     </properties>
 
 </project>
+

@@ -40,6 +40,7 @@ public class SetField extends CollectionField {
   private Fetch fetch;
   private List<AnnotationAttributeValue<?>> joinTableAttributes;
   private Cascade cascadeType;
+  private final String ROO_DEFAULT_JOIN_TABLE_NAME = "_ROO_JOIN_TABLE_";
 
   /**
    * Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be
@@ -179,7 +180,7 @@ public class SetField extends CollectionField {
         new ArrayList<AnnotationAttributeValue<?>>();
 
     // If name not specified, use default name value
-    if (!FieldCommands.ROO_DEFAULT_JOIN_TABLE_NAME.equals(joinTableName)) {
+    if (ROO_DEFAULT_JOIN_TABLE_NAME.equals(joinTableName)) {
       joinTableAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), joinTableName));
     }
 

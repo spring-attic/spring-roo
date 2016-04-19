@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.dto.addon;
 
+import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +155,7 @@ public class DtoCommands implements CommandMarker {
       @CliOption(
           key = "class",
           mandatory = false,
+          optionContext = UPDATE_PROJECT,
           help = "Name of the DTO class to create, including package and module (if multimodule project)") final JavaType name,
       @CliOption(key = "entity", mandatory = false,
           help = "Name of the entity which can be used to create DTO from") final JavaType entity,

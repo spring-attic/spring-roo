@@ -1,4 +1,4 @@
-package org.springframework.roo.classpath.operations.jsr303;
+package org.springframework.roo.classpath.details;
 
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;

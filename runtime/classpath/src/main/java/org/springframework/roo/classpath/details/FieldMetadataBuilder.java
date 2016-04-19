@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.comments.CommentStructure;
 import org.springframework.roo.classpath.details.comments.JavadocComment;
-import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
+import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 

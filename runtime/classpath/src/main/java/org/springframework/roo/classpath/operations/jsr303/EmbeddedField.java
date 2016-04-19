@@ -4,6 +4,7 @@ import static org.springframework.roo.model.JpaJavaType.EMBEDDED;
 
 import java.util.List;
 
+import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
