@@ -18,6 +18,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -35,6 +36,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
@@ -69,6 +71,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
   private boolean readOnly;
   private JavaType entity;
   private JavaType identifierType;
+  private MethodMetadata identifierAccessor;
   private JavaType service;
   private String path;
   private String metadataIdentificationString;
@@ -78,6 +81,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
   private JavaType datatablesDataType;
 
   private ControllerMVCService controllerMVCService;
+
+  private List<JavaType> typesToImport;
 
   /**
    * This service is being activated so setup it:
@@ -166,6 +171,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
+    this.typesToImport = new ArrayList<JavaType>();
     this.controller = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     this.metadataIdentificationString = metadataIdentificationString;
 
@@ -186,6 +192,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     // Getting identifierType
     this.identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
+    this.identifierAccessor = getPersistenceMemberLocator().getIdentifierAccessor(entity);
 
     // Getting service and its metadata
     this.service = (JavaType) controllerAnnotation.getAttribute("service").getValue();
@@ -211,7 +218,10 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     return new ThymeleafMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, getListFormMethod(), getListMethod(serviceFindAllMethod,
-            serviceCountMethod), getShowMethod(), this.readOnly);
+            serviceCountMethod), getCreateFormMethod(), getCreateMethod(serviceSaveMethod),
+        getEditFormMethod(), getUpdateMethod(serviceSaveMethod),
+        getDeleteMethod(serviceDeleteMethod), getShowMethod(), getPopulateFormMethod(),
+        this.readOnly, typesToImport);
   }
 
   /**
@@ -339,8 +349,360 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // return "path/list";
-    bodyBuilder.appendFormalLine(String.format("return \"%s/list\";",
-        this.path.startsWith("/") ? this.path.substring(1) : this.path));
+    bodyBuilder.appendFormalLine(String.format("return \"%s/list\";", getViewsPath()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "create" form method  using Thymeleaf view 
+   * response type
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getCreateFormMethod() {
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null, null,
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+    if (existingMVCMethod != null) {
+      throw new RuntimeException(
+          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("createForm");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null, null,
+        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // model.addAttribute(new Entity());
+    bodyBuilder.appendFormalLine(String.format("model.addAttribute(new %s());",
+        this.entity.getSimpleTypeName()));
+
+    // populateForm(model);
+    bodyBuilder.appendFormalLine("populateForm(model);");
+
+    // return "path/create";
+    bodyBuilder.appendFormalLine(String.format("return \"%s/create\";", getViewsPath()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "create" method  using Thymeleaf view 
+   * response type
+   * 
+   * @param serviceSaveMethod MethodMetadata
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getCreateMethod(MethodMetadata serviceSaveMethod) {
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_POST, "", null, null, null,
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+    if (existingMVCMethod != null) {
+      throw new RuntimeException(
+          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("create");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
+        new JavaType("javax.validation.Valid")).build(), new AnnotationMetadataBuilder(
+        SpringJavaType.MODEL_ATTRIBUTE).build()));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(getEntityField().getFieldName());
+    parameterNames.add(new JavaSymbolName("result"));
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_POST, "", null, null, null,
+        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // if (result.hasErrors()) {
+    bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
+    bodyBuilder.indent();
+
+    // populateForm(model);
+    bodyBuilder.appendFormalLine("populateForm(model);");
+
+    // return "path/create";
+    bodyBuilder.appendFormalLine(String.format("return \"%s/create\";", getViewsPath()));
+    bodyBuilder.indentRemove();
+
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // Entity newEntity = entityService.SAVE_METHOD(entityField);
+    bodyBuilder.appendFormalLine(String.format("%s new%s = %s.%s(%s);", this.entity
+        .getSimpleTypeName(), this.entity.getSimpleTypeName(), getServiceField().getFieldName(),
+        serviceSaveMethod.getMethodName(), getEntityField().getFieldName()));
+
+    // UriComponents uriComponents = UriComponentsBuilder.fromUriString("/path/{entityField}").build();
+    bodyBuilder.appendFormalLine(String.format("%s uriComponents = "
+        + "%s.fromUriString(\"/%s/{%s}\").build();", addTypeToImport(SpringJavaType.URI_COMPONENTS)
+        .getSimpleTypeName(), addTypeToImport(SpringJavaType.URI_COMPONENTS_BUILDER)
+        .getSimpleTypeName(), getViewsPath(), getEntityField().getFieldName()));
+
+    // URI uri = uriComponents.expand(newEntity.getId()).encode().toUri();
+    bodyBuilder.appendFormalLine(String.format(
+        "%s uri = uriComponents.expand(new%s.%s()).encode().toUri();",
+        addTypeToImport(new JavaType("java.net.URI")).getSimpleTypeName(),
+        this.entity.getSimpleTypeName(), this.identifierAccessor.getMethodName()));
+
+    // return "redirect:" + uri.getPath();
+    bodyBuilder.appendFormalLine(String.format("return \"redirect:\" + uri.getPath();"));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "edit" form method  using Thymeleaf view 
+   * response type
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getEditFormMethod() {
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET,
+            String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null, null,
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+    if (existingMVCMethod != null) {
+      throw new RuntimeException(
+          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("editForm");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
+        SpringJavaType.PATH_VARIABLE).build()));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(getEntityField().getFieldName());
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET,
+        String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null, null,
+        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // populateForm(model);
+    bodyBuilder.appendFormalLine("populateForm(model);");
+
+    // return "path/create";
+    bodyBuilder.appendFormalLine(String.format("return \"%s/edit\";", getViewsPath()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "update" method  using Thymeleaf view 
+   * response type
+   * 
+   * @param serviceSaveMethod MethodMetadata
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getUpdateMethod(MethodMetadata serviceSaveMethod) {
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_PUT,
+            String.format("/{%s}", getEntityField().getFieldName()), null, null, null,
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+    if (existingMVCMethod != null) {
+      throw new RuntimeException(
+          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("update");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
+        new JavaType("javax.validation.Valid")).build(), new AnnotationMetadataBuilder(
+        SpringJavaType.MODEL_ATTRIBUTE).build()));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(getEntityField().getFieldName());
+    parameterNames.add(new JavaSymbolName("result"));
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_PUT,
+        String.format("/{%s}", getEntityField().getFieldName()), null, null, null,
+        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // if (result.hasErrors()) {
+    bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
+    bodyBuilder.indent();
+
+    // populateForm(model);
+    bodyBuilder.appendFormalLine("populateForm(model);");
+
+    // return "path/create";
+    bodyBuilder.appendFormalLine(String.format("return \"%s/edit\";", getViewsPath()));
+    bodyBuilder.indentRemove();
+
+    // }
+    bodyBuilder.appendFormalLine("}");
+
+    // Entity savedEntity = entityService.SAVE_METHOD(entityField);
+    bodyBuilder.appendFormalLine(String.format("%s saved%s = %s.%s(%s);", this.entity
+        .getSimpleTypeName(), this.entity.getSimpleTypeName(), getServiceField().getFieldName(),
+        serviceSaveMethod.getMethodName(), getEntityField().getFieldName()));
+
+    // UriComponents uriComponents = UriComponentsBuilder.fromUriString("/path/{entityField}").build();
+    bodyBuilder.appendFormalLine(String.format("%s uriComponents = "
+        + "%s.fromUriString(\"/%s/{%s}\").build();", addTypeToImport(SpringJavaType.URI_COMPONENTS)
+        .getSimpleTypeName(), addTypeToImport(SpringJavaType.URI_COMPONENTS_BUILDER)
+        .getSimpleTypeName(), getViewsPath(), getEntityField().getFieldName()));
+
+    // URI uri = uriComponents.expand(savedEntity.getId()).encode().toUri();
+    bodyBuilder.appendFormalLine(String.format(
+        "%s uri = uriComponents.expand(saved%s.%s()).encode().toUri();",
+        addTypeToImport(new JavaType("java.net.URI")).getSimpleTypeName(),
+        this.entity.getSimpleTypeName(), this.identifierAccessor.getMethodName()));
+
+    // return "redirect:" + uri.getPath();
+    bodyBuilder.appendFormalLine(String.format("return \"redirect:\" + uri.getPath();"));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "delete" method using Thymeleaf view 
+   * response type
+   * 
+   * @param serviceDeleteMethod
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getDeleteMethod(MethodMetadata serviceDeleteMethod) {
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null, null,
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+    if (existingMVCMethod != null) {
+      throw new RuntimeException(
+          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("delete");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    AnnotationMetadataBuilder pathVariableAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariableAnnotation.addStringAttribute("value", "id");
+
+    parameterTypes.add(new AnnotatedJavaType(this.identifierType, pathVariableAnnotation.build()));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null, null,
+        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // entityService.DELETE_METHOD(id);
+    bodyBuilder.appendFormalLine(String.format("%s.%s(id);", getServiceField().getFieldName(),
+        serviceDeleteMethod.getMethodName()));
+
+    // return "redirect:/path";
+    bodyBuilder.appendFormalLine(String.format("return \"redirect:/%s\";", getViewsPath()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
@@ -394,8 +756,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // return "path/show";
-    bodyBuilder.appendFormalLine(String.format("return \"%s/show\";",
-        this.path.startsWith("/") ? this.path.substring(1) : this.path));
+    bodyBuilder.appendFormalLine(String.format("return \"%s/show\";", getViewsPath()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
@@ -403,6 +764,77 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "populateForm" method 
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getPopulateFormMethod() {
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("populateForm");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Check if exists other populateForm method in this controller
+    MemberDetails controllerMemberDetails = getMemberDetails(this.controller);
+    MethodMetadata existingMethod =
+        controllerMemberDetails.getMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Getting all enum types from provided entity
+    MemberDetails entityDetails =
+        getMemberDetails(getTypeLocationService().getTypeDetails(this.entity));
+    List<FieldMetadata> fields = entityDetails.getFields();
+    for (FieldMetadata field : fields) {
+      if (isEnumType(field.getFieldType())) {
+        // model.addAttribute("enumField", Arrays.asList(Enum.values()));
+        bodyBuilder.appendFormalLine(String.format(
+            "model.addAttribute(\"%s\", %s.asList(%s.values()));", field.getFieldName(),
+            addTypeToImport(new JavaType("java.util.Arrays")).getSimpleTypeName(),
+            addTypeToImport(field.getFieldType()).getSimpleTypeName()));
+      }
+    }
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method checks if the provided type is enum or not
+   * 
+   * @param fieldType
+   * @return
+   */
+  private boolean isEnumType(JavaType fieldType) {
+    Validate.notNull(fieldType, "Java type required");
+    final ClassOrInterfaceTypeDetails javaTypeDetails =
+        getTypeLocationService().getTypeDetails(fieldType);
+    if (javaTypeDetails != null) {
+      if (javaTypeDetails.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -436,6 +868,28 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     return new FieldMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC,
         new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.service)
         .build();
+  }
+
+
+  /**
+   * This method returns the final views path to be used
+   * 
+   * @return
+   */
+  private String getViewsPath() {
+    return this.path.startsWith("/") ? this.path.substring(1) : this.path;
+  }
+
+  /**
+   * This method registers a new type on types to import list
+   * and then returns it.
+   * 
+   * @param type
+   * @return
+   */
+  private JavaType addTypeToImport(JavaType type) {
+    typesToImport.add(type);
+    return type;
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

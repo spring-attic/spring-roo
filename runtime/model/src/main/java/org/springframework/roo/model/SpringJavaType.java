@@ -110,6 +110,10 @@ public final class SpringJavaType {
   public static final JavaType TRANSACTIONAL = new JavaType(
       "org.springframework.transaction.annotation.Transactional");
   public static final JavaType URI_UTILS = new JavaType("org.springframework.web.util.UriUtils");
+  public static final JavaType URI_COMPONENTS = new JavaType(
+      "org.springframework.web.util.UriComponents");
+  public static final JavaType URI_COMPONENTS_BUILDER = new JavaType(
+      "org.springframework.web.util.UriComponentsBuilder");
   public static final JavaType VALUE = new JavaType(
       "org.springframework.beans.factory.annotation.Value");
   public static final JavaType WEB_UTILS = new JavaType("org.springframework.web.util.WebUtils");

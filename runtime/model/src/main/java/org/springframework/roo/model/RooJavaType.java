@@ -109,6 +109,9 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleaf");
   public static final JavaType ROO_THYMELEAF_MAIN_CONTROLLER = new JavaType(
       "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafMainController");
+  public static final JavaType ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooWebMvcThymeleafUIConfiguration");
 
   /**
    * Constructor is private to prevent instantiation

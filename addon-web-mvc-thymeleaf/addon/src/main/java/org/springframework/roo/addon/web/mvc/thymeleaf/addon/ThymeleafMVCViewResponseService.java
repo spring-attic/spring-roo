@@ -321,7 +321,74 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
    * @param module
    */
   private void addThymeleafDatatablesResources(Pom module) {
-    // TODO: Add thymeleaf datatables resources
+    // Add necessary dependencies
+    getProjectOperations().addDependency(module.getModuleName(),
+        new Dependency("com.github.dandelion", "datatables-spring3", "1.1.0"));
+
+    getProjectOperations().addDependency(module.getModuleName(),
+        new Dependency("com.github.dandelion", "datatables-thymeleaf", "1.1.0"));
+
+    // Add WebMVCThymeleafUIConfiguration config class
+    //addWebMVCThymeleafUIConfigurationClass(module);
+  }
+
+  /**
+   * This method adds new WebMVCThymeleafUIConfiguration.java class inside .config
+   * package of generated project
+   * 
+   * @param module
+   */
+  private void addWebMVCThymeleafUIConfigurationClass(Pom module) {
+
+    // Check if already exists other main controller annotated with @RooWebMvcThymeleafUIConfiguration
+    Set<ClassOrInterfaceTypeDetails> webMvcUIConfiguration =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION);
+    if (webMvcUIConfiguration != null && !webMvcUIConfiguration.isEmpty()) {
+      return;
+    }
+
+    // If not, define new JavaType
+    JavaType thymeleafUiConfig =
+        new JavaType(String.format("%s.config.WebMvcThymeleafUIConfiguration",
+            getProjectOperations().getTopLevelPackage(module.getModuleName())),
+            module.getModuleName());
+
+    // Check that new JavaType doesn't exists
+    ClassOrInterfaceTypeDetails thymeleafUiConfigDetails =
+        getTypeLocationService().getTypeDetails(thymeleafUiConfig);
+
+    if (thymeleafUiConfigDetails != null) {
+      AnnotationMetadata webMvcUIConfigAnnotation =
+          thymeleafUiConfigDetails.getAnnotation(getMainControllerAnnotation());
+      // Maybe, this config class already exists
+      if (webMvcUIConfigAnnotation != null) {
+        return;
+      } else {
+        throw new RuntimeException(
+            "ERROR: You are trying to generate more than one WebMvcThymeleafUIConfiguration.");
+      }
+    }
+
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder = null;
+    final LogicalPath path =
+        getPathResolver().getPath(thymeleafUiConfig.getModule(), Path.SRC_MAIN_JAVA);
+    final String resourceIdentifier =
+        getTypeLocationService().getPhysicalTypeCanonicalPath(thymeleafUiConfig, path);
+    final String declaredByMetadataId =
+        PhysicalTypeIdentifier.createIdentifier(thymeleafUiConfig,
+            getPathResolver().getPath(resourceIdentifier));
+
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    annotations.add(new AnnotationMetadataBuilder(
+        RooJavaType.ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION));
+
+    cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC,
+            thymeleafUiConfig, PhysicalTypeCategory.CLASS);
+    cidBuilder.setAnnotations(annotations);
+
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 
   /**
