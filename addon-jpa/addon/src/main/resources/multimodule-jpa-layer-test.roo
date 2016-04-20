@@ -109,7 +109,8 @@ entity jpa --class ~.NewPet --extends model:~.Pet
 #--------------------------------------------------------------------
 # Goal:    Create fields for an entity in other module
 #
-field string --fieldName name --class model:~.Owner
+focus --class model:~.Owner
+field string --fieldName name
 #       
 # Output:  Updated model:SRC_MAIN_JAVA/org/example/model/Owner.java
 #          Created model:SRC_MAIN_JAVA/org/example/model/Owner_Roo_JavaBean.aj
@@ -154,7 +155,8 @@ field reference --fieldName pet --type ~.Pet
 #
 module create --moduleName cars --parent ~
 entity jpa --class cars:~.Car
-field reference --fieldName car --type ~.Car --class model:~.Owner
+focus --class model:~.Owner
+field reference --fieldName car --type cars:~.Car
 #       
 # Output:  ...
 #          Updated model:SRC_MAIN_JAVA/org/example/model/Owner.java

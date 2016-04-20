@@ -4426,9 +4426,11 @@ you need to provide a @ManyToOne annotated field on the opposite side:
 
 [subs=quotes,options=nowrap]
 ----
-field set --fieldName students --type com.foo.domain.Person *--class com.foo.domain.School --cardinality ONE_TO_MANY*
+focus --class com.foo.domain.School
+field set --fieldName students --type com.foo.domain.Person *--cardinality ONE_TO_MANY*
 
-field reference --fieldName school --type com.foo.domain.School --class com.foo.domain.Person *--cardinality MANY_TO_ONE*
+focus --class com.foo.domain.Person
+field reference --fieldName school --type com.foo.domain.School *--cardinality MANY_TO_ONE*
 ----
 
 In case a field is annotated with @Pattern, the regular expression is

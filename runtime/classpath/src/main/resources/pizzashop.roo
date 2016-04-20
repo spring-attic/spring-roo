@@ -24,7 +24,8 @@ field number --fieldName total --type java.math.BigDecimal
 field date --fieldName deliveryDate --type java.util.Date
 field set --fieldName pizzas --type ~.domain.Pizza
 
-field string --fieldName shopCountry --class ~.domain.PizzaOrderPk
+focus --class ~.domain.PizzaOrderPk
+field string --fieldName shopCountry
 field string --fieldName shopCity
 field string --fieldName shopName
 

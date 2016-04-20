@@ -7,7 +7,8 @@ entity jpa --class model:~.Owner
 entity jpa --class ~.Pet
 entity jpa --class model:~.City --readOnly
 entity jpa --class model:~.Adress --readOnly
-field string --fieldName name --class model:~.Owner
+focus --class model:~.Owner
+field string --fieldName name
 field number --fieldName age --type int
 field reference --fieldName pet --type ~.Pet
 
