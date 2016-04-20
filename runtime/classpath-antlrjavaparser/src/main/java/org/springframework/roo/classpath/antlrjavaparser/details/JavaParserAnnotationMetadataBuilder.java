@@ -309,7 +309,9 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
     if (value instanceof ClassAttributeValue) {
       final JavaType castValue = ((ClassAttributeValue) value).getValue();
       // This doesn't preserve type parameters
-      final NameExpr nameExpr = JavaParserUtils.getNameExpr(castValue.getFullyQualifiedTypeName());
+      final NameExpr nameExpr =
+          JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(),
+              compilationUnitServices.getImports(), castValue);
       final ClassExpr convertedValue = new ClassExpr(JavaParserUtils.getReferenceType(nameExpr));
       return new MemberValuePair(value.getName().getSymbolName(), convertedValue);
     }
