@@ -72,6 +72,11 @@ public class PartTree {
   private JavaType returnType;
 
   /**
+   * Return type provided in constructor when it is different from target entity. Can be null.
+   */
+  private JavaType providedReturnType;
+
+  /**
    * Parameters of generated finder
    */
   List<FinderParameter> finderParameters;
@@ -86,7 +91,8 @@ public class PartTree {
    *            to expose them as options.
    * @param finderAutocomplete interface that provides operations to obtain useful information during autocomplete 
    */
-  public PartTree(String source, MemberDetails memberDetails, FinderAutocomplete finderAutocomplete) {
+  public PartTree(String source, MemberDetails memberDetails,
+      FinderAutocomplete finderAutocomplete, JavaType providedReturnType) {
 
     Validate.notNull(source, "Source must not be null");
     Validate.notNull(memberDetails, "MemberDetails must not be null");
@@ -108,12 +114,17 @@ public class PartTree {
       this.predicate = new Predicate(this, source.substring(matcher.group().length()), fields);
     }
 
+    this.providedReturnType = providedReturnType;
+
     this.returnType = extractReturnType(memberDetails);
 
     this.finderParameters = predicate.getParameters();
 
   }
 
+  public PartTree(String source, MemberDetails memberDetails, FinderAutocomplete finderAutocomplete) {
+    this(source, memberDetails, finderAutocomplete, null);
+  }
 
   /**
    * Extracts the java type of the results to be returned by the PartTree query 
@@ -132,6 +143,8 @@ public class PartTree {
       // Returns the property type if it is specified
       type = property.getLeft().getFieldType();
 
+    } else if (providedReturnType != null) {
+      type = providedReturnType;
     } else {
 
       // By default returns entity type

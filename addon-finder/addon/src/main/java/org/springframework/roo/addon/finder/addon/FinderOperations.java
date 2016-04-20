@@ -13,7 +13,7 @@ import org.springframework.roo.model.JavaType;
  */
 public interface FinderOperations {
 
-  void installFinder(JavaType typeName, JavaSymbolName finderName);
+  void installFinder(JavaType typeName, JavaSymbolName finderName, JavaType returnType);
 
   boolean isFinderInstallationPossible();
 

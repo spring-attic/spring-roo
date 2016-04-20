@@ -70,13 +70,11 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
    * @param finders the list of finders to be included
    */
   public FinderMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final FinderAnnotationValues annotationValues, List<FinderMethod> finders) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, List<FinderMethod> finders) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notEmpty(finders,
         "ERROR: You should provide a list of finders on @RooFinder annotation");
-    Validate.notNull(annotationValues, "Annotation values required");
 
     this.finders = finders;
 

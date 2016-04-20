@@ -8,7 +8,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.model.RooJavaType;
 
 /**
- * The values of a {@link RooFinder} annotation.
+ * The values of a {@link RooFinders} annotation.
  * 
  * @author Juan Carlos García
  * @since 2.0

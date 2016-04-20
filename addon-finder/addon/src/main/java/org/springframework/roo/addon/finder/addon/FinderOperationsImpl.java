@@ -23,7 +23,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
@@ -68,7 +68,8 @@ public class FinderOperationsImpl implements FinderOperations {
     return "";
   }
 
-  public void installFinder(final JavaType entity, final JavaSymbolName finderName) {
+  public void installFinder(final JavaType entity, final JavaSymbolName finderName,
+      JavaType returnType) {
     Validate.notNull(entity, "ERROR: Entity type required to generate finder.");
     Validate.notNull(finderName, "ERROR: Finder name required to generate finder.");
 
@@ -107,43 +108,64 @@ public class FinderOperationsImpl implements FinderOperations {
             repository,
             "ERROR: You must generate a repository to the provided entity before to add new finder. You could use 'repository jpa' commands.");
 
-    // Add new finder to related repository using @RooFinder annotation
-    AnnotationMetadata finderAnnotation = repository.getAnnotation(RooJavaType.ROO_FINDER);
+    // Add new finder to related repository using @RooFinders annotation
+    AnnotationMetadata findersAnnotation = repository.getAnnotation(RooJavaType.ROO_FINDERS);
 
-    // Maybe, this repository already has finder annotation, if not, create new @RooFinder annotation
+    // Maybe, this repository already has finder annotation, if not, create new @RooFinders annotation
     AnnotationMetadataBuilder finderAnnotationBuilder = null;
-    if (finderAnnotation == null) {
-      finderAnnotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_FINDER);
-      finderAnnotation = finderAnnotationBuilder.build();
+    if (findersAnnotation == null) {
+      finderAnnotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_FINDERS);
+      findersAnnotation = finderAnnotationBuilder.build();
     } else {
-      // If provided finderName is not included, adds to @RooFinder annotation
-      finderAnnotationBuilder = new AnnotationMetadataBuilder(finderAnnotation);
+      // If provided finder name is not included, adds to @RooFinders annotation
+      finderAnnotationBuilder = new AnnotationMetadataBuilder(findersAnnotation);
     }
 
     // Create list that will include finders to add
     List<AnnotationAttributeValue<?>> finders = new ArrayList<AnnotationAttributeValue<?>>();
 
-    // Check if new finderName to be included already exists in @RooFinder annotation
-    AnnotationAttributeValue<?> currentFinders = finderAnnotation.getAttribute("finders");
+    // Check if new finder name to be included already exists in @RooFinders annotation
+    AnnotationAttributeValue<?> currentFinders = findersAnnotation.getAttribute("finders");
     if (currentFinders != null) {
       List<?> values = (List<?>) currentFinders.getValue();
       Iterator<?> it = values.iterator();
 
       while (it.hasNext()) {
-        StringAttributeValue finder = (StringAttributeValue) it.next();
-        if (finder.getValue().equals(finderName.getSymbolName())) {
-          LOGGER.log(
-              Level.WARNING,
-              String.format("ERROR: Finder '%s' already exists on entity '%s'",
-                  finderName.getSymbolName(), entity.getSimpleTypeName()));
-          return;
+        NestedAnnotationAttributeValue finder = (NestedAnnotationAttributeValue) it.next();
+        if (finder.getValue() != null && finder.getValue().getAttribute("finder") != null) {
+          if (finder.getValue().getAttribute("finder").getValue()
+              .equals(finderName.getSymbolName())) {
+            LOGGER.log(
+                Level.WARNING,
+                String.format("ERROR: Finder '%s' already exists on entity '%s'",
+                    finderName.getSymbolName(), entity.getSimpleTypeName()));
+            return;
+          }
+          finders.add(finder);
         }
-        finders.add(finder);
       }
     }
 
+    // Create @RooFinder
+    AnnotationMetadataBuilder singleFinderAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_FINDER);
+
+    // Add finder attribute
+    singleFinderAnnotation.addStringAttribute("finder", finderName.getSymbolName());
+
+    // Add returnType attribute
+    if (returnType == null) {
+      singleFinderAnnotation.addClassAttribute("returnType", entity);
+    } else {
+      singleFinderAnnotation.addClassAttribute("returnType", returnType);
+    }
+
+    NestedAnnotationAttributeValue newFinder =
+        new NestedAnnotationAttributeValue(new JavaSymbolName("value"),
+            singleFinderAnnotation.build());
+
     // If not exists current finder, include it
-    finders.add(new StringAttributeValue(new JavaSymbolName("value"), finderName.getSymbolName()));
+    finders.add(newFinder);
 
     // Add finder list to currentFinders
     ArrayAttributeValue<AnnotationAttributeValue<?>> newFinders =
@@ -152,7 +174,7 @@ public class FinderOperationsImpl implements FinderOperations {
     // Include finder name to finders attribute
     finderAnnotationBuilder.addAttribute(newFinders);
 
-    // Include @RooFinder on related repository
+    // Include @RooFinders on related repository
     final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(repository);
 
@@ -162,7 +184,6 @@ public class FinderOperationsImpl implements FinderOperations {
     // Save changes on disk
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
-
   }
 
   public boolean isFinderInstallationPossible() {
@@ -171,99 +192,6 @@ public class FinderOperationsImpl implements FinderOperations {
   }
 
   public SortedSet<String> listFindersFor(final JavaType typeName, final Integer depth) {
-    /*Validate.notNull(typeName, "Java type required");
-    
-    final String id = getTypeLocationService()
-            .getPhysicalTypeIdentifier(typeName);
-    if (id == null) {
-        throw new IllegalArgumentException("Cannot locate source for '"
-                + typeName.getFullyQualifiedTypeName() + "'");
-    }
-    
-    // Go and get the entity metadata, as any type with finders has to be an
-    // entity
-    final JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
-    final LogicalPath path = PhysicalTypeIdentifier.getPath(id);
-    final String entityMid = JpaActiveRecordMetadata.createIdentifier(
-            javaType, path);
-    
-    // Get the entity metadata
-    final JpaActiveRecordMetadata jpaActiveRecordMetadata = (JpaActiveRecordMetadata) getMetadataService()
-            .get(entityMid);
-    if (jpaActiveRecordMetadata == null) {
-        throw new IllegalArgumentException(
-                "Cannot provide finders because '"
-                        + typeName.getFullyQualifiedTypeName()
-                        + "' is not an 'active record' entity");
-    }
-    
-    // Get the member details
-    final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) getMetadataService()
-            .get(PhysicalTypeIdentifier.createIdentifier(javaType, path));
-    if (physicalTypeMetadata == null) {
-        throw new IllegalStateException(
-                "Could not determine physical type metadata for type "
-                        + javaType);
-    }
-    final ClassOrInterfaceTypeDetails cid = physicalTypeMetadata
-            .getMemberHoldingTypeDetails();
-    if (cid == null) {
-        throw new IllegalStateException(
-                "Could not determine class or interface type details for type "
-                        + javaType);
-    }
-    final MemberDetails memberDetails = getMemberDetailsScanner()
-            .getMemberDetails(getClass().getName(), cid);
-    final List<FieldMetadata> idFields = getPersistenceMemberLocator()
-            .getIdentifierFields(javaType);
-    final FieldMetadata versionField = getPersistenceMemberLocator()
-            .getVersionField(javaType);
-    
-    // Compute the finders (excluding the ID, version, and EM fields)
-    final Set<JavaSymbolName> exclusions = new HashSet<JavaSymbolName>();
-    exclusions.add(jpaActiveRecordMetadata.getEntityManagerField()
-            .getFieldName());
-    for (final FieldMetadata idField : idFields) {
-        exclusions.add(idField.getFieldName());
-    }
-    
-    if (versionField != null) {
-        exclusions.add(versionField.getFieldName());
-    }
-    
-    final SortedSet<String> result = new TreeSet<String>();
-    
-    final List<JavaSymbolName> finders = getDynamicFinderServices().getFinders(
-            memberDetails, jpaActiveRecordMetadata.getPlural(), depth,
-            exclusions);
-    for (final JavaSymbolName finder : finders) {
-        // Avoid displaying problematic finders
-        try {
-            final QueryHolder queryHolder = getDynamicFinderServices()
-                    .getQueryHolder(memberDetails, finder,
-                            jpaActiveRecordMetadata.getPlural(),
-                            jpaActiveRecordMetadata.getEntityName());
-            final List<JavaSymbolName> parameterNames = queryHolder
-                    .getParameterNames();
-            final List<JavaType> parameterTypes = queryHolder
-                    .getParameterTypes();
-            final StringBuilder signature = new StringBuilder();
-            int x = -1;
-            for (final JavaType param : parameterTypes) {
-                x++;
-                if (x > 0) {
-                    signature.append(", ");
-                }
-                signature.append(param.getSimpleTypeName()).append(" ")
-                        .append(parameterNames.get(x).getSymbolName());
-            }
-            result.add(finder.getSymbolName() + "(" + signature + ")");
-        }
-        catch (final RuntimeException e) {
-            result.add(finder.getSymbolName() + " - failure");
-        }
-    }
-    return result;*/
     return null;
   }
 

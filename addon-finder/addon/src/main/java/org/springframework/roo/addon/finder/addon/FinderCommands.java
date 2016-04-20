@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -70,7 +72,7 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
-    entitiesDetails = new HashMap<JavaType, MemberDetails>();
+    this.entitiesDetails = new HashMap<JavaType, MemberDetails>();
   }
 
   @CliAvailabilityIndicator({"finder add"})
@@ -138,13 +140,53 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
 
   }
 
+  @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
+      param = "class", help = "--class option should be an entity.", validate = false)
+  public List<String> getClassPossibleResults(ShellContext shellContext) {
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    Set<ClassOrInterfaceTypeDetails> dtosInProject =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY, JpaJavaType.ENTITY);
+    for (ClassOrInterfaceTypeDetails dto : dtosInProject) {
+      String name = replaceTopLevelPackageString(dto);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
+      param = "returnType",
+      help = "--returnType option should be a DTO class, annotated with @RooDTO.", validate = false)
+  public List<String> getReturnTypePossibleResults(ShellContext shellContext) {
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    Set<ClassOrInterfaceTypeDetails> dtosInProject =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
+    for (ClassOrInterfaceTypeDetails dto : dtosInProject) {
+      String name = replaceTopLevelPackageString(dto);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
+  }
+
   @CliCommand(value = "finder add",
       help = "Install a finder in the given target (must be an entity)")
-  public void installFinders(@CliOption(key = "class", mandatory = true,
-      unspecifiedDefaultValue = "*", optionContext = PROJECT,
-      help = "The entity for which the finders are generated") final JavaType typeName,
+  public void installFinders(
+      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
+          optionContext = PROJECT, help = "The entity for which the finders are generated") final JavaType typeName,
       @CliOption(key = "name", mandatory = true,
-          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName) {
+          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName,
+      @CliOption(key = "returnType", mandatory = false, optionContext = PROJECT,
+          help = "The finder's results return type. Should be a DTO class.") JavaType returnType) {
 
     // Check if specified finderName follows Spring Data nomenclature
     PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(typeName), this);
@@ -155,8 +197,38 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
             partTree.isValid(),
             "--name parameter must follow Spring Data nomenclature. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)");
 
-    finderOperations.installFinder(typeName, finderName);
+    finderOperations.installFinder(typeName, finderName, returnType);
 
+  }
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * 
+   * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @return the String representing a JavaType with its name shortened
+   */
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+    if (StringUtils.isNotBlank(cid.getType().getModule())) {
+      javaTypeString = cid.getType().getModule().concat(":");
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+      topLevelPackageString =
+          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Replace String if necessary
+    if (StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+      javaTypeString =
+          javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+              topLevelPackageString, "~"));
+    }
+
+    return javaTypeString;
   }
 
   /**

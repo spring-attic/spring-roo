@@ -1,10 +1,11 @@
 package org.springframework.roo.addon.finder.addon;
 
-import static org.springframework.roo.model.RooJavaType.ROO_FINDER;
+import static org.springframework.roo.model.RooJavaType.ROO_FINDERS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.springframework.roo.addon.finder.addon.parser.FinderAutocomplete;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.finder.addon.parser.PartTree;
 import org.springframework.roo.addon.finder.annotations.RooFinder;
+import org.springframework.roo.addon.finder.annotations.RooFinders;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -28,6 +30,8 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
@@ -67,7 +71,7 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_FINDER} as additional 
+   * <li>Registers {@link RooJavaType#ROO_FINDERS} as additional 
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -82,11 +86,11 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_FINDER);
+    addMetadataTrigger(ROO_FINDERS);
 
     this.keyDecoratorTracker =
-        new CustomDataKeyDecoratorTracker(context, getClass(), new LayerTypeMatcher(ROO_FINDER,
-            new JavaSymbolName(RooFinder.FINDERS_ATTRIBUTE)));
+        new CustomDataKeyDecoratorTracker(context, getClass(), new LayerTypeMatcher(ROO_FINDERS,
+            new JavaSymbolName(RooFinders.FINDERS_ATTRIBUTE)));
     this.keyDecoratorTracker.open();
   }
 
@@ -103,7 +107,7 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_FINDER);
+    removeMetadataTrigger(ROO_FINDERS);
 
     CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
     keyDecorator.unregisterMatchers(getClass());
@@ -153,16 +157,8 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
   protected ItdTypeDetailsProvidingMetadataItem getMetadata(
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-    final FinderAnnotationValues annotationValues =
-        new FinderAnnotationValues(governorPhysicalTypeMetadata);
-
-    // Check if exists some finder 
-    String[] finderParams = annotationValues.getFinders();
-    if (finderParams == null || finderParams.length == 0) {
-      LOGGER.log(Level.SEVERE,
-          "ERROR: You must include 'finders' attribute on @RooFinder annotation");
-      return null;
-    }
+    //    final FindersAnnotationValues annotationValues =
+    //        new FindersAnnotationValues(governorPhysicalTypeMetadata);
 
     // Getting related entity
     ClassOrInterfaceTypeDetails repository =
@@ -182,32 +178,67 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
     // Getting member details
     MemberDetails entityMemberDetails = getMemberDetails(entity);
 
-    // Generating finder methods
-    List<String> finders = Arrays.asList(annotationValues.getFinders());
-
+    // Create list of finder to add
     List<FinderMethod> findersToAdd = new ArrayList<FinderMethod>();
 
-    for (String finderName : finders) {
-      PartTree finder = new PartTree(finderName, entityMemberDetails, this);
+    // Get @RooFinders
+    ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+    AnnotationMetadata findersAnnotation = cid.getAnnotation(ROO_FINDERS);
 
-      Validate
-          .notNull(
-              finder,
-              String
-                  .format(
-                      "ERROR: '%s' is not a valid finder. Use autocomplete feature (TAB or CTRL + Space) to include finder that follows Spring Data nomenclature.",
-                      finderName));
+    Validate
+        .notNull(findersAnnotation, String.format("%s%s", "Cannot obtain @RooFinders from ", cid
+            .getName().getSimpleTypeName()));
 
-      FinderMethod finderMethod =
-          new FinderMethod(finder.getReturnType(), new JavaSymbolName(finderName),
-              finder.getParameters());
+    // Get @RooFinders attributes
+    AnnotationAttributeValue<?> currentFinders = findersAnnotation.getAttribute("finders");
+    if (currentFinders != null) {
+      List<?> values = (List<?>) currentFinders.getValue();
+      Iterator<?> it = values.iterator();
 
-      findersToAdd.add(finderMethod);
+      while (it.hasNext()) {
+        NestedAnnotationAttributeValue finderAnnotation =
+            (NestedAnnotationAttributeValue) it.next();
+        if (finderAnnotation.getValue() != null
+            && finderAnnotation.getValue().getAttribute("finder") != null) {
 
+          // Get finder name
+          String finderName = null;
+          if (finderAnnotation.getValue().getAttribute("finder").getValue() instanceof String) {
+            finderName = (String) finderAnnotation.getValue().getAttribute("finder").getValue();
+          }
+          Validate.notNull(finderName, "'finder' attribute in @RooFinder must be a String");
+
+          // Get finder return type
+          JavaType returnType =
+              (JavaType) finderAnnotation.getValue().getAttribute("returnType").getValue();
+
+          // Create FinderMethod
+          PartTree finder = new PartTree(finderName, entityMemberDetails, this, returnType);
+
+          Validate
+              .notNull(
+                  finder,
+                  String
+                      .format(
+                          "ERROR: '%s' is not a valid finder. Use autocomplete feature (TAB or CTRL + Space) to include finder that follows Spring Data nomenclature.",
+                          finderName));
+
+          FinderMethod finderMethod =
+              new FinderMethod(finder.getReturnType(), new JavaSymbolName(finderName),
+                  finder.getParameters());
+
+          // Add to finder methods list
+          findersToAdd.add(finderMethod);
+        }
+      }
+    } else {
+      LOGGER.log(Level.SEVERE,
+          "ERROR: You must include 'finders' attribute on @RooFinders annotation");
+      return null;
     }
 
     return new FinderMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, findersToAdd);
+        governorPhysicalTypeMetadata, findersToAdd);
   }
 
   public String getProvidesType() {
