@@ -36,7 +36,8 @@ field string --fieldName email --regexp "[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+
 field set --fieldName products --type ~.domain.Product --mappedBy supplier --notNull false --cardinality ONE_TO_MANY --fetch EAGER
 repository jpa --interface ~.domain.SupplierRepository
 
-field reference --fieldName supplier --class ~.domain.Product --type ~.domain.Supplier --notNull
+focus --class ~.domain.Product
+field reference --fieldName supplier --type ~.domain.Supplier --notNull
 
 web jsf setup
 web jsf all --package ~.web

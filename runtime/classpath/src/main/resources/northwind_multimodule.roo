@@ -11,37 +11,21 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 // Create domain entities
 module focus --moduleName model
 entity jpa --class ~.AttachedFile --table NORTHWIND_ATTACHED_FILES --sequenceName NORTHWIND_ATTACHED_FILES_ATTACHED_FILE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ATTACHED_FILE_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.Category --table NORTHWIND_CATEGORIES --sequenceName NORTHWIND_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.City --table NORTHWIND_CITIES --sequenceName NORTHWIND_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
-
 entity jpa --class ~.Country --table NORTHWIND_COUNTRIES --sequenceName NORTHWIND_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
-
 entity jpa --class ~.CustomerOrder --table NORTHWIND_CUSTOMER_ORDERS --sequenceName NORTHWIND_CUSTOMER_ORDERS_CUSTOMER_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CUSTOMER_ORDER_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.LoginRole --table NORTHWIND_LOGIN_ROLES --sequenceName NORTHWIND_LOGIN_ROLES_LOGIN_ROLE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn LOGIN_ROLE_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.OrderDetail --table NORTHWIND_ORDER_DETAILS --sequenceName NORTHWIND_ORDER_DETAILS_ORDER_DETAIL_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ORDER_DETAIL_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.Party --table NORTHWIND_PARTIES --sequenceName NORTHWIND_PARTIES_PARTY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PARTY_ID --versionField version --versionType long --versionColumn VERSION --inheritanceType JOINED
-
 entity jpa --class ~.Product --table NORTHWIND_PRODUCTS --sequenceName NORTHWIND_PRODUCTS_PRODUCT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PRODUCT_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.PurchaseOrder --table NORTHWIND_PURCHASE_ORDERS --sequenceName NORTHWIND_PURCHASE_ORDERS_PURCHASE_ORDER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn PURCHASE_ORDER_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.Region --table NORTHWIND_REGIONS --sequenceName NORTHWIND_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType long --versionColumn VERSION --readOnly
-
 entity jpa --class ~.Report --table NORTHWIND_REPORTS --sequenceName NORTHWIND_REPORTS_REPORT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REPORT_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.Shipper --table NORTHWIND_SHIPPERS --sequenceName NORTHWIND_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SHIPPER_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.Store --table NORTHWIND_STORES --sequenceName NORTHWIND_STORES_STORE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn STORE_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.Supplier --table NORTHWIND_SUPPLIERS --sequenceName NORTHWIND_SUPPLIERS_SUPPLIER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SUPPLIER_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.UserLogin --table NORTHWIND_USERS_LOGIN --sequenceName NORTHWIND_USERS_LOGIN_USER_LOGIN_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn USER_LOGIN_ID --versionField version --versionType long --versionColumn VERSION 
-
 entity jpa --class ~.UserLoginRole --table NORTHWIND_USER_LOGIN_ROLES --sequenceName NORTHWIND_USER_LOGIN_ROLES_USER_LOGIN_ROLE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn USER_LOGIN_ROLE_ID --versionField version --versionType long --versionColumn VERSION 
 
 // Extended entities (identifierColumn still mandatory, but overrided)

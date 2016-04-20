@@ -53,7 +53,7 @@ field date --fieldName date_field --type java.util.Date --column date_column
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test enum field creation command with required dynamic mandatory options based on project settings.
 #
-field enum --fieldName enum_field --type ~.enumerated.Enumerated --column enum_column --class ~.domain.Entity1
+field enum --fieldName enum_field --type ~.enumerated.Enumerated --column enum_column
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
@@ -183,7 +183,8 @@ entity jpa --class ~.domain.AutoEntity --table AUTO_ENTITY_TABLE --identifierCol
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with --joinTable param with value and all its associated attributes.
 #
-field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
+focus --class ~.domain.Entity1
+field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity --cardinality MANY_TO_MANY --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
@@ -336,7 +337,8 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 # Goal:   Test field set command with --joinTable param with value and without any of its associated attributes when 
 #         schema object names are required.
 #
-#field set --fieldName set_field_join_table1 --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable JOIN_TABLE
+#focus --class ~.domain.Entity1
+#field set --fieldName set_field_join_table1 --type ~.domain.TableEntity --cardinality MANY_TO_MANY --joinTable JOIN_TABLE
 #
 # Output: You must specify option 'joinColumns' for this command
 #
@@ -350,7 +352,8 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 # Goal:   Test field set command with --joinTable param without value and with all of its related attributes when 
 #         schema object names are required.
 #
-#field set --fieldName set_field_join_table2 --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
+#focus --class ~.domain.Entity1
+#field set --fieldName set_field_join_table2 --type ~.domain.TableEntity --cardinality MANY_TO_MANY --joinTable --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
 #
 # Output: Undo manage ROOT/.roo/config/project.properties
 #         It is mandatory to assign a specific table name for --joinTable. Please, assign it a table name.
@@ -365,7 +368,8 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 # Goal:   Test field set command without --joinTable and with --cardinality MANY_TO_MANY when schema object names are 
 #         required.
 #
-#field set --fieldName set_field_join_table_cardinality --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY
+#focus --class ~.domain.Entity1
+#field set --fieldName set_field_join_table_cardinality --type ~.domain.TableEntity --cardinality MANY_TO_MANY
 #      
 # Output: You must specify option 'joinTable' for this command
 #
@@ -384,7 +388,8 @@ field set --fieldName set_field_complete_join_table --type ~.domain.TableEntity 
 # Goal:   Test field set command without --joinTable and with --cardinality MANY_TO_MANY when schema object names are 
 #         not required.
 #
-#field set --fieldName set_field_join_table_cardinality --type ~.domain.TableEntity --class ~.domain.Entity1 --cardinality MANY_TO_MANY
+#focus --class ~.domain.Entity1
+#field set --fieldName set_field_join_table_cardinality --type ~.domain.TableEntity --cardinality MANY_TO_MANY
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj

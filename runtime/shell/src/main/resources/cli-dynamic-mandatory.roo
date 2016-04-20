@@ -3,6 +3,7 @@ project setup --topLevelPackage aaa.aaa.aa
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 entity jpa --class ~.domain.Entity1
 settings add --name spring.roo.jpa.require.schema-object-name --value true
+focus --class ~.domain.Entity1
 
 
 #=================================================================================================================
@@ -11,7 +12,7 @@ settings add --name spring.roo.jpa.require.schema-object-name --value true
 # Goal:   Test if command execution is not interrupted if used a dynamic mandatory option depending of a project 
 #         setting.
 #
-field boolean --fieldName boolean_field --column boolean_column --class ~.domain.Entity1
+field boolean --fieldName boolean_field --column boolean_column
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1.java
 #         Created SRC_MAIN_JAVA/aaa/aaa/aa/domain/Entity1_Roo_JavaBean.aj

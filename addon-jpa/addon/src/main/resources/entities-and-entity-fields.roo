@@ -94,7 +94,8 @@ field set --fieldName entity1_set_default --type ~.domain.Entity1 --cardinality 
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field string command with the optional parameter --lob
 #
-field string --fieldName entity1_lob --class ~.domain.Entity1
+focus --class ~.domain.Entity1
+field string --fieldName entity1_lob
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Created SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
@@ -142,7 +143,8 @@ entity jpa --class ~.domain.Extended_Entity2 --extends ~.domain.Entity1 --versio
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with --joinTable param with default value (no value and no associate params).
 #
-field set --fieldName set_field_join_table --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable
+focus --class ~.domain.Entity1
+field set --fieldName set_field_join_table --type ~.domain.Extended_Entity2 --cardinality MANY_TO_MANY --joinTable
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
@@ -156,7 +158,7 @@ field set --fieldName set_field_join_table --type ~.domain.Extended_Entity2 --cl
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command without --joinTable param and with --cardinality ONE_TO_MANY
 #
-field set --fieldName set_field_join_table_name --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality ONE_TO_MANY
+field set --fieldName set_field_join_table_name --type ~.domain.Extended_Entity2 --cardinality ONE_TO_MANY
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
@@ -170,7 +172,7 @@ field set --fieldName set_field_join_table_name --type ~.domain.Extended_Entity2
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with --joinTable param with value and all its associated attributes.
 #
-field set --fieldName set_field_complete_join_table --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
+field set --fieldName set_field_complete_join_table --type ~.domain.Extended_Entity2 --cardinality MANY_TO_MANY --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
@@ -185,7 +187,7 @@ field set --fieldName set_field_complete_join_table --type ~.domain.Extended_Ent
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field list command with --joinTable param with value and all its associated attributes with default --cardinality (ONE_TO_MANY).
 #
-field list --fieldName list_field_complete_join_table --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
+field list --fieldName list_field_complete_join_table --type ~.domain.Extended_Entity2 --cardinality --joinTable JOIN_TABLE --joinColumns COLUMN1_FK,COLUMN2_FK --referencedColumns COLUMN1,COLUMN2 --inverseJoinColumns INVERSE_COLUMN1_FK,INVERSE_COLUMN2_FK --inverseReferencedColumns INVERSE_COLUMN1,INVERSE_COLUMN2
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj
@@ -200,7 +202,7 @@ field list --fieldName list_field_complete_join_table --type ~.domain.Extended_E
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field list command with --joinTable param with default value (no value and no associate params).
 #
-field set --fieldName list_field_join_table --type ~.domain.Extended_Entity2 --class ~.domain.Entity1 --cardinality MANY_TO_MANY --joinTable
+field set --fieldName list_field_join_table --type ~.domain.Extended_Entity2 --cardinality MANY_TO_MANY --joinTable
 #      
 # Output: Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1.java
 #         Updated SRC_MAIN_JAVA/aaa/bbb/cc/domain/Entity1_Roo_JavaBean.aj

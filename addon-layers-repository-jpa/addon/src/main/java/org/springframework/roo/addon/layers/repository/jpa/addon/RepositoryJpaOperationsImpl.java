@@ -1,15 +1,8 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_READ_ONLY_REPOSITORY;
-import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
-import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
-import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -48,7 +40,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -91,7 +82,8 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   public void generateAllRepositories(JavaPackage repositoriesPackage) {
     // Getting all project entities
     Set<ClassOrInterfaceTypeDetails> entities =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY);
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY);
     Iterator<ClassOrInterfaceTypeDetails> it = entities.iterator();
     while (it.hasNext()) {
       ClassOrInterfaceTypeDetails entity = it.next();
@@ -159,7 +151,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
     // Check if current entity is defined as "readOnly".
     AnnotationAttributeValue<Boolean> readOnlyAttr =
-        entityDetails.getAnnotation(ROO_JPA_ENTITY).getAttribute("readOnly");
+        entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY).getAttribute("readOnly");
 
     boolean readOnly = readOnlyAttr != null && readOnlyAttr.getValue() ? true : false;
 
@@ -175,6 +167,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // implementation that allow developers to include its dynamic queries
     // using QueryDSL
     addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage());
+
+    // Also, is necessary to include a class annotated with @RooGlobalSearch. This class
+    // will be used in some repository methods
+    generateGlobalSearch(interfaceType.getPackage());
 
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(interfaceType.getModule(), domainType.getModule());
@@ -210,7 +206,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // Generates @RooJpaRepository annotation with referenced entity value
     // and repository custom associated to this repository
     final AnnotationMetadataBuilder interfaceAnnotationMetadata =
-        new AnnotationMetadataBuilder(ROO_REPOSITORY_JPA);
+        new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA);
     interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("entity"),
         domainType));
     // Generating interface
@@ -243,7 +239,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // First of all, check if already exists a @RooReadOnlyRepository
     // interface on current project
     Set<JavaType> readOnlyRepositories =
-        getTypeLocationService().findTypesWithAnnotation(ROO_READ_ONLY_REPOSITORY);
+        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_READ_ONLY_REPOSITORY);
 
     if (!readOnlyRepositories.isEmpty()) {
       Iterator<JavaType> it = readOnlyRepositories.iterator();
@@ -268,6 +264,55 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       input = input.replace("__PACKAGE__", repositoryPackage.getFullyQualifiedPackageName());
 
       // Creating ReadOnlyRepository interface
+      fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+
+    return javaType;
+
+  }
+
+  /**
+   * Method that generates GlobalSearch class on current repository package. If
+   * GlobalSearch already exists in this or other package, will not be
+   * generated.
+   * 
+   * @param repositoryPackage Package where GlobalSearch should be generated
+   * @return JavaType with existing or new GlobalSearch
+   */
+  private JavaType generateGlobalSearch(JavaPackage repositoryPackage) {
+
+    // First of all, check if already exists a @RooGlobalSearch
+    // interface on current project
+    Set<JavaType> globalSearchClasses =
+        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
+
+    if (!globalSearchClasses.isEmpty()) {
+      Iterator<JavaType> it = globalSearchClasses.iterator();
+      while (it.hasNext()) {
+        return it.next();
+      }
+    }
+
+    final JavaType javaType =
+        new JavaType(String.format("%s.GlobalSearch", repositoryPackage),
+            repositoryPackage.getModule());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+    // Including GlobalSearch class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream = FileUtils.getInputStream(getClass(), "GlobalSearch-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", repositoryPackage.getFullyQualifiedPackageName());
+
+      // Creating GlobalSearch class
       fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
     } catch (final IOException e) {
       throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
@@ -309,7 +354,8 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // @RooJpaRepositoryCustomImpl
     // that implements the same repositoryCustom interface.
     Set<JavaType> repositoriesCustomImpl =
-        getTypeLocationService().findTypesWithAnnotation(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+        getTypeLocationService()
+            .findTypesWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
 
     if (!repositoriesCustomImpl.isEmpty()) {
       Iterator<JavaType> it = repositoriesCustomImpl.iterator();
@@ -318,7 +364,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         ClassOrInterfaceTypeDetails repositoryDetails =
             getTypeLocationService().getTypeDetails(repositoryCustom);
         AnnotationMetadata annotation =
-            repositoryDetails.getAnnotation(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+            repositoryDetails.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
         AnnotationAttributeValue<JavaType> repositoryType = annotation.getAttribute("repository");
         if (repositoryType.getValue().equals(interfaceType)) {
           return repositoryType.getValue();
@@ -397,7 +443,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
     // Generates @RooJpaRepositoryCustom annotation with referenced entity value
     final AnnotationMetadataBuilder repositoryCustomAnnotationMetadata =
-        new AnnotationMetadataBuilder(ROO_REPOSITORY_JPA_CUSTOM);
+        new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
     repositoryCustomAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
         "entity"), domainType));
 
