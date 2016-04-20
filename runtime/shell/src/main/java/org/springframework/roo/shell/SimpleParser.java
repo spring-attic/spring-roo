@@ -712,10 +712,7 @@ public class SimpleParser implements Parser {
                 for (String value : values) {
                   allValues.add(new Completion(value));
                 }
-              }
-
-              // If still no values, try with a converter
-              if (allValues.isEmpty()) {
+              } else {
 
                 // Use a Converter if one is available
                 for (final Converter<?> candidate : converters) {
