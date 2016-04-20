@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.web.mvc.controller.annotations.responses.json.RooJSON;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -30,6 +32,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private MethodMetadata createMethod;
   private MethodMetadata updateMethod;
   private MethodMetadata deleteMethod;
+  private List<MethodMetadata> finderMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -66,12 +69,14 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * @param updateMethod MethodMetadata 
    * @param deleteMethod MethodMetadata 
    * @param showMethod MethodMetadata 
+   * @param finderMethods List of MethodMetadata
    * @param readOnly boolean 
    */
   public JSONMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listMethod,
       final MethodMetadata createMethod, final MethodMetadata updateMethod,
-      final MethodMetadata deleteMethod, final MethodMetadata showMethod, boolean readOnly) {
+      final MethodMetadata deleteMethod, final MethodMetadata showMethod,
+      List<MethodMetadata> finderMethods, boolean readOnly) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = readOnly;
@@ -80,6 +85,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     this.updateMethod = updateMethod;
     this.deleteMethod = deleteMethod;
     this.showMethod = showMethod;
+    this.finderMethods = finderMethods;
 
     ensureGovernorHasMethod(new MethodMetadataBuilder(listMethod));
     if (!readOnly) {
@@ -88,6 +94,10 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
     }
     ensureGovernorHasMethod(new MethodMetadataBuilder(showMethod));
+
+    for (MethodMetadata finderMethod : finderMethods) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
+    }
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -137,6 +147,15 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    */
   public MethodMetadata getShowMethod() {
     return this.showMethod;
+  }
+
+  /**
+   * Method that returns finder JSON methods
+   * 
+   * @return
+   */
+  public List<MethodMetadata> getFinderMethods() {
+    return this.finderMethods;
   }
 
   /**

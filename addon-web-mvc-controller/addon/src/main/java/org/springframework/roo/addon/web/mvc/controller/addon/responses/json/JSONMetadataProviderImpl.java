@@ -15,10 +15,13 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
+import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -44,12 +47,14 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link JSONMetadataProvider}.
  * 
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 2.0
  */
 @Component
@@ -74,6 +79,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   private ClassOrInterfaceTypeDetails controller;
 
   private ControllerMVCService controllerMVCService;
+
+  private ProjectOperations projectOperations;
 
   /**
    * This service is being activated so setup it:
@@ -188,7 +195,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     ClassOrInterfaceTypeDetails serviceDetails =
         getTypeLocationService().getTypeDetails(this.service);
 
-    List<MethodMetadata> finders = new ArrayList<MethodMetadata>();
+
     final LogicalPath logicalPath =
         PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
     final String serviceMetadataKey =
@@ -205,10 +212,64 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     MethodMetadata serviceFindAllMethod = serviceMetadata.getFindAllMethod();
     MethodMetadata serviceFindOneMethod = serviceMetadata.getFindOneMethod();
 
+
+    List<MethodMetadata> findersToAdd = new ArrayList<MethodMetadata>();
+
+    // Getting annotated finders
+    final JSONAnnotationValues annotationValues =
+        new JSONAnnotationValues(governorPhysicalTypeMetadata);
+
+    if (annotationValues.getFinders() != null) {
+      List<String> finders = new ArrayList<String>(Arrays.asList(annotationValues.getFinders()));
+
+      // Search indicated finders in its related service
+      for (FinderMethod serviceFinder : serviceMetadata.getFinders()) {
+        if (finders.contains(serviceFinder.getMethodName().toString())) {
+          MethodMetadata finderMethod = getFinderMethod(serviceFinder);
+          findersToAdd.add(finderMethod);
+
+          // Add dependencies between modules
+          List<JavaType> types = new ArrayList<JavaType>();
+          types.add(finderMethod.getReturnType());
+          types.addAll(finderMethod.getReturnType().getParameters());
+
+          for (AnnotatedJavaType parameter : finderMethod.getParameterTypes()) {
+            types.add(parameter.getJavaType());
+            types.addAll(parameter.getJavaType().getParameters());
+          }
+
+          for (JavaType parameter : types) {
+            if (parameter.getModule() != null) {
+              getProjectOperations().addModuleDependency(
+                  governorPhysicalTypeMetadata.getType().getModule(), parameter.getModule());
+            } else {
+              ClassOrInterfaceTypeDetails details =
+                  getTypeLocationService().getTypeDetails(parameter);
+              if (details != null && details.getName().getModule() != null) {
+                getProjectOperations().addModuleDependency(
+                    governorPhysicalTypeMetadata.getType().getModule(),
+                    details.getName().getModule());
+              }
+            }
+          }
+
+          finders.remove(serviceFinder.getMethodName().toString());
+        }
+      }
+
+      // Check all finders have its service method
+      if (!finders.isEmpty()) {
+        throw new IllegalArgumentException(String.format(
+            "ERROR: Service %s does not have these finder methods: %s ",
+            service.getFullyQualifiedTypeName(), StringUtils.join(finders, ", ")));
+      }
+    }
+
     return new JSONMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata,
         getListMethod(serviceFindAllMethod), getCreateMethod(serviceSaveMethod),
         getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod),
-        getShowMethod(serviceFindOneMethod), this.readOnly);
+        getShowMethod(serviceFindOneMethod), findersToAdd, this.readOnly);
+
   }
 
   /**
@@ -457,6 +518,74 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
+   * This method provides a finder method  using JSON 
+   * response type
+   * 
+   * @param finderMethod
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getFinderMethod(FinderMethod finderMethod) {
+
+    List<String> parameters = new ArrayList<String>();
+    for (FinderParameter parameter : finderMethod.getParameters()) {
+      parameters.add(parameter.getName().toString());
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = finderMethod.getMethodName();
+
+    // Check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, "/" + methodName.toString(), parameters, null,
+            null, SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, "");
+    if (existingMVCMethod != null) {
+      return existingMVCMethod;
+    }
+
+    // Get parameters
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    for (FinderParameter parameter : finderMethod.getParameters()) {
+      parameterTypes.add(new AnnotatedJavaType(parameter.getType(), new AnnotationMetadataBuilder(
+          SpringJavaType.REQUEST_PARAM).build()));
+      parameterNames.add(parameter.getName());
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, "/" + methodName.toString(), parameters, null, null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return entityService.FINDER_METHOD(%s);
+    bodyBuilder.appendFormalLine(String.format("return %s.%s(%s);", getServiceField()
+        .getFieldName(), finderMethod.getMethodName(), StringUtils.join(parameters, ", ")));
+
+    // Generating returnType
+    JavaType returnType = finderMethod.getReturnType();
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            returnType, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
    * This method provides the "show" method  using JSON 
    * response type
    * 
@@ -584,4 +713,28 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       return controllerMVCService;
     }
   }
+
+  public ProjectOperations getProjectOperations() {
+    if (projectOperations == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          projectOperations = (ProjectOperations) context.getService(ref);
+          return projectOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on JSONMetadataProviderImpl.");
+        return null;
+      }
+    } else {
+      return projectOperations;
+    }
+  }
+
 }

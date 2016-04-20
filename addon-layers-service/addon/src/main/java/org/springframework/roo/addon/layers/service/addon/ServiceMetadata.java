@@ -432,4 +432,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     builder.append("itdTypeDetails", itdTypeDetails);
     return builder.toString();
   }
+
+  /**
+   * Method that returns the finder methos.
+   * 
+   * @return a list of finder methods
+   */
+  public List<FinderMethod> getFinders() {
+    return finders;
+  }
 }

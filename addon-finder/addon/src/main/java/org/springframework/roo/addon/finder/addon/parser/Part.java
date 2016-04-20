@@ -335,7 +335,7 @@ public class Part {
       JavaType listType =
           new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(new JavaType(
               javaType.getFullyQualifiedTypeName(), javaType.getArray(), DataType.TYPE, javaType
-                  .getArgName(), javaType.getParameters())));
+                  .getArgName(), javaType.getParameters(), javaType.getModule())));
 
       parameters.add(new FinderParameter(listType, new JavaSymbolName(name)));
 

@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -15,7 +17,12 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
@@ -31,6 +38,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * types during controller generations.
  * 
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 2.0
  */
 @Component
@@ -135,7 +143,57 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
    */
   @Override
   public void addFinders(JavaType controller, List<String> finders) {
-    // TODO Auto-generated method stub
+    Validate.notNull(controller, "ERROR: You must provide a valid controller");
+
+    ClassOrInterfaceTypeDetails controllerDetails =
+        getTypeLocationService().getTypeDetails(controller);
+
+    // Check if provided controller exists on current project
+    Validate.notNull(controllerDetails, "ERROR: You must provide an existing controller");
+
+    // Check if provided controller has been annotated with @RooJson
+    AnnotationMetadata jsonAnnotation = controllerDetails.getAnnotation(RooJavaType.ROO_JSON);
+    Validate
+        .notNull(jsonAnnotation, "ERROR: You must provide a controller annotated with @RooJson");
+
+    // Create list that will include finders to add
+    List<AnnotationAttributeValue<?>> findersToAdd = new ArrayList<AnnotationAttributeValue<?>>();
+
+    // Add finder already generated
+    AnnotationAttributeValue<?> currentFinders = jsonAnnotation.getAttribute("finders");
+    if (currentFinders != null) {
+      List<?> values = (List<?>) currentFinders.getValue();
+      Iterator<?> it = values.iterator();
+
+      while (it.hasNext()) {
+        StringAttributeValue finder = ((StringAttributeValue) it.next());
+        finders.remove(finder.getValue());
+        findersToAdd.add(finder);
+      }
+    }
+
+    // Add new finders
+    for (String finderMethod : finders) {
+      findersToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), finderMethod));
+    }
+
+    // Add finder list to currentFinders
+    ArrayAttributeValue<AnnotationAttributeValue<?>> newFinders =
+        new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("finders"),
+            findersToAdd);
+
+    // Include finders to annotation
+    AnnotationMetadataBuilder jsonAnnotationBuilder = new AnnotationMetadataBuilder(jsonAnnotation);
+    jsonAnnotationBuilder.addAttribute(newFinders);
+
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(controllerDetails);
+
+    // Update annotation
+    cidBuilder.updateTypeAnnotation(jsonAnnotationBuilder);
+
+    // Save changes on disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
   }
 

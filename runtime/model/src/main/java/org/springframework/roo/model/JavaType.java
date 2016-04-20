@@ -218,8 +218,7 @@ public class JavaType implements Comparable<JavaType> {
    * @param module the module where is created (optional)
    */
   public JavaType(final String fullyQualifiedTypeName, String module) {
-    this(fullyQualifiedTypeName, 0, DataType.TYPE, null, null);
-    this.module = module;
+    this(fullyQualifiedTypeName, 0, DataType.TYPE, null, null, module);
   }
 
   /**
@@ -241,6 +240,28 @@ public class JavaType implements Comparable<JavaType> {
     this(fullyQualifiedTypeName, null, arrayDimensions, dataType, argName, parameters, null);
   }
 
+
+  /**
+   * Construct a {@link JavaType} with full details. Recall that
+   * {@link JavaType} is immutable and therefore this is the only way of
+   * setting these non-default values.
+   * 
+   * @param fullyQualifiedTypeName the name (as per the rules above)
+   * @param arrayDimensions the number of array dimensions (0 = not an array,
+   *            1 = one-dimensional array, etc.)
+   * @param dataType the {@link DataType} (required)
+   * @param argName the type argument name to this particular Java type (can
+   *            be null if unassigned)
+   * @param parameters the type parameters applicable (can be null if there
+   *            aren't any)
+   * @param module the module where is created (optional)
+   */
+  public JavaType(final String fullyQualifiedTypeName, final int arrayDimensions,
+      final DataType dataType, final JavaSymbolName argName, final List<JavaType> parameters,
+      final String module) {
+    this(fullyQualifiedTypeName, null, arrayDimensions, dataType, argName, parameters, module);
+  }
+
   /**
    * Constructs a {@link JavaType}.
    * <p>
@@ -258,8 +279,32 @@ public class JavaType implements Comparable<JavaType> {
    * @param enclosingType the type's enclosing type
    */
   public JavaType(final String fullyQualifiedTypeName, final JavaType enclosingType) {
-    this(fullyQualifiedTypeName, enclosingType, 0, DataType.TYPE, null, null, null);
+    this(fullyQualifiedTypeName, enclosingType, 0, DataType.TYPE, null, null, enclosingType
+        .getModule());
   }
+
+  /**
+   * Constructs a {@link JavaType}.
+   * <p>
+   * The fully qualified type name will be enforced as follows:
+   * <ul>
+   * <li>The rules listed in
+   * {@link JavaSymbolName#assertJavaNameLegal(String)}
+   * <li>First letter of simple type name must be upper-case</li>
+   * </ul>
+   * <p>
+   * A fully qualified type name may include or exclude a package designator.
+   * 
+   * @param fullyQualifiedTypeName the name (as per the above rules;
+   *            mandatory)
+   * @param enclosingType the type's enclosing type
+   * @param module the module where is created (optional)
+   */
+  public JavaType(final String fullyQualifiedTypeName, final JavaType enclosingType,
+      final String module) {
+    this(fullyQualifiedTypeName, enclosingType, 0, DataType.TYPE, null, null, module);
+  }
+
 
   /**
    * Construct a {@link JavaType} with full details. Recall that

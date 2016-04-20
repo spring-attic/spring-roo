@@ -125,7 +125,6 @@ public class ServiceCommands implements CommandMarker {
   public List<String> returnRepositories(ShellContext shellContext) {
 
     List<String> allPossibleValues = new ArrayList<String>();
-    String value = "";
 
     // Get all defined parameters
     Map<String, String> contextParameters = shellContext.getParameters();
@@ -144,6 +143,8 @@ public class ServiceCommands implements CommandMarker {
               .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
 
       for (ClassOrInterfaceTypeDetails repository : repositories) {
+        String value = "";
+
         AnnotationAttributeValue<JavaType> entityAttr =
             repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
 

@@ -172,7 +172,7 @@ public class PartTree {
       // Lists cannot return primitive types, so primitive types are transformed into their wrapper class
       type =
           new JavaType(type.getFullyQualifiedTypeName(), type.getArray(), DataType.TYPE,
-              type.getArgName(), type.getParameters());
+              type.getArgName(), type.getParameters(), type.getModule());
     }
     return new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(type));
 
