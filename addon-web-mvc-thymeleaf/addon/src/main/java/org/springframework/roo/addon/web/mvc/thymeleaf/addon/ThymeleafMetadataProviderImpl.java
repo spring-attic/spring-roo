@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.jvnet.inflector.Noun;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -443,11 +445,13 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         new JavaType("javax.validation.Valid")).build(), new AnnotationMetadataBuilder(
         SpringJavaType.MODEL_ATTRIBUTE).build()));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.REDIRECT_ATTRIBUTES));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(getEntityField().getFieldName());
     parameterNames.add(new JavaSymbolName("result"));
+    parameterNames.add(new JavaSymbolName("redirectAttrs"));
     parameterNames.add(new JavaSymbolName("model"));
 
     // Adding annotations
@@ -480,20 +484,13 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         .getSimpleTypeName(), this.entity.getSimpleTypeName(), getServiceField().getFieldName(),
         serviceSaveMethod.getMethodName(), getEntityField().getFieldName()));
 
-    // UriComponents uriComponents = UriComponentsBuilder.fromUriString("/path/{entityField}").build();
-    bodyBuilder.appendFormalLine(String.format("%s uriComponents = "
-        + "%s.fromUriString(\"/%s/{%s}\").build();", addTypeToImport(SpringJavaType.URI_COMPONENTS)
-        .getSimpleTypeName(), addTypeToImport(SpringJavaType.URI_COMPONENTS_BUILDER)
-        .getSimpleTypeName(), getViewsPath(), getEntityField().getFieldName()));
 
-    // URI uri = uriComponents.expand(newEntity.getId()).encode().toUri();
-    bodyBuilder.appendFormalLine(String.format(
-        "%s uri = uriComponents.expand(new%s.%s()).encode().toUri();",
-        addTypeToImport(new JavaType("java.net.URI")).getSimpleTypeName(),
+    // redirectAttrs.addAttribute("id", newEntity.ACCESSOR_METHOD());
+    bodyBuilder.appendFormalLine(String.format("redirectAttrs.addAttribute(\"id\", new%s.%s());",
         this.entity.getSimpleTypeName(), this.identifierAccessor.getMethodName()));
 
-    // return "redirect:" + uri.getPath();
-    bodyBuilder.appendFormalLine(String.format("return \"redirect:\" + uri.getPath();"));
+    // return "redirect:/path/{id}";
+    bodyBuilder.appendFormalLine(String.format("return \"redirect:/%s/{id}\";", getViewsPath()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
@@ -589,11 +586,13 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         new JavaType("javax.validation.Valid")).build(), new AnnotationMetadataBuilder(
         SpringJavaType.MODEL_ATTRIBUTE).build()));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.REDIRECT_ATTRIBUTES));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(getEntityField().getFieldName());
     parameterNames.add(new JavaSymbolName("result"));
+    parameterNames.add(new JavaSymbolName("redirectAttrs"));
     parameterNames.add(new JavaSymbolName("model"));
 
     // Adding annotations
@@ -627,20 +626,12 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         .getSimpleTypeName(), this.entity.getSimpleTypeName(), getServiceField().getFieldName(),
         serviceSaveMethod.getMethodName(), getEntityField().getFieldName()));
 
-    // UriComponents uriComponents = UriComponentsBuilder.fromUriString("/path/{entityField}").build();
-    bodyBuilder.appendFormalLine(String.format("%s uriComponents = "
-        + "%s.fromUriString(\"/%s/{%s}\").build();", addTypeToImport(SpringJavaType.URI_COMPONENTS)
-        .getSimpleTypeName(), addTypeToImport(SpringJavaType.URI_COMPONENTS_BUILDER)
-        .getSimpleTypeName(), getViewsPath(), getEntityField().getFieldName()));
-
-    // URI uri = uriComponents.expand(savedEntity.getId()).encode().toUri();
-    bodyBuilder.appendFormalLine(String.format(
-        "%s uri = uriComponents.expand(saved%s.%s()).encode().toUri();",
-        addTypeToImport(new JavaType("java.net.URI")).getSimpleTypeName(),
+    // redirectAttrs.addAttribute("id", savedEntity.ACCESSOR_METHOD());
+    bodyBuilder.appendFormalLine(String.format("redirectAttrs.addAttribute(\"id\", saved%s.%s());",
         this.entity.getSimpleTypeName(), this.identifierAccessor.getMethodName()));
 
-    // return "redirect:" + uri.getPath();
-    bodyBuilder.appendFormalLine(String.format("return \"redirect:\" + uri.getPath();"));
+    // return "redirect:/path/{id}";
+    bodyBuilder.appendFormalLine(String.format("return \"redirect:/%s/{id}\";", getViewsPath()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
@@ -805,7 +796,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
       if (isEnumType(field.getFieldType())) {
         // model.addAttribute("enumField", Arrays.asList(Enum.values()));
         bodyBuilder.appendFormalLine(String.format(
-            "model.addAttribute(\"%s\", %s.asList(%s.values()));", field.getFieldName(),
+            "model.addAttribute(\"%s\", %s.asList(%s.values()));",
+            Noun.pluralOf(field.getFieldName().getSymbolName(), Locale.ENGLISH),
             addTypeToImport(new JavaType("java.util.Arrays")).getSimpleTypeName(),
             addTypeToImport(field.getFieldType()).getSimpleTypeName()));
       }

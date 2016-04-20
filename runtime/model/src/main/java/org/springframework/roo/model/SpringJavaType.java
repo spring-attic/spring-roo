@@ -130,6 +130,8 @@ public final class SpringJavaType {
   public static final JavaType PAGE = new JavaType("org.springframework.data.domain.Page");
   public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
   public static final JavaType MEDIA_TYPE = new JavaType("org.springframework.http.MediaType");
+  public static final JavaType REDIRECT_ATTRIBUTES = new JavaType(
+      "org.springframework.web.servlet.mvc.support.RedirectAttributes");
 
 
   /**
