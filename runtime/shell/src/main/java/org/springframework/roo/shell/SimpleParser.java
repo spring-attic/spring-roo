@@ -10,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
-import java.lang.annotation.AnnotationTypeMismatchException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -30,12 +29,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
-
-import javax.swing.text.html.Option;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -1404,26 +1399,28 @@ public class SimpleParser implements Parser {
       }
     }
 
-    // Ensure the user didn't specified an incorrect value
-    String value = options.get(cliOption.key()[0]);
-    List<String> possibleValues =
-        getPossibleValuesByIndicator(methodTarget.getKey(), cliOption, shellContext);
-    if (possibleValues != null && !possibleValues.contains(value)) {
+    // Ensure the user didn't specified an incorrect value if necessary
+    if (autocompleteNeedsValidation(methodTarget.getKey(), cliOption)) {
+      String value = options.get(cliOption.key()[0]);
+      List<String> possibleValues =
+          getPossibleValuesByIndicator(methodTarget.getKey(), cliOption, shellContext);
+      if (possibleValues != null && !possibleValues.contains(value)) {
 
-      // The user specified an incorrect value
-      MethodTarget optionAutocompleteIndicator =
-          optionAutocompleteIndicators.get(methodTarget.getKey().concat("|")
-              .concat(cliOption.key()[0]));
+        // The user specified an incorrect value
+        MethodTarget optionAutocompleteIndicator =
+            optionAutocompleteIndicators.get(methodTarget.getKey().concat("|")
+                .concat(cliOption.key()[0]));
 
-      if (optionAutocompleteIndicator != null && optionAutocompleteIndicator.getMethod() != null) {
-        CliOptionAutocompleteIndicator autocompleteIndicator =
-            optionAutocompleteIndicator.getMethod().getAnnotation(
-                CliOptionAutocompleteIndicator.class);
+        if (optionAutocompleteIndicator != null && optionAutocompleteIndicator.getMethod() != null) {
+          CliOptionAutocompleteIndicator autocompleteIndicator =
+              optionAutocompleteIndicator.getMethod().getAnnotation(
+                  CliOptionAutocompleteIndicator.class);
 
-        // Get autocomplete indicator help message
-        if (autocompleteIndicator != null) {
-          LOGGER.warning(autocompleteIndicator.help());
-          throw new RuntimeException();
+          // Get autocomplete indicator help message
+          if (autocompleteIndicator != null) {
+            LOGGER.warning(autocompleteIndicator.help());
+            throw new RuntimeException();
+          }
         }
       }
     }
@@ -1558,8 +1555,6 @@ public class SimpleParser implements Parser {
     }
   }
 
-
-  @SuppressWarnings("unchecked")
   private boolean hasToIncludeSpaceOnFinish(String command, CliOption cliOption) {
     String[] option = cliOption.key();
     try {
@@ -1571,6 +1566,38 @@ public class SimpleParser implements Parser {
                 CliOptionAutocompleteIndicator.class);
 
         return autocompleteIndicator.includeSpaceOnFinish();
+
+      }
+
+      return true;
+    } catch (Exception e) {
+      throw new RuntimeException(
+          String
+              .format(
+                  "ERROR: Error trying to get autocomplete values for '%s' option on '%s' command. Please, fix errors on indicator method and also be sure return type is a List<String>",
+                  option[0], command));
+    }
+  }
+
+  /**
+   * Checks if exists {@link CliOptionAutocompleteIndicator} for a {@link CliOption} and 
+   * returns if value specified for the option must be validated with autocomplete results
+   * 
+   * @param command
+   * @param cliOption
+   * @return <code>true</code> if value specified shoud be validated with indicator return values
+   */
+  private boolean autocompleteNeedsValidation(String command, CliOption cliOption) {
+    String[] option = cliOption.key();
+    try {
+      MethodTarget optionAutocompleteIndicator =
+          optionAutocompleteIndicators.get(command.concat("|").concat(option[0]));
+      if (optionAutocompleteIndicator != null) {
+        CliOptionAutocompleteIndicator autocompleteIndicator =
+            optionAutocompleteIndicator.getMethod().getAnnotation(
+                CliOptionAutocompleteIndicator.class);
+
+        return autocompleteIndicator.validate();
 
       }
 
