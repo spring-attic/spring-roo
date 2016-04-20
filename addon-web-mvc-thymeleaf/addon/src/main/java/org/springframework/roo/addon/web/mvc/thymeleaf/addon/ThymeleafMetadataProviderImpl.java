@@ -4,10 +4,13 @@ import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +45,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -212,6 +216,19 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // Getting path
     this.path = (String) controllerAnnotation.getAttribute("path").getValue();
 
+    // Getting Global search class
+    Set<ClassOrInterfaceTypeDetails> globalSearchClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_GLOBAL_SEARCH);
+    if (globalSearchClasses.isEmpty()) {
+      throw new RuntimeException("ERROR: GlobalSearch.java file doesn't exist or has been deleted.");
+    }
+    Iterator<ClassOrInterfaceTypeDetails> it = globalSearchClasses.iterator();
+    while (it.hasNext()) {
+      this.globalSearchType = it.next().getType();
+      break;
+    }
+
     // Getting methods from related service
     MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
     MethodMetadata serviceDeleteMethod = serviceMetadata.getDeleteMethod();
@@ -219,7 +236,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata serviceCountMethod = serviceMetadata.getCountMethod();
 
     return new ThymeleafMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, getListFormMethod(), getListMethod(serviceFindAllMethod,
+        governorPhysicalTypeMetadata, getListFormMethod(), getListJSONMethod(serviceFindAllMethod,
             serviceCountMethod), getCreateFormMethod(), getCreateMethod(serviceSaveMethod),
         getEditFormMethod(), getUpdateMethod(serviceSaveMethod),
         getDeleteMethod(serviceDeleteMethod), getShowMethod(), getPopulateFormMethod(),
@@ -227,7 +244,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
   }
 
   /**
-   * This method provides the "list" method  using JSON 
+   * This method provides the "list" JSON method  using JSON 
    * response type and returns Datatables element
    * 
    * @param serviceFindAllMethod
@@ -235,14 +252,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
    * 
    * @return MethodMetadata
    */
-  private MethodMetadata getListMethod(MethodMetadata serviceFindAllMethod,
+  private MethodMetadata getListJSONMethod(MethodMetadata serviceFindAllMethod,
       MethodMetadata serviceCountMethod) {
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null, null,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, "");
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -251,16 +268,12 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     final JavaSymbolName methodName = new JavaSymbolName("list");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    // TODO
-    //parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType.INT_OBJECT));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    // TODO
-    //parameterNames.add(new JavaSymbolName("search"));
+    parameterNames.add(new JavaSymbolName("search"));
     parameterNames.add(new JavaSymbolName("pageable"));
-    parameterNames.add(new JavaSymbolName("draw"));
 
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -268,7 +281,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
         SpringEnumDetails.REQUEST_METHOD_GET, "", null, null, null,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, ""));
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
 
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =
@@ -279,30 +292,24 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // Page<Entity> entityField = serviceField.findAll(search, pageable);
-    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
-        SpringJavaType.PAGE, this.entity, getEntityField().getFieldName(), getServiceField()
-            .getFieldName(), serviceFindAllMethod.getMethodName()));
+    // TODO: Change to use findAll Datatables method
+    /*bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
+        addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(this.entity)
+            .getSimpleTypeName(), getEntityField().getFieldName(),
+        getServiceField().getFieldName(), serviceFindAllMethod.getMethodName()));
+    
+    // return entityField;
+    bodyBuilder.appendFormalLine(String.format("return %s;", getEntityField().getFieldName()));*/
 
-    // long allAvailableEntityField = serviceField.count();
-    bodyBuilder.appendFormalLine(String.format("%s allAvailable%s = %s.%s();", serviceCountMethod
-        .getReturnType(), StringUtils.capitalize(getEntityField().getFieldName().getSymbolName()),
-        getServiceField().getFieldName(), serviceCountMethod.getMethodName()));
-
-    // return new DatatablesData<Entity>(entityField.getContent(),
-    //          Long.valueOf(allAvailableEntityField), Long.valueOf(entityField.getTotalElements()), draw);
-    // TODO
-    /*bodyBuilder.appendFormalLine(String.format("return new %s<%s>(%s.getContent(), "
-        + "Long.valueOf(allAvailable%s), Long.valueOf(%s.getTotalElements()), draw);",
-        this.datatablesDataType, this.entity, getEntityField().getFieldName(), StringUtils
-            .capitalize(getEntityField().getFieldName().getSymbolName()), getEntityField()
-            .getFieldName()));*/
+    // TODO: Remove this body implementation when findAll method be available
+    bodyBuilder
+        .appendFormalLine("// TODO: Remove this body implementation when findAll method be available.");
+    bodyBuilder.appendFormalLine("return null;");
 
     // Generating returnType
-    // TODO
-    /*JavaType returnType =
-        new JavaType(this.datatablesDataType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
-            Arrays.asList(this.entity));*/
-    JavaType returnType = JavaType.VOID_PRIMITIVE;
+    JavaType returnType =
+        new JavaType(SpringJavaType.PAGE.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+            Arrays.asList(this.entity));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,

@@ -31,7 +31,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
   private boolean readOnly;
   private MethodMetadata listFormMethod;
-  private MethodMetadata listMethod;
+  private MethodMetadata listJSONMethod;
   private MethodMetadata createFormMethod;
   private MethodMetadata createMethod;
   private MethodMetadata editFormMethod;
@@ -71,7 +71,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
    * @param listFormMethod MethodMetadata
-   * @param listMethod MethodMetadata 
+   * @param listJSONMethod MethodMetadata 
    * @param createFormMethod MethodMetadata
    * @param createMethod MethodMetadata 
    * @param editFormMethod MethodMetadata
@@ -84,7 +84,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public ThymeleafMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listFormMethod,
-      final MethodMetadata listMethod, final MethodMetadata createFormMethod,
+      final MethodMetadata listJSONMethod, final MethodMetadata createFormMethod,
       final MethodMetadata createMethod, final MethodMetadata editFormMethod,
       final MethodMetadata updateMethod, final MethodMetadata deleteMethod,
       final MethodMetadata showMethod, final MethodMetadata populateFormMethod,
@@ -95,7 +95,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     this.readOnly = readOnly;
     this.listFormMethod = listFormMethod;
-    this.listMethod = listMethod;
+    this.listJSONMethod = listJSONMethod;
     this.createFormMethod = createFormMethod;
     this.createMethod = createMethod;
     this.editFormMethod = editFormMethod;
@@ -106,8 +106,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // Adds list and list form method
     ensureGovernorHasMethod(new MethodMetadataBuilder(listFormMethod));
-    // TODO
-    //ensureGovernorHasMethod(new MethodMetadataBuilder(listMethod));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(listJSONMethod));
 
     // Include CUD methods only if provided entity is not a readOnly entity
     if (!readOnly) {
@@ -141,12 +140,12 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
-   * Method that returns list Thymeleaf method
+   * Method that returns list JSON method
    * 
    * @return
    */
-  public MethodMetadata getListMethod() {
-    return this.listMethod;
+  public MethodMetadata getListJSONMethod() {
+    return this.listJSONMethod;
   }
 
   /**

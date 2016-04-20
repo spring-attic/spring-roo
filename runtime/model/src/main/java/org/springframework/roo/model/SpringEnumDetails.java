@@ -22,7 +22,7 @@ public final class SpringEnumDetails {
   // MediaType enum details
   public static final EnumDetails MEDIA_TYPE_TEXT_HTML_VALUE = new EnumDetails(
       SpringJavaType.MEDIA_TYPE, new JavaSymbolName("TEXT_HTML_VALUE"));
-  public static final EnumDetails MEDIA_TYPE_APPLICATION_JSON = new EnumDetails(
+  public static final EnumDetails MEDIA_TYPE_APPLICATION_JSON_VALUE = new EnumDetails(
       SpringJavaType.MEDIA_TYPE, new JavaSymbolName("APPLICATION_JSON_VALUE"));
 
   /**
