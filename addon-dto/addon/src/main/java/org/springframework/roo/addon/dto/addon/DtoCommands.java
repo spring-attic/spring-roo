@@ -6,15 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -37,6 +39,8 @@ public class DtoCommands implements CommandMarker {
   private DtoOperations dtoOperations;
   @Reference
   private TypeLocationService typeLocationService;
+  @Reference
+  private ProjectOperations projectOperations;
 
   @CliAvailabilityIndicator({"dto"})
   public boolean isDtoCreationAvailable() {
@@ -130,7 +134,8 @@ public class DtoCommands implements CommandMarker {
    * @return List<String> with available entity full qualified names.
    */
   @CliOptionAutocompleteIndicator(command = "dto", param = "entity",
-      help = "Option entity must have an existing entity value. Please, assign it a right value.")
+      help = "Option entity must have an existing entity value. Please, assign it a right value.",
+      validate = false)
   public List<String> returnEntityValues(ShellContext shellContext) {
 
     // Create results to return
@@ -141,7 +146,7 @@ public class DtoCommands implements CommandMarker {
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY,
             JpaJavaType.ENTITY);
     for (ClassOrInterfaceTypeDetails entity : entities) {
-      String name = entity.getType().getFullyQualifiedTypeName();
+      String name = replaceTopLevelPackageString(entity);
       if (!results.contains(name)) {
         results.add(name);
       }
@@ -157,7 +162,7 @@ public class DtoCommands implements CommandMarker {
           mandatory = false,
           optionContext = UPDATE_PROJECT,
           help = "Name of the DTO class to create, including package and module (if multimodule project)") final JavaType name,
-      @CliOption(key = "entity", mandatory = false,
+      @CliOption(key = "entity", mandatory = false, optionContext = UPDATE_PROJECT,
           help = "Name of the entity which can be used to create DTO from") final JavaType entity,
       @CliOption(key = "all", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
@@ -193,6 +198,25 @@ public class DtoCommands implements CommandMarker {
       }
     }
 
+    if (entity != null) {
+      Set<ClassOrInterfaceTypeDetails> currentEntities =
+          typeLocationService
+              .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
+      boolean entityFound = false;
+      for (ClassOrInterfaceTypeDetails cid : currentEntities) {
+        // If exists and developer doesn't use --force global parameter,
+        // we can't create a duplicate dto
+        if (entity.equals(cid.getName())) {
+          entityFound = true;
+          break;
+        }
+      }
+      if (!entityFound) {
+        throw new IllegalArgumentException(String.format(
+            "Entity '%s' doesn't exists or is not a @RooJpaEntity", entity));
+      }
+    }
+
     if (all) {
       dtoOperations.createDtoFromAll(immutable, utilityMethods, serializable);
     } else if (entity != null) {
@@ -203,4 +227,35 @@ public class DtoCommands implements CommandMarker {
       dtoOperations.createDto(name, immutable, utilityMethods, serializable, fromEntity);
     }
   }
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * 
+   * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @return the String representing a JavaType with its name shortened
+   */
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+    if (StringUtils.isNotBlank(cid.getType().getModule())) {
+      javaTypeString = cid.getType().getModule().concat(":");
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+      topLevelPackageString =
+          projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Replace String if necessary
+    if (StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+      javaTypeString =
+          javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+              topLevelPackageString, "~"));
+    }
+
+    return javaTypeString;
+  }
+
 }
