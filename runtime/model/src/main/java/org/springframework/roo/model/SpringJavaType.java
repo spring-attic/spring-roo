@@ -125,6 +125,8 @@ public final class SpringJavaType {
       "org.springframework.data.jpa.domain.support.AuditingEntityListener");
   public static final JavaType PAGE = new JavaType("org.springframework.data.domain.Page");
   public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
+  public static final JavaType MEDIA_TYPE = new JavaType("org.springframework.http.MediaType");
+
 
   /**
    * Returns the {@link JavaType} for a Spring converter
@@ -136,6 +138,7 @@ public final class SpringJavaType {
   public static JavaType getConverterType(final JavaType fromType, final JavaType toType) {
     Validate.notNull(fromType, "'From' type is required");
     Validate.notNull(toType, "'To' type is required");
+
     return new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE,
         null, Arrays.asList(fromType, toType));
   }

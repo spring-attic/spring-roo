@@ -26,21 +26,17 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
-import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -189,8 +185,8 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
-        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(), "GET",
-            "/{id}", null, "", "", "application/json", "");
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, "/", null, null, null, null, "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -207,7 +203,8 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @RequestMapping annotation
-    annotations.add(getRequestMappingAnnotation("", "/", null, "", "", "", ""));
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, "/", null, null, null, null, ""));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -221,67 +218,6 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
-  }
-
-  /**
-   * This method generates a valid @RequestMapping annotation with provided parameters
-   * 
-   * @param method
-   * @param path
-   * @param params
-   * @param accept
-   * @param consumes
-   * @param produces
-   * @param headers
-   * 
-   * @return
-   */
-  private AnnotationMetadataBuilder getRequestMappingAnnotation(String method, String path,
-      List<String> params, String accept, String consumes, String produces, String headers) {
-
-    List<AnnotationAttributeValue<?>> requestMappingAttributes =
-        new ArrayList<AnnotationAttributeValue<?>>();
-
-    // Adding method attribute. Force GET method if empty
-    if (StringUtils.isNotBlank(method)) {
-      requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"),
-          new EnumDetails(SpringJavaType.REQUEST_METHOD, new JavaSymbolName(method))));
-    } else {
-      requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"),
-          new EnumDetails(SpringJavaType.REQUEST_METHOD, new JavaSymbolName("GET"))));
-    }
-
-    // Adding path attribute
-    if (StringUtils.isNotBlank(path)) {
-      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), path));
-    }
-
-    // TODO: Adding params attribute
-
-    // Adding accept attribute
-    if (StringUtils.isNotBlank(accept)) {
-      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("accept"), accept));
-    }
-
-    // Adding consumes attribute
-    if (StringUtils.isNotBlank(consumes)) {
-      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("consumes"),
-          consumes));
-    }
-
-    // Adding produces attribute
-    if (StringUtils.isNotBlank(produces)) {
-      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("produces"),
-          produces));
-    }
-
-    // Adding headers attribute
-    if (StringUtils.isNotBlank(headers)) {
-      requestMappingAttributes
-          .add(new StringAttributeValue(new JavaSymbolName("headers"), headers));
-    }
-
-    return new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING, requestMappingAttributes);
   }
 
   public ControllerMVCService getControllerMVCService() {

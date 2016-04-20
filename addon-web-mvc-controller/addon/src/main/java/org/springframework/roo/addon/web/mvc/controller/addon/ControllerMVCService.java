@@ -3,6 +3,8 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -31,7 +33,26 @@ public interface ControllerMVCService {
    *           with the provided attributes. Will return null if doesn't exists any method that match
    *           with the provided parameters.
    */
-  MethodMetadata getMVCMethodByRequestMapping(JavaType controller, String method, String path,
-      List<String> params, String accept, String consumes, String produces, String headers);
+  MethodMetadata getMVCMethodByRequestMapping(JavaType controller, EnumDetails method, String path,
+      List<String> params, EnumDetails accept, EnumDetails consumes, EnumDetails produces,
+      String headers);
+
+  /**
+   * This operation will generate a valid @RequestMapping annotation with 
+   * provided parameters
+   * 
+   * @param method
+   * @param path
+   * @param params
+   * @param accept
+   * @param consumes
+   * @param produces
+   * @param headers
+   * 
+   * @return
+   */
+  AnnotationMetadataBuilder getRequestMappingAnnotation(EnumDetails method, String path,
+      List<String> params, EnumDetails accept, EnumDetails consumes, EnumDetails produces,
+      String headers);
 
 }
