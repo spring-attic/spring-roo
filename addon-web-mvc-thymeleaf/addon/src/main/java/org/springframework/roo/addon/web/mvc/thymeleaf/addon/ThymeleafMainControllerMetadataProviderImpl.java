@@ -186,7 +186,7 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_GET, "/", null, null, null, null, "");
+            SpringEnumDetails.REQUEST_METHOD_GET, "/", null, "", "", "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -204,7 +204,7 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "/", null, null, null, null, ""));
+        SpringEnumDetails.REQUEST_METHOD_GET, "/", null, "", "", ""));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

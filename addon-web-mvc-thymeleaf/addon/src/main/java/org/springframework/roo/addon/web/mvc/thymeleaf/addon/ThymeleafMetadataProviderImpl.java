@@ -236,29 +236,27 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata serviceCountMethod = serviceMetadata.getCountMethod();
 
     return new ThymeleafMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, getListFormMethod(), getListJSONMethod(serviceFindAllMethod,
-            serviceCountMethod), getCreateFormMethod(), getCreateMethod(serviceSaveMethod),
-        getEditFormMethod(), getUpdateMethod(serviceSaveMethod),
-        getDeleteMethod(serviceDeleteMethod), getShowMethod(), getPopulateFormMethod(),
-        this.readOnly, typesToImport);
+        governorPhysicalTypeMetadata, getListFormMethod(), getListJSONMethod(serviceFindAllMethod),
+        getListDatatablesJSONMethod(serviceFindAllMethod, serviceCountMethod),
+        getCreateFormMethod(), getCreateMethod(serviceSaveMethod), getEditFormMethod(),
+        getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod), getShowMethod(),
+        getPopulateFormMethod(), this.readOnly, typesToImport);
   }
 
   /**
-   * This method provides the "list" JSON method  using JSON 
-   * response type and returns Datatables element
+   * This method provides the "list" JSON method using JSON 
+   * response type and returns Page element
    * 
    * @param serviceFindAllMethod
-   * @param serviceCountMethod
    * 
    * @return MethodMetadata
    */
-  private MethodMetadata getListJSONMethod(MethodMetadata serviceFindAllMethod,
-      MethodMetadata serviceCountMethod) {
+  private MethodMetadata getListJSONMethod(MethodMetadata serviceFindAllMethod) {
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_GET, "", null, null, null,
+            SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
@@ -280,8 +278,85 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "", null, null, null,
+        SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
         SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Page<Entity> entityField = serviceField.findAll(search, pageable);
+    // TODO: Change to use findAll Datatables method
+    /*bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
+        addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(this.entity)
+            .getSimpleTypeName(), getEntityField().getFieldName(),
+        getServiceField().getFieldName(), serviceFindAllMethod.getMethodName()));
+    
+    // return entityField;
+    bodyBuilder.appendFormalLine(String.format("return %s;", getEntityField().getFieldName()));*/
+
+    // TODO: Remove this body implementation when findAll method be available
+    bodyBuilder
+        .appendFormalLine("// TODO: Remove this body implementation when findAll method be available.");
+    bodyBuilder.appendFormalLine("return null;");
+
+    // Generating returnType
+    JavaType returnType =
+        new JavaType(SpringJavaType.PAGE.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+            Arrays.asList(this.entity));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            returnType, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "list" Datatables JSON method  using JSON 
+   * response type and returns Datatables element
+   * 
+   * @param serviceFindAllMethod
+   * @param serviceCountMethod
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getListDatatablesJSONMethod(MethodMetadata serviceFindAllMethod,
+      MethodMetadata serviceCountMethod) {
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, "", null, "", "application/vnd.datatables+json",
+            "");
+    if (existingMVCMethod != null) {
+      return existingMVCMethod;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("list");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType.INT_OBJECT));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("search"));
+    parameterNames.add(new JavaSymbolName("pageable"));
+    parameterNames.add(new JavaSymbolName("draw"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, "", null, "", "application/vnd.datatables+json", ""));
 
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =
@@ -330,7 +405,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_GET, "", null, null, null,
+            SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
     if (existingMVCMethod != null) {
       throw new RuntimeException(
@@ -351,7 +426,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "", null, null, null,
+        SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -379,7 +454,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null, null,
+            SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
     if (existingMVCMethod != null) {
       throw new RuntimeException(
@@ -400,7 +475,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null, null,
+        SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -437,7 +512,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_POST, "", null, null, null,
+            SpringEnumDetails.REQUEST_METHOD_POST, "", null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
     if (existingMVCMethod != null) {
       throw new RuntimeException(
@@ -466,7 +541,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_POST, "", null, null, null,
+        SpringEnumDetails.REQUEST_METHOD_POST, "", null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -519,7 +594,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET,
-            String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null, null,
+            String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
     if (existingMVCMethod != null) {
       throw new RuntimeException(
@@ -544,7 +619,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
         SpringEnumDetails.REQUEST_METHOD_GET,
-        String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null, null,
+        String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -578,7 +653,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_PUT,
-            String.format("/{%s}", getEntityField().getFieldName()), null, null, null,
+            String.format("/{%s}", getEntityField().getFieldName()), null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
     if (existingMVCMethod != null) {
       throw new RuntimeException(
@@ -608,7 +683,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
         SpringEnumDetails.REQUEST_METHOD_PUT,
-        String.format("/{%s}", getEntityField().getFieldName()), null, null, null,
+        String.format("/{%s}", getEntityField().getFieldName()), null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -661,7 +736,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null, null,
+            SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
     if (existingMVCMethod != null) {
       throw new RuntimeException(
@@ -689,7 +764,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null, null,
+        SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -722,7 +797,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET,
-            String.format("/{%s}", getEntityField().getFieldName()), null, null, null,
+            String.format("/{%s}", getEntityField().getFieldName()), null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
     if (existingMVCMethod != null) {
       throw new RuntimeException(
@@ -747,7 +822,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
         SpringEnumDetails.REQUEST_METHOD_GET,
-        String.format("/{%s}", getEntityField().getFieldName()), null, null, null,
+        String.format("/{%s}", getEntityField().getFieldName()), null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body

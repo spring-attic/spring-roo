@@ -21,7 +21,6 @@ import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -291,9 +290,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_POST, "", null, null,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, "");
+            SpringEnumDetails.REQUEST_METHOD_POST, "", null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -313,9 +312,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_POST, "", null, null,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, ""));
+        SpringEnumDetails.REQUEST_METHOD_POST, "", null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
 
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =
@@ -356,9 +355,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_PUT, "", null, null,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, "");
+            SpringEnumDetails.REQUEST_METHOD_PUT, "", null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -378,9 +377,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_PUT, "", null, null,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, ""));
+        SpringEnumDetails.REQUEST_METHOD_PUT, "", null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
 
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =
@@ -421,7 +420,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null, null, null, "");
+            SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, "", "", "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -441,7 +440,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null, null, null, ""));
+        SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, "", "", ""));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -471,8 +470,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_GET, "", null, null, null,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, "");
+            SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -489,8 +488,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "", null, null, null,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, ""));
+        SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
 
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =
@@ -539,7 +538,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "/" + methodName.toString(), parameters, null,
-            null, SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, "");
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -559,8 +558,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "/" + methodName.toString(), parameters, null, null,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, ""));
+        SpringEnumDetails.REQUEST_METHOD_GET, "/" + methodName.toString(), parameters, null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
 
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =
@@ -598,8 +597,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_GET, "/{id}", null, null, null,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, "");
+            SpringEnumDetails.REQUEST_METHOD_GET, "/{id}", null, null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -619,8 +618,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET, "/{id}", null, null, null,
-        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON, ""));
+        SpringEnumDetails.REQUEST_METHOD_GET, "/{id}", null, null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
 
     // Adding @ResponseBody annotation
     AnnotationMetadataBuilder responseBodyAnnotation =

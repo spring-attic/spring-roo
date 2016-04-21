@@ -51,8 +51,7 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
 
   @Override
   public MethodMetadata getMVCMethodByRequestMapping(JavaType controller, EnumDetails method,
-      String path, List<String> params, EnumDetails accept, EnumDetails consumes,
-      EnumDetails produces, String headers) {
+      String path, List<String> params, EnumDetails consumes, EnumDetails produces, String headers) {
 
     // Getting controller member details
     MemberDetails controllerDetails =
@@ -79,9 +78,6 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
 
         // TODO: Get params and compare them
 
-        EnumDetails acceptAttr =
-            requesMappingAnnotation.getAttribute("accept") == null ? null
-                : (EnumDetails) requesMappingAnnotation.getAttribute("accept").getValue();
         EnumDetails consumesAttr =
             requesMappingAnnotation.getAttribute("consumes") == null ? null
                 : (EnumDetails) requesMappingAnnotation.getAttribute("consumes").getValue();
@@ -93,8 +89,58 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
                 : (String) requesMappingAnnotation.getAttribute("headers").getValue();
 
         // If every attribute match, return this method
-        if (methodAttr == method && valueAttr.equals(path) && acceptAttr == accept
-            && consumesAttr == consumes && producesAttr == produces && headersAttr.equals(headers)) {
+        if (methodAttr == method && valueAttr.equals(path) && consumesAttr == consumes
+            && producesAttr == produces && headersAttr.equals(headers)) {
+          return definedMethod;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  public MethodMetadata getMVCMethodByRequestMapping(JavaType controller, EnumDetails method,
+      String path, List<String> params, String consumes, String produces, String headers) {
+
+    // Getting controller member details
+    MemberDetails controllerDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().toString(),
+            getTypeLocationService().getTypeDetails(controller));
+
+    // Getting all controller methods
+    List<MethodMetadata> methods = controllerDetails.getMethods();
+
+    for (MethodMetadata definedMethod : methods) {
+
+      // Getting request mapping annotation
+      AnnotationMetadata requesMappingAnnotation =
+          definedMethod.getAnnotation(SpringJavaType.REQUEST_MAPPING);
+
+      if (requesMappingAnnotation != null) {
+        // Get all attributes
+        EnumDetails methodAttr =
+            requesMappingAnnotation.getAttribute("method") == null ? null
+                : (EnumDetails) requesMappingAnnotation.getAttribute("method").getValue();
+        String valueAttr =
+            requesMappingAnnotation.getAttribute("value") == null ? ""
+                : (String) requesMappingAnnotation.getAttribute("value").getValue();
+
+        // TODO: Get params and compare them
+
+        String consumesAttr =
+            requesMappingAnnotation.getAttribute("consumes") == null ? ""
+                : (String) requesMappingAnnotation.getAttribute("consumes").getValue();
+        String producesAttr =
+            requesMappingAnnotation.getAttribute("produces") == null ? ""
+                : (String) requesMappingAnnotation.getAttribute("produces").getValue();
+        String headersAttr =
+            requesMappingAnnotation.getAttribute("headers") == null ? ""
+                : (String) requesMappingAnnotation.getAttribute("headers").getValue();
+
+        // If every attribute match, return this method
+        if (methodAttr == method && valueAttr.equals(path) && consumesAttr.equals(consumes)
+            && producesAttr.equals(produces) && headersAttr.equals(headers)) {
           return definedMethod;
         }
       }
@@ -105,8 +151,7 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
 
   @Override
   public AnnotationMetadataBuilder getRequestMappingAnnotation(EnumDetails method, String path,
-      List<String> params, EnumDetails accept, EnumDetails consumes, EnumDetails produces,
-      String headers) {
+      List<String> params, EnumDetails consumes, EnumDetails produces, String headers) {
 
     List<AnnotationAttributeValue<?>> requestMappingAttributes =
         new ArrayList<AnnotationAttributeValue<?>>();
@@ -125,11 +170,6 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
     }
 
     // TODO: Adding params attribute
-
-    // Adding accept attribute
-    if (accept != null) {
-      requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("accept"), accept));
-    }
 
     // Adding consumes attribute
     if (consumes != null) {
@@ -152,6 +192,48 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
     return new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING, requestMappingAttributes);
   }
 
+  @Override
+  public AnnotationMetadataBuilder getRequestMappingAnnotation(EnumDetails method, String path,
+      List<String> params, String consumes, String produces, String headers) {
+
+    List<AnnotationAttributeValue<?>> requestMappingAttributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
+
+    // Adding method attribute. Force GET method if empty
+    if (method != null) {
+      requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), method));
+    } else {
+      requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"),
+          SpringEnumDetails.REQUEST_METHOD_GET));
+    }
+
+    // Adding path attribute
+    if (StringUtils.isNotBlank(path)) {
+      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), path));
+    }
+
+    // TODO: Adding params attribute
+
+    // Adding consumes attribute
+    if (StringUtils.isNotBlank(consumes)) {
+      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("consumes"),
+          consumes));
+    }
+
+    // Adding produces attribute
+    if (StringUtils.isNotBlank(produces)) {
+      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("produces"),
+          produces));
+    }
+
+    // Adding headers attribute
+    if (StringUtils.isNotBlank(headers)) {
+      requestMappingAttributes
+          .add(new StringAttributeValue(new JavaSymbolName("headers"), headers));
+    }
+
+    return new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING, requestMappingAttributes);
+  }
 
   // Methods to obtain OSGi Services
 

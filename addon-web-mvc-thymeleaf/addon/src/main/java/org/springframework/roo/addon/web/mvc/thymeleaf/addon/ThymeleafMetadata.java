@@ -32,6 +32,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private boolean readOnly;
   private MethodMetadata listFormMethod;
   private MethodMetadata listJSONMethod;
+  private MethodMetadata listDatatablesJSONMethod;
   private MethodMetadata createFormMethod;
   private MethodMetadata createMethod;
   private MethodMetadata editFormMethod;
@@ -72,6 +73,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
    * @param listFormMethod MethodMetadata
    * @param listJSONMethod MethodMetadata 
+   * @param listDatatablesJSONMethod MethodMetadata 
    * @param createFormMethod MethodMetadata
    * @param createMethod MethodMetadata 
    * @param editFormMethod MethodMetadata
@@ -84,11 +86,12 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public ThymeleafMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listFormMethod,
-      final MethodMetadata listJSONMethod, final MethodMetadata createFormMethod,
-      final MethodMetadata createMethod, final MethodMetadata editFormMethod,
-      final MethodMetadata updateMethod, final MethodMetadata deleteMethod,
-      final MethodMetadata showMethod, final MethodMetadata populateFormMethod,
-      final boolean readOnly, final List<JavaType> typesToImport) {
+      final MethodMetadata listJSONMethod, final MethodMetadata listDatatablesJSONMethod,
+      final MethodMetadata createFormMethod, final MethodMetadata createMethod,
+      final MethodMetadata editFormMethod, final MethodMetadata updateMethod,
+      final MethodMetadata deleteMethod, final MethodMetadata showMethod,
+      final MethodMetadata populateFormMethod, final boolean readOnly,
+      final List<JavaType> typesToImport) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
@@ -96,6 +99,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.readOnly = readOnly;
     this.listFormMethod = listFormMethod;
     this.listJSONMethod = listJSONMethod;
+    this.listDatatablesJSONMethod = listDatatablesJSONMethod;
     this.createFormMethod = createFormMethod;
     this.createMethod = createMethod;
     this.editFormMethod = editFormMethod;
@@ -107,6 +111,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Adds list and list form method
     ensureGovernorHasMethod(new MethodMetadataBuilder(listFormMethod));
     ensureGovernorHasMethod(new MethodMetadataBuilder(listJSONMethod));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(listDatatablesJSONMethod));
 
     // Include CUD methods only if provided entity is not a readOnly entity
     if (!readOnly) {
@@ -146,6 +151,15 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public MethodMetadata getListJSONMethod() {
     return this.listJSONMethod;
+  }
+
+  /**
+   * Method that returns list Datatables JSON method
+   * 
+   * @return
+   */
+  public MethodMetadata getListDatatablesJSONMethod() {
+    return this.listDatatablesJSONMethod;
   }
 
   /**
