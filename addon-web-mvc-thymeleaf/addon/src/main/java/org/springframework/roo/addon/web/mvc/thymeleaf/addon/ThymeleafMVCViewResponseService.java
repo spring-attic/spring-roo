@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -23,8 +26,10 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -33,6 +38,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -68,6 +74,7 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
   private TypeLocationService typeLocationService;
   private TypeManagementService typeManagementService;
   private PathResolver pathResolver;
+  private FileManager fileManager;
 
   /**
    * This operation returns the Feature name. In this case,
@@ -329,7 +336,52 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
         new Dependency("com.github.dandelion", "datatables-thymeleaf", "1.1.0"));
 
     // Add WebMVCThymeleafUIConfiguration config class
-    //addWebMVCThymeleafUIConfigurationClass(module);
+    addDatatablesDataClass(module);
+    addWebMVCThymeleafUIConfigurationClass(module);
+  }
+
+  /**
+   * This method adds new DatatablesData.class annotated with @RooDatatablesData.
+   * 
+   * This class will be used on Thymeleaf Controllers to return DatatablesData object.
+   * 
+   * @param module
+   */
+  private void addDatatablesDataClass(Pom module) {
+    // First of all, check if already exists a @RooThymeleafDatatablesData
+    // class on current project
+    Set<JavaType> datatablesDataClasses =
+        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_THYMELEAF_DATATABLES_DATA);
+
+    if (!datatablesDataClasses.isEmpty()) {
+      return;
+    }
+
+    JavaPackage modulePackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+
+    final JavaType javaType =
+        new JavaType(String.format("%s.datatables.DatatablesData", modulePackage),
+            module.getModuleName());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+
+    // Including DatatablesData class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream = FileUtils.getInputStream(getClass(), "DatatablesData-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
+
+      // Creating DatatablesData class
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
   }
 
   /**
@@ -499,6 +551,29 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
       }
     } else {
       return pathResolver;
+    }
+  }
+
+  public FileManager getFileManager() {
+    if (fileManager == null) {
+      // Get all Services implement FileManager interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(FileManager.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          fileManager = (FileManager) this.context.getService(ref);
+          return fileManager;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load FileManager on ThymeleafMVCViewResponseService.");
+        return null;
+      }
+    } else {
+      return fileManager;
     }
   }
 }

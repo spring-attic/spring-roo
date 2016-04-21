@@ -286,7 +286,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   private JavaType generateGlobalSearch(JavaPackage repositoryPackage) {
 
     // First of all, check if already exists a @RooGlobalSearch
-    // interface on current project
+    // class on current project
     Set<JavaType> globalSearchClasses =
         getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
 

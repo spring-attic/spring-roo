@@ -112,6 +112,8 @@ public final class RooJavaType {
   public static final JavaType ROO_WEB_MVC_THYMELEAF_UI_CONFIGURATION =
       new JavaType(
           "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooWebMvcThymeleafUIConfiguration");
+  public static final JavaType ROO_THYMELEAF_DATATABLES_DATA = new JavaType(
+      "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesData");
   public static final JavaType ROO_GLOBAL_SEARCH = new JavaType(
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooGlobalSearch");
 
