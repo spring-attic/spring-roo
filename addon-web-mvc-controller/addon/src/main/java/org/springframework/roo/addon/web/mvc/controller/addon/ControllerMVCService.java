@@ -33,25 +33,6 @@ public interface ControllerMVCService {
    *           with the provided parameters.
    */
   MethodMetadata getMVCMethodByRequestMapping(JavaType controller, EnumDetails method, String path,
-      List<String> params, EnumDetails consumes, EnumDetails produces, String headers);
-
-  /**
-   * This operation will obtain an existing method with the provided
-   * @RequestMapping attributes.
-   * 
-   * @param controller
-   * @param method
-   * @param path
-   * @param params
-   * @param consumes
-   * @param produces
-   * @param headers
-   * 
-   * @return MethodMetadata if exists some method that has @RequestMapping annotation
-   *           with the provided attributes. Will return null if doesn't exists any method that match
-   *           with the provided parameters.
-   */
-  MethodMetadata getMVCMethodByRequestMapping(JavaType controller, EnumDetails method, String path,
       List<String> params, String consumes, String produces, String headers);
 
   /**

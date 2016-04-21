@@ -273,7 +273,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
-            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, "");
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
     if (existingMVCMethod != null) {
       return existingMVCMethod;
     }
@@ -421,10 +421,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
-            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null) {
-      throw new RuntimeException(
-          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+      return existingMVCMethod;
     }
 
     // Define methodName
@@ -470,10 +469,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null,
-            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null) {
-      throw new RuntimeException(
-          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+      return existingMVCMethod;
     }
 
     // Define methodName
@@ -528,10 +526,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_POST, "", null, null,
-            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null) {
-      throw new RuntimeException(
-          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+      return existingMVCMethod;
     }
 
     // Define methodName
@@ -610,10 +607,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET,
             String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null,
-            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null) {
-      throw new RuntimeException(
-          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+      return existingMVCMethod;
     }
 
     // Define methodName
@@ -669,10 +665,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_PUT,
             String.format("/{%s}", getEntityField().getFieldName()), null, null,
-            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null) {
-      throw new RuntimeException(
-          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+      return existingMVCMethod;
     }
 
     // Define methodName
@@ -752,10 +747,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
-            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null) {
-      throw new RuntimeException(
-          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+      return existingMVCMethod;
     }
 
     // Define methodName
@@ -813,10 +807,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET,
             String.format("/{%s}", getEntityField().getFieldName()), null, null,
-            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, "");
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null) {
-      throw new RuntimeException(
-          "ERROR: You are trying to generate more than one method with the same @RequestMapping");
+      return existingMVCMethod;
     }
 
     // Define methodName

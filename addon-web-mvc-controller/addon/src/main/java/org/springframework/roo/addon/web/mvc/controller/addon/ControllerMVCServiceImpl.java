@@ -51,58 +51,15 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
 
   @Override
   public MethodMetadata getMVCMethodByRequestMapping(JavaType controller, EnumDetails method,
-      String path, List<String> params, EnumDetails consumes, EnumDetails produces, String headers) {
-
-    // Getting controller member details
-    MemberDetails controllerDetails =
-        getMemberDetailsScanner().getMemberDetails(getClass().toString(),
-            getTypeLocationService().getTypeDetails(controller));
-
-    // Getting all controller methods
-    List<MethodMetadata> methods = controllerDetails.getMethods();
-
-    for (MethodMetadata definedMethod : methods) {
-
-      // Getting request mapping annotation
-      AnnotationMetadata requesMappingAnnotation =
-          definedMethod.getAnnotation(SpringJavaType.REQUEST_MAPPING);
-
-      if (requesMappingAnnotation != null) {
-        // Get all attributes
-        EnumDetails methodAttr =
-            requesMappingAnnotation.getAttribute("method") == null ? null
-                : (EnumDetails) requesMappingAnnotation.getAttribute("method").getValue();
-        String valueAttr =
-            requesMappingAnnotation.getAttribute("value") == null ? ""
-                : (String) requesMappingAnnotation.getAttribute("value").getValue();
-
-        // TODO: Get params and compare them
-
-        EnumDetails consumesAttr =
-            requesMappingAnnotation.getAttribute("consumes") == null ? null
-                : (EnumDetails) requesMappingAnnotation.getAttribute("consumes").getValue();
-        EnumDetails producesAttr =
-            requesMappingAnnotation.getAttribute("produces") == null ? null
-                : (EnumDetails) requesMappingAnnotation.getAttribute("produces").getValue();
-        String headersAttr =
-            requesMappingAnnotation.getAttribute("headers") == null ? ""
-                : (String) requesMappingAnnotation.getAttribute("headers").getValue();
-
-        // If every attribute match, return this method
-        if (methodAttr == method && valueAttr.equals(path) && consumesAttr == consumes
-            && producesAttr == produces && headersAttr.equals(headers)) {
-          return definedMethod;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  @Override
-  public MethodMetadata getMVCMethodByRequestMapping(JavaType controller, EnumDetails method,
       String path, List<String> params, String consumes, String produces, String headers) {
 
+    // Replacing null values with empty
+    path = path == null ? "" : path;
+    consumes = consumes == null ? "" : consumes;
+    produces = produces == null ? "" : produces;
+    headers = headers == null ? "" : headers;
+
+
     // Getting controller member details
     MemberDetails controllerDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().toString(),
@@ -119,28 +76,29 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
 
       if (requesMappingAnnotation != null) {
         // Get all attributes
-        EnumDetails methodAttr =
-            requesMappingAnnotation.getAttribute("method") == null ? null
-                : (EnumDetails) requesMappingAnnotation.getAttribute("method").getValue();
+        String methodAttr =
+            requesMappingAnnotation.getAttribute("method") == null ? "" : requesMappingAnnotation
+                .getAttribute("method").getValue().toString();
         String valueAttr =
-            requesMappingAnnotation.getAttribute("value") == null ? ""
-                : (String) requesMappingAnnotation.getAttribute("value").getValue();
+            requesMappingAnnotation.getAttribute("value") == null ? "" : requesMappingAnnotation
+                .getAttribute("value").getValue().toString();
 
         // TODO: Get params and compare them
 
-        EnumDetails consumesAttr =
-            requesMappingAnnotation.getAttribute("consumes") == null ? null
-                : (EnumDetails) requesMappingAnnotation.getAttribute("consumes").getValue();
-        EnumDetails producesAttr =
-            requesMappingAnnotation.getAttribute("produces") == null ? null
-                : (EnumDetails) requesMappingAnnotation.getAttribute("produces").getValue();
+        String consumesAttr =
+            requesMappingAnnotation.getAttribute("consumes") == null ? "" : requesMappingAnnotation
+                .getAttribute("consumes").getValue().toString();
+        String producesAttr =
+            requesMappingAnnotation.getAttribute("produces") == null ? "" : requesMappingAnnotation
+                .getAttribute("produces").getValue().toString();
         String headersAttr =
-            requesMappingAnnotation.getAttribute("headers") == null ? ""
-                : (String) requesMappingAnnotation.getAttribute("headers").getValue();
+            requesMappingAnnotation.getAttribute("headers") == null ? "" : requesMappingAnnotation
+                .getAttribute("headers").getValue().toString();
 
         // If every attribute match, return this method
-        if (methodAttr == method && valueAttr.equals(path) && consumesAttr.equals(consumes)
-            && producesAttr.equals(produces) && headersAttr.equals(headers)) {
+        if (method.toString().equals(methodAttr) && valueAttr.equals(path)
+            && consumesAttr.equals(consumes) && producesAttr.equals(produces)
+            && headersAttr.equals(headers)) {
           return definedMethod;
         }
       }
