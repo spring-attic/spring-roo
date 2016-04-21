@@ -1,38 +1,42 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Metadata for {@link RooJpaRepositoryCustomImpl}.
+ * Metadata for {@link RooJpaRepositoryCustom}.
  * 
- * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 2.0
  */
-public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-  private static final String PROVIDES_TYPE_STRING = RepositoryJpaCustomImplMetadata.class
-      .getName();
+  private static final String PROVIDES_TYPE_STRING = RepositoryJpaCustomMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
   private ImportRegistrationResolver importResolver;
+  private JavaType globalSearch;
+  private JavaType entity;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -68,57 +72,65 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param identifierType the type of the entity's identifier field
    *            (required)
    * @param domainType entity referenced on interface
-   * @param findAllMethod the findAll metadata 
+   * @param globalSearch the class annotated with @RooGlobalSearch 
    */
-  public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
+  public RepositoryJpaCustomMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
-      final MethodMetadata findAllMethod) {
+      final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
+      final JavaType globalSearch) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
+    Validate.notNull(globalSearch, "Global search required");
 
     this.importResolver = builder.getImportRegistrationResolver();
+    this.globalSearch = globalSearch;
+    this.entity = domainType;
 
-    // Get repository that needs to be implemented
-    ensureGovernorImplements(annotationValues.getRepository());
-
-    // All repositories should be generated with @Transactional(readOnly = true)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", true);
-    ensureGovernorIsAnnotated(transactionalAnnotation);
-
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllImpl(findAllMethod)));
+    // Generate findAll method
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAll()));
 
     // Build the ITD
     itdTypeDetails = builder.build();
   }
 
+
   /**
-   * Method that generates the findAll implementation method
+   * Method that generates the findAll method on current interface
+   * @param javaType 
+   * @param classOrInterfaceTypeDetails 
    * 
-   * @param findAllMethod the findAll method to implement 
+   * @param finderMethod
    * @return
    */
-  public MethodMetadata getFindAllImpl(MethodMetadata findAllMethod) {
+  public MethodMetadata getFindAll() {
 
-    // Use provided findAll method to generate its implementation
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    //Global search parameter
+    parameterTypes.add(new AnnotatedJavaType(globalSearch));
+    parameterNames.add(new JavaSymbolName("globalSearch"));
+
+    // Pageable parameter
+    parameterTypes.add(new AnnotatedJavaType(new JavaType(
+        "org.springframework.data.domain.Pageable")));
+    parameterNames.add(new JavaSymbolName("pageable"));
+
+    // Method name
+    JavaSymbolName methodName = new JavaSymbolName("findAll");
+
+    // Return type
+    JavaType returnType =
+        new JavaType("org.springframework.data.domain.Page", 0, DataType.TYPE, null,
+            Arrays.asList(entity));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, findAllMethod.getMethodName(),
-            findAllMethod.getReturnType(), findAllMethod.getParameterTypes(),
-            findAllMethod.getParameterNames(), null);
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // return null;
-    bodyBuilder.appendFormalLine(String.format("return null;"));
-
-    // Sets body to generated method
-    methodBuilder.setBodyBuilder(bodyBuilder);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            returnType, parameterTypes, parameterNames, null);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
   }
 
 

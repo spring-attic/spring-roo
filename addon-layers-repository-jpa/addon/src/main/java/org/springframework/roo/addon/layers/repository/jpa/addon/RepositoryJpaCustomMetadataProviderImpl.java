@@ -1,17 +1,17 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
-import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
+import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -19,8 +19,6 @@ import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorat
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
@@ -33,18 +31,18 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * Implementation of {@link RepositoryJpaCustomImplMetadataProvider}.
+ * Implementation of {@link RepositoryJpaCustomMetadataProvider}.
  * 
- * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 2.0
  */
 @Component
 @Service
-public class RepositoryJpaCustomImplMetadataProviderImpl extends
-    AbstractMemberDiscoveringItdMetadataProvider implements RepositoryJpaCustomImplMetadataProvider {
+public class RepositoryJpaCustomMetadataProviderImpl extends
+    AbstractMemberDiscoveringItdMetadataProvider implements RepositoryJpaCustomMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
-      .getLogger(RepositoryJpaCustomImplMetadataProviderImpl.class);
+      .getLogger(RepositoryJpaCustomMetadataProviderImpl.class);
 
   private final Map<JavaType, String> domainTypeToRepositoryMidMap =
       new LinkedHashMap<JavaType, String>();
@@ -59,7 +57,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA_CUSTOM_IMPL} as additional 
+   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA_CUSTOM} as additional 
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -74,12 +72,11 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+    addMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM);
 
     this.keyDecoratorTracker =
         new CustomDataKeyDecoratorTracker(context, getClass(), new LayerTypeMatcher(
-            ROO_REPOSITORY_JPA_CUSTOM_IMPL, new JavaSymbolName(
-                RooJpaRepositoryCustomImpl.REPOSITORY_ATTRIBUTE)));
+            ROO_REPOSITORY_JPA_CUSTOM, new JavaSymbolName(RooJpaRepositoryCustom.ENTITY_ATTRIBUTE)));
     this.keyDecoratorTracker.open();
   }
 
@@ -96,7 +93,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+    removeMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM);
 
     CustomDataKeyDecorator keyDecorator = this.keyDecoratorTracker.getService();
     keyDecorator.unregisterMatchers(getClass());
@@ -105,19 +102,18 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return RepositoryJpaCustomImplMetadata.createIdentifier(javaType, path);
+    return RepositoryJpaCustomMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType =
-        RepositoryJpaCustomImplMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = RepositoryJpaCustomImplMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = RepositoryJpaCustomMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = RepositoryJpaCustomMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
   public String getItdUniquenessFilenameSuffix() {
-    return "Jpa_Repository_Impl";
+    return "Jpa_Repository_Custom";
   }
 
   @Override
@@ -147,46 +143,33 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   protected ItdTypeDetailsProvidingMetadataItem getMetadata(
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-    final RepositoryJpaCustomImplAnnotationValues annotationValues =
-        new RepositoryJpaCustomImplAnnotationValues(governorPhysicalTypeMetadata);
+    final RepositoryJpaCustomAnnotationValues annotationValues =
+        new RepositoryJpaCustomAnnotationValues(governorPhysicalTypeMetadata);
 
     // Getting repository custom
-    JavaType repositoryCustom = annotationValues.getRepository();
-
-    // Validate that contains repository interface
-    Validate.notNull(repositoryCustom,
-        "ERROR: You need to specify interface repository to be implemented.");
-
-    ClassOrInterfaceTypeDetails repositoryDetails =
-        getTypeLocationService().getTypeDetails(repositoryCustom);
-
-    AnnotationMetadata repositoryCustomAnnotation =
-        repositoryDetails.getAnnotation(ROO_REPOSITORY_JPA_CUSTOM);
-
-    Validate.notNull(repositoryCustomAnnotation,
-        "ERROR: Repository interface should be annotated with @RooJpaRepositoryCustom");
-
-    AnnotationAttributeValue<JavaType> entityAttribute =
-        repositoryCustomAnnotation.getAttribute("entity");
+    JavaType entity = annotationValues.getEntity();
 
     Validate
-        .notNull(entityAttribute,
-            "ERROR: Repository interface should be contain an entity on @RooJpaRepositoryCustom annotation");
+        .notNull(
+            entity,
+            "ERROR: Repository custom interface should be contain an entity on @RooJpaRepositoryCustom annotation");
 
-    // Getting repository metadata
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
-    final String repositoryMetadataKey =
-        RepositoryJpaCustomMetadata.createIdentifier(repositoryDetails.getType(), logicalPath);
-    final RepositoryJpaCustomMetadata repositoryCustomMetadata =
-        (RepositoryJpaCustomMetadata) getMetadataService().get(repositoryMetadataKey);
+    // Getting the class annotated with @RooGlobalSearch
+    Set<ClassOrInterfaceTypeDetails> globalSearchDetails =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_GLOBAL_SEARCH);
 
-    return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(),
-        repositoryCustomMetadata.getFindAll());
+    if (globalSearchDetails.size() == 0) {
+      throw new RuntimeException("ERROR: Not found a class annotated with @RooGlobalSearch");
+    }
+
+    return new RepositoryJpaCustomMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, annotationValues, entity, globalSearchDetails.iterator()
+            .next().getType());
   }
 
+
   public String getProvidesType() {
-    return RepositoryJpaCustomImplMetadata.getMetadataIdentiferType();
+    return RepositoryJpaCustomMetadata.getMetadataIdentiferType();
   }
 }
