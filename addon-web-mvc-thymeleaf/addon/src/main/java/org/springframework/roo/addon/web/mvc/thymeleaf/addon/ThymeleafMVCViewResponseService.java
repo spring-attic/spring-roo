@@ -192,11 +192,11 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
     addThymeleafDependencies(module);
     // Is necessary to generate the main controller
     addMainController(module);
-    // Is necessary to copy static resources
-    copyStaticResources(module);
     // Thymeleaf needs Datatables component to list
     // data, so is necessary to install Datatables resources
     addThymeleafDatatablesResources(module);
+    // Is necessary to copy static resources
+    copyStaticResources(module);
   }
 
   /**
@@ -336,12 +336,177 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
         new Dependency("com.github.dandelion", "datatables-thymeleaf", "1.1.0"));
 
     // Add WebMVCThymeleafUIConfiguration config class
-    addDatatablesDataClass(module);
     addWebMVCThymeleafUIConfigurationClass(module);
+
+    // Add DatatablesData.java class
+    addDatatablesDataClass(module);
+
+    // Add DatatablesPageableHandlerMethodArgumentResolver.java class
+    addDatatablesPageableHandlerMethodArgumentResolverClass(module);
+
+    // Add DatatablesSortHandlerMethodArgumentResolver.java class
+    addDatatablesSortHandlerMethodArgumentResolverClass(module);
+
+    // Add GlobalSearchHandlerMethodArgumentResolver.java
+    addGlobalSearchHandlerMethodArgumentResolverClass(module);
   }
 
   /**
-   * This method adds new DatatablesData.class annotated with @RooDatatablesData.
+   * This method adds new GlobalSearchHandlerMethodArgumentResolver.java class
+   * annotated with @RooThymeleafGlobalSearchHandler
+   * 
+   * @param module
+   */
+  private void addGlobalSearchHandlerMethodArgumentResolverClass(Pom module) {
+    // First of all, check if already exists a @RooThymeleafGlobalSearchHandler
+    // class on current project
+    Set<JavaType> globalSearchHandlerClasses =
+        getTypeLocationService().findTypesWithAnnotation(
+            RooJavaType.ROO_THYMELEAF_DATATABLES_GLOBAL_SEARCH_HANDLER);
+
+    if (!globalSearchHandlerClasses.isEmpty()) {
+      return;
+    }
+
+    // Getting generated global class
+    Set<ClassOrInterfaceTypeDetails> gobalSearchClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_GLOBAL_SEARCH);
+    if (gobalSearchClasses.isEmpty()) {
+      throw new RuntimeException(
+          "ERROR: GlobalSearch.java class doesn't exists or has been deleted.");
+    }
+    JavaType globalSearchClass = null;
+    Iterator<ClassOrInterfaceTypeDetails> it = gobalSearchClasses.iterator();
+    while (it.hasNext()) {
+      globalSearchClass = it.next().getType();
+      break;
+    }
+
+    JavaPackage modulePackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+
+    final JavaType javaType =
+        new JavaType(String.format("%s.datatables.GlobalSearchHandlerMethodArgumentResolver",
+            modulePackage), module.getModuleName());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+    // Including GlobalSearchHandlerMethodArgumentResolver class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream =
+          FileUtils.getInputStream(getClass(),
+              "GlobalSearchHandlerMethodArgumentResolver-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
+      input = input.replace("__GLOBAL_SEARCH__", globalSearchClass.getFullyQualifiedTypeName());
+
+
+      // Creating GlobalSearchHandlerMethodArgumentResolver class
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+  }
+
+  /**
+   * This method adds new DatatablesSortHandlerMethodArgumentResolver.java class
+   * annotated with @RooThymeleafDatatablesSortHandler
+   * 
+   * @param module
+   */
+  private void addDatatablesSortHandlerMethodArgumentResolverClass(Pom module) {
+    // First of all, check if already exists a @RooThymeleafDatatablesSortHandler
+    // class on current project
+    Set<JavaType> sortHandlerClasses =
+        getTypeLocationService().findTypesWithAnnotation(
+            RooJavaType.ROO_THYMELEAF_DATATABLES_SORT_HANDLER);
+
+    if (!sortHandlerClasses.isEmpty()) {
+      return;
+    }
+
+    JavaPackage modulePackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+
+    final JavaType javaType =
+        new JavaType(String.format("%s.datatables.DatatablesSortHandlerMethodArgumentResolver",
+            modulePackage), module.getModuleName());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+
+    // Including DatatablesSortHandlerMethodArgumentResolver class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream =
+          FileUtils.getInputStream(getClass(),
+              "DatatablesSortHandlerMethodArgumentResolver-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
+
+      // Creating DatatablesSortHandlerMethodArgumentResolver class
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+  }
+
+  /**
+   * This method adds new DatatablesPageableHandlerMethodArgumentResolver.java class
+   * annotated with @RooThymeleafDatatablesPageableHandler
+   * 
+   * @param module
+   */
+  private void addDatatablesPageableHandlerMethodArgumentResolverClass(Pom module) {
+    // First of all, check if already exists a @RooThymeleafDatatablesPageableHandler
+    // class on current project
+    Set<JavaType> pageableHandlerClasses =
+        getTypeLocationService().findTypesWithAnnotation(
+            RooJavaType.ROO_THYMELEAF_DATATABLES_PAGEABLE_HANDLER);
+
+    if (!pageableHandlerClasses.isEmpty()) {
+      return;
+    }
+
+    JavaPackage modulePackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+
+    final JavaType javaType =
+        new JavaType(String.format("%s.datatables.DatatablesPageableHandlerMethodArgumentResolver",
+            modulePackage), module.getModuleName());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+
+    // Including DatatablesPageableHandlerMethodArgumentResolver class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream =
+          FileUtils.getInputStream(getClass(),
+              "DatatablesPageableHandlerMethodArgumentResolver-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
+
+      // Creating DatatablesPageableHandlerMethodArgumentResolver class
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+  }
+
+  /**
+   * This method adds new DatatablesData.java annotated with @RooDatatablesData.
    * 
    * This class will be used on Thymeleaf Controllers to return DatatablesData object.
    * 

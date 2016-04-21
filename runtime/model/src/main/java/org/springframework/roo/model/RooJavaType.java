@@ -114,6 +114,15 @@ public final class RooJavaType {
           "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooWebMvcThymeleafUIConfiguration");
   public static final JavaType ROO_THYMELEAF_DATATABLES_DATA = new JavaType(
       "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesData");
+  public static final JavaType ROO_THYMELEAF_DATATABLES_PAGEABLE_HANDLER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesPageableHandler");
+  public static final JavaType ROO_THYMELEAF_DATATABLES_SORT_HANDLER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesSortHandler");
+  public static final JavaType ROO_THYMELEAF_DATATABLES_GLOBAL_SEARCH_HANDLER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafGlobalSearchHandler");
   public static final JavaType ROO_GLOBAL_SEARCH = new JavaType(
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooGlobalSearch");
 
