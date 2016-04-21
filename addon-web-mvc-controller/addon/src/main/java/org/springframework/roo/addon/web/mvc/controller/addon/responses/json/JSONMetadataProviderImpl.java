@@ -19,6 +19,7 @@ import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -650,15 +651,15 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
    * @return
    */
   private FieldMetadata getServiceField() {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(this.controller.getDeclaredByMetadataId());
+    final String controllerMetadataKey =
+        ControllerMetadata.createIdentifier(this.controller.getType(), logicalPath);
+    registerDependency(controllerMetadataKey, metadataIdentificationString);
+    final ControllerMetadata controllerMetadata =
+        (ControllerMetadata) getMetadataService().get(controllerMetadataKey);
 
-    // Generating service field name
-    String fieldName =
-        new JavaSymbolName(this.service.getSimpleTypeName())
-            .getSymbolNameUnCapitalisedFirstLetter();
-
-    return new FieldMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC,
-        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.service)
-        .build();
+    return controllerMetadata.getServiceField();
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

@@ -23,6 +23,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -223,9 +224,24 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     if (globalSearchClasses.isEmpty()) {
       throw new RuntimeException("ERROR: GlobalSearch.java file doesn't exist or has been deleted.");
     }
-    Iterator<ClassOrInterfaceTypeDetails> it = globalSearchClasses.iterator();
-    while (it.hasNext()) {
-      this.globalSearchType = it.next().getType();
+    Iterator<ClassOrInterfaceTypeDetails> gobalSearchClassIterator = globalSearchClasses.iterator();
+    while (gobalSearchClassIterator.hasNext()) {
+      this.globalSearchType = gobalSearchClassIterator.next().getType();
+      break;
+    }
+
+    // Getting DatatablesDataType
+    Set<ClassOrInterfaceTypeDetails> datatablesDataClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_THYMELEAF_DATATABLES_DATA);
+    if (datatablesDataClasses.isEmpty()) {
+      throw new RuntimeException(
+          "ERROR: DatatablesData.java file doesn't exist or has been deleted.");
+    }
+    Iterator<ClassOrInterfaceTypeDetails> datatablesDataClassIterator =
+        datatablesDataClasses.iterator();
+    while (datatablesDataClassIterator.hasNext()) {
+      this.datatablesDataType = datatablesDataClassIterator.next().getType();
       break;
     }
 
@@ -237,8 +253,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     return new ThymeleafMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, getListFormMethod(), getListJSONMethod(serviceFindAllMethod),
-        getListDatatablesJSONMethod(serviceFindAllMethod, serviceCountMethod),
-        getCreateFormMethod(), getCreateMethod(serviceSaveMethod), getEditFormMethod(),
+        getListDatatablesJSONMethod(serviceCountMethod), getCreateFormMethod(),
+        getCreateMethod(serviceSaveMethod), getEditFormMethod(),
         getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod), getShowMethod(),
         getPopulateFormMethod(), this.readOnly, typesToImport);
   }
@@ -321,13 +337,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
    * This method provides the "list" Datatables JSON method  using JSON 
    * response type and returns Datatables element
    * 
-   * @param serviceFindAllMethod
    * @param serviceCountMethod
    * 
    * @return MethodMetadata
    */
-  private MethodMetadata getListDatatablesJSONMethod(MethodMetadata serviceFindAllMethod,
-      MethodMetadata serviceCountMethod) {
+  private MethodMetadata getListDatatablesJSONMethod(MethodMetadata serviceCountMethod) {
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
@@ -366,24 +380,25 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Page<Entity> entityField = serviceField.findAll(search, pageable);
-    // TODO: Change to use findAll Datatables method
-    /*bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
+    // Page<Entity> entityField = list(search, pageable);
+    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = list(search, pageable);",
         addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(this.entity)
-            .getSimpleTypeName(), getEntityField().getFieldName(),
-        getServiceField().getFieldName(), serviceFindAllMethod.getMethodName()));
-    
-    // return entityField;
-    bodyBuilder.appendFormalLine(String.format("return %s;", getEntityField().getFieldName()));*/
+            .getSimpleTypeName(), getEntityField().getFieldName()));
 
-    // TODO: Remove this body implementation when findAll method be available
-    bodyBuilder
-        .appendFormalLine("// TODO: Remove this body implementation when findAll method be available.");
-    bodyBuilder.appendFormalLine("return null;");
+    // long allAvailableEntity = serviceField.count();
+    bodyBuilder.appendFormalLine(String.format("long allAvailable%s = %s.%s();",
+        this.entity.getSimpleTypeName(), getServiceField().getFieldName(),
+        serviceCountMethod.getMethodName()));
+
+    // return new DatatablesData<Entity>(entityField, allAvailableEntity, draw);
+    bodyBuilder.appendFormalLine(String.format("return new %s<%s>(%s, allAvailable%s, draw);",
+        addTypeToImport(this.datatablesDataType).getSimpleTypeName(),
+        this.entity.getSimpleTypeName(), getEntityField().getFieldName(),
+        this.entity.getSimpleTypeName()));
 
     // Generating returnType
     JavaType returnType =
-        new JavaType(SpringJavaType.PAGE.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+        new JavaType(this.datatablesDataType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
             Arrays.asList(this.entity));
 
     MethodMetadataBuilder methodBuilder =
@@ -933,15 +948,15 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
    * @return
    */
   private FieldMetadata getServiceField() {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(this.controller.getDeclaredByMetadataId());
+    final String controllerMetadataKey =
+        ControllerMetadata.createIdentifier(this.controller.getType(), logicalPath);
+    registerDependency(controllerMetadataKey, metadataIdentificationString);
+    final ControllerMetadata controllerMetadata =
+        (ControllerMetadata) getMetadataService().get(controllerMetadataKey);
 
-    // Generating service field name
-    String fieldName =
-        new JavaSymbolName(this.service.getSimpleTypeName())
-            .getSymbolNameUnCapitalisedFirstLetter();
-
-    return new FieldMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC,
-        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.service)
-        .build();
+    return controllerMetadata.getServiceField();
   }
 
 
