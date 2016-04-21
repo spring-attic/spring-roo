@@ -711,6 +711,9 @@ if [[ "$COMMAND" = "assembly" ]]; then
             load_roo_build_and_test script multimodule-web-mvc-embedded-test.roo
             load_roo_build_and_test script multimodule-web-mvc-weblogic-test.roo
 
+		load_roo_build_and_test script web-finder-test.roo
+		load_roo_build_and_test script multimodule-web-finder-test.roo
+
         # Temporally disabled
 	    
         #load_roo_build_and_test script vote.roo
