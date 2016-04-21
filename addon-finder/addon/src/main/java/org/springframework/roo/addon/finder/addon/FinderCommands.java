@@ -27,8 +27,8 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -48,6 +48,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Stefan Schmidt
  * @author Paula Navarro
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.0
  */
 @Component
@@ -141,16 +142,19 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
   }
 
   @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
-      param = "class", help = "--class option should be an entity.", validate = false)
+      param = "class", help = "--class option should be an entity.")
   public List<String> getClassPossibleResults(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("class");
 
     List<String> allPossibleValues = new ArrayList<String>();
 
     Set<ClassOrInterfaceTypeDetails> dtosInProject =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_JPA_ENTITY, JpaJavaType.ENTITY);
+            RooJavaType.ROO_JPA_ENTITY);
     for (ClassOrInterfaceTypeDetails dto : dtosInProject) {
-      String name = replaceTopLevelPackageString(dto);
+      String name = replaceTopLevelPackageString(dto, currentText);
       if (!allPossibleValues.contains(name)) {
         allPossibleValues.add(name);
       }
@@ -161,15 +165,18 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
 
   @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
       param = "returnType",
-      help = "--returnType option should be a DTO class, annotated with @RooDTO.", validate = false)
+      help = "--returnType option should be a DTO class, annotated with @RooDTO.")
   public List<String> getReturnTypePossibleResults(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("returnType");
 
     List<String> allPossibleValues = new ArrayList<String>();
 
     Set<ClassOrInterfaceTypeDetails> dtosInProject =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
     for (ClassOrInterfaceTypeDetails dto : dtosInProject) {
-      String name = replaceTopLevelPackageString(dto);
+      String name = replaceTopLevelPackageString(dto, currentText);
       if (!allPossibleValues.contains(name)) {
         allPossibleValues.add(name);
       }
@@ -205,27 +212,53 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
    * 
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
    */
-  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid) {
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
     String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
     String javaTypeString = "";
     String topLevelPackageString = "";
-    if (StringUtils.isNotBlank(cid.getType().getModule())) {
-      javaTypeString = cid.getType().getModule().concat(":");
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
       topLevelPackageString =
           getProjectOperations().getTopLevelPackage(cid.getType().getModule())
               .getFullyQualifiedPackageName();
     } else {
+
+      // Not multimodule project
       topLevelPackageString =
           getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
     }
 
-    // Replace String if necessary
-    if (StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
-      javaTypeString =
-          javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
-              topLevelPackageString, "~"));
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value  
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
     }
 
     return javaTypeString;

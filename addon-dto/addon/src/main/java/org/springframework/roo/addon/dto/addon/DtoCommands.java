@@ -16,6 +16,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -134,9 +135,11 @@ public class DtoCommands implements CommandMarker {
    * @return List<String> with available entity full qualified names.
    */
   @CliOptionAutocompleteIndicator(command = "dto", param = "entity",
-      help = "Option entity must have an existing entity value. Please, assign it a right value.",
-      validate = false)
+      help = "Option entity must have an existing entity value. Please, assign it a right value.")
   public List<String> returnEntityValues(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("entity");
 
     // Create results to return
     List<String> results = new ArrayList<String>();
@@ -146,7 +149,7 @@ public class DtoCommands implements CommandMarker {
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY,
             JpaJavaType.ENTITY);
     for (ClassOrInterfaceTypeDetails entity : entities) {
-      String name = replaceTopLevelPackageString(entity);
+      String name = replaceTopLevelPackageString(entity, currentText);
       if (!results.contains(name)) {
         results.add(name);
       }
@@ -232,27 +235,53 @@ public class DtoCommands implements CommandMarker {
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
    * 
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
    */
-  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid) {
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
     String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
     String javaTypeString = "";
     String topLevelPackageString = "";
-    if (StringUtils.isNotBlank(cid.getType().getModule())) {
-      javaTypeString = cid.getType().getModule().concat(":");
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(projectOperations.getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(projectOperations.getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
       topLevelPackageString =
           projectOperations.getTopLevelPackage(cid.getType().getModule())
               .getFullyQualifiedPackageName();
     } else {
+
+      // Not multimodule project
       topLevelPackageString =
           projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName();
     }
 
-    // Replace String if necessary
-    if (StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
-      javaTypeString =
-          javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
-              topLevelPackageString, "~"));
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value  
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
     }
 
     return javaTypeString;

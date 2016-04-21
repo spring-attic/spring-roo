@@ -3,7 +3,6 @@ package org.springframework.roo.addon.layers.service.addon;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,15 +17,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.finder.addon.parser.PartTree;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.converters.JavaTypeConverter;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -37,10 +34,6 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import static org.springframework.roo.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
-import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
-
 
 /**
  * This class defines available commands to manage service layer. Allows to
@@ -124,6 +117,9 @@ public class ServiceCommands implements CommandMarker {
       help = "--repository parameter must  be the repository associated to the entity specified in --entity parameter. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)")
   public List<String> returnRepositories(ShellContext shellContext) {
 
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("repository");
+
     List<String> allPossibleValues = new ArrayList<String>();
 
     // Get all defined parameters
@@ -149,12 +145,8 @@ public class ServiceCommands implements CommandMarker {
             repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
 
         if (entityAttr != null && entityAttr.getValue().equals(domainEntity)) {
-          String module = repository.getType().getModule();
-
-          if (!module.equals(projectOperations.getFocusedModuleName())) {
-            value = module + MODULE_PATH_SEPARATOR;
-          }
-          allPossibleValues.add(value.concat(repository.getType().getFullyQualifiedTypeName()));
+          String replacedValue = replaceTopLevelPackageString(repository, currentText);
+          allPossibleValues.add(replacedValue);
         }
       }
 
@@ -199,6 +191,63 @@ public class ServiceCommands implements CommandMarker {
     serviceOperations.addAllServices(apiPackage, implPackage);
   }
 
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * 
+   * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(projectOperations.getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(projectOperations.getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value  
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
+    }
+
+    return javaTypeString;
+  }
+
+  @SuppressWarnings("unchecked")
   public Converter<JavaType> getJavaTypeConverter() {
     if (javaTypeConverter == null) {
       // Get all Services implement JavaTypeConverter interface
