@@ -46,7 +46,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -78,8 +77,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   private ClassOrInterfaceTypeDetails controller;
 
   private ControllerMVCService controllerMVCService;
-
-  private ProjectOperations projectOperations;
 
   /**
    * This service is being activated so setup it:
@@ -229,27 +226,17 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
           // Add dependencies between modules
           List<JavaType> types = new ArrayList<JavaType>();
-          types.add(finderMethod.getReturnType());
-          types.addAll(finderMethod.getReturnType().getParameters());
+          types.add(serviceFinder.getReturnType());
+          types.addAll(serviceFinder.getReturnType().getParameters());
 
-          for (AnnotatedJavaType parameter : finderMethod.getParameterTypes()) {
-            types.add(parameter.getJavaType());
-            types.addAll(parameter.getJavaType().getParameters());
+          for (FinderParameter parameter : serviceFinder.getParameters()) {
+            types.add(parameter.getType());
+            types.addAll(parameter.getType().getParameters());
           }
 
           for (JavaType parameter : types) {
-            if (parameter.getModule() != null) {
-              getProjectOperations().addModuleDependency(
-                  governorPhysicalTypeMetadata.getType().getModule(), parameter.getModule());
-            } else {
-              ClassOrInterfaceTypeDetails details =
-                  getTypeLocationService().getTypeDetails(parameter);
-              if (details != null && details.getName().getModule() != null) {
-                getProjectOperations().addModuleDependency(
-                    governorPhysicalTypeMetadata.getType().getModule(),
-                    details.getName().getModule());
-              }
-            }
+            getTypeLocationService().addModuleDependency(
+                governorPhysicalTypeMetadata.getType().getModule(), parameter);
           }
 
           finders.remove(serviceFinder.getMethodName().toString());
@@ -710,29 +697,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       }
     } else {
       return controllerMVCService;
-    }
-  }
-
-  public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on JSONMetadataProviderImpl.");
-        return null;
-      }
-    } else {
-      return projectOperations;
     }
   }
 

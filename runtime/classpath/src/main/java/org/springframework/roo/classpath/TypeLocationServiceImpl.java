@@ -692,6 +692,18 @@ public class TypeLocationServiceImpl implements TypeLocationService {
     }
   }
 
+  public void addModuleDependency(final String moduleName, final JavaType moduleJavaTypeToDependUpon) {
+    if (moduleJavaTypeToDependUpon.getModule() != null) {
+      getProjectOperations()
+          .addModuleDependency(moduleName, moduleJavaTypeToDependUpon.getModule());
+    } else {
+      ClassOrInterfaceTypeDetails details = getTypeDetails(moduleJavaTypeToDependUpon);
+      if (details != null && details.getName().getModule() != null) {
+        getProjectOperations().addModuleDependency(moduleName, details.getName().getModule());
+      }
+    }
+  }
+
   public void removeDependencies(ModuleFeatureName moduleFeatureName,
       final Collection<? extends Dependency> newDependencies) {
     for (String moduleName : getModuleNames(moduleFeatureName)) {

@@ -128,12 +128,12 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
 
         // TODO: Get params and compare them
 
-        String consumesAttr =
-            requesMappingAnnotation.getAttribute("consumes") == null ? ""
-                : (String) requesMappingAnnotation.getAttribute("consumes").getValue();
-        String producesAttr =
-            requesMappingAnnotation.getAttribute("produces") == null ? ""
-                : (String) requesMappingAnnotation.getAttribute("produces").getValue();
+        EnumDetails consumesAttr =
+            requesMappingAnnotation.getAttribute("consumes") == null ? null
+                : (EnumDetails) requesMappingAnnotation.getAttribute("consumes").getValue();
+        EnumDetails producesAttr =
+            requesMappingAnnotation.getAttribute("produces") == null ? null
+                : (EnumDetails) requesMappingAnnotation.getAttribute("produces").getValue();
         String headersAttr =
             requesMappingAnnotation.getAttribute("headers") == null ? ""
                 : (String) requesMappingAnnotation.getAttribute("headers").getValue();

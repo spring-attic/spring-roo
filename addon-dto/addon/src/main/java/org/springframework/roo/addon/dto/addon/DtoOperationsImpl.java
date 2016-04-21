@@ -280,6 +280,10 @@ public class DtoOperationsImpl implements DtoOperations {
         fieldBuilder = new FieldMetadataBuilder(dtoBuilder.getDeclaredByMetadataId(), field);
       }
 
+      // Add dependency between modules
+      typeLocationService.addModuleDependency(dtoBuilder.getName().getModule(),
+          field.getFieldType());
+
       // If it is a CollectionField it needs an initializer
       String initializer = null;
       if (fieldDetails instanceof CollectionField) {

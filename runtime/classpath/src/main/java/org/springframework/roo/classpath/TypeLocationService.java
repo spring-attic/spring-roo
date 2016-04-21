@@ -38,6 +38,14 @@ public interface TypeLocationService {
       Collection<? extends Dependency> dependencies);
 
   /**
+   * Adds to the given module the dependency with the module that contains the java type.
+   * 
+   * @param moduleName the name of the module where to install the dependency (required)
+   * @param moduleJavaType the java type that belongs to the module to act upon 
+   */
+  void addModuleDependency(String module, JavaType moduleJavaType);
+
+  /**
    * Attempts to remove the specified dependencies from modules that have installed a module feature. If all the dependencies do
    * not exist according to
    * {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method

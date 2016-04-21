@@ -156,8 +156,12 @@ public class FinderOperationsImpl implements FinderOperations {
     // Add returnType attribute
     if (returnType == null) {
       singleFinderAnnotation.addClassAttribute("returnType", entity);
+      getProjectOperations().addModuleDependency(repository.getName().getModule(),
+          entity.getModule());
     } else {
       singleFinderAnnotation.addClassAttribute("returnType", returnType);
+      getProjectOperations().addModuleDependency(repository.getName().getModule(),
+          returnType.getModule());
     }
 
     NestedAnnotationAttributeValue newFinder =

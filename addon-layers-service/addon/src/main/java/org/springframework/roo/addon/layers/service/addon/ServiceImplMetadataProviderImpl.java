@@ -17,6 +17,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.finder.addon.FinderMetadata;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
+import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.annotations.RooServiceImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -233,6 +234,23 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     if (finderMetadata != null) {
       finders = finderMetadata.getFinders();
+
+      // Add dependencies between modules
+      for (FinderMethod finder : finders) {
+        List<JavaType> types = new ArrayList<JavaType>();
+        types.add(finder.getReturnType());
+        types.addAll(finder.getReturnType().getParameters());
+
+        for (FinderParameter parameter : finder.getParameters()) {
+          types.add(parameter.getType());
+          types.addAll(parameter.getType().getParameters());
+        }
+
+        for (JavaType parameter : types) {
+          getTypeLocationService().addModuleDependency(
+              governorPhysicalTypeMetadata.getType().getModule(), parameter);
+        }
+      }
     }
 
     return new ServiceImplMetadata(metadataIdentificationString, aspectName,

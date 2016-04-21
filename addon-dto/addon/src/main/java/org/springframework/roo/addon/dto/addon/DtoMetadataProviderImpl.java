@@ -101,6 +101,11 @@ public class DtoMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadat
     List<FieldMetadata> fields =
         getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), cid).getFields();
 
+    // Add dependency between modules
+    for (FieldMetadata field : fields) {
+      getTypeLocationService().addModuleDependency(cid.getName().getModule(), field.getFieldType());
+    }
+
     return new DtoMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata,
         annotationValues, fields);
   }
