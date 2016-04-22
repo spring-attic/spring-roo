@@ -248,11 +248,13 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     // Getting methods from related service
     MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
     MethodMetadata serviceDeleteMethod = serviceMetadata.getDeleteMethod();
-    MethodMetadata serviceFindAllMethod = serviceMetadata.getFindAllMethod();
+    MethodMetadata serviceFindAllGlobalSearchMethod =
+        serviceMetadata.getFindAllGlobalSearchMethod();
     MethodMetadata serviceCountMethod = serviceMetadata.getCountMethod();
 
     return new ThymeleafMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, getListFormMethod(), getListJSONMethod(serviceFindAllMethod),
+        governorPhysicalTypeMetadata, getListFormMethod(),
+        getListJSONMethod(serviceFindAllGlobalSearchMethod),
         getListDatatablesJSONMethod(serviceCountMethod), getCreateFormMethod(),
         getCreateMethod(serviceSaveMethod), getEditFormMethod(),
         getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod), getShowMethod(),
@@ -263,11 +265,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
    * This method provides the "list" JSON method using JSON 
    * response type and returns Page element
    * 
-   * @param serviceFindAllMethod
+   * @param serviceFindAllGlobalSearchMethod
    * 
    * @return MethodMetadata
    */
-  private MethodMetadata getListJSONMethod(MethodMetadata serviceFindAllMethod) {
+  private MethodMetadata getListJSONMethod(MethodMetadata serviceFindAllGlobalSearchMethod) {
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
@@ -306,19 +308,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // Page<Entity> entityField = serviceField.findAll(search, pageable);
-    // TODO: Change to use findAll Datatables method
-    /*bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
+    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
         addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(this.entity)
             .getSimpleTypeName(), getEntityField().getFieldName(),
-        getServiceField().getFieldName(), serviceFindAllMethod.getMethodName()));
-    
-    // return entityField;
-    bodyBuilder.appendFormalLine(String.format("return %s;", getEntityField().getFieldName()));*/
+        getServiceField().getFieldName(), serviceFindAllGlobalSearchMethod.getMethodName()));
 
-    // TODO: Remove this body implementation when findAll method be available
-    bodyBuilder
-        .appendFormalLine("// TODO: Remove this body implementation when findAll method be available.");
-    bodyBuilder.appendFormalLine("return null;");
+    // return entityField;
+    bodyBuilder.appendFormalLine(String.format("return %s;", getEntityField().getFieldName()));
+
 
     // Generating returnType
     JavaType returnType =

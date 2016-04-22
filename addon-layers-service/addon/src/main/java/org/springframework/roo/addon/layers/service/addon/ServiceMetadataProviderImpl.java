@@ -13,12 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.finder.addon.FinderMetadata;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomMetadata;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -233,8 +232,41 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
       }
     }
 
+    // Getting methods declared on related RepositoryJpaCustomMetadata
+    ClassOrInterfaceTypeDetails customRepositoryDetails = null;
+    Set<ClassOrInterfaceTypeDetails> customRepositories =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
+    for (ClassOrInterfaceTypeDetails customRepo : customRepositories) {
+      AnnotationAttributeValue<JavaType> entityAttr =
+          customRepo.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM).getAttribute("entity");
+      if (entityAttr != null && entityAttr.getValue().equals(entity)) {
+        customRepositoryDetails = customRepo;
+      }
+    }
+
+    // Check if we have a valid repository
+    Validate
+        .notNull(
+            repositoryDetails,
+            String
+                .format(
+                    "ERROR: A valid @RooJpaCustomRepository for entity '%s' doesn't exists or has been deleted",
+                    entity.getSimpleTypeName()));
+
+    // Getting finders to be included on current service
+    final LogicalPath customLogicalPath =
+        PhysicalTypeIdentifier.getPath(customRepositoryDetails.getDeclaredByMetadataId());
+    final String customRepositoryMetadataKey =
+        RepositoryJpaCustomMetadata.createIdentifier(customRepositoryDetails.getType(),
+            customLogicalPath);
+    registerDependency(customRepositoryMetadataKey, metadataIdentificationString);
+    final RepositoryJpaCustomMetadata repositoryCustomMetadata =
+        (RepositoryJpaCustomMetadata) getMetadataService().get(customRepositoryMetadataKey);
+
     return new ServiceMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders);
+        governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders,
+        repositoryCustomMetadata.getFindAllGlobalSearchMethod());
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

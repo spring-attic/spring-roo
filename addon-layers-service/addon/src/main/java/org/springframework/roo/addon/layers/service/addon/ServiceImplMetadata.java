@@ -2,26 +2,26 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
-import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.annotations.RooServiceImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
@@ -38,6 +38,13 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private static final String PROVIDES_TYPE_STRING = ServiceImplMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
+
+  private ImportRegistrationResolver importResolver;
+
+  private JavaType repository;
+  private JavaType entity;
+  private List<MethodMetadata> allImplementedMethods;
+  private MethodMetadata findAllIterableMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -69,19 +76,21 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
-   * @param serviceInterface the JavaType of service interface
-   * @param repository the javatype of related repository
-   * @param entity the entity that is managed by current service
-   * @param readOnly boolean that specifies if related entity is readOnly or not
-   * @param finders list of finders to be included
+   * @param serviceInterface JavaType with interface that this service will implement
+   * @param methodsToBeImplemented list of MethodMetadata that represents all necessary methods
+   *            that should be implemented on current service implementation
    */
   public ServiceImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType serviceInterface,
-      final ClassOrInterfaceTypeDetails repository, final JavaType entity,
-      final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders) {
+      final JavaType repository, final JavaType entity, final MethodMetadata findAllIterableMethod,
+      final List<MethodMetadata> methodsToBeImplemented) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
-    Validate.notNull(serviceInterface, "ERROR: Service interface required");
+    this.importResolver = builder.getImportRegistrationResolver();
+    this.entity = entity;
+    this.repository = repository;
+    this.findAllIterableMethod = findAllIterableMethod;
+    this.setAllImplementedMethods(methodsToBeImplemented);
 
     // Get service that needs to be implemented
     ensureGovernorImplements(serviceInterface);
@@ -102,30 +111,16 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // a repository related with managed entity
     FieldMetadataBuilder repositoryFieldMetadata =
         new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
-            new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName("repository"),
-            repository.getType());
+            new ArrayList<AnnotationMetadataBuilder>(), getRepositoryField().getFieldName(),
+            getRepositoryField().getFieldType());
     ensureGovernorHasField(repositoryFieldMetadata);
 
     // Add constructor
-    ensureGovernorHasConstructor(getConstructor(repository));
+    ensureGovernorHasConstructor(getConstructor());
 
-    // Generating persistent methods for not readOnly entities
-    if (!readOnly) {
-      ensureGovernorHasMethod(getSaveMethod(entity, repository.getType()));
-      ensureGovernorHasMethod(getDeleteMethod(identifierType, repository.getType()));
-      ensureGovernorHasMethod(getSaveBatchMethod(entity, repository.getType()));
-      ensureGovernorHasMethod(getDeleteBatchMethod(entity, identifierType, repository.getType()));
-    }
-
-    // Implements readOnly methods for every services
-    ensureGovernorHasMethod(getFindAllMethod(entity, repository.getType()));
-    ensureGovernorHasMethod(getFindAllIterableMethod(entity, identifierType, repository.getType()));
-    ensureGovernorHasMethod(getFindOneMethod(entity, identifierType, repository.getType()));
-    ensureGovernorHasMethod(getCountMethod(repository.getType()));
-
-    // Generating finders
-    for (FinderMethod finder : finders) {
-      ensureGovernorHasMethod(getFinderMethod(finder, repository.getType()));
+    // Generating all methods that should be implemented
+    for (MethodMetadata method : methodsToBeImplemented) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method)));
     }
 
     // Build the ITD
@@ -136,18 +131,19 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
    * Method that generates Service implementation constructor. If exists a
    * repository, it will be included as constructor parameter
    * 
-   * @param repository
    * @return
    */
-  public ConstructorMetadataBuilder getConstructor(ClassOrInterfaceTypeDetails repository) {
+  public ConstructorMetadataBuilder getConstructor() {
 
     ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // Append repository parameter if needed
     if (repository != null) {
-      constructorBuilder.addParameter("repository", repository.getType());
-      bodyBuilder.appendFormalLine("this.repository = repository;");
+      constructorBuilder.addParameter(getRepositoryField().getFieldName().getSymbolName(),
+          this.repository);
+      bodyBuilder.appendFormalLine(String.format("this.%s = %s;", getRepositoryField()
+          .getFieldName().getSymbolName(), getRepositoryField().getFieldName().getSymbolName()));
     }
 
     constructorBuilder.setBodyBuilder(bodyBuilder);
@@ -160,370 +156,106 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   }
 
   /**
-   * Method that generates method "findAll" method.
+   * Method that generates implementation of provided method
    * 
-   * @param entity
-   * @param repository
-   * @return MethodMetadataBuilder with public List <Entity> findAll();
-   *         structure
+   * @return MethodMetadataBuilder 
    */
-  private MethodMetadataBuilder getFindAllMethod(JavaType entity, JavaType repository) {
+  private MethodMetadata getMethod(final MethodMetadata methodToBeImplemented) {
+    // Define methodName
+    JavaSymbolName methodName = methodToBeImplemented.getMethodName();
+
     // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<AnnotatedJavaType> parameterTypes = methodToBeImplemented.getParameterTypes();
 
     // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    List<JavaSymbolName> parameterNames = methodToBeImplemented.getParameterNames();
 
-    JavaType listEntityJavaType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    if (repository != null) {
-      bodyBuilder.appendFormalLine("return repository.findAll();");
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
+    // Check if is batch method
+    boolean isBatch = false;
+    for (AnnotatedJavaType parameters : parameterTypes) {
+      JavaType type = parameters.getJavaType();
+      isBatch = !type.getParameters().isEmpty();
+      if (isBatch) {
+        break;
+      }
     }
 
+    if (isBatch && methodName.getSymbolName().equals("delete")) {
+
+      // List<Entity> toDelete = repositoryField.FIND_ALL_METHOD(paramName);
+      bodyBuilder.appendFormalLine(String.format("%s<%s> toDelete = %s.%s(ids);", new JavaType(
+          "java.util.List").getNameIncludingTypeParameters(false, importResolver), this.entity
+          .getNameIncludingTypeParameters(false, importResolver), getRepositoryField()
+          .getFieldName(), this.findAllIterableMethod.getMethodName()));
+
+      bodyBuilder.appendFormalLine(String.format("%s.deleteInBatch(toDelete);",
+          getRepositoryField().getFieldName(), methodToBeImplemented.getMethodName()
+              .getSymbolName()));
+
+    } else {
+      // Getting parameters String
+      String parametersString = "";
+      for (JavaSymbolName parameterName : parameterNames) {
+        parametersString = parametersString.concat(parameterName.getSymbolName()).concat(", ");
+      }
+      if (StringUtils.isNotBlank(parametersString)) {
+        parametersString = parametersString.substring(0, parametersString.length() - 2);
+      }
+
+      bodyBuilder
+          .appendFormalLine(String.format("%s %s.%s(%s);", methodToBeImplemented.getReturnType()
+              .equals(JavaType.VOID_PRIMITIVE) ? "" : "return",
+              getRepositoryField().getFieldName(), methodToBeImplemented.getMethodName()
+                  .getSymbolName(), parametersString));
+    }
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("findAll"),
-            listEntityJavaType, parameterTypes, parameterNames, bodyBuilder);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            methodToBeImplemented.getReturnType(), parameterTypes, parameterNames, bodyBuilder);
 
-    return methodBuilder; // Build and return a MethodMetadata
+    // Adding annotations
+    for (AnnotationMetadata annotation : methodToBeImplemented.getAnnotations()) {
+      methodBuilder.addAnnotation(annotation);
+    }
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
 
   /**
-   * Method that generates method "findAll" with iterable parameter.
+   * This method returns repository field included on controller
    * 
-   * @param entity
-   * @param identifierType
-   * @param repository
-   * @return MethodMetadataBuilder with public List <Entity> findAll(Iterable
-   *         <Long> ids) structure
-   */
-  private MethodMetadataBuilder getFindAllIterableMethod(JavaType entity, JavaType identifierType,
-      JavaType repository) {
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
-        DataType.TYPE, null, Arrays.asList(identifierType))));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("ids"));
-
-
-    JavaType listEntityJavaType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    if (repository != null) {
-      bodyBuilder.appendFormalLine("return repository.findAll(ids);");
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("findAll"),
-            listEntityJavaType, parameterTypes, parameterNames, bodyBuilder);
-
-    return methodBuilder; // Build and return a MethodMetadata
-    // instance
-  }
-
-
-  /**
-   * Method that generates method "findOne".
-   * 
-   * @param entity
-   * @param identifierType
-   * @param repository
-   * @return MethodMetadataBuilder with public Entity findOne(Long id);
-   *         structure
-   */
-  private MethodMetadataBuilder getFindOneMethod(JavaType entity, JavaType identifierType,
-      JavaType repository) {
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    if (repository != null) {
-      bodyBuilder.appendFormalLine("return repository.findOne(id);");
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("findOne"), entity,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    return methodBuilder; // Build and return a MethodMetadata
-    // instance
-  }
-
-
-  /**
-   * Method that generates method "count".
-   * 
-   * @param repository
-   * @return MethodMetadataBuilder with public long count();
-   *         structure
-   */
-  private MethodMetadataBuilder getCountMethod(JavaType repository) {
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("count");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    if (repository != null) {
-      bodyBuilder.appendFormalLine("return repository.count();");
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.LONG_PRIMITIVE,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    return methodBuilder; // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * Method that generates "save" method.
-   * 
-   * @param entity
-   * @param repository
-   * @return MethodMetadataBuilder with public Entity save(Entity entity);
-   *         structure
-   */
-  private MethodMetadataBuilder getSaveMethod(JavaType entity, JavaType repository) {
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(entity));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("entity"));
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    if (repository != null) {
-      bodyBuilder.appendFormalLine("return repository.save(entity);");
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("save"), entity,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    // save method should be defined with @Transactional(readOnly = false)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", false);
-    methodBuilder.addAnnotation(transactionalAnnotation);
-
-    return methodBuilder; // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * Method that generates "delete" method.
-   * 
-   * @param identifierType
-   * @param repository
-   * @return MethodMetadataBuilder with public void delete(Long id); structure
-   */
-  private MethodMetadataBuilder getDeleteMethod(JavaType identifierType, JavaType repository) {
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    if (repository != null) {
-      bodyBuilder.appendFormalLine("repository.delete(id);");
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("delete"),
-            JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
-
-    // delete method should be defined with @Transactional(readOnly = false)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", false);
-    methodBuilder.addAnnotation(transactionalAnnotation);
-
-    return methodBuilder; // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * Method that generates "save" batch method.
-   * 
-   * @param entity
-   * @param repository
-   * @return MethodMetadataBuilder with public List<Entity> save(Iterable
-   *         <Entity> entities); structure
-   */
-  private MethodMetadataBuilder getSaveBatchMethod(JavaType entity, JavaType repository) {
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
-        DataType.TYPE, null, Arrays.asList(entity))));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("entities"));
-
-    JavaType listEntityJavaType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    if (repository != null) {
-      bodyBuilder.appendFormalLine("return repository.save(entities);");
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("save"),
-            listEntityJavaType, parameterTypes, parameterNames, bodyBuilder);
-
-    // save batch method should be defined with @Transactional(readOnly = false)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", false);
-    methodBuilder.addAnnotation(transactionalAnnotation);
-
-    return methodBuilder; // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * Method that generates "delete" batch method
-   * 
-   * @param entityTyoe
-   * @param identifierType
-   * @param repository
-   * @return MethodMetadataBuilder with public void delete(Iterable
-   *         <Long> ids); structure
-   */
-  private MethodMetadataBuilder getDeleteBatchMethod(JavaType entityType, JavaType identifierType,
-      JavaType repository) {
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
-        DataType.TYPE, null, Arrays.asList(identifierType))));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("ids"));
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    if (repository != null) {
-      bodyBuilder.appendFormalLine(String.format("List<%s> toDelete = repository.findAll(ids);",
-          entityType.getSimpleTypeName()));
-      bodyBuilder.appendFormalLine("repository.deleteInBatch(toDelete);");
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("delete"),
-            JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
-
-    // delete batch method should be defined with @Transactional(readOnly = false)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", false);
-    methodBuilder.addAnnotation(transactionalAnnotation);
-
-    return methodBuilder; // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * Method that generates finder method on current interface
-   * 
-   * @param finderMethod
+   * @param service
    * @return
    */
-  private MethodMetadataBuilder getFinderMethod(FinderMethod finderMethod, JavaType repository) {
+  public FieldMetadata getRepositoryField() {
 
-    // Define method parameter types and parameter names
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    String parameters = "";
+    // Generating service field name
+    String fieldName =
+        new JavaSymbolName(this.repository.getSimpleTypeName())
+            .getSymbolNameUnCapitalisedFirstLetter();
 
-    for (FinderParameter param : finderMethod.getParameters()) {
-      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(param.getType()));
-      parameterNames.add(param.getName());
-      parameters = parameters.concat(param.getName().getSymbolName()).concat(", ");
-    }
+    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
+        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.repository)
+        .build();
+  }
 
-    // Remove last comma
-    if (parameters.length() > 0) {
-      parameters = parameters.substring(0, parameters.length() - 2);
-    }
+  public List<MethodMetadata> getAllImplementedMethods() {
+    return allImplementedMethods;
+  }
 
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    if (repository != null) {
-      bodyBuilder.appendFormalLine(String.format("return repository.%s(%s);",
-          finderMethod.getMethodName(), parameters));
-    } else {
-      bodyBuilder.appendFormalLine("// TO BE IMPLEMENTED BY DEVELOPER");
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethod.getMethodName(),
-            finderMethod.getReturnType(), parameterTypes, parameterNames, bodyBuilder);
-
-    return methodBuilder; // Build and return a MethodMetadata
-    // instance
+  public void setAllImplementedMethods(List<MethodMetadata> allImplementedMethods) {
+    this.allImplementedMethods = allImplementedMethods;
   }
 
   @Override

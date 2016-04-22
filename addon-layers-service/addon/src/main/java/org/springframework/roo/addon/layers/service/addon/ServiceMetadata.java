@@ -16,11 +16,13 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -38,6 +40,10 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private JavaType entity;
   private JavaType identifierType;
   private List<FinderMethod> finders;
+
+  private MethodMetadata findAllGlobalSearchMethod;
+
+  private List<MethodMetadata> allDefinedMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -74,11 +80,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    *            (required)
    * @param readOnly specifies if current entity is defined as readOnly or not
    * @param finders list of finders added to current entity
+   * @param findAllGlobalSearchMethod MethodMetadata with findAllGlobalSearch method
    * 
    */
   public ServiceMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
-      final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders) {
+      final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders,
+      final MethodMetadata findAllGlobalSearchMethod) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -88,28 +96,91 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.entity = entity;
     this.identifierType = identifierType;
     this.finders = finders;
+    this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
+    this.allDefinedMethod = new ArrayList<MethodMetadata>();
 
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
-      ensureGovernorHasMethod(new MethodMetadataBuilder(getSaveMethod()));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(getDeleteMethod()));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(getSaveBatchMethod()));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(getDeleteBatchMethod()));
+      MethodMetadata saveMethod = getSaveMethod();
+      this.allDefinedMethod.add(saveMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(saveMethod));
+
+      MethodMetadata deleteMethod = getDeleteMethod();
+      this.allDefinedMethod.add(deleteMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
+
+      MethodMetadata saveBatchMethod = getSaveBatchMethod();
+      this.allDefinedMethod.add(saveBatchMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(saveBatchMethod));
+
+      MethodMetadata deleteBatchMethod = getDeleteBatchMethod();
+      this.allDefinedMethod.add(deleteBatchMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(deleteBatchMethod));
     }
 
     // Generating readOnly methods for every services
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllMethod()));
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllIterableMethod()));
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindOneMethod()));
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getCountMethod()));
+    MethodMetadata findAllMethod = getFindAllMethod();
+    this.allDefinedMethod.add(findAllMethod);
+    ensureGovernorHasMethod(new MethodMetadataBuilder(findAllMethod));
+
+    MethodMetadata findAllIterableMethod = getFindAllIterableMethod();
+    this.allDefinedMethod.add(findAllIterableMethod);
+    ensureGovernorHasMethod(new MethodMetadataBuilder(findAllIterableMethod));
+
+    MethodMetadata findOneMethod = getFindOneMethod();
+    this.allDefinedMethod.add(findOneMethod);
+    ensureGovernorHasMethod(new MethodMetadataBuilder(findOneMethod));
+
+    MethodMetadata countMethod = getCountMethod();
+    this.allDefinedMethod.add(countMethod);
+    ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
 
     // Generating finders
     for (FinderMethod finder : finders) {
-      ensureGovernorHasMethod(new MethodMetadataBuilder(getFinderMethod(finder)));
+      MethodMetadata finderMethod = getFinderMethod(finder);
+      this.allDefinedMethod.add(finderMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
     }
+
+    // Generating findAll method that includes GlobalSearch parameter
+    MethodMetadata findAllWithGlobalSearchMethod = getFindAllGlobalSearchMethod();
+    this.allDefinedMethod.add(findAllWithGlobalSearchMethod);
+    ensureGovernorHasMethod(new MethodMetadataBuilder(findAllWithGlobalSearchMethod));
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * Method that generates method "findAll" method. This method includes
+   * GlobalSearch parameters to be able to filter results.
+   * 
+   * @return MethodMetadata
+   */
+  public MethodMetadata getFindAllGlobalSearchMethod() {
+    // Define method name
+    JavaSymbolName methodName = this.findAllGlobalSearchMethod.getMethodName();
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = this.findAllGlobalSearchMethod.getParameterTypes();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = this.findAllGlobalSearchMethod.getParameterNames();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            this.findAllGlobalSearchMethod.getReturnType(), parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
   }
 
   /**
@@ -283,6 +354,12 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             this.entity, parameterTypes, parameterNames, null);
 
+    // save method should be defined with @Transactional(readOnly = false)
+    AnnotationMetadataBuilder transactionalAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
+    transactionalAnnotation.addBooleanAttribute("readOnly", false);
+    methodBuilder.addAnnotation(transactionalAnnotation);
+
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
@@ -315,6 +392,12 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
+
+    // save method should be defined with @Transactional(readOnly = false)
+    AnnotationMetadataBuilder transactionalAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
+    transactionalAnnotation.addBooleanAttribute("readOnly", false);
+    methodBuilder.addAnnotation(transactionalAnnotation);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
@@ -354,6 +437,12 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             listEntityJavaType, parameterTypes, parameterNames, null);
 
+    // save method should be defined with @Transactional(readOnly = false)
+    AnnotationMetadataBuilder transactionalAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
+    transactionalAnnotation.addBooleanAttribute("readOnly", false);
+    methodBuilder.addAnnotation(transactionalAnnotation);
+
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
@@ -389,6 +478,12 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
 
+    // save method should be defined with @Transactional(readOnly = false)
+    AnnotationMetadataBuilder transactionalAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
+    transactionalAnnotation.addBooleanAttribute("readOnly", false);
+    methodBuilder.addAnnotation(transactionalAnnotation);
+
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
@@ -420,6 +515,14 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     // instance
   }
 
+  /**
+   * This method returns all defined methods in service interface
+   * 
+   * @return
+   */
+  public List<MethodMetadata> getAllDefinedMethods() {
+    return this.allDefinedMethod;
+  }
 
   @Override
   public String toString() {

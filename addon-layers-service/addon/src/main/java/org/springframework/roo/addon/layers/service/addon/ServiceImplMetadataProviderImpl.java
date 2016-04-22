@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.layers.service.addon;
 
-import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
 import java.util.ArrayList;
@@ -15,9 +14,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.finder.addon.FinderMetadata;
-import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
-import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.annotations.RooServiceImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -26,6 +22,8 @@ import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorat
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
@@ -156,94 +154,41 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     // Getting service interface
     JavaType serviceInterface = annotationValues.getService();
-
-    // Validate that contains service interface
-    Validate.notNull(serviceInterface,
-        "ERROR: You need to specify service interface to be implemented.");
-
-    ClassOrInterfaceTypeDetails interfaceTypeDetails =
+    ClassOrInterfaceTypeDetails serviceInterfaceDetails =
         getTypeLocationService().getTypeDetails(serviceInterface);
 
-    // Getting related entity
-    AnnotationMetadata serviceAnnotation = interfaceTypeDetails.getAnnotation(ROO_SERVICE);
+    AnnotationMetadata serviceAnnotation =
+        serviceInterfaceDetails.getAnnotation(RooJavaType.ROO_SERVICE);
 
     Validate.notNull(serviceAnnotation,
-        "ERROR: Service interface should be annotated with @RooService");
+        "ERROR: Provided service should be annotated with @RooService");
 
-    AnnotationAttributeValue<JavaType> relatedEntity = serviceAnnotation.getAttribute("entity");
+    JavaType entity = (JavaType) serviceAnnotation.getAttribute("entity").getValue();
 
-    Validate.notNull(relatedEntity,
-        "ERROR: @RooService annotation should has a reference to managed entity");
+    // Getting all methods defined on service interface that should be implemented in this 
+    // service implementation
+    List<MethodMetadata> methodsToBeImplemented = new ArrayList<MethodMetadata>();
 
-    JavaType entity = relatedEntity.getValue();
-
-    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
-    AnnotationMetadata entityAnnotation = entityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY);
-
-    Validate.notNull(entityAnnotation,
-        "ERROR: Related entity should be annotated with @RooJpaEntity");
-
-    // Getting entity identifier type
-    final JavaType identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
-
-    Validate.notNull(identifierType,
-        "ERROR: Related entity should define a field annotated with @Id");
-
-    // Check if related entity is readOnly or not
-    AnnotationAttributeValue<Boolean> readOnlyAttribute = entityAnnotation.getAttribute("readOnly");
-
-    boolean readOnly = false;
-    if (readOnlyAttribute != null && readOnlyAttribute.getValue()) {
-      readOnly = true;
-    }
-
-    // Getting related repository to current entity
-    Set<ClassOrInterfaceTypeDetails> repositories =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_REPOSITORY_JPA);
-
-    ClassOrInterfaceTypeDetails repositoryDetails = null;
-    for (ClassOrInterfaceTypeDetails repository : repositories) {
-      AnnotationAttributeValue<JavaType> entityAttr =
-          repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
-
-      if (entityAttr != null && entityAttr.getValue().equals(entity)) {
-        repositoryDetails = repository;
-        break;
-      }
-    }
-
-    // Check if we have a valid repository
-    Validate
-        .notNull(
-            repositoryDetails,
-            String
-                .format(
-                    "ERROR: You must generate some @RooJpaRepository for entity '%s' to be able to generate services",
-                    entity.getSimpleTypeName()));
-
-    // Getting finders to be included on current service
-    List<FinderMethod> finders = new ArrayList<FinderMethod>();
     final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
-    final String finderMetadataKey =
-        FinderMetadata.createIdentifier(repositoryDetails.getType(), logicalPath);
-    registerDependency(finderMetadataKey, metadataIdentificationString);
-    final FinderMetadata finderMetadata =
-        (FinderMetadata) getMetadataService().get(finderMetadataKey);
+        PhysicalTypeIdentifier.getPath(serviceInterfaceDetails.getDeclaredByMetadataId());
+    final String serviceMetadataKey =
+        ServiceMetadata.createIdentifier(serviceInterfaceDetails.getType(), logicalPath);
+    registerDependency(serviceMetadataKey, metadataIdentificationString);
+    final ServiceMetadata serviceMetadata =
+        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
 
-    if (finderMetadata != null) {
-      finders = finderMetadata.getFinders();
+    if (serviceMetadata != null) {
+      methodsToBeImplemented = serviceMetadata.getAllDefinedMethods();
 
       // Add dependencies between modules
-      for (FinderMethod finder : finders) {
+      for (MethodMetadata method : methodsToBeImplemented) {
         List<JavaType> types = new ArrayList<JavaType>();
-        types.add(finder.getReturnType());
-        types.addAll(finder.getReturnType().getParameters());
+        types.add(method.getReturnType());
+        types.addAll(method.getReturnType().getParameters());
 
-        for (FinderParameter parameter : finder.getParameters()) {
-          types.add(parameter.getType());
-          types.addAll(parameter.getType().getParameters());
+        for (AnnotatedJavaType parameter : method.getParameterTypes()) {
+          types.add(AnnotatedJavaType.convertFromAnnotatedJavaType(parameter));
+          types.addAll(AnnotatedJavaType.convertFromAnnotatedJavaType(parameter).getParameters());
         }
 
         for (JavaType parameter : types) {
@@ -253,9 +198,26 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
       }
     }
 
+    // Getting associated repository
+    ClassOrInterfaceTypeDetails repositoryDetails = null;
+    Set<ClassOrInterfaceTypeDetails> repositories =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA);
+    for (ClassOrInterfaceTypeDetails repo : repositories) {
+      AnnotationAttributeValue<JavaType> entityAttr =
+          repo.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
+      if (entityAttr != null && entityAttr.getValue().equals(entity)) {
+        repositoryDetails = repo;
+      }
+    }
+
+    // Getting findAll Iterable method. This method will be used to findAll results 
+    // before to invoke batch operations
+    MethodMetadata findAllIterableMethod = serviceMetadata.getFindAllIterableMethod();
+
     return new ServiceImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, serviceInterface, repositoryDetails, entity, identifierType,
-        readOnly, finders);
+        governorPhysicalTypeMetadata, serviceInterface, repositoryDetails.getType(), entity,
+        findAllIterableMethod, methodsToBeImplemented);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

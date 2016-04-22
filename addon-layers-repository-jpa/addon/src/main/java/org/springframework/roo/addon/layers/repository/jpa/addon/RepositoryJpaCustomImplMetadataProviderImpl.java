@@ -183,7 +183,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(),
-        repositoryCustomMetadata.getFindAll());
+        repositoryCustomMetadata.getFindAllGlobalSearchMethod());
   }
 
   public String getProvidesType() {

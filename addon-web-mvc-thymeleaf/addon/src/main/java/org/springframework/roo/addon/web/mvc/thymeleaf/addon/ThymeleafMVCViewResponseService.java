@@ -346,7 +346,7 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
 
     // Add GlobalSearchHandlerMethodArgumentResolver.java
     addGlobalSearchHandlerMethodArgumentResolverClass(module);
-    
+
     // Add WebMVCThymeleafUIConfiguration config class
     addWebMVCThymeleafUIConfigurationClass(module);
   }

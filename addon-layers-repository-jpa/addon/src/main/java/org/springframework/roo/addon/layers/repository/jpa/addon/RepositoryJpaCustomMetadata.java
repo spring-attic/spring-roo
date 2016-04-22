@@ -87,22 +87,18 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     this.entity = domainType;
 
     // Generate findAll method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAll()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllGlobalSearchMethod()));
 
     // Build the ITD
     itdTypeDetails = builder.build();
   }
 
-
   /**
-   * Method that generates the findAll method on current interface
-   * @param javaType 
-   * @param classOrInterfaceTypeDetails 
+   * Method that generates the findAll method on current interface. 
    * 
-   * @param finderMethod
    * @return
    */
-  public MethodMetadata getFindAll() {
+  public MethodMetadata getFindAllGlobalSearchMethod() {
 
     // Define method parameter types and parameter names
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -132,7 +128,6 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
     return methodBuilder.build(); // Build and return a MethodMetadata
   }
-
 
   @Override
   public String toString() {
