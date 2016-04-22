@@ -68,6 +68,7 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType STRING = new JavaType("java.lang.String");
   public static final JavaType STRING_ARRAY = new JavaType("java.lang.String", 1, DataType.TYPE,
       null, null);
+  public static final JavaType OVERRIDE = new JavaType("java.lang.Override");
 
   /**
    * @deprecated use {@link #STRING} instead

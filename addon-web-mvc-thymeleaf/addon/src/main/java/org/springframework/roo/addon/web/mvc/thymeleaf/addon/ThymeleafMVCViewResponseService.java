@@ -335,9 +335,6 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
     getProjectOperations().addDependency(module.getModuleName(),
         new Dependency("com.github.dandelion", "datatables-thymeleaf", "1.1.0"));
 
-    // Add WebMVCThymeleafUIConfiguration config class
-    addWebMVCThymeleafUIConfigurationClass(module);
-
     // Add DatatablesData.java class
     addDatatablesDataClass(module);
 
@@ -349,6 +346,9 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
 
     // Add GlobalSearchHandlerMethodArgumentResolver.java
     addGlobalSearchHandlerMethodArgumentResolverClass(module);
+    
+    // Add WebMVCThymeleafUIConfiguration config class
+    addWebMVCThymeleafUIConfigurationClass(module);
   }
 
   /**

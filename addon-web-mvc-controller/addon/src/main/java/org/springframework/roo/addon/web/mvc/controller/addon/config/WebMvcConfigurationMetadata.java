@@ -176,7 +176,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
             parameterTypes, parameterNames, bodyBuilder);
 
     // Add Override annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("java.lang.Override")));
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
