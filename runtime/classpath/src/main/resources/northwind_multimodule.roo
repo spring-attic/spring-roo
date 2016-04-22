@@ -197,6 +197,256 @@ focus --class ~.UserLoginRole
 field reference --fieldName userLogin --type ~.UserLogin --joinColumnName USER_LOGIN --cardinality MANY_TO_ONE --fetch LAZY
 field reference --fieldName loginRole --type ~.LoginRole --joinColumnName LOGIN_ROLE --cardinality MANY_TO_ONE --fetch LAZY
 
+// Generate DTO's
+dto --class ~.ActiveCustomerOrder --immutable
+field number --fieldName orderId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field other --fieldName status --type ~.Status
+field date --fieldName orderDate --type java.util.Calendar
+field string --fieldName customerCompanyName
+
+dto --class ~.CategoryInfo --immutable
+field number --fieldName categoryId --type java.lang.Long
+field string --fieldName name
+field string --fieldName description
+
+dto --class ~.CityInfo --immutable
+field number --fieldName cityId --type java.lang.Long
+field number --fieldName regionId --type java.lang.Long
+field string --fieldName description
+
+dto --class ~.ClosedSalesReportByCustomer --immutable
+field number --fieldName customerId --type java.lang.Long
+field date --fieldName closedDate --type java.util.Calendar
+field string --fieldName customerCompanyName
+field number --fieldName total --type java.math.BigDecimal
+
+dto --class ~.ClosedSalesReportByProduct --immutable
+field number --fieldName productId --type java.lang.Long
+field string --fieldName productName
+field number --fieldName quantity --type java.lang.Integer
+field number --fieldName total --type java.math.BigDecimal
+
+dto --class ~.CountryInfo --immutable
+field number --fieldName countryId --type java.lang.Long
+field string --fieldName description
+
+dto --class ~.CustomerInfo --immutable
+field number --fieldName customerId --type java.lang.Long
+field string --fieldName companyName
+field string --fieldName contactName
+field string --fieldName email
+field string --fieldName phone
+field string --fieldName fax
+
+dto --class ~.CustomerOrderInfo --immutable
+field number --fieldName orderId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field date --fieldName orderDate --type java.util.Calendar
+field string --fieldName employeeName
+field string --fieldName customerCompanyName
+field other --fieldName status --type ~.Status
+field date --fieldName shippedDate --type java.util.Calendar
+field number --fieldName freight --type java.math.BigDecimal
+
+dto --class ~.CustomerSalesReport --immutable
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field string --fieldName employeeName
+field date --fieldName fromDate --type java.util.Calendar
+field date --fieldName thruDate --type java.util.Calendar
+field string --fieldName customerCompanyName
+field number --fieldName total --type java.math.BigDecimal
+field set --fieldName closedSalesReportByCustomer --type ~.ClosedSalesReportByCustomer
+
+dto --class ~.EmployeeInfo --immutable
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName supervisorId --type java.lang.Long
+field string --fieldName firstName
+field string --fieldName lastName
+field string --fieldName phone
+field string --fieldName extension
+field string --fieldName supervisorName
+
+dto --class ~.Inventory --immutable
+field number --fieldName productId --type java.lang.Long
+field string --fieldName name
+field number --fieldName unitsInStock --type java.lang.Integer
+field number --fieldName assignedStock --type java.lang.Integer
+field number --fieldName availableStock --type java.lang.Integer
+field number --fieldName reorderLevel --type java.lang.Integer
+field number --fieldName replenishStock --type java.lang.Integer
+
+dto --class ~.Invoice --immutable
+field number --fieldName customerOrderId --type java.lang.Long
+field number --fieldName shipCountryId --type java.lang.Long
+field number --fieldName shipRegionId --type java.lang.Long
+field number --fieldName shipCityId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field number --fieldName customerCountryId --type java.lang.Long
+field number --fieldName customerRegionId --type java.lang.Long
+field number --fieldName customerCityId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName shippedId --type java.lang.Long
+field date --fieldName invoiceDate --type java.util.Calendar
+field string --fieldName shipName
+field string --fieldName shipAddress
+field string --fieldName shipCountryDescription
+field string --fieldName shipRegionDescription
+field string --fieldName shipCityDescription
+field string --fieldName shipPostalCode
+field string --fieldName customerCompanyName
+field string --fieldName customerCountryDescription
+field string --fieldName customerRegionDescription
+field string --fieldName customerCityDescription
+field string --fieldName customerPostalCode
+field date --fieldName orderDate --type java.util.Calendar
+field date --fieldName shippedDate --type java.util.Calendar
+field string --fieldName employeeName
+field string --fieldName shipperCompanyName
+field number --fieldName freight --type java.math.BigDecimal
+field number --fieldName subtotal --type java.math.BigDecimal
+field number --fieldName total --type java.math.BigDecimal
+field set --fieldName orderDetailsInfo --type ~.OrderDetailInfo
+
+dto --class ~.OrderDetailInfo --immutable
+field number --fieldName orderDetailId --type java.lang.Long
+field number --fieldName customerOrderId --type java.lang.Long
+field number --fieldName productId --type java.lang.Long
+field string --fieldName productName
+field number --fieldName quantity --type java.lang.Integer
+field number --fieldName unitPrice --type java.math.BigDecimal
+field number --fieldName discount --type java.math.BigDecimal
+field number --fieldName total --type java.math.BigDecimal
+
+dto --class ~.OrderDetailOfProduct --immutable
+field number --fieldName orderId --type java.lang.Long
+field number --fieldName productId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field date --fieldName orderDate --type java.util.Calendar
+field other --fieldName status --type ~.Status
+field string --fieldName employeeName
+field string --fieldName customerCompanyName
+field date --fieldName shippedDate --type java.util.Calendar
+field number --fieldName freight --type java.math.BigDecimal
+
+dto --class ~.ProductInfo --immutable
+field number --fieldName productId --type java.lang.Long
+field number --fieldName categoryId --type java.lang.Long
+field number --fieldName supplierId --type java.lang.Long
+field string --fieldName code
+field string --fieldName name
+field string --fieldName supplierCompanyName
+field number --fieldName unitCost --type java.math.BigDecimal
+field number --fieldName unitPrice --type java.math.BigDecimal
+field string --fieldName quantityPerUnit
+field boolean --fieldName discontinued
+
+dto --class ~.ProductSalesReport --immutable
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName productId --type java.lang.Long
+field string --fieldName employeeName
+field date --fieldName fromDate --type java.util.Calendar
+field date --fieldName thruDate --type java.util.Calendar
+field string --fieldName productName
+field number --fieldName total --type java.math.BigDecimal
+field set --fieldName closedSalesReportByProduct --type ~.ClosedSalesReportByProduct
+
+dto --class ~.PurchaseOrderInfo --immutable
+field number --fieldName purchaseOrderId --type java.lang.Long
+field number --fieldName productId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field date --fieldName orderDate --type java.util.Calendar
+field string --fieldName employeeName
+field number --fieldName quantity --type java.lang.Integer
+field number --fieldName totalCost --type java.math.BigDecimal
+
+dto --class ~.RegionInfo --immutable
+field number --fieldName regionId --type java.lang.Long
+field number --fieldName countryId --type java.lang.Long
+field string --fieldName description
+
+dto --class ~.ShipperInfo --immutable
+field number --fieldName shipperId --type java.lang.Long
+field string --fieldName companyName
+field string --fieldName phone
+
+dto --class ~.StoreInfo --immutable
+field number --fieldName storeId --type java.lang.Long
+field number --fieldName countryId --type java.lang.Long
+field number --fieldName regionId --type java.lang.Long
+field number --fieldName cityId --type java.lang.Long
+field string --fieldName name
+field string --fieldName address
+field string --fieldName countryDescription
+field string --fieldName regionDescription
+field string --fieldName cityDescription
+
+dto --class ~.StoreOfSupplier --immutable
+field number --fieldName storeId --type java.lang.Long
+field number --fieldName supplierId --type java.lang.Long
+field string --fieldName name
+
+dto --class ~.SupplierInfo --immutable
+field number --fieldName supplierId --type java.lang.Long
+field number --fieldName countryId --type java.lang.Long
+field number --fieldName regionId --type java.lang.Long
+field number --fieldName cityId --type java.lang.Long
+field string --fieldName companyName
+field string --fieldName contactName
+field string --fieldName contactTitle
+field string --fieldName address
+field string --fieldName countryDescription
+field string --fieldName regionDescription
+field string --fieldName cityDescription
+field string --fieldName postalCode
+field string --fieldName phone
+field string --fieldName fax
+field string --fieldName web
+
+dto --class ~.UserLoginDetails --immutable
+field number --fieldName id --type java.lang.Long
+field string --fieldName username
+field string --fieldName password
+field date --fieldName fromDate --type java.util.Calendar
+field date --fieldName thruDate --type java.util.Calendar
+field set --fieldName userLoginRoles --type ~.UserLoginRole
+
+dto --class ~.Invoice --immutable
+field number --fieldName customerOrderId --type java.lang.Long
+field number --fieldName shipCountryId --type java.lang.Long
+field number --fieldName shipRegionId --type java.lang.Long
+field number --fieldName shipCityId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field number --fieldName customerCountryId --type java.lang.Long
+field number --fieldName customerRegionId --type java.lang.Long
+field number --fieldName customerCityId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName shippedId --type java.lang.Long
+field date --fieldName invoiceDate --type java.util.Calendar
+field string --fieldName shipName
+field string --fieldName shipAddress
+field string --fieldName shipCountryDescription
+field string --fieldName shipRegionDescription
+field string --fieldName shipCityDescription
+field string --fieldName shipPostalCode
+field string --fieldName customerCompanyName
+field string --fieldName customerCountryDescription
+field string --fieldName customerRegionDescription
+field string --fieldName customerCityDescription
+field string --fieldName customerPostalCode
+field date --fieldName orderDate --type java.util.Calendar
+field date --fieldName shippedDate --type java.util.Calendar
+field string --fieldName employeeName
+field string --fieldName shipperCompanyName
+field number --fieldName freight --type java.math.BigDecimal
+field number --fieldName subtotal --type java.math.BigDecimal
+field number --fieldName total --type java.math.BigDecimal
+field set --fieldName orderDetailsInfo --type ~.OrderDetailInfo
+
 // Generate repositories
 repository jpa all --package repository:org.springframework.roo.northwind.repository
 
