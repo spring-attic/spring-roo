@@ -30,24 +30,24 @@ field string --fieldName shopCity
 field string --fieldName shopName
 
 // Define a repository layer for persistence
-repository jpa --interface ~.repository.ToppingRepository --entity ~.domain.Topping
-repository jpa --interface ~.repository.BaseRepository --entity ~.domain.Base
-repository jpa --interface ~.repository.PizzaRepository --entity ~.domain.Pizza
-repository jpa --interface ~.repository.PizzaOrderRepository --entity ~.domain.PizzaOrder
+repository jpa add --entity ~.domain.Topping --interface ~.repository.ToppingRepository
+repository jpa add --entity ~.domain.Base --interface ~.repository.BaseRepository 
+repository jpa add --entity ~.domain.Pizza --interface ~.repository.PizzaRepository 
+repository jpa add --entity ~.domain.PizzaOrder --interface ~.repository.PizzaOrderRepository 
 
 // Define a service/facade layer
-service type --interface ~.service.ToppingService --entity ~.domain.Topping
-service type --interface ~.service.BaseService --entity ~.domain.Base
-service type --interface ~.service.PizzaService --entity ~.domain.Pizza
-service type --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
+service add --entity ~.domain.Topping --repository ~.repository.ToppingRepository --interface ~.service.ToppingService
+service add --entity ~.domain.Base --repository ~.repository.BaseRepository --interface ~.service.BaseService
+service add --entity ~.domain.Pizza --repository ~.repository.PizzaRepository --interface ~.service.PizzaService
+service add --entity ~.domain.PizzaOrder --repository ~.repository.PizzaOrderRepository --interface ~.service.PizzaOrderService
 
 // Offer JSON remoting for all domain types through Spring MVC
-json all --deepSerialize
-web mvc json setup
-web mvc json all --package ~.web
+//json all --deepSerialize
+//web mvc json setup
+//web mvc json all --package ~.web
 
 web mvc setup
-web mvc all --package ~.web
+web mvc controller --all --package com.springsource.pizzashop.web --responseType JSON
 
 // Example scripts for JSON remoting:
 // curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name: "Thin Crust"}' http://localhost:8080/pizzashop/bases

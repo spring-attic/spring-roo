@@ -5,24 +5,28 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class ~.domain.Choice --testAutomatically
 field string namingChoice --notNull --sizeMin 1 --sizeMax 30
 field string description --sizeMax 80
+repository jpa add --entity ~.domain.Choice --interface ~.repository.ChoiceRepository
+service add --entity ~.domain.Choice --repository ~.repository.ChoiceRepository --interface ~.service.api.ChoiceService --class ~.service.impl.ChoiceServiceImpl
 web mvc setup
-web mvc scaffold ~.web.ChoiceController
+web mvc controller --controller ~.web.ChoiceController --entity ~.domain.Choice --service ~.service.api.ChoiceService --responseType THYMELEAF
 
 entity jpa --class Vote --testAutomatically
 field reference choice --type Choice
 field string ip --notNull --sizeMin 7 --sizeMax 15
 field date registered --type java.util.Date --notNull --past
-web mvc scaffold ~.web.VoteController
+repository jpa add --entity ~.domain.Vote --interface ~.repository.VoteRepository
+service add --entity ~.domain.Vote --repository ~.repository.VoteRepository --interface ~.service.api.VoteService --class ~.service.impl.VoteServiceImpl
+web mvc controller --controller ~.web.VoteController --entity ~.domain.Vote --service ~.service.api.VoteService --responseType THYMELEAF
 
-web mvc controller ~.web.PublicVoteController --preferredMapping /public
+//web mvc controller ~.web.PublicVoteController --preferredMapping /public
 
-web mvc language --code de
-web mvc language --code es
+//web mvc language --code de
+//web mvc language --code es
 
-logging setup --level WARN --package WEB
+//logging setup --level WARN --package WEB
 
 security setup
 
-finder list --class ~.domain.Vote --depth 2 --filter reg,betw,IpEq
+finder add --class ~.domain.Vote --name findChoiceByRegistered
 
-logging setup --level INFO
+//logging setup --level INFO
