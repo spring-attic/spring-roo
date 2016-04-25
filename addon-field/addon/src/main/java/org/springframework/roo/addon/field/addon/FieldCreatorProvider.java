@@ -1,6 +1,18 @@
 package org.springframework.roo.addon.field.addon;
 
 
+import java.util.Set;
+
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldDetails;
+import org.springframework.roo.classpath.operations.Cardinality;
+import org.springframework.roo.classpath.operations.Cascade;
+import org.springframework.roo.classpath.operations.DateTime;
+import org.springframework.roo.classpath.operations.EnumType;
+import org.springframework.roo.classpath.operations.Fetch;
+import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
+import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.ShellContext;
 
@@ -32,6 +44,20 @@ public interface FieldCreatorProvider {
    * @return true if field management commands are available
    */
   boolean isFieldManagementAvailable();
+
+  /**
+   * Whether field embedded command is available.
+   * 
+   * @return true if field embedded command is available
+   */
+  boolean isFieldEmbeddedAvailable();
+
+  /**
+   * Whether field reference command is available.
+   * 
+   * @return true if field reference command is available
+   */
+  boolean isFieldReferenceAvailable();
 
   boolean isColumnMandatoryForFieldBoolean(ShellContext shellContext);
 
@@ -129,4 +155,65 @@ public interface FieldCreatorProvider {
 
   boolean isTransientVisibleForFieldOther(ShellContext shellContext);
 
+  void createBooleanField(ClassOrInterfaceTypeDetails javaTypeDetails, boolean primitive,
+      JavaSymbolName fieldName, boolean notNull, boolean nullRequired, boolean assertFalse,
+      boolean assertTrue, String column, String comment, String value, boolean permitReservedWords,
+      boolean transientModifier);
+
+  void createDateField(ClassOrInterfaceTypeDetails javaTypeDetails, JavaType fieldType,
+      JavaSymbolName fieldName, boolean notNull, boolean nullRequired, boolean future,
+      boolean past, DateFieldPersistenceType persistenceType, String column, String comment,
+      DateTime dateFormat, DateTime timeFormat, String pattern, String value,
+      boolean permitReservedWords, boolean transientModifier);
+
+  void createEmbeddedField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      boolean permitReservedWords);
+
+  void createEnumField(ClassOrInterfaceTypeDetails cid, JavaType fieldType,
+      JavaSymbolName fieldName, String column, boolean notNull, boolean nullRequired,
+      EnumType enumType, String comment, boolean permitReservedWords, boolean transientModifier);
+
+  void createNumericField(ClassOrInterfaceTypeDetails javaTypeDetails, JavaType fieldType,
+      boolean primitive, Set<String> legalNumericPrimitives, JavaSymbolName fieldName,
+      boolean notNull, boolean nullRequired, String decimalMin, String decimalMax,
+      Integer digitsInteger, Integer digitsFraction, Long min, Long max, String column,
+      String comment, boolean unique, String value, boolean permitReservedWords,
+      boolean transientModifier);
+
+  void createReferenceField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality,
+      JavaType typeName, JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType,
+      boolean notNull, boolean nullRequired, String joinColumnName, String referencedColumnName,
+      Fetch fetch, String comment, boolean permitReservedWords, boolean transientModifier);
+
+  void createSetField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality, JavaType typeName,
+      JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType, boolean notNull,
+      boolean nullRequired, Integer sizeMin, Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch,
+      String comment, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      boolean transientModifier);
+
+  void createListField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality, JavaType typeName,
+      JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType, boolean notNull,
+      boolean nullRequired, Integer sizeMin, Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch,
+      String comment, String joinTable, String joinColumns, String referencedColumns,
+      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
+      boolean transientModifier);
+
+  void createStringField(ClassOrInterfaceTypeDetails cid, JavaSymbolName fieldName,
+      boolean notNull, boolean nullRequired, String decimalMin, String decimalMax, Integer sizeMin,
+      Integer sizeMax, String regexp, String column, String comment, boolean unique, String value,
+      boolean lob, boolean permitReservedWords, boolean transientModifier);
+
+  void createFileField(ClassOrInterfaceTypeDetails cid, JavaSymbolName fieldName,
+      UploadedFileContentType contentType, boolean autoUpload, boolean notNull, String column,
+      boolean permitReservedWords);
+
+  void createOtherField(ClassOrInterfaceTypeDetails cid, JavaType fieldType,
+      JavaSymbolName fieldName, boolean notNull, boolean nullRequired, String comment,
+      String column, boolean permitReservedWords, boolean transientModifier);
+
+  void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords,
+      final boolean transientModifier);
+
+  void formatFieldComment(FieldDetails fieldDetails);
 }

@@ -1,22 +1,15 @@
 package org.springframework.roo.addon.field.addon;
 
-import static org.springframework.roo.model.JdkJavaType.LIST;
-import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
-import static org.springframework.roo.model.JpaJavaType.ENTITY;
-import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -25,47 +18,23 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.comments.CommentFormatter;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.Cascade;
 import org.springframework.roo.classpath.operations.DateTime;
 import org.springframework.roo.classpath.operations.EnumType;
 import org.springframework.roo.classpath.operations.Fetch;
-import org.springframework.roo.classpath.operations.jsr303.BooleanField;
-import org.springframework.roo.classpath.operations.jsr303.CollectionField;
-import org.springframework.roo.classpath.operations.jsr303.DateField;
 import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
-import org.springframework.roo.classpath.operations.jsr303.EmbeddedField;
-import org.springframework.roo.classpath.operations.jsr303.EnumField;
-import org.springframework.roo.classpath.operations.jsr303.ListField;
-import org.springframework.roo.classpath.operations.jsr303.NumericField;
-import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
-import org.springframework.roo.classpath.operations.jsr303.SetField;
-import org.springframework.roo.classpath.operations.jsr303.StringField;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
-import org.springframework.roo.classpath.operations.jsr303.UploadedFileField;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -231,25 +200,9 @@ public class FieldCommands implements CommandMarker {
 
     checkFieldExists(fieldName, shellContext, javaTypeDetails);
 
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final BooleanField fieldDetails =
-        new BooleanField(physicalTypeIdentifier, primitive ? JavaType.BOOLEAN_PRIMITIVE
-            : JavaType.BOOLEAN_OBJECT, fieldName);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    fieldDetails.setAssertFalse(assertFalse);
-    fieldDetails.setAssertTrue(assertTrue);
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (value != null) {
-      fieldDetails.setValue(value);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+    getFieldCreatorProvider(typeName).createBooleanField(javaTypeDetails, primitive, fieldName,
+        notNull, nullRequired, assertFalse, assertTrue, column, comment, value,
+        permitReservedWords, transientModifier);
   }
 
   @CliOptionMandatoryIndicator(command = "field date", params = {"column"})
@@ -358,36 +311,9 @@ public class FieldCommands implements CommandMarker {
 
     checkFieldExists(fieldName, shellContext, javaTypeDetails);
 
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final DateField fieldDetails = new DateField(physicalTypeIdentifier, fieldType, fieldName);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    fieldDetails.setFuture(future);
-    fieldDetails.setPast(past);
-    if (JdkJavaType.isDateField(fieldType)) {
-      fieldDetails.setPersistenceType(persistenceType != null ? persistenceType
-          : DateFieldPersistenceType.JPA_TIMESTAMP);
-    }
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (dateFormat != null) {
-      fieldDetails.setDateFormat(dateFormat);
-    }
-    if (timeFormat != null) {
-      fieldDetails.setTimeFormat(timeFormat);
-    }
-    if (pattern != null) {
-      fieldDetails.setPattern(pattern);
-    }
-    if (value != null) {
-      fieldDetails.setValue(value);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+    getFieldCreatorProvider(typeName).createDateField(javaTypeDetails, fieldType, fieldName,
+        notNull, nullRequired, future, past, persistenceType, column, comment, dateFormat,
+        timeFormat, pattern, value, permitReservedWords, transientModifier);
   }
 
   @CliOptionVisibilityIndicator(command = "field embedded", params = {"class"},
@@ -432,33 +358,8 @@ public class FieldCommands implements CommandMarker {
 
     checkFieldExists(fieldName, shellContext, cid);
 
-    // Check if the requested entity is a JPA @Entity
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final PhysicalTypeMetadata targetTypeMetadata =
-        (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
-    Validate
-        .notNull(targetTypeMetadata,
-            "The specified target '--class' does not exist or can not be found. Please create this type first.");
-    final PhysicalTypeDetails targetPtd = targetTypeMetadata.getMemberHoldingTypeDetails();
-    Validate.isInstanceOf(MemberHoldingTypeDetails.class, targetPtd);
-
-    final ClassOrInterfaceTypeDetails targetTypeCid = (ClassOrInterfaceTypeDetails) targetPtd;
-    final MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), targetTypeCid);
-    Validate
-        .isTrue(
-            memberDetails.getAnnotation(ENTITY) != null
-                || memberDetails.getAnnotation(PERSISTENT) != null,
-            "The field embedded command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
-
-    final EmbeddedField fieldDetails =
-        new EmbeddedField(physicalTypeIdentifier, fieldType, fieldName);
-
-    insertField(fieldDetails, permitReservedWords, false);
+    getFieldCreatorProvider(typeName).createEmbeddedField(typeName, fieldType, fieldName,
+        permitReservedWords);
   }
 
   @CliOptionMandatoryIndicator(command = "field enum", params = {"column"})
@@ -544,21 +445,8 @@ public class FieldCommands implements CommandMarker {
 
     checkFieldExists(fieldName, shellContext, cid);
 
-    final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
-    final EnumField fieldDetails = new EnumField(physicalTypeIdentifier, fieldType, fieldName);
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (enumType != null) {
-      fieldDetails.setEnumType(enumType);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+    getFieldCreatorProvider(typeName).createEnumField(cid, fieldType, fieldName, column, notNull,
+        nullRequired, enumType, comment, permitReservedWords, transientModifier);
   }
 
   @CliOptionMandatoryIndicator(command = "field number", params = {"column"})
@@ -662,50 +550,10 @@ public class FieldCommands implements CommandMarker {
 
     checkFieldExists(fieldName, shellContext, javaTypeDetails);
 
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    if (primitive && legalNumericPrimitives.contains(fieldType.getFullyQualifiedTypeName())) {
-      fieldType =
-          new JavaType(fieldType.getFullyQualifiedTypeName(), 0, DataType.PRIMITIVE, null, null);
-    }
-    final NumericField fieldDetails =
-        new NumericField(physicalTypeIdentifier, fieldType, fieldName);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (decimalMin != null) {
-      fieldDetails.setDecimalMin(decimalMin);
-    }
-    if (decimalMax != null) {
-      fieldDetails.setDecimalMax(decimalMax);
-    }
-    if (digitsInteger != null) {
-      fieldDetails.setDigitsInteger(digitsInteger);
-    }
-    if (digitsFraction != null) {
-      fieldDetails.setDigitsFraction(digitsFraction);
-    }
-    if (min != null) {
-      fieldDetails.setMin(min);
-    }
-    if (max != null) {
-      fieldDetails.setMax(max);
-    }
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (unique) {
-      fieldDetails.setUnique(true);
-    }
-    if (value != null) {
-      fieldDetails.setValue(value);
-    }
-
-    Validate.isTrue(fieldDetails.isDigitsSetCorrectly(),
-        "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+    getFieldCreatorProvider(typeName).createNumericField(javaTypeDetails, fieldType, primitive,
+        legalNumericPrimitives, fieldName, notNull, nullRequired, decimalMin, decimalMax,
+        digitsInteger, digitsFraction, min, max, column, comment, unique, value,
+        permitReservedWords, transientModifier);
   }
 
   @CliOptionMandatoryIndicator(command = "field reference", params = {"joinColumnName"})
@@ -837,45 +685,9 @@ public class FieldCommands implements CommandMarker {
     final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
     checkFieldExists(fieldName, shellContext, selfCid);
 
-    // Check if the requested entity is a JPA @Entity
-    final MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
-    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
-    Validate
-        .isTrue(
-            entityAnnotation != null || persistentAnnotation != null,
-            "The field reference command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
-
-    Validate.isTrue(
-        cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE,
-        "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final ReferenceField fieldDetails =
-        new ReferenceField(physicalTypeIdentifier, fieldType, fieldName, cardinality, cascadeType);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (joinColumnName != null) {
-      fieldDetails.setJoinColumnName(joinColumnName);
-    }
-    if (referencedColumnName != null) {
-      Validate.notNull(joinColumnName,
-          "@JoinColumn name is required if specifying a referencedColumnName");
-      fieldDetails.setReferencedColumnName(referencedColumnName);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+    getFieldCreatorProvider(typeName).createReferenceField(cid, cardinality, typeName, fieldType,
+        fieldName, cascadeType, notNull, nullRequired, joinColumnName, referencedColumnName, fetch,
+        comment, permitReservedWords, transientModifier);
   }
 
   @CliOptionMandatoryIndicator(command = "field set", params = {"joinColumns", "referencedColumns",
@@ -1041,87 +853,10 @@ public class FieldCommands implements CommandMarker {
     final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
     checkFieldExists(fieldName, shellContext, selfCid);
 
-    // Check if the requested entity is a JPA @Entity
-    final MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
-    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
-
-    if (entityAnnotation != null) {
-      Validate.isTrue(cardinality == Cardinality.ONE_TO_MANY
-          || cardinality == Cardinality.MANY_TO_MANY,
-          "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
-    } else if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
-      cardinality = null;
-    } else if (persistentAnnotation != null) {
-      // Yes, we can deal with that
-    } else {
-      throw new IllegalStateException(
-          "The field set command is only applicable to enum, JPA @Entity or Spring Data @Persistence elements");
-    }
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final SetField fieldDetails =
-        new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0,
-            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
-            cascadeType);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (sizeMin != null) {
-      fieldDetails.setSizeMin(sizeMin);
-    }
-    if (sizeMax != null) {
-      fieldDetails.setSizeMax(sizeMax);
-    }
-    if (mappedBy != null) {
-      fieldDetails.setMappedBy(mappedBy);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (joinTable != null) {
-
-      // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = null;
-      String[] referencedColumnsArray = null;
-      String[] inverseJoinColumnsArray = null;
-      String[] inverseReferencedColumnsArray = null;
-      if (joinColumns != null) {
-        joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      }
-      if (referencedColumns != null) {
-        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      }
-      if (inverseJoinColumns != null) {
-        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      }
-      if (inverseReferencedColumns != null) {
-        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
-      }
-
-      // Validate same number of elements
-      if (joinColumnsArray != null && referencedColumnsArray != null) {
-        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-            "--joinColumns and --referencedColumns must have same number of column values");
-      }
-      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate
-            .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-                "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
-      }
-
-      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
-          inverseJoinColumnsArray, inverseReferencedColumnsArray);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+    getFieldCreatorProvider(typeName).createSetField(cid, cardinality, typeName, fieldType,
+        fieldName, cascadeType, notNull, nullRequired, sizeMin, sizeMax, mappedBy, fetch, comment,
+        joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
+        permitReservedWords, transientModifier);
   }
 
   @CliOptionVisibilityIndicator(command = "field list", params = {"joinColumns",
@@ -1284,88 +1019,11 @@ public class FieldCommands implements CommandMarker {
     final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
     checkFieldExists(fieldName, shellContext, selfCid);
 
-    // Check if the requested entity is a JPA @Entity
-    final MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
-    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
+    getFieldCreatorProvider(typeName).createListField(cid, cardinality, typeName, fieldType,
+        fieldName, cascadeType, notNull, nullRequired, sizeMin, sizeMax, mappedBy, fetch, comment,
+        joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
+        permitReservedWords, transientModifier);
 
-    if (entityAnnotation != null) {
-      Validate.isTrue(cardinality == Cardinality.ONE_TO_MANY
-          || cardinality == Cardinality.MANY_TO_MANY,
-          "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field list command");
-    } else if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
-      cardinality = null;
-    } else if (persistentAnnotation != null) {
-      // Yes, we can deal with that
-    } else {
-      throw new IllegalStateException(
-          "The field list command is only applicable to enum, JPA @Entity or Spring "
-              + "Data @Persistence elements");
-    }
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s' doesn't exist", typeName);
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final ListField fieldDetails =
-        new ListField(physicalTypeIdentifier, new JavaType(LIST.getFullyQualifiedTypeName(), 0,
-            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
-            cascadeType);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (sizeMin != null) {
-      fieldDetails.setSizeMin(sizeMin);
-    }
-    if (sizeMax != null) {
-      fieldDetails.setSizeMax(sizeMax);
-    }
-    if (mappedBy != null) {
-      fieldDetails.setMappedBy(mappedBy);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (joinTable != null) {
-
-      // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = null;
-      String[] referencedColumnsArray = null;
-      String[] inverseJoinColumnsArray = null;
-      String[] inverseReferencedColumnsArray = null;
-      if (joinColumns != null) {
-        joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      }
-      if (referencedColumns != null) {
-        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      }
-      if (inverseJoinColumns != null) {
-        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      }
-      if (inverseReferencedColumns != null) {
-        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
-      }
-
-      // Validate same number of elements
-      if (joinColumnsArray != null && referencedColumnsArray != null) {
-        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-            "--joinColumns and --referencedColumns must have same number of column values");
-      }
-      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate.isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-            "--inverseJoinColumns and --inverseReferencedColumns must have same "
-                + "number of column values");
-      }
-
-      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
-          inverseJoinColumnsArray, inverseReferencedColumnsArray);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   @CliOptionMandatoryIndicator(command = "field string", params = {"column"})
@@ -1475,50 +1133,9 @@ public class FieldCommands implements CommandMarker {
 
     checkFieldExists(fieldName, shellContext, cid);
 
-    final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
-    final StringField fieldDetails = new StringField(physicalTypeIdentifier, fieldName);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (decimalMin != null) {
-      fieldDetails.setDecimalMin(decimalMin);
-    }
-    if (decimalMax != null) {
-      fieldDetails.setDecimalMax(decimalMax);
-    }
-    if (sizeMin != null) {
-      fieldDetails.setSizeMin(sizeMin);
-    }
-    if (sizeMax != null) {
-      fieldDetails.setSizeMax(sizeMax);
-    }
-    if (regexp != null) {
-      fieldDetails.setRegexp(regexp.replace("\\", "\\\\"));
-    }
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (unique) {
-      fieldDetails.setUnique(true);
-    }
-    if (value != null) {
-      fieldDetails.setValue(value);
-    }
-
-    if (lob) {
-      fieldDetails.getInitedAnnotations().add(
-          new AnnotationMetadataBuilder("javax.persistence.Lob"));
-
-      // ROO-3722: Add LAZY load in @Lob fields using @Basic
-      AnnotationMetadataBuilder basicAnnotation =
-          new AnnotationMetadataBuilder("javax.persistence.Basic");
-      basicAnnotation.addEnumAttribute("fetch", new EnumDetails(new JavaType(
-          "javax.persistence.FetchType"), new JavaSymbolName("LAZY")));
-      fieldDetails.getInitedAnnotations().add(basicAnnotation);
-    }
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+    getFieldCreatorProvider(typeName).createStringField(cid, fieldName, notNull, nullRequired,
+        decimalMin, decimalMax, sizeMin, sizeMax, regexp, column, comment, unique, value, lob,
+        permitReservedWords, transientModifier);
   }
 
   @CliOptionMandatoryIndicator(command = "field file", params = {"column"})
@@ -1582,80 +1199,8 @@ public class FieldCommands implements CommandMarker {
 
     checkFieldExists(fieldName, shellContext, cid);
 
-    final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
-    final UploadedFileField fieldDetails =
-        new UploadedFileField(physicalTypeIdentifier, fieldName, contentType);
-    fieldDetails.setAutoUpload(autoUpload);
-    fieldDetails.setNotNull(notNull);
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
-
-    insertField(fieldDetails, permitReservedWords, false);
-  }
-
-
-  private void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords,
-      final boolean transientModifier) {
-
-    String module = null;
-    if (!permitReservedWords) {
-      ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
-      if (fieldDetails.getColumn() != null) {
-        ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
-      }
-    }
-
-    final List<AnnotationMetadataBuilder> annotations = fieldDetails.getInitedAnnotations();
-    fieldDetails.decorateAnnotationsList(annotations);
-    fieldDetails.setAnnotations(annotations);
-
-    if (fieldDetails.getFieldType() != null) {
-      module = fieldDetails.getFieldType().getModule();
-    }
-
-    String initializer = null;
-    if (fieldDetails instanceof CollectionField) {
-      final CollectionField collectionField = (CollectionField) fieldDetails;
-      module = collectionField.getGenericParameterTypeName().getModule();
-      initializer = "new " + collectionField.getInitializer() + "()";
-    } else if (fieldDetails instanceof DateField
-        && fieldDetails.getFieldName().getSymbolName().equals("created")) {
-      initializer = "new Date()";
-    }
-    int modifier = Modifier.PRIVATE;
-    if (transientModifier) {
-      modifier += Modifier.TRANSIENT;
-    }
-    fieldDetails.setModifiers(modifier);
-
-    // Format the passed-in comment (if given)
-    formatFieldComment(fieldDetails);
-
-    final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails);
-    fieldBuilder.setFieldInitializer(initializer);
-    typeManagementService.addField(fieldBuilder.build());
-
-    if (module != null) {
-      projectOperations.addModuleDependency(module);
-    }
-  }
-
-  private void formatFieldComment(FieldDetails fieldDetails) {
-    // If a comment was defined, we need to format it
-    if (fieldDetails.getComment() != null) {
-
-      // First replace all "" with the proper escape sequence \"
-      String unescapedMultiLineComment = fieldDetails.getComment().replaceAll("\"\"", "\\\\\"");
-
-      // Then unescape all characters
-      unescapedMultiLineComment = StringEscapeUtils.unescapeJava(unescapedMultiLineComment);
-
-      CommentFormatter commentFormatter = new CommentFormatter();
-      String javadocComment = commentFormatter.formatStringAsJavadoc(unescapedMultiLineComment);
-
-      fieldDetails.setComment(commentFormatter.format(javadocComment, 1));
-    }
+    getFieldCreatorProvider(typeName).createFileField(cid, fieldName, contentType, autoUpload,
+        notNull, column, permitReservedWords);
   }
 
   @CliOptionMandatoryIndicator(command = "field other", params = {"column"})
@@ -1731,25 +1276,31 @@ public class FieldCommands implements CommandMarker {
 
     checkFieldExists(fieldName, shellContext, cid);
 
-    final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
-    final FieldDetails fieldDetails =
-        new FieldDetails(physicalTypeIdentifier, fieldType, fieldName);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+    getFieldCreatorProvider(typeName).createOtherField(cid, fieldType, fieldName, notNull,
+        nullRequired, comment, column, permitReservedWords, transientModifier);
   }
 
   @CliAvailabilityIndicator({"field other", "field number", "field string", "field date",
-      "field boolean", "field enum", "field embedded", "field file", "field reference",
-      "field set", "field list"})
+      "field boolean", "field enum", "field file", "field set", "field list"})
   public boolean isFieldManagementAvailable() {
+    return getFieldCreatorAvailable();
+  }
+
+  @CliAvailabilityIndicator({"field embedded"})
+  public boolean isFieldEmbeddedAvailable() {
+    JavaType type = lastUsed.getJavaType();
+    if (type != null) {
+      return getFieldCreatorProvider(type).isFieldEmbeddedAvailable();
+    }
+    return getFieldCreatorAvailable();
+  }
+
+  @CliAvailabilityIndicator({"field reference"})
+  public boolean isFieldReferenceAvailable() {
+    JavaType type = lastUsed.getJavaType();
+    if (type != null) {
+      return getFieldCreatorProvider(type).isFieldReferenceAvailable();
+    }
     return getFieldCreatorAvailable();
   }
 

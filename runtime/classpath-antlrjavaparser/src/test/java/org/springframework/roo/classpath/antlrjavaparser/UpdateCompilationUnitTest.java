@@ -173,7 +173,7 @@ public class UpdateCompilationUnitTest {
     final SetField fieldDetails =
         new SetField(SIMPLE_CLASS3_DECLARED_BY_MID, new JavaType(SET.getFullyQualifiedTypeName(),
             0, DataType.TYPE, null, Arrays.asList(SIMPLE_CLASS3_TYPE)), new JavaSymbolName(
-            "children"), SIMPLE_CLASS3_TYPE, Cardinality.ONE_TO_MANY, Cascade.REMOVE);
+            "children"), SIMPLE_CLASS3_TYPE, Cardinality.ONE_TO_MANY, Cascade.REMOVE, false);
 
     final FieldMetadataBuilder fieldBuilder =
         new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE,

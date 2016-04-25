@@ -41,6 +41,7 @@ public class SetField extends CollectionField {
   private List<AnnotationAttributeValue<?>> joinTableAttributes;
   private Cascade cascadeType;
   private final String ROO_DEFAULT_JOIN_TABLE_NAME = "_ROO_JOIN_TABLE_";
+  private final boolean isDto;
 
   /**
    * Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be
@@ -48,12 +49,24 @@ public class SetField extends CollectionField {
    */
   private JavaSymbolName mappedBy;
 
+  /**
+   * Constructor for SetField
+   * 
+   * @param physicalTypeIdentifier
+   * @param fieldType
+   * @param fieldName
+   * @param genericParameterTypeName
+   * @param cardinality
+   * @param cascadeType
+   * @param isDto whether target class is a DTO
+   */
   public SetField(final String physicalTypeIdentifier, final JavaType fieldType,
       final JavaSymbolName fieldName, final JavaType genericParameterTypeName,
-      final Cardinality cardinality, final Cascade cascadeType) {
+      final Cardinality cardinality, final Cascade cascadeType, final boolean isDto) {
     super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName);
     this.cardinality = cardinality;
     this.cascadeType = cascadeType;
+    this.isDto = isDto;
   }
 
   @Override
@@ -62,38 +75,41 @@ public class SetField extends CollectionField {
     final List<AnnotationAttributeValue<?>> attributes =
         new ArrayList<AnnotationAttributeValue<?>>();
 
-    if (cardinality == null) {
-      // Assume set field is an enum
-      annotations.add(new AnnotationMetadataBuilder(ELEMENT_COLLECTION));
-    } else {
-      attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(
-          CASCADE_TYPE, new JavaSymbolName(cascadeType.name()))));
-      if (fetch != null) {
-        JavaSymbolName value = new JavaSymbolName("EAGER");
-        if (fetch == Fetch.LAZY) {
-          value = new JavaSymbolName("LAZY");
+    // Manage cardinality only if class is not a DTO
+    if (!isDto) {
+      if (cardinality == null) {
+        // Assume set field is an enum
+        annotations.add(new AnnotationMetadataBuilder(ELEMENT_COLLECTION));
+      } else {
+        attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(
+            CASCADE_TYPE, new JavaSymbolName(cascadeType.name()))));
+        if (fetch != null) {
+          JavaSymbolName value = new JavaSymbolName("EAGER");
+          if (fetch == Fetch.LAZY) {
+            value = new JavaSymbolName("LAZY");
+          }
+          attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(
+              FETCH_TYPE, value)));
         }
-        attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(
-            FETCH_TYPE, value)));
-      }
-      if (mappedBy != null) {
-        attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy
-            .getSymbolName()));
-      }
+        if (mappedBy != null) {
+          attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy
+              .getSymbolName()));
+        }
 
-      switch (cardinality) {
-        case ONE_TO_MANY:
-          annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY, attributes));
-          break;
-        case MANY_TO_MANY:
-          annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY, attributes));
-          break;
-        case ONE_TO_ONE:
-          annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE, attributes));
-          break;
-        default:
-          annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE, attributes));
-          break;
+        switch (cardinality) {
+          case ONE_TO_MANY:
+            annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY, attributes));
+            break;
+          case MANY_TO_MANY:
+            annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY, attributes));
+            break;
+          case ONE_TO_ONE:
+            annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE, attributes));
+            break;
+          default:
+            annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE, attributes));
+            break;
+        }
       }
     }
 

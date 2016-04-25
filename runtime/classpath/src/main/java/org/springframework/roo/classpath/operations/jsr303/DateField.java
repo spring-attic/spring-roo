@@ -75,7 +75,8 @@ public class DateField extends FieldDetails {
           new JavaSymbolName(value))));
       annotations.add(new AnnotationMetadataBuilder(TEMPORAL, attrs));
     }
-    // Always add a DateTimeFormat annotation
+
+    // Only add a DateTimeFormat annotation if class is not a DTO
     final List<AnnotationAttributeValue<?>> attributes =
         new ArrayList<AnnotationAttributeValue<?>>();
     if (pattern != null) {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -29,7 +30,6 @@ import org.springframework.roo.classpath.operations.jsr303.ListField;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
@@ -37,6 +37,7 @@ import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.project.Path;
 
 /**
@@ -48,6 +49,8 @@ import org.springframework.roo.project.Path;
 @Component
 @Service
 public class DtoOperationsImpl implements DtoOperations {
+
+  protected final static Logger LOGGER = HandlerUtils.getLogger(DtoOperationsImpl.class);
 
   @Reference
   private ProjectOperations projectOperations;
@@ -238,6 +241,28 @@ public class DtoOperationsImpl implements DtoOperations {
       }
     }
 
+    // Show a warning if one or more typed fields don't exists in the entity
+    StringBuffer wrongFields = new StringBuffer();
+    for (int i = 0; i < fields.length; i++) {
+      boolean fieldAdded = false;
+      for (FieldMetadata dtoField : dtoFields) {
+        if (dtoField.getFieldName().getSymbolName().equals(fields[i])) {
+          fieldAdded = true;
+          break;
+        }
+      }
+      if (!fieldAdded) {
+        if (StringUtils.isNotEmpty(wrongFields)) {
+          wrongFields.append(", ");
+        }
+        wrongFields.append(fields[i]);
+      }
+    }
+    if (StringUtils.isNotEmpty(wrongFields)) {
+      LOGGER.warning(String.format("%s%s",
+          "Followind fields don't exist in the entity or were wrong typed: ", wrongFields));
+    }
+
     return dtoFields;
   }
 
@@ -262,7 +287,7 @@ public class DtoOperationsImpl implements DtoOperations {
         fieldDetails =
             new SetField(dtoBuilder.getDeclaredByMetadataId(), new JavaType(
                 JdkJavaType.SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
-                Arrays.asList(fieldType)), field.getFieldName(), fieldType, null, null);
+                Arrays.asList(fieldType)), field.getFieldName(), fieldType, null, null, true);
         fieldBuilder = new FieldMetadataBuilder(fieldDetails);
         fieldBuilder.setModifier(field.getModifier());
         fieldBuilder.setAnnotations(field.getAnnotations());
@@ -271,7 +296,7 @@ public class DtoOperationsImpl implements DtoOperations {
         fieldDetails =
             new ListField(dtoBuilder.getDeclaredByMetadataId(), new JavaType(
                 JdkJavaType.LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
-                Arrays.asList(fieldType)), field.getFieldName(), fieldType, null, null);
+                Arrays.asList(fieldType)), field.getFieldName(), fieldType, null, null, true);
         fieldBuilder = new FieldMetadataBuilder(fieldDetails);
         fieldBuilder.setModifier(field.getModifier());
         fieldBuilder.setAnnotations(field.getAnnotations());
@@ -306,7 +331,9 @@ public class DtoOperationsImpl implements DtoOperations {
 
       // Add field as final if necessary
       if (immutable) {
-        fieldBuilder.setModifier(Modifier.FINAL);
+        fieldBuilder.setModifier(Modifier.PRIVATE + Modifier.FINAL);
+      } else {
+        fieldBuilder.setModifier(Modifier.PRIVATE);
       }
 
       // Build field

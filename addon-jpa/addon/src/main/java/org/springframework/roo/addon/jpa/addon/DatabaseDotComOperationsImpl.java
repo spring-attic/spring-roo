@@ -28,7 +28,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Service
 public class DatabaseDotComOperationsImpl implements DatabaseDotComOperations {
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(GaeOperationsImpl.class);
+  protected final static Logger LOGGER = HandlerUtils.getLogger(DatabaseDotComOperationsImpl.class);
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
