@@ -279,38 +279,6 @@ field number --fieldName availableStock --type java.lang.Integer
 field number --fieldName reorderLevel --type java.lang.Integer
 field number --fieldName replenishStock --type java.lang.Integer
 
-dto --class ~.Invoice --immutable
-field number --fieldName customerOrderId --type java.lang.Long
-field number --fieldName shipCountryId --type java.lang.Long
-field number --fieldName shipRegionId --type java.lang.Long
-field number --fieldName shipCityId --type java.lang.Long
-field number --fieldName customerId --type java.lang.Long
-field number --fieldName customerCountryId --type java.lang.Long
-field number --fieldName customerRegionId --type java.lang.Long
-field number --fieldName customerCityId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName shippedId --type java.lang.Long
-field date --fieldName invoiceDate --type java.util.Calendar
-field string --fieldName shipName
-field string --fieldName shipAddress
-field string --fieldName shipCountryDescription
-field string --fieldName shipRegionDescription
-field string --fieldName shipCityDescription
-field string --fieldName shipPostalCode
-field string --fieldName customerCompanyName
-field string --fieldName customerCountryDescription
-field string --fieldName customerRegionDescription
-field string --fieldName customerCityDescription
-field string --fieldName customerPostalCode
-field date --fieldName orderDate --type java.util.Calendar
-field date --fieldName shippedDate --type java.util.Calendar
-field string --fieldName employeeName
-field string --fieldName shipperCompanyName
-field number --fieldName freight --type java.math.BigDecimal
-field number --fieldName subtotal --type java.math.BigDecimal
-field number --fieldName total --type java.math.BigDecimal
-field set --fieldName orderDetailsInfo --type ~.OrderDetailInfo
-
 dto --class ~.OrderDetailInfo --immutable
 field number --fieldName orderDetailId --type java.lang.Long
 field number --fieldName customerOrderId --type java.lang.Long
