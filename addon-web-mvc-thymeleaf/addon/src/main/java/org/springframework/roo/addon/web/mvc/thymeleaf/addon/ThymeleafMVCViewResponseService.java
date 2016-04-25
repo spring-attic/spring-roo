@@ -18,6 +18,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
+import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -75,6 +76,7 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
   private TypeManagementService typeManagementService;
   private PathResolver pathResolver;
   private FileManager fileManager;
+  private MVCViewGenerationService viewGenerationService;
 
   /**
    * This operation returns the Feature name. In this case,
@@ -197,6 +199,9 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
     addThymeleafDatatablesResources(module);
     // Is necessary to copy static resources
     copyStaticResources(module);
+    // Delegate on view generation to create new index and error page
+    getViewGenerationService().addIndexView(null);
+    getViewGenerationService().addErrorView(null);
   }
 
   /**
@@ -348,7 +353,7 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
     addGlobalSearchHandlerMethodArgumentResolverClass(module);
 
     // Add WebMVCThymeleafUIConfiguration config class
-    addWebMVCThymeleafUIConfigurationClass(module);
+    //addWebMVCThymeleafUIConfigurationClass(module);
   }
 
   /**
@@ -739,6 +744,32 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
       }
     } else {
       return fileManager;
+    }
+  }
+
+  public MVCViewGenerationService getViewGenerationService() {
+    if (viewGenerationService == null) {
+      // Get all Services implement MVCViewGenerationService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(MVCViewGenerationService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          MVCViewGenerationService service =
+              (MVCViewGenerationService) this.context.getService(ref);
+          if (service.getName().equals(getName())) {
+            viewGenerationService = service;
+            return viewGenerationService;
+          }
+        }
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load MVCViewGenerationService on ThymeleafMVCViewResponseService.");
+        return null;
+      }
+    } else {
+      return viewGenerationService;
     }
   }
 }

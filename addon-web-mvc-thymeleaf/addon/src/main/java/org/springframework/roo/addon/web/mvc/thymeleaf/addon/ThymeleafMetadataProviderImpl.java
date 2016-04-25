@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -24,9 +23,10 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.views.AbstractViewGeneratorMetadataProvider;
+import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -37,14 +37,11 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
@@ -63,8 +60,8 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Component
 @Service
-public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
-    implements ThymeleafMetadataProvider {
+public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadataProvider implements
+    ThymeleafMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils
       .getLogger(ThymeleafMetadataProviderImpl.class);
@@ -75,19 +72,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
 
-  private boolean readOnly;
-  private JavaType entity;
-  private JavaType identifierType;
-  private MethodMetadata identifierAccessor;
-  private JavaType service;
-  private String path;
-  private String metadataIdentificationString;
-  private ClassOrInterfaceTypeDetails controller;
-
   private JavaType globalSearchType;
   private JavaType datatablesDataType;
 
   private ControllerMVCService controllerMVCService;
+  private MVCViewGenerationService viewGenerationService;
 
   private List<JavaType> typesToImport;
 
@@ -174,48 +163,48 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
   }
 
   @Override
-  protected ItdTypeDetailsProvidingMetadataItem getMetadata(
-      final String metadataIdentificationString, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
+  protected MVCViewGenerationService getViewGenerationService() {
+    if (viewGenerationService == null) {
+      // Get all Services implement MVCViewGenerationService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(MVCViewGenerationService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          MVCViewGenerationService viewService =
+              (MVCViewGenerationService) this.context.getService(ref);
+          if (viewService.getName().equals("THYMELEAF")) {
+            viewGenerationService = viewService;
+            return viewGenerationService;
+          }
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load MVCViewGenerationService on ThymeleafMetadataProviderImpl.");
+        return null;
+      }
+    } else {
+      return viewGenerationService;
+    }
+  }
+
+  @Override
+  protected ItdTypeDetailsProvidingMetadataItem createMetadataInstance() {
 
     this.typesToImport = new ArrayList<JavaType>();
-    this.controller = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-    this.metadataIdentificationString = metadataIdentificationString;
 
-    AnnotationMetadata controllerAnnotation = controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
-
-    // Getting entity and check if is a readOnly entity or not
-    this.entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
-    AnnotationMetadata entityAnnotation =
-        getTypeLocationService().getTypeDetails(this.entity).getAnnotation(
-            RooJavaType.ROO_JPA_ENTITY);
-
-    Validate.notNull(entityAnnotation, "ERROR: Entity should be annotated with @RooJpaEntity");
-
-    this.readOnly = false;
-    if (entityAnnotation.getAttribute("readOnly") != null) {
-      this.readOnly = (Boolean) entityAnnotation.getAttribute("readOnly").getValue();
-    }
-
-    // Getting identifierType
-    this.identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
-    this.identifierAccessor = getPersistenceMemberLocator().getIdentifierAccessor(entity);
-
-    // Getting service and its metadata
-    this.service = (JavaType) controllerAnnotation.getAttribute("service").getValue();
+    // Getting service details
     ClassOrInterfaceTypeDetails serviceDetails =
-        getTypeLocationService().getTypeDetails(this.service);
+        getTypeLocationService().getTypeDetails(getService());
 
-    List<MethodMetadata> finders = new ArrayList<MethodMetadata>();
     final LogicalPath logicalPath =
         PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
     final String serviceMetadataKey =
         ServiceMetadata.createIdentifier(serviceDetails.getType(), logicalPath);
     final ServiceMetadata serviceMetadata =
         (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
-
-    // Getting path
-    this.path = (String) controllerAnnotation.getAttribute("path").getValue();
 
     // Getting Global search class
     Set<ClassOrInterfaceTypeDetails> globalSearchClasses =
@@ -252,13 +241,13 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         serviceMetadata.getFindAllGlobalSearchMethod();
     MethodMetadata serviceCountMethod = serviceMetadata.getCountMethod();
 
-    return new ThymeleafMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, getListFormMethod(),
+    return new ThymeleafMetadata(metadataIdentificationString, this.aspectName,
+        this.governorPhysicalTypeMetadata, getListFormMethod(),
         getListJSONMethod(serviceFindAllGlobalSearchMethod),
         getListDatatablesJSONMethod(serviceCountMethod), getCreateFormMethod(),
         getCreateMethod(serviceSaveMethod), getEditFormMethod(),
         getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod), getShowMethod(),
-        getPopulateFormMethod(), this.readOnly, typesToImport);
+        getPopulateFormMethod(), isReadOnly(), typesToImport);
   }
 
   /**
@@ -273,7 +262,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
-        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+        getControllerMVCService().getMVCMethodByRequestMapping(this.controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
     if (existingMVCMethod != null) {
@@ -923,12 +912,12 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
    */
   private FieldMetadata getEntityField() {
 
-    // Generating service field name
+    // Generating entity field name
     String fieldName =
         new JavaSymbolName(this.entity.getSimpleTypeName()).getSymbolNameUnCapitalisedFirstLetter();
 
     return new FieldMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC,
-        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.service)
+        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.entity)
         .build();
   }
 
@@ -956,7 +945,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
    * @return
    */
   private String getViewsPath() {
-    return this.path.startsWith("/") ? this.path.substring(1) : this.path;
+    return this.controllerPath.startsWith("/") ? this.controllerPath.substring(1)
+        : this.controllerPath;
   }
 
   /**
@@ -969,18 +959,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
   private JavaType addTypeToImport(JavaType type) {
     typesToImport.add(type);
     return type;
-  }
-
-  private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
-
-    if (getMetadataDependencyRegistry() != null
-        && StringUtils.isNotBlank(upstreamDependency)
-        && StringUtils.isNotBlank(downStreamDependency)
-        && !upstreamDependency.equals(downStreamDependency)
-        && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(
-            MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
-      getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
-    }
   }
 
   public String getProvidesType() {
@@ -1002,7 +980,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         return null;
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ControllerMVCService on JSONMetadataProviderImpl.");
+        LOGGER.warning("Cannot load ControllerMVCService on ThymeleafMetadataProviderImpl.");
         return null;
       }
     } else {

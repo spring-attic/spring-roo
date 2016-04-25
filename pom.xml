@@ -466,6 +466,11 @@
                 <artifactId>org.springframework.roo.wrapping.jline</artifactId>
                 <version>1.0.S2-B.0013</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.roo.wrapping</groupId>
+                <artifactId>org.springframework.roo.wrapping.jsoup</artifactId>
+                <version>1.9.1.001</version>
+            </dependency>
 
             <!-- Roo Addons -->
             <dependency>
@@ -801,6 +806,12 @@
                 <version>${powermock.version}</version>
                 <scope>test</scope>
             </dependency>
+            <!-- FreeMarker Bundle -->
+            <dependency>
+			    <groupId>org.apache.servicemix.bundles</groupId>
+			    <artifactId>org.apache.servicemix.bundles.freemarker</artifactId>
+			    <version>2.3.23_1</version>
+			</dependency>
         </dependencies>
     </dependencyManagement>
     <build>
