@@ -19,6 +19,9 @@ public class RepositoryJpaCustomAnnotationValues extends AbstractAnnotationValue
   @AutoPopulate
   private JavaType entity;
 
+  @AutoPopulate
+  private JavaType defaultSearchResult;
+
   /**
    * Constructor
    * 
@@ -27,6 +30,15 @@ public class RepositoryJpaCustomAnnotationValues extends AbstractAnnotationValue
   public RepositoryJpaCustomAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     super(governorPhysicalTypeMetadata, RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
     AutoPopulationUtils.populate(this, annotationMetadata);
+  }
+
+  /**
+   * Returns the search result type returned by the findAll method of the annotated repository
+   * 
+   * @return a non-<code>null</code> type
+   */
+  public JavaType getDefaultSearchResult() {
+    return defaultSearchResult;
   }
 
   /**

@@ -3,20 +3,25 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -25,6 +30,7 @@ import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadat
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -173,6 +179,9 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         .notNull(entityAttribute,
             "ERROR: Repository interface should be contain an entity on @RooJpaRepositoryCustom annotation");
 
+    ClassOrInterfaceTypeDetails entityDetails =
+        getTypeLocationService().getTypeDetails(entityAttribute.getValue());
+
     // Getting repository metadata
     final LogicalPath logicalPath =
         PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
@@ -181,9 +190,50 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     final RepositoryJpaCustomMetadata repositoryCustomMetadata =
         (RepositoryJpaCustomMetadata) getMetadataService().get(repositoryMetadataKey);
 
+    // Getting java bean metadata
+    final LogicalPath entityLogicalPath =
+        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
+    final String javaBeanMetadataKey =
+        JavaBeanMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
+
+    // Create dependency between repository and java bean annotations
+    registerDependency(javaBeanMetadataKey, metadataIdentificationString);
+
+
+    // Getting entity properties for findAll method
+    ClassOrInterfaceTypeDetails searchResultDetails =
+        getTypeLocationService().getTypeDetails(repositoryCustomMetadata.getSearchResult());
+
+    final int maxFields = 5;
+    List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
+    for (FieldMetadata field : getMemberDetails(searchResultDetails).getFields()) {
+
+      // Exclude non-simple fields
+      if (!field.getFieldType().isCommonCollectionType()
+          && getTypeLocationService().getTypeDetails(field.getFieldType()) == null) {
+        validFields.add(field);
+
+        if (validFields.size() == maxFields) {
+          break;
+        }
+      }
+    }
+
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(),
+        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(), validFields,
         repositoryCustomMetadata.getFindAllGlobalSearchMethod());
+  }
+
+  private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
+
+    if (getMetadataDependencyRegistry() != null
+        && StringUtils.isNotBlank(upstreamDependency)
+        && StringUtils.isNotBlank(downStreamDependency)
+        && !upstreamDependency.equals(downStreamDependency)
+        && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(
+            MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
+      getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
+    }
   }
 
   public String getProvidesType() {

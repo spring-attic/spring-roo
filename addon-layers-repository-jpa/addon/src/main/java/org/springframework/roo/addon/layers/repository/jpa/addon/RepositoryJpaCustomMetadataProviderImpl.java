@@ -154,6 +154,15 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
             entity,
             "ERROR: Repository custom interface should be contain an entity on @RooJpaRepositoryCustom annotation");
 
+    // Getting findAll results type
+    JavaType searchResult = annotationValues.getDefaultSearchResult();
+
+    Validate
+        .notNull(
+            searchResult,
+            "ERROR: Repository custom interface should contain a defaultSearchResult on @RooJpaRepositoryCustom annotation");
+
+
     // Getting the class annotated with @RooGlobalSearch
     Set<ClassOrInterfaceTypeDetails> globalSearchDetails =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
@@ -163,9 +172,18 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
       throw new RuntimeException("ERROR: Not found a class annotated with @RooGlobalSearch");
     }
 
+    JavaType globalSearch = globalSearchDetails.iterator().next().getType();
+
+
+    // Add dependency between modules
+    ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+    getTypeLocationService().addModuleDependency(cid.getName().getModule(), entity);
+    getTypeLocationService().addModuleDependency(cid.getName().getModule(), searchResult);
+    getTypeLocationService().addModuleDependency(cid.getName().getModule(), globalSearch);
+
+
     return new RepositoryJpaCustomMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, globalSearchDetails.iterator()
-            .next().getType());
+        governorPhysicalTypeMetadata, annotationValues, entity, searchResult, globalSearch);
   }
 
 

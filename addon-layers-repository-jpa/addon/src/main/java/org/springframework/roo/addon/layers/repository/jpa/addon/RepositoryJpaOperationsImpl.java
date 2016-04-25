@@ -35,12 +35,14 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.Execution;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
@@ -97,14 +99,15 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
                 repositoriesPackage.getModule());
 
         // Delegate on simple add repository method
-        addRepository(interfaceType, entity.getType());
+        addRepository(interfaceType, entity.getType(), null);
       }
     }
 
   }
 
   @Override
-  public void addRepository(final JavaType interfaceType, final JavaType domainType) {
+  public void addRepository(final JavaType interfaceType, final JavaType domainType,
+      JavaType defaultSearchResult) {
     Validate.notNull(interfaceType, "ERROR: You must specify an interface repository type.");
     Validate.notNull(interfaceType.getModule(), "ERROR: interfaceType module is required.");
     Validate.notNull(domainType, "ERROR: You must specify a valid Entity. ");
@@ -117,6 +120,21 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // @RooJpaEntity
     Validate.notNull(entityAnnotation,
         "ERROR: Provided entity should be annotated with @RooJpaEntity");
+
+    if (defaultSearchResult != null) {
+
+      ClassOrInterfaceTypeDetails defaultSearchResultDetails =
+          getTypeLocationService().getTypeDetails(defaultSearchResult);
+      AnnotationMetadata defaultSearchResultAnnotation =
+          defaultSearchResultDetails.getAnnotation(RooJavaType.ROO_DTO);
+
+      // Show an error indicating that defaultSearchResult should be annotated with
+      // @RooDTO
+      Validate.notNull(defaultSearchResultAnnotation,
+          "ERROR: Provided defaultSearchResult should be annotated with @RooDTO");
+    } else {
+      defaultSearchResult = domainType;
+    }
 
     // Check if the new interface to be created exists yet
     final String interfaceIdentifier =
@@ -166,7 +184,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // By default, generate RepositoryCustom interface and its
     // implementation that allow developers to include its dynamic queries
     // using QueryDSL
-    addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage());
+    addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage(), defaultSearchResult);
 
     // Also, is necessary to include a class annotated with @RooGlobalSearch. This class
     // will be used in some repository methods
@@ -184,12 +202,29 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
           new Dependency(dependencyElement));
     }
 
-    // Add querydsl Plugin
-    List<Element> elements = XmlUtils.findElements("/configuration/plugins/plugin", configuration);
-    for (final Element element : elements) {
-      getProjectOperations().addBuildPlugin(interfaceType.getModule(), new Plugin(element));
+    // Add querydsl plugin
+    Plugin queryDslPlugin = null;
+    final List<Element> plugins =
+        XmlUtils.findElements("/configuration/plugins/plugin", configuration);
+    for (final Element pluginElement : plugins) {
+      Plugin plugin = new Plugin(pluginElement);
+      if (plugin.getArtifactId().equals("querydsl-maven-plugin")) {
+        queryDslPlugin = plugin;
+      }
+      getProjectOperations().addBuildPlugin(interfaceType.getModule(), plugin);
     }
 
+    if (queryDslPlugin == null) {
+      throw new RuntimeException("Error: Missing QueryDSL plugin");
+    }
+
+    // Add entity package to find Q classes.
+    getProjectOperations().addPackageToPluginExecution(
+        interfaceType.getModule(),
+        queryDslPlugin,
+        "generate-qtypes",
+        getProjectOperations().getTopLevelPackage(domainType.getModule())
+            .getFullyQualifiedPackageName());
   }
 
   /**
@@ -416,7 +451,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
    * @return JavaType with new RepositoryCustom interface.
    */
   private JavaType addRepositoryCustom(JavaType domainType, JavaType repositoryType,
-      JavaPackage repositoryPackage) {
+      JavaPackage repositoryPackage, JavaType defaultSearchResult) {
 
     // Getting RepositoryCustom interface JavaTYpe
     JavaType interfaceType =
@@ -446,6 +481,13 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
     repositoryCustomAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
         "entity"), domainType));
+
+    repositoryCustomAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
+        "defaultSearchResult"), defaultSearchResult));
+
+    // Add dependencies between modules
+    getProjectOperations().addModuleDependency(interfaceType.getModule(),
+        defaultSearchResult.getModule());
 
     interfaceBuilder.addAnnotation(repositoryCustomAnnotationMetadata);
 

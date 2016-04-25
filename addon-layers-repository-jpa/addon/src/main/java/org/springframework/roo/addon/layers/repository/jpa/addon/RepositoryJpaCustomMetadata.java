@@ -37,6 +37,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   private ImportRegistrationResolver importResolver;
   private JavaType globalSearch;
   private JavaType entity;
+  private JavaType searchResult;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -72,19 +73,22 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    * @param identifierType the type of the entity's identifier field
    *            (required)
    * @param domainType entity referenced on interface
+   * @param searchResult the java type o the search result returned by findAll finder
    * @param globalSearch the class annotated with @RooGlobalSearch 
    */
   public RepositoryJpaCustomMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
-      final JavaType globalSearch) {
+      final JavaType searchResult, JavaType globalSearch) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(globalSearch, "Global search required");
+    Validate.notNull(searchResult, "Search result required");
 
     this.importResolver = builder.getImportRegistrationResolver();
     this.globalSearch = globalSearch;
     this.entity = domainType;
+    this.searchResult = searchResult;
 
     // Generate findAll method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllGlobalSearchMethod()));
@@ -119,7 +123,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     // Return type
     JavaType returnType =
         new JavaType("org.springframework.data.domain.Page", 0, DataType.TYPE, null,
-            Arrays.asList(entity));
+            Arrays.asList(searchResult));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
@@ -139,5 +143,9 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     builder.append("governor", governorPhysicalTypeMetadata.getId());
     builder.append("itdTypeDetails", itdTypeDetails);
     return builder.toString();
+  }
+
+  public JavaType getSearchResult() {
+    return searchResult;
   }
 }

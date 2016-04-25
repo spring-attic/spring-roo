@@ -249,6 +249,23 @@ public interface ProjectOperations {
   void addResource(final String moduleName, Resource resource);
 
   /**
+   * Attempts to add the specified package into the specified plugin execution. 
+   * If the package already exists or the execution does not exist in the specified plugin, the
+   * method silently returns. Otherwise the package is added.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param plugin the plugin where add the package (required)
+   * @param executionId the id of the plugin execution where add the package (required)
+   * @param packageName the package to add (required)
+   */
+  void addPackageToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, final String packageName);
+
+  /**
    * Verifies if the specified build plugin is present. If it is present,
    * silently returns. If it is not present, removes any build plugin which
    * matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
@@ -635,4 +652,5 @@ public interface ProjectOperations {
    * @param projectType the project type to update (required)
    */
   void updateProjectType(final String moduleName, ProjectType projectType);
+
 }

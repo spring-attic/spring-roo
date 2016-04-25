@@ -332,6 +332,72 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
         descriptionOfChange, false);
   }
 
+
+  public void addPackageToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, final String packageName) {
+    Validate.isTrue(isProjectAvailable(moduleName), "Package modification prohibited at this time");
+    Validate.notNull(executionId, "Execution id required");
+    Validate.notNull(plugin, "Plugin required");
+    Validate.notNull(packageName, "Package required");
+
+    String descriptionOfChange;
+    final Pom pom = getPomFromModuleName(moduleName);
+    final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+    final Element root = document.getDocumentElement();
+
+
+    // Find plugin
+    final Element pluginsElement =
+        DomUtils.createChildIfNotExists("/project/build/plugins", root, document);
+    final List<Element> existingPluginElements = XmlUtils.findElements("plugin", pluginsElement);
+
+
+    for (final Element existingPluginElement : existingPluginElements) {
+      final Plugin existingPlugin = new Plugin(existingPluginElement);
+
+      if (existingPlugin.hasSameCoordinates(plugin)) {
+
+        // FInd execution
+        final List<Element> existingExecutionElements =
+            XmlUtils.findElements("executions/execution", existingPluginElement);
+
+        for (final Element existingExecutionElement : existingExecutionElements) {
+
+          final Element idElement = XmlUtils.findFirstElement("id", existingExecutionElement);
+          final String id = DomUtils.getTextContent(idElement, "");
+
+          if (id.equals(executionId)) {
+
+            // Check if package is already added
+            final List<Element> existingPackages =
+                XmlUtils.findElements("configuration/packages/package", existingExecutionElement);
+
+            for (Element existingPackage : existingPackages) {
+              final String pack = DomUtils.getTextContent(existingPackage, "");
+              if (pack.equals(packageName)) {
+                return;
+              }
+            }
+
+
+            // No such package; add it
+            final Element confElement =
+                DomUtils
+                    .createChildIfNotExists("configuration", existingExecutionElement, document);
+            final Element packagesElement =
+                DomUtils.createChildIfNotExists("packages", confElement, document);
+            packagesElement.appendChild(XmlUtils
+                .createTextElement(document, "package", packageName));
+            descriptionOfChange = highlight(ADDED + " package") + " '" + packageName + "'";
+
+            fileManager.createOrUpdateTextFileIfRequired(pom.getPath(),
+                XmlUtils.nodeToString(document), descriptionOfChange, false);
+          }
+        }
+      }
+    }
+  }
+
   public void addModuleDependency(final String moduleToDependUpon) {
     addModuleDependency(getFocusedModuleName(), moduleToDependUpon);
   }

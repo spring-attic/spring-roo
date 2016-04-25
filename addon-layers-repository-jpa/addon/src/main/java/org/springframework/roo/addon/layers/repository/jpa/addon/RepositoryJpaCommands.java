@@ -93,15 +93,43 @@ public class RepositoryJpaCommands implements CommandMarker {
     return allPossibleValues;
   }
 
+
+  @CliOptionAutocompleteIndicator(command = "repository jpa add", param = "defaultSearchResult",
+      help = "--defaultSearchResult option should be a DTO class.")
+  public List<String> getDTOResults(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("defaultSearchResult");
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    Set<ClassOrInterfaceTypeDetails> dtosInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
+    for (ClassOrInterfaceTypeDetails dto : dtosInProject) {
+      String name = replaceTopLevelPackageString(dto, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    if (allPossibleValues.isEmpty()) {
+      allPossibleValues.add("");
+    }
+
+    return allPossibleValues;
+  }
+
   @CliCommand(value = "repository jpa add",
       help = "Generates new Spring Data repository for specified entity.")
   public void repository(
       @CliOption(key = "interface", mandatory = true,
           help = "The java Spring Data repository to generate.") final JavaType interfaceType,
       @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*",
-          optionContext = PROJECT, help = "The domain entity this repository should expose") final JavaType domainType) {
+          optionContext = PROJECT, help = "The domain entity this repository should expose") final JavaType domainType,
+      @CliOption(key = "defaultSearchResult", mandatory = false, optionContext = PROJECT,
+          help = "The findAll finder return type. Should be a DTO class.") JavaType defaultSearchResult) {
 
-    repositoryJpaOperations.addRepository(interfaceType, domainType);
+    repositoryJpaOperations.addRepository(interfaceType, domainType, defaultSearchResult);
   }
 
   /**

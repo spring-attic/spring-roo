@@ -22,10 +22,23 @@ public @interface RooJpaRepositoryCustom {
   String ENTITY_ATTRIBUTE = "entity";
 
   /**
+   * The name of this annotation's attribute that specifies the findAll search results
+   * type.
+   */
+  String DTO_ATTRIBUTE = "defaultSearchResult";
+
+  /**
    * The entity managed by the annotated repository
    * 
    * @return a non-<code>null</code> entity type
    */
   Class<?> entity(); // No default => mandatory
+
+  /**
+   * The type of the results returned by the findAll search of annotated repository
+   * 
+   * @return a non-<code>null</code> type
+   */
+  Class<?> defaultSearchResult(); // No default => mandatory
 
 }

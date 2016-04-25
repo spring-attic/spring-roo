@@ -553,7 +553,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
       for (final ClassOrInterfaceTypeDetails entity : newEntities) {
         final JavaType type = entity.getType();
         getRepositoryJpaOperations().addRepository(
-            new JavaType(type.getFullyQualifiedTypeName() + "Repository"), type);
+            new JavaType(type.getFullyQualifiedTypeName() + "Repository"), type, null);
       }
     }
 
