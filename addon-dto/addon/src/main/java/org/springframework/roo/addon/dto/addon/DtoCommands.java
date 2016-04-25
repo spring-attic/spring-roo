@@ -144,7 +144,7 @@ public class DtoCommands implements CommandMarker {
     // Create results to return
     List<String> results = new ArrayList<String>();
 
-    // Get entity full qualilfied names
+    // Get entity fully qualified names
     Set<ClassOrInterfaceTypeDetails> entities =
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY,
             JpaJavaType.ENTITY);

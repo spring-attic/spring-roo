@@ -691,6 +691,19 @@ public class SimpleParser implements Parser {
 
           for (final String key : option.key()) {
             if (key.equals(lastOptionKey)) {
+
+              // Check if CliOption is boolean mandatory and has specific value
+              if (!option.specifiedDefaultValue().equals(CliOption.NULL)
+                  && parameterType.equals(boolean.class)) {
+
+                // Complete with next option keys and let current key with default value
+                suggestOptionKey(shellContext, translated, results, methodTarget, options,
+                    unspecified, lastOptionValue, alreadySpecified);
+
+                candidates.addAll(results);
+                return 0;
+              }
+
               final List<Completion> allValues = new ArrayList<Completion>();
               String suffix = " ";
 

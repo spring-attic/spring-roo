@@ -4,6 +4,7 @@ import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -489,6 +491,99 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
+   * Find entities in project and returns a list with their fully qualified names.
+   * 
+   * @param shellContext
+   * @return List<String> with available entity full qualified names.
+   */
+  @CliOptionAutocompleteIndicator(command = "web mvc controller", param = "entity",
+      help = "Option entity must have an existing entity value. Please, assign it a right value.")
+  public List<String> returnEntityValues(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("entity");
+
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    // Get entity full qualified names
+    Set<ClassOrInterfaceTypeDetails> entities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : entities) {
+      String name = replaceTopLevelPackageString(entity, currentText);
+      if (!results.contains(name)) {
+        results.add(name);
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Find controllers in project and returns a list with their fully qualified names.
+   * 
+   * @param shellContext
+   * @return List<String> with available controllers full qualified names.
+   */
+  @CliOptionAutocompleteIndicator(
+      command = "web mvc controller",
+      param = "controller",
+      help = "Option controller must have an existing controller value. Please, assign it a right value.",
+      validate = false)
+  public List<String> returnControllerValues(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("controller");
+
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    // Get controller full qualified names
+    Set<ClassOrInterfaceTypeDetails> controllers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_CONTROLLER);
+    for (ClassOrInterfaceTypeDetails controller : controllers) {
+      String name = replaceTopLevelPackageString(controller, currentText);
+      if (!results.contains(name)) {
+        results.add(name);
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Find entities in project and returns a list with their fully qualified names.
+   * 
+   * @param shellContext
+   * @return List<String> with available entity full qualified names.
+   */
+  @CliOptionAutocompleteIndicator(command = "web mvc controller", param = "service",
+      help = "Option service must have an existing service value. Please, assign it a right value.")
+  public List<String> returnServiceValues(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("service");
+
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    // Get service full qualified names
+    Set<ClassOrInterfaceTypeDetails> services =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_SERVICE);
+    for (ClassOrInterfaceTypeDetails service : services) {
+      String name = replaceTopLevelPackageString(service, currentText);
+      if (!results.contains(name)) {
+        results.add(name);
+      }
+    }
+
+    return results;
+  }
+
+  /**
    * This method provides the Command definition to be able to generate
    * new Controllers on current project.
    * 
@@ -507,9 +602,9 @@ public class ControllerCommands implements CommandMarker {
       @CliOption(
           key = "all",
           mandatory = false,
-          specifiedDefaultValue = "*",
-          unspecifiedDefaultValue = "",
-          help = "Indicates if devloper wants to generate controllers for every entity of current project ") String all,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "Indicates if developer wants to generate controllers for every entity of current project ") boolean all,
       @CliOption(
           key = "package",
           mandatory = true,
@@ -556,13 +651,69 @@ public class ControllerCommands implements CommandMarker {
     }
 
     // Check --all parameter
-    if (all.equals("*") || !StringUtils.isEmpty(all)) {
+    if (all) {
       getControllerOperations().createControllerForAllEntities(controllersPackage,
           responseTypeServices.get(responseType), formattersPackage);
-    } else if (all.equals("")) {
+    } else {
       getControllerOperations().createController(controller, entity, service, path,
           responseTypeServices.get(responseType), formattersPackage);
     }
+  }
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * 
+   * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value  
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
+    }
+
+    return javaTypeString;
   }
 
   /**
