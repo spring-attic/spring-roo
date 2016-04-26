@@ -166,7 +166,20 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addErrorView(ViewContext ctx) {
-    // TODO Auto-generated method stub
+
+    // Process elements to generate 
+    DOC newDoc = process("error", null, ctx);
+
+    // Getting new viewName
+    String viewName = getViewsFolder().concat("/error").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(newDoc, loadExistingDoc(viewName));
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
 
   }
 
