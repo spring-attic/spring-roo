@@ -193,10 +193,31 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(interfaceType.getModule(), domainType.getModule());
 
-    // Add querydsl dependency
+    // Add dependencies and plugins
+    generateConfiguration(interfaceType, domainType);
+
+  }
+
+  private void generateConfiguration(JavaType interfaceType, JavaType domainType) {
+
     final Element configuration = XmlUtils.getConfiguration(getClass());
-    final List<Element> dependencies =
-        XmlUtils.findElements("/configuration/dependencies/dependency", configuration);
+
+    // Add querydsl dependency
+    final List<Element> dependencies;
+    final List<Element> plugins;
+
+    if (getProjectOperations().isMultimoduleProject()) {
+      dependencies =
+          XmlUtils
+              .findElements("/configuration/multimodule/dependencies/dependency", configuration);
+      plugins = XmlUtils.findElements("/configuration/multimodule/plugins/plugin", configuration);
+
+    } else {
+      dependencies =
+          XmlUtils.findElements("/configuration/monomodule/dependencies/dependency", configuration);
+      plugins = XmlUtils.findElements("/configuration/monomodule/plugins/plugin", configuration);
+    }
+
     for (final Element dependencyElement : dependencies) {
       getProjectOperations().addDependency(interfaceType.getModule(),
           new Dependency(dependencyElement));
@@ -204,8 +225,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
     // Add querydsl plugin
     Plugin queryDslPlugin = null;
-    final List<Element> plugins =
-        XmlUtils.findElements("/configuration/plugins/plugin", configuration);
+
     for (final Element pluginElement : plugins) {
       Plugin plugin = new Plugin(pluginElement);
       if (plugin.getArtifactId().equals("querydsl-maven-plugin")) {
@@ -214,17 +234,21 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       getProjectOperations().addBuildPlugin(interfaceType.getModule(), plugin);
     }
 
-    if (queryDslPlugin == null) {
-      throw new RuntimeException("Error: Missing QueryDSL plugin");
+    if (getProjectOperations().isMultimoduleProject()) {
+
+      if (queryDslPlugin == null) {
+        throw new RuntimeException("Error: Missing QueryDSL plugin");
+      }
+
+      // Add entity package to find Q classes.
+      getProjectOperations().addPackageToPluginExecution(
+          interfaceType.getModule(),
+          queryDslPlugin,
+          "generate-qtypes",
+          getProjectOperations().getTopLevelPackage(domainType.getModule())
+              .getFullyQualifiedPackageName());
     }
 
-    // Add entity package to find Q classes.
-    getProjectOperations().addPackageToPluginExecution(
-        interfaceType.getModule(),
-        queryDslPlugin,
-        "generate-qtypes",
-        getProjectOperations().getTopLevelPackage(domainType.getModule())
-            .getFullyQualifiedPackageName());
   }
 
   /**

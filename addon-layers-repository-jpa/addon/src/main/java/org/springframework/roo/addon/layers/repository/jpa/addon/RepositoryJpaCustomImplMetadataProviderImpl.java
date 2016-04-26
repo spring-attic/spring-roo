@@ -204,17 +204,34 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     ClassOrInterfaceTypeDetails searchResultDetails =
         getTypeLocationService().getTypeDetails(repositoryCustomMetadata.getSearchResult());
 
+    // Getting valid fields to construct the findAll query
     final int maxFields = 5;
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
-    for (FieldMetadata field : getMemberDetails(searchResultDetails).getFields()) {
+    List<FieldMetadata> persistenceFields =
+        getPersistenceMemberLocator().getIdentifierFields(entityAttribute.getValue());
+    persistenceFields
+        .add(getPersistenceMemberLocator().getVersionField(entityAttribute.getValue()));
 
+    boolean found;
+    for (FieldMetadata field : searchResultDetails.getDeclaredFields()) {
       // Exclude non-simple fields
       if (!field.getFieldType().isCommonCollectionType()
           && getTypeLocationService().getTypeDetails(field.getFieldType()) == null) {
-        validFields.add(field);
 
-        if (validFields.size() == maxFields) {
-          break;
+        // Check if field is the id or version field
+        found = false;
+        for (FieldMetadata persistenceField : persistenceFields) {
+          if (persistenceField.getFieldName().equals(field.getFieldName())) {
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          validFields.add(field);
+          if (validFields.size() == maxFields) {
+            break;
+          }
         }
       }
     }
