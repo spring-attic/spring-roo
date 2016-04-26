@@ -329,12 +329,7 @@ public class DtoOperationsImpl implements DtoOperations {
         }
       }
 
-      // Add field as final if necessary
-      if (immutable) {
-        fieldBuilder.setModifier(Modifier.PRIVATE + Modifier.FINAL);
-      } else {
-        fieldBuilder.setModifier(Modifier.PRIVATE);
-      }
+      fieldBuilder.setModifier(Modifier.PRIVATE);
 
       // Build field
       FieldMetadata dtoField = fieldBuilder.build();

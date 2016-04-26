@@ -361,9 +361,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setValue(value);
     }
 
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, javaTypeDetails);
-
     insertField(fieldDetails, permitReservedWords, false);
   }
 
@@ -402,9 +399,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setValue(value);
     }
 
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, javaTypeDetails);
-
     insertField(fieldDetails, permitReservedWords, false);
   }
 
@@ -433,9 +427,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
-
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, cid);
 
     insertField(fieldDetails, permitReservedWords, false);
   }
@@ -490,9 +481,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
     Validate.isTrue(fieldDetails.isDigitsSetCorrectly(),
         "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
-
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, javaTypeDetails);
 
     insertField(fieldDetails, permitReservedWords, false);
   }
@@ -578,9 +566,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
           inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, javaTypeDetails);
-
     insertField(fieldDetails, permitReservedWords, false);
   }
 
@@ -653,9 +638,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
           inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, javaTypeDetails);
-
     insertField(fieldDetails, permitReservedWords, false);
   }
 
@@ -709,9 +691,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.getInitedAnnotations().add(basicAnnotation);
     }
 
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, cid);
-
     insertField(fieldDetails, permitReservedWords, false);
   }
 
@@ -728,9 +707,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     if (column != null) {
       fieldDetails.setColumn(column);
     }
-
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, cid);
 
     insertField(fieldDetails, permitReservedWords, false);
   }
@@ -752,34 +728,7 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setColumn(column);
     }
 
-    // Check if needs final modifier and adds it if necessary
-    checkAndAddFinal(fieldDetails, cid);
-
     insertField(fieldDetails, permitReservedWords, false);
-  }
-
-  /**
-   * Check if FieldDetails needs final modifier and adds it if necessary
-   * 
-   * @param fieldDetails
-   * @param cid
-   * @return the FieldDetails with final modifier if it needed to be added
-   */
-  private FieldDetails checkAndAddFinal(FieldDetails fieldDetails, ClassOrInterfaceTypeDetails cid) {
-
-    // Get @RooDto
-    AnnotationMetadata dtoAnnotation = cid.getAnnotation(RooJavaType.ROO_DTO);
-    if (dtoAnnotation != null) {
-      AnnotationAttributeValue<?> immutableAttribute =
-          dtoAnnotation.getAttribute(new JavaSymbolName("immutable"));
-      if (immutableAttribute != null && immutableAttribute.getValue().equals(true)) {
-        fieldDetails.setModifiers(Modifier.PRIVATE + Modifier.FINAL);
-      } else {
-        fieldDetails.setModifiers(Modifier.PRIVATE);
-      }
-    }
-
-    return fieldDetails;
   }
 
   public void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords,
@@ -800,6 +749,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     if (fieldDetails.getFieldType() != null) {
       module = fieldDetails.getFieldType().getModule();
     }
+
+    fieldDetails.setModifiers(Modifier.PRIVATE);
 
     String initializer = null;
     if (fieldDetails instanceof CollectionField) {
