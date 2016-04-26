@@ -133,7 +133,6 @@ public final class SpringJavaType {
   public static final JavaType REDIRECT_ATTRIBUTES = new JavaType(
       "org.springframework.web.servlet.mvc.support.RedirectAttributes");
 
-
   /**
    * Returns the {@link JavaType} for a Spring converter
    * 

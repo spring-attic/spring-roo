@@ -25,6 +25,14 @@ public final class SpringEnumDetails {
   public static final EnumDetails MEDIA_TYPE_APPLICATION_JSON_VALUE = new EnumDetails(
       SpringJavaType.MEDIA_TYPE, new JavaSymbolName("APPLICATION_JSON_VALUE"));
 
+  // HttpStatus enum details
+  public static final EnumDetails HTTP_STATUS_CONFLICT = new EnumDetails(
+      SpringJavaType.HTTP_STATUS, new JavaSymbolName("CONFLICT"));
+  public static final EnumDetails HTTP_STATUS_CREATED = new EnumDetails(SpringJavaType.HTTP_STATUS,
+      new JavaSymbolName("CREATED"));
+  public static final EnumDetails HTTP_STATUS_OK = new EnumDetails(SpringJavaType.HTTP_STATUS,
+      new JavaSymbolName("OK"));
+
   /**
    * Constructor is private to prevent instantiation
    */

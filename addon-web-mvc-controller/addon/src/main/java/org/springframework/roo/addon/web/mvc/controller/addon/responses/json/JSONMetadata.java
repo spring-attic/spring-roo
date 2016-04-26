@@ -33,6 +33,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private MethodMetadata updateMethod;
   private MethodMetadata deleteMethod;
   private List<MethodMetadata> finderMethods;
+  private MethodMetadata populateHeadersMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -69,6 +70,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * @param updateMethod MethodMetadata 
    * @param deleteMethod MethodMetadata 
    * @param showMethod MethodMetadata 
+   * @param populateHeadersMethod MethodMetadata
    * @param finderMethods List of MethodMetadata
    * @param readOnly boolean 
    */
@@ -76,7 +78,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listMethod,
       final MethodMetadata createMethod, final MethodMetadata updateMethod,
       final MethodMetadata deleteMethod, final MethodMetadata showMethod,
-      List<MethodMetadata> finderMethods, boolean readOnly) {
+      final MethodMetadata populateHeadersMethod, List<MethodMetadata> finderMethods,
+      boolean readOnly, List<JavaType> typesToImport) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = readOnly;
@@ -86,18 +89,23 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     this.deleteMethod = deleteMethod;
     this.showMethod = showMethod;
     this.finderMethods = finderMethods;
+    this.populateHeadersMethod = populateHeadersMethod;
 
     ensureGovernorHasMethod(new MethodMetadataBuilder(listMethod));
     if (!readOnly) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(createMethod));
       ensureGovernorHasMethod(new MethodMetadataBuilder(updateMethod));
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(populateHeadersMethod));
     }
     ensureGovernorHasMethod(new MethodMetadataBuilder(showMethod));
 
     for (MethodMetadata finderMethod : finderMethods) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
     }
+
+    // Add imports
+    builder.getImportRegistrationResolver().addImports(typesToImport);
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -106,7 +114,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Method that returns list JSON method
    * 
-   * @return
+   * @return {@link MethodMetadata}
    */
   public MethodMetadata getListMethod() {
     return this.listMethod;
@@ -116,7 +124,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Method that returns create JSON method
    * 
-   * @return
+   * @return {@link MethodMetadata}
    */
   public MethodMetadata getCreateMethod() {
     return this.createMethod;
@@ -125,7 +133,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Method that returns update JSON method
    * 
-   * @return
+   * @return {@link MethodMetadata}
    */
   public MethodMetadata getUpdateMethod() {
     return this.updateMethod;
@@ -134,7 +142,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Method that returns delete JSON method
    * 
-   * @return
+   * @return {@link MethodMetadata}
    */
   public MethodMetadata getDeleteMethod() {
     return this.deleteMethod;
@@ -143,7 +151,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Method that returns show JSON method
    * 
-   * @return
+   * @return {@link MethodMetadata}
    */
   public MethodMetadata getShowMethod() {
     return this.showMethod;
@@ -152,10 +160,19 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Method that returns finder JSON methods
    * 
-   * @return
+   * @return {@link List<MethodMetadata>}
    */
   public List<MethodMetadata> getFinderMethods() {
     return this.finderMethods;
+  }
+
+  /**
+   * Method that returns populateHeaders method
+   * 
+   * @return {@link MethodMetadata}
+   */
+  public MethodMetadata getPopulateHeaders() {
+    return this.populateHeadersMethod;
   }
 
   /**
