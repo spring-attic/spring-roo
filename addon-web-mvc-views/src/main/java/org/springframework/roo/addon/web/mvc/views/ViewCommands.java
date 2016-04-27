@@ -101,11 +101,11 @@ public class ViewCommands implements CommandMarker {
    * @return
    */
   @CliOptionAutocompleteIndicator(param = "type", command = "web mvc view setup",
-      help = "--responseType parameter should be completed with the provided response types.")
+      help = "--type parameter should be completed with the provided response types.")
   public List<String> getAllResponseTypeValues(ShellContext context) {
     // Getting all not installed services that implements ControllerMVCResponseService
     Map<String, ControllerMVCResponseService> notInstalledResponseTypes =
-        getNotInstalledControllerMVCResponseTypes();
+        getControllerMVCResponseTypes(false);
 
     // Generating all possible values
     List<String> responseTypes = new ArrayList<String>();
@@ -119,7 +119,7 @@ public class ViewCommands implements CommandMarker {
   }
 
   /**
-   * This method checks if web mvc setup command is available or not.
+   * This method checks if web mvc view setup command is available or not.
    * 
    * View setup command will be available if exists some type that 
    * has not been installed.
@@ -129,13 +129,14 @@ public class ViewCommands implements CommandMarker {
   @CliAvailabilityIndicator("web mvc view setup")
   public boolean isSetupAvailable() {
     return getProjectOperations().isFeatureInstalled(FeatureNames.MVC)
-        && !getNotInstalledControllerMVCResponseTypes().isEmpty();
+        && !getControllerMVCResponseTypes(false).isEmpty();
   }
 
   /**
    * This method provides the Command definition to be able to install
    * provided responseType on generated project
    * 
+   * @param type
    * @param module
    */
   @CliCommand(value = "web mvc view setup",
@@ -149,13 +150,77 @@ public class ViewCommands implements CommandMarker {
           help = "The application module where to install the persistence",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
-    Map<String, ControllerMVCResponseService> responseTypes =
-        getNotInstalledControllerMVCResponseTypes();
+    Map<String, ControllerMVCResponseService> responseTypes = getControllerMVCResponseTypes(false);
     if (!responseTypes.containsKey(type)) {
       throw new IllegalArgumentException("ERROR: You have provided an invalid type.");
     }
 
     getViewOperations().setup(responseTypes.get(type), module);
+  }
+
+  /**
+   * This indicator returns all possible values for --type parameter.
+   * 
+   * Only installed response types will be provided.
+   * 
+   * @param context
+   * @return
+   */
+  @CliOptionAutocompleteIndicator(param = "type", command = "web mvc templates setup",
+      help = "--type parameter should be completed with the provided response types.")
+  public List<String> getAllViewTypeValues(ShellContext context) {
+    // Getting all installed services that implements ControllerMVCResponseService
+    Map<String, ControllerMVCResponseService> installedResponseType =
+        getControllerMVCResponseTypes(true);
+
+    // Generating all possible values
+    List<String> responseTypes = new ArrayList<String>();
+
+    for (Entry<String, ControllerMVCResponseService> responseType : installedResponseType
+        .entrySet()) {
+      responseTypes.add(responseType.getKey());
+    }
+
+    return responseTypes;
+  }
+
+  /**
+   * This method checks if web mvc templates setup command is available or not.
+   * 
+   * Templates setup command will be available if exists some type that 
+   * has been installed.
+   * 
+   * @return
+   */
+  @CliAvailabilityIndicator("web mvc templates setup")
+  public boolean isInstallTemplateAvailable() {
+    return getProjectOperations().isFeatureInstalled(FeatureNames.MVC)
+        && !getControllerMVCResponseTypes(true).isEmpty();
+  }
+
+  /**
+   * This method provides the Command definition to be able to install
+   * view generation templates on current project.
+   * 
+   * Installing this templates, developers will be able to customize view generation.
+   * 
+   * @param  type
+   */
+  @CliCommand(
+      value = "web mvc templates setup",
+      help = "Includes view generation templates on current project. Will allow developers to customize view generation.")
+  public void installTemplates(
+      @CliOption(
+          key = "type",
+          mandatory = true,
+          help = "View identifier of templates you want to install. Only installed views are availbale.") String type) {
+
+    Map<String, ControllerMVCResponseService> responseTypes = getControllerMVCResponseTypes(true);
+    if (!responseTypes.containsKey(type)) {
+      throw new IllegalArgumentException("ERROR: You have provided an invalid type.");
+    }
+
+    getMVCViewGenerationService(type).installTemplates();
   }
 
 
@@ -232,11 +297,14 @@ public class ViewCommands implements CommandMarker {
 
   /**
    * This method gets all implementations of ControllerMVCResponseService interface to be able
-   * to locate all not installed ControllerMVCResponseService
+   * to locate all ControllerMVCResponseService. Uses param installed to obtain only the installed
+   * or not installed response types.
+   * 
+   * @param installed indicates if returned responseType should be installed or not.
    * 
    * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
    */
-  public Map<String, ControllerMVCResponseService> getNotInstalledControllerMVCResponseTypes() {
+  public Map<String, ControllerMVCResponseService> getControllerMVCResponseTypes(boolean installed) {
     Map<String, ControllerMVCResponseService> responseTypes =
         new HashMap<String, ControllerMVCResponseService>();
 
@@ -249,7 +317,7 @@ public class ViewCommands implements CommandMarker {
             (ControllerMVCResponseService) this.context.getService(ref);
         boolean isAbleToInstall = false;
         for (Pom module : getProjectOperations().getPoms()) {
-          if (!responseTypeService.isInstalledInModule(module.getModuleName())) {
+          if (responseTypeService.isInstalledInModule(module.getModuleName()) == installed) {
             isAbleToInstall = true;
             break;
           }
@@ -266,5 +334,33 @@ public class ViewCommands implements CommandMarker {
     }
   }
 
+
+  /**
+   * This method gets MVCViewGenerationService implementation that contains necessary operations
+   * to install templates inside generated project.
+   * 
+   * @param type
+   * @return
+   */
+  public MVCViewGenerationService getMVCViewGenerationService(String type) {
+    try {
+      ServiceReference<?>[] references =
+          this.context.getAllServiceReferences(MVCViewGenerationService.class.getName(), null);
+
+      for (ServiceReference<?> ref : references) {
+        MVCViewGenerationService viewGenerationService =
+            (MVCViewGenerationService) this.context.getService(ref);
+        if (viewGenerationService.getName().equals(type)) {
+          return viewGenerationService;
+        }
+      }
+
+      return null;
+
+    } catch (InvalidSyntaxException e) {
+      LOGGER.warning("Cannot load MVCViewGenerationService on ViewCommands.");
+      return null;
+    }
+  }
 
 }

@@ -1,19 +1,26 @@
 package org.springframework.roo.addon.web.mvc.views.template.engines;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGenerationService;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.support.osgi.OSGiUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -32,15 +39,6 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
   protected boolean checkTemplates(String location, String templateName) {
     // Check if provided template exists and has .ftl extension
     return fileManager.exists(location.concat("/").concat(templateName).concat(".ftl"));
-  }
-
-  @Override
-  public void installTemplates() {
-    // Getting destination where FreeMarker templates should be installed.
-    // This will allow developers to customize his own templates.
-    String destination = getTemplatesLocation();
-
-    // TODO: Load Templates to install from getResourceLoaderClass()
   }
 
   protected DOC process(String templateName, List<FieldMetadata> fields, ViewContext ctx) {
@@ -103,6 +101,58 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
           "ERROR: Error trying to generate final content from provided template. You should provide a valid .ftl file");
     }
 
+  }
+
+  /**
+   * This method will copy the contents of a directory to another if the
+   * resource does not already exist in the target directory
+   * 
+   * @param sourceAntPath the source path
+   * @param targetDirectory the target directory
+   */
+  protected void copyDirectoryContents(final String sourceAntPath, String targetDirectory,
+      final boolean replace) {
+    Validate.notBlank(sourceAntPath, "Source path required");
+    Validate.notBlank(targetDirectory, "Target directory required");
+
+    if (!targetDirectory.endsWith("/")) {
+      targetDirectory += "/";
+    }
+
+    if (!fileManager.exists(targetDirectory)) {
+      fileManager.createDirectory(targetDirectory);
+    }
+
+    final String path = FileUtils.getPath(getClass(), sourceAntPath);
+    final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(context, path);
+    Validate.notNull(urls, "Could not search bundles for resources for Ant Path '%s'", path);
+    for (final URL url : urls) {
+      final String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+      if (replace) {
+        try {
+          String contents = IOUtils.toString(url);
+          fileManager.createOrUpdateTextFileIfRequired(targetDirectory + fileName, contents, false);
+        } catch (final Exception e) {
+          throw new IllegalStateException(e);
+        }
+      } else {
+        if (!fileManager.exists(targetDirectory + fileName)) {
+          InputStream inputStream = null;
+          OutputStream outputStream = null;
+          try {
+            inputStream = url.openStream();
+            outputStream = fileManager.createFile(targetDirectory + fileName).getOutputStream();
+            IOUtils.copy(inputStream, outputStream);
+          } catch (final Exception e) {
+            throw new IllegalStateException(
+                "Encountered an error during copying of resources for the add-on.", e);
+          } finally {
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
+          }
+        }
+      }
+    }
   }
 
 }

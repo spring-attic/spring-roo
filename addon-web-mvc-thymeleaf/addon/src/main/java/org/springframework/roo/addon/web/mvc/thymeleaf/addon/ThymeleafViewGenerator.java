@@ -55,32 +55,43 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
 
 
   @Override
-  protected Class<?> getResourceLoaderClass() {
+  public Class<?> getResourceLoaderClass() {
     return ThymeleafViewGenerator.class;
   }
 
   @Override
-  protected Document parse(String content) {
+  public Document parse(String content) {
     return Jsoup.parse(content, "", Parser.xmlParser());
   }
 
   @Override
-  protected Document merge(Document existingDoc, Document newDoc) {
+  public Document merge(Document existingDoc, Document newDoc) {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  protected String getTemplatesLocation() {
-    return pathResolver.getRoot().concat(".roo/templates/thymeleaf");
+  public String getTemplatesLocation() {
+    return pathResolver.getFocusedIdentifier(Path.ROOT_ROO_CONFIG, "templates/thymeleaf");
   }
 
   @Override
-  protected void writeDoc(Document document, String viewPath) {
+  public void writeDoc(Document document, String viewPath) {
     // Write doc on disk
     if (document != null && StringUtils.isNotBlank(viewPath)) {
       getFileManager().createOrUpdateTextFileIfRequired(viewPath, document.html(), false);
     }
+  }
+
+  @Override
+  public void installTemplates() {
+    // Getting destination where FreeMarker templates should be installed.
+    // This will allow developers to customize his own templates.
+    copyDirectoryContents("templates/*.ftl", getTemplatesLocation(), true);
+    copyDirectoryContents("templates/fragments/*.ftl",
+        getTemplatesLocation().concat("/").concat("fragments"), true);
+    copyDirectoryContents("templates/layouts/*.ftl",
+        getTemplatesLocation().concat("/").concat("layouts"), true);
   }
 
 }

@@ -35,7 +35,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   private FileManager fileManager;
 
   // ------------ OSGi component attributes ----------------
-  private BundleContext context;
+  protected BundleContext context;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
