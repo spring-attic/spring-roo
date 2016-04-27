@@ -495,6 +495,10 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     }
     final Pom pom = getPomFromModuleName(moduleName);
     Validate.notNull(pom, "The pom is not available, so repository addition cannot be performed");
+    final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+    final Element repositoriesElement =
+        DomUtils.createChildIfNotExists(containingPath, document.getDocumentElement(), document);
+
     if ("pluginRepository".equals(path)) {
       if (pom.isAllPluginRepositoriesRegistered(repositories)) {
         return;
@@ -503,18 +507,23 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
       return;
     }
 
-    final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
-    final Element repositoriesElement =
-        DomUtils.createChildIfNotExists(containingPath, document.getDocumentElement(), document);
+    final List<Repository> existingRepositories = new ArrayList<Repository>();
+    for (Element exisitingRepElement : XmlUtils.findElements(path, repositoriesElement)) {
+      existingRepositories.add(new Repository(exisitingRepElement));
+    }
 
     final List<String> addedRepositories = new ArrayList<String>();
     for (final Repository repository : repositories) {
       if ("pluginRepository".equals(path)) {
         if (pom.isPluginRepositoryRegistered(repository)) {
           continue;
+        } else if (existingRepositories.contains(repository)) {
+          continue;
         }
       } else {
         if (pom.isRepositoryRegistered(repository)) {
+          continue;
+        } else if (existingRepositories.contains(repository)) {
           continue;
         }
       }

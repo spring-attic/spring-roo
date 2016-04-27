@@ -41,6 +41,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
@@ -247,6 +248,16 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
           "generate-qtypes",
           getProjectOperations().getTopLevelPackage(domainType.getModule())
               .getFullyQualifiedPackageName());
+    } else {
+
+      // Add querydsl processor repository
+      List<Element> repositories =
+          XmlUtils.findElements("/configuration/monomodule/repositories/repository", configuration);
+
+      for (final Element repositoryElement : repositories) {
+        getProjectOperations().addRepository(interfaceType.getModule(),
+            new Repository(repositoryElement));
+      }
     }
 
   }

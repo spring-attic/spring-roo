@@ -58,7 +58,7 @@
 			<dependency>
 				<groupId>org.springframework.roo</groupId>
 				<artifactId>org.springframework.roo.querydsl.processor</artifactId>
-				<version>1.0</version>
+				<version>1.0.0.RELEASE</version>
 			</dependency>
 		</dependencies>
 		<plugins>
@@ -74,7 +74,7 @@
 						<configuration>
 							<outputDirectory>target/generated-sources/java</outputDirectory>
 							<processors>
-								<processor>org.springframework.roo.querydsl.processor.Roo2xAnnotationProcessor
+								<processor>org.springframework.roo.querydsl.processor.RooAnnotationProcessor
 								</processor>
 							</processors>
 						</configuration>
@@ -82,6 +82,13 @@
 				</executions>
 			</plugin>
 		</plugins>
+
+		<repositories>
+			<repository>
+				<id>spring roo repository</id>
+				<url>http://repo.spring.io/spring-roo</url>
+			</repository>
+		</repositories>
 	</monomodule>
 
 </configuration>

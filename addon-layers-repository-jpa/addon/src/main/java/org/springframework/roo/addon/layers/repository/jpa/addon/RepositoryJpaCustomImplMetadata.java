@@ -254,7 +254,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     boolean existsDateField = false;
     String expression;
     String query = "";
+    String variables = "";
     JavaType dateUtils = new JavaType("org.apache.commons.lang3.time.DateUtils");
+    JavaType calendar = new JavaType(Calendar.class);
 
     // if (globalSearch != null) {
     bodyBuilder.appendFormalLine(String.format("if (%s != null) {", globalSearch));
@@ -262,25 +264,49 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // String txt = globalSearch.getText();
     bodyBuilder.appendFormalLine(String.format("    String txt = %s.getText();", globalSearch));
 
-
     if (!fields.isEmpty()) {
 
       // Start query
-      query = query.concat(String.format("    where.and(\n"));
+      query = query.concat(String.format("where.and(\n"));
 
       for (FieldMetadata field : fields) {
         if (field.getFieldType().equals(JavaType.STRING)) {
+
+          // qEntity.property.containsIgnoreCase(txt)
           expression =
               String.format("%s.%s.containsIgnoreCase(txt)", entityVariable, field.getFieldName());
-        } else if (field.getFieldType().equals(new JavaType(Date.class))
-            || field.getFieldType().equals(new JavaType(Calendar.class))) {
 
+        } else if (field.getFieldType().equals(new JavaType(Date.class))) {
           existsDateField = true;
+
+          // qEntity.property.eq(DateUtils.parseDateStrictly(txt, FULL_DATE_PATTERNS))
           expression =
               String.format("%s.%s.eq(%s.parseDateStrictly(txt, FULL_DATE_PATTERNS))",
                   entityVariable, field.getFieldName(),
                   dateUtils.getNameIncludingTypeParameters(false, importResolver));
+
+        } else if (field.getFieldType().equals(new JavaType(Calendar.class))) {
+          existsDateField = true;
+
+          // Calendar property = Calendar.getInstance();
+          variables =
+              variables.concat(String.format("      %1$s %2$s= %1$s.getInstance();\n",
+                  calendar.getNameIncludingTypeParameters(false, importResolver),
+                  field.getFieldName()));
+
+          // property.setTime(DateUtils.parseDateStrictly(text,FULL_DATE_PATTERNS ););
+          variables =
+              variables.concat(String.format(
+                  "                 %s.setTime(%s.parseDateStrictly(txt, FULL_DATE_PATTERNS));\n",
+                  field.getFieldName(),
+                  dateUtils.getNameIncludingTypeParameters(false, importResolver)));
+
+          // qEntity.property.eq(property);
+          expression = String.format("%1$s.%2$s.eq(%2$s)", entityVariable, field.getFieldName());
+
         } else {
+
+          // qEntity.property.like("%".concat(txt).concat("%"));
           expression =
               String.format("%s.%s.like(\"%%\".concat(txt).concat(\"%%\"))", entityVariable,
                   field.getFieldName());
@@ -299,6 +325,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
       if (existsDateField) {
         bodyBuilder.appendFormalLine(String.format("    try{"));
+        bodyBuilder.appendFormalLine(variables);
         bodyBuilder.appendFormalLine(String.format("        %s", query));
         bodyBuilder.appendFormalLine(String.format("    } catch(Exception e){}"));
       } else {
