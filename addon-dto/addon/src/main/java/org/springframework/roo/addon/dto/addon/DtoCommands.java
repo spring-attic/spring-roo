@@ -22,6 +22,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
@@ -47,6 +48,27 @@ public class DtoCommands implements CommandMarker {
   public boolean isDtoCreationAvailable() {
     return dtoOperations.isDtoCreationPossible();
   }
+
+  /**
+   * Makes class option mandatory if --all is not specified and --entity is specified
+   * 
+   * @param shellContext
+   * @return <code>true</code> if --class is mandatory
+   */
+  @CliOptionMandatoryIndicator(command = "dto", params = {"class"})
+  public boolean isClassMandatory(ShellContext shellContext) {
+
+    // Get
+    String allParam = shellContext.getParameters().get("all");
+    String entityParam = shellContext.getParameters().get("entity");
+
+    if (allParam == null && entityParam != null) {
+      return true;
+    }
+
+    return false;
+  }
+
 
   /**
    * Makes 'all' option visible only if 'entity' or 'class' options are not already specified.
@@ -162,10 +184,10 @@ public class DtoCommands implements CommandMarker {
   public void newDtoClass(
       @CliOption(
           key = "class",
-          mandatory = false,
+          mandatory = true,
           optionContext = UPDATE_PROJECT,
           help = "Name of the DTO class to create, including package and module (if multimodule project)") final JavaType name,
-      @CliOption(key = "entity", mandatory = false, optionContext = UPDATE_PROJECT,
+      @CliOption(key = "entity", mandatory = false,
           help = "Name of the entity which can be used to create DTO from") final JavaType entity,
       @CliOption(key = "all", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
@@ -221,10 +243,10 @@ public class DtoCommands implements CommandMarker {
     }
 
     if (all) {
-      dtoOperations.createDtoFromAll(immutable, utilityMethods, serializable);
+      dtoOperations.createDtoFromAll(immutable, utilityMethods, serializable, shellContext);
     } else if (entity != null) {
       dtoOperations.createDtoFromEntity(name, entity, fields, excludeFields, immutable,
-          utilityMethods, serializable);
+          utilityMethods, serializable, shellContext);
     } else {
       boolean fromEntity = false;
       dtoOperations.createDto(name, immutable, utilityMethods, serializable, fromEntity);

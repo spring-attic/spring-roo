@@ -37,6 +37,7 @@ import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.project.Path;
 
@@ -118,35 +119,35 @@ public class DtoOperationsImpl implements DtoOperations {
   }
 
   @Override
-  public void createDtoFromAll(boolean immutable, boolean utilityMethods, boolean serializable) {
+  public void createDtoFromAll(boolean immutable, boolean utilityMethods, boolean serializable,
+      ShellContext shellContext) {
 
     // Get all entities
     Set<ClassOrInterfaceTypeDetails> entities =
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY,
             JpaJavaType.ENTITY);
-    List<String> entityNames = new ArrayList<String>();
+    List<String> dtoNames = new ArrayList<String>();
+
+    // Get all DTO's to check names
+    Set<ClassOrInterfaceTypeDetails> currentDtos =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
+    for (ClassOrInterfaceTypeDetails dto : currentDtos) {
+      dtoNames.add(dto.getType().getSimpleTypeName());
+    }
 
     // Create DTO for each entity
     for (ClassOrInterfaceTypeDetails entity : entities) {
-      String name = entity.getType().getSimpleTypeName();
 
-      // Attempt to find a no repeated name
-      if (!entityNames.contains(name)) {
-        entityNames.add(name);
-      } else {
-        name =
-            StringUtils.capitalize(entity.getType().getPackage().getLastElement()).concat(
-                entity.getType().getSimpleTypeName());
-        int count = 2;
-        while (entityNames.contains(name)) {
-          name = entity.getType().getSimpleTypeName().concat(String.valueOf(count));
-          count++;
-        }
+      String name = entity.getType().getSimpleTypeName().concat("DTO");
+
+      if (dtoNames.contains(name) && !shellContext.isForce()) {
+        throw new IllegalArgumentException("One or more DTO's with pre-generated names already "
+            + "exist and cannot be created. Use --force parameter to overwrite them.");
       }
 
       // Create DTO
       JavaType dtoType =
-          new JavaType(String.format("%s.%sDTO", entity.getType().getPackage()
+          new JavaType(String.format("%s.%s", entity.getType().getPackage()
               .getFullyQualifiedPackageName(), name), entity.getType().getModule());
       ClassOrInterfaceTypeDetailsBuilder dtoBuilder =
           createDto(dtoType, immutable, utilityMethods, serializable, true);
@@ -164,7 +165,12 @@ public class DtoOperationsImpl implements DtoOperations {
 
   @Override
   public void createDtoFromEntity(JavaType name, JavaType entity, String fields,
-      String excludeFields, boolean immutable, boolean utilityMethods, boolean serializable) {
+      String excludeFields, boolean immutable, boolean utilityMethods, boolean serializable,
+      ShellContext shellContext) {
+
+    if (name == null) {
+      throw new IllegalArgumentException("Use --class to select the name of the DTO.");
+    }
 
     // Get entity details
     ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
@@ -183,19 +189,9 @@ public class DtoOperationsImpl implements DtoOperations {
       dtoFields = allFields;
     }
 
-    JavaType dto = null;
-    if (name != null) {
-      dto = name;
-    } else {
-      dto =
-          new JavaType(String.format("%s.%sDTO",
-              entity.getPackage().getFullyQualifiedPackageName(), entity.getSimpleTypeName()),
-              entity.getModule());
-    }
-
     // Create DTO and add fields to it
     ClassOrInterfaceTypeDetailsBuilder dtoBuilder =
-        createDto(dto, immutable, utilityMethods, serializable, true);
+        createDto(name, immutable, utilityMethods, serializable, true);
     addFieldsToDto(immutable, dtoBuilder, dtoFields);
 
     // Build and save changes to disk
@@ -245,10 +241,19 @@ public class DtoOperationsImpl implements DtoOperations {
     StringBuffer wrongFields = new StringBuffer();
     for (int i = 0; i < fields.length; i++) {
       boolean fieldAdded = false;
-      for (FieldMetadata dtoField : dtoFields) {
-        if (dtoField.getFieldName().getSymbolName().equals(fields[i])) {
-          fieldAdded = true;
-          break;
+      if (includeMode) {
+        for (FieldMetadata dtoField : dtoFields) {
+          if (dtoField.getFieldName().getSymbolName().equals(fields[i])) {
+            fieldAdded = true;
+            break;
+          }
+        }
+      } else {
+        for (FieldMetadata entityField : allFields) {
+          if (entityField.getFieldName().getSymbolName().equals(fields[i])) {
+            fieldAdded = true;
+            break;
+          }
         }
       }
       if (!fieldAdded) {

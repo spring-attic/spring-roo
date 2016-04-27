@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dto.addon;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.shell.ShellContext;
 
 /**
  * Provides DTO configuration and operations.
@@ -37,8 +38,10 @@ public interface DtoOperations {
    * @param immutable whether the DTO's should be immutable
    * @param utilityMethods whether the DTO's should have utility methods
    * @param serializable whether the DTO's should implement Serializable
+   * @param shellContext 
    */
-  void createDtoFromAll(boolean immutable, boolean utilityMethods, boolean serializable);
+  void createDtoFromAll(boolean immutable, boolean utilityMethods, boolean serializable,
+      ShellContext shellContext);
 
   /**
    * Creates a DTO from the specified fields of an entity.
@@ -50,8 +53,9 @@ public interface DtoOperations {
    * @param immutable whether the DTO should be immutable
    * @param utilityMethods whether the DTO should have utility methods
    * @param serializable whether the DTO should implement Serializable
+   * @param shellContext
    */
   void createDtoFromEntity(JavaType name, JavaType entity, String fields, String excludeFields,
-      boolean immutable, boolean utilityMethods, boolean serializable);
+      boolean immutable, boolean utilityMethods, boolean serializable, ShellContext shellContext);
 
 }

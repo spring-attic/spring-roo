@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -30,6 +29,7 @@ public class DtoMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   private final DtoAnnotationValues annotationValues;
   private final List<FieldMetadata> fields;
+  private final JavaSymbolName serialField = new JavaSymbolName("serialVersionUID");
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -94,11 +94,15 @@ public class DtoMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    for (FieldMetadata field : fields) {
-      if (Modifier.isFinal(field.getModifier())) {
-        String fieldName = field.getFieldName().getSymbolName();
-        constructorBuilder.addParameter(fieldName, field.getFieldType());
-        bodyBuilder.appendFormalLine(String.format("this.%s = %s;", fieldName, fieldName));
+    if (annotationValues.getImmutable() == true) {
+      for (FieldMetadata field : fields) {
+
+        // Add all fields excluding Serializable field
+        if (!field.getFieldName().equals(serialField)) {
+          String fieldName = field.getFieldName().getSymbolName();
+          constructorBuilder.addParameter(fieldName, field.getFieldType());
+          bodyBuilder.appendFormalLine(String.format("this.%s = %s;", fieldName, fieldName));
+        }
       }
     }
 
