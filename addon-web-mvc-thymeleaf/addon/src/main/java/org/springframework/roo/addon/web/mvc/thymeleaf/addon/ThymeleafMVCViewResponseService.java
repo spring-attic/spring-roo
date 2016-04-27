@@ -13,12 +13,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
+import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -27,6 +26,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.operations.AbstractOperations;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -53,7 +53,8 @@ import org.springframework.roo.support.util.FileUtils;
  */
 @Component
 @Service
-public class ThymeleafMVCViewResponseService implements ControllerMVCResponseService {
+public class ThymeleafMVCViewResponseService extends AbstractOperations implements
+    ControllerMVCResponseService {
 
   private static Logger LOGGER = HandlerUtils.getLogger(ThymeleafMVCViewResponseService.class);
   private static final String RESPONSE_TYPE = "THYMELEAF";
@@ -62,14 +63,6 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
       "spring-boot-starter-thymeleaf", null);
   private final Dependency layoutThymeleafDependency = new Dependency("nz.net.ultraq.thymeleaf",
       "thymeleaf-layout-dialect", null);
-
-  // ------------ OSGi component attributes ----------------
-  private BundleContext context;
-
-  protected void activate(final ComponentContext context) {
-    this.context = context.getBundleContext();
-  }
-
 
   private ProjectOperations projectOperations;
   private TypeLocationService typeLocationService;
@@ -199,9 +192,19 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
     addThymeleafDatatablesResources(module);
     // Is necessary to copy static resources
     copyStaticResources(module);
-    // Delegate on view generation to create new index and error page
-    getViewGenerationService().addIndexView(null);
-    getViewGenerationService().addErrorView(null);
+
+    // Delegate on view generation to create view elements
+    ViewContext ctx = new ViewContext();
+    ctx.setProjectName(getProjectOperations().getProjectName(""));
+    ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
+
+    getViewGenerationService().addIndexView(ctx);
+    getViewGenerationService().addErrorView(ctx);
+    getViewGenerationService().addDefaultLayout(ctx);
+    getViewGenerationService().addFooter(ctx);
+    getViewGenerationService().addHeader(ctx);
+    getViewGenerationService().addMenu(ctx);
+    getViewGenerationService().addSession(ctx);
   }
 
   /**
@@ -320,7 +323,38 @@ public class ThymeleafMVCViewResponseService implements ControllerMVCResponseSer
    * @param module
    */
   private void copyStaticResources(Pom module) {
-    // TODO: Copy all necessary static resources
+    LogicalPath resourcesPath =
+        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
+
+    // copy all necessary styles inside SRC_MAIN_RESOURCES/static/css
+    copyDirectoryContents("static/css/*.css",
+        getPathResolver().getIdentifier(resourcesPath, "/static/css"), true);
+
+    // copy all necessary fonts inside SRC_MAIN_RESOURCES/static/fonts
+    copyDirectoryContents("static/fonts/*.eot",
+        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+    copyDirectoryContents("static/fonts/*.svg",
+        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+    copyDirectoryContents("static/fonts/*.ttf",
+        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+    copyDirectoryContents("static/fonts/*.woff",
+        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+    copyDirectoryContents("static/fonts/*.woff2",
+        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+
+    // copy all necessary images inside SRC_MAIN_RESOURCES/static/img
+    copyDirectoryContents("static/img/*.ico",
+        getPathResolver().getIdentifier(resourcesPath, "/static/img"), false);
+    copyDirectoryContents("static/img/*.jpg",
+        getPathResolver().getIdentifier(resourcesPath, "/static/img"), false);
+    copyDirectoryContents("static/img/*.png",
+        getPathResolver().getIdentifier(resourcesPath, "/static/img"), false);
+    copyDirectoryContents("static/img/*.gif",
+        getPathResolver().getIdentifier(resourcesPath, "/static/img"), false);
+
+    // copy all necessary scripts inside SRC_MAIN_RESOURCES/static/js
+    copyDirectoryContents("static/js/*.js",
+        getPathResolver().getIdentifier(resourcesPath, "/static/js"), true);
   }
 
   /**

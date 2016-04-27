@@ -61,10 +61,8 @@ finder add --class ~.domain.Visit --name findByVisitDateBetween
 finder add --class ~.domain.Visit --name findByDescriptionLike
 
 web mvc setup
-
-web mvc controller --all --package ~.web --formattersPackage ~.format --responseType JSON
-
 web mvc view setup --type THYMELEAF
+web mvc controller --all --package ~.web --formattersPackage ~.format --responseType THYMELEAF
 
 // web mvc finder all
 

@@ -55,21 +55,23 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addListView(MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    /*List<FieldMetadata> fields = getFieldViewItems(entityDetails);
-    
+    List<FieldMetadata> fields = getFieldViewItems(entityDetails, true);
+
     // Process elements to generate 
     DOC newDoc = process("list", fields, ctx);
-    
+
     // Getting new viewName
-    String viewName = getViewsFolder().concat("/list").concat(getViewsExtension());
-    
+    String viewName =
+        getViewsFolder().concat(ctx.getControllerPath()).concat("/").concat("/list")
+            .concat(getViewsExtension());
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc = merge(newDoc, loadExistingDoc(viewName));
     }
-    
+
     // Write newDoc on disk
-    writeDoc(newDoc);*/
+    writeDoc(newDoc, viewName);
 
   }
 
@@ -77,21 +79,23 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addShowView(MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    /*List<FieldMetadata> fields = getFieldViewItems(entityDetails);
-    
+    List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
+
     // Process elements to generate 
     DOC newDoc = process("show", fields, ctx);
-    
+
     // Getting new viewName
-    String viewName = getViewsFolder().concat("/show").concat(getViewsExtension());
-    
+    String viewName =
+        getViewsFolder().concat(ctx.getControllerPath()).concat("/").concat("/show")
+            .concat(getViewsExtension());
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc = merge(newDoc, loadExistingDoc(viewName));
     }
-    
+
     // Write newDoc on disk
-    writeDoc(newDoc);*/
+    writeDoc(newDoc, viewName);
 
   }
 
@@ -99,21 +103,23 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addCreateView(MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    /*List<FieldMetadata> fields = getFieldViewItems(entityDetails);
-    
+    List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
+
     // Process elements to generate 
     DOC newDoc = process("create", fields, ctx);
-    
+
     // Getting new viewName
-    String viewName = getViewsFolder().concat("/create").concat(getViewsExtension());
-    
+    String viewName =
+        getViewsFolder().concat(ctx.getControllerPath()).concat("/").concat("/create")
+            .concat(getViewsExtension());
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc = merge(newDoc, loadExistingDoc(viewName));
     }
-    
+
     // Write newDoc on disk
-    writeDoc(newDoc);*/
+    writeDoc(newDoc, viewName);
 
   }
 
@@ -121,21 +127,23 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addUpdateView(MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    /*List<FieldMetadata> fields = getFieldViewItems(entityDetails);
-    
+    List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
+
     // Process elements to generate 
     DOC newDoc = process("edit", fields, ctx);
-    
+
     // Getting new viewName
-    String viewName = getViewsFolder().concat("/edit").concat(getViewsExtension());
-    
+    String viewName =
+        getViewsFolder().concat(ctx.getControllerPath()).concat("/").concat("/edit")
+            .concat(getViewsExtension());
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc = merge(newDoc, loadExistingDoc(viewName));
     }
-    
+
     // Write newDoc on disk
-    writeDoc(newDoc);*/
+    writeDoc(newDoc, viewName);
 
   }
 
@@ -183,6 +191,109 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   }
 
+  @Override
+  public void addDefaultLayout(ViewContext ctx) {
+
+    // Process elements to generate 
+    DOC newDoc = process("layouts/default-layout", null, ctx);
+
+    // Getting new viewName
+    String viewName = getLayoutsFolder().concat("/default-layout").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(newDoc, loadExistingDoc(viewName));
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addFooter(ViewContext ctx) {
+    // Process elements to generate 
+    DOC newDoc = process("fragments/footer", null, ctx);
+
+    // Getting new viewName
+    String viewName = getFragmentsFolder().concat("/footer").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(newDoc, loadExistingDoc(viewName));
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addHeader(ViewContext ctx) {
+    // Process elements to generate 
+    DOC newDoc = process("fragments/header", null, ctx);
+
+    // Getting new viewName
+    String viewName = getFragmentsFolder().concat("/header").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(newDoc, loadExistingDoc(viewName));
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addMenu(ViewContext ctx) {
+    // Process elements to generate 
+    DOC newDoc = process("fragments/menu", null, ctx);
+
+    // Getting new viewName
+    String viewName = getFragmentsFolder().concat("/menu").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(newDoc, loadExistingDoc(viewName));
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addSession(ViewContext ctx) {
+    // Process elements to generate 
+    DOC newDoc = process("fragments/session", null, ctx);
+
+    // Getting new viewName
+    String viewName = getFragmentsFolder().concat("/session").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(newDoc, loadExistingDoc(viewName));
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public String getLayoutsFolder() {
+    // Default implementation
+    return getViewsFolder();
+  }
+
+  @Override
+  public String getFragmentsFolder() {
+    // Default implementation
+    return getViewsFolder();
+  }
+
   /**
    * This method obtains all necessary information about fields from entity
    * and returns a List of FieldMetadata.
@@ -194,7 +305,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * 
    * @return List that contains FieldMetadata that will be added to the view.
    */
-  protected List<FieldMetadata> getFieldViewItems(MemberDetails entityDetails) {
+  protected List<FieldMetadata> getFieldViewItems(MemberDetails entityDetails,
+      boolean checkMaxFields) {
     // Getting entity fields
     List<FieldMetadata> entityFields = entityDetails.getFields();
     int addedFields = 0;
@@ -204,7 +316,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     for (FieldMetadata entityField : entityFields) {
       fieldViewItems.add(entityField);
       addedFields++;
-      if (addedFields == MAX_FIELDS_TO_ADD) {
+      if (addedFields == MAX_FIELDS_TO_ADD && checkMaxFields) {
         break;
       }
     }

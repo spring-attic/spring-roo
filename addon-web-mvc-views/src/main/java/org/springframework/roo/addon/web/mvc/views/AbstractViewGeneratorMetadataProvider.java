@@ -1,23 +1,33 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.felix.scr.annotations.Component;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.ProjectOperations;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
@@ -29,6 +39,7 @@ import org.springframework.roo.project.LogicalPath;
  * @author Juan Carlos García
  * @since 2.0
  */
+@Component(componentAbstract = true)
 public abstract class AbstractViewGeneratorMetadataProvider extends
     AbstractMemberDiscoveringItdMetadataProvider {
 
@@ -45,6 +56,8 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
   public String controllerPath;
   public JavaType identifierType;
   public MethodMetadata identifierAccessor;
+
+  private ProjectOperations projectOperations;
 
   /**
    * This operation returns the MVCViewGenerationService that should be used
@@ -120,6 +133,10 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     // Fill view context
     ViewContext ctx = new ViewContext();
     ctx.setControllerPath(controllerPath);
+    ctx.setProjectName(getProjectOperations().getProjectName(""));
+    ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
+    ctx.setEntityName(entity.getSimpleTypeName());
+    ctx.setModelAttribute(getEntityField().getFieldName().getSymbolName());
     fillContext(ctx);
 
     // Use provided MVCViewGenerationService to generate views
@@ -194,6 +211,45 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
   public List<FinderMethod> getFinders() {
     return this.finders;
+  }
+
+  /**
+   * This method returns entity field included on controller
+   * 
+   * @return
+   */
+  private FieldMetadata getEntityField() {
+
+    // Generating entity field name
+    String fieldName =
+        new JavaSymbolName(this.entity.getSimpleTypeName()).getSymbolNameUnCapitalisedFirstLetter();
+
+    return new FieldMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC,
+        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.entity)
+        .build();
+  }
+
+  public ProjectOperations getProjectOperations() {
+    if (projectOperations == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          projectOperations = (ProjectOperations) this.context.getService(ref);
+          return projectOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on AbstractViewGeneratorMetadataProvider.");
+        return null;
+      }
+    } else {
+      return projectOperations;
+    }
   }
 
 }

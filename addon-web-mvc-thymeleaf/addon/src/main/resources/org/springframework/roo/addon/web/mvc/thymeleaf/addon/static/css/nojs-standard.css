@@ -1,0 +1,19 @@
+
+.navbar-toggle{visibility:hidden !important;}
+.collapse{display:block}
+.modal {position: relative; display: block}
+.fade {opacity: 1}
+.modal.fade .modal-dialog {transform: translate(0px, 0%);}
+.modal-content {box-shadow: 0 0 0; border: 0}
+.modal-dialog {width: 97%}
+button.close {display: none}
+
+/* Menu desplegable */
+.dropdown:hover > .dropdown-menu {display:block}
+
+
+@media (max-width: 768px) {
+  .dropdown-menu {position: relative; float: none; box-shadow: none}
+  .dropdown-submenu > .dropdown-menu {left: 0 !important; border: 0; box-shadow: none}
+}
+

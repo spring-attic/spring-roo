@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -43,6 +44,17 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
   }
 
   @Override
+  public String getLayoutsFolder() {
+    return getViewsFolder().concat("/").concat("layouts");
+  }
+
+  @Override
+  public String getFragmentsFolder() {
+    return getViewsFolder().concat("/").concat("fragments");
+  }
+
+
+  @Override
   protected Class<?> getResourceLoaderClass() {
     return ThymeleafViewGenerator.class;
   }
@@ -66,7 +78,9 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
   @Override
   protected void writeDoc(Document document, String viewPath) {
     // Write doc on disk
-    getFileManager().createOrUpdateTextFileIfRequired(viewPath, document.html(), false);
+    if (document != null && StringUtils.isNotBlank(viewPath)) {
+      getFileManager().createOrUpdateTextFileIfRequired(viewPath, document.html(), false);
+    }
   }
 
 }
