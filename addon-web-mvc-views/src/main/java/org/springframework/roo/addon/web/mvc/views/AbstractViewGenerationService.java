@@ -1,9 +1,12 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -67,7 +70,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -91,7 +94,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -115,7 +118,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -139,7 +142,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -164,7 +167,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -183,7 +186,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -202,7 +205,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -220,7 +223,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -238,7 +241,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -256,7 +259,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -274,7 +277,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(newDoc, loadExistingDoc(viewName));
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
     }
 
     // Write newDoc on disk
@@ -332,8 +335,15 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * @return
    */
   protected DOC loadExistingDoc(String path) {
-    // TODO: Load file and get STRING content
     String content = "";
+    try {
+      // Load file and get STRING content
+      content = FileUtils.readFileToString(new File(path));
+
+    } catch (IOException e) {
+      throw new RuntimeException(String.format("ERROR: Error trying to load existing doc %s", path));
+    }
+
     // Parse String content to obtain the same type of object
     return parse(content);
   }

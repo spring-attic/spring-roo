@@ -66,8 +66,9 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
 
   @Override
   public Document merge(Document existingDoc, Document newDoc) {
-    // TODO Auto-generated method stub
-    return null;
+    // TODO: Merge existing document and new document. Now, return always
+    // new document.
+    return newDoc;
   }
 
   @Override
