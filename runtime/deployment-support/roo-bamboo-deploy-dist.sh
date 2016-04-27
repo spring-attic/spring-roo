@@ -680,13 +680,17 @@ if [[ "$COMMAND" = "assembly" ]]; then
             load_roo_build_and_test script tests.roo
             load_roo_build_and_test script tests-multimodule.roo
 
-	    # Web mvc tests
+	          # Web mvc tests
             load_roo_build_and_test script web-mvc-test.roo
             load_roo_build_and_test script multimodule-web-mvc-embedded-test.roo
             load_roo_build_and_test script multimodule-web-mvc-weblogic-test.roo
 
-		load_roo_build_and_test script web-finder-test.roo
-		load_roo_build_and_test script multimodule-web-finder-test.roo
+		        load_roo_build_and_test script web-finder-test.roo
+		        load_roo_build_and_test script multimodule-web-finder-test.roo
+
+            # DTO's tests
+            load_roo_build_and_test script dto.roo
+            load_roo_build_and_test script dto-multimodule.roo
 
 
         # Temporally disabled
