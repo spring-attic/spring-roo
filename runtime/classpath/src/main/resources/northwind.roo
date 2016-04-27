@@ -200,7 +200,7 @@ dto --class ~.domain.ActiveCustomerOrder --immutable
 field number --fieldName orderId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
-field other --fieldName status --type ~.Status
+field other --fieldName status --type ~.domain.Status
 field date --fieldName orderDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 
@@ -245,7 +245,7 @@ field number --fieldName customerId --type java.lang.Long
 field date --fieldName orderDate --type java.util.Calendar
 field string --fieldName employeeName
 field string --fieldName customerCompanyName
-field other --fieldName status --type ~.Status
+field other --fieldName status --type ~.domain.Status
 field date --fieldName shippedDate --type java.util.Calendar
 field number --fieldName freight --type java.math.BigDecimal
 
@@ -293,7 +293,7 @@ field number --fieldName productId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
 field date --fieldName orderDate --type java.util.Calendar
-field other --fieldName status --type ~.Status
+field other --fieldName status --type ~.domain.Status
 field string --fieldName employeeName
 field string --fieldName customerCompanyName
 field date --fieldName shippedDate --type java.util.Calendar
