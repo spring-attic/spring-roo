@@ -1,0 +1,263 @@
+# Create project, add persistence, entities, repositories and services to be able to test subsequent commands.
+project setup --topLevelPackage aaaa.bbb.cc
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY 
+entity jpa --class aaaa.bbb.cc.domain.Entity1
+field string --fieldName string_field
+field number --fieldName number_field --type int
+field string --fieldName string_field2
+entity jpa --class aaaa.bbb.cc.domain.Entity2
+field string --fieldName string_field
+field number --fieldName number_field --type int
+field string --fieldName string_field2
+
+
+#=======================================================================================================
+# TEST 1: Create DTO with basic configuration
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'dto' command with basic configuration.
+#
+dto --class ~.domain.TestDto
+#      
+# Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto.java
+#
+# Result: Creates DTO class without errors.             
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 2: Create DTO with all extra configuration
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'dto' command with all its boolean parameters.
+#
+dto --class ~.domain.TestDto2 --immutable --utilityMethods --serializable
+#      
+# Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto2.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto2_Roo_Serializable.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto2_Roo_ToString.aj
+#
+# Result: Creates DTO class without errors and creates its associated ITD's.            
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 3: Create DTO from entity with all extra configuration
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'dto' command --entity option with all its boolean parameters.
+#
+dto --class ~.model.TestDto3 --entity ~.domain.Entity1 --immutable --utilityMethods --serializable
+#      
+# Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/model
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/TestDto3.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/TestDto3_Roo_Serializable.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/TestDto3_Roo_JavaBean.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/TestDto3_Roo_ToString.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/TestDto3_Roo_DTO.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/TestDto3_Roo_Equals.aj
+#
+# Result: Creates DTO class from entity without errors and creates its associated ITD's. Its name will 
+#         be that specified in --class option.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 4: Try to create a DTO with same existing name using --force
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if command success when trying to create an already existing DTO with --force option.
+#
+dto --class ~.domain.TestDto --immutable --force
+#      
+# Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto.java
+#
+# Result: Command successful.                   
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 5: Create DTO from entity selecting fields
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'dto' command --entity option with --fields option.
+#
+dto --class ~.domain.TestDto4 --entity ~.domain.Entity1 --fields string_field,number_field
+#      
+# Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto4.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto4_Roo_JavaBean.aj
+#
+# Result: Creates DTO class from entity selecting fields, without errors.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 6: Create DTO from entity excluding fields
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'dto' command --entity option with --excludeFields option.
+#
+dto --class ~.domain.TestDto5 --entity ~.domain.Entity2 --excludeFields string_field,number_field
+#      
+# Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto5.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto5_Roo_JavaBean.aj
+#
+# Result: Creates DTO class from entity excluding fields, without errors.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 7: Try to create a DTO from entity with same existing pre-generated name using --force
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if command success when trying to create an already existing DTO using --force.
+#
+dto --class ~.domain.TestDto5 --entity ~.domain.Entity1 --immutable --force
+#      
+# Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto5.java
+#         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto5_Roo_JavaBean.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestDto5_Roo_DTO.aj
+#
+# Result: Command successful.               
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 8: Create DTO from entity excluding wrong typed fields
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'dto' command --entity option with --excludeFields option where some fields are wrong 
+#         typed.
+#
+dto --class ~.domain.TestFieldDTO2 --entity ~.domain.Entity2 --excludeFields string_field,number_fi
+#      
+# Output: Followind fields don't exist in the entity or were wrong typed: number_fi
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO2.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO2_Roo_JavaBean.aj
+#
+# Result: Command executes correctly, but showing a warning for the wrong typed fields.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 9: Create DTO from entity including wrong typed fields
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'dto' command --entity option with --fields option where some fields are wrong typed.
+#
+dto --class ~.domain.TestFieldDTO3 --entity ~.domain.Entity2 --fields string_field,number_fi
+#      
+# Output: Followind fields don't exist in the entity or were wrong typed: number_fi
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO3.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO3_Roo_JavaBean.aj
+#
+# Result: Command executes correctly, but showing a warning for the wrong typed fields.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 10: Create DTO from all entities
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test creation of DTO's from all entities.
+#
+dto --all
+#      
+# Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity1DTO.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity2DTO.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity2DTO_Roo_JavaBean.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity1DTO_Roo_JavaBean.aj
+#
+# Result: Creates DTO from all entities without errors.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 11: Create DTO from all entities using force to overwrite previously pre-generated DTO names
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test overwrite of previously generated DTO's from all entities with all extra configuration.
+#
+dto --all --immutable --serializable --utilityMethods --force
+#      
+# Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity1DTO.java
+#         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity2DTO.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity2DTO_Roo_Serializable.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity2DTO_Roo_ToString.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity2DTO_Roo_Equals.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity2DTO_Roo_DTO.aj
+#         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity2DTO_Roo_JavaBean.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity1DTO_Roo_Serializable.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity1DTO_Roo_ToString.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity1DTO_Roo_Equals.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity1DTO_Roo_DTO.aj
+#         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/Entity1DTO_Roo_JavaBean.aj
+#
+# Result: Overwrites previously created DTO's with pre-generated names with all extra configuration.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 12: Create basic String field in DTO's
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test basic String field command creation in DTO's.
+#
+field string --fieldName string_field3
+#      
+# Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO3.java
+#         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO3_Roo_JavaBean.aj
+#
+# Result: Creates String field in DTO without errors.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 13: Create reference field in DTO's without persistence params
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test reference field command creation in DTO's.
+#
+field other --fieldName reference_field --type ~.domain.Entity1
+#      
+# Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO3.java
+#         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO3_Roo_JavaBean.aj
+#
+# Result: Creates reference field in DTO without errors.
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 14: Create set field in DTO's without persistence params
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test set field command creation in DTO's.
+#
+field set --fieldName set_field --type ~.domain.Entity1
+#      
+# Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO3.java
+#         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/domain/TestFieldDTO3_Roo_JavaBean.aj
+#
+# Result: Creates set field in DTO without errors.
+#=======================================================================================================
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they are      #
+# supposed to interrupt script execution.                                #
+#                                                                        #
+##########################################################################
+
+#=======================================================================================================
+# TEST 15: Try to create a DTO with same existing name
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if command execution interrupts when trying to create an already existing DTO.
+#
+#dto --class ~.domain.TestDto --immutable
+#      
+# Output: DTO 'aaaa.bbb.cc.domain.TestDto' already exists and cannot be created. Try to use a 
+#         different DTO name on --class parameter or use --force parameter to overwrite it.
+#
+# Result: Command execution interrupts showing an exception message.                   
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 16: Try to create a DTO from entity with same existing pre-generated name
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if command execution interrupts when trying to create an already existing DTO.
+#
+#dto --class ~.domain.TestDto --entity ~.domain.Entity1 --immutable
+#
+# Output: A DTO's with Entity1DTO pre-generated name already exist and cannot be created. Use --class 
+#         to select its name or --force parameter to overwrite it.
+#
+# Result: Command execution interrupts showing an exception message.               
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 17: Try to create DTO's from all entities with same existing pre-generated name
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if command success when trying to create already existing DTO's from all entities.
+#
+#dto --all
+#      
+# Output: One or more DTO's with pre-generated names already exist and cannot be created. Use --force 
+#         parameter to overwrite them.
+#
+# Result: Command execution interrupts showing an exception message.            
+#=======================================================================================================
