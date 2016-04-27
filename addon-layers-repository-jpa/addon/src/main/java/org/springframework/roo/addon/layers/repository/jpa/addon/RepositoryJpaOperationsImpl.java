@@ -3,6 +3,8 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -242,6 +244,26 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       }
 
       // Add entity package to find Q classes.
+      Set<String> packages = new HashSet();
+      for (ClassOrInterfaceTypeDetails cid : getTypeLocationService()
+          .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA)) {
+        if (cid.getType().getModule().equals(interfaceType.getModule())) {
+
+          JavaType relatedEntity =
+              (JavaType) cid.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity")
+                  .getValue();
+          String module =
+              getTypeLocationService().getTypeDetails(relatedEntity).getType().getModule();
+
+          if (!packages.contains(module)) {
+            packages.add(module);
+
+            getProjectOperations().addPackageToPluginExecution(interfaceType.getModule(),
+                queryDslPlugin, "generate-qtypes",
+                getProjectOperations().getTopLevelPackage(module).getFullyQualifiedPackageName());
+          }
+        }
+      }
       getProjectOperations().addPackageToPluginExecution(
           interfaceType.getModule(),
           queryDslPlugin,

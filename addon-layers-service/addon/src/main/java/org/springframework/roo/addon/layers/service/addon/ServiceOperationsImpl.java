@@ -203,6 +203,18 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     // Add dependencies between modules
     projectOperations.addModuleDependency(interfaceType.getModule(), domainType.getModule());
+
+    // Getting the class annotated with @RooGlobalSearch
+    Set<ClassOrInterfaceTypeDetails> globalSearchDetails =
+        typeLocationService
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
+
+    if (globalSearchDetails.size() == 0) {
+      throw new RuntimeException("ERROR: Not found a class annotated with @RooGlobalSearch");
+    }
+
+    JavaType globalSearch = globalSearchDetails.iterator().next().getType();
+    projectOperations.addModuleDependency(interfaceType.getModule(), globalSearch.getModule());
   }
 
   /**

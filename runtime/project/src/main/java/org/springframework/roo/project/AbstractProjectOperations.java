@@ -357,20 +357,16 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
       if (existingPlugin.hasSameCoordinates(plugin)) {
 
-        // FInd execution
-        final List<Element> existingExecutionElements =
-            XmlUtils.findElements("executions/execution", existingPluginElement);
-
-        for (final Element existingExecutionElement : existingExecutionElements) {
-
-          final Element idElement = XmlUtils.findFirstElement("id", existingExecutionElement);
-          final String id = DomUtils.getTextContent(idElement, "");
-
-          if (id.equals(executionId)) {
+        for (final Execution execution : existingPlugin.getExecutions()) {
+          if (executionId.equals(execution.getId()) && execution.getConfiguration() != null) {
 
             // Check if package is already added
+            final Element packagesElement =
+                DomUtils.createChildIfNotExists("packages", execution.getConfiguration()
+                    .getConfiguration(), document);
+
             final List<Element> existingPackages =
-                XmlUtils.findElements("configuration/packages/package", existingExecutionElement);
+                XmlUtils.findElements("package", packagesElement);
 
             for (Element existingPackage : existingPackages) {
               final String pack = DomUtils.getTextContent(existingPackage, "");
@@ -379,13 +375,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
               }
             }
 
-
-            // No such package; add it
-            final Element confElement =
-                DomUtils
-                    .createChildIfNotExists("configuration", existingExecutionElement, document);
-            final Element packagesElement =
-                DomUtils.createChildIfNotExists("packages", confElement, document);
+	    // No such package; add it
             packagesElement.appendChild(XmlUtils
                 .createTextElement(document, "package", packageName));
             descriptionOfChange = highlight(ADDED + " package") + " '" + packageName + "'";
