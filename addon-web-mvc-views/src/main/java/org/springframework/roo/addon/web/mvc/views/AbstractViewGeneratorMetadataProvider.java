@@ -156,6 +156,12 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       viewGenerationService.addUpdateView(entityDetails, ctx);
     }
 
+    // Update menu view every time that new controller has been modified
+    // TODO: Maybe, instead of modify all menu view, only new generated controller should
+    // be included on it. Must be fixed on future versions.
+    viewGenerationService.updateMenuView(ctx);
+
+
     // Register dependency between JavaBeanMetadata and this one
     final LogicalPath logicalPath =
         PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(entity)

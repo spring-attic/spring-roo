@@ -257,7 +257,7 @@ field date --fieldName fromDate --type java.util.Calendar
 field date --fieldName thruDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 field number --fieldName total --type java.math.BigDecimal
-field set --fieldName closedSalesReportByCustomer --type ~.ClosedSalesReportByCustomer
+field set --fieldName closedSalesReportByCustomer --type ~.domain.ClosedSalesReportByCustomer
 
 dto --class ~.domain.EmployeeInfo --immutable
 field number --fieldName employeeId --type java.lang.Long
@@ -319,7 +319,7 @@ field date --fieldName fromDate --type java.util.Calendar
 field date --fieldName thruDate --type java.util.Calendar
 field string --fieldName productName
 field number --fieldName total --type java.math.BigDecimal
-field set --fieldName closedSalesReportByProduct --type ~.ClosedSalesReportByProduct
+field set --fieldName closedSalesReportByProduct --type ~.domain.ClosedSalesReportByProduct
 
 dto --class ~.domain.PurchaseOrderInfo --immutable
 field number --fieldName purchaseOrderId --type java.lang.Long
@@ -379,7 +379,7 @@ field string --fieldName username
 field string --fieldName password
 field date --fieldName fromDate --type java.util.Calendar
 field date --fieldName thruDate --type java.util.Calendar
-field set --fieldName userLoginRoles --type ~.UserLoginRole
+field set --fieldName userLoginRoles --type ~.domain.UserLoginRole
 
 dto --class ~.domain.Invoice --immutable
 field number --fieldName customerOrderId --type java.lang.Long
@@ -411,13 +411,13 @@ field string --fieldName shipperCompanyName
 field number --fieldName freight --type java.math.BigDecimal
 field number --fieldName subtotal --type java.math.BigDecimal
 field number --fieldName total --type java.math.BigDecimal
-field set --fieldName orderDetailsInfo --type ~.OrderDetailInfo
+field set --fieldName orderDetailsInfo --type ~.domain.OrderDetailInfo
 
 // Generate repositories
-repository jpa all --package org.springframework.roo.northwind.repository
+repository jpa all --package ~.repository
 
 // Generate services
-service all --apiPackage org.springframework.roo.northwind.service.api --implPackage org.springframework.roo.northwind.service.impl
+service all --apiPackage ~.service.api --implPackage ~.service.impl
 
 // Create finders
 finder add --class ~.domain.UserLogin --name findByUsername
@@ -447,6 +447,9 @@ web mvc setup
 
 // Setup Thymeleaf view
 web mvc view setup --type THYMELEAF
+
+// Include templates inside generated project to allow developers to customize them
+web mvc templates setup --type THYMELEAF
 
 // Add necessary controllers
 web mvc controller --controller ~.web.CategoriesController --entity ~.domain.Category --service ~.service.api.CategoryService --formattersPackage ~.format --responseType THYMELEAF

@@ -41,7 +41,7 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
     return fileManager.exists(location.concat("/").concat(templateName).concat(".ftl"));
   }
 
-  protected DOC process(String templateName, List<FieldMetadata> fields, ViewContext ctx) {
+  protected DOC process(String templateName, ViewContext ctx) {
     String content = "";
 
     try {
@@ -78,9 +78,6 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
       for (Entry<String, Object> extraInformation : ctx.getExtraInformation().entrySet()) {
         input.put(extraInformation.getKey(), extraInformation.getValue());
       }
-
-      // Adding entity fields
-      input.put("fields", fields);
 
       Template template = cfg.getTemplate(templateName.concat(".ftl"));
       StringBuilderWriter writer = new StringBuilderWriter();

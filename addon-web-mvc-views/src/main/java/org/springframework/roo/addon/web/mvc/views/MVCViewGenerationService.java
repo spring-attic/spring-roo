@@ -170,6 +170,17 @@ public interface MVCViewGenerationService {
   void addSession(ViewContext ctx);
 
   /**
+   * This operation will updates menu view.
+   * 
+   * TODO: Maybe, instead of modify all menu view, only new generated controller should
+   * be included on it. Must be fixed on future versions.
+   * 
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void updateMenuView(ViewContext ctx);
+
+  /**
    * This operation will install all necessary templates on generated project.
    * With that, Spring Roo users will be able to customize the Spring Roo templates 
    * to be able to generate views with their custom code.

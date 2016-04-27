@@ -49,7 +49,7 @@
             src="../../static/img/logo_spring_roo.png" /></a>
         </div>
         <div class="application-name">
-          ${projectName} <small>${version}</small>
+          ${projectName}
         </div>
       </div>
 
