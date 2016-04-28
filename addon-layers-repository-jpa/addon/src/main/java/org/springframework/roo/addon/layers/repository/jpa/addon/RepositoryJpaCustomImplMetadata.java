@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -32,6 +33,7 @@ import org.springframework.roo.project.LogicalPath;
  * Metadata for {@link RooJpaRepositoryCustomImpl}.
  * 
  * @author Juan Carlos García
+ * @author Paula Navarro
  * @since 2.0
  */
 public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -80,12 +82,15 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param identifierType the type of the entity's identifier field
    *            (required)
    * @param domainType entity referenced on interface
+   * @param idFields entity id fields
+   * @param validFields entity fields to search for (excluded id, reference and collection fields)
    * @param findAllGlobalSearchMethod the findAll metadata 
    */
   public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
-      final List<FieldMetadata> validFields, final MethodMetadata findAllGlobalSearchMethod) {
+      final List<FieldMetadata> idFields, List<FieldMetadata> validFields,
+      final MethodMetadata findAllGlobalSearchMethod) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
@@ -103,7 +108,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     ensureGovernorIsAnnotated(transactionalAnnotation);
 
     // Generate findAll implementation method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllImpl(validFields)));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllImpl(idFields, validFields)));
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -111,11 +116,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Method that generates the findAll implementation method
+   * @param ids the entity id fields
    * @param fields the entity fields to search for 
    *
    * @return
    */
-  public MethodMetadata getFindAllImpl(List<FieldMetadata> fields) {
+  public MethodMetadata getFindAllImpl(List<FieldMetadata> ids, List<FieldMetadata> fields) {
 
     // Define method name
     JavaSymbolName methodName = this.findAllGlobalSearchMethod.getMethodName();
@@ -160,70 +166,43 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
     JavaType returnType = findAllGlobalSearchMethod.getReturnType().getParameters().get(0);
-    JavaType booleanBuilder = new JavaType("com.mysema.query.BooleanBuilder");
-    JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
-    JavaType sort = new JavaType("org.springframework.data.domain.Sort");
     JavaType pageImpl = new JavaType("org.springframework.data.domain.PageImpl");
     JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
 
-
-    // Date expressions
-    bodyBuilder
-        .appendFormalLine("final String[] FULL_DATE_PATTERNS = new String[] {\"dd-MM-yyyy HH:mm:ss\", \"dd/MM/yyyy HH:mm:ss\","
-            + "\"MM-dd-yyyy HH:mm:ss\", \"MM/dd/yyyy HH:mm:ss\", \"dd-MM-yyyy HH:mm\",\"dd/MM/yyyy HH:mm\", \"MM-dd-yyyy HH:mm\", \"MM/dd/yyyy HH:mm\","
-            + "\"dd-MM-yyyy\", \"dd/MM/yyyy\", \"MM-dd-yyyy\", \"MM/dd/yyyy\",\"dd-MMMM-yyyy HH:mm:ss\", \"dd/MMMM/yyyy HH:mm:ss\","
-            + "\"MMMM-dd-yyyy HH:mm:ss\", \"MMMM/dd/yyyy HH:mm:ss\",\"dd-MMMM-yyyy HH:mm\", \"dd/MMMM/yyyy HH:mm\", \"MMMM-dd-yyyy HH:mm\","
-            + "\"MMMM/dd/yyyy HH:mm\", \"dd-MMMM-yyyy\", \"dd/MMMM/yyyy\", \"MMMM-dd-yyyy\", \"MMMM/dd/yyyy\" };");
+    buildVariables(bodyBuilder, ids);
 
     // QEntity qEntity = QEntity.entity;
     bodyBuilder.appendFormalLine(String.format("%1$s %2$s = %1$s.%2$s;",
         qEntity.getNameIncludingTypeParameters(false, importResolver), entityVariable));
 
-    //JPQLQuery query = from(qEntity);
-    bodyBuilder.appendFormalLine(String.format("%s query = from(%s);",
-        jpql.getNameIncludingTypeParameters(false, importResolver), entityVariable));
-
-    // BooleanBuilder where = new BooleanBuilder()
-    bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s();\n",
-        booleanBuilder.getNameIncludingTypeParameters(false, importResolver)));
-
     // Construct query
-    constructQuery(bodyBuilder, fields, entityVariable, globalSearch);
-
-    bodyBuilder.appendFormalLine(String.format("query.where(where);\n"));
+    buildQuery(bodyBuilder, fields, entityVariable, globalSearch);
 
     bodyBuilder.appendFormalLine(String.format("long totalFound = query.count();"));
-
 
     // if (pageable != null) {
     bodyBuilder.appendFormalLine(String.format("if (%s != null) {", pageable));
 
-    //  if (pageable.getSort() != null) {
-    bodyBuilder.appendFormalLine(String.format("    if (%s.getSort() != null) {", pageable));
-
-    //for (Sort.Order sortOrder : pageable.getSort()) {
-    bodyBuilder.appendFormalLine(String.format("       for (%s.Order sortOrder : %s.getSort()) {",
-        sort.getNameIncludingTypeParameters(false, importResolver), pageable));
-
-    buildOrderClauseField(fields, bodyBuilder, entityVariable);
-
-    // End  for
-    bodyBuilder.appendFormalLine("      }");
-
-    // End (pageable.getSort() != null)
-    bodyBuilder.appendFormalLine("  }");
+    if (!fields.isEmpty()) {
+      buildOrderClause(fields, bodyBuilder, entityVariable, pageable);
+    }
 
     //  query.offset(pageable.getOffset()).limit(pageable.getPageSize());}
     bodyBuilder.appendFormalLine(String.format(
         "   query.offset(%1$s.getOffset()).limit(%1$s.getPageSize());", pageable));
 
-    // End (pageable != null)
+    // End if
     bodyBuilder.appendFormalLine("}");
+
+    // query.orderBy(qEntity.id.asc());
+    for (FieldMetadata id : ids) {
+      bodyBuilder.appendFormalLine(String.format("query.orderBy(%s.asc());", id.getFieldName()));
+    }
 
     // List<Entity> results = query.list(ConstructorExpression.create(Entity.class, qEntity.parameter1, qEntity.parameter1, ...));
     if (queryList.isEmpty()) {
       bodyBuilder.appendFormalLine(String.format(
-          "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
+          "\n%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
               "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
               .getNameIncludingTypeParameters(false, importResolver), constructorExp
               .getNameIncludingTypeParameters(false, importResolver)));
@@ -248,7 +227,46 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // instance
   }
 
-  private void constructQuery(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> fields,
+  /**
+   * Builds variables that the method needs internally
+   * 
+   * @param bodyBuilder method body builder
+   * @param ids id fields
+   */
+  private void buildVariables(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> ids) {
+    JavaType numberPath = new JavaType("com.mysema.query.types.path.NumberPath");
+
+    // Date expressions
+    bodyBuilder
+        .appendFormalLine("final String[] FULL_DATE_PATTERNS = new String[] {\"dd-MM-yyyy HH:mm:ss\", \"dd/MM/yyyy HH:mm:ss\","
+            + "\"MM-dd-yyyy HH:mm:ss\", \"MM/dd/yyyy HH:mm:ss\", \"dd-MM-yyyy HH:mm\",\"dd/MM/yyyy HH:mm\", \"MM-dd-yyyy HH:mm\", \"MM/dd/yyyy HH:mm\","
+            + "\"dd-MM-yyyy\", \"dd/MM/yyyy\", \"MM-dd-yyyy\", \"MM/dd/yyyy\",\"dd-MMMM-yyyy HH:mm:ss\", \"dd/MMMM/yyyy HH:mm:ss\","
+            + "\"MMMM-dd-yyyy HH:mm:ss\", \"MMMM/dd/yyyy HH:mm:ss\",\"dd-MMMM-yyyy HH:mm\", \"dd/MMMM/yyyy HH:mm\", \"MMMM-dd-yyyy HH:mm\","
+            + "\"MMMM/dd/yyyy HH:mm\", \"dd-MMMM-yyyy\", \"dd/MMMM/yyyy\", \"MMMM-dd-yyyy\", \"MMMM/dd/yyyy\" };");
+
+
+    // Getting id dynamically
+    for (FieldMetadata id : ids) {
+      bodyBuilder
+          .appendFormalLine(String.format(
+              "%1$s<%3$s> %2$s = new %1$s<%3$s>(%3$s.class, \"%2$s\");",
+              numberPath.getNameIncludingTypeParameters(true, importResolver), id.getFieldName(),
+              id.getFieldType().toObjectType()
+                  .getNameIncludingTypeParameters(false, importResolver)));
+    }
+
+    bodyBuilder.appendFormalLine("\n");
+  }
+
+  /**
+   * Builds the search query
+   * 
+   * @param bodyBuilder method body builder
+   * @param fields fields to search for
+   * @param entityVariable name of the variable that contains the Q entity 
+   * @param globalSearch global search variable name
+   */
+  private void buildQuery(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> fields,
       String entityVariable, JavaSymbolName globalSearch) {
 
     boolean addOr = false;
@@ -256,9 +274,18 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     String expression = null;
     String query = "";
     String variables = "";
-    JavaType dateUtils = new JavaType("org.apache.commons.lang3.time.DateUtils");
-    JavaType booleanUtils = new JavaType("org.apache.commons.lang3.BooleanUtils");
+    JavaType booleanBuilder = new JavaType("com.mysema.query.BooleanBuilder");
+    JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
     JavaType calendar = new JavaType(Calendar.class);
+    JavaType dateUtils = new JavaType("org.apache.commons.lang3.time.DateUtils");
+
+    //JPQLQuery query = from(qEntity);
+    bodyBuilder.appendFormalLine(String.format("%s query = from(%s);",
+        jpql.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+
+    // BooleanBuilder where = new BooleanBuilder()
+    bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s();\n",
+        booleanBuilder.getNameIncludingTypeParameters(false, importResolver)));
 
     // if (globalSearch != null) {
     bodyBuilder.appendFormalLine(String.format("if (%s != null) {", globalSearch));
@@ -266,160 +293,198 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // String txt = globalSearch.getText();
     bodyBuilder.appendFormalLine(String.format("    String txt = %s.getText();", globalSearch));
 
-    if (!fields.isEmpty()) {
+    for (FieldMetadata field : fields) {
 
-      // Start query
-      query = query.concat(String.format("where.and(\n"));
+      if (field.getFieldType().equals(JavaType.STRING)) {
+        expression = buildStringExpression(entityVariable, field.getFieldName());
 
-      for (FieldMetadata field : fields) {
+      } else if (field.getFieldType().equals(new JavaType(Date.class))) {
+        existsDateField = true;
+        expression = buildDateExpression(entityVariable, field.getFieldName());
 
+      } else if (field.getFieldType().equals(new JavaType(Calendar.class))) {
+        existsDateField = true;
+        // Calendar property = Calendar.getInstance();
+        variables =
+            variables.concat(String.format("      %1$s %2$s= %1$s.getInstance();\n",
+                calendar.getNameIncludingTypeParameters(false, importResolver),
+                field.getFieldName()));
+
+        // property.setTime(DateUtils.parseDateStrictly(text,FULL_DATE_PATTERNS ););
+        variables =
+            variables.concat(String.format(
+                "                 %s.setTime(%s.parseDateStrictly(txt, FULL_DATE_PATTERNS));\n",
+                field.getFieldName(),
+                dateUtils.getNameIncludingTypeParameters(false, importResolver)));
+
+        expression = buildCalendarExpression(entityVariable, field.getFieldName());
+
+      } else if (field.getFieldType().isBoolean()) {
+        expression = buildBooleanExpression(entityVariable, field.getFieldName());
+
+      } else {
         try {
-
-          if (field.getFieldType().equals(JavaType.STRING)) {
-
-            // qEntity.property.containsIgnoreCase(txt)
-            expression =
-                String
-                    .format("%s.%s.containsIgnoreCase(txt)", entityVariable, field.getFieldName());
-
-          } else if (field.getFieldType().equals(new JavaType(Date.class))) {
-            existsDateField = true;
-
-            // qEntity.property.eq(DateUtils.parseDateStrictly(txt, FULL_DATE_PATTERNS))
-            expression =
-                String.format("%s.%s.eq(%s.parseDateStrictly(txt, FULL_DATE_PATTERNS))",
-                    entityVariable, field.getFieldName(),
-                    dateUtils.getNameIncludingTypeParameters(false, importResolver));
-
-          } else if (field.getFieldType().equals(new JavaType(Calendar.class))) {
-            existsDateField = true;
-
-            // Calendar property = Calendar.getInstance();
-            variables =
-                variables.concat(String.format("      %1$s %2$s= %1$s.getInstance();\n",
-                    calendar.getNameIncludingTypeParameters(false, importResolver),
-                    field.getFieldName()));
-
-            // property.setTime(DateUtils.parseDateStrictly(text,FULL_DATE_PATTERNS ););
-            variables =
-                variables
-                    .concat(String
-                        .format(
-                            "                 %s.setTime(%s.parseDateStrictly(txt, FULL_DATE_PATTERNS));\n",
-                            field.getFieldName(),
-                            dateUtils.getNameIncludingTypeParameters(false, importResolver)));
-
-            // qEntity.property.eq(property);
-            expression = String.format("%1$s.%2$s.eq(%2$s)", entityVariable, field.getFieldName());
-
-          } else if (ClassUtils.getClass(field.getFieldType().getFullyQualifiedTypeName())
-              .getSuperclass().equals(Number.class)) {
-
-            // qEntity.property.like("%".concat(txt).concat("%"));
-            expression =
-                String.format("%s.%s.like(\"%%\".concat(txt).concat(\"%%\"))", entityVariable,
-                    field.getFieldName());
-
-          } else if (field.getFieldType().isBoolean()) {
-
-            // qEntity.property.eq(BooleanUtils.toBooleanObject(txt));
-            expression =
-                String.format("%s.%s.eq(%s.toBooleanObject(txt))", entityVariable,
-                    field.getFieldName(),
-                    booleanUtils.getNameIncludingTypeParameters(false, importResolver));
+          if (ClassUtils.getClass(field.getFieldType().getFullyQualifiedTypeName()).getSuperclass()
+              .equals(Number.class)) {
+            expression = buildNumberExpression(entityVariable, field.getFieldName());
 
           } else {
             expression = String.format("%1$s.%2$s.eq(txt)", entityVariable, field.getFieldName());
           }
-
         } catch (ClassNotFoundException e) {
         }
-
-        if (addOr) {
-          query = query.concat(String.format("                  .or(%s)\n", expression));
-        } else {
-          query = query.concat(String.format("                  %s\n", expression));
-        }
-        addOr = true;
       }
 
-      // End query
-      query = query.concat(String.format("                );"));
+      if (addOr) {
+        query = query.concat(String.format("\n                  .or(%s)", expression));
+      } else {
+        query = query.concat(String.format("                  %s", expression));
+      }
+      addOr = true;
+    }
 
+    if (!fields.isEmpty()) {
+
+      // where.and(property1.operator(text).or(property2.operator(text).or(...)));
       if (existsDateField) {
         bodyBuilder.appendFormalLine(String.format("    try{"));
         bodyBuilder.appendFormalLine(variables);
-        bodyBuilder.appendFormalLine(String.format("        %s", query));
+        bodyBuilder.appendFormalLine(String.format("        where.and(\n%s);\n", query));
         bodyBuilder.appendFormalLine(String.format("    } catch(Exception e){}"));
       } else {
         bodyBuilder.appendFormalLine(variables);
-        bodyBuilder.appendFormalLine(String.format("    %s", query));
+        bodyBuilder.appendFormalLine(String.format("    where.and(\n%s);\n", query));
       }
     }
 
     // End if 
     bodyBuilder.appendFormalLine(String.format("}"));
 
+    bodyBuilder.appendFormalLine(String.format("query.where(where);\n"));
   }
 
-  private void buildOrderClauseField(List<FieldMetadata> fields,
-      InvocableMemberBodyBuilder bodyBuilder, String entityVariable) {
+  /**
+   * Creates a calendar query expression with the given property
+   * 
+   * @param entityVariable name of the variable that contains the Q entity 
+   * @param fieldName property name
+   * @return string that represents the expression
+   */
+  private String buildCalendarExpression(String entityVariable, JavaSymbolName fieldName) {
+    // qEntity.property.eq(property);
+    return String.format("%1$s.%2$s.eq(%2$s)", entityVariable, fieldName);
+  }
+
+  /**
+   * Creates a boolean query expression with the given property
+   * 
+   * @param entityVariable name of the variable that contains the Q entity 
+   * @param fieldName property name
+   * @return string that represents the expression
+   */
+  private String buildBooleanExpression(String entityVariable, JavaSymbolName fieldName) {
+    JavaType booleanUtils = new JavaType("org.apache.commons.lang3.BooleanUtils");
+
+    // qEntity.property.eq(BooleanUtils.toBooleanObject(txt));
+    return String.format("%s.%s.eq(%s.toBooleanObject(txt))", entityVariable, fieldName,
+        booleanUtils.getNameIncludingTypeParameters(false, importResolver));
+  }
+
+  /**
+   * Creates a number query expression with the given property
+   * 
+   * @param entityVariable name of the variable that contains the Q entity 
+   * @param fieldName property name
+   * @return string that represents the expression
+   */
+  private String buildNumberExpression(String entityVariable, JavaSymbolName fieldName) {
+    // qEntity.property.like("%".concat(txt).concat("%"));
+    return String
+        .format("%s.%s.like(\"%%\".concat(txt).concat(\"%%\"))", entityVariable, fieldName);
+  }
+
+  /**
+   * Creates a date query expression with the given property
+   * 
+   * @param entityVariable name of the variable that contains the Q entity 
+   * @param fieldName property name
+   * @return string that represents the expression
+   */
+  private String buildDateExpression(String entityVariable, JavaSymbolName fieldName) {
+    JavaType dateUtils = new JavaType("org.apache.commons.lang3.time.DateUtils");
+
+    // qEntity.property.eq(DateUtils.parseDateStrictly(txt, FULL_DATE_PATTERNS))
+    return String.format("%s.%s.eq(%s.parseDateStrictly(txt, FULL_DATE_PATTERNS))", entityVariable,
+        fieldName, dateUtils.getNameIncludingTypeParameters(false, importResolver));
+  }
+
+  /**
+   * Creates a string query expression with the given property
+   * 
+   * @param entityVariable name of the variable that contains the Q entity 
+   * @param fieldName property name
+   * @return string that represents the expression
+   */
+  private String buildStringExpression(String entityVariable, JavaSymbolName fieldName) {
+    // qEntity.property.containsIgnoreCase(txt)
+    return String.format("%s.%s.containsIgnoreCase(txt)", entityVariable, fieldName);
+  }
+
+  /**
+   * Builds the query clause for the given entity fields 
+   * 
+   * @param fields properties to order by
+   * @param bodyBuilder method body builder
+   * @param entityVariable name of the variable that contains the Q entity 
+   * @param pageable pageable variable name
+   */
+  private void buildOrderClause(List<FieldMetadata> fields, InvocableMemberBodyBuilder bodyBuilder,
+      String entityVariable, JavaSymbolName pageable) {
 
     JavaType orderSpecifier = new JavaType("com.mysema.query.types.OrderSpecifier");
-    JavaType pathBuilder = new JavaType("com.mysema.query.types.path.PathBuilder");
     JavaType order = new JavaType("com.mysema.query.types.Order");
-    String condition = null;
-    boolean elseCondition = false;
+    JavaType sort = new JavaType("org.springframework.data.domain.Sort");
 
-    //  PathBuilder<Entity> orderByExpression = new PathBuilder<Entity>(Entity.class, "entity");
-    bodyBuilder.appendFormalLine(String.format(
-        "           %3$s<%1$s> orderByExpression = new %3$s<%1s>(%1$s.class, \"%2$s\");", entity,
-        entityVariable, pathBuilder.getNameIncludingTypeParameters(false, importResolver)));
+    //  if (pageable.getSort() != null) {
+    bodyBuilder.appendFormalLine(String.format("    if (%s.getSort() != null) {", pageable));
+
+    //for (Sort.Order sortOrder : pageable.getSort()) {
+    bodyBuilder.appendFormalLine(String.format("       for (%s.Order order : %s.getSort()) {",
+        sort.getNameIncludingTypeParameters(false, importResolver), pageable));
+
 
     // Order direction = sortOrder.isAscending() ? Order.ASC : Order.DESC;
     bodyBuilder.appendFormalLine(String.format(
-        "           %1$s direction = sortOrder.isAscending() ? %1$s.ASC : %1$s.DESC;\n",
+        "           %1$s direction = order.isAscending() ? %1$s.ASC : %1$s.DESC;\n",
         order.getNameIncludingTypeParameters(false, importResolver)));
+
+    bodyBuilder.appendFormalLine(String.format("           switch(order.getProperty()){"));
 
     for (FieldMetadata field : fields) {
 
-      if (!field.getFieldType().equals(JavaType.STRING)) {
-        continue;
-      }
+      // case "property":
+      bodyBuilder
+          .appendFormalLine(String.format("              case \"%s\":", field.getFieldName()));
 
-      if (!elseCondition) {
-        condition = "if";
-        elseCondition = true;
-      } else {
-        condition = "else if";
-      }
-
-      // if ("property1".equals(sortOrder.getProperty())) {
+      // query.orderBy(new OrderSpecifier<String>(dir, qEntity.property));
       bodyBuilder.appendFormalLine(String.format(
-          "           %s (\"%s\".equals(sortOrder.getProperty())) {", condition,
-          field.getFieldName()));
-
-      // query.orderBy(new OrderSpecifier<String>(direction, qEntity.property1));
-      bodyBuilder.appendFormalLine(String.format(
-          "             query.orderBy(new %s<String>(direction, %s.%s));",
-          orderSpecifier.getNameIncludingTypeParameters(false, importResolver), entityVariable,
-          field.getFieldName()));
-      bodyBuilder.appendFormalLine("            }");
+          "                 query.orderBy(new %s<%s>(direction, %s.%s));",
+          orderSpecifier.getNameIncludingTypeParameters(false, importResolver), field
+              .getFieldType().toObjectType().getNameIncludingTypeParameters(false, importResolver),
+          entityVariable, field.getFieldName()));
+      bodyBuilder.appendFormalLine("                break;");
     }
 
-    if (condition != null) {
-      bodyBuilder.appendFormalLine("            else {");
-    }
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "               query.orderBy( new %s(direction, orderByExpression.get(sortOrder.getProperty())));",
-                orderSpecifier.getNameIncludingTypeParameters(false, importResolver)));
-    if (condition != null) {
-      bodyBuilder.appendFormalLine("            }");
-    }
+    // End switch
+    bodyBuilder.appendFormalLine("            }");
 
+    // End  for
+    bodyBuilder.appendFormalLine("      }");
+
+    // End if
+    bodyBuilder.appendFormalLine("  }");
   }
+
 
   @Override
   public String toString() {

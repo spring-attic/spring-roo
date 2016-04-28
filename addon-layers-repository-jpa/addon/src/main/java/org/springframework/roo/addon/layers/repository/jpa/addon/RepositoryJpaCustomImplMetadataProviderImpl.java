@@ -204,6 +204,14 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     ClassOrInterfaceTypeDetails searchResultDetails =
         getTypeLocationService().getTypeDetails(repositoryCustomMetadata.getSearchResult());
 
+    List<FieldMetadata> idFields =
+        getPersistenceMemberLocator().getIdentifierFields(entityAttribute.getValue());
+
+    if (idFields.isEmpty()) {
+      throw new RuntimeException(String.format("Error: Entity %s does not have an identifier",
+          entityAttribute.getName()));
+    }
+
     // Getting valid fields to construct the findAll query
     final int maxFields = 5;
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
@@ -237,8 +245,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(), validFields,
-        repositoryCustomMetadata.getFindAllGlobalSearchMethod());
+        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(), idFields,
+        validFields, repositoryCustomMetadata.getFindAllGlobalSearchMethod());
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

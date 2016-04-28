@@ -708,8 +708,21 @@ public class JavaType implements Comparable<JavaType> {
     return DataType.PRIMITIVE == dataType;
   }
 
+  /**
+   * Returns the non-primitive type that represent this type if it is primitive. Otherwise, returns itself.
+   * @return
+   */
+  public JavaType toObjectType() {
+    if (isPrimitive()) {
+      return new JavaType(getFullyQualifiedTypeName(), getArray(), DataType.TYPE, getArgName(),
+          getParameters(), getModule());
+    }
+    return this;
+  }
+
   @Override
   public String toString() {
     return getNameIncludingTypeParameters();
   }
+
 }
