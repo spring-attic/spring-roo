@@ -112,6 +112,9 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
     Validate.notNull(entityAnnotation, "ERROR: Entity should be annotated with @RooJpaEntity");
 
+    // Getting identifierField
+    List<FieldMetadata> identifierField = getPersistenceMemberLocator().getIdentifierFields(entity);
+
     // Getting entity details
     MemberDetails entityDetails = getMemberDetails(entity);
 
@@ -137,6 +140,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
     ctx.setEntityName(entity.getSimpleTypeName());
     ctx.setModelAttribute(getEntityField().getFieldName().getSymbolName());
+    ctx.setIdentifierField(identifierField.get(0).getFieldName().getSymbolName());
     fillContext(ctx);
 
     // Use provided MVCViewGenerationService to generate views

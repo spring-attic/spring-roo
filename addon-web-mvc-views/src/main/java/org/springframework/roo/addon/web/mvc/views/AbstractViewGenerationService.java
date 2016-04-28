@@ -21,6 +21,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -371,7 +372,11 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     // Get the MAX_FIELDS_TO_ADD
     List<FieldMetadata> fieldViewItems = new ArrayList<FieldMetadata>();
     for (FieldMetadata entityField : entityFields) {
-      fieldViewItems.add(entityField);
+      // Exclude id and version fields
+      if (entityField.getAnnotation(JpaJavaType.ID) == null
+          && entityField.getAnnotation(JpaJavaType.VERSION) == null) {
+        fieldViewItems.add(entityField);
+      }
       addedFields++;
       if (addedFields == MAX_FIELDS_TO_ADD && checkMaxFields) {
         break;
@@ -459,5 +464,4 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       return typeLocationService;
     }
   }
-
 }

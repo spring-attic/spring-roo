@@ -16,7 +16,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-          <a class="navbar-brand" href="#">Principal Menu</a>
+          <a class="navbar-brand" href="#">Main Menu</a>
           </div>
 
           <div id="bs-example-navbar-collapse-1" class="navbar-collapse collapse">

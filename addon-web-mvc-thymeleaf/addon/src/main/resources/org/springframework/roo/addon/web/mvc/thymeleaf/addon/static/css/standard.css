@@ -1,5 +1,4 @@
-/* CSS Aplicaciones Externas Sanidad*/
-/*custom por DISID*/
+/* CSS Spring Roo Applications*/
 
 body {background: #F8F8F8 url("../img/background.jpg") top left repeat-x; padding: 2.8em 0% 1.8em;}
 html {font-size: 94% !important;}
@@ -173,28 +172,28 @@ abbr {margin-left: 0.2em; text-decoration: none; color: #b70000}
 
 .btn-accion:focus, .btn-accion:active {box-shadow: 2px 2px 3px #6b898f inset;}
 
-.btn-accion.modificar {background:#fff url(../img/ico-modificar.png) 0.1em 0.15em no-repeat;}
+.btn-accion.modificar {background:#fff url(../img/ico-update.png) 0.1em 0.15em no-repeat;}
 
-.btn-accion.aceptar {background:#fff url(../img/ico-aceptar.png) 0.1em 0.15em no-repeat;}
+.btn-accion.aceptar {background:#fff url(../img/ico-accept.png) 0.1em 0.15em no-repeat;}
 
-.btn-accion.eliminar {background:#fff url(../img/ico-eliminar.png) 0.1em 0.15em no-repeat;}
-.btn-accion.agregar {background:#fff url(../img/ico-agregar.png) 0.1em 0.15em no-repeat;}
+.btn-accion.eliminar {background:#fff url(../img/ico-remove.png) 0.1em 0.15em no-repeat;}
+.btn-accion.agregar {background:#fff url(../img/ico-add.png) 0.1em 0.15em no-repeat;}
 
-.btn-accion.ver {background:#fff url(../img/ico-ver.png) 0.1em 0.15em no-repeat;}
+.btn-accion.ver {background:#fff url(../img/ico-show.png) 0.1em 0.15em no-repeat;}
 .btn-default.excel, .btn-primary.excel {background-image: url(../img/ico-excel.png); background-repeat: no-repeat; background-position: 0.6em 0.5em; padding-left: 2.6em}
 
 .btn-default.pdf, .btn-primary.pdf {background-image: url(../img/ico-pdf-red.png); background-repeat: no-repeat; background-position: 0.6em 0.5em; padding-left: 2.6em}
 
 .btn-default.xml, .btn-primary.xml {background-image: url(../img/ico-xml.png); background-repeat: no-repeat; background-position: 0.6em 0.5em; padding-left: 2.6em}
 
-.btn-default.eliminar, .btn-primary.eliminar {background-image: url(../img/ico-eliminar.png); background-repeat: no-repeat; background-position: 0.6em 0.5em; padding-left: 2.6em}
+.btn-default.eliminar, .btn-primary.eliminar {background-image: url(../img/ico-remove.png); background-repeat: no-repeat; background-position: 0.6em 0.5em; padding-left: 2.6em}
 
 .btn-default.excel:hover, .btn-primary.excel:hover, .btn-default.excel:active, .btn-primary.excel:active, .btn-default.excel:focus, .btn-primary.excel:focus {background-image: url(../img/ico-excel.png) !important; background-repeat: no-repeat !important; background-position: 0.6em 0.5em !important; padding-left: 2.6em}
 .btn-default.xml:hover, .btn-primary.xml:hover, .btn-default.xml:active, .btn-primary.xml:active, .btn-default.xml:focus, .btn-primary.xml:focus {background-image: url(../img/ico-xml.png) !important; background-repeat: no-repeat !important; background-position: 0.6em 0.5em !important; padding-left: 2.6em}
 
 .btn-default.pdf:hover, .btn-primary.pdf:hover, .btn-default.pdf:active, .btn-primary.pdf:active, .btn-default.pdf:focus, .btn-primary.pdf:focus {background-image: url(../img/ico-pdf-red.png)!important; background-repeat: no-repeat !important; background-position: 0.6em 0.5em !important; padding-left: 2.6em}
 
-.btn-default.eliminar:hover, .btn-primary.eliminar:hover, .btn-default.eliminar:active, .btn-primary.eliminar:active, .btn-default.eliminar:focus, .btn-primary.eliminar:focus {background-image: url(../img/ico-eliminar.png) !important; background-repeat: no-repeat !important; background-position: 0.6em 0.5em !important; padding-left: 2.6em}
+.btn-default.eliminar:hover, .btn-primary.eliminar:hover, .btn-default.eliminar:active, .btn-primary.eliminar:active, .btn-default.eliminar:focus, .btn-primary.eliminar:focus {background-image: url(../img/ico-remove.png) !important; background-repeat: no-repeat !important; background-position: 0.6em 0.5em !important; padding-left: 2.6em}
 .btn {margin: 0.1em}
 
 .btn-xs, .btn-group-xs > .btn {padding: 2px 16px 1px 16px; font-size: 1em; line-height: 1.5; border-radius: 5px; margin: 0.6em 0.2em;}
@@ -234,10 +233,10 @@ button:focus, input:focus, a:focus {outline: 0 !important}
 /*--ICONOS AÑADIDOS-------------*/
 .glyphicon {margin: 3px 6px 3px 3px; font-size: 110%}
 .ico {padding: 0 0 0.2em 0.2em;}
-.aceptado {background: url(../img/ico-aceptado.png) 0.1em 0.2em no-repeat; padding: 0.2em 1.5em 0 0}
-.pendiente {background: url(../img/ico-pendiente.png) 0.1em 0.2em no-repeat; padding: 0.2em 1.5em 0 0}
-.rechazado {background: url(../img/ico-rechazado.png) 0.1em 0.2em no-repeat; padding: 0.2em 1.5em 0 0}
-.enviado {background: url(../img/ico-enviado.png) 0em 0.2em no-repeat; padding: 0.2em 1.5em 0 0.1em}
+.aceptado {background: url(../img/ico-accepted.png) 0.1em 0.2em no-repeat; padding: 0.2em 1.5em 0 0}
+.pendiente {background: url(../img/ico-waiting-for.png) 0.1em 0.2em no-repeat; padding: 0.2em 1.5em 0 0}
+.rechazado {background: url(../img/ico-rejected.png) 0.1em 0.2em no-repeat; padding: 0.2em 1.5em 0 0}
+.enviado {background: url(../img/ico-sent.png) 0em 0.2em no-repeat; padding: 0.2em 1.5em 0 0.1em}
 
 /*--TABLAS-------------*/
 .table {width: 100%; margin: 0.6em auto; border-bottom: 1px solid #ccc}

@@ -71,6 +71,7 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
 
       // Getting entity information from ViewContext
       input.put("entityName", ctx.getEntityName());
+      input.put("identifierField", ctx.getIdentifierField());
       input.put("modelAttribute", String.format("${%s}", ctx.getModelAttribute()));
 
       // Add all extra elements from ViewContext. This is useful if some
@@ -87,15 +88,19 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
       content = writer.toString();
 
       if (StringUtils.isBlank(content)) {
-        throw new RuntimeException(
-            "ERROR: Error trying to generate final content from provided template");
+        throw new RuntimeException(String.format(
+            "ERROR: Error trying to generate final content from provided template '%s.ftl'",
+            templateName));
       }
 
       return parse(content);
 
     } catch (Exception e) {
       throw new RuntimeException(
-          "ERROR: Error trying to generate final content from provided template. You should provide a valid .ftl file");
+          String
+              .format(
+                  "ERROR: Error trying to generate final content from provided template '%s.ftl'. You should provide a valid .ftl file",
+                  templateName));
     }
 
   }

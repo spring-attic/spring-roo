@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html lang="es" data-layout-decorator="layouts/default-layout">
 <head>
-<meta charset="utf-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8" data-th-remove="all" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
+<meta name="viewport" content="width=device-width, initial-scale=1"
+  data-th-remove="all" />
+<meta name="description"
+  content="${projectName}"
+  data-th-remove="all" />
+<meta name="author"
+  content="Spring Roo"
+  data-th-remove="all" />
+<link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
+  href="../../static/public/img/favicon.ico" />
 
-<title>Edit ${entityName}</title>
+<title>${projectName}
+  - Create ${entityName}</title>
 
-<!-- CSS -->
-<link data-th-href="@{/css/bootstrap.min.css}" data-th-remove="all"
-    href="../../static/css/bootstrap.min.css" rel="stylesheet" />
-<link data-th-href="@{/css/standard.css}" data-th-remove="all"
-    href="../../static/css/standard.css" rel="stylesheet" />
-<!--[if IE 8 ]> <html class="ie8" lang="es"/> <![endif]-->
-<!--[if lt IE 9]><script data-th-remove="all" data-th-src="@{/js/html5shiv.min.js}" src="../../static/js/html5shiv.min.js"></script><![endif]-->
+<!-- Bootstrap core CSS -->
+<link data-th-href="@{/public/css/bootstrap.min.css}" data-th-remove="all"
+  href="../../static/public/css/bootstrap.min.css" rel="stylesheet" />
+  
+<!-- Spring Roo CSS -->
+<link data-th-href="@{/public/css/standard.css}" data-th-remove="all"
+  href="../../static/public/css/standard.css" rel="stylesheet" />
+<noscript data-th-remove="all">
+  <link data-th-href="@{../../css/nojs-standard.css}"
+    data-th-remove="all" href="../../static/public/css/nojs-standard.css"
+    rel="stylesheet" />
+</noscript>
 
-<!-- DateTimePicker -->
-<link rel="stylesheet" type="text/css"
-    href="../../static/css/jquery.datetimepicker.css" />
-<script src="../../static/js/jquery.min.js"></script>
-<script src="../../static/js/jquery.datetimepicker.full.min.js"></script>
-<script type="text/javascript">
-  jQuery(function() {
-    jQuery(".datetimepicker").datetimepicker({
-      format : "d/m/Y"
-    });
-  });
-</script>
 </head>
 <body>
 
@@ -49,110 +52,120 @@
 
     <!-- HEADER -->
     <header role="banner">
-      <!-- header -->
+
       <div class="bg-header">
         <div class="organization-logo">
           <a
             title="${projectName}"
             href="/"><img
             alt="${projectName}"
-            src="../../static/img/logo_spring_roo.png" /></a>
+            src="../../static/public/img/logo_spring_roo.png" /></a>
         </div>
         <div class="application-name">
           ${projectName}
         </div>
       </div>
 
-        <!-- NAVIGATION MENU -->
-        <nav class="navbar navbar-default">
-            <div class="container-fluid">
-    
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed"
-                        data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
-                        aria-expanded="false">
-                        <span class="sr-only">Dropdown</span> <span class="icon-bar"></span> <span
-                            class="icon-bar"></span> <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="#">Main menu</a>
-                </div>
-    
-                <div id="bs-example-navbar-collapse-1" class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav">
-                        <li class="active"><a href="#">Menu 1</a></li>
-                        <li><a href="#">Menu 2</a></li>
-                        <li class="dropdown"><a href="#" class="dropdown-toggle"
-                            data-toggle="dropdown" role="button" aria-haspopup="true"
-                            aria-expanded="false">Dorpdown Menu 3<span class="caret"></span></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">Submenu 1</a></li>
-                                <li><a href="#">Submenu 2</a></li>
-                                <li><a href="#">Submenu 3</a></li>
-                            </ul></li>
-                    </ul>
-                </div>
-    
-            </div>
-        </nav>
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed"
+              data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+              aria-expanded="false">
+              <span class="sr-only">Dropdown</span> <span class="icon-bar"></span> <span
+                class="icon-bar"></span> <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Main Menu</a>
+          </div>
+
+          <div id="bs-example-navbar-collapse-1" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Active Menu 1</a></li>
+              <li><a href="#">Menu 2</a></li>
+              <li class="dropdown"><a href="#" class="dropdown-toggle"
+                data-toggle="dropdown" role="button" aria-haspopup="true"
+                aria-expanded="false">Dropdown Menu 3<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Submenu 1</a></li>
+                  <li><a href="#">Submenu 2</a></li>
+                  <li><a href="#">Submenu 3</a></li>
+                </ul></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
     </header>
     <!-- END HEADER -->
 
     <!--START CONTENT-->
-        <section data-layout-fragment="content">
-            <div class="container-fluid content">
-                <h1>Edit ${entityName}</h1>
+    <section data-layout-fragment="content">
+      <div class="container-fluid content">
 
-                <!-- START FORM -->
-                <form class="form-horizontal" method="POST" data-th-object="${modelAttribute}"
-                    data-th-action="@{${controllerPath}/{id}(id=*{id})}">
-                    <input type="hidden" name="_method" value="PUT"/>
-                    <fieldset>
-                        <#list fields as field>
-                          <div class="form-group">
-                            <label for="${field.fieldName}" class="col-md-3 control-label">
-                                ${field.fieldName} <abbr title="Mandatory">(*)</abbr>
-                            </label>
-                            <div class="col-md-6">
-                                <input type="text" class="form-control"
-                                    id="${field.fieldName}" placeholder="${field.fieldName}"
-                                    data-toggle="tooltip" title="${field.fieldName}" />
-                            </div>
-                        </div>
-                        </#list>
-                        
-                        <!-- FORM BUTTONS -->
-                        <div class="row">
-                            <div class="col-md-9 col-md-offset-3">
-                                <!-- TODO IE8 -->
-                                <button type="reset" class="btn btn-default"
-                                    onclick="location.href='list.html'"
-                                    data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''">Cancel</button>
-                                <input type="submit" value="Accept" class="btn btn-primary"/>
-                            </div>
-                        </div>
-                        
-                        
-                    </fieldset>
-                </form>
-                <!--END FORM -->
+        <h1>Create ${entityName}</h1>
 
+        <!--START FORM-->
+        <form class="form-horizontal" method="POST" data-th-object="${modelAttribute}"
+          data-th-action="@{${controllerPath}/{id}(id=*{id})}">
+          <input type="hidden" name="_method" value="PUT" />
+          <fieldset>
+            <#list fields as field>
+            <div class="form-group"
+              data-th-classappend="${r"${#fields.hasErrors('name')}"}? 'has-error'">
+              <label for="${field.fieldName}" class="col-md-3 control-label">${field.fieldName}</label>
+              <div class="col-md-3">
+                <input data-th-field="*{${field.fieldName}}" type="text" class="form-control"
+                  placeholder="${field.fieldName}"
+                  data-th-placeholder="${field.fieldName}"
+                  data-toggle="tooltip" title="Mandatory Field"/> <span
+                  id="name-help" class="help-block"
+                  data-th-if="${r"${#fields.hasErrors('name')}"}"
+                  data-th-errors="*{${field.fieldName}}">Help message.</span>
+              </div>
             </div>
-           <!--END CONTENT-->
+            </#list>
+
+            <!-- FORM BUTTONS -->
+            <div class="row">
+              <div class="col-md-9 col-md-offset-3">
+                <!-- TODO IE8 -->
+                <button type="reset" class="btn btn-default"
+                  onclick="location.href='list.html'"
+                  data-th-onclick="'location.href=\'' + @{${controllerPath}.html} + '\''">Cancel</button>
+                <button type="submit" class="btn btn-primary"
+                  onclick="location.href='list.html'"
+                  data-th-onclick="'location.href=\'' + @{${controllerPath}.html} + '\''"
+                  value="Accept">Accept</button>
+              </div>
+            </div>
+
+          </fieldset>
+        </form>
+        <!--END FORM-->
+
+      </div>
+      <!--END CONTENT-->
 
     </section>
 
   </div>
   <!--END CONTAINER-->
 
-    <footer class="container">
-        <p class="text-right">© Powered by Spring Roo</p>
-    </footer>
+  <footer class="container">
+    <p class="text-right">© Powered By Spring Roo</p>
+  </footer>
 
-  <script data-th-remove="all" data-th-src="@{../js/bootstrap.min.js}"
-    src="../../static/js/bootstrap.min.js"></script>
-  <script data-th-remove="all" data-th-src="@{../js/main.js}"
-    src="../../static/js/main.js"></script>
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <script data-th-remove="all" data-th-src="@{/public/js/jquery.min.js}"
+    src="../../static/public/js/jquery.min.js"></script>
+  <script data-th-remove="all" data-th-src="@{/public/js/bootstrap.min.js}"
+    src="../../static/public/js/bootstrap.min.js"></script>
+  <script data-th-remove="all" data-th-src="@{/public/js/main.js}"
+    src="../../static/public/js/main.js"></script>
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script data-th-remove="all" data-th-src="@{/public/js/bootstrap.min.js}"
+    src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
 
 </body>
-
 </html>

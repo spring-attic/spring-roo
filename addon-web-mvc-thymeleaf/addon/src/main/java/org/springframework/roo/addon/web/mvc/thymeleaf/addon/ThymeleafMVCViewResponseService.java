@@ -326,35 +326,35 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     LogicalPath resourcesPath =
         LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
 
-    // copy all necessary styles inside SRC_MAIN_RESOURCES/static/css
+    // copy all necessary styles inside SRC_MAIN_RESOURCES/static/public/css
     copyDirectoryContents("static/css/*.css",
-        getPathResolver().getIdentifier(resourcesPath, "/static/css"), true);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/css"), true);
 
-    // copy all necessary fonts inside SRC_MAIN_RESOURCES/static/fonts
+    // copy all necessary fonts inside SRC_MAIN_RESOURCES/static/public/fonts
     copyDirectoryContents("static/fonts/*.eot",
-        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
     copyDirectoryContents("static/fonts/*.svg",
-        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
     copyDirectoryContents("static/fonts/*.ttf",
-        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
     copyDirectoryContents("static/fonts/*.woff",
-        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
     copyDirectoryContents("static/fonts/*.woff2",
-        getPathResolver().getIdentifier(resourcesPath, "/static/fonts"), true);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/fonts"), true);
 
-    // copy all necessary images inside SRC_MAIN_RESOURCES/static/img
+    // copy all necessary images inside SRC_MAIN_RESOURCES/static/public/img
     copyDirectoryContents("static/img/*.ico",
-        getPathResolver().getIdentifier(resourcesPath, "/static/img"), false);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
     copyDirectoryContents("static/img/*.jpg",
-        getPathResolver().getIdentifier(resourcesPath, "/static/img"), false);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
     copyDirectoryContents("static/img/*.png",
-        getPathResolver().getIdentifier(resourcesPath, "/static/img"), false);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
     copyDirectoryContents("static/img/*.gif",
-        getPathResolver().getIdentifier(resourcesPath, "/static/img"), false);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/img"), false);
 
-    // copy all necessary scripts inside SRC_MAIN_RESOURCES/static/js
+    // copy all necessary scripts inside SRC_MAIN_RESOURCES/static/public/js
     copyDirectoryContents("static/js/*.js",
-        getPathResolver().getIdentifier(resourcesPath, "/static/js"), true);
+        getPathResolver().getIdentifier(resourcesPath, "/static/public/js"), true);
   }
 
   /**

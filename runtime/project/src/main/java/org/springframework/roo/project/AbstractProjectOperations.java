@@ -375,7 +375,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
               }
             }
 
-	    // No such package; add it
+            // No such package; add it
             packagesElement.appendChild(XmlUtils
                 .createTextElement(document, "package", packageName));
             descriptionOfChange = highlight(ADDED + " package") + " '" + packageName + "'";

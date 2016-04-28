@@ -22,6 +22,9 @@ public class ViewContext {
   // Controller information
   private String controllerPath;
 
+  // Entity information
+  private String identifierField;
+
   // View information
   private String modelAttribute;
   private String entityName;
@@ -91,6 +94,14 @@ public class ViewContext {
 
   public void setEntityName(String entityName) {
     this.entityName = entityName;
+  }
+
+  public String getIdentifierField() {
+    return identifierField;
+  }
+
+  public void setIdentifierField(String identifierField) {
+    this.identifierField = identifierField;
   }
 
 }

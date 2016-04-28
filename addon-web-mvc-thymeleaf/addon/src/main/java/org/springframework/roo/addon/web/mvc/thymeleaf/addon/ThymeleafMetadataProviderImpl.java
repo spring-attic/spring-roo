@@ -37,7 +37,9 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -602,8 +604,12 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     final JavaSymbolName methodName = new JavaSymbolName("editForm");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    final List<AnnotationAttributeValue<?>> annotationAttributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
+    annotationAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), getEntityField()
+        .getFieldName().getSymbolName()));
     parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
-        SpringJavaType.PATH_VARIABLE).build()));
+        SpringJavaType.PATH_VARIABLE, annotationAttributes).build()));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -802,8 +808,12 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     final JavaSymbolName methodName = new JavaSymbolName("show");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    final List<AnnotationAttributeValue<?>> annotationAttributes =
+        new ArrayList<AnnotationAttributeValue<?>>();
+    annotationAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), getEntityField()
+        .getFieldName().getSymbolName()));
     parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
-        SpringJavaType.PATH_VARIABLE).build()));
+        SpringJavaType.PATH_VARIABLE, annotationAttributes).build()));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();

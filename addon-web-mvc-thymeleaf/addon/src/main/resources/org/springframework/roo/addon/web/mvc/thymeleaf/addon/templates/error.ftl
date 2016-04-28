@@ -11,16 +11,14 @@
     <section data-layout-fragment="content">
         <h2>Error!</h2>
         <div>
-            An error occurs (type=<span data-text="${r"${error}"}">Bad</span>, status=<span data-text="${r"${status}"}">500</span>).
+            An error occurred (type=<span data-text="${r"${error}"}">Bad</span>, status=<span data-text="${r"${status}"}">500</span>).
         </div>
         <hr/>
         <div data-text="${r"${message}"}"></div>
         <hr/>
-        <li><a href="/" data-th-href="@{/}">Home</a></li>
-        </ul>
     </section>
     <footer>
-        Powered by Spring Roo
+        &copy; Powered By Spring Roo
     </footer> 
   </body>
 </html>
