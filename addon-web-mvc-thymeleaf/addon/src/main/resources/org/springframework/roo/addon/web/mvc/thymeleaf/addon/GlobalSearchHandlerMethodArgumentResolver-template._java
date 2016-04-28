@@ -1,14 +1,15 @@
 package __PACKAGE__;
 
+import __GLOBAL_SEARCH__;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafGlobalSearchHandler;
 
-import __GLOBAL_SEARCH__;
+import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafGlobalSearchHandler;
 
 @RooThymeleafGlobalSearchHandler
 public class GlobalSearchHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {

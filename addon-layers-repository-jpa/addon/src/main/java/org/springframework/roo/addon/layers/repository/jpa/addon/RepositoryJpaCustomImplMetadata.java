@@ -22,7 +22,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -45,6 +44,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   private ImportRegistrationResolver importResolver;
   private JavaType entity;
+  private boolean isDTO;
 
   private MethodMetadata findAllGlobalSearchMethod;
 
@@ -82,6 +82,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param identifierType the type of the entity's identifier field
    *            (required)
    * @param domainType entity referenced on interface
+   * @param isDTO indicates if the provided domainType is a DTO or an entity
    * @param idFields entity id fields
    * @param validFields entity fields to search for (excluded id, reference and collection fields)
    * @param findAllGlobalSearchMethod the findAll metadata 
@@ -89,13 +90,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
-      final List<FieldMetadata> idFields, List<FieldMetadata> validFields,
+      final boolean isDTO, final List<FieldMetadata> idFields, List<FieldMetadata> validFields,
       final MethodMetadata findAllGlobalSearchMethod) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
     this.importResolver = builder.getImportRegistrationResolver();
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
+    this.isDTO = isDTO;
     this.entity = domainType;
 
     // Get repository that needs to be implemented
@@ -200,7 +202,11 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     }
 
     // List<Entity> results = query.list(ConstructorExpression.create(Entity.class, qEntity.parameter1, qEntity.parameter1, ...));
-    if (queryList.isEmpty()) {
+    if (!this.isDTO) {
+      bodyBuilder.appendFormalLine(String.format("\n%1$s<%2$s> results = query.list(%3$s);",
+          new JavaType("java.util.List").getNameIncludingTypeParameters(false, importResolver),
+          returnType.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    } else if (queryList.isEmpty()) {
       bodyBuilder.appendFormalLine(String.format(
           "\n%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
               "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
@@ -483,6 +489,11 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // End if
     bodyBuilder.appendFormalLine("  }");
+  }
+
+
+  public boolean isDTO() {
+    return this.isDTO;
   }
 
 

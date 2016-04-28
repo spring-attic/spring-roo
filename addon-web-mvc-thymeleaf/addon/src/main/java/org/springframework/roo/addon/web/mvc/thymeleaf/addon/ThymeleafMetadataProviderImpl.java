@@ -76,6 +76,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   private JavaType globalSearchType;
   private JavaType datatablesDataType;
+  private JavaType datatablesPageable;
 
   private ControllerMVCService controllerMVCService;
   private MVCViewGenerationService viewGenerationService;
@@ -236,6 +237,21 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
       break;
     }
 
+    // Getting DatatablesPageable
+    Set<ClassOrInterfaceTypeDetails> datatablesPageableClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_THYMELEAF_DATATABLES_PAGEABLE);
+    if (datatablesPageableClasses.isEmpty()) {
+      throw new RuntimeException(
+          "ERROR: DatatablesPageable.java file doesn't exist or has been deleted.");
+    }
+    Iterator<ClassOrInterfaceTypeDetails> datatablesPageableClassIterator =
+        datatablesPageableClasses.iterator();
+    while (datatablesPageableClassIterator.hasNext()) {
+      this.datatablesPageable = datatablesPageableClassIterator.next().getType();
+      break;
+    }
+
     // Getting methods from related service
     MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
     MethodMetadata serviceDeleteMethod = serviceMetadata.getDeleteMethod();
@@ -345,8 +361,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType.INT_OBJECT));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.datatablesPageable));
+    AnnotationMetadataBuilder requestParamAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.REQUEST_PARAM);
+    requestParamAnnotation.addStringAttribute("value", "draw");
+    parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("search"));

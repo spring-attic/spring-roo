@@ -1,56 +1,38 @@
 package __PACKAGE__;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesPageableHandler;
 
 @RooThymeleafDatatablesPageableHandler
 public class DatatablesPageableHandlerMethodArgumentResolver
-    implements HandlerMethodArgumentResolver {
-
-  private PageableHandlerMethodArgumentResolver defaultResolver;
+    extends PageableHandlerMethodArgumentResolver {
 
   public DatatablesPageableHandlerMethodArgumentResolver() {
-    this(new DatatablesSortHandlerMethodArgumentResolver());
-  }
-
-  public DatatablesPageableHandlerMethodArgumentResolver(
-      DatatablesSortHandlerMethodArgumentResolver datatablesSortResolver) {
-    this(new PageableHandlerMethodArgumentResolver(datatablesSortResolver));
-  }
-
-  public DatatablesPageableHandlerMethodArgumentResolver(
-      PageableHandlerMethodArgumentResolver defaultResolver) {
-    this.defaultResolver = defaultResolver;
-    this.defaultResolver.setPageParameterName("start");
-    this.defaultResolver.setSizeParameterName("length");
+    super(new DatatablesSortHandlerMethodArgumentResolver());
+    setPageParameterName("start");
+    setSizeParameterName("length");
   }
 
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
-    return defaultResolver.supportsParameter(parameter);
+    return DatatablesPageable.class.equals(parameter.getParameterType());
   }
 
   @Override
-  public Pageable resolveArgument(MethodParameter methodParameter,
+  public DatatablesPageable resolveArgument(MethodParameter methodParameter,
       ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
       WebDataBinderFactory binderFactory) {
     Pageable pageable =
-        defaultResolver.resolveArgument(methodParameter, mavContainer, webRequest, binderFactory);
+        super.resolveArgument(methodParameter, mavContainer, webRequest, binderFactory);
 
-    int pageSize = pageable.getPageSize();
-    int start = pageable.getPageNumber();
-    int pageNumber = start / pageSize;
-
-    return new PageRequest(pageNumber, pageSize, pageable.getSort());
+    return new DatatablesPageable(pageable);
   }
 
 }

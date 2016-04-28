@@ -367,12 +367,6 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
    * @param module
    */
   private void addThymeleafDatatablesResources(Pom module) {
-    // Add necessary dependencies
-    getProjectOperations().addDependency(module.getModuleName(),
-        new Dependency("com.github.dandelion", "datatables-spring3", "1.1.0"));
-
-    getProjectOperations().addDependency(module.getModuleName(),
-        new Dependency("com.github.dandelion", "datatables-thymeleaf", "1.1.0"));
 
     // Add DatatablesData.java class
     addDatatablesDataClass(module);
@@ -380,14 +374,20 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // Add DatatablesPageableHandlerMethodArgumentResolver.java class
     addDatatablesPageableHandlerMethodArgumentResolverClass(module);
 
+    // Add DatatablesPageable.java class
+    addDatatablesPageableClass(module);
+
     // Add DatatablesSortHandlerMethodArgumentResolver.java class
     addDatatablesSortHandlerMethodArgumentResolverClass(module);
+
+    // Add DatatablesSort.java class
+    addDatatablesSortClass(module);
 
     // Add GlobalSearchHandlerMethodArgumentResolver.java
     addGlobalSearchHandlerMethodArgumentResolverClass(module);
 
     // Add WebMVCThymeleafUIConfiguration config class
-    //addWebMVCThymeleafUIConfigurationClass(module);
+    addWebMVCThymeleafUIConfigurationClass(module);
   }
 
   /**
@@ -499,6 +499,49 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   }
 
   /**
+   * This method adds new DatatablesSort.java class
+   * annotated with @RooThymeleafDatatablesSort
+   * 
+   * @param module
+   */
+  private void addDatatablesSortClass(Pom module) {
+    // First of all, check if already exists a @RooThymeleafDatatablesSort
+    // class on current project
+    Set<JavaType> sortClasses =
+        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_THYMELEAF_DATATABLES_SORT);
+
+    if (!sortClasses.isEmpty()) {
+      return;
+    }
+
+    JavaPackage modulePackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+
+    final JavaType javaType =
+        new JavaType(String.format("%s.datatables.DatatablesSort", modulePackage),
+            module.getModuleName());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+
+    // Including DatatablesSort class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream = FileUtils.getInputStream(getClass(), "DatatablesSort-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
+
+      // Creating DatatablesSort class
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+  }
+
+  /**
    * This method adds new DatatablesPageableHandlerMethodArgumentResolver.java class
    * annotated with @RooThymeleafDatatablesPageableHandler
    * 
@@ -536,6 +579,50 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
       input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
 
       // Creating DatatablesPageableHandlerMethodArgumentResolver class
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+  }
+
+  /**
+   * This method adds new DatatablesPageable.java class
+   * annotated with @RooThymeleafDatatablesPageable
+   * 
+   * @param module
+   */
+  private void addDatatablesPageableClass(Pom module) {
+    // First of all, check if already exists a @RooThymeleafDatatablesPageable
+    // class on current project
+    Set<JavaType> pageableClasses =
+        getTypeLocationService().findTypesWithAnnotation(
+            RooJavaType.ROO_THYMELEAF_DATATABLES_PAGEABLE);
+
+    if (!pageableClasses.isEmpty()) {
+      return;
+    }
+
+    JavaPackage modulePackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+
+    final JavaType javaType =
+        new JavaType(String.format("%s.datatables.DatatablesPageable", modulePackage),
+            module.getModuleName());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+
+    // Including DatatablesPageable class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream = FileUtils.getInputStream(getClass(), "DatatablesPageable-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
+
+      // Creating DatatablesPageable class
       getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
     } catch (final IOException e) {
       throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);

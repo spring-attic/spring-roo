@@ -94,25 +94,13 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
     ensureGovernorExtends(new JavaType(
         "org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter"));
 
-    // Add @Bean datatablesFilter()
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getDatatablesFilter()));
-
-    // Add @Bean dandelionServletRegistrationBean()
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getDandelionServletRegistrationBean()));
-
-    // Add @Bean datatablesDialect()
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getDatatablesDialect()));
-
     // Add addArgumentResolvers() @Override method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getAddArgumentResolvers()));
 
-    // Add @Bean pageableResolver() 
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getPageableResolver()));
+    // Add datatablesPageableResolver() 
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getDatatablesPageableResolver()));
 
-    // Add @Bean sortResolver() 
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getSortResolver()));
-
-    // Add @Bean globalSearchResolver() 
+    // Add globalSearchResolver() 
     ensureGovernorHasMethod(new MethodMetadataBuilder(getGlobalSearchResolver()));
 
     // Build the ITD
@@ -154,53 +142,6 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.globalSearchHandler,
             parameterTypes, parameterNames, bodyBuilder);
 
-    // Add @Override annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(
-        "org.springframework.context.annotation.Bean"));
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * This method returns sortResolver() method annotated with @Bean
-   * 
-   * @return MethodMetadata that contains all information about sortResolver 
-   * method.
-   */
-  public MethodMetadata getSortResolver() {
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("sortResolver");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // return new DATATABLES_SORT_HANDLER(sortResolver());
-    bodyBuilder.appendFormalLine(String.format("return new %s();",
-        this.datatablesSortHandler.getNameIncludingTypeParameters(false, importResolver)));
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.datatablesSortHandler,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    // Add @Override annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(
-        "org.springframework.context.annotation.Bean"));
-
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
@@ -211,9 +152,9 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
    * @return MethodMetadata that contains all information about pageableResolver 
    * method.
    */
-  public MethodMetadata getPageableResolver() {
+  public MethodMetadata getDatatablesPageableResolver() {
     // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("pageableResolver");
+    JavaSymbolName methodName = new JavaSymbolName("datatablesPageableResolver");
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -231,18 +172,14 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // return new DATATABLES_PAGEABLE_HANDLER(sortResolver());
-    bodyBuilder.appendFormalLine(String.format("return new %s(sortResolver());",
+    // return new DATATABLES_PAGEABLE_HANDLER();
+    bodyBuilder.appendFormalLine(String.format("return new %s();",
         this.datatablesPageableHandler.getNameIncludingTypeParameters(false, importResolver)));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
             this.datatablesPageableHandler, parameterTypes, parameterNames, bodyBuilder);
-
-    // Add @Override annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(
-        "org.springframework.context.annotation.Bean"));
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
@@ -278,20 +215,8 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // argumentResolvers.add(new DatatablesCriteriasMethodArgumentResolver());
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "argumentResolvers.add(new %s());",
-                new JavaType(
-                    "com.github.dandelion.datatables.extras.spring3.ajax.DatatablesCriteriasMethodArgumentResolver")
-                    .getNameIncludingTypeParameters(false, importResolver)));
-
-    // argumentResolvers.add(sortResolver());
-    bodyBuilder.appendFormalLine("argumentResolvers.add(sortResolver());");
-
-    // argumentResolvers.add(pageableResolver());
-    bodyBuilder.appendFormalLine("argumentResolvers.add(pageableResolver());");
+    // argumentResolvers.add(datatablesPageableResolver());
+    bodyBuilder.appendFormalLine("argumentResolvers.add(datatablesPageableResolver());");
 
     // argumentResolvers.add(globalSearchResolver());
     bodyBuilder.appendFormalLine("argumentResolvers.add(globalSearchResolver());");
@@ -308,171 +233,6 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
   }
-
-  /**
-   * This method returns datatablesDialect() method annotated with @Bean
-   * 
-   * @return MethodMetadata that contains all information about datatablesDialect 
-   * method.
-   */
-  public MethodMetadata getDatatablesDialect() {
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("datatablesDialect");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // return new DatatablesDialect();
-    bodyBuilder.appendFormalLine(String.format("return new %s();", new JavaType(
-        "com.github.dandelion.datatables.thymeleaf.dialect.DataTablesDialect")
-        .getNameIncludingTypeParameters(false, importResolver)));
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType(
-            "com.github.dandelion.datatables.thymeleaf.dialect.DataTablesDialect"), parameterTypes,
-            parameterNames, bodyBuilder);
-
-    // Add @Bean annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType(
-        "org.springframework.context.annotation.Bean")));
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * This method returns dandelionServletRegistrationBean() method annotated with @Bean
-   * 
-   * @return MethodMetadata that contains all information about dandelionServletRegistrationBean 
-   * method.
-   */
-  public MethodMetadata getDandelionServletRegistrationBean() {
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("dandelionServletRegistrationBean");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(new DandelionServlet(), "/dandelion-assets/*");
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(new %s(), \"/dandelion-assets/*\");",
-                new JavaType("com.github.dandelion.core.web.DandelionServlet")
-                    .getNameIncludingTypeParameters(false, importResolver)));
-
-    // servletRegistrationBean.setName("dandelionServlet");
-    bodyBuilder.appendFormalLine("servletRegistrationBean.setName(\"dandelionServlet\");");
-
-    // return servletRegistrationBean;
-    bodyBuilder.appendFormalLine("return servletRegistrationBean;");
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType(
-            "org.springframework.boot.context.embedded.ServletRegistrationBean"), parameterTypes,
-            parameterNames, bodyBuilder);
-    // Add @Bean annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType(
-        "org.springframework.context.annotation.Bean")));
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * This method returns datatablesFilter() method annotated with @Bean
-   * 
-   * @return MethodMetadata that contains all information about datatablesFilter 
-   * method.
-   */
-
-  public MethodMetadata getDatatablesFilter() {
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("datatablesFilter");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // FilterRegistrationBean registration = new FilterRegistrationBean();
-    bodyBuilder
-        .appendFormalLine("FilterRegistrationBean registration = new FilterRegistrationBean();");
-
-    // registration.setFilter(new DandelionFilter());
-    bodyBuilder.appendFormalLine(String.format("registration.setFilter(new %s());", new JavaType(
-        "com.github.dandelion.core.web.DandelionFilter").getNameIncludingTypeParameters(false,
-        importResolver)));
-
-    // registration.setName("dandelionFilter");
-    bodyBuilder.appendFormalLine("registration.setName(\"dandelionFilter\");");
-
-    // registration.addUrlPatterns("/*");
-    bodyBuilder.appendFormalLine("registration.addUrlPatterns(\"/*\");");
-
-    // registration.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ERROR);
-    bodyBuilder
-        .appendFormalLine(String
-            .format(
-                "registration.setDispatcherTypes(%s.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ERROR);",
-                new JavaType("javax.servlet.DispatcherType").getNameIncludingTypeParameters(false,
-                    importResolver)));
-
-    // return registration;
-    bodyBuilder.appendFormalLine("return registration;");
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType(
-            "org.springframework.boot.context.embedded.FilterRegistrationBean"), parameterTypes,
-            parameterNames, bodyBuilder);
-    // Add @Bean annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType(
-        "org.springframework.context.annotation.Bean")));
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
-  }
-
 
   @Override
   public String toString() {

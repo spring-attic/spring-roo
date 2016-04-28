@@ -21,6 +21,7 @@ import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafD
 public class DatatablesSortHandlerMethodArgumentResolver extends SortHandlerMethodArgumentResolver {
 
   private static final int MAX_ORDERED_COLUMNS = 5;
+
   private final int maxOrderedColumns;
 
   public DatatablesSortHandlerMethodArgumentResolver() {
@@ -32,14 +33,12 @@ public class DatatablesSortHandlerMethodArgumentResolver extends SortHandlerMeth
   }
 
   @Override
-  public Sort resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+  public DatatablesSort resolveArgument(MethodParameter parameter,
+      ModelAndViewContainer mavContainer,
       NativeWebRequest request, WebDataBinderFactory binderFactory) {
 
-    Sort sort = new SortParametersParser(maxOrderedColumns, request.getParameterMap()).getSort();
-
-    if (sort == null) {
-      sort = super.resolveArgument(parameter, mavContainer, request, binderFactory);
-    }
+    DatatablesSort sort =
+        new SortParametersParser(maxOrderedColumns, request.getParameterMap()).getSort();
 
     return sort;
   }
@@ -77,7 +76,6 @@ public class DatatablesSortHandlerMethodArgumentResolver extends SortHandlerMeth
       return columnCount > maxColumnCount ? maxColumnCount : columnCount;
     }
 
-
     static int getColumnPosition(String paramName) {
       Matcher matcher = PATTERN.matcher(paramName);
       while (matcher.find()) {
@@ -90,7 +88,6 @@ public class DatatablesSortHandlerMethodArgumentResolver extends SortHandlerMeth
       return -1;
     }
 
-
     String getPropertyNameInOrderPosition(int pos) {
       String columnPosition = getParameter("order[" + pos + "][column]");
 
@@ -101,7 +98,6 @@ public class DatatablesSortHandlerMethodArgumentResolver extends SortHandlerMeth
       return getParameter("columns[" + columnPosition + "][data]");
     }
 
-
     Direction getOrderDirection(int pos) {
       String direction = getParameter("order[" + pos + "][dir]");
       if ("desc".equals(direction)) {
@@ -109,7 +105,6 @@ public class DatatablesSortHandlerMethodArgumentResolver extends SortHandlerMeth
       }
       return Direction.ASC;
     }
-
 
     Order getOrderInPosition(int pos) {
       String propertyName = getPropertyNameInOrderPosition(pos);
@@ -120,8 +115,7 @@ public class DatatablesSortHandlerMethodArgumentResolver extends SortHandlerMeth
       return new Order(direction, propertyName);
     }
 
-
-    public Sort getSort() {
+    public DatatablesSort getSort() {
       int columnCount = getColumnCount();
 
       if (columnCount <= 0) {
@@ -141,7 +135,7 @@ public class DatatablesSortHandlerMethodArgumentResolver extends SortHandlerMeth
         return null;
       }
 
-      return new Sort(orderList);
+      return new DatatablesSort(orderList);
     }
 
     private String getParameter(String name) {

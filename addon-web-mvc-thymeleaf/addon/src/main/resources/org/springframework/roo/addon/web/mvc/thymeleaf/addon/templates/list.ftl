@@ -135,8 +135,17 @@
                 <#list fields as field>
                 <th>${field.fieldName}</th>
                 </#list>
+                <th>Tools</th>
               </tr>
             </thead>
+            <tbody data-th-remove="all">
+              <tr>
+                <#list fields as field>
+                <td>${field.fieldName}</td>
+                </#list>
+                <td>Tools</td>
+              </tr>
+            </tbody>
           </table>
         </div>
         <!--END TABLE-->

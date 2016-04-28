@@ -180,8 +180,12 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         .notNull(entityAttribute,
             "ERROR: Repository interface should be contain an entity on @RooJpaRepositoryCustom annotation");
 
-    ClassOrInterfaceTypeDetails entityDetails =
-        getTypeLocationService().getTypeDetails(entityAttribute.getValue());
+    JavaType entity = entityAttribute.getValue();
+
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+
+    // Check if current entity is a DTO or entiy
+    boolean isDTO = entityDetails.getAnnotation(RooJavaType.ROO_DTO) != null;
 
     // Getting repository metadata
     final LogicalPath logicalPath =
@@ -211,8 +215,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     ClassOrInterfaceTypeDetails searchResultDetails =
         getTypeLocationService().getTypeDetails(repositoryCustomMetadata.getSearchResult());
 
-    List<FieldMetadata> idFields =
-        getPersistenceMemberLocator().getIdentifierFields(entityAttribute.getValue());
+    List<FieldMetadata> idFields = getPersistenceMemberLocator().getIdentifierFields(entity);
 
     if (idFields.isEmpty()) {
       throw new RuntimeException(String.format("Error: Entity %s does not have an identifier",
@@ -239,8 +242,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     final int maxFields = 5;
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
     List<FieldMetadata> persistenceFields = idFields;
-    persistenceFields
-        .add(getPersistenceMemberLocator().getVersionField(entityAttribute.getValue()));
+    persistenceFields.add(getPersistenceMemberLocator().getVersionField(entity));
 
     boolean found;
     for (FieldMetadata field : searchResultDetails.getDeclaredFields()) {
@@ -267,8 +269,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(), validIdFields,
-        validFields, repositoryCustomMetadata.getFindAllGlobalSearchMethod());
+        governorPhysicalTypeMetadata, annotationValues, entity, isDTO, validIdFields, validFields,
+        repositoryCustomMetadata.getFindAllGlobalSearchMethod());
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
