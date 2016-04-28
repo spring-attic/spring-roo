@@ -15,6 +15,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -196,9 +197,15 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     final String javaBeanMetadataKey =
         JavaBeanMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
 
-    // Create dependency between repository and java bean annotations
+    // Getting jpa entity metadata
+    final String jpaEntityMetadataKey =
+        JpaEntityMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
+
+    // Create dependency between repository and java bean annotation
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
+    // Create dependency between repository and jpa entity annotation
+    registerDependency(jpaEntityMetadataKey, metadataIdentificationString);
 
     // Getting entity properties for findAll method
     ClassOrInterfaceTypeDetails searchResultDetails =
@@ -212,11 +219,26 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
           entityAttribute.getName()));
     }
 
+    boolean duplicated;
+    List<FieldMetadata> validIdFields = new ArrayList<FieldMetadata>();
+    for (FieldMetadata id : idFields) {
+      duplicated = false;
+
+      for (FieldMetadata validId : validIdFields) {
+        if (id.getFieldName().equals(validId.getFieldName())) {
+          duplicated = true;
+          break;
+        }
+      }
+      if (!duplicated) {
+        validIdFields.add(id);
+      }
+    }
+
     // Getting valid fields to construct the findAll query
     final int maxFields = 5;
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
-    List<FieldMetadata> persistenceFields =
-        getPersistenceMemberLocator().getIdentifierFields(entityAttribute.getValue());
+    List<FieldMetadata> persistenceFields = idFields;
     persistenceFields
         .add(getPersistenceMemberLocator().getVersionField(entityAttribute.getValue()));
 
@@ -245,7 +267,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(), idFields,
+        governorPhysicalTypeMetadata, annotationValues, entityAttribute.getValue(), validIdFields,
         validFields, repositoryCustomMetadata.getFindAllGlobalSearchMethod());
   }
 

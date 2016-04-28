@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.*;
+import org.springframework.roo.project.LogicalPath;
 
 /**
  * The metadata for a JPA entity's *_Roo_Jpa_Entity.aj ITD.
@@ -45,6 +46,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   public static JavaType getJavaType(final String metadataIdentificationString) {
     return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING,
         metadataIdentificationString);
+  }
+
+  public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
+    return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
   }
 
   /**
