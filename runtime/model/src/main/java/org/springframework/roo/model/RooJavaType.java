@@ -101,6 +101,9 @@ public final class RooJavaType {
       "org.springframework.roo.addon.web.mvc.controller.annotations.RooController");
   public static final JavaType ROO_WEB_MVC_CONFIGURATION = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcConfiguration");
+  public static final JavaType ROO_WEB_MVC_JSON_CONFIGURATION =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcJSONConfiguration");
   public static final JavaType ROO_FORMATTER = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.formatters.RooFormatter");
   public static final JavaType ROO_JSON = new JavaType(
@@ -129,6 +132,32 @@ public final class RooJavaType {
           "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafGlobalSearchHandler");
   public static final JavaType ROO_GLOBAL_SEARCH = new JavaType(
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooGlobalSearch");
+
+  //Roo JSON converter annotations
+  public static final JavaType ROO_JSON_BINDING_ERROR_EXCEPTION =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONBindingErrorException");
+  public static final JavaType ROO_JSON_BINDING_RESULT_SERIALIZER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONBindingResultSerializer");
+  public static final JavaType ROO_JSON_CONVERSION_SERVICE_BEAN_SERIALIZER_MODIFIER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONConversionServiceBeanSerializerModifier");
+  public static final JavaType ROO_JSON_CONVERSION_SERVICE_PROPERTY_SERIALIZER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONConversionServicePropertySerializer");
+  public static final JavaType ROO_JSON_DATA_BINDER_BEAN_DESERIALIZER_MODIFIER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONDataBinderBeanDeserializerModifier");
+  public static final JavaType ROO_JSON_DATA_BINDER_DESERIALIZER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONDataBinderDeserializer");
+  public static final JavaType ROO_JSON_FIELD_ERROR_SERIALIZER =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONFieldErrorSerializer");
+  public static final JavaType ROO_JSON_JSONP_ADVICE =
+      new JavaType(
+          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONJsonpAdvice");
 
   /**
    * Constructor is private to prevent instantiation

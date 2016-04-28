@@ -39,6 +39,8 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
   private static final JavaType CONFIGURATION = new JavaType(
       "org.springframework.context.annotation.Configuration");
+  private static final JavaType LOCAL_VALIDATOR_FACTORY_BEAN = new JavaType(
+      "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean");
 
   private ImportRegistrationResolver importResolver;
   private Set<ClassOrInterfaceTypeDetails> formatters;
@@ -100,6 +102,10 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
       ensureGovernorHasField(getServiceField(service));
     }
 
+    // Add validator method
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getValidatorMethod()));
+
+
     // Add addFormatters method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getAddFormattersMethod()));
 
@@ -108,9 +114,51 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
   }
 
   /**
+   * Method that generates "validator" method.
+   * 
+   * @return MethodMetadata
+   */
+  private MethodMetadata getValidatorMethod() {
+
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("validator");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    if (governorHasMethod(methodName,
+        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
+      return getGovernorMethod(methodName,
+          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return new LocalValidatorFactoryBean();
+    bodyBuilder.appendFormalLine(String.format("return new %s();",
+        LOCAL_VALIDATOR_FACTORY_BEAN.getNameIncludingTypeParameters(false, importResolver)));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
+            LOCAL_VALIDATOR_FACTORY_BEAN, parameterTypes, parameterNames, bodyBuilder);
+
+    // Add @Bean and @Primary annotations
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.PRIMARY));
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.BEAN));
+
+    // Build and return a MethodMetadata instance
+    return methodBuilder.build();
+  }
+
+  /**
    * Method that generates "addFormatters" method.
    * 
-   * @return MethodMetadataBuilder
+   * @return MethodMetadata
    */
   public MethodMetadata getAddFormattersMethod() {
 

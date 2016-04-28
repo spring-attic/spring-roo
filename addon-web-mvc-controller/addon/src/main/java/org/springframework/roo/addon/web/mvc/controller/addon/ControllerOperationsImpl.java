@@ -1,8 +1,9 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static java.lang.reflect.Modifier.PUBLIC;
-import static org.springframework.roo.model.RooJavaType.ROO_WEB_MVC_CONFIGURATION;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -22,8 +24,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
+import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcJSONConfiguration;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -42,7 +46,6 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
@@ -54,6 +57,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Implementation of {@link ControllerOperations}.
@@ -77,13 +81,18 @@ public class ControllerOperationsImpl implements ControllerOperations {
   private Map<String, ControllerMVCResponseService> responseTypes =
       new HashMap<String, ControllerMVCResponseService>();
 
-
   private ProjectOperations projectOperations;
+
   private TypeLocationService typeLocationService;
+
   private PathResolver pathResolver;
+
   private FileManager fileManager;
+
   private TypeManagementService typeManagementService;
+
   private ApplicationConfigService applicationConfigService;
+
   private Converter<Pom> pomConverter;
 
   protected void activate(final ComponentContext context) {
@@ -104,10 +113,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   /**
    * This operation will setup Spring MVC on generated project.
    * 
-   * @param module 
-   *            Pom module where Spring MVC should be included
-   * @param appServer
-   *            Server where application should be deployed
+   * @param module Pom module where Spring MVC should be included
+   * @param appServer Server where application should be deployed
    */
   @Override
   public void setup(Pom module, ServerProvider appServer) {
@@ -150,13 +157,39 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
       // Generating @RooWebMvcConfiguration annotation
       final AnnotationMetadataBuilder annotationMetadata =
-          new AnnotationMetadataBuilder(ROO_WEB_MVC_CONFIGURATION);
+          new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_CONFIGURATION);
       typeBuilder.addAnnotation(annotationMetadata.build());
 
       // Write new class disk
       getTypeManagementService().createOrUpdateTypeOnDisk(typeBuilder.build());
-
     }
+
+    // Create JSON configuration class
+    createJsonConfigurationClass(module);
+
+    // Create Roo Validator classes
+    createClassFromTemplate(module, "CollectionValidator-template._java", "CollectionValidator",
+        "validation");
+    createClassFromTemplate(module, "ValidatorAdvice-template._java", "ValidatorAdvice",
+        "validation");
+
+    // Create Roo JSON converters
+    createClassFromTemplate(module, "BindingErrorException-template._java",
+        "BindingErrorException", "http.converter.json");
+    createClassFromTemplate(module, "BindingResultSerializer-template._java",
+        "BindingResultSerializer", "http.converter.json");
+    createClassFromTemplate(module, "ConversionServiceBeanSerializerModifier-template._java",
+        "ConversionServiceBeanSerializerModifier", "http.converter.json");
+    createClassFromTemplate(module, "ConversionServicePropertySerializer-template._java",
+        "ConversionServicePropertySerializer", "http.converter.json");
+    createClassFromTemplate(module, "DataBinderBeanDeserializerModifier-template._java",
+        "DataBinderBeanDeserializerModifier", "http.converter.json");
+    createClassFromTemplate(module, "DataBinderDeserializer-template._java",
+        "DataBinderDeserializer", "http.converter.json");
+    createClassFromTemplate(module, "FieldErrorSerializer-template._java", "FieldErrorSerializer",
+        "http.converter.json");
+    createClassFromTemplate(module, "JsonpAdvice-template._java", "JsonpAdvice",
+        "http.converter.json");
 
     // Adding spring.jackson.serialization.indent_output property
     getApplicationConfigService().addProperty(module.getModuleName(),
@@ -167,15 +200,54 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * This operation will check if add controllers operation is 
-   * available
+   * This operation will check if add controllers operation is available
    * 
-   * @return true if add controller operation is available. 
-   * false if not.
+   * @return true if add controller operation is available. false if not.
    */
   @Override
   public boolean isAddControllerAvailable() {
     return getProjectOperations().isFeatureInstalled(FeatureNames.MVC);
+  }
+
+  /**
+   * Create WebMvcJSONConfiguration.java class and adds it 
+   * {@link RooWebMvcJSONConfiguration} annotation
+   * 
+   * @param module the Pom where configuration classes should be installed
+   */
+  private void createJsonConfigurationClass(Pom module) {
+
+    // Create WebMvcJSONConfiguration.java class
+    JavaType webMvcJSONConfiguration =
+        new JavaType(String.format("%s.config.WebMvcJSONConfiguration", module.getGroupId()),
+            module.getModuleName());
+
+    Validate.notNull(webMvcJSONConfiguration.getModule(),
+        "ERROR: Module name is required to generate a valid JavaType");
+
+    final String webMvcJSONConfigurationIdentifier =
+        getPathResolver().getCanonicalPath(webMvcJSONConfiguration.getModule(), Path.SRC_MAIN_JAVA,
+            webMvcJSONConfiguration);
+
+    // Check if file already exists
+    if (!getFileManager().exists(webMvcJSONConfigurationIdentifier)) {
+
+      // Creating class builder
+      final String mid =
+          PhysicalTypeIdentifier.createIdentifier(webMvcJSONConfiguration, getPathResolver()
+              .getPath(webMvcJSONConfigurationIdentifier));
+      final ClassOrInterfaceTypeDetailsBuilder typeBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(mid, PUBLIC, webMvcJSONConfiguration,
+              PhysicalTypeCategory.CLASS);
+
+      // Generating @RooWebMvcConfiguration annotation
+      final AnnotationMetadataBuilder annotationMetadata =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_JSON_CONFIGURATION);
+      typeBuilder.addAnnotation(annotationMetadata.build());
+
+      // Write new class disk
+      getTypeManagementService().createOrUpdateTypeOnDisk(typeBuilder.build());
+    }
   }
 
   /**
@@ -196,7 +268,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
             RooJavaType.ROO_JPA_ENTITY);
 
     for (ClassOrInterfaceTypeDetails entity : allEntities) {
-      // Check if exists yet some controller that manages this entity 
+      // Check if exists yet some controller that manages this entity
       // and if current entity is not abstract
       if (!existsControllerForEntity(entity) && !entity.isAbstract()) {
         // Generate controller JavaType
@@ -221,7 +293,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * This operation will generate a new controller with the specified information 
+   * This operation will generate a new controller with the specified
+   * information
    * 
    * @param controller
    * @param entity
@@ -288,7 +361,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
                     "ERROR: Provided entity '%s' is not a valid class. Provide an entity class annotated with @RooJpaEntity",
                     entity.getFullyQualifiedTypeName()));
 
-    // Check if provided service exists and it's annotated with @RooService 
+    // Check if provided service exists and it's annotated with @RooService
     // and service annotation has reference to provided entity
     ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService().getTypeDetails(service);
     Validate.notNull(
@@ -310,7 +383,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     Validate.isTrue(entity.equals(serviceEntity), String.format(
         "ERROR: Provided service '%s' is not related with provided entity '%s' class.",
         service.getFullyQualifiedTypeName(), entity.getFullyQualifiedTypeName()));
-
 
     // Find service implementation related to service api
     for (ClassOrInterfaceTypeDetails serviceImpl : typeLocationService
@@ -341,12 +413,15 @@ public class ControllerOperationsImpl implements ControllerOperations {
         PhysicalTypeIdentifier.createIdentifier(controller,
             getPathResolver().getPath(resourceIdentifier));
 
-    // Create annotation @RooController(path = "/test", entity = MyEntity.class, service = MyService.class)
+    // Create annotation @RooController(path = "/test", entity = MyEntity.class,
+    // service = MyService.class)
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
     annotations.add(getRooControllerAnnotation(entity, service, path, PATH));
 
-    // Add responseType annotation. Don't use responseTypeService annotate to prevent multiple 
-    // updates of the .java file. Annotate operation will be used during controller update.
+    // Add responseType annotation. Don't use responseTypeService annotate to
+    // prevent multiple
+    // updates of the .java file. Annotate operation will be used during
+    // controller update.
     annotations.add(new AnnotationMetadataBuilder(responseType.getAnnotation()));
 
     cidBuilder =
@@ -377,15 +452,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
           formattersPackage.getModule());
     }
 
-
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(controller.getModule(), serviceImplType.getModule());
     getProjectOperations().addModuleDependency(controller.getModule(), service.getModule());
   }
 
   /**
-   * This method checks if exists some formatter for
-   * provided entity
+   * This method checks if exists some formatter for provided entity
    * 
    * @param entity
    * @return
@@ -410,10 +483,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * This method generates new formatter inside generated project. 
-   * 
-   * This formatter will be annotated with @RooFormatted and will be related
-   * with some existing entity.
+   * This method generates new formatter inside generated project. This
+   * formatter will be annotated with @RooFormatted and will be related with
+   * some existing entity.
    * 
    * @param entity
    * @param service
@@ -435,7 +507,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
         PhysicalTypeIdentifier.createIdentifier(formatter,
             getPathResolver().getPath(resourceIdentifier));
 
-    // Create annotation @RooFormatter(entity = MyEntity.class, service = MyService.class)
+    // Create annotation @RooFormatter(entity = MyEntity.class, service =
+    // MyService.class)
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
     annotations.add(getRooFormatterAnnotation(entity, service));
     cidBuilder =
@@ -485,8 +558,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * This method generates a valir controller path that doesn't repeat on any controller of
-   * current project. This prevent request mapping errors. 
+   * This method generates a valir controller path that doesn't repeat on any
+   * controller of current project. This prevent request mapping errors.
    * 
    * @param entity
    * @return
@@ -506,7 +579,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * This method checks if exists some controller inside generated project that 
+   * This method checks if exists some controller inside generated project that
    * manages provided entity
    * 
    * @param entity
@@ -587,6 +660,55 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
 
     return false;
+  }
+
+  /**
+   * Creates a class from a template
+   * 
+   * @param module the Pom related to modeule where the class should be created
+   * @param templateName the String with the template name
+   * @param className the String with the class name to create
+   * @param packageLastElement the String (optional) with the last element of the package, which will be appended to module artifactId. If null, package will be module artifactId
+   */
+  public void createClassFromTemplate(Pom module, String templateName, String className,
+      String packageLastElement) {
+
+    // Set package
+    String packageName = null;
+    if (StringUtils.isNotBlank(packageLastElement)) {
+      packageName = String.format("%s.%s", module.getGroupId(), packageLastElement);
+    } else {
+      packageName = module.getGroupId();
+    }
+
+    // Include implementation of Validator from template
+    final JavaType type =
+        new JavaType(String.format("%s.%s", packageName, className), module.getModuleName());
+    Validate.notNull(type.getModule(),
+        "ERROR: Module name is required to generate a valid JavaType");
+    final String identifier =
+        getPathResolver().getCanonicalPath(type.getModule(), Path.SRC_MAIN_JAVA, type);
+    InputStream inputStream = null;
+
+    // Check first if file exists
+    if (!getFileManager().exists(identifier)) {
+      try {
+
+        // Use defined template
+        inputStream = FileUtils.getInputStream(getClass(), templateName);
+        String input = IOUtils.toString(inputStream);
+
+        // Replacing package
+        input = input.replace("__PACKAGE__", packageName);
+
+        // Creating CollectionValidator
+        getFileManager().createOrUpdateTextFileIfRequired(identifier, input, true);
+      } catch (final IOException e) {
+        throw new IllegalStateException(String.format("Unable to create '%s'", identifier), e);
+      } finally {
+        IOUtils.closeQuietly(inputStream);
+      }
+    }
   }
 
   // Methods to obtain OSGi Services
@@ -730,11 +852,12 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * This method obtains Pom converter to be able to obtain Pom module 
-   * from strings
+   * This method obtains Pom converter to be able to obtain Pom module from
+   * strings
    * 
    * @return
    */
+  @SuppressWarnings("unchecked")
   public Converter<Pom> getPomConverter() {
     if (pomConverter == null) {
       // Get all Services implement Converter<Pom> interface
@@ -762,10 +885,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * This method gets all implementations of ControllerMVCResponseService interface to be able
-   * to locate all installed ControllerMVCResponseService
+   * This method gets all implementations of ControllerMVCResponseService
+   * interface to be able to locate all installed ControllerMVCResponseService
    * 
-   * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
+   * @return Map with responseTypes identifier and the
+   *         ControllerMVCResponseService implementation
    */
   public Map<String, ControllerMVCResponseService> getInstalledControllerMVCResponseTypes() {
     if (responseTypes.isEmpty()) {
@@ -799,7 +923,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
   }
 
-
   @Override
   public String getName() {
     return FEATURE_NAME;
@@ -809,7 +932,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
   public boolean isInstalledInModule(String moduleName) {
     Pom module = getProjectOperations().getPomFromModuleName(moduleName);
     for (JavaType javaType : getTypeLocationService().findTypesWithAnnotation(
-        ROO_WEB_MVC_CONFIGURATION)) {
+        RooJavaType.ROO_WEB_MVC_CONFIGURATION)) {
       if (javaType.getModule().equals(moduleName)
           && module.hasDependencyExcludingVersion(new Dependency("org.springframework.boot",
               "spring-boot-starter-web", null))) {

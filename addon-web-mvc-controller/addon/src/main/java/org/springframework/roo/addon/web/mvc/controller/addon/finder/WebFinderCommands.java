@@ -1,15 +1,10 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
-import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
-import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
-import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,18 +17,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.web.mvc.controller.addon.ControllerCommands;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -87,26 +79,26 @@ public class WebFinderCommands implements CommandMarker {
       command = "web mvc finder",
       help = "--controller parameter should be completed with classes annotated with @RooController.")
   public List<String> getControllerValues(ShellContext context) {
-    List<String> controllers = new ArrayList<String>();
 
-    for (JavaType controller : getTypeLocationService().findTypesWithAnnotation(
-        RooJavaType.ROO_CONTROLLER)) {
-      String value = "";
-      String module = controller.getModule();
+    // Get current value of class
+    String currentText = context.getParameters().get("controller");
 
-      if (!module.equals(getProjectOperations().getFocusedModuleName())) {
-        value = module + MODULE_PATH_SEPARATOR;
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    for (ClassOrInterfaceTypeDetails controller : getTypeLocationService()
+        .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_CONTROLLER)) {
+      String name = replaceTopLevelPackageString(controller, currentText);
+      if (!results.contains(name)) {
+        results.add(name);
       }
-      controllers.add(value.concat(controller.getFullyQualifiedTypeName()));
-      controllers.add(value.concat(StringUtils.replace(controller.getFullyQualifiedTypeName(),
-          getProjectOperations().getTopLevelPackage(module).getFullyQualifiedPackageName(), "~")));
     }
 
-    if (controllers.isEmpty()) {
-      controllers.add("");
+    if (results.isEmpty()) {
+      results.add("");
     }
 
-    return controllers;
+    return results;
   }
 
   /**
@@ -318,9 +310,9 @@ public class WebFinderCommands implements CommandMarker {
       @CliOption(
           key = "all",
           mandatory = false,
-          specifiedDefaultValue = "*",
-          unspecifiedDefaultValue = "",
-          help = "Indicates if developer wants to generate all finders of the service related to the controller") String all,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "Indicates if developer wants to generate all finders of the service related to the controller") boolean all,
       @CliOption(key = "finder", mandatory = false,
           help = "Indicates the name of the finder to add into controller") String finder,
       @CliOption(
@@ -345,7 +337,7 @@ public class WebFinderCommands implements CommandMarker {
     List<String> finders = getFinders(controller);
 
     // Check --all parameter
-    if (all.equals("")) {
+    if (!all) {
       if (!finders.contains(finder)) {
         LOGGER.log(Level.SEVERE,
             "ERROR: Specified finder is not valid. User autocomplete in --finder parameter.");
@@ -358,6 +350,61 @@ public class WebFinderCommands implements CommandMarker {
     webFinderOperations.addFinders(controller, finders, responseTypeServices.get(responseType));
   }
 
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * 
+   * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value  
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
+    }
+
+    return javaTypeString;
+  }
 
   /**
    * This method gets all implementations of ControllerMVCResponseService interface to be able

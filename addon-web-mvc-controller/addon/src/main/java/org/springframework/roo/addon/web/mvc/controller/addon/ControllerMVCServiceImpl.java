@@ -114,17 +114,17 @@ public class ControllerMVCServiceImpl implements ControllerMVCService {
     List<AnnotationAttributeValue<?>> requestMappingAttributes =
         new ArrayList<AnnotationAttributeValue<?>>();
 
+    // Adding path attribute
+    if (StringUtils.isNotBlank(path)) {
+      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), path));
+    }
+
     // Adding method attribute. Force GET method if empty
     if (method != null) {
       requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), method));
     } else {
       requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"),
           SpringEnumDetails.REQUEST_METHOD_GET));
-    }
-
-    // Adding path attribute
-    if (StringUtils.isNotBlank(path)) {
-      requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), path));
     }
 
     // TODO: Adding params attribute

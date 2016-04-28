@@ -22,6 +22,7 @@ public final class SpringJavaType {
       "org.springframework.beans.factory.annotation.Autowired");
   public static final JavaType BINDING_RESULT = new JavaType(
       "org.springframework.validation.BindingResult");
+  public static final JavaType BEAN = new JavaType("org.springframework.context.annotation.Bean");
   public static final JavaType CHARACTER_ENCODING_FILTER = new JavaType(
       "org.springframework.web.filter.CharacterEncodingFilter");
   public static final JavaType COMPONENT = new JavaType("org.springframework.stereotype.Component");
@@ -88,6 +89,8 @@ public final class SpringJavaType {
       "org.springframework.security.access.prepost.PostAuthorize");
   public static final JavaType PROPAGATION = new JavaType(
       "org.springframework.transaction.annotation.Propagation");
+  public static final JavaType PRIMARY = new JavaType(
+      "org.springframework.context.annotation.Primary");
   public static final JavaType REPOSITORY = new JavaType(
       "org.springframework.stereotype.Repository");
   public static final JavaType REQUEST_BODY = new JavaType(

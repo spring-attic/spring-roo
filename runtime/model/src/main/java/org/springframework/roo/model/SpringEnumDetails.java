@@ -32,6 +32,10 @@ public final class SpringEnumDetails {
       new JavaSymbolName("CREATED"));
   public static final EnumDetails HTTP_STATUS_OK = new EnumDetails(SpringJavaType.HTTP_STATUS,
       new JavaSymbolName("OK"));
+  public static final EnumDetails HTTP_STATUS_NOT_FOUND = new EnumDetails(
+      SpringJavaType.HTTP_STATUS, new JavaSymbolName("NOT_FOUND"));
+  public static final EnumDetails HTTP_STATUS_FOUND = new EnumDetails(SpringJavaType.HTTP_STATUS,
+      new JavaSymbolName("FOUND"));
 
   /**
    * Constructor is private to prevent instantiation

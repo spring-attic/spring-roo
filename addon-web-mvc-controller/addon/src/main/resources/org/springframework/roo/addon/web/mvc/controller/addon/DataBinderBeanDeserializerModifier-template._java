@@ -1,0 +1,44 @@
+package __PACKAGE__;
+
+import org.springframework.core.convert.ConversionService;
+import org.springframework.validation.Validator;
+
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerBase;
+import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
+
+import org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONDataBinderBeanDeserializerModifier;
+
+/**
+ * Jackson {@link BeanDeserializerModifier} which return
+ * {@link DataBinderDeserializer}.
+ * 
+ */
+@RooJSONDataBinderBeanDeserializerModifier
+public class DataBinderBeanDeserializerModifier extends BeanDeserializerModifier {
+
+  private final ConversionService conversionService;
+  private final Validator validatorService;
+
+  public DataBinderBeanDeserializerModifier(ConversionService cs, Validator v) {
+    super();
+    this.conversionService = cs;
+    this.validatorService = v;
+  }
+
+  @Override
+  public JsonDeserializer<?> modifyDeserializer(DeserializationConfig config,
+      BeanDescription beanDesc, JsonDeserializer<?> deserializer) {
+
+    if (deserializer instanceof BeanDeserializerBase) {
+      return new DataBinderDeserializer((BeanDeserializerBase) deserializer, conversionService, validatorService);
+    }
+
+    // When there is no custom-deserializer implementation returns the
+    // default jackson deserializer
+    return deserializer;
+  }
+
+}

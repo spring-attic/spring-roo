@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
@@ -32,6 +33,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   private MethodMetadata createMethod;
   private MethodMetadata updateMethod;
   private MethodMetadata deleteMethod;
+  private MethodMetadata createBatchMethod;
+  private MethodMetadata updateBatchMethod;
+  private MethodMetadata deleteBatchMethod;
   private List<MethodMetadata> finderMethods;
   private MethodMetadata populateHeadersMethod;
 
@@ -71,15 +75,20 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * @param deleteMethod MethodMetadata 
    * @param showMethod MethodMetadata 
    * @param populateHeadersMethod MethodMetadata
+   * @param methodMetadata3 
+   * @param methodMetadata2 
+   * @param methodMetadata 
    * @param finderMethods List of MethodMetadata
    * @param readOnly boolean 
+   * @param convertersJavaPackage 
    */
   public JSONMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listMethod,
       final MethodMetadata createMethod, final MethodMetadata updateMethod,
       final MethodMetadata deleteMethod, final MethodMetadata showMethod,
-      final MethodMetadata populateHeadersMethod, List<MethodMetadata> finderMethods,
-      boolean readOnly, List<JavaType> typesToImport) {
+      final MethodMetadata createBatchMethod, MethodMetadata updateBatchMethod,
+      MethodMetadata deleteBatchMethod, MethodMetadata populateHeadersMethod,
+      List<MethodMetadata> finderMethods, boolean readOnly, List<JavaType> typesToImport) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = readOnly;
@@ -88,6 +97,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     this.updateMethod = updateMethod;
     this.deleteMethod = deleteMethod;
     this.showMethod = showMethod;
+    this.createBatchMethod = createBatchMethod;
+    this.updateBatchMethod = updateBatchMethod;
+    this.deleteBatchMethod = deleteBatchMethod;
     this.finderMethods = finderMethods;
     this.populateHeadersMethod = populateHeadersMethod;
 
@@ -96,6 +108,9 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       ensureGovernorHasMethod(new MethodMetadataBuilder(createMethod));
       ensureGovernorHasMethod(new MethodMetadataBuilder(updateMethod));
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(createBatchMethod));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(updateBatchMethod));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(deleteBatchMethod));
       ensureGovernorHasMethod(new MethodMetadataBuilder(populateHeadersMethod));
     }
     ensureGovernorHasMethod(new MethodMetadataBuilder(showMethod));
@@ -146,6 +161,33 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    */
   public MethodMetadata getDeleteMethod() {
     return this.deleteMethod;
+  }
+
+  /**
+   * Method that returns delete batch JSON method
+   * 
+   * @return {@link MethodMetadata}
+   */
+  public MethodMetadata getDeleteBatchMethod() {
+    return this.deleteBatchMethod;
+  }
+
+  /**
+   * Method that returns create batch JSON method
+   * 
+   * @return {@link MethodMetadata}
+   */
+  public MethodMetadata getCreateBatchMethod() {
+    return this.createBatchMethod;
+  }
+
+  /**
+   * Method that returns update batch JSON method
+   * 
+   * @return {@link MethodMetadata}
+   */
+  public MethodMetadata getUpdateBatchMethod() {
+    return this.updateBatchMethod;
   }
 
   /**
