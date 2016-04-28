@@ -280,7 +280,6 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
     }
 
     if (cid.getAnnotation(RooJavaType.ROO_JPA_ENTITY) == null) {
-      LOGGER.warning("Unable to find the entity annotation on '" + entity + "'");
       return null;
     }
 

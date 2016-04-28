@@ -181,11 +181,11 @@ public class AuditOperationsImpl implements AuditOperations {
   }
 
   /**
-       * Create an implementation of AuditionAware in the project for being aware
-       * of the user who make changes to entities.
-       * 
-       * @param javaPackage
-       */
+   * Create an implementation of AuditionAware in the project for being aware
+   * of the user who make changes to entities.
+   * 
+   * @param javaPackage
+   */
   private void createAuditorAware(JavaPackage javaPackage) {
 
     Validate.notNull(javaPackage, "JavaPackage required");
