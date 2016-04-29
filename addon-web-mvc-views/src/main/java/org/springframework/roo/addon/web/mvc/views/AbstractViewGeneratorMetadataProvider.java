@@ -189,8 +189,9 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
   }
 
   /**
+   * Adds the entity properties as labels into i18n messages file 
    * 
-   * @param entityDetails
+   * @param entityDetails member details where entity properties are defined
    */
   private void updateI18n(MemberDetails entityDetails) {
 
