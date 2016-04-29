@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -205,6 +206,39 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addHeader(module.getModuleName(), ctx);
     getViewGenerationService().addMenu(module.getModuleName(), ctx);
     getViewGenerationService().addSession(module.getModuleName(), ctx);
+
+    // Add i18n support
+    installI18n(module);
+  }
+
+  /**
+   * Create i18n message file with default labels
+   * 
+   * @param module module where message file will be created
+   */
+  private void installI18n(Pom module) {
+
+    LogicalPath resourcesPath =
+        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
+
+    final String messagesPath =
+        getPathResolver().getIdentifier(resourcesPath, "messages.properties");
+
+    if (!fileManager.exists(messagesPath)) {
+      InputStream inputStream = null;
+      OutputStream outputStream = null;
+      try {
+        inputStream = FileUtils.getInputStream(getClass(), "messages-template.properties");
+        outputStream = fileManager.createFile(messagesPath).getOutputStream();
+        IOUtils.copy(inputStream, outputStream);
+      } catch (final Exception e) {
+        throw new IllegalStateException(
+            "Error: Encountered an error copying the massages.properties file.");
+      } finally {
+        IOUtils.closeQuietly(inputStream);
+        IOUtils.closeQuietly(outputStream);
+      }
+    }
   }
 
   /**
