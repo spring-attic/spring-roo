@@ -3,6 +3,8 @@ package org.springframework.roo.project;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +29,7 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.project.packaging.PackagingProvider;
 import org.springframework.roo.project.packaging.PackagingProviderRegistry;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -193,6 +196,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     createSpringBootApplicationClass(topLevelPackage, projectName);
     createApplicationTestsClass(topLevelPackage, projectName);
 
+    // ROO-3741: Including banner.txt on application module
+    addBannerFile(getPomFromModuleName("application"));
+
     // Create standard project modules
     if (multimodule == Multimodule.STANDARD) {
       createModule(pom, "model", jarPackagingProvider, "model");
@@ -256,6 +262,43 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     // ROO-3687: Generates necessary Spring Boot artifacts
     createSpringBootApplicationClass(topLevelPackage, projectName);
     createApplicationTestsClass(topLevelPackage, projectName);
+
+    // ROO-3741: Including banner.txt
+    addBannerFile(getPomFromModuleName(""));
+  }
+
+  /**
+   * This method creates a banner.txt file inside generated project that
+   * will be displayed when the generated Spring Boot application starts.
+   * 
+   * @param Pom module where banner.txt should be generated
+   */
+  private void addBannerFile(Pom module) {
+
+    LogicalPath resourcesPath =
+        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
+
+    String sourceAntPath = "banner/banner.txt";
+    String targetDirectory = getPathResolver().getIdentifier(resourcesPath, "");
+
+    if (!getFileManager().exists(targetDirectory)) {
+      getFileManager().createDirectory(targetDirectory);
+    }
+
+    final String path = FileUtils.getPath(getClass(), sourceAntPath);
+    final Iterable<URL> urls = OSGiUtils.findEntriesByPattern(context, path);
+    Validate.notNull(urls, "Could not search bundles for resources for Ant Path '%s'", path);
+    for (final URL url : urls) {
+      final String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+      try {
+        String contents = IOUtils.toString(url);
+        getFileManager().createOrUpdateTextFileIfRequired(targetDirectory + fileName, contents,
+            false);
+      } catch (final Exception e) {
+        throw new IllegalStateException(e);
+      }
+
+    }
   }
 
   /**
