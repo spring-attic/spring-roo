@@ -173,9 +173,8 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     // be included on it. Must be fixed on future versions.
     viewGenerationService.updateMenuView(this.controller.getType().getModule(), ctx);
 
-    // Genetare i18n labels
-    installI18n(entityDetails);
-
+    // Update i18n labels
+    updateI18n(entityDetails);
 
     // Register dependency between JavaBeanMetadata and this one
     final LogicalPath logicalPath =
@@ -189,7 +188,11 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     return createMetadataInstance();
   }
 
-  private void installI18n(MemberDetails entityDetails) {
+  /**
+   * 
+   * @param entityDetails
+   */
+  private void updateI18n(MemberDetails entityDetails) {
 
     final Map<String, String> properties = new LinkedHashMap<String, String>();
 
