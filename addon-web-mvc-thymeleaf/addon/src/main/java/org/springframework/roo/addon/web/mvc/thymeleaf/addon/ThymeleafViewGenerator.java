@@ -34,8 +34,8 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
   }
 
   @Override
-  public String getViewsFolder() {
-    return pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES, "/templates");
+  public String getViewsFolder(String moduleName) {
+    return pathResolver.getIdentifier(moduleName, Path.SRC_MAIN_RESOURCES, "/templates");
   }
 
   @Override
@@ -44,13 +44,13 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
   }
 
   @Override
-  public String getLayoutsFolder() {
-    return getViewsFolder().concat("/").concat("layouts");
+  public String getLayoutsFolder(String moduleName) {
+    return getViewsFolder(moduleName).concat("/").concat("layouts");
   }
 
   @Override
-  public String getFragmentsFolder() {
-    return getViewsFolder().concat("/").concat("fragments");
+  public String getFragmentsFolder(String moduleName) {
+    return getViewsFolder(moduleName).concat("/").concat("fragments");
   }
 
 
@@ -73,7 +73,7 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
 
   @Override
   public String getTemplatesLocation() {
-    return pathResolver.getFocusedIdentifier(Path.ROOT_ROO_CONFIG, "templates/thymeleaf");
+    return pathResolver.getIdentifier("", Path.ROOT_ROO_CONFIG, "templates/thymeleaf");
   }
 
   @Override

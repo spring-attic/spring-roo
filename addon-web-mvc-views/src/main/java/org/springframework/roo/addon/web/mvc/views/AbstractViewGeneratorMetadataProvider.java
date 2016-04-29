@@ -2,7 +2,9 @@ package org.springframework.roo.addon.web.mvc.views;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -27,7 +29,10 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.propfiles.manager.PropFilesManagerService;
+import org.springframework.roo.support.util.XmlUtils;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
@@ -58,6 +63,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
   public MethodMetadata identifierAccessor;
 
   private ProjectOperations projectOperations;
+  private PropFilesManagerService propFilesManagerService;
 
   /**
    * This operation returns the MVCViewGenerationService that should be used
@@ -147,23 +153,28 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     MVCViewGenerationService viewGenerationService = getViewGenerationService();
 
     // Add list view
-    viewGenerationService.addListView(entityDetails, ctx);
+    viewGenerationService.addListView(this.controller.getType().getModule(), entityDetails, ctx);
 
     // Add show view
-    viewGenerationService.addShowView(entityDetails, ctx);
+    viewGenerationService.addShowView(this.controller.getType().getModule(), entityDetails, ctx);
 
     if (!readOnly) {
       // If not readOnly, add create view
-      viewGenerationService.addCreateView(entityDetails, ctx);
+      viewGenerationService
+          .addCreateView(this.controller.getType().getModule(), entityDetails, ctx);
 
       // If not readOnly, add update view
-      viewGenerationService.addUpdateView(entityDetails, ctx);
+      viewGenerationService
+          .addUpdateView(this.controller.getType().getModule(), entityDetails, ctx);
     }
 
     // Update menu view every time that new controller has been modified
     // TODO: Maybe, instead of modify all menu view, only new generated controller should
     // be included on it. Must be fixed on future versions.
-    viewGenerationService.updateMenuView(ctx);
+    viewGenerationService.updateMenuView(this.controller.getType().getModule(), ctx);
+
+    // Genetare i18n labels
+    installI18n(entityDetails);
 
 
     // Register dependency between JavaBeanMetadata and this one
@@ -176,6 +187,49 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
     return createMetadataInstance();
+  }
+
+  private void installI18n(MemberDetails entityDetails) {
+
+    final Map<String, String> properties = new LinkedHashMap<String, String>();
+
+    final LogicalPath webappPath =
+        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, controller.getType().getModule());
+
+    // Setup labels for i18n support
+    String resourceId = XmlUtils.convertId("label." + entity.getSimpleTypeName().toLowerCase());
+
+    properties.put(resourceId,
+        new JavaSymbolName(entity.getSimpleTypeName().toLowerCase()).getReadableSymbolName());
+
+
+    final String pluralResourceId = XmlUtils.convertId(resourceId + ".plural");
+    final String plural = entity.getSimpleTypeName() + "s";
+    properties.put(pluralResourceId, new JavaSymbolName(plural).getReadableSymbolName());
+
+    final List<FieldMetadata> javaTypePersistenceMetadataDetails =
+        getPersistenceMemberLocator().getIdentifierFields(entity);
+
+    if (!javaTypePersistenceMetadataDetails.isEmpty()) {
+      for (final FieldMetadata idField : javaTypePersistenceMetadataDetails) {
+        properties.put(XmlUtils.convertId(resourceId + "."
+            + idField.getFieldName().getSymbolName().toLowerCase()), idField.getFieldName()
+            .getReadableSymbolName());
+      }
+    }
+
+    for (final FieldMetadata field : entityDetails.getFields()) {
+
+      final JavaSymbolName fieldName = field.getFieldName();
+      final String fieldResourceId =
+          XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
+
+      properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
+
+    }
+
+    getPropFilesManager().addProperties(webappPath, "messages.properties", properties, true, false);
+
   }
 
   protected void registerDependency(final String upstreamDependency,
@@ -259,6 +313,30 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       }
     } else {
       return projectOperations;
+    }
+  }
+
+  public PropFilesManagerService getPropFilesManager() {
+    if (propFilesManagerService == null) {
+      // Get all Services implement PropFileOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(PropFilesManagerService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          propFilesManagerService = (PropFilesManagerService) this.context.getService(ref);
+          return propFilesManagerService;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER
+            .warning("Cannot load PropFilesManagerService on AbstractViewGeneratorMetadataProvider.");
+        return null;
+      }
+    } else {
+      return propFilesManagerService;
     }
   }
 

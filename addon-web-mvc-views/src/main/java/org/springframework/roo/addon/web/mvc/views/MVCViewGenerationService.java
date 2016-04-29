@@ -24,12 +24,13 @@ public interface MVCViewGenerationService {
   String getName();
 
   /**
-   * This operation returns the view folder where views
+   * This operation returns the view folder of the specified module, where views
    * will be included.
    * 
+   * @param moduleName module where view folder is located
    * @return String with the views folder path
    */
-  String getViewsFolder();
+  String getViewsFolder(String moduleName);
 
   /**
    * This operation returns the file extension to use
@@ -45,7 +46,7 @@ public interface MVCViewGenerationService {
    * 
    * @return String with the views folder path
    */
-  String getLayoutsFolder();
+  String getLayoutsFolder(String moduleName);
 
   /**
    * This operation returns the folder where fragment will be included.
@@ -53,66 +54,72 @@ public interface MVCViewGenerationService {
    * 
    * @return String with the views folder path
    */
-  String getFragmentsFolder();
+  String getFragmentsFolder(String moduleName);
 
   /**
    * This operation will add a list view using entityDetails 
    * and the provided context
    * 
+   * @param moduleName module where list view will be added
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addListView(MemberDetails entity, ViewContext ctx);
+  void addListView(String moduleName, MemberDetails entity, ViewContext ctx);
 
   /**
    * This operation will add a show view using entityDetails 
    * and the provided context
    * 
+   * @param moduleName module where show view will be added
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addShowView(MemberDetails entity, ViewContext ctx);
+  void addShowView(String moduleName, MemberDetails entity, ViewContext ctx);
 
   /**
    * This operation will add a create view using entityDetails 
    * and the provided context
    * 
+   * @param moduleName module where create view will be added
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addCreateView(MemberDetails entity, ViewContext ctx);
+  void addCreateView(String moduleName, MemberDetails entity, ViewContext ctx);
 
   /**
    * This operation will add an update view using entityDetails 
    * and the provided context
    * 
+   * @param moduleName module where update view will be added
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addUpdateView(MemberDetails entity, ViewContext ctx);
+  void addUpdateView(String moduleName, MemberDetails entity, ViewContext ctx);
 
   /**
    * This operation will add a finder view using entityDetails 
    * and the provided context
    * 
+   * @param moduleName module where finder view will be added
    * @param entity Details of an entity to be able to generate view
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderView(MemberDetails entity, String finderName, ViewContext ctx);
+  void addFinderView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
 
   /**
    * This operation will add the application index view using 
    * the provided context
    * 
+   * @param moduleName module where index view will be added
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addIndexView(ViewContext ctx);
+  void addIndexView(String moduleName, ViewContext ctx);
 
   /**
    * This operation will add the application error view using 
@@ -121,53 +128,58 @@ public interface MVCViewGenerationService {
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addErrorView(ViewContext ctx);
+  void addErrorView(String moduleName, ViewContext ctx);
 
 
   /**
    * This operation will add the default-layout view using 
    * the provided context
    * 
+   * @param moduleName module where default view will be added
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addDefaultLayout(ViewContext ctx);
+  void addDefaultLayout(String moduleName, ViewContext ctx);
 
   /**
    * This operation will add the footer fragment using 
    * the provided context
    * 
+   * @param moduleName module where footer fragment will be added
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFooter(ViewContext ctx);
+  void addFooter(String moduleName, ViewContext ctx);
 
   /**
    * This operation will add the header fragment using 
    * the provided context
    * 
+   * @param moduleName module where header fragment will be added
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addHeader(ViewContext ctx);
+  void addHeader(String moduleName, ViewContext ctx);
 
   /**
    * This operation will add the menu fragment using 
    * the provided context
    * 
+   * @param moduleName module where menu fragment will be added
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addMenu(ViewContext ctx);
+  void addMenu(String moduleName, ViewContext ctx);
 
   /**
    * This operation will add the session fragment using 
    * the provided context
    * 
+   * @param moduleName module where session fragment will be added
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addSession(ViewContext ctx);
+  void addSession(String moduleName, ViewContext ctx);
 
   /**
    * This operation will updates menu view.
@@ -175,10 +187,11 @@ public interface MVCViewGenerationService {
    * TODO: Maybe, instead of modify all menu view, only new generated controller should
    * be included on it. Must be fixed on future versions.
    * 
+   * @param moduleName module where menu view is located
    * @param ctx ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void updateMenuView(ViewContext ctx);
+  void updateMenuView(String moduleName, ViewContext ctx);
 
   /**
    * This operation will install all necessary templates on generated project.

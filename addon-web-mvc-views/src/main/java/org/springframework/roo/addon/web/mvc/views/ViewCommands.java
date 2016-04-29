@@ -147,8 +147,8 @@ public class ViewCommands implements CommandMarker {
           mandatory = true,
           help = "View identifier you want to install. Install your necessary views before to be used on controller generation command") String type,
       @CliOption(key = "module", mandatory = true,
-          help = "The application module where to install the persistence",
-          unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
+          help = "The application module where to install views", unspecifiedDefaultValue = ".",
+          optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
     Map<String, ControllerMVCResponseService> responseTypes = getControllerMVCResponseTypes(false);
     if (!responseTypes.containsKey(type)) {
@@ -213,7 +213,7 @@ public class ViewCommands implements CommandMarker {
       @CliOption(
           key = "type",
           mandatory = true,
-          help = "View identifier of templates you want to install. Only installed views are availbale.") String type) {
+          help = "View identifier of templates you want to install. Only installed views are available.") String type) {
 
     Map<String, ControllerMVCResponseService> responseTypes = getControllerMVCResponseTypes(true);
     if (!responseTypes.containsKey(type)) {

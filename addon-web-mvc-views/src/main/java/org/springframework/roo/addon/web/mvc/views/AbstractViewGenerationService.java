@@ -65,7 +65,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   protected abstract void writeDoc(DOC document, String viewPath);
 
   @Override
-  public void addListView(MemberDetails entityDetails, ViewContext ctx) {
+  public void addListView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> fields = getFieldViewItems(entityDetails, true);
@@ -77,7 +77,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Getting new viewName
     String viewName =
-        getViewsFolder().concat(ctx.getControllerPath()).concat("/").concat("/list")
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/list")
             .concat(getViewsExtension());
 
     // Check if new view to generate exists or not
@@ -91,7 +91,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addShowView(MemberDetails entityDetails, ViewContext ctx) {
+  public void addShowView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
@@ -103,7 +103,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Getting new viewName
     String viewName =
-        getViewsFolder().concat(ctx.getControllerPath()).concat("/").concat("/show")
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/show")
             .concat(getViewsExtension());
 
     // Check if new view to generate exists or not
@@ -117,7 +117,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addCreateView(MemberDetails entityDetails, ViewContext ctx) {
+  public void addCreateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
@@ -129,7 +129,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Getting new viewName
     String viewName =
-        getViewsFolder().concat(ctx.getControllerPath()).concat("/").concat("/create")
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/create")
             .concat(getViewsExtension());
 
     // Check if new view to generate exists or not
@@ -143,7 +143,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addUpdateView(MemberDetails entityDetails, ViewContext ctx) {
+  public void addUpdateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
     List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
@@ -155,7 +155,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Getting new viewName
     String viewName =
-        getViewsFolder().concat(ctx.getControllerPath()).concat("/").concat("/edit")
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat("/edit")
             .concat(getViewsExtension());
 
     // Check if new view to generate exists or not
@@ -169,19 +169,20 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addFinderView(MemberDetails entity, String finderName, ViewContext ctx) {
+  public void addFinderView(String moduleName, MemberDetails entity, String finderName,
+      ViewContext ctx) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void addIndexView(ViewContext ctx) {
+  public void addIndexView(String moduleName, ViewContext ctx) {
 
     // Process elements to generate 
     DOC newDoc = process("index", ctx);
 
     // Getting new viewName
-    String viewName = getViewsFolder().concat("/index").concat(getViewsExtension());
+    String viewName = getViewsFolder(moduleName).concat("/index").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -194,13 +195,13 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addErrorView(ViewContext ctx) {
+  public void addErrorView(String moduleName, ViewContext ctx) {
 
     // Process elements to generate 
     DOC newDoc = process("error", ctx);
 
     // Getting new viewName
-    String viewName = getViewsFolder().concat("/error").concat(getViewsExtension());
+    String viewName = getViewsFolder(moduleName).concat("/error").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -213,13 +214,14 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addDefaultLayout(ViewContext ctx) {
+  public void addDefaultLayout(String moduleName, ViewContext ctx) {
 
     // Process elements to generate 
     DOC newDoc = process("layouts/default-layout", ctx);
 
     // Getting new viewName
-    String viewName = getLayoutsFolder().concat("/default-layout").concat(getViewsExtension());
+    String viewName =
+        getLayoutsFolder(moduleName).concat("/default-layout").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -232,12 +234,12 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addFooter(ViewContext ctx) {
+  public void addFooter(String moduleName, ViewContext ctx) {
     // Process elements to generate 
     DOC newDoc = process("fragments/footer", ctx);
 
     // Getting new viewName
-    String viewName = getFragmentsFolder().concat("/footer").concat(getViewsExtension());
+    String viewName = getFragmentsFolder(moduleName).concat("/footer").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -250,12 +252,12 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addHeader(ViewContext ctx) {
+  public void addHeader(String moduleName, ViewContext ctx) {
     // Process elements to generate 
     DOC newDoc = process("fragments/header", ctx);
 
     // Getting new viewName
-    String viewName = getFragmentsFolder().concat("/header").concat(getViewsExtension());
+    String viewName = getFragmentsFolder(moduleName).concat("/header").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -268,7 +270,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addMenu(ViewContext ctx) {
+  public void addMenu(String moduleName, ViewContext ctx) {
     // First of all, generate a list of MenuEntries based on existing controllers
     List<MenuEntry> menuEntries = new ArrayList<MenuEntry>();
 
@@ -302,7 +304,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     DOC newDoc = process("fragments/menu", ctx);
 
     // Getting new viewName
-    String viewName = getFragmentsFolder().concat("/menu").concat(getViewsExtension());
+    String viewName = getFragmentsFolder(moduleName).concat("/menu").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -315,12 +317,12 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addSession(ViewContext ctx) {
+  public void addSession(String moduleName, ViewContext ctx) {
     // Process elements to generate 
     DOC newDoc = process("fragments/session", ctx);
 
     // Getting new viewName
-    String viewName = getFragmentsFolder().concat("/session").concat(getViewsExtension());
+    String viewName = getFragmentsFolder(moduleName).concat("/session").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
@@ -333,23 +335,23 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void updateMenuView(ViewContext ctx) {
+  public void updateMenuView(String moduleName, ViewContext ctx) {
     // TODO: This method should update menu view with the new 
     // controller to include, instead of regenerate menu view page.
-    addMenu(ctx);
+    addMenu(moduleName, ctx);
 
   }
 
   @Override
-  public String getLayoutsFolder() {
+  public String getLayoutsFolder(String moduleName) {
     // Default implementation
-    return getViewsFolder();
+    return getViewsFolder(moduleName);
   }
 
   @Override
-  public String getFragmentsFolder() {
+  public String getFragmentsFolder(String moduleName) {
     // Default implementation
-    return getViewsFolder();
+    return getViewsFolder(moduleName);
   }
 
   /**
