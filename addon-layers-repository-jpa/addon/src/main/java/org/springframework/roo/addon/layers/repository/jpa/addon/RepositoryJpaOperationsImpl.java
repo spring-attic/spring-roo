@@ -476,6 +476,14 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       // Replacing entity import
       input = input.replace("__ENTITY_IMPORT__", entity.getFullyQualifiedTypeName());
 
+      // Creates QEntity to be able to use QueryDsl
+      JavaType qEntity =
+          new JavaType(String.format("%s.Q%s", entity.getPackage(), entity.getSimpleTypeName()),
+              entity.getModule());
+
+      // Replacing qEntity import
+      input = input.replace("__QENTITY_IMPORT__", qEntity.getFullyQualifiedTypeName());
+
       // Replacing interface .class
       input = input.replace("__REPOSITORY_CUSTOM_INTERFACE__", interfaceType.getSimpleTypeName());
 
@@ -484,6 +492,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
       // Replacing entity name
       input = input.replace("__ENTITY_NAME__", entity.getSimpleTypeName());
+
+      // Replacing qEntity name
+      input = input.replace("__QENTITY_NAME__", qEntity.getSimpleTypeName());
 
       // Creating RepositoryCustomImpl class
       fileManager.createOrUpdateTextFileIfRequired(implIdentifier, input, false);

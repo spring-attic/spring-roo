@@ -285,8 +285,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType calendar = new JavaType(Calendar.class);
     JavaType dateUtils = new JavaType("org.apache.commons.lang3.time.DateUtils");
 
-    //JPQLQuery query = from(qEntity);
-    bodyBuilder.appendFormalLine(String.format("%s query = from(%s);",
+    //JPQLQuery query = getQueryFrom(qEntity);
+    bodyBuilder.appendFormalLine(String.format("%s query = getQueryFrom(%s);",
         jpql.getNameIncludingTypeParameters(false, importResolver), entityVariable));
 
     // BooleanBuilder where = new BooleanBuilder()
