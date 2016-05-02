@@ -671,16 +671,16 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
           returnParameterTypes.get(i));
     }
 
-    // Page<Object> object = entityService.findAll(search, pageable);
+    // Page<Object> objects = entityService.findAll(search, pageable);
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
         addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
-        StringUtils.uncapitalize(this.entity.getSimpleTypeName()),
-        getServiceField().getFieldName(), serviceFindAllGlobalSearchMethod.getMethodName()));
+        StringUtils.uncapitalize(this.entityPlural), getServiceField().getFieldName(),
+        serviceFindAllGlobalSearchMethod.getMethodName()));
 
-    // return object;
+    // return objects;
     bodyBuilder.appendFormalLine(String.format("return %s;",
-        StringUtils.uncapitalize(this.entity.getSimpleTypeName())));
+        StringUtils.uncapitalize(this.entityPlural)));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
@@ -874,7 +874,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     }
 
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName("createBatch");
+    final JavaSymbolName methodName = new JavaSymbolName("create");
 
     // Adding parameter types 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();

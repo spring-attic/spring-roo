@@ -1,10 +1,16 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 
+import static java.lang.reflect.Modifier.PUBLIC;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -13,6 +19,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
+import org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcJSONConfiguration;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -25,10 +34,14 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -59,6 +72,8 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
   private ProjectOperations projectOperations;
   private TypeLocationService typeLocationService;
   private TypeManagementService typeManagementService;
+  private PathResolver pathResolver;
+  private FileManager fileManager;
 
   /**
    * This operation returns the Feature name. In this case,
@@ -79,7 +94,8 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
    */
   @Override
   public boolean isInstalledInModule(String moduleName) {
-    // JSON is installed if Spring MVC has been installed
+
+    // Check if JSON MVC and Spring MVC config exists
     return getProjectOperations().isFeatureInstalled(FeatureNames.MVC);
   }
 
@@ -227,9 +243,48 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
    */
   @Override
   public void install(Pom module) {
-    // Nothing to do here. JSON doesn't need extra configurations
-  }
 
+    // Check if setup is needed by finding JSON configuration class
+    JavaType webMvcJSONConfiguration =
+        new JavaType(String.format("%s.config.WebMvcJSONConfiguration", module.getGroupId()),
+            module.getModuleName());
+    Validate.notNull(webMvcJSONConfiguration.getModule(),
+        "ERROR: Module name is required to generate a valid JavaType");
+    final String webMvcJSONConfigurationIdentifier =
+        getPathResolver().getCanonicalPath(webMvcJSONConfiguration.getModule(), Path.SRC_MAIN_JAVA,
+            webMvcJSONConfiguration);
+
+    // Check if file already exists
+    if (!getFileManager().exists(webMvcJSONConfigurationIdentifier)) {
+
+      // Create JSON configuration class
+      createJsonConfigurationClass(webMvcJSONConfiguration, webMvcJSONConfigurationIdentifier);
+
+      // Create Roo Validator classes
+      createClassFromTemplate(module, "CollectionValidator-template._java", "CollectionValidator",
+          "validation");
+      createClassFromTemplate(module, "ValidatorAdvice-template._java", "ValidatorAdvice",
+          "validation");
+
+      // Create Roo JSON converters
+      createClassFromTemplate(module, "BindingErrorException-template._java",
+          "BindingErrorException", "http.converter.json");
+      createClassFromTemplate(module, "BindingResultSerializer-template._java",
+          "BindingResultSerializer", "http.converter.json");
+      createClassFromTemplate(module, "ConversionServiceBeanSerializerModifier-template._java",
+          "ConversionServiceBeanSerializerModifier", "http.converter.json");
+      createClassFromTemplate(module, "ConversionServicePropertySerializer-template._java",
+          "ConversionServicePropertySerializer", "http.converter.json");
+      createClassFromTemplate(module, "DataBinderBeanDeserializerModifier-template._java",
+          "DataBinderBeanDeserializerModifier", "http.converter.json");
+      createClassFromTemplate(module, "DataBinderDeserializer-template._java",
+          "DataBinderDeserializer", "http.converter.json");
+      createClassFromTemplate(module, "FieldErrorSerializer-template._java",
+          "FieldErrorSerializer", "http.converter.json");
+      createClassFromTemplate(module, "JsonpAdvice-template._java", "JsonpAdvice",
+          "http.converter.json");
+    }
+  }
 
   @Override
   public JavaType getMainControllerAnnotation() {
@@ -242,6 +297,81 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
   public JavaType getMainController() {
     // JSON Response Service doesn't provide main controller
     return null;
+  }
+
+  /**
+   * Create WebMvcJSONConfiguration.java class and adds it 
+   * {@link RooWebMvcJSONConfiguration} annotation
+   * 
+   * @param module the Pom where configuration classes should be installed
+   */
+  private void createJsonConfigurationClass(JavaType webMvcJSONConfiguration,
+      String webMvcJSONConfigurationIdentifier) {
+
+    // Creating class builder
+    final String mid =
+        PhysicalTypeIdentifier.createIdentifier(webMvcJSONConfiguration,
+            getPathResolver().getPath(webMvcJSONConfigurationIdentifier));
+    final ClassOrInterfaceTypeDetailsBuilder typeBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(mid, PUBLIC, webMvcJSONConfiguration,
+            PhysicalTypeCategory.CLASS);
+
+    // Generating @RooWebMvcConfiguration annotation
+    final AnnotationMetadataBuilder annotationMetadata =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_MVC_JSON_CONFIGURATION);
+    typeBuilder.addAnnotation(annotationMetadata.build());
+
+    // Write new class disk
+    getTypeManagementService().createOrUpdateTypeOnDisk(typeBuilder.build());
+  }
+
+  /**
+   * Creates a class from a template
+   * 
+   * @param module the Pom related to modeule where the class should be created
+   * @param templateName the String with the template name
+   * @param className the String with the class name to create
+   * @param packageLastElement the String (optional) with the last element of the package, which will be appended to module artifactId. If null, package will be module artifactId
+   */
+  public void createClassFromTemplate(Pom module, String templateName, String className,
+      String packageLastElement) {
+
+    // Set package
+    String packageName = null;
+    if (StringUtils.isNotBlank(packageLastElement)) {
+      packageName = String.format("%s.%s", module.getGroupId(), packageLastElement);
+    } else {
+      packageName = module.getGroupId();
+    }
+
+    // Include implementation of Validator from template
+    final JavaType type =
+        new JavaType(String.format("%s.%s", packageName, className), module.getModuleName());
+    Validate.notNull(type.getModule(),
+        "ERROR: Module name is required to generate a valid JavaType");
+    final String identifier =
+        getPathResolver().getCanonicalPath(type.getModule(), Path.SRC_MAIN_JAVA, type);
+    InputStream inputStream = null;
+
+    // Check first if file exists
+    if (!getFileManager().exists(identifier)) {
+      try {
+
+        // Use defined template
+        inputStream = FileUtils.getInputStream(getClass(), templateName);
+        String input = IOUtils.toString(inputStream);
+
+        // Replacing package
+        input = input.replace("__PACKAGE__", packageName);
+
+        // Creating CollectionValidator
+        getFileManager().createOrUpdateTextFileIfRequired(identifier, input, true);
+      } catch (final IOException e) {
+        throw new IllegalStateException(String.format("Unable to create '%s'", identifier), e);
+      } finally {
+        IOUtils.closeQuietly(inputStream);
+      }
+    }
   }
 
   // Getting OSGi services
@@ -315,4 +445,49 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
     }
   }
 
+  public PathResolver getPathResolver() {
+    if (pathResolver == null) {
+      // Get all Services implement PathResolver interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          pathResolver = (PathResolver) this.context.getService(ref);
+          return pathResolver;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load PathResolver on ControllerOperationsImpl.");
+        return null;
+      }
+    } else {
+      return pathResolver;
+    }
+  }
+
+  public FileManager getFileManager() {
+    if (fileManager == null) {
+      // Get all Services implement FileManager interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(FileManager.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          fileManager = (FileManager) this.context.getService(ref);
+          return fileManager;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load FileManager on ControllerOperationsImpl.");
+        return null;
+      }
+    } else {
+      return fileManager;
+    }
+  }
 }

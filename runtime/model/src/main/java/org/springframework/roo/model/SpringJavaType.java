@@ -16,6 +16,8 @@ public final class SpringJavaType {
   // org.springframework
   public static final JavaType ASYNC = new JavaType(
       "org.springframework.scheduling.annotation.Async");
+  public static final JavaType AUDITING_ENTITY_LISTENER = new JavaType(
+      "org.springframework.data.jpa.domain.support.AuditingEntityListener");
   public static final JavaType AUTHENTICATION = new JavaType(
       "org.springframework.security.core.Authentication");
   public static final JavaType AUTOWIRED = new JavaType(
@@ -38,6 +40,10 @@ public final class SpringJavaType {
       "org.springframework.core.convert.ConversionService");
   public static final JavaType CONVERSION_SERVICE_EXPOSING_INTERCEPTOR = new JavaType(
       "org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor");
+  public static final JavaType CREATED_BY = new JavaType(
+      "org.springframework.data.annotation.CreatedBy");
+  public static final JavaType CREATED_DATE = new JavaType(
+      "org.springframework.data.annotation.CreatedDate");
   public static final JavaType DATA_ID = new JavaType("org.springframework.data.annotation.Id");
   public static final JavaType DATE_TIME_FORMAT = new JavaType(
       "org.springframework.format.annotation.DateTimeFormat");
@@ -48,6 +54,8 @@ public final class SpringJavaType {
   public static final JavaType FORMATTER = new JavaType("org.springframework.format.Formatter");
   public static final JavaType FORMATTER_REGISTRY = new JavaType(
       "org.springframework.format.FormatterRegistry");
+  public static final JavaType FORMATTING_CONVERSION_SERVICE = new JavaType(
+      "org.springframework.format.support.FormattingConversionService");
   public static final JavaType HIDDEN_HTTP_METHOD_FILTER = new JavaType(
       "org.springframework.web.filter.HiddenHttpMethodFilter");
   public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
@@ -60,13 +68,20 @@ public final class SpringJavaType {
       "org.springframework.jms.core.JmsTemplate");
   public static final JavaType JPA_TRANSACTION_MANAGER = new JavaType(
       "org.springframework.orm.jpa.JpaTransactionManager");
+  public static final JavaType LAST_MODIFIED_BY = new JavaType(
+      "org.springframework.data.annotation.LastModifiedBy");
+  public static final JavaType LAST_MODIFIED_DATE = new JavaType(
+      "org.springframework.data.annotation.LastModifiedDate");
   public static final JavaType LOCAL_CONTAINER_ENTITY_MANAGER_FACTORY_BEAN = new JavaType(
       "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
   public static final JavaType LOCAL_ENTITY_MANAGER_FACTORY_BEAN = new JavaType(
       "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
   public static final JavaType LOCALE_CONTEXT_HOLDER = new JavaType(
       "org.springframework.context.i18n.LocaleContextHolder");
+  public static final JavaType LOCAL_VALIDATOR_FACTORY_BEAN = new JavaType(
+      "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean");
   public static final JavaType MAIL_SENDER = new JavaType("org.springframework.mail.MailSender");
+  public static final JavaType MEDIA_TYPE = new JavaType("org.springframework.http.MediaType");
   public static final JavaType MOCK_STATIC_ENTITY_METHODS = new JavaType(
       "org.springframework.mock.staticmock.MockStaticEntityMethods");
   public static final JavaType MODEL = new JavaType("org.springframework.ui.Model");
@@ -77,6 +92,8 @@ public final class SpringJavaType {
       "org.springframework.format.annotation.NumberFormat");
   public static final JavaType OPEN_ENTITY_MANAGER_IN_VIEW_FILTER = new JavaType(
       "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter");
+  public static final JavaType PAGE = new JavaType("org.springframework.data.domain.Page");
+  public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
   public static final JavaType PATH_VARIABLE = new JavaType(
       "org.springframework.web.bind.annotation.PathVariable");
   public static final JavaType PERMISSION_EVALUATOR = new JavaType(
@@ -91,6 +108,8 @@ public final class SpringJavaType {
       "org.springframework.transaction.annotation.Propagation");
   public static final JavaType PRIMARY = new JavaType(
       "org.springframework.context.annotation.Primary");
+  public static final JavaType REDIRECT_ATTRIBUTES = new JavaType(
+      "org.springframework.web.servlet.mvc.support.RedirectAttributes");
   public static final JavaType REPOSITORY = new JavaType(
       "org.springframework.stereotype.Repository");
   public static final JavaType REQUEST_BODY = new JavaType(
@@ -120,21 +139,6 @@ public final class SpringJavaType {
   public static final JavaType VALUE = new JavaType(
       "org.springframework.beans.factory.annotation.Value");
   public static final JavaType WEB_UTILS = new JavaType("org.springframework.web.util.WebUtils");
-  public static final JavaType CREATED_DATE = new JavaType(
-      "org.springframework.data.annotation.CreatedDate");
-  public static final JavaType LAST_MODIFIED_DATE = new JavaType(
-      "org.springframework.data.annotation.LastModifiedDate");
-  public static final JavaType CREATED_BY = new JavaType(
-      "org.springframework.data.annotation.CreatedBy");
-  public static final JavaType LAST_MODIFIED_BY = new JavaType(
-      "org.springframework.data.annotation.LastModifiedBy");
-  public static final JavaType AUDITING_ENTITY_LISTENER = new JavaType(
-      "org.springframework.data.jpa.domain.support.AuditingEntityListener");
-  public static final JavaType PAGE = new JavaType("org.springframework.data.domain.Page");
-  public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
-  public static final JavaType MEDIA_TYPE = new JavaType("org.springframework.http.MediaType");
-  public static final JavaType REDIRECT_ATTRIBUTES = new JavaType(
-      "org.springframework.web.servlet.mvc.support.RedirectAttributes");
 
   /**
    * Returns the {@link JavaType} for a Spring converter

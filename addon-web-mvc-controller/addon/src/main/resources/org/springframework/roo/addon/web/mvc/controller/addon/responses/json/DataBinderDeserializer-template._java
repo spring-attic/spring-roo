@@ -10,9 +10,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,12 +41,19 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
   private static final Logger LOGGER = LoggerFactory.getLogger(DataBinderDeserializer.class);
 
   private ConversionService conversionService;
-  private Validator validatorService;
 
-  public DataBinderDeserializer(BeanDeserializerBase source, ConversionService cs, Validator v) {
+  /**
+   * Validador específico para JSR-303 y JSR-349. No se utiliza un {@link Validator} genérico
+   * porque el objeto es validar clases del modelo en función de sus anotaciones JSR-303/349.
+   */
+  @Autowired
+  private LocalValidatorFactoryBean validatorFactory;
+
+  public DataBinderDeserializer(BeanDeserializerBase source, ConversionService cs,
+      LocalValidatorFactoryBean vf) {
     super(source);
     this.conversionService = cs;
-    this.validatorService = v;
+    this.validatorFactory = vf;
   }
 
   public DataBinderDeserializer(BeanDeserializerBase source, ObjectIdReader objectIdReader) {
@@ -100,7 +109,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
     //        .getThreadVariable(BindingResult.MODEL_KEY_PREFIX.concat("JSON_DataBinder"));
     DataBinder binder = new DataBinder(ClassUtil.createInstance(handledType(), false));
     binder.setConversionService(this.conversionService);
-    binder.setValidator(this.validatorService);
+    binder.setValidator(this.validatorFactory);
 
     Object target = binder.getTarget();
 

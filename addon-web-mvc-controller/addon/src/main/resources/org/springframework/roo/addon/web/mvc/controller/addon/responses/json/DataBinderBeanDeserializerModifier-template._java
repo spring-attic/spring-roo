@@ -1,7 +1,9 @@
 package __PACKAGE__;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.DeserializationConfig;
@@ -20,12 +22,18 @@ import org.springframework.roo.addon.web.mvc.controller.annotations.http.convert
 public class DataBinderBeanDeserializerModifier extends BeanDeserializerModifier {
 
   private final ConversionService conversionService;
-  private final Validator validatorService;
 
-  public DataBinderBeanDeserializerModifier(ConversionService cs, Validator v) {
+  /**
+   * Validador específico para JSR-303 y JSR-349. No se utiliza un {@link Validator} genérico
+   * porque el objeto es validar clases del modelo en función de sus anotaciones JSR-303/349.
+   */
+  @Autowired
+  private LocalValidatorFactoryBean validatorFactory;
+
+  public DataBinderBeanDeserializerModifier(ConversionService cs, LocalValidatorFactoryBean vf) {
     super();
     this.conversionService = cs;
-    this.validatorService = v;
+    this.validatorFactory = vf;
   }
 
   @Override
@@ -33,7 +41,8 @@ public class DataBinderBeanDeserializerModifier extends BeanDeserializerModifier
       BeanDescription beanDesc, JsonDeserializer<?> deserializer) {
 
     if (deserializer instanceof BeanDeserializerBase) {
-      return new DataBinderDeserializer((BeanDeserializerBase) deserializer, conversionService, validatorService);
+      return new DataBinderDeserializer((BeanDeserializerBase) deserializer, conversionService,
+          validatorFactory);
     }
 
     // When there is no custom-deserializer implementation returns the

@@ -48,13 +48,12 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
   private static final JavaType SIMPLE_MODULE = new JavaType(
       "com.fasterxml.jackson.databind.module.SimpleModule");
 
+  private static final JavaType MODULE = new JavaType("com.fasterxml.jackson.databind.Module");
+
   private static final EnumDetails DESERIALIZATION_WRAP_EXCEPTIONS = new EnumDetails(
       DESERIALIZATION_FEATURE, new JavaSymbolName("WRAP_EXCEPTIONS"));
 
   private ImportRegistrationResolver importResolver;
-
-  private final JavaType OBJECT_MAPPER =
-      new JavaType("com.fasterxml.jackson.databind.ObjectMapper");
 
   private final JavaPackage convertersJavaPackage;
 
@@ -101,37 +100,60 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
     // Add @Configuration
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONFIGURATION));
 
+    // Add FormattingConversionService field
+    ensureGovernorHasField(getFormattingConversionServiceField());
+
+    // Add LocalValidatorFactoryBean field
+    ensureGovernorHasField(getLocalValidatorFactoryBeanField());
+
     // Add objectMapper method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getObjectMapper()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getJacksonDatabindModule()));
 
     // Build the ITD
     itdTypeDetails = builder.build();
   }
 
   /**
-   * Method that generates "objectMapper" method.
+   * Creates FormattingConversionService field with @Autowired
+   * 
+   * @return FieldMetadataBuilder
+   */
+  private FieldMetadataBuilder getFormattingConversionServiceField() {
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
+        "conversionService"), SpringJavaType.FORMATTING_CONVERSION_SERVICE);
+  }
+
+  /**
+   * Creates LocalValidatorFactoryBean field with @Autowired
+   * 
+   * @return FieldMetadataBuilder
+   */
+  private FieldMetadataBuilder getLocalValidatorFactoryBeanField() {
+    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED));
+
+    return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName(
+        "validatorFactory"), SpringJavaType.LOCAL_VALIDATOR_FACTORY_BEAN);
+  }
+
+  /**
+   * Method that generates "jacksonDatabindModule" method.
    * 
    * @return MethodMetadataBuilder
    */
-  public MethodMetadata getObjectMapper() {
+  public MethodMetadata getJacksonDatabindModule() {
 
     // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("objectMapper");
+    JavaSymbolName methodName = new JavaSymbolName("jacksonDatabindModule");
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType(
-        "org.springframework.http.converter.json.Jackson2ObjectMapperBuilder")));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType(
-        "org.springframework.format.support.FormattingConversionService")));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType(
-        "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean")));
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("builder"));
-    parameterNames.add(new JavaSymbolName("conversionService"));
-    parameterNames.add(new JavaSymbolName("validatorFactory"));
 
     if (governorHasMethod(methodName,
         AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
@@ -142,15 +164,6 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // ObjectMapper objectMapper =
-    // builder.createXmlMapper(false).featuresToDisable(DeserializationFeature.WRAP_EXCEPTIONS).build();
-    bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine(String.format(
-        "%s objectMapper = builder.createXmlMapper(false).featuresToDisable(%s.%s).build();",
-        OBJECT_MAPPER.getNameIncludingTypeParameters(false, importResolver),
-        DESERIALIZATION_WRAP_EXCEPTIONS.getType().getNameIncludingTypeParameters(false,
-            importResolver), DESERIALIZATION_WRAP_EXCEPTIONS.getField().getSymbolName()));
-
     // SimpleModule module = new SimpleModule();
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format("%s module = new %s();",
@@ -158,6 +171,7 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
         SIMPLE_MODULE.getNameIncludingTypeParameters(false, importResolver)));
 
     // module.setSerializerModifier(new ConversionServiceBeanSerializerModifier(conversionService));
+    bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format(
         "module.setSerializerModifier(new %s(conversionService));",
         new JavaType(String.format("%s.%s",
@@ -191,21 +205,17 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
             this.convertersJavaPackage.getModule()).getNameIncludingTypeParameters(false,
             importResolver)));
 
-    // objectMapper.registerModule(module);
-    bodyBuilder.appendFormalLine("objectMapper.registerModule(module);");
-
-    // return objectMapper;
+    // return module;
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine("return objectMapper;");
+    bodyBuilder.appendFormalLine("return module;");
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, OBJECT_MAPPER,
-            parameterTypes, parameterNames, bodyBuilder);
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, MODULE, parameterTypes,
+            parameterNames, bodyBuilder);
 
     // Add @Bean and @Primary annotations
     methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.BEAN));
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.PRIMARY));
 
     // Build and return a MethodMetadata instance
     return methodBuilder.build();
