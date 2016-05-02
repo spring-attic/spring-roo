@@ -384,7 +384,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         break;
       }
     }
-    return fieldViewItems.isEmpty() ? null : fieldViewItems;
+    return fieldViewItems;
   }
 
   /**
