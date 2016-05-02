@@ -298,7 +298,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.appendFormalLine(String.format("    String txt = %s.getText();", globalSearch));
 
     // Boolean searchBoolean = BooleanUtils.toBoolean(txt);
-    bodyBuilder.appendFormalLine(String.format("    Boolean searchBoolean = %s.toBoolean(txt);",
+    bodyBuilder.appendFormalLine(String.format(
+        "    Boolean searchBoolean = %s.toBooleanObject(txt);",
         booleanUtils.getNameIncludingTypeParameters(false, importResolver)));
 
     bodyBuilder.appendFormalLine(String.format("    %s searchDate = null;",
