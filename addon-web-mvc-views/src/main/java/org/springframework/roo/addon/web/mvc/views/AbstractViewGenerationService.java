@@ -318,6 +318,24 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
+  public void addModal(String moduleName, ViewContext ctx) {
+    // Process elements to generate 
+    DOC newDoc = process("fragments/modal", ctx);
+
+    // Getting new viewName
+    String viewName = getFragmentsFolder(moduleName).concat("/modal").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
   public void addSession(String moduleName, ViewContext ctx) {
     // Process elements to generate 
     DOC newDoc = process("fragments/session", ctx);

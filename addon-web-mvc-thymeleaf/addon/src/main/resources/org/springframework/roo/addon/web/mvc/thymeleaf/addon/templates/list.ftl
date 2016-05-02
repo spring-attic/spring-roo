@@ -161,6 +161,36 @@
 
       </div>
       <!--END CONTENT-->
+      
+       <!-- MODAL -->
+      <div
+        data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=Delete)">
+
+        <script type="text/javascript">
+            function openDeleteModal(){
+              jQuery('#staticModal').modal();
+            }
+          </script>
+
+        <div class="modal fade" id="staticModal" tabindex="-1" role="dialog"
+          aria-labelledby="staticModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                  aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h2 class="modal-title" id="staticModalLabel">Delete</h2>
+              </div>
+              <div class="modal-body" id="staticModalBody">
+                <p>Message</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
     </section>
     
   </div>
@@ -211,11 +241,43 @@
                 'render': function ( data, type, full, meta ) {
                     return '<a role="button" class="btn-accion ver" href="${controllerPath}/' + data + '">Show</a>' +
                     '<a role="button" class="btn-accion modificar" href="${controllerPath}/' + data + '/edit-form">Edit</a>' +
-                    '<a role="button" class="btn-accion eliminar" href="${controllerPath}/' + data + '/delete-form">Delete</a>'
+                    '<a role="button" class="btn-accion eliminar" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
                 }
               }
             ]  
         });
+        
+        jQuery.extend({
+           'delete${entityName}': function(${identifierField}) {
+               jQuery.ajax({
+                   url: '${controllerPath}/'+${identifierField},
+                   type: 'DELETE',
+                   success: function(result) {
+                     jQuery('#delete${entityName}ModalBody').empty();
+                     jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');
+                     jQuery('#delete${entityName}Modal').modal();
+                     /** Refresh Datatables */
+                     ${entityName}Table.ajax.reload();
+                   },
+                   error: function(jqXHR) {
+                     /** Getting error code */
+                     var message = '';
+                     /** CONFLICT */
+                     if (jqXHR.status == 409) {
+                         message = '<p data-th-text="|${r"#{info_no_deleted_item}"}|">0 items has been deleted.</p>';
+                     }
+                     /** NOT_FOUND */
+                     if (jqXHR.status == 404 ) {
+                         message = '<p data-th-text="|${r"#{info_deleted_item_problem} #{info_no_exist_item}"}|">Error deleting selected item.</p>';
+                     }
+                     jQuery('#delete${entityName}ModalBody').empty();
+                     jQuery('#delete${entityName}ModalBody').append(message);
+                     jQuery('#delete${entityName}Modal').modal();
+                   }
+                });
+           }
+         });
+        
     });
     </script>
    

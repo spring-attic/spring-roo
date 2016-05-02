@@ -172,6 +172,16 @@ public interface MVCViewGenerationService {
   void addMenu(String moduleName, ViewContext ctx);
 
   /**
+   * This operation will add the modal fragment using 
+   * the provided context
+   * 
+   * @param moduleName module where session fragment will be added
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addModal(String moduleName, ViewContext ctx);
+
+  /**
    * This operation will add the session fragment using 
    * the provided context
    * 
