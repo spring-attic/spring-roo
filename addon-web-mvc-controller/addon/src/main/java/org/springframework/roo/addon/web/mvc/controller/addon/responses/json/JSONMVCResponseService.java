@@ -243,47 +243,7 @@ public class JSONMVCResponseService implements ControllerMVCResponseService {
    */
   @Override
   public void install(Pom module) {
-
-    // Check if setup is needed by finding JSON configuration class
-    JavaType webMvcJSONConfiguration =
-        new JavaType(String.format("%s.config.WebMvcJSONConfiguration", module.getGroupId()),
-            module.getModuleName());
-    Validate.notNull(webMvcJSONConfiguration.getModule(),
-        "ERROR: Module name is required to generate a valid JavaType");
-    final String webMvcJSONConfigurationIdentifier =
-        getPathResolver().getCanonicalPath(webMvcJSONConfiguration.getModule(), Path.SRC_MAIN_JAVA,
-            webMvcJSONConfiguration);
-
-    // Check if file already exists
-    if (!getFileManager().exists(webMvcJSONConfigurationIdentifier)) {
-
-      // Create JSON configuration class
-      createJsonConfigurationClass(webMvcJSONConfiguration, webMvcJSONConfigurationIdentifier);
-
-      // Create Roo Validator classes
-      createClassFromTemplate(module, "CollectionValidator-template._java", "CollectionValidator",
-          "validation");
-      createClassFromTemplate(module, "ValidatorAdvice-template._java", "ValidatorAdvice",
-          "validation");
-
-      // Create Roo JSON converters
-      createClassFromTemplate(module, "BindingErrorException-template._java",
-          "BindingErrorException", "http.converter.json");
-      createClassFromTemplate(module, "BindingResultSerializer-template._java",
-          "BindingResultSerializer", "http.converter.json");
-      createClassFromTemplate(module, "ConversionServiceBeanSerializerModifier-template._java",
-          "ConversionServiceBeanSerializerModifier", "http.converter.json");
-      createClassFromTemplate(module, "ConversionServicePropertySerializer-template._java",
-          "ConversionServicePropertySerializer", "http.converter.json");
-      createClassFromTemplate(module, "DataBinderBeanDeserializerModifier-template._java",
-          "DataBinderBeanDeserializerModifier", "http.converter.json");
-      createClassFromTemplate(module, "DataBinderDeserializer-template._java",
-          "DataBinderDeserializer", "http.converter.json");
-      createClassFromTemplate(module, "FieldErrorSerializer-template._java",
-          "FieldErrorSerializer", "http.converter.json");
-      createClassFromTemplate(module, "JsonpAdvice-template._java", "JsonpAdvice",
-          "http.converter.json");
-    }
+    // Managed by ControllerOperationsImpl
   }
 
   @Override

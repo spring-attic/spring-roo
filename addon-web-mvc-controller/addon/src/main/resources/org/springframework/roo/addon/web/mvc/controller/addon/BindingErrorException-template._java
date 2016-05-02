@@ -11,6 +11,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
 import org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONBindingErrorException;
 
 @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -20,6 +21,10 @@ public class BindingErrorException extends RuntimeException implements BindingRe
   private static final long serialVersionUID = 3173335735776325694L;
 
   private final BindingResult bindingResult;
+
+  public BindingResult getBindingResult() {
+    return bindingResult;
+  }
 
   public BindingErrorException(BindingResult bindingResult) {
     super();

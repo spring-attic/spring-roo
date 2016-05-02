@@ -199,7 +199,8 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
     // module.addSerializer(FieldError.class, new FieldErrorSerializer());
     bodyBuilder.appendFormalLine(String.format(
         "module.addSerializer(%s.class, new %s());",
-        new JavaType("org.springframework.validation.FieldError"),
+        new JavaType("org.springframework.validation.FieldError").getNameIncludingTypeParameters(
+            false, importResolver),
         new JavaType(String.format("%s.%s",
             this.convertersJavaPackage.getFullyQualifiedPackageName(), "FieldErrorSerializer"),
             this.convertersJavaPackage.getModule()).getNameIncludingTypeParameters(false,

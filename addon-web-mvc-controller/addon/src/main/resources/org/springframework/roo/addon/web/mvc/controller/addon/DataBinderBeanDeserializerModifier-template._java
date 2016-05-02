@@ -24,8 +24,8 @@ public class DataBinderBeanDeserializerModifier extends BeanDeserializerModifier
   private final ConversionService conversionService;
 
   /**
-   * Validador específico para JSR-303 y JSR-349. No se utiliza un {@link Validator} genérico
-   * porque el objeto es validar clases del modelo en función de sus anotaciones JSR-303/349.
+   * Specific validator for JSR-303 y JSR-349. A {@link Validator} is not used because the goal
+   * is to validate model classes by its JSR-303/349 annotations.
    */
   @Autowired
   private LocalValidatorFactoryBean validatorFactory;

@@ -874,7 +874,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     }
 
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName("create");
+    final JavaSymbolName methodName = new JavaSymbolName("createBatch");
 
     // Adding parameter types 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
