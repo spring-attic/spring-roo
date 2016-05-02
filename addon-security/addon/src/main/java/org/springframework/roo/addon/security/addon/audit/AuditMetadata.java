@@ -2,6 +2,7 @@ package org.springframework.roo.addon.security.addon.audit;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -30,6 +31,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       .create(PROVIDES_TYPE_STRING);
 
   private final AuditAnnotationValues annotationValues;
+  private ArrayList<FieldMetadata> auditFields = new ArrayList<FieldMetadata>();
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -104,8 +106,21 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Add @EntityListeners annotation
     ensureGovernorIsAnnotated(getEntityListenersAnnotation());
 
+    // Save audit fields
+    auditFields.addAll(Arrays.asList(createdDateField.build(), modifiedDateField.build(),
+        createdByField.build(), modifiedByField.build()));
+
     // Build ITD
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * Returns the list of audit fields
+   * 
+   * @return
+   */
+  public List<FieldMetadata> getAuditFields() {
+    return auditFields;
   }
 
   /**

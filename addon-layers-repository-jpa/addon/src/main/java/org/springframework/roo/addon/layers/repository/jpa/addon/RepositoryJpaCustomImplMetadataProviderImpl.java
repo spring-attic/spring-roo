@@ -17,6 +17,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
+import org.springframework.roo.addon.security.addon.audit.AuditMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -206,11 +207,33 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     final String jpaEntityMetadataKey =
         JpaEntityMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
 
+    // Get audit metadata
+    final String auditMetadataKey =
+        AuditMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
+    final AuditMetadata auditMetadata = (AuditMetadata) getMetadataService().get(auditMetadataKey);
+
+
     // Create dependency between repository and java bean annotation
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
     // Create dependency between repository and jpa entity annotation
     registerDependency(jpaEntityMetadataKey, metadataIdentificationString);
+
+    // Create dependency between repository and audit annotation
+    registerDependency(auditMetadataKey, metadataIdentificationString);
+
+    // Getting audit properties
+    List<FieldMetadata> auditFields = new ArrayList<FieldMetadata>();
+    if (auditMetadata != null) {
+      auditFields = auditMetadata.getAuditFields();
+    }
+
+    // Getting persistent properties
+    List<FieldMetadata> idFields = getPersistenceMemberLocator().getIdentifierFields(entity);
+    if (idFields.isEmpty()) {
+      throw new RuntimeException(String.format("Error: Entity %s does not have an identifier",
+          entityAttribute.getName()));
+    }
 
     // Getting entity properties for findAll method
     ClassOrInterfaceTypeDetails searchResultCid =
@@ -219,13 +242,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     MemberDetails searchResultDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), searchResultCid);
 
-    List<FieldMetadata> idFields = getPersistenceMemberLocator().getIdentifierFields(entity);
 
-    if (idFields.isEmpty()) {
-      throw new RuntimeException(String.format("Error: Entity %s does not have an identifier",
-          entityAttribute.getName()));
-    }
-
+    // Removing duplicates in persistent properties
     boolean duplicated;
     List<FieldMetadata> validIdFields = new ArrayList<FieldMetadata>();
     for (FieldMetadata id : idFields) {
@@ -244,21 +262,38 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     // Getting valid fields to construct the findAll query
     final int maxFields = 5;
+    boolean isAudit;
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
 
     for (FieldMetadata field : searchResultDetails.getFields()) {
 
       // Exclude non-simple fields
-      if (field.getFieldType().isMultiValued())
+      if (field.getFieldType().isMultiValued()) {
         continue;
+      }
 
       // Exclude version field
-      if (field.getAnnotation(new JavaType("javax.persistence.Version")) != null)
+      if (field.getAnnotation(new JavaType("javax.persistence.Version")) != null) {
         continue;
+      }
 
       // Exclude id fields
-      if (field.getAnnotation(new JavaType("javax.persistence.Id")) != null)
+      if (field.getAnnotation(new JavaType("javax.persistence.Id")) != null) {
         continue;
+      }
+
+      // Exclude audit fields
+      isAudit = false;
+      for (FieldMetadata auditField : auditFields) {
+        if (auditField.getFieldName().equals(field.getFieldName())) {
+          isAudit = true;
+          break;
+        }
+      }
+
+      if (isAudit) {
+        continue;
+      }
 
       // Exclude references to other entities
       if (getTypeLocationService().getTypeDetails(field.getFieldType()) == null) {
