@@ -178,7 +178,12 @@ public class ViewCommands implements CommandMarker {
 
     for (Entry<String, ControllerMVCResponseService> responseType : installedResponseType
         .entrySet()) {
-      responseTypes.add(responseType.getKey());
+
+      // Only that response types that generates views will be able
+      // on this command.
+      if (getMVCViewGenerationService(responseType.getKey()) != null) {
+        responseTypes.add(responseType.getKey());
+      }
     }
 
     return responseTypes;
