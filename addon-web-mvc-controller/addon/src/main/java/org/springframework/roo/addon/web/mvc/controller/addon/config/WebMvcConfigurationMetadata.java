@@ -109,6 +109,15 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     // Add addFormatters method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getAddFormattersMethod()));
 
+    // Add localResolver
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getLocaleResolver()));
+
+    // Add localeChangeInterceptor
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getLocaleChangeInterceptor()));
+
+    // Add addInterceptors
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getAddInterceptors()));
+
     // Build the ITD
     itdTypeDetails = builder.build();
   }
@@ -260,6 +269,154 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
    */
   private String getServiceFieldName(JavaType service) {
     return StringUtils.uncapitalize(service.getSimpleTypeName());
+  }
+
+
+  /**
+   * Method that generates "localeResolver" method.
+   * 
+   * @return MethodMetadata
+   */
+  public MethodMetadata getLocaleResolver() {
+
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("localeResolver");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Define method return type
+    JavaType returnType = new JavaType("org.springframework.web.servlet.LocaleResolver");
+
+    if (governorHasMethod(methodName,
+        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
+      return getGovernorMethod(methodName,
+          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // SessionLocaleResolver localeResolver = new SessionLocaleResolver();
+    bodyBuilder.appendFormalLine(String.format("%1$s localeResolver = new %1$s();", new JavaType(
+        "org.springframework.web.servlet.i18n.SessionLocaleResolver")
+        .getNameIncludingTypeParameters(false, importResolver)));
+
+    // localeResolver.setDefaultLocale(new Locale(\"en\", \"EN\"));
+    bodyBuilder.appendFormalLine(String.format(
+        "localeResolver.setDefaultLocale(new %s(\"en\", \"EN\"));",
+        new JavaType("java.util.Locale").getNameIncludingTypeParameters(false, importResolver)));
+
+    // return
+    bodyBuilder.appendFormalLine("return localeResolver;");
+
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
+            parameterNames, bodyBuilder);
+
+    // Add Bean annotation
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.BEAN));
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+
+  /**
+   * Method that generates "localeChangeInterceptor" method.
+   * 
+   * @return MethodMetadata
+   */
+  public MethodMetadata getLocaleChangeInterceptor() {
+
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("localeChangeInterceptor");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Define method return type
+    JavaType returnType =
+        new JavaType("org.springframework.web.servlet.i18n.LocaleChangeInterceptor");
+
+    if (governorHasMethod(methodName,
+        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
+      return getGovernorMethod(methodName,
+          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    bodyBuilder
+        .appendFormalLine("LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();");
+    bodyBuilder.appendFormalLine("localeChangeInterceptor.setParamName(\"lang\");");
+
+    // return
+    bodyBuilder.appendFormalLine("return localeChangeInterceptor;");
+
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, parameterTypes,
+            parameterNames, bodyBuilder);
+
+    // Add Bean annotation
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.BEAN));
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+
+  /**
+   * Method that generates "addInterceptors" method.
+   * 
+   * @return MethodMetadata
+   */
+  public MethodMetadata getAddInterceptors() {
+
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("addInterceptors");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType(
+        "org.springframework.web.servlet.config.annotation.InterceptorRegistry")));
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("registry"));
+
+    if (governorHasMethod(methodName,
+        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
+      return getGovernorMethod(methodName,
+          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    bodyBuilder.appendFormalLine("registry.addInterceptor(localeChangeInterceptor());");
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
+            parameterTypes, parameterNames, bodyBuilder);
+
+    // Add Bean annotation
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
   }
 
   @Override
