@@ -30,6 +30,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
@@ -212,8 +213,11 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     registerDependency(jpaEntityMetadataKey, metadataIdentificationString);
 
     // Getting entity properties for findAll method
-    ClassOrInterfaceTypeDetails searchResultDetails =
+    ClassOrInterfaceTypeDetails searchResultCid =
         getTypeLocationService().getTypeDetails(repositoryCustomMetadata.getSearchResult());
+
+    MemberDetails searchResultDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().getName(), searchResultCid);
 
     List<FieldMetadata> idFields = getPersistenceMemberLocator().getIdentifierFields(entity);
 
@@ -241,29 +245,26 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     // Getting valid fields to construct the findAll query
     final int maxFields = 5;
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
-    List<FieldMetadata> persistenceFields = idFields;
-    persistenceFields.add(getPersistenceMemberLocator().getVersionField(entity));
 
-    boolean found;
-    for (FieldMetadata field : searchResultDetails.getDeclaredFields()) {
+    for (FieldMetadata field : searchResultDetails.getFields()) {
+
       // Exclude non-simple fields
-      if (!field.getFieldType().isCommonCollectionType()
-          && getTypeLocationService().getTypeDetails(field.getFieldType()) == null) {
+      if (field.getFieldType().isMultiValued())
+        continue;
 
-        // Check if field is the id or version field
-        found = false;
-        for (FieldMetadata persistenceField : persistenceFields) {
-          if (persistenceField.getFieldName().equals(field.getFieldName())) {
-            found = true;
-            break;
-          }
-        }
+      // Exclude version field
+      if (field.getAnnotation(new JavaType("javax.persistence.Version")) != null)
+        continue;
 
-        if (!found) {
-          validFields.add(field);
-          if (validFields.size() == maxFields) {
-            break;
-          }
+      // Exclude id fields
+      if (field.getAnnotation(new JavaType("javax.persistence.Id")) != null)
+        continue;
+
+      // Exclude references to other entities
+      if (getTypeLocationService().getTypeDetails(field.getFieldType()) == null) {
+        validFields.add(field);
+        if (validFields.size() == maxFields) {
+          break;
         }
       }
     }

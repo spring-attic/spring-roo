@@ -275,15 +275,13 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   private void buildQuery(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> fields,
       String entityVariable, JavaSymbolName globalSearch) {
 
-    boolean addOr = false;
-    boolean existsDateField = false;
-    String expression = null;
-    String query = "";
-    String variables = "";
     JavaType booleanBuilder = new JavaType("com.mysema.query.BooleanBuilder");
     JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
-    JavaType calendar = new JavaType(Calendar.class);
+    JavaType booleanExpr = new JavaType("com.mysema.query.types.expr.BooleanExpression");
+    JavaType booleanUtils = new JavaType("org.apache.commons.lang3.BooleanUtils");
     JavaType dateUtils = new JavaType("org.apache.commons.lang3.time.DateUtils");
+    JavaType calendar = new JavaType(Calendar.class);
+    JavaType date = new JavaType(Date.class);
 
     //JPQLQuery query = getQueryFrom(qEntity);
     bodyBuilder.appendFormalLine(String.format("%s query = getQueryFrom(%s);",
@@ -299,74 +297,121 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // String txt = globalSearch.getText();
     bodyBuilder.appendFormalLine(String.format("    String txt = %s.getText();", globalSearch));
 
+    // Boolean searchBoolean = BooleanUtils.toBoolean(txt);
+    bodyBuilder.appendFormalLine(String.format("    Boolean searchBoolean = %s.toBoolean(txt);",
+        booleanUtils.getNameIncludingTypeParameters(false, importResolver)));
+
+    bodyBuilder.appendFormalLine(String.format("    %s searchDate = null;",
+        date.getNameIncludingTypeParameters(false, importResolver)));
+
+    // Calendar searchCalendar = Calendar.getInstance();
+    bodyBuilder.appendFormalLine(String.format("    %1$s searchCalendar= %1$s.getInstance();\n",
+        calendar.getNameIncludingTypeParameters(false, importResolver)));
+
+    bodyBuilder.appendFormalLine(String.format("    try{"));
+
+    // searchDate = DateUtils.parseDateStrictly(txt, FULL_DATE_PATTERNS);
+    bodyBuilder.appendFormalLine(String.format(
+        "    searchDate = %s.parseDateStrictly(txt, FULL_DATE_PATTERNS);",
+        dateUtils.getNameIncludingTypeParameters(false, importResolver)));
+
+    bodyBuilder.appendFormalLine(String.format("    searchCalendar.setTime(searchDate);"));
+
+    bodyBuilder
+        .appendFormalLine(String
+            .format("    }catch(Exception e){\n      searchDate = null;\n        searchCalendar = null;\n   }"));
+
+
+    bodyBuilder.appendFormalLine(String.format("    %s expression;",
+        booleanExpr.getNameIncludingTypeParameters(true, importResolver)));
+
+
+    List<FieldMetadata> convertedFields = new ArrayList<FieldMetadata>();
+    boolean isFirst = true;
+
     for (FieldMetadata field : fields) {
-
       if (field.getFieldType().equals(JavaType.STRING)) {
-        expression = buildStringExpression(entityVariable, field.getFieldName());
 
-      } else if (field.getFieldType().equals(new JavaType(Date.class))) {
-        existsDateField = true;
-        expression = buildDateExpression(entityVariable, field.getFieldName());
-
-      } else if (field.getFieldType().equals(new JavaType(Calendar.class))) {
-        existsDateField = true;
-        // Calendar property = Calendar.getInstance();
-        variables =
-            variables.concat(String.format("      %1$s %2$s= %1$s.getInstance();\n",
-                calendar.getNameIncludingTypeParameters(false, importResolver),
-                field.getFieldName()));
-
-        // property.setTime(DateUtils.parseDateStrictly(text,FULL_DATE_PATTERNS ););
-        variables =
-            variables.concat(String.format(
-                "                 %s.setTime(%s.parseDateStrictly(txt, FULL_DATE_PATTERNS));\n",
-                field.getFieldName(),
-                dateUtils.getNameIncludingTypeParameters(false, importResolver)));
-
-        expression = buildCalendarExpression(entityVariable, field.getFieldName());
-
-      } else if (field.getFieldType().isBoolean()) {
-        expression = buildBooleanExpression(entityVariable, field.getFieldName());
+        if (isFirst) {
+          bodyBuilder.appendFormalLine(String.format("    expression = %s;",
+              buildStringExpression(entityVariable, field.getFieldName())));
+        } else {
+          bodyBuilder.appendFormalLine(String.format("    expression = expression.or(%s);",
+              buildStringExpression(entityVariable, field.getFieldName())));
+        }
+        isFirst = false;
 
       } else {
+
         try {
           if (ClassUtils.getClass(field.getFieldType().getFullyQualifiedTypeName()).getSuperclass()
               .equals(Number.class)) {
-            expression = buildNumberExpression(entityVariable, field.getFieldName());
-
+            if (isFirst) {
+              bodyBuilder.appendFormalLine(String.format("    expression = %s;",
+                  buildNumberExpression(entityVariable, field.getFieldName())));
+            } else {
+              bodyBuilder.appendFormalLine(String.format("    expression = expression.or(%s);",
+                  buildNumberExpression(entityVariable, field.getFieldName())));
+            }
           } else {
-            expression = String.format("%1$s.%2$s.eq(txt)", entityVariable, field.getFieldName());
+            convertedFields.add(field);
           }
         } catch (ClassNotFoundException e) {
         }
       }
-
-      if (addOr) {
-        query = query.concat(String.format("\n                  .or(%s)", expression));
-      } else {
-        query = query.concat(String.format("                  %s", expression));
-      }
-      addOr = true;
     }
 
-    if (!fields.isEmpty()) {
+    isFirst = buildConvertedFieldsQuery(bodyBuilder, convertedFields, isFirst, entityVariable);
 
-      // where.and(property1.operator(text).or(property2.operator(text).or(...)));
-      if (existsDateField) {
-        bodyBuilder.appendFormalLine(String.format("    try{"));
-        bodyBuilder.appendFormalLine(variables);
-        bodyBuilder.appendFormalLine(String.format("        where.and(\n%s);\n", query));
-        bodyBuilder.appendFormalLine(String.format("    } catch(Exception e){}"));
-      } else {
-        bodyBuilder.appendFormalLine(variables);
-        bodyBuilder.appendFormalLine(String.format("    where.and(\n%s);\n", query));
-      }
+    if (!isFirst) {
+      // where.and(property1.operator(text).or(property2.operator(text).or(...)))
+      bodyBuilder.appendFormalLine(String.format("     where.and(expression);\n"));
     }
 
     // End if 
     bodyBuilder.appendFormalLine(String.format("}"));
 
     bodyBuilder.appendFormalLine(String.format("query.where(where);\n"));
+  }
+
+  /**
+   * Builds a query using field that needed to be converted previously to a java type.
+   * Query method should check if converted type is correct (not null)
+   * 
+   * @param bodyBuilder method body builder
+   * @param fields fields that need a value converted to a specific java type
+   * @param isFirst indicates if the query  has already added expressions
+   * @param entityVariable name of the variable that contains the Q entity 
+   * @return True is returned if the query contains any field expression. Otherwise, returns false
+   */
+  private boolean buildConvertedFieldsQuery(InvocableMemberBodyBuilder bodyBuilder,
+      List<FieldMetadata> fields, boolean isFirst, String entityVariable) {
+    String expression = "";
+
+    for (FieldMetadata field : fields) {
+      if (field.getFieldType().equals(new JavaType(Date.class))) {
+        expression = buildDateExpression(entityVariable, field.getFieldName());
+      } else if (field.getFieldType().equals(new JavaType(Calendar.class))) {
+        expression = buildCalendarExpression(entityVariable, field.getFieldName());
+      } else if (field.getFieldType().isBoolean()) {
+        expression = buildBooleanExpression(entityVariable, field.getFieldName());
+      }
+
+      bodyBuilder.appendFormalLine(String.format("    if(search%s != null){", field.getFieldType()
+          .getSimpleTypeName()));
+
+      if (isFirst) {
+        bodyBuilder.appendFormalLine(String.format("    expression = %s;", expression));
+      } else {
+        bodyBuilder.appendFormalLine(String.format("    expression = expression.or(%s);",
+            expression));
+      }
+      isFirst = false;
+
+      bodyBuilder.appendFormalLine(String.format("    }", expression));
+    }
+
+    return isFirst;
   }
 
   /**
@@ -377,8 +422,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @return string that represents the expression
    */
   private String buildCalendarExpression(String entityVariable, JavaSymbolName fieldName) {
-    // qEntity.property.eq(property);
-    return String.format("%1$s.%2$s.eq(%2$s)", entityVariable, fieldName);
+    // qEntity.property.eq(searchCalendar);
+    return String.format("%s.%s.eq(searchCalendar)", entityVariable, fieldName);
   }
 
   /**
@@ -389,11 +434,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @return string that represents the expression
    */
   private String buildBooleanExpression(String entityVariable, JavaSymbolName fieldName) {
-    JavaType booleanUtils = new JavaType("org.apache.commons.lang3.BooleanUtils");
-
     // qEntity.property.eq(BooleanUtils.toBooleanObject(txt));
-    return String.format("%s.%s.eq(%s.toBooleanObject(txt))", entityVariable, fieldName,
-        booleanUtils.getNameIncludingTypeParameters(false, importResolver));
+    return String.format("%s.%s.eq(searchBoolean)", entityVariable, fieldName);
   }
 
   /**
@@ -417,11 +459,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @return string that represents the expression
    */
   private String buildDateExpression(String entityVariable, JavaSymbolName fieldName) {
-    JavaType dateUtils = new JavaType("org.apache.commons.lang3.time.DateUtils");
-
     // qEntity.property.eq(DateUtils.parseDateStrictly(txt, FULL_DATE_PATTERNS))
-    return String.format("%s.%s.eq(%s.parseDateStrictly(txt, FULL_DATE_PATTERNS))", entityVariable,
-        fieldName, dateUtils.getNameIncludingTypeParameters(false, importResolver));
+    return String.format("%s.%s.eq(searchDate)", entityVariable, fieldName);
   }
 
   /**
