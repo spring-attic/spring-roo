@@ -14,6 +14,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -68,7 +69,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addListView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> fields = getFieldViewItems(entityDetails, true);
+    List<FieldItem> fields = getFieldViewItems(ctx.getEntityName(), entityDetails, true);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -94,7 +95,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addShowView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
+    List<FieldItem> fields = getFieldViewItems(ctx.getEntityName(), entityDetails, false);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -120,7 +121,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addCreateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
+    List<FieldItem> fields = getFieldViewItems(ctx.getEntityName(), entityDetails, false);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -146,7 +147,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addUpdateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldMetadata> fields = getFieldViewItems(entityDetails, false);
+    List<FieldItem> fields = getFieldViewItems(ctx.getEntityName(), entityDetails, false);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -356,7 +357,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   /**
    * This method obtains all necessary information about fields from entity
-   * and returns a List of FieldMetadata.
+   * and returns a List of FieldItem.
    * 
    * If provided entity has more than 5 fields, only the first 5 ones will be
    * included on generated view.
@@ -365,19 +366,19 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * 
    * @return List that contains FieldMetadata that will be added to the view.
    */
-  protected List<FieldMetadata> getFieldViewItems(MemberDetails entityDetails,
+  protected List<FieldItem> getFieldViewItems(String entity, MemberDetails entityDetails,
       boolean checkMaxFields) {
     // Getting entity fields
     List<FieldMetadata> entityFields = entityDetails.getFields();
     int addedFields = 0;
 
     // Get the MAX_FIELDS_TO_ADD
-    List<FieldMetadata> fieldViewItems = new ArrayList<FieldMetadata>();
+    List<FieldItem> fieldViewItems = new ArrayList<FieldItem>();
     for (FieldMetadata entityField : entityFields) {
       // Exclude id and version fields
       if (entityField.getAnnotation(JpaJavaType.ID) == null
           && entityField.getAnnotation(JpaJavaType.VERSION) == null) {
-        fieldViewItems.add(entityField);
+        fieldViewItems.add(new FieldItem(entityField, entity));
       }
       addedFields++;
       if (addedFields == MAX_FIELDS_TO_ADD && checkMaxFields) {

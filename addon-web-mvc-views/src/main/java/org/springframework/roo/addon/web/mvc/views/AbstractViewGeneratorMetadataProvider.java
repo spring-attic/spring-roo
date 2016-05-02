@@ -13,6 +13,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -201,7 +202,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, controller.getType().getModule());
 
     // Setup labels for i18n support
-    String resourceId = XmlUtils.convertId("label." + entity.getSimpleTypeName().toLowerCase());
+    String resourceId = FieldItem.buildLabel(entity.getSimpleTypeName());
 
     properties.put(resourceId,
         new JavaSymbolName(entity.getSimpleTypeName().toLowerCase()).getReadableSymbolName());
@@ -216,20 +217,15 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
     if (!javaTypePersistenceMetadataDetails.isEmpty()) {
       for (final FieldMetadata idField : javaTypePersistenceMetadataDetails) {
-        properties.put(XmlUtils.convertId(resourceId + "."
-            + idField.getFieldName().getSymbolName().toLowerCase()), idField.getFieldName()
+        properties.put(FieldItem.buildFieldLabel(resourceId, idField), idField.getFieldName()
             .getReadableSymbolName());
       }
     }
 
     for (final FieldMetadata field : entityDetails.getFields()) {
-
-      final JavaSymbolName fieldName = field.getFieldName();
-      final String fieldResourceId =
-          XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
+      final String fieldResourceId = FieldItem.buildFieldLabel(resourceId, field);
 
       properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
-
     }
 
     getPropFilesManager().addProperties(webappPath, "messages.properties", properties, true, false);
