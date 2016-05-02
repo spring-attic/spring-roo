@@ -30,6 +30,14 @@
     rel="stylesheet" />
 </noscript>
 
+<!-- Select2 -->
+<link rel="stylesheet" type="text/css"
+  data-th-href="@{/public/css/select2.css}"
+  href="../../static/public/css/select2.css" />
+<link rel="stylesheet" type="text/css"
+  data-th-href="@{/public/css/select2-bootstrap.css}"
+  href="../../static/public/css/select2-bootstrap.css" />
+
 </head>
 <body>
 
@@ -166,6 +174,13 @@
   <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
   <script data-th-remove="all" data-th-src="@{/public/js/bootstrap.min.js}"
     src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
+    
+  <div data-layout-fragment="javascript">
+    <!-- Select2 -->
+    <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
+    <script src="../../static/public/js/select2.full-es.js" data-th-src="@{/public/js/select2.full-es.js}"></script>
+    <script src="../../static/public/js/select2-defaults.js" data-th-src="@{/public/js/select2-defaults.js}"></script>
+  </div>
 
 </body>
 </html>
