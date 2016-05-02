@@ -307,7 +307,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
     // localeResolver.setDefaultLocale(new Locale(\"en\", \"EN\"));
     bodyBuilder.appendFormalLine(String.format(
-        "localeResolver.setDefaultLocale(new %s(\"en\", \"EN\"));",
+        "localeResolver.setDefaultLocale(new %s(\"en\", \"GB\"));",
         new JavaType("java.util.Locale").getNameIncludingTypeParameters(false, importResolver)));
 
     // return
