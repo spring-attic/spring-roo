@@ -185,13 +185,17 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // if (pageable != null) {
     bodyBuilder.appendFormalLine(String.format("if (%s != null) {", pageable));
 
+    bodyBuilder.indent();
+
     if (!fields.isEmpty()) {
       buildOrderClause(fields, bodyBuilder, entityVariable, pageable);
     }
 
     //  query.offset(pageable.getOffset()).limit(pageable.getPageSize());}
     bodyBuilder.appendFormalLine(String.format(
-        "   query.offset(%1$s.getOffset()).limit(%1$s.getPageSize());", pageable));
+        "query.offset(%1$s.getOffset()).limit(%1$s.getPageSize());", pageable));
+
+    bodyBuilder.indentRemove();
 
     // End if
     bodyBuilder.appendFormalLine("}");
@@ -201,14 +205,16 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       bodyBuilder.appendFormalLine(String.format("query.orderBy(%s.asc());", id.getFieldName()));
     }
 
+    bodyBuilder.appendFormalLine("");
+
     // List<Entity> results = query.list(ConstructorExpression.create(Entity.class, qEntity.parameter1, qEntity.parameter1, ...));
     if (!this.isDTO) {
-      bodyBuilder.appendFormalLine(String.format("\n%1$s<%2$s> results = query.list(%3$s);",
+      bodyBuilder.appendFormalLine(String.format("%1$s<%2$s> results = query.list(%3$s);",
           new JavaType("java.util.List").getNameIncludingTypeParameters(false, importResolver),
           returnType.getNameIncludingTypeParameters(false, importResolver), entityVariable));
     } else if (queryList.isEmpty()) {
       bodyBuilder.appendFormalLine(String.format(
-          "\n%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
+          "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
               "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
               .getNameIncludingTypeParameters(false, importResolver), constructorExp
               .getNameIncludingTypeParameters(false, importResolver)));
@@ -294,36 +300,38 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // if (globalSearch != null) {
     bodyBuilder.appendFormalLine(String.format("if (%s != null) {", globalSearch));
 
+    bodyBuilder.indent();
+
     // String txt = globalSearch.getText();
-    bodyBuilder.appendFormalLine(String.format("    String txt = %s.getText();", globalSearch));
+    bodyBuilder.appendFormalLine(String.format("String txt = %s.getText();", globalSearch));
 
     // Boolean searchBoolean = BooleanUtils.toBoolean(txt);
-    bodyBuilder.appendFormalLine(String.format(
-        "    Boolean searchBoolean = %s.toBooleanObject(txt);",
+    bodyBuilder.appendFormalLine(String.format("Boolean searchBoolean = %s.toBooleanObject(txt);",
         booleanUtils.getNameIncludingTypeParameters(false, importResolver)));
 
-    bodyBuilder.appendFormalLine(String.format("    %s searchDate = null;",
+    bodyBuilder.appendFormalLine(String.format("%s searchDate = null;",
         date.getNameIncludingTypeParameters(false, importResolver)));
 
     // Calendar searchCalendar = Calendar.getInstance();
-    bodyBuilder.appendFormalLine(String.format("    %1$s searchCalendar= %1$s.getInstance();\n",
+    bodyBuilder.appendFormalLine(String.format("%1$s searchCalendar= %1$s.getInstance();\n",
         calendar.getNameIncludingTypeParameters(false, importResolver)));
 
-    bodyBuilder.appendFormalLine(String.format("    try{"));
+    bodyBuilder.appendFormalLine(String.format("try{"));
+    bodyBuilder.indent();
 
     // searchDate = DateUtils.parseDateStrictly(txt, FULL_DATE_PATTERNS);
     bodyBuilder.appendFormalLine(String.format(
-        "    searchDate = %s.parseDateStrictly(txt, FULL_DATE_PATTERNS);",
+        "searchDate = %s.parseDateStrictly(txt, FULL_DATE_PATTERNS);",
         dateUtils.getNameIncludingTypeParameters(false, importResolver)));
 
-    bodyBuilder.appendFormalLine(String.format("    searchCalendar.setTime(searchDate);"));
+    bodyBuilder.appendFormalLine(String.format("searchCalendar.setTime(searchDate);"));
 
-    bodyBuilder
-        .appendFormalLine(String
-            .format("    }catch(Exception e){\n      searchDate = null;\n        searchCalendar = null;\n   }"));
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine(String
+        .format("}catch(Exception e){\nsearchDate = null;\n        searchCalendar = null;\n   }"));
 
 
-    bodyBuilder.appendFormalLine(String.format("    %s expression;",
+    bodyBuilder.appendFormalLine(String.format("%s expression;",
         booleanExpr.getNameIncludingTypeParameters(true, importResolver)));
 
 
@@ -334,10 +342,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       if (field.getFieldType().equals(JavaType.STRING)) {
 
         if (isFirst) {
-          bodyBuilder.appendFormalLine(String.format("    expression = %s;",
+          bodyBuilder.appendFormalLine(String.format("expression = %s;",
               buildStringExpression(entityVariable, field.getFieldName())));
         } else {
-          bodyBuilder.appendFormalLine(String.format("    expression = expression.or(%s);",
+          bodyBuilder.appendFormalLine(String.format("expression = expression.or(%s);",
               buildStringExpression(entityVariable, field.getFieldName())));
         }
         isFirst = false;
@@ -348,10 +356,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
           if (ClassUtils.getClass(field.getFieldType().getFullyQualifiedTypeName()).getSuperclass()
               .equals(Number.class)) {
             if (isFirst) {
-              bodyBuilder.appendFormalLine(String.format("    expression = %s;",
+              bodyBuilder.appendFormalLine(String.format("expression = %s;",
                   buildNumberExpression(entityVariable, field.getFieldName())));
             } else {
-              bodyBuilder.appendFormalLine(String.format("    expression = expression.or(%s);",
+              bodyBuilder.appendFormalLine(String.format("expression = expression.or(%s);",
                   buildNumberExpression(entityVariable, field.getFieldName())));
             }
           } else {
@@ -366,10 +374,11 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     if (!isFirst) {
       // where.and(property1.operator(text).or(property2.operator(text).or(...)))
-      bodyBuilder.appendFormalLine(String.format("     where.and(expression);\n"));
+      bodyBuilder.appendFormalLine(String.format("where.and(expression);\n"));
     }
 
     // End if 
+    bodyBuilder.indentRemove();
     bodyBuilder.appendFormalLine(String.format("}"));
 
     bodyBuilder.appendFormalLine(String.format("query.where(where);\n"));
@@ -398,18 +407,20 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         expression = buildBooleanExpression(entityVariable, field.getFieldName());
       }
 
-      bodyBuilder.appendFormalLine(String.format("    if(search%s != null){", field.getFieldType()
+      bodyBuilder.appendFormalLine(String.format("if(search%s != null){", field.getFieldType()
           .getSimpleTypeName()));
 
+      bodyBuilder.indent();
+
       if (isFirst) {
-        bodyBuilder.appendFormalLine(String.format("    expression = %s;", expression));
+        bodyBuilder.appendFormalLine(String.format("expression = %s;", expression));
       } else {
-        bodyBuilder.appendFormalLine(String.format("    expression = expression.or(%s);",
-            expression));
+        bodyBuilder.appendFormalLine(String.format("expression = expression.or(%s);", expression));
       }
       isFirst = false;
 
-      bodyBuilder.appendFormalLine(String.format("    }", expression));
+      bodyBuilder.indentRemove();
+      bodyBuilder.appendFormalLine(String.format("}", expression));
     }
 
     return isFirst;
@@ -492,43 +503,46 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType sort = new JavaType("org.springframework.data.domain.Sort");
 
     //  if (pageable.getSort() != null) {
-    bodyBuilder.appendFormalLine(String.format("    if (%s.getSort() != null) {", pageable));
+    bodyBuilder.appendFormalLine(String.format("if (%s.getSort() != null) {", pageable));
+    bodyBuilder.indent();
 
     //for (Sort.Order sortOrder : pageable.getSort()) {
-    bodyBuilder.appendFormalLine(String.format("       for (%s.Order order : %s.getSort()) {",
+    bodyBuilder.appendFormalLine(String.format("for (%s.Order order : %s.getSort()) {",
         sort.getNameIncludingTypeParameters(false, importResolver), pageable));
-
+    bodyBuilder.indent();
 
     // Order direction = sortOrder.isAscending() ? Order.ASC : Order.DESC;
     bodyBuilder.appendFormalLine(String.format(
-        "           %1$s direction = order.isAscending() ? %1$s.ASC : %1$s.DESC;\n",
+        "%1$s direction = order.isAscending() ? %1$s.ASC : %1$s.DESC;\n",
         order.getNameIncludingTypeParameters(false, importResolver)));
 
-    bodyBuilder.appendFormalLine(String.format("           switch(order.getProperty()){"));
+    bodyBuilder.appendFormalLine(String.format("switch(order.getProperty()){"));
+    bodyBuilder.indent();
 
     for (FieldMetadata field : fields) {
 
       // case "property":
-      bodyBuilder
-          .appendFormalLine(String.format("              case \"%s\":", field.getFieldName()));
+      bodyBuilder.appendFormalLine(String.format("case \"%s\":", field.getFieldName()));
 
       // query.orderBy(new OrderSpecifier<String>(dir, qEntity.property));
-      bodyBuilder.appendFormalLine(String.format(
-          "                 query.orderBy(new %s<%s>(direction, %s.%s));",
+      bodyBuilder.appendFormalLine(String.format("   query.orderBy(new %s<%s>(direction, %s.%s));",
           orderSpecifier.getNameIncludingTypeParameters(false, importResolver), field
               .getFieldType().toObjectType().getNameIncludingTypeParameters(false, importResolver),
           entityVariable, field.getFieldName()));
-      bodyBuilder.appendFormalLine("                break;");
+      bodyBuilder.appendFormalLine("   break;");
     }
 
     // End switch
-    bodyBuilder.appendFormalLine("            }");
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
 
     // End  for
-    bodyBuilder.appendFormalLine("      }");
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
 
     // End if
-    bodyBuilder.appendFormalLine("  }");
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
   }
 
 
