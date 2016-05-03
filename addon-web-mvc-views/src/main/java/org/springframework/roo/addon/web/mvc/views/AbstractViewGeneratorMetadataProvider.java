@@ -202,7 +202,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, controller.getType().getModule());
 
     // Setup labels for i18n support
-    String resourceId = FieldItem.buildLabel(entity.getSimpleTypeName());
+    String resourceId = FieldItem.buildLabel(entity.getSimpleTypeName(), "");
 
     properties.put(resourceId,
         new JavaSymbolName(entity.getSimpleTypeName().toLowerCase()).getReadableSymbolName());
@@ -217,13 +217,14 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
     if (!javaTypePersistenceMetadataDetails.isEmpty()) {
       for (final FieldMetadata idField : javaTypePersistenceMetadataDetails) {
-        properties.put(FieldItem.buildFieldLabel(resourceId, idField), idField.getFieldName()
-            .getReadableSymbolName());
+        properties.put(FieldItem.buildLabel(resourceId, idField.getFieldName().getSymbolName()),
+            idField.getFieldName().getReadableSymbolName());
       }
     }
 
     for (final FieldMetadata field : entityDetails.getFields()) {
-      final String fieldResourceId = FieldItem.buildFieldLabel(resourceId, field);
+      final String fieldResourceId =
+          FieldItem.buildLabel(resourceId, field.getFieldName().getSymbolName());
 
       properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
     }

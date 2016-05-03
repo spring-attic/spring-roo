@@ -7,12 +7,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.jvnet.inflector.Noun;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -428,7 +430,11 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           fieldItem.setType(FieldTypes.BOOLEAN.toString());
         } else if (typeDetails != null
             && typeDetails.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+          // Saving enum and items to display. Same name as populateForm method
           fieldItem.setType(FieldTypes.ENUM.toString());
+          fieldItem.addConfigurationElement("items",
+              Noun.pluralOf(entityField.getFieldName().getSymbolName(), Locale.ENGLISH));
+
         } else if (type.getFullyQualifiedTypeName().equals(Date.class.getName())
             || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
           // Check if is a date field

@@ -1,6 +1,11 @@
 (function(jQuery){
+	
+		jQuery('.dropdown-select-simple').select2({
+			debug: false,
+			theme: "bootstrap"
+		});
 
-		jQuery('.dropdown-select').select2({
+		jQuery('.dropdown-select-ajax').select2({
 			debug: false,
 			theme: "bootstrap",
 			ajax: {

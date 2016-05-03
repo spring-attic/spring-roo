@@ -1,5 +1,7 @@
 <#import "fields/input-text.ftl" as text>
 <#import "fields/reference.ftl" as reference>
+<#import "fields/checkbox.ftl" as checkbox>
+<#import "fields/enum.ftl" as enum>
 <!DOCTYPE html>
 <html lang="es" data-layout-decorator="layouts/default-layout">
 <head>
@@ -130,6 +132,12 @@
                         referencedPath=field.configuration.referencedPath
                         fieldOne=field.configuration.fieldOne
                         fieldTwo=field.configuration.fieldTwo />
+                <#elseif field.type == "ENUM">
+                    <@enum.input label=field.label 
+                    fieldName=field.fieldName
+                    items=field.configuration.items />                
+                <#elseif field.type == "BOOLEAN">
+                    <@checkbox.input label=field.label fieldName=field.fieldName />                
                 </#if>
             </#list>
 

@@ -3,7 +3,7 @@ package org.springframework.roo.addon.web.mvc.views.components;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.roo.classpath.details.FieldMetadata;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
 /**
@@ -26,15 +26,15 @@ public class FieldItem {
   private int z;
 
   /**
-   * Constructs a FieldItem sung the name and entityName
+   * Constructs a FieldItem using the name and entityName
    * 
-   * @param name the field name
+   * @param fieldName the field name
    * @param entityName the entity where this field is defined
    * @param type the field java type
    */
-  public FieldItem(String name, String entityName) {
-    this.fieldName = name;
-    this.label = buildLabel(entityName);
+  public FieldItem(String fieldName, String entityName) {
+    this.fieldName = fieldName;
+    this.label = buildLabel(entityName, fieldName);
     this.configuration = new HashMap<String, String>();
 
     // Calculate the Z parameter as the hash code of the other parameters
@@ -42,16 +42,17 @@ public class FieldItem {
   }
 
   /**
-   * Constructs a FieldItem sung the name, entityName and type of a field
+   * Constructs a FieldItem using the name, entityName and type of a field
    * 
-   * @param name the field name
+   * @param fieldName the field name
    * @param entityName the entity where this field is defined
    * @param type the field java type
    * @param configuration
    */
-  public FieldItem(String name, String entityName, String type, Map<String, String> configuration) {
-    this.fieldName = name;
-    this.label = buildLabel(entityName);
+  public FieldItem(String fieldName, String entityName, String type,
+      Map<String, String> configuration) {
+    this.fieldName = fieldName;
+    this.label = buildLabel(entityName, fieldName);
     this.type = type;
     this.configuration = configuration;
 
@@ -59,38 +60,24 @@ public class FieldItem {
     this.z = calculateZ();
   }
 
-  /**
-   * Builds the label of the entity
-   * 
-   * @param entity the entity name
-   * @return label
-   */
-  public static String buildLabel(String entity) {
-    return XmlUtils.convertId("label." + entity.toLowerCase());
-  }
-
-
-  /**
-   * Builds the label of the entity and its field
-   * 
-   * @param entity the entity name
-   * @param field the entity field metadata
-   * @return label
-   */
-  static String buildLabel(String entity, FieldMetadata field) {
-    return buildFieldLabel(buildLabel(entity), field);
-  }
 
   /**
    * Builds the label of the specified field and adds it to the entity label
    * 
-   * @param entityLabel the entity label to concatenate the field name
-   * @param field the field metadata
+   * @param entity the entity name
+   * @param field the field name
    * @return label
    */
-  public static String buildFieldLabel(String entityLabel, FieldMetadata field) {
-    return XmlUtils.convertId(entityLabel + "."
-        + field.getFieldName().getSymbolName().toLowerCase());
+  public static String buildLabel(String entityName, String fieldName) {
+    String entityLabel = XmlUtils.convertId("label." + entityName.toLowerCase());
+
+    // If field is blank or null, only entity label will be generated
+    if (fieldName != null && StringUtils.isBlank(fieldName)) {
+      return entityLabel;
+    }
+
+    // Else, is necessary to concat fieldName to generate full field label
+    return XmlUtils.convertId(entityLabel.concat(".").concat(fieldName.toLowerCase()));
   }
 
   /**
