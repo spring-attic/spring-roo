@@ -3,7 +3,7 @@
     <label for="${fieldName}" class="col-md-3 control-label" data-th-text="${label}">${referencedEntity}</label>
     <div class="col-md-6">
       <!-- Select2 -->
-      <select id="${fieldName}" class="dropdown-select-ajax" style="width: 50%" 
+      <select data-th-field="*{${fieldName}}" class="dropdown-select-ajax" style="width: 50%" 
         data-placeholder="Select an option" data-allow-clear="true" 
         data-id-field="${identifierField}" data-text-fields="${fieldOne},${fieldTwo}" 
         data-ajax--url="${referencedPath}" data-ajax--cache="true" data-ajax--delay="250" 
@@ -13,6 +13,9 @@
             data-th-text="|*{${fieldName}.${fieldOne}} *{${fieldName}.${fieldTwo}}|" 
          selected="selected">${referencedEntity}</option>
       </select>
+      <span id="name-help" class="help-block"
+      data-th-if="${r"${#fields.hasErrors"}('${fieldName}')}"
+      data-th-errors="*{${fieldName}}">Help message.</span>
     </div>
 </div>
 </#macro>

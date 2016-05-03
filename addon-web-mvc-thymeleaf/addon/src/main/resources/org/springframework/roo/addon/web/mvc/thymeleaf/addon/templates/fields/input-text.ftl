@@ -6,7 +6,7 @@
     <input data-th-field="*{${fieldName}}" type="text" class="form-control"
       placeholder="${fieldName}"
       data-th-placeholder="${fieldName}"
-      data-toggle="tooltip" title="Mandatory Field"/> <span
+      data-toggle="tooltip"/> <span
       id="name-help" class="help-block"
       data-th-if="${r"${#fields.hasErrors"}('${fieldName}')}"
       data-th-errors="*{${fieldName}}">Help message.</span>

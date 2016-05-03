@@ -115,7 +115,7 @@
             <dl class="dl-horizontal">
               <#list fields as field>
               <dt>${field.fieldName}</dt>
-              <dd data-th-text="*{${field.fieldName}}">${field.fieldName}Value</dd>
+              <dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
               </#list>
             </dl>
 
