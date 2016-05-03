@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -654,10 +655,34 @@ public class ControllerCommands implements CommandMarker {
     if (all) {
       getControllerOperations().createControllerForAllEntities(controllersPackage,
           responseTypeServices.get(responseType), formattersPackage);
+    } else if (controllerExists(controller)) {
+      getControllerOperations()
+          .updateController(controller, responseTypeServices.get(responseType));
     } else {
       getControllerOperations().createController(controller, entity, service, path,
           responseTypeServices.get(responseType), formattersPackage);
     }
+  }
+
+  /**
+   * Checks if provided controller already exists.
+   * 
+   * @param controller JavaType representing provided controller
+   * @return <code>true</code> if provided controller already exists
+   */
+  private boolean controllerExists(JavaType controller) {
+    Validate.notNull(controller,
+        "ERROR: Controller class is required to be able to generate or update new controller");
+
+    Set<JavaType> controllers =
+        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_CONTROLLER);
+    for (JavaType controllerType : controllers) {
+      if (controllerType.equals(controller)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

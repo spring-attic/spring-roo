@@ -71,4 +71,12 @@ public interface ControllerOperations extends Feature {
   void createController(JavaType controller, JavaType entity, JavaType service, String path,
       ControllerMVCResponseService responseType, JavaPackage formattersPackage);
 
+  /**
+   * Adds provided response type to existing controller
+   * 
+   * @param controller
+   * @param controllerMVCResponseService
+   */
+  void updateController(JavaType controller, ControllerMVCResponseService responseType);
+
 }

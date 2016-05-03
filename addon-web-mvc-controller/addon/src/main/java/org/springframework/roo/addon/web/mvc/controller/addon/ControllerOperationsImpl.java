@@ -65,6 +65,7 @@ import org.springframework.roo.support.util.FileUtils;
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @author Paula Navarro
+ * @author Sergio Clares
  * @since 1.0
  */
 @Component
@@ -457,6 +458,25 @@ public class ControllerOperationsImpl implements ControllerOperations {
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(controller.getModule(), serviceImplType.getModule());
     getProjectOperations().addModuleDependency(controller.getModule(), service.getModule());
+  }
+
+  @Override
+  public void updateController(JavaType controller, ControllerMVCResponseService responseType) {
+    ClassOrInterfaceTypeDetails controllerCid = getTypeLocationService().getTypeDetails(controller);
+    if (controllerCid.getAnnotation(responseType.getAnnotation()) == null) {
+
+      // Get controller builder
+      ClassOrInterfaceTypeDetailsBuilder controllerCidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(controllerCid);
+      controllerCidBuilder
+          .addAnnotation(new AnnotationMetadataBuilder(responseType.getAnnotation()).build());
+
+      // Write changes to disk
+      getTypeManagementService().createOrUpdateTypeOnDisk(controllerCidBuilder.build());
+    } else {
+      LOGGER.info(String.format("No changes are necessary. %s already has %s responseType",
+          controller.getSimpleTypeName(), responseType.getName()));
+    }
   }
 
   /**
@@ -943,4 +963,5 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
     return false;
   }
+
 }
