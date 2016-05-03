@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.formatters;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -206,7 +208,22 @@ public class FormatterMetadataProviderImpl extends AbstractMemberDiscoveringItdM
         (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
 
     if (javaBeanMetadata.getAccesorMethods() != null) {
-      accessors.addAll(javaBeanMetadata.getAccesorMethods());
+      // Get accessors
+      List<MethodMetadata> javaBeanAccessors = javaBeanMetadata.getAccesorMethods();
+      for (MethodMetadata method : javaBeanAccessors) {
+        JavaType returnType = method.getReturnType();
+        ClassOrInterfaceTypeDetails typeDetails =
+            getTypeLocationService().getTypeDetails(returnType);
+        // Ignore Set, List, Dates and Entity fields
+        if (returnType.getFullyQualifiedTypeName().equals(Set.class.getName())
+            || returnType.getFullyQualifiedTypeName().equals(List.class.getName())
+            || returnType.getFullyQualifiedTypeName().equals(Date.class.getName())
+            || returnType.getFullyQualifiedTypeName().equals(Calendar.class.getName())
+            || typeDetails != null) {
+          continue;
+        }
+        accessors.add(method);
+      }
     }
 
     // Check if entity has superclass, to get accessors
@@ -219,7 +236,22 @@ public class FormatterMetadataProviderImpl extends AbstractMemberDiscoveringItdM
       javaBeanMetadata = (JavaBeanMetadata) getMetadataService().get(javaBeanMetadataKey);
 
       if (javaBeanMetadata != null && javaBeanMetadata.getAccesorMethods() != null) {
-        accessors.addAll(javaBeanMetadata.getAccesorMethods());
+        // Get accessors
+        List<MethodMetadata> javaBeanAccessors = javaBeanMetadata.getAccesorMethods();
+        for (MethodMetadata method : javaBeanAccessors) {
+          JavaType returnType = method.getReturnType();
+          ClassOrInterfaceTypeDetails typeDetails =
+              getTypeLocationService().getTypeDetails(returnType);
+          // Ignore Set, List, Dates and Entity fields
+          if (returnType.getFullyQualifiedTypeName().equals(Set.class.getName())
+              || returnType.getFullyQualifiedTypeName().equals(List.class.getName())
+              || returnType.getFullyQualifiedTypeName().equals(Date.class.getName())
+              || returnType.getFullyQualifiedTypeName().equals(Calendar.class.getName())
+              || typeDetails != null) {
+            continue;
+          }
+          accessors.add(method);
+        }
       }
     }
 
