@@ -97,10 +97,9 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
 
     } catch (Exception e) {
       throw new RuntimeException(
-          String
-              .format(
-                  "ERROR: Error trying to generate final content from provided template '%s.ftl'. You should provide a valid .ftl file",
-                  templateName));
+          String.format(
+              "ERROR: Error trying to generate final content from provided template '%s.ftl'. You should provide a valid .ftl file",
+              templateName), e);
     }
 
   }

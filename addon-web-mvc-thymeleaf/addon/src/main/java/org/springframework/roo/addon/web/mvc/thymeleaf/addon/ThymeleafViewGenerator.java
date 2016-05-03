@@ -93,6 +93,8 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
         getTemplatesLocation().concat("/").concat("fragments"), true);
     copyDirectoryContents("templates/layouts/*.ftl",
         getTemplatesLocation().concat("/").concat("layouts"), true);
+    copyDirectoryContents("templates/fields/*.ftl",
+        getTemplatesLocation().concat("/").concat("fields"), true);
   }
 
 }

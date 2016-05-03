@@ -1,46 +1,59 @@
 package org.springframework.roo.addon.web.mvc.views.components;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.support.util.XmlUtils;
 
 /**
- * FieldMetadata DTO that contains the field data that views will use to display the property
+ * This class contains all necessary information about a field to be displayed
+ * on generated views.
+ * 
+ * Will receive a FieldMetadata item to be able to obtain all this necessary
+ * information.
  * 
  * @author Paula Navarro
+ * @autor Juan Carlos García
  * @since 2.0
  */
 public class FieldItem {
 
   private String fieldName;
-
   private String label;
-
   private String type;
-
+  private Map<String, String> configuration;
   private int z;
 
   /**
-   * Constructs a FieldItem based on the specified field properties
+   * Constructs a FieldItem sung the name and entityName
    * 
-   * @param field the field that will represent the FieldItem
-   * @param entity the entity name used to get the field label
+   * @param name the field name
+   * @param entityName the entity where this field is defined
+   * @param type the field java type
    */
-  public FieldItem(FieldMetadata field, String entity) {
-    this(field.getFieldName().getSymbolName(), buildLabel(entity, field), field.getFieldType()
-        .getSimpleTypeName());
+  public FieldItem(String name, String entityName) {
+    this.fieldName = name;
+    this.label = buildLabel(entityName);
+    this.configuration = new HashMap<String, String>();
+
+    // Calculate the Z parameter as the hash code of the other parameters
+    this.z = calculateZ();
   }
 
   /**
-   * Constructs a FieldItem sung the name, label and type of a field
+   * Constructs a FieldItem sung the name, entityName and type of a field
    * 
    * @param name the field name
-   * @param label the field label registered on messages.properties
+   * @param entityName the entity where this field is defined
    * @param type the field java type
+   * @param configuration
    */
-  public FieldItem(String name, String label, String type) {
+  public FieldItem(String name, String entityName, String type, Map<String, String> configuration) {
     this.fieldName = name;
-    this.label = label;
+    this.label = buildLabel(entityName);
     this.type = type;
+    this.configuration = configuration;
 
     // Calculate the Z parameter as the hash code of the other parameters
     this.z = calculateZ();
@@ -55,6 +68,7 @@ public class FieldItem {
   public static String buildLabel(String entity) {
     return XmlUtils.convertId("label." + entity.toLowerCase());
   }
+
 
   /**
    * Builds the label of the entity and its field
@@ -125,6 +139,12 @@ public class FieldItem {
     this.z = z;
   }
 
+  public Map<String, String> getConfiguration() {
+    return this.configuration;
+  }
 
+  public void addConfigurationElement(String key, String value) {
+    this.configuration.put(key, value);
+  }
 
 }

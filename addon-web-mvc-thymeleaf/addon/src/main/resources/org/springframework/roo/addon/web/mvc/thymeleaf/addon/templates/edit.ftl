@@ -1,3 +1,5 @@
+<#import "fields/input-text.ftl" as text>
+<#import "fields/reference.ftl" as reference>
 <!DOCTYPE html>
 <html lang="es" data-layout-decorator="layouts/default-layout">
 <head>
@@ -118,19 +120,17 @@
           <input type="hidden" name="_method" value="PUT" />
           <fieldset>
             <#list fields as field>
-            <div class="form-group"
-              data-th-classappend="${r"${#fields.hasErrors('name')}"}? 'has-error'">
-              <label for="${field.fieldName}" class="col-md-3 control-label">${field.fieldName}</label>
-              <div class="col-md-3">
-                <input data-th-field="*{${field.fieldName}}" type="text" class="form-control"
-                  placeholder="${field.fieldName}"
-                  data-th-placeholder="${field.fieldName}"
-                  data-toggle="tooltip" title="Mandatory Field"/> <span
-                  id="name-help" class="help-block"
-                  data-th-if="${r"${#fields.hasErrors('name')}"}"
-                  data-th-errors="*{${field.fieldName}}">Help message.</span>
-              </div>
-            </div>
+                <#if field.type == "TEXT">
+                    <@text.input label=field.label fieldName=field.fieldName />
+                <#elseif field.type == "REFERENCE">
+                    <@reference.input label=field.label 
+                        fieldName=field.fieldName 
+                        referencedEntity=field.configuration.referencedEntity
+                        identifierField=field.configuration.identifierField
+                        referencedPath=field.configuration.referencedPath
+                        fieldOne=field.configuration.fieldOne
+                        fieldTwo=field.configuration.fieldTwo />
+                </#if>
             </#list>
 
             <!-- FORM BUTTONS -->
