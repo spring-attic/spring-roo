@@ -34,6 +34,7 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -439,6 +440,27 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
             || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
           // Check if is a date field
           fieldItem.setType(FieldTypes.DATE.toString());
+          // Getting datetime format to use
+          AnnotationMetadata dateTimeFormatAnnotation =
+              entityField.getAnnotation(SpringJavaType.DATE_TIME_FORMAT);
+          String format = "d/m/Y";
+          if (dateTimeFormatAnnotation != null) {
+            AnnotationAttributeValue<String> styleAttribute =
+                dateTimeFormatAnnotation.getAttribute("style");
+            if (styleAttribute != null) {
+              String annotationFormat = styleAttribute.getValue();
+              if (annotationFormat.equals("M-")) {
+                format = "d-M-Y";
+              } else {
+                format = annotationFormat;
+              }
+            }
+          }
+          fieldItem.addConfigurationElement("format", format);
+        } else if (type.getFullyQualifiedTypeName().equals("java.util.Set")
+            || type.getFullyQualifiedTypeName().equals("java.util.List")) {
+          // Ignore if field type is Set or List
+          continue;
         } else {
           fieldItem.setType(FieldTypes.TEXT.toString());
         }

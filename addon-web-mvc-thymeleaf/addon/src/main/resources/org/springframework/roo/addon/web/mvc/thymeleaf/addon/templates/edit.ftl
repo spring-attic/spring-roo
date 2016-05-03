@@ -1,4 +1,5 @@
 <#import "fields/input-text.ftl" as text>
+<#import "fields/input-date.ftl" as date>
 <#import "fields/reference.ftl" as reference>
 <#import "fields/checkbox.ftl" as checkbox>
 <#import "fields/enum.ftl" as enum>
@@ -41,6 +42,13 @@
 <link rel="stylesheet" type="text/css"
   data-th-href="@{/public/css/select2-bootstrap.css}"
   href="../../static/public/css/select2-bootstrap.css" />
+  
+<!-- DateTimePicker -->
+<link rel="stylesheet" type="text/css"
+    data-th-href="@{/public/css/jquery.datetimepicker.css}"
+    href="../../static/public/css/jquery.datetimepicker.css" />
+<script data-th-src="@{/public/js/jquery.min.js}"
+    src="../../static/public/js/jquery.min.js"></script>
 
 </head>
 <body>
@@ -124,6 +132,10 @@
             <#list fields as field>
                 <#if field.type == "TEXT">
                     <@text.input label=field.label fieldName=field.fieldName />
+                <#elseif field.type == "DATE">
+                    <@date.input label=field.label 
+                    fieldName=field.fieldName
+                    format=field.configuration.format />
                 <#elseif field.type == "REFERENCE">
                     <@reference.input label=field.label 
                         fieldName=field.fieldName 
@@ -182,13 +194,15 @@
   <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
   <script data-th-remove="all" data-th-src="@{/public/js/bootstrap.min.js}"
     src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
-    
+  
   <div data-layout-fragment="javascript">
-    <!-- Select2 -->
-    <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
-    <script src="../../static/public/js/select2.full-es.js" data-th-src="@{/public/js/select2.full-es.js}"></script>
-    <script src="../../static/public/js/select2-defaults.js" data-th-src="@{/public/js/select2-defaults.js}"></script>
+      <!-- Select2 -->
+      <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
+      <script src="../../static/public/js/select2.full-es.js" data-th-src="@{/public/js/select2.full-es.js}"></script>
+      <script src="../../static/public/js/select2-defaults.js" data-th-src="@{/public/js/select2-defaults.js}"></script>
+      <!-- DateTime Picker -->
+      <script src="../../static/public/js/jquery.datetimepicker.full.min.js" data-th-src="@{/public/js/jquery.datetimepicker.full.min.js}"></script>
   </div>
-
+  
 </body>
 </html>
