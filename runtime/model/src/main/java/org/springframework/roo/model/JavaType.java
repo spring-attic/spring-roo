@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -696,6 +697,20 @@ public class JavaType implements Comparable<JavaType> {
    */
   public boolean isMultiValued() {
     return isCommonCollectionType() || isArray();
+  }
+
+  /**
+   * Indicates whether this type is any kind of number
+   * 
+   * @return see above
+   * @since 2.0
+   */
+  public boolean isNumber() {
+    try {
+      return ClassUtils.getClass(getFullyQualifiedTypeName()).getSuperclass().equals(Number.class);
+    } catch (ClassNotFoundException e) {
+      return false;
+    }
   }
 
   /**

@@ -236,11 +236,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     // Getting entity properties for findAll method
-    ClassOrInterfaceTypeDetails searchResultCid =
-        getTypeLocationService().getTypeDetails(repositoryCustomMetadata.getSearchResult());
-
-    MemberDetails searchResultDetails =
-        getMemberDetailsScanner().getMemberDetails(getClass().getName(), searchResultCid);
+    MemberDetails entityMemberDetails =
+        getMemberDetailsScanner().getMemberDetails(getClass().getName(), entityDetails);
 
 
     // Removing duplicates in persistent properties
@@ -265,7 +262,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     boolean isAudit;
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
 
-    for (FieldMetadata field : searchResultDetails.getFields()) {
+    for (FieldMetadata field : entityMemberDetails.getFields()) {
 
       // Exclude non-simple fields
       if (field.getFieldType().isMultiValued()) {
@@ -295,8 +292,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         continue;
       }
 
-      // Exclude references to other entities
-      if (getTypeLocationService().getTypeDetails(field.getFieldType()) == null) {
+      // Exclude non string or number fields
+      if (field.getFieldType().equals(JavaType.STRING) || field.getFieldType().isNumber()) {
         validFields.add(field);
         if (validFields.size() == maxFields) {
           break;
