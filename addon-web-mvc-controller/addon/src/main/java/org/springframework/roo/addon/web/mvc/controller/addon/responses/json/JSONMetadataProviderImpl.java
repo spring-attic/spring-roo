@@ -675,7 +675,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
           returnParameterTypes.get(i));
     }
 
-    // Page<Object> objects = entityService.findAll(search, pageable);
+    // ReturnType<ReturnTypeParams> objects = entityService.findAll(search, pageable);
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
         addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
@@ -725,11 +725,22 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Get parameters
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    List<FinderParameter> finderParams = finderMethod.getParameters();
+    StringBuffer finderParamsString = new StringBuffer();
+    for (int i = 0; i < finderParams.size(); i++) {
+      AnnotationMetadataBuilder requestParamAnnotation =
+          new AnnotationMetadataBuilder(SpringJavaType.REQUEST_PARAM);
+      requestParamAnnotation.addStringAttribute("value", finderParams.get(i).getName()
+          .getSymbolName());
+      parameterTypes.add(new AnnotatedJavaType(finderParams.get(i).getType(),
+          requestParamAnnotation.build()));
+      parameterNames.add(finderParams.get(i).getName());
 
-    for (FinderParameter parameter : finderMethod.getParameters()) {
-      parameterTypes.add(new AnnotatedJavaType(parameter.getType(), new AnnotationMetadataBuilder(
-          SpringJavaType.REQUEST_PARAM).build()));
-      parameterNames.add(parameter.getName());
+      // Build finder parameters String
+      if (i > 0) {
+        finderParamsString.append(",");
+      }
+      finderParamsString.append(finderParams.get(i).getName());
     }
 
     // Adding annotations
@@ -748,12 +759,33 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // return entityService.FINDER_METHOD(%s);
-    bodyBuilder.appendFormalLine(String.format("return %s.%s(%s);", getServiceField()
-        .getFieldName(), finderMethod.getMethodName(), StringUtils.join(parameters, ", ")));
-
     // Generating returnType
     JavaType returnType = finderMethod.getReturnType();
+    List<JavaType> returnParameterTypes = returnType.getParameters();
+    StringBuffer returnTypeParamsString = new StringBuffer();
+    for (int i = 0; i < returnParameterTypes.size(); i++) {
+      addTypeToImport(returnParameterTypes.get(i));
+      if (i > 0) {
+        returnTypeParamsString.append(",");
+      }
+      returnTypeParamsString.append(returnParameterTypes.get(i).getSimpleTypeName());
+
+      // Add module dependency
+      getTypeLocationService().addModuleDependency(this.controller.getType().getModule(),
+          returnParameterTypes.get(i));
+    }
+
+    // ReturnType<ReturnTypeParams> entity = ENTITY_SERVICE_FIELD.FINDER_NAME(SEARCH_PARAMS);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(%s);",
+        addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
+        StringUtils.uncapitalize(this.entityPlural), getServiceField().getFieldName(), methodName,
+        finderParamsString));
+
+    // return entityService.FINDER_METHOD(%s);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("return %s;",
+        StringUtils.uncapitalize(this.entityPlural)));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,

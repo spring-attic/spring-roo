@@ -459,3 +459,8 @@ web mvc controller --controller ~.web.EmployeesController --entity ~.domain.Empl
 web mvc controller --controller ~.web.ShippersController --entity ~.domain.Shipper --service ~.service.api.ShipperService --formattersPackage ~.format --responseType THYMELEAF
 web mvc controller --controller ~.web.StoresController --entity ~.domain.Store --service ~.service.api.StoreService --formattersPackage ~.format --responseType THYMELEAF
 web mvc controller --controller ~.web.SuppliersController --entity ~.domain.Supplier --service ~.service.api.SupplierService --formattersPackage ~.format --responseType THYMELEAF
+
+// Update controller with JSON response type and add a finder to JSON response layer
+web mvc controller --controller ~.web.ShippersController --responseType JSON
+web mvc finder --controller ~.web.ShippersController --all --responseType JSON
+
