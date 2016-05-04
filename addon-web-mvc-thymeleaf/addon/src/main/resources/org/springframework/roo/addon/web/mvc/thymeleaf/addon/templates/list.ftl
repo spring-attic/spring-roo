@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-layout-decorator="layouts/default-layout">
+<html data-layout-decorator="layouts/default-layout">
 
 <head>
   <meta charset="utf-8" />
@@ -8,7 +8,7 @@
   <meta name="description" content="${projectName}" data-th-remove="all" />
   <meta name="author" content="Spring Roo" data-th-remove="all" />
   
-  <title>List ${entityName}</title>
+  <title data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</title>
   
   <!-- Bootstrap -->
   
@@ -51,13 +51,13 @@
   <!-- Session -->
   <div class="container upper-nav">
     <div class="session">
-      <div>
+      <div data-th-text="${r"#{"}label_user${r"}"}">
         <span class="glyphicon glyphicon-user" aria-hidden="true"></span>User
       </div>
-      <div>
+      <div data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}">
         <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000
       </div>
-      <button type="submit" class="exit">
+      <button type="submit" class="exit" data-th-text="${r"#{"}label_exit${r"}"}">
         <span class="glyphicon glyphicon-off" aria-hidden="true"></span>Exit
       </button>
     </div>
@@ -129,13 +129,13 @@
                  data-select="single"
                  data-order="[[ 0, &quot;asc&quot; ]]"
                  data-th-attr="data-ajax-url=@{${controllerPath}/},data-create-url=@{${controllerPath}/create-form/}">
-            <caption>List ${entityName}</caption>
+            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
             <thead>
               <tr>
                 <#list fields as field>
-                <th>${field.fieldName}</th>
+                <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
                 </#list>
-                <th>Tools</th>
+                <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
               </tr>
             </thead>
             <tbody data-th-remove="all">
@@ -143,7 +143,7 @@
                 <#list fields as field>
                 <td>${field.fieldName}</td>
                 </#list>
-                <td>Tools</td>
+                <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
               </tr>
             </tbody>
           </table>
@@ -153,7 +153,7 @@
         <div class="clearfix">
           <div class="pull-left">
             <a href="../index.html" class="btn btn-default"
-               data-th-href="@{/}">
+               data-th-href="@{/}" data-th-text="${r"#{label_back}"}">
                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>Back
             </a>
           </div>
@@ -164,7 +164,7 @@
       
        <!-- MODAL -->
       <div
-        data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=Delete)">
+        data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
 
         <script type="text/javascript">
             function openDeleteModal(){
@@ -178,13 +178,13 @@
             <div class="modal-content">
               <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"
-                  aria-label="Close">
+                  aria-label="${r"#{"}label_close${r"}"}">
                   <span aria-hidden="true">&times;</span>
                 </button>
-                <h2 class="modal-title" id="staticModalLabel">Delete</h2>
+                <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete${r"}"}">Delete</h2>
               </div>
               <div class="modal-body" id="staticModalBody">
-                <p>Message</p>
+                <p data-th-text="${r"#{"}label_message${r"}"}">Message</p>
               </div>
             </div>
           </div>
@@ -239,8 +239,8 @@
                 'orderable': false,
                 'searchable': false,
                 'render': function ( data, type, full, meta ) {
-                    return '<a role="button" class="btn-accion ver" href="${controllerPath}/' + data + '">Show</a>' +
-                    '<a role="button" class="btn-accion modificar" href="${controllerPath}/' + data + '/edit-form">Edit</a>' +
+                    return '<a role="button" class="btn-accion ver" href="${controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
+                    '<a role="button" class="btn-accion modificar" href="${controllerPath}/' + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
                     '<a role="button" class="btn-accion eliminar" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
                 }
               }

@@ -17,6 +17,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGenerationService;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
+import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.osgi.OSGiUtils;
@@ -71,6 +72,10 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
 
       // Getting entity information from ViewContext
       input.put("entityName", ctx.getEntityName());
+      if (ctx.getEntityName() != null) {
+        input.put("entityLabel", FieldItem.buildLabel(ctx.getEntityName(), ""));
+        input.put("entityLabelPlural", FieldItem.buildLabel(ctx.getEntityName(), "plural"));
+      }
       input.put("identifierField", ctx.getIdentifierField());
       input.put("modelAttribute", String.format("${%s}", ctx.getModelAttribute()));
 

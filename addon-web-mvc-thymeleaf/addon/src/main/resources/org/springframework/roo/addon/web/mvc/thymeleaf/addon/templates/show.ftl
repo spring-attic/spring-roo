@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-layout-decorator="layouts/default-layout">
+<html data-layout-decorator="layouts/default-layout">
 <head>
 <meta charset="utf-8" data-th-remove="all" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
@@ -14,7 +14,7 @@
 <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
   href="../../static/public/img/favicon.ico" />
 
-<title>Show ${entityName}</title>
+<title data-th-text="${r"#{"}label_show(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</title>
 
 <!-- Bootstrap core CSS -->
 <link data-th-href="@{/public/css/bootstrap.min.css}" data-th-remove="all"
@@ -38,13 +38,13 @@
     <!-- session -->
     <div class="container upper-nav">
       <div class="session">
-        <div>
+        <div data-th-text="${r"#{"}label_user${r"}"}">
           <span class="glyphicon glyphicon-user" aria-hidden="true"></span>User
         </div>
-        <div>
+        <div data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}">
           <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000
         </div>
-        <button type="submit" class="exit">
+        <button type="submit" class="exit" data-th-text="${r"#{"}label_exit${r"}"}">
           <span class="glyphicon glyphicon-off" aria-hidden="true"></span>Exit
         </button>
       </div>
@@ -105,16 +105,16 @@
     <section data-layout-fragment="content" data-th-object="${modelAttribute}">
 
         <!-- CONTENT -->
-        <h1>${entityName}</h1>
+        <h1 data-th-text="${r"${entityLabel}"}">${entityName}</h1>
 
         <div class="panel panel-default">
           <div class="panel-heading">
-            <h3 class="panel-title">Show ${entityName}</h3>
+            <h3 class="panel-title" data-th-text="${r"#{"}label_show(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</h3>
           </div>
           <div class="panel-body">
             <dl class="dl-horizontal">
               <#list fields as field>
-              <dt>${field.fieldName}</dt>
+              <dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
               <dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
               </#list>
             </dl>
@@ -127,7 +127,7 @@
             <button onclick="location.href='list.html'"
               data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''" type="button"
               class="btn btn-default">
-              <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span><span>Back</span>
+              <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span><span data-th-text="${r"#{"}label_back${r"}"}">Back</span>
             </button>
           </div>
         </div>

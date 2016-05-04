@@ -4,11 +4,13 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
+import org.jvnet.inflector.Noun;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
@@ -201,15 +203,13 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     final LogicalPath webappPath =
         LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, controller.getType().getModule());
 
-    // Setup labels for i18n support
-    String resourceId = FieldItem.buildLabel(entity.getSimpleTypeName(), "");
+    final String entityName = entity.getSimpleTypeName();
 
-    properties.put(resourceId,
-        new JavaSymbolName(entity.getSimpleTypeName().toLowerCase()).getReadableSymbolName());
+    properties.put(FieldItem.buildLabel(entityName, ""), new JavaSymbolName(entity
+        .getSimpleTypeName().toLowerCase()).getReadableSymbolName());
 
-
-    final String pluralResourceId = XmlUtils.convertId(resourceId + ".plural");
-    final String plural = entity.getSimpleTypeName() + "s";
+    final String pluralResourceId = FieldItem.buildLabel(entity.getSimpleTypeName(), "plural");
+    final String plural = Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH);
     properties.put(pluralResourceId, new JavaSymbolName(plural).getReadableSymbolName());
 
     final List<FieldMetadata> javaTypePersistenceMetadataDetails =
@@ -217,14 +217,14 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
     if (!javaTypePersistenceMetadataDetails.isEmpty()) {
       for (final FieldMetadata idField : javaTypePersistenceMetadataDetails) {
-        properties.put(FieldItem.buildLabel(resourceId, idField.getFieldName().getSymbolName()),
+        properties.put(FieldItem.buildLabel(entityName, idField.getFieldName().getSymbolName()),
             idField.getFieldName().getReadableSymbolName());
       }
     }
 
     for (final FieldMetadata field : entityDetails.getFields()) {
       final String fieldResourceId =
-          FieldItem.buildLabel(resourceId, field.getFieldName().getSymbolName());
+          FieldItem.buildLabel(entityName, field.getFieldName().getSymbolName());
 
       properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
     }

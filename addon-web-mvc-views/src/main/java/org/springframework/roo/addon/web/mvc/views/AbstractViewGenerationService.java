@@ -307,6 +307,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       // Include info inside menuEntry
       menuEntry.setEntityName(entity.getSimpleTypeName());
       menuEntry.setPath(path);
+      menuEntry.setEntityLabel(FieldItem.buildLabel(entity.getSimpleTypeName(), ""));
+      menuEntry.setEntityPluralLabel(FieldItem.buildLabel(entity.getSimpleTypeName(), "plural"));
 
       // Add new menu entry to menuEntries list
       menuEntries.add(menuEntry);

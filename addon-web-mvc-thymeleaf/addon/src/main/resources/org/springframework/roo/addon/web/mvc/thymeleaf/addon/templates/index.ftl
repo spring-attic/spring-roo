@@ -22,9 +22,9 @@
 
   <div class="container upper-nav">
     <div class="session">
-      <div><span class="glyphicon glyphicon-user" aria-hidden="true"></span>User</div>
-      <div><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000</div>
-      <button type="submit" class="exit"><span class="glyphicon glyphicon-off" aria-hidden="true"></span>Exit</button>
+      <div data-th-text="${r"#{"}label_user${r"}"}"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>User</div>
+      <div data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}"><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000</div>
+      <button type="submit" class="exit" data-th-text="${r"#{"}label_exit${r"}"}"><span class="glyphicon glyphicon-off" aria-hidden="true"></span>Exit</button>
     </div>
   </div>
 
@@ -75,7 +75,7 @@
       <div class="container-fluid content">
         <section class="main">
             <div class="jumbotron">
-              <h2>Welcome to ${projectName}</h2>
+              <h2 data-th-text="${r"#{"}label_welcome(${projectName})${r"}"}">Welcome to ${projectName}</h2>
             </div>
         </section>
       </div>

@@ -4,7 +4,7 @@
 <#import "fields/checkbox.ftl" as checkbox>
 <#import "fields/enum.ftl" as enum>
 <!DOCTYPE html>
-<html lang="es" data-layout-decorator="layouts/default-layout">
+<html data-layout-decorator="layouts/default-layout">
 <head>
 <meta charset="utf-8" data-th-remove="all" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
@@ -19,7 +19,7 @@
 <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
   href="../../static/public/img/favicon.ico" />
 
-<title>${projectName}
+<title data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${projectName}
   - Create ${entityName}</title>
 
 <!-- Bootstrap core CSS -->
@@ -58,13 +58,13 @@
 
   <div class="container upper-nav">
     <div class="session">
-      <div>
+      <div data-th-text="${r"#{"}label_user${r"}"}">
         <span class="glyphicon glyphicon-user" aria-hidden="true"></span>User
       </div>
-      <div>
+      <div data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}">
         <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000
       </div>
-      <button type="submit" class="exit">
+      <button type="submit" class="exit" data-th-text="${r"#{"}label_exit${r"}"}">
         <span class="glyphicon glyphicon-off" aria-hidden="true"></span>Exit
       </button>
     </div>
@@ -125,7 +125,7 @@
     <section data-layout-fragment="content">
       <div class="container-fluid content">
 
-        <h1>Create ${entityName}</h1>
+        <h1 data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Create ${entityName}</h1>
 
         <!--START FORM-->
         <form class="form-horizontal" method="POST" data-th-object="${modelAttribute}"
@@ -162,11 +162,12 @@
                 <!-- TODO IE8 -->
                 <button type="reset" class="btn btn-default"
                   onclick="location.href='list.html'"
-                  data-th-onclick="'location.href=\'' + @{${controllerPath}.html} + '\''">Cancel</button>
+                  data-th-onclick="'location.href=\'' + @{${controllerPath}.html} + '\''"
+                  data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
                 <button type="submit" class="btn btn-primary"
                   onclick="location.href='list.html'"
                   data-th-onclick="'location.href=\'' + @{${controllerPath}.html} + '\''"
-                  value="Accept">Accept</button>
+                  value="Accept" data-th-text="${r"#{"}label_submit${r"}"}">Accept</button>
               </div>
             </div>
 
