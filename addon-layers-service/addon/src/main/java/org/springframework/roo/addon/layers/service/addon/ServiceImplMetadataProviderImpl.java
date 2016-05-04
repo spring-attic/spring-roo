@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.service.addon;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,6 +169,8 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
     // Getting all methods defined on service interface that should be implemented in this 
     // service implementation
     List<MethodMetadata> methodsToBeImplemented = new ArrayList<MethodMetadata>();
+    Map<JavaType, MethodMetadata> countReferencedFieldsMethodsToBeImplemented =
+        new HashMap<JavaType, MethodMetadata>();
 
     final LogicalPath logicalPath =
         PhysicalTypeIdentifier.getPath(serviceInterfaceDetails.getDeclaredByMetadataId());
@@ -179,6 +182,8 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     if (serviceMetadata != null) {
       methodsToBeImplemented = serviceMetadata.getAllDefinedMethods();
+      countReferencedFieldsMethodsToBeImplemented =
+          serviceMetadata.getCountByReferenceFieldDefinedMethod();
 
       // Add dependencies between modules
       for (MethodMetadata method : methodsToBeImplemented) {
@@ -217,7 +222,7 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     return new ServiceImplMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, serviceInterface, repositoryDetails.getType(), entity,
-        findAllIterableMethod, methodsToBeImplemented);
+        findAllIterableMethod, methodsToBeImplemented, countReferencedFieldsMethodsToBeImplemented);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

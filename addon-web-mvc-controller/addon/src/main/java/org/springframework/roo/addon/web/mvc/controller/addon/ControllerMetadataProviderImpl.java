@@ -2,8 +2,11 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_CONTROLLER;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,11 +17,15 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
@@ -147,8 +154,44 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     // Getting path
     String path = (String) controllerAnnotation.getAttribute("path").getValue();
 
+    // Check if is necessary to include service fields of Set and List fields
+    Set<ClassOrInterfaceTypeDetails> allDefinedServices =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_SERVICE);
+
+    MemberDetails entityDetails = getMemberDetails(entity);
+    List<FieldMetadata> entityFields = entityDetails.getFields();
+
+    List<JavaType> detailsService = new ArrayList<JavaType>();
+
+    for (FieldMetadata field : entityFields) {
+
+      // If entity has some Set or List field, maybe is necessary to generate details service
+      if (field.getFieldType().getFullyQualifiedTypeName().equals(Set.class.getName())
+          || field.getFieldType().getFullyQualifiedTypeName().equals(List.class.getName())) {
+
+        // Getting inner type
+        JavaType detailType = field.getFieldType().getBaseType();
+        // Check if provided inner type is an entity annotated with @RooJPAEntity
+        if (detailType != null
+            && getTypeLocationService().getTypeDetails(detailType) != null
+            && getTypeLocationService().getTypeDetails(detailType).getAnnotation(
+                RooJavaType.ROO_JPA_ENTITY) != null) {
+          // Getting service that manages detail type
+          for (ClassOrInterfaceTypeDetails detailService : allDefinedServices) {
+            AnnotationAttributeValue<JavaType> entityServiceAttr =
+                detailService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+            if (entityServiceAttr != null && entityServiceAttr.getValue().equals(detailType)) {
+              detailsService.add(detailService.getType());
+            }
+          }
+        }
+
+      }
+    }
+
     return new ControllerMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, entity, service, path);
+        governorPhysicalTypeMetadata, entity, service, detailsService, path);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

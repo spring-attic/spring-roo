@@ -41,6 +41,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private MethodMetadata deleteJSONMethod;
   private MethodMetadata showMethod;
   private MethodMetadata populateFormMethod;
+  private List<MethodMetadata> detailsMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -82,6 +83,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @param deleteMethod MethodMetadata 
    * @param deleteJSONMethod MethodMetadata 
    * @param showMethod MethodMetadata 
+   * @param detailsMetdhos List<MethodMetadata>
    * @param populateFormMethod MethodMetadata
    * @param readOnly boolean 
    * @param typesToImport List<JavaType>
@@ -92,8 +94,9 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       final MethodMetadata createFormMethod, final MethodMetadata createMethod,
       final MethodMetadata editFormMethod, final MethodMetadata updateMethod,
       final MethodMetadata deleteMethod, final MethodMetadata deleteJSONMethod,
-      final MethodMetadata showMethod, final MethodMetadata populateFormMethod,
-      final boolean readOnly, final List<JavaType> typesToImport) {
+      final MethodMetadata showMethod, final List<MethodMetadata> detailsMethods,
+      final MethodMetadata populateFormMethod, final boolean readOnly,
+      final List<JavaType> typesToImport) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
@@ -109,6 +112,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.deleteMethod = deleteMethod;
     this.deleteJSONMethod = deleteJSONMethod;
     this.showMethod = showMethod;
+    this.detailsMethods = detailsMethods;
     this.populateFormMethod = populateFormMethod;
 
     // Adds list and list form method
@@ -128,6 +132,11 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // Adds show method
     ensureGovernorHasMethod(new MethodMetadataBuilder(showMethod));
+
+    // Adds details methods
+    for (MethodMetadata detailMethod : detailsMethods) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(detailMethod));
+    }
 
     // Always add populateForm method
     ensureGovernorHasMethod(new MethodMetadataBuilder(populateFormMethod));
@@ -227,6 +236,15 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public MethodMetadata getShowMethod() {
     return this.showMethod;
+  }
+
+  /**
+   * Method that returns details Thymeleaf methods
+   * 
+   * @return
+   */
+  public List<MethodMetadata> getDetailsMethod() {
+    return this.detailsMethods;
   }
 
   /**

@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -265,8 +266,334 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getListDatatablesJSONMethod(serviceCountMethod), getCreateFormMethod(),
         getCreateMethod(serviceSaveMethod), getEditFormMethod(),
         getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod),
-        getDeleteJSONMethod(serviceDeleteMethod), getShowMethod(), getPopulateFormMethod(),
-        isReadOnly(), typesToImport);
+        getDeleteJSONMethod(serviceDeleteMethod), getShowMethod(), getDetailsMethods(),
+        getPopulateFormMethod(), isReadOnly(), typesToImport);
+  }
+
+  /**
+   * This method provides a list of methods that will be used to list
+   * relations between entities.
+   * 
+   * @return
+   */
+  private List<MethodMetadata> getDetailsMethods() {
+
+    List<MethodMetadata> detailsMethods = new ArrayList<MethodMetadata>();
+
+    // Getting all defined controllers and services. This controllers will be used on 
+    // next steps
+    Set<ClassOrInterfaceTypeDetails> allDefinedControllers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_CONTROLLER);
+    Set<ClassOrInterfaceTypeDetails> allDefinedServices =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_SERVICE);
+
+    // Getting entityDetails
+    MemberDetails entityDetails = getMemberDetails(getEntity());
+
+    // Getting all fields defined on current entity
+    List<FieldMetadata> entityFields = entityDetails.getFields();
+
+    for (FieldMetadata field : entityFields) {
+
+      // If entity has some Set or List field, maybe is necessary to generate details method
+      if (field.getFieldType().getFullyQualifiedTypeName().equals(Set.class.getName())
+          || field.getFieldType().getFullyQualifiedTypeName().equals(List.class.getName())) {
+
+        // Getting inner type
+        JavaType detailType = field.getFieldType().getBaseType();
+        // Check if provided inner type is an entity annotated with @RooJPAEntity
+        if (detailType != null
+            && getTypeLocationService().getTypeDetails(detailType) != null
+            && getTypeLocationService().getTypeDetails(detailType).getAnnotation(
+                RooJavaType.ROO_JPA_ENTITY) != null) {
+          // Check if exists some controller associated to current entity before
+          // continue
+          Iterator<ClassOrInterfaceTypeDetails> it = allDefinedControllers.iterator();
+          while (it.hasNext()) {
+            ClassOrInterfaceTypeDetails detailController = it.next();
+            AnnotationAttributeValue<JavaType> entityAttr =
+                detailController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("entity");
+            if (entityAttr != null && entityAttr.getValue().equals(detailType)) {
+
+              // Getting service that manages detail type
+              for (ClassOrInterfaceTypeDetails detailService : allDefinedServices) {
+
+                AnnotationAttributeValue<JavaType> entityServiceAttr =
+                    detailService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+                if (entityServiceAttr != null && entityServiceAttr.getValue().equals(detailType)) {
+                  MethodMetadata listDetailsMethod =
+                      getListDetailsMethod(detailType, detailService.getType(), detailController);
+
+                  // Getting count method for current detailType
+                  MethodMetadata countMethod = null;
+                  final LogicalPath logicalPath =
+                      PhysicalTypeIdentifier.getPath(detailService.getDeclaredByMetadataId());
+                  final String detailServiceMetadataKey =
+                      ServiceMetadata.createIdentifier(detailService.getType(), logicalPath);
+                  final ServiceMetadata detailServiceMetadata =
+                      (ServiceMetadata) getMetadataService().get(detailServiceMetadataKey);
+
+                  Map<JavaType, MethodMetadata> countMethods =
+                      detailServiceMetadata.getCountByReferenceFieldDefinedMethod();
+
+                  for (Entry<JavaType, MethodMetadata> method : countMethods.entrySet()) {
+                    if (method.getKey().equals(this.entity)) {
+                      countMethod = method.getValue();
+                      break;
+                    }
+                  }
+
+                  if (countMethod == null) {
+                    continue;
+                  }
+
+                  MethodMetadata listDetailsDatatablesMethod =
+                      getListDetailsDatatablesMethod(detailType, detailService.getType(),
+                          detailController, countMethod);
+                  if (listDetailsMethod != null && listDetailsDatatablesMethod != null) {
+                    detailsMethods.add(listDetailsMethod);
+                    detailsMethods.add(listDetailsDatatablesMethod);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return detailsMethods;
+  }
+
+  /**
+   * This method generates listDetailsMethod that will be used
+   * to display relations between entities
+   * 
+   * @param detailType
+   * @param detailService
+   * @param detailController
+   * @return
+   */
+  private MethodMetadata getListDetailsMethod(JavaType detailType, JavaType detailService,
+      ClassOrInterfaceTypeDetails detailController) {
+
+    // Calculate method path value
+    // Getting identifier Fields
+    List<FieldMetadata> identifierFields =
+        getPersistenceMemberLocator().getIdentifierFields(detailType);
+    if (identifierFields.isEmpty()) {
+      return null;
+    }
+
+    // Getting detail controller path
+    AnnotationAttributeValue<String> pathAttr =
+        detailController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("path");
+    if (pathAttr == null) {
+      return null;
+    }
+
+    String listDetailsPath =
+        String.format("/{%s}%s/", identifierFields.get(0).getFieldName().getSymbolName(),
+            pathAttr.getValue());
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(this.controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, listDetailsPath, null, null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName =
+        new JavaSymbolName(String.format("list%sDetails", detailType.getSimpleTypeName()));
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder pathVariableAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariableAnnotation.addStringAttribute("value", "id");
+    parameterTypes.add(new AnnotatedJavaType(identifierFields.get(0).getFieldType(),
+        pathVariableAnnotation.build()));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames.add(new JavaSymbolName("search"));
+    parameterNames.add(new JavaSymbolName("pageable"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, listDetailsPath, null, null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Getting serviceMetadata
+    ClassOrInterfaceTypeDetails serviceDetails =
+        getTypeLocationService().getTypeDetails(detailService);
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
+    final String serviceMetadataKey =
+        ServiceMetadata.createIdentifier(serviceDetails.getType(), logicalPath);
+    final ServiceMetadata serviceMetadata =
+        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+
+    // Getting findAll method
+    MethodMetadata serviceFindAllGlobalSearchMethod =
+        serviceMetadata.getFindAllGlobalSearchMethod();
+
+    // Page<Entity> entityField = detailService.FIND_ALL_METHOD(id, search, pageable);
+    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(id, search, pageable);",
+        addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(detailType)
+            .getSimpleTypeName(), getDetailEntityField(detailType).getFieldName().getSymbolName(),
+        getServiceDetailField(detailService).getFieldName().getSymbolName(),
+        serviceFindAllGlobalSearchMethod.getMethodName().getSymbolName()));
+
+    // return entityField;
+    bodyBuilder.appendFormalLine(String.format("return %s;", getDetailEntityField(detailType)
+        .getFieldName()));
+
+
+    // Generating returnType
+    JavaType returnType =
+        new JavaType(SpringJavaType.PAGE.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+            Arrays.asList(detailType));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            returnType, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method generates listDetailsDatatablesMethod that will be used
+   * to display relations between entities using DTT component
+   * 
+   * @param detailType
+   * @param detailService
+   * @param detailController
+   * @param countMethod
+   * @return
+   */
+  private MethodMetadata getListDetailsDatatablesMethod(JavaType detailType,
+      JavaType detailService, ClassOrInterfaceTypeDetails detailController,
+      MethodMetadata countMethod) {
+
+    // Calculate method path value
+    // Getting identifier Fields
+    List<FieldMetadata> identifierFields =
+        getPersistenceMemberLocator().getIdentifierFields(detailType);
+    if (identifierFields.isEmpty()) {
+      return null;
+    }
+
+    // Getting detail controller path
+    AnnotationAttributeValue<String> pathAttr =
+        detailController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("path");
+    if (pathAttr == null) {
+      return null;
+    }
+
+    String listDetailsPath =
+        String.format("/{%s}%s/", identifierFields.get(0).getFieldName().getSymbolName(),
+            pathAttr.getValue());
+
+    // First of all, check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(this.controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, listDetailsPath, null, null,
+            "application/vnd.datatables+json", "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName =
+        new JavaSymbolName(String.format("list%sDetails", detailType.getSimpleTypeName()));
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder pathVariableAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariableAnnotation.addStringAttribute("value", "id");
+    parameterTypes.add(new AnnotatedJavaType(identifierFields.get(0).getFieldType(),
+        pathVariableAnnotation.build()));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
+    AnnotationMetadataBuilder requestParamAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.REQUEST_PARAM);
+    requestParamAnnotation.addStringAttribute("value", "draw");
+    parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames.add(new JavaSymbolName("search"));
+    parameterNames.add(new JavaSymbolName("pageable"));
+    parameterNames.add(new JavaSymbolName("draw"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, listDetailsPath, null, null,
+        "application/vnd.datatables+json", ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Page<Entity> entityField = listEntityDetails(id, search, pageable);
+    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = list%sDetails(id, search, pageable);",
+        addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(detailType)
+            .getSimpleTypeName(), getDetailEntityField(detailType).getFieldName().getSymbolName(),
+        detailType.getSimpleTypeName()));
+
+    // long allAvailableEntityDetails = detailService.countByMasterId(id);
+    bodyBuilder.appendFormalLine(String.format("long allAvailable%sDetails = %s.%s(%s);",
+        detailType.getSimpleTypeName(), getServiceDetailField(detailService).getFieldName()
+            .getSymbolName(), countMethod.getMethodName().getSymbolName(), identifierFields.get(0)
+            .getFieldName().getSymbolName()));
+
+    // return new DatatablesData<OrderDetailInfo>(orderDetails, allAvailableOrderDetails, draw);
+    bodyBuilder.appendFormalLine(String.format(
+        "return new %s<%s>(%s, allAvailable%sDetails, draw);", addTypeToImport(datatablesDataType)
+            .getSimpleTypeName(), addTypeToImport(detailType).getSimpleTypeName(),
+        getDetailEntityField(detailType).getFieldName().getSymbolName(), detailType
+            .getSimpleTypeName()));
+
+
+    // Generating returnType
+    JavaType returnType =
+        new JavaType(datatablesDataType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+            Arrays.asList(detailType));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            returnType, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
   }
 
   /**
@@ -1024,6 +1351,23 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
+   * This method returns detail entity field included on controller
+   * 
+   * @return
+   */
+  private FieldMetadata getDetailEntityField(JavaType detailEntity) {
+
+    // Generating detail entity field name
+    String fieldName =
+        new JavaSymbolName(detailEntity.getSimpleTypeName())
+            .getSymbolNameUnCapitalisedFirstLetter();
+
+    return new FieldMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC,
+        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), detailEntity)
+        .build();
+  }
+
+  /**
    * This method returns service field included on controller
    * 
    * @return
@@ -1038,6 +1382,23 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         (ControllerMetadata) getMetadataService().get(controllerMetadataKey);
 
     return controllerMetadata.getServiceField();
+  }
+
+  /**
+   * This method returns service detail field included on controller
+   * 
+   * @return
+   */
+  private FieldMetadata getServiceDetailField(JavaType detailService) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(this.controller.getDeclaredByMetadataId());
+    final String controllerMetadataKey =
+        ControllerMetadata.createIdentifier(this.controller.getType(), logicalPath);
+    registerDependency(controllerMetadataKey, metadataIdentificationString);
+    final ControllerMetadata controllerMetadata =
+        (ControllerMetadata) getMetadataService().get(controllerMetadataKey);
+
+    return controllerMetadata.getServiceDetailField(detailService);
   }
 
 

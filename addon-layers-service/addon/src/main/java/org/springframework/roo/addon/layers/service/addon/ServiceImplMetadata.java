@@ -3,6 +3,8 @@ package org.springframework.roo.addon.layers.service.addon;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -44,6 +46,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private JavaType repository;
   private JavaType entity;
   private List<MethodMetadata> allImplementedMethods;
+  private Map<JavaType, MethodMetadata> allCountByReferencedFieldMethods;
   private MethodMetadata findAllIterableMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -83,14 +86,16 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   public ServiceImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType serviceInterface,
       final JavaType repository, final JavaType entity, final MethodMetadata findAllIterableMethod,
-      final List<MethodMetadata> methodsToBeImplemented) {
+      final List<MethodMetadata> methodsToBeImplemented,
+      final Map<JavaType, MethodMetadata> countReferencedFieldsMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
     this.entity = entity;
     this.repository = repository;
     this.findAllIterableMethod = findAllIterableMethod;
-    this.setAllImplementedMethods(methodsToBeImplemented);
+    this.allImplementedMethods = methodsToBeImplemented;
+    this.allCountByReferencedFieldMethods = countReferencedFieldsMethods;
 
     // Get service that needs to be implemented
     ensureGovernorImplements(serviceInterface);
@@ -121,6 +126,11 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Generating all methods that should be implemented
     for (MethodMetadata method : methodsToBeImplemented) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method)));
+    }
+
+    // Generating all count methods that should be implemented
+    for (Entry<JavaType, MethodMetadata> method : countReferencedFieldsMethods.entrySet()) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method.getValue())));
     }
 
     // Build the ITD
@@ -254,8 +264,8 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     return allImplementedMethods;
   }
 
-  public void setAllImplementedMethods(List<MethodMetadata> allImplementedMethods) {
-    this.allImplementedMethods = allImplementedMethods;
+  public Map<JavaType, MethodMetadata> getAllCountByReferencedFieldMethods() {
+    return allCountByReferencedFieldMethods;
   }
 
   @Override

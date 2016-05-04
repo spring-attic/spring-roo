@@ -18,6 +18,7 @@ import org.springframework.roo.addon.finder.addon.FinderMetadata;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomMetadata;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -264,9 +265,18 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     final RepositoryJpaCustomMetadata repositoryCustomMetadata =
         (RepositoryJpaCustomMetadata) getMetadataService().get(customRepositoryMetadataKey);
 
+    final LogicalPath repositoryLogicalPath =
+        PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
+    final String repositoryMetadataKey =
+        RepositoryJpaMetadata.createIdentifier(repositoryDetails.getType(), repositoryLogicalPath);
+    registerDependency(repositoryMetadataKey, metadataIdentificationString);
+    final RepositoryJpaMetadata repositoryMetadata =
+        (RepositoryJpaMetadata) getMetadataService().get(repositoryMetadataKey);
+
     return new ServiceMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders,
-        repositoryCustomMetadata.getFindAllGlobalSearchMethod());
+        repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
+        repositoryMetadata.getCountMethodByReferencedFields());
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

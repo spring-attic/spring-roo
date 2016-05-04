@@ -6,6 +6,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,13 +24,14 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
@@ -223,9 +225,33 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
       }
     }
 
+    // Getting reference fields to be able to generate countsByReferences
+    Map<JavaType, JavaType> referenceFields = new HashMap<JavaType, JavaType>();
+
+    // Getting all entity fields
+    MemberDetails entityMemberDetails = getMemberDetails(entity);
+    List<FieldMetadata> allEntityFields = entityMemberDetails.getFields();
+    for (FieldMetadata field : allEntityFields) {
+      ClassOrInterfaceTypeDetails fieldTypeDetails =
+          getTypeLocationService().getTypeDetails(field.getFieldType());
+      // Get only reference fields
+      if (fieldTypeDetails != null
+          && fieldTypeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+
+        List<FieldMetadata> identifierFields =
+            getPersistenceMemberLocator().getIdentifierFields(field.getFieldType());
+
+        if (identifierFields.isEmpty()) {
+          continue;
+        }
+
+        referenceFields.put(field.getFieldType(), identifierFields.get(0).getFieldType());
+      }
+    }
+
     return new RepositoryJpaMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, identifierType, readOnly,
-        readOnlyRepository, repositoryCustomList);
+        readOnlyRepository, repositoryCustomList, referenceFields);
   }
 
   public String getProvidesType() {
