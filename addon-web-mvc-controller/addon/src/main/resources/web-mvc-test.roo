@@ -3,8 +3,8 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class ~.Owner
 field string --fieldName name
 entity jpa --class ~.Pet
-repository jpa all --package ~.rep
-service all --apiPackage ~.api --implPackage ~.impl
+repository jpa --all --package ~.rep
+service --all --apiPackage ~.api --implPackage ~.impl
 
 
 #====================================================================

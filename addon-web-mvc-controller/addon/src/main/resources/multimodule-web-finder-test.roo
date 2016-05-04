@@ -7,8 +7,8 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class model:~.Owner
 field string --fieldName name
 field date --fieldName birthday --type java.util.Calendar
-repository jpa all --package repository:~
-service all --apiPackage service-api:~ --implPackage service-impl:~
+repository jpa --all --package repository:~
+service --all --apiPackage service-api:~ --implPackage service-impl:~
 web mvc setup 
 web mvc controller --all --package application:~.web
 

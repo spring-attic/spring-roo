@@ -29,6 +29,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
@@ -68,7 +69,7 @@ public class ServiceCommands implements CommandMarker {
   }
 
 
-  @CliAvailabilityIndicator({"service add", "service all"})
+  @CliAvailabilityIndicator({"service"})
   public boolean isServiceCommandAvailable() {
     return serviceOperations.areServiceCommandsAvailable();
   }
@@ -80,15 +81,15 @@ public class ServiceCommands implements CommandMarker {
   }*/
 
   @CliOptionVisibilityIndicator(
-      command = "service add",
-      params = "interface",
-      help = "--interface parameter is not available if you don't specify --entity or --repository parameters")
-  public boolean isIterfaceVisible(ShellContext shellContext) {
+      command = "service",
+      params = {"interface", "class"},
+      help = "--interface and --class parameters are not available if you don't specify --entity or --repository parameters")
+  public boolean areIterfaceAndClassVisible(ShellContext shellContext) {
 
     // Get all defined parameters
     Map<String, String> parameters = shellContext.getParameters();
 
-    // If --entity and --repository have been defined, show --class parameter
+    // If --entity and --repository have been defined, show --class and --interface parameters
     if (parameters.containsKey("entity") && StringUtils.isNotBlank(parameters.get("entity"))
         && parameters.containsKey("repository")
         && StringUtils.isNotBlank(parameters.get("repository"))) {
@@ -97,7 +98,7 @@ public class ServiceCommands implements CommandMarker {
     return false;
   }
 
-  @CliOptionVisibilityIndicator(command = "service add", params = "repository",
+  @CliOptionVisibilityIndicator(command = "service", params = "repository",
       help = "--repository parameter is not available if you don't specify --entity parameter")
   public boolean isRepositoryVisible(ShellContext shellContext) {
 
@@ -112,7 +113,7 @@ public class ServiceCommands implements CommandMarker {
   }
 
   @CliOptionAutocompleteIndicator(
-      command = "service add",
+      command = "service",
       param = "repository",
       help = "--repository parameter must  be the repository associated to the entity specified in --entity parameter. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)")
   public List<String> returnRepositories(ShellContext shellContext) {
@@ -163,30 +164,100 @@ public class ServiceCommands implements CommandMarker {
     return allPossibleValues;
   }
 
-
-  @CliCommand(value = "service add", help = "Creates new service interface and its implementation.")
-  public void service(@CliOption(key = "entity", unspecifiedDefaultValue = "*",
-      optionContext = PROJECT, mandatory = true,
-      help = "The domain entity this service should expose") final JavaType domainType, @CliOption(
-      key = "repository", optionContext = PROJECT, mandatory = true,
-      help = "The repository this service should expose") final JavaType repositoryType,
-      @CliOption(key = "interface", mandatory = true,
-          help = "The service interface to be generated") final JavaType interfaceType,
-      @CliOption(key = "class", mandatory = false,
-          help = "The service implementation to be generated") final JavaType implType) {
-
-    serviceOperations.addService(domainType, repositoryType, interfaceType, implType);
+  /**
+   * This indicator says if --apiPackage and --implPackage parameters should be mandatory or not
+   *
+   * If --all parameter has been specified, --apiPackage and --implPackage parameters will be mandatory.
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionMandatoryIndicator(params = {"apiPackage", "implPackage"}, command = "service")
+  public boolean arePackageParametersMandatory(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return true;
+    }
+    return false;
   }
 
-  @CliCommand(
-      value = "service all",
-      help = "Creates new service interface and its implementation for every entity of generated project.")
+  /**
+   * This indicator says if --apiPackage and --implPackage parameters are visible.
+   * 
+   * If --all is specified, --apiPackage and --implPackage will be visible
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(
+      params = {"apiPackage", "implPackage"},
+      command = "service",
+      help = "--apiPackage and --implPackage parameters are not visible if --all parameter hasn't been specified before.")
+  public boolean arePackageParametersVisible(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * This indicator says if --all parameter is visible.
+   * 
+   * If --entity is specified, --all won't be visible
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(params = {"all"}, command = "service",
+      help = "--all parameter is not visible if --entity parameter has been specified before.")
+  public boolean isAllParameterVisible(ShellContext context) {
+    if (context.getParameters().containsKey("entity")) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * This indicator says if --entity parameter is visible.
+   * 
+   * If --all is specified, --entity won't be visible
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(params = {"entity"}, command = "service",
+      help = "--all parameter is not visible if --entity parameter has been specified before.")
+  public boolean isEntityParameterVisible(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return false;
+    }
+    return true;
+  }
+
+  @CliCommand(value = "service", help = "Creates new service interface and its implementation.")
   public void service(
+      @CliOption(
+          key = "all",
+          mandatory = false,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "Indicates if developer wants to generate service interfaces and their implementations for every entity of current project ") boolean all,
+      @CliOption(key = "entity", optionContext = PROJECT, mandatory = false,
+          help = "The domain entity this service should expose") final JavaType domainType,
+      @CliOption(key = "repository", optionContext = PROJECT, mandatory = false,
+          help = "The repository this service should expose") final JavaType repositoryType,
+      @CliOption(key = "interface", mandatory = false,
+          help = "The service interface to be generated") final JavaType interfaceType,
+      @CliOption(key = "class", mandatory = false,
+          help = "The service implementation to be generated") final JavaType implType,
       @CliOption(key = "apiPackage", mandatory = true, help = "The java interface package") final JavaPackage apiPackage,
       @CliOption(key = "implPackage", mandatory = true,
           help = "The java package of the implementation classes for the interfaces") JavaPackage implPackage) {
 
-    serviceOperations.addAllServices(apiPackage, implPackage);
+    if (all) {
+      serviceOperations.addAllServices(apiPackage, implPackage);
+    } else {
+      serviceOperations.addService(domainType, repositoryType, interfaceType, implType);
+    }
   }
 
   /**

@@ -5,8 +5,8 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class ~.domain.Choice --testAutomatically
 field string namingChoice --notNull --sizeMin 1 --sizeMax 30
 field string description --sizeMax 80
-repository jpa add --entity ~.domain.Choice --interface ~.repository.ChoiceRepository
-service add --entity ~.domain.Choice --repository ~.repository.ChoiceRepository --interface ~.service.api.ChoiceService --class ~.service.impl.ChoiceServiceImpl
+repository jpa --entity ~.domain.Choice --interface ~.repository.ChoiceRepository
+service --entity ~.domain.Choice --repository ~.repository.ChoiceRepository --interface ~.service.api.ChoiceService --class ~.service.impl.ChoiceServiceImpl
 web mvc setup
 web mvc controller --controller ~.web.ChoiceController --entity ~.domain.Choice --service ~.service.api.ChoiceService --responseType THYMELEAF
 
@@ -14,8 +14,8 @@ entity jpa --class Vote --testAutomatically
 field reference choice --type Choice
 field string ip --notNull --sizeMin 7 --sizeMax 15
 field date registered --type java.util.Date --notNull --past
-repository jpa add --entity ~.domain.Vote --interface ~.repository.VoteRepository
-service add --entity ~.domain.Vote --repository ~.repository.VoteRepository --interface ~.service.api.VoteService --class ~.service.impl.VoteServiceImpl
+repository jpa --entity ~.domain.Vote --interface ~.repository.VoteRepository
+service --entity ~.domain.Vote --repository ~.repository.VoteRepository --interface ~.service.api.VoteService --class ~.service.impl.VoteServiceImpl
 web mvc controller --controller ~.web.VoteController --entity ~.domain.Vote --service ~.service.api.VoteService --responseType THYMELEAF
 
 //web mvc controller ~.web.PublicVoteController --preferredMapping /public

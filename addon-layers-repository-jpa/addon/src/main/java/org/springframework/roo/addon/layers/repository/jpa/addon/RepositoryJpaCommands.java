@@ -4,7 +4,6 @@ import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +21,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
@@ -44,35 +44,12 @@ public class RepositoryJpaCommands implements CommandMarker {
   @Reference
   private TypeLocationService typeLocationService;
 
-  @CliAvailabilityIndicator({"repository jpa add", "repository jpa all"})
+  @CliAvailabilityIndicator({"repository jpa"})
   public boolean isRepositoryCommandAvailable() {
     return repositoryJpaOperations.isRepositoryInstallationPossible();
   }
 
-  @CliCommand(value = "repository jpa all",
-      help = "Generates new Spring Data repository for all entities.")
-  public void all(
-      @CliOption(key = "package", mandatory = true,
-          help = "The package where repositories will be generated") final JavaPackage repositoriesPackage) {
-
-    repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
-  }
-
-  @CliOptionVisibilityIndicator(params = {"interface"}, command = "repository jpa add",
-      help = "You should specify --entity param to be able to specify repository name")
-  public boolean isClassVisible(ShellContext shellContext) {
-    // Get all defined parameters
-    Map<String, String> parameters = shellContext.getParameters();
-
-    // If --entity has been defined, show --class parameter
-    if (parameters.containsKey("entity") && StringUtils.isNotBlank(parameters.get("entity"))) {
-      return true;
-    }
-
-    return false;
-  }
-
-  @CliOptionAutocompleteIndicator(command = "repository jpa add", param = "entity",
+  @CliOptionAutocompleteIndicator(command = "repository jpa", param = "entity",
       help = "--entity option should be an entity.")
   public List<String> getClassPossibleResults(ShellContext shellContext) {
 
@@ -93,8 +70,7 @@ public class RepositoryJpaCommands implements CommandMarker {
     return allPossibleValues;
   }
 
-
-  @CliOptionAutocompleteIndicator(command = "repository jpa add", param = "defaultSearchResult",
+  @CliOptionAutocompleteIndicator(command = "repository jpa", param = "defaultSearchResult",
       help = "--defaultSearchResult option should be a DTO class.")
   public List<String> getDTOResults(ShellContext shellContext) {
 
@@ -119,17 +95,121 @@ public class RepositoryJpaCommands implements CommandMarker {
     return allPossibleValues;
   }
 
-  @CliCommand(value = "repository jpa add",
+  /**
+   * This indicator says if --package parameter should be mandatory or not
+   *
+   * If --all parameter has been specified, --package parameter will be mandatory.
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionMandatoryIndicator(params = "package", command = "repository jpa")
+  public boolean isPackageParameterMandatory(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * This indicator says if --package parameter should be visible or not
+   *
+   * If --all parameter has not been specified, --package parameter will not be visible
+   * to prevent conflicts.
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(
+      params = "package",
+      command = "repository jpa",
+      help = "--package parameter is not be visible if --all parameter has not been specified before.")
+  public boolean isPackageParameterVisible(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * This indicator says if --all parameter should be visible or not
+   *
+   * If --interface parameter has been specified, --all parameter will not be visible
+   * to prevent conflicts.
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(
+      params = "all",
+      command = "repository jpa",
+      help = "--all parameter is not be visible if --interface parameter has been specified before.")
+  public boolean isAllParameterVisible(ShellContext context) {
+    if (context.getParameters().containsKey("interface")) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * This indicator says if --entity and --defaultSearchResult parameter are visible.
+   * 
+   * If --interface is specified, --entity and --defaultSearchResult will be visible
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(
+      params = {"entity", "defaultSearchResult"},
+      command = "repository jpa",
+      help = "--entity or --defaultSearchResult parameters are not be visible --entity parameter hasn't been specified before.")
+  public boolean areEntityAndSearchResultVisible(ShellContext context) {
+    if (context.getParameters().containsKey("interface")) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * This indicator says if --interface parameter is visible.
+   * 
+   * If --all is specified, --interface won't be visible
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(params = "interface", command = "repository jpa",
+      help = "--interface parameter is not be visible --all parameter has been specified before.")
+  public boolean isInterfaceParameterVisible(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return false;
+    }
+    return true;
+  }
+
+  @CliCommand(value = "repository jpa",
       help = "Generates new Spring Data repository for specified entity.")
   public void repository(
-      @CliOption(key = "interface", mandatory = true,
+      @CliOption(
+          key = "all",
+          mandatory = false,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "Indicates if developer wants to generate repositories for every entity of current project ") boolean all,
+      @CliOption(key = "interface", mandatory = false,
           help = "The java Spring Data repository to generate.") final JavaType interfaceType,
-      @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*",
-          optionContext = PROJECT, help = "The domain entity this repository should expose") final JavaType domainType,
+      @CliOption(key = "entity", mandatory = false, optionContext = PROJECT,
+          help = "The domain entity this repository should expose") final JavaType domainType,
       @CliOption(key = "defaultSearchResult", mandatory = false, optionContext = PROJECT,
-          help = "The findAll finder return type. Should be a DTO class.") JavaType defaultSearchResult) {
+          help = "The findAll finder return type. Should be a DTO class.") JavaType defaultSearchResult,
+      @CliOption(key = "package", mandatory = true,
+          help = "The package where repositories will be generated") final JavaPackage repositoriesPackage) {
 
-    repositoryJpaOperations.addRepository(interfaceType, domainType, defaultSearchResult);
+    if (all) {
+      repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
+    } else {
+      repositoryJpaOperations.addRepository(interfaceType, domainType, defaultSearchResult);
+    }
   }
 
   /**

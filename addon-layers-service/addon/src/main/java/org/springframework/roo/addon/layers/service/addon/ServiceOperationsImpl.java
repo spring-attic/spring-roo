@@ -136,6 +136,8 @@ public class ServiceOperationsImpl implements ServiceOperations {
     Validate.notNull(interfaceType,
         "ERROR: Interface type required to be able to generate service.");
     Validate.notNull(domainType, "ERROR: Domain type required to be able to generate service.");
+    Validate.notNull(repositoryType,
+        "ERROR: You must specify a repository type to be able to generate service.");
 
     // Check if current entity is related with the repository
     ClassOrInterfaceTypeDetails repository = typeLocationService.getTypeDetails(repositoryType);

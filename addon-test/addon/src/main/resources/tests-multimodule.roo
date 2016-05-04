@@ -4,8 +4,8 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 entity jpa --class model:aaaa.bbb.cc.model.Entity1
 field string --fieldName string_field
 field number --fieldName number_field --type int
-repository jpa all --package repository:aaaa.bbb.cc.repository
-service all --apiPackage service-api:aaaa.bbb.cc.service.api --implPackage service-impl:aaaa.bbb.cc.service.impl
+repository jpa --all --package repository:aaaa.bbb.cc.repository
+service --all --apiPackage service-api:aaaa.bbb.cc.service.api --implPackage service-impl:aaaa.bbb.cc.service.impl
 
 
 #=======================================================================================================

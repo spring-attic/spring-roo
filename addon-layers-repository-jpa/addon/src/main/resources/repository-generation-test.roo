@@ -90,7 +90,7 @@ entity jpa --class ~.ExampleTableGenTypeSeqName --identifierStrategy TABLE --seq
 #------------------------------------------------------------------------------------------
 # Goal:    Create repository files
 #
-repository jpa add --entity ~.Example --interface ~.ExampleRepository 
+repository jpa --entity ~.Example --interface ~.ExampleRepository 
 #      
 # Output:  Created SRC_MAIN_JAVA/org/example/ExampleRepository.java
 #          Created SRC_MAIN_JAVA/org/example/ExampleRepositoryCustom.java
@@ -107,7 +107,7 @@ repository jpa add --entity ~.Example --interface ~.ExampleRepository
 #------------------------------------------------------------------------------------------
 # Goal:    Create repository files
 #
-repository jpa add --entity ~.ExampleReadOnly --interface ~.ExampleReadOnlyRepository 
+repository jpa --entity ~.ExampleReadOnly --interface ~.ExampleReadOnlyRepository 
 #      
 # Output:  Created SRC_MAIN_JAVA/org/example/ExampleReadOnlyRepository.java
 #          Created SRC_MAIN_JAVA/org/example/ExampleReadOnlyRepositoryCustom.java
@@ -124,7 +124,7 @@ repository jpa add --entity ~.ExampleReadOnly --interface ~.ExampleReadOnlyRepos
 #------------------------------------------------------------------------------------------
 # Goal:  Create repository files for the entities that does not have one
 #
-repository jpa all --package ~.repository
+repository jpa --all --package ~.repository
 #      
 # Output:  INFO: Already exists a repository associated to the entity 'Example'. Only one repository per entity is allowed.
 #          INFO: Already exists a repository associated to the entity 'ExampleReadOnly'. Only one repository per entity is allowed.
@@ -164,7 +164,7 @@ repository jpa all --package ~.repository
 #
 # entity jpa --class ~.ExampleNonJpa
 # Remove @RooJpaEntity from ExampleNonJpa_Roo_Jpa_Entiti.aj 
-# repository jpa add --entity ~.ExampleNonJpa --interface ~.ExampleNonJpaRepository 
+# repository jpa --entity ~.ExampleNonJpa --interface ~.ExampleNonJpaRepository 
 #      
 # Output:  Created SRC_MAIN_JAVA/org/example/ExampleNonJpa.java
 #          Created SRC_MAIN_JAVA/org/example/ExampleNonJpa_Roo_Jpa_Entity.aj

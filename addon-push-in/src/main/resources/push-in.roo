@@ -1,5 +1,5 @@
 // Generating complete application
-script northwind_multimodule.roo
+script northwind-multimodule.roo
 
 // Make push-in of every generated elements
 push-in --all --force

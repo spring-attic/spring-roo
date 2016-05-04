@@ -30,16 +30,16 @@ field string --fieldName shopCity
 field string --fieldName shopName
 
 // Define a repository layer for persistence
-repository jpa add --entity ~.domain.Topping --interface ~.repository.ToppingRepository
-repository jpa add --entity ~.domain.Base --interface ~.repository.BaseRepository 
-repository jpa add --entity ~.domain.Pizza --interface ~.repository.PizzaRepository 
-repository jpa add --entity ~.domain.PizzaOrder --interface ~.repository.PizzaOrderRepository 
+repository jpa --entity ~.domain.Topping --interface ~.repository.ToppingRepository
+repository jpa --entity ~.domain.Base --interface ~.repository.BaseRepository 
+repository jpa --entity ~.domain.Pizza --interface ~.repository.PizzaRepository 
+repository jpa --entity ~.domain.PizzaOrder --interface ~.repository.PizzaOrderRepository 
 
 // Define a service/facade layer
-service add --entity ~.domain.Topping --repository ~.repository.ToppingRepository --interface ~.service.ToppingService
-service add --entity ~.domain.Base --repository ~.repository.BaseRepository --interface ~.service.BaseService
-service add --entity ~.domain.Pizza --repository ~.repository.PizzaRepository --interface ~.service.PizzaService
-service add --entity ~.domain.PizzaOrder --repository ~.repository.PizzaOrderRepository --interface ~.service.PizzaOrderService
+service --entity ~.domain.Topping --repository ~.repository.ToppingRepository --interface ~.service.ToppingService
+service --entity ~.domain.Base --repository ~.repository.BaseRepository --interface ~.service.BaseService
+service --entity ~.domain.Pizza --repository ~.repository.PizzaRepository --interface ~.service.PizzaService
+service --entity ~.domain.PizzaOrder --repository ~.repository.PizzaOrderRepository --interface ~.service.PizzaOrderService
 
 // Offer JSON remoting for all domain types through Spring MVC
 //json all --deepSerialize

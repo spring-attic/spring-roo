@@ -192,7 +192,7 @@ field reference --fieldName house --type houses:~.House
 #--------------------------------------------------------------------
 # Goal:    Create repository files in a module
 #
-repository jpa add --entity ~.Pet --interface repository:~.PetRep
+repository jpa --entity ~.Pet --interface repository:~.PetRep
 #       
 # Output:  Created repository:SRC_MAIN_JAVA/org/example/repository/PetRep.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepCustom.java
@@ -211,7 +211,7 @@ repository jpa add --entity ~.Pet --interface repository:~.PetRep
 # Goal:    Create repository files in a module
 #
 module focus --moduleName repository
-repository jpa add --entity model:~.Owner --interface ~.OwnerRep
+repository jpa --entity model:~.Owner --interface ~.OwnerRep
 #       
 # Output:  Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRep.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepCustom.java
@@ -229,7 +229,7 @@ repository jpa add --entity model:~.Owner --interface ~.OwnerRep
 # Goal:    Create repository files in a module
 #
 module focus --moduleName repository
-repository jpa add --entity houses:~.House --interface ~.HouseRep
+repository jpa --entity houses:~.House --interface ~.HouseRep
 #       
 # Output:  Created repository:SRC_MAIN_JAVA/org/example/repository/HouseRep.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/HouseRepCustom.java
@@ -249,10 +249,10 @@ repository jpa add --entity houses:~.House --interface ~.HouseRep
 # Goal:    Create repository files in a module for all domain classes 
 #
 module focus --moduleName ~
-repository jpa all --package repository:org.example.repository
+repository jpa --all --package repository:org.example.repository
 #       
 # Output:  roo>
-#          repository jpa all --package repository:org.example.repository
+#          repository jpa --all --package repository:org.example.repository
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/CarRepository.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/CarRepositoryCustom.java
 #          INFO: Already exists a repository associated to the entity 'House'. Only one repository per entity is allowed.
@@ -319,8 +319,8 @@ finder add --class ~.Owner --name findByAge
 #
 entity jpa --class model:~.City
 entity jpa --class ~.Address
-repository jpa add --entity ~.City --interface service-impl:~.CityRep
-repository jpa add --entity model:~.Address --interface service-api:~.AddressRep 
+repository jpa --entity ~.City --interface service-impl:~.CityRep
+repository jpa --entity model:~.Address --interface service-api:~.AddressRep 
 #       
 # Output:  Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityRep.java
 #          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/CityRepCustom.java

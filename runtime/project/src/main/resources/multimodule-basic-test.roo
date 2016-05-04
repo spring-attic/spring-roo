@@ -270,7 +270,7 @@ module focus --moduleName ~
 #
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class model:~.Owner
-repository jpa add --entity model:~.Owner --interface repository:org.example.repository.OwnerRep
+repository jpa --entity model:~.Owner --interface repository:org.example.repository.OwnerRep
 #       
 # Output:  ...
 #          Updated repository:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT; added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
@@ -286,7 +286,7 @@ repository jpa add --entity model:~.Owner --interface repository:org.example.rep
 #          repository module pom
 #
 entity jpa --class model:~.Pet
-repository jpa all --package repository:org.example.repository
+repository jpa --all --package repository:org.example.repository
 #       
 # Output:  INFO: Already exists a repository associated to the entity 'Owner'. Only one repository per entity is allowed.
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepository.java
@@ -305,7 +305,7 @@ repository jpa all --package repository:org.example.repository
 # Goal:    Validates that a module cannot have a dependency with itself
 #
 entity jpa --class model:~.City 
-repository jpa add --entity ~.City --interface ~.repository.CityRep
+repository jpa --entity ~.City --interface ~.repository.CityRep
 #       
 # Output:  Created model:SRC_MAIN_JAVA/org/example/model/repository
 #          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep.java
@@ -325,7 +325,7 @@ repository jpa add --entity ~.City --interface ~.repository.CityRep
 # Goal:    Test if module dependencies are added to service interface 
 #          and implementation modules 
 #
-service add --entity model:~.Owner --repository repository:org.example.repository.OwnerRep --interface api:~.OwnerService --class impl:~.OwnerServiceImpl
+service --entity model:~.Owner --repository repository:org.example.repository.OwnerRep --interface api:~.OwnerService --class impl:~.OwnerServiceImpl
 #       
 # Output:  Created api:SRC_MAIN_JAVA/org/example/api/OwnerService.java
 #          Created impl:SRC_MAIN_JAVA/org/example/impl/OwnerServiceImpl.java
@@ -346,7 +346,7 @@ service add --entity model:~.Owner --repository repository:org.example.repositor
 # Goal:    Test if module dependencies are added to service module 
 #
 module create --moduleName otherservice --parent ~
-service all --apiPackage otherservice:~ --implPackage otherservice:~
+service --all --apiPackage otherservice:~ --implPackage otherservice:~
 #       
 # Output:  ...
 #          Updated otherservice:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT; added dependency org.example:repository:0.1.0.BUILD-SNAPSHOT;]
@@ -449,7 +449,7 @@ service all --apiPackage otherservice:~ --implPackage otherservice:~
 # Goal:    Validate that a circular dependency between modules is 
 #          not allowed 
 # 
-# service add --entity model:~.Pet --repository repository:org.example.repository.PetRepository  --interface model:~.api.PetService --class model:~.impl.PetServiceImpl
+# service --entity model:~.Pet --repository repository:org.example.repository.PetRepository  --interface model:~.api.PetService --class model:~.impl.PetServiceImpl
 #       
 # Output:  Created model:SRC_MAIN_JAVA/org/example/model/api
 #          Created model:SRC_MAIN_JAVA/org/example/model/api/PetService.java

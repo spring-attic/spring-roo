@@ -1,5 +1,5 @@
 // Creating Northwind project
-project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind --multimodule
+project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind --multimodule --java 7
 module create --moduleName integration --parent ~
 
 // Configuring settings
@@ -416,10 +416,10 @@ field number --fieldName total --type java.math.BigDecimal
 field set --fieldName orderDetailsInfo --type ~.OrderDetailInfo
 
 // Generate repositories
-repository jpa all --package repository:org.springframework.roo.northwind.repository
+repository jpa --all --package repository:org.springframework.roo.northwind.repository
 
 // Generate services
-service all --apiPackage service-api:org.springframework.roo.northwind.service.api --implPackage service-impl:org.springframework.roo.northwind.service.impl
+service --all --apiPackage service-api:org.springframework.roo.northwind.service.api --implPackage service-impl:org.springframework.roo.northwind.service.impl
 
 // Create finders
 finder add --class model:~.UserLogin --name findByUsername

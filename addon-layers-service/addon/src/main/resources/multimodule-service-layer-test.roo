@@ -12,7 +12,7 @@ field string --fieldName name
 field number --fieldName age --type int
 field reference --fieldName pet --type ~.Pet
 
-repository jpa all --package repository:org.example.repository
+repository jpa --all --package repository:org.example.repository
 #finder add --class model:~.Owner --name findByName
 
 #====================================================================
@@ -21,7 +21,7 @@ repository jpa all --package repository:org.example.repository
 # Goal:    Test if service interface and implementation classes are 
 #          created in apiPackage module 
 # 
-service add --entity ~.Adress --repository repository:org.example.repository.AdressRepository --interface service-api:~.AddressService
+service --entity ~.Adress --repository repository:org.example.repository.AdressRepository --interface service-api:~.AddressService
 #       
 # Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressService.java
 #          Created service-api:SRC_MAIN_JAVA/org/example/service/api/AddressServiceImpl.java
@@ -40,7 +40,7 @@ service add --entity ~.Adress --repository repository:org.example.repository.Adr
 #          module and service implementation class is generated in 
 #          implPackage module
 #
-service add --entity ~.Owner --repository repository:org.example.repository.OwnerRepository --interface service-api:~.OwnerService --class service-impl:~.OwnerServiceImpl
+service --entity ~.Owner --repository repository:org.example.repository.OwnerRepository --interface service-api:~.OwnerService --class service-impl:~.OwnerServiceImpl
 #       
 # Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService.java
 #          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl.java
@@ -59,7 +59,7 @@ service add --entity ~.Owner --repository repository:org.example.repository.Owne
 #          apiPackage module and service implementation classes are 
 #          created in implPackage module
 #
-service all ---apiPackage service-api:~ --implPackage service-impl:~
+service --all ---apiPackage service-api:~ --implPackage service-impl:~
 #       
 # Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/AdressService.java
 #          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/AdressServiceImpl.java
@@ -87,9 +87,9 @@ service all ---apiPackage service-api:~ --implPackage service-impl:~
 #          classes are created in implPackage module
 #
 entity jpa --class ~.Visit
-repository jpa all --package repository:~
+repository jpa --all --package repository:~
 module focus --moduleName service-api
-service all --apiPackage ~ --implPackage service-impl:~
+service --all --apiPackage ~ --implPackage service-impl:~
 #       
 # Output:  Created service-api:SRC_MAIN_JAVA/org/example/service/api/VisitService.java
 #          Created service-impl:SRC_MAIN_JAVA/org/example/service/impl/VisitServiceImpl.java

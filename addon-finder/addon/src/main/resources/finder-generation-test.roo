@@ -13,7 +13,7 @@ field number --fieldName age --type int
 field date --fieldName birthday --type java.util.Date
 field set --fieldName pets --type ~.Pet
 field reference --fieldName pet --type ~.Pet
-repository jpa all --package ~.repository
+repository jpa --all --package ~.repository
 
 
 

@@ -48,8 +48,8 @@ field enum --fieldName specialty --type ~.reference.Specialty --notNull false
 focus --class ~.domain.Owner
 field set --fieldName pets --type ~.domain.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
 
-repository jpa all --package ~.repository
-service all --apiPackage ~.service.api --implPackage ~.service.impl
+repository jpa --all --package ~.repository
+service --all --apiPackage ~.service.api --implPackage ~.service.impl
 
 finder add --class ~.domain.Pet --name findByNameAndWeight
 finder add --class ~.domain.Pet --name findByOwner

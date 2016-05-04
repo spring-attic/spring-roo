@@ -7,8 +7,8 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class model:~.Owner
 field string --fieldName name
 entity jpa --class model:~.Pet
-repository jpa all --package repository:~
-service all --apiPackage service-api:~ --implPackage service-impl:~
+repository jpa --all --package repository:~
+service --all --apiPackage service-api:~ --implPackage service-impl:~
 
 
 #====================================================================
@@ -131,8 +131,8 @@ web mvc controller --all --package application:~.web
 #
 module create --moduleName formatter --parent ~
 entity jpa --class model:~.Visit
-repository jpa all --package repository:~
-service all --apiPackage service-api:~ --implPackage service-impl:~
+repository jpa --all --package repository:~
+service --all --apiPackage service-api:~ --implPackage service-impl:~
 # Copy ExampleApplication class form application to formatter module
 # web mvc controller --controller application:~.VisitController  --entity ~.Visit --service service-api:~.VisitService  --formattersPackage formatter:~
 #       

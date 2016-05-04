@@ -688,7 +688,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
             # Complete application
             load_roo_build_and_test script northwind.roo
-	          load_roo_build_and_test script northwind_multimodule.roo
+	          load_roo_build_and_test script northwind-multimodule.roo
 
 	          # Multimodule tests
             load_roo_build_and_test script multimodule-standard-test.roo

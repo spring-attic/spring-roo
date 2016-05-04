@@ -2,8 +2,8 @@ project setup --topLevelPackage org.example --multimodule
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class model:~.Owner
 entity jpa --class model:~.Pet
-repository jpa all --package repository:~
-service all --apiPackage service-api:~ --implPackage service-impl:~
+repository jpa --all --package repository:~
+service --all --apiPackage service-api:~ --implPackage service-impl:~
 
 #====================================================================
 # TEST 1:  Install web layer for embedded servers                   

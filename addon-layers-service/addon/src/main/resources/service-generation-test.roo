@@ -13,7 +13,7 @@ field number --fieldName age --type int
 field date --fieldName birthday --type java.util.Date
 field set --fieldName pets --type ~.Pet
 field reference --fieldName pet --type ~.Pet
-repository jpa all --package ~.repository
+repository jpa --all --package ~.repository
 
 
 #=========================================================================================================
@@ -21,7 +21,7 @@ repository jpa all --package ~.repository
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create a service with read only operations
 #
-service add --entity ~.Pet --repository org.example.repository.PetRepository --interface ~.PetServiceExample
+service --entity ~.Pet --repository org.example.repository.PetRepository --interface ~.PetServiceExample
 #      
 # Output:  Created SRC_MAIN_JAVA/org/example/PetServiceExample.java
 #          Created SRC_MAIN_JAVA/org/example/PetServiceExampleImpl.java
@@ -39,7 +39,7 @@ service add --entity ~.Pet --repository org.example.repository.PetRepository --i
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create a service with read and write operations
 #
-service add --entity ~.Owner --repository org.example.repository.OwnerRepository --interface ~.OwnerServiceExample
+service --entity ~.Owner --repository org.example.repository.OwnerRepository --interface ~.OwnerServiceExample
 #      
 # Output:  Created SRC_MAIN_JAVA/org/example/OwnerServiceExample.java
 #          Created SRC_MAIN_JAVA/org/example/OwnerServiceExampleImpl.java
@@ -61,7 +61,7 @@ service add --entity ~.Owner --repository org.example.repository.OwnerRepository
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create services for all entities
 #
-service all --apiPackage ~.service --implPackage ~.service.impl
+service --all --apiPackage ~.service --implPackage ~.service.impl
 #      
 # Output: Created SRC_MAIN_JAVA/org/example/service
 #         Created SRC_MAIN_JAVA/org/example/service/OwnerService.java
@@ -441,7 +441,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Fail if repository entity does not match with the specified repository
 #
-#service add --entity ~.Pet --repository org.example.repository.OwnerRepository --interface ~.PetService --class ~.PetServiceImplementation
+#service --entity ~.Pet --repository org.example.repository.OwnerRepository --interface ~.PetService --class ~.PetServiceImplementation
 #      
 # Output:  --repository parameter must  be the repository associated to the entity specified in --entity parameter. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)
 #

@@ -1,5 +1,5 @@
 // Creating Northwind project
-project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind
+project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind --java 7
 
 // Configuring settings
 settings add --name spring.roo.jpa.require.schema-object-name --value true
@@ -414,10 +414,10 @@ field number --fieldName total --type java.math.BigDecimal
 field set --fieldName orderDetailsInfo --type ~.domain.OrderDetailInfo
 
 // Generate repositories
-repository jpa all --package ~.repository
+repository jpa --all --package ~.repository
 
 // Generate services
-service all --apiPackage ~.service.api --implPackage ~.service.impl
+service --all --apiPackage ~.service.api --implPackage ~.service.impl
 
 // Create finders
 finder add --class ~.domain.UserLogin --name findByUsername

@@ -13,8 +13,8 @@ field string specialRequests --sizeMax 100
 field date confirmed --type java.util.Date
 
 web mvc setup
-repository jpa add --entity ~.domain.Rsvp --interface ~.repository.RsvpRepository
-service add --entity ~.domain.Rsvp --repository ~.repository.RsvpRepository --interface ~.service.api.RsvpService --class ~.service.impl.RsvpServiceImpl
+repository jpa --entity ~.domain.Rsvp --interface ~.repository.RsvpRepository
+service --entity ~.domain.Rsvp --repository ~.repository.RsvpRepository --interface ~.service.api.RsvpService --class ~.service.impl.RsvpServiceImpl
 web mvc controller --controller ~.web.RsvpController --entity ~.domain.Rsvp --service ~.service.api.RsvpService --responseType THYMELEAF
 
 //selenium test --controller ~.web.RsvpController

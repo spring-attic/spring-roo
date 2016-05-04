@@ -5,8 +5,8 @@ entity jpa --class ~.Owner
 field string --fieldName name
 field date --fieldName birthday --type java.util.Calendar
 field reference --fieldName pet --type ~.Pet
-repository jpa all --package ~.rep
-service all --apiPackage ~.api --implPackage ~.impl
+repository jpa --all --package ~.rep
+service --all --apiPackage ~.api --implPackage ~.impl
 web mvc setup 
 web mvc controller --all --package ~.web
 
