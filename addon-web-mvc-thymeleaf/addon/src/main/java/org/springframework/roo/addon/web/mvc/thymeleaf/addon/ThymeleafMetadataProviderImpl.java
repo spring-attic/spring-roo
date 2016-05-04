@@ -284,7 +284,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getControllerMVCService().getMVCMethodByRequestMapping(this.controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -353,7 +354,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, "", "application/vnd.datatables+json",
             "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -430,7 +432,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -478,7 +481,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -535,7 +539,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_POST, "", null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -616,7 +621,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
             SpringEnumDetails.REQUEST_METHOD_GET,
             String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -678,7 +684,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
             SpringEnumDetails.REQUEST_METHOD_PUT,
             String.format("/{%s}", getEntityField().getFieldName()), null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -760,7 +767,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -820,7 +828,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -882,7 +891,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
             SpringEnumDetails.REQUEST_METHOD_GET,
             String.format("/{%s}", getEntityField().getFieldName()), null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 

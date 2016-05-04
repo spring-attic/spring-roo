@@ -168,7 +168,8 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
    */
   protected final void ensureGovernorHasMethod(final MethodMetadataBuilder methodMetadata) {
     if (governorTypeDetails.getMethod(methodMetadata.getMethodName(),
-        AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes())) == null) {
+        AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes())) == null
+        && methodMetadata.getDeclaredByMetadataId().equals(getId())) {
       builder.addMethod(methodMetadata);
     }
   }

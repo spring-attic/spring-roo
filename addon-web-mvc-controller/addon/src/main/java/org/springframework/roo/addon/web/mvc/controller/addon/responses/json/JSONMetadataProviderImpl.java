@@ -313,7 +313,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
             SpringEnumDetails.REQUEST_METHOD_POST, "", null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(),
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -444,7 +445,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
             SpringEnumDetails.REQUEST_METHOD_PUT, value, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(),
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -547,7 +549,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -623,7 +626,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -713,7 +717,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "/" + methodName.toString(), parameters, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -773,7 +778,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "/{id}", null, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -869,7 +875,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
             SpringEnumDetails.REQUEST_METHOD_POST, "/batch", null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(),
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -974,7 +981,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
             SpringEnumDetails.REQUEST_METHOD_PUT, "/batch", null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(),
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
@@ -1078,7 +1086,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_DELETE, "/batch/{ids}", null, null,
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
-    if (existingMVCMethod != null) {
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
       return existingMVCMethod;
     }
 
