@@ -112,6 +112,22 @@ public class RepositoryJpaCommands implements CommandMarker {
   }
 
   /**
+   * This indicator says if --interface parameter should be mandatory or not
+   *
+   * If --entity parameter has been specified, --interface parameter will be mandatory.
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionMandatoryIndicator(params = "interface", command = "repository jpa")
+  public boolean isInterfaceParameterMandatory(ShellContext context) {
+    if (context.getParameters().containsKey("entity")) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * This indicator says if --package parameter should be visible or not
    *
    * If --all parameter has not been specified, --package parameter will not be visible
@@ -134,53 +150,51 @@ public class RepositoryJpaCommands implements CommandMarker {
   /**
    * This indicator says if --all parameter should be visible or not
    *
-   * If --interface parameter has been specified, --all parameter will not be visible
+   * If --entity parameter has been specified, --all parameter will not be visible
    * to prevent conflicts.
    * 
    * @param context ShellContext
    * @return
    */
-  @CliOptionVisibilityIndicator(
-      params = "all",
-      command = "repository jpa",
-      help = "--all parameter is not be visible if --interface parameter has been specified before.")
+  @CliOptionVisibilityIndicator(params = "all", command = "repository jpa",
+      help = "--all parameter is not be visible if --entity parameter has been specified before.")
   public boolean isAllParameterVisible(ShellContext context) {
-    if (context.getParameters().containsKey("interface")) {
+    if (context.getParameters().containsKey("entity")) {
       return false;
     }
     return true;
   }
 
   /**
-   * This indicator says if --entity and --defaultSearchResult parameter are visible.
+   * This indicator says if --interface and --defaultSearchResult parameter are visible.
    * 
-   * If --interface is specified, --entity and --defaultSearchResult will be visible
+   * If --entity is specified, --interface and --defaultSearchResult will be visible
    * 
    * @param context ShellContext
    * @return
    */
   @CliOptionVisibilityIndicator(
-      params = {"entity", "defaultSearchResult"},
+      params = {"interface", "defaultSearchResult"},
       command = "repository jpa",
-      help = "--entity or --defaultSearchResult parameters are not be visible --entity parameter hasn't been specified before.")
-  public boolean areEntityAndSearchResultVisible(ShellContext context) {
-    if (context.getParameters().containsKey("interface")) {
+      help = "--interface or --defaultSearchResult parameters are not be visible if --entity parameter hasn't been specified before.")
+  public boolean areInterfaceAndSearchResultVisible(ShellContext context) {
+    if (context.getParameters().containsKey("entity")) {
       return true;
     }
     return false;
   }
 
   /**
-   * This indicator says if --interface parameter is visible.
+   * This indicator says if --entity parameter is visible.
    * 
-   * If --all is specified, --interface won't be visible
+   * If --all is specified, --entity won't be visible
    * 
    * @param context ShellContext
    * @return
    */
-  @CliOptionVisibilityIndicator(params = "interface", command = "repository jpa",
-      help = "--interface parameter is not be visible --all parameter has been specified before.")
-  public boolean isInterfaceParameterVisible(ShellContext context) {
+  @CliOptionVisibilityIndicator(params = "entity", command = "repository jpa",
+      help = "--entity parameter is not be visible --all parameter has been specified before.")
+  public boolean isEntityParameterVisible(ShellContext context) {
     if (context.getParameters().containsKey("all")) {
       return false;
     }
@@ -196,7 +210,7 @@ public class RepositoryJpaCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Indicates if developer wants to generate repositories for every entity of current project ") boolean all,
-      @CliOption(key = "interface", mandatory = false,
+      @CliOption(key = "interface", mandatory = true,
           help = "The java Spring Data repository to generate.") final JavaType interfaceType,
       @CliOption(key = "entity", mandatory = false, optionContext = PROJECT,
           help = "The domain entity this repository should expose") final JavaType domainType,
