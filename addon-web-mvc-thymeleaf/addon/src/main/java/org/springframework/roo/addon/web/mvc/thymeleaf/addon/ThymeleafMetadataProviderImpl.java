@@ -323,11 +323,10 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
                 AnnotationAttributeValue<JavaType> entityServiceAttr =
                     detailService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
                 if (entityServiceAttr != null && entityServiceAttr.getValue().equals(detailType)) {
-                  MethodMetadata listDetailsMethod =
-                      getListDetailsMethod(detailType, detailService.getType(), detailController);
 
                   // Getting count method for current detailType
                   MethodMetadata countMethod = null;
+                  MethodMetadata findAllByReferencedFieldMethod = null;
                   final LogicalPath logicalPath =
                       PhysicalTypeIdentifier.getPath(detailService.getDeclaredByMetadataId());
                   final String detailServiceMetadataKey =
@@ -337,6 +336,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
                   Map<JavaType, MethodMetadata> countMethods =
                       detailServiceMetadata.getCountByReferenceFieldDefinedMethod();
+
+                  Map<JavaType, MethodMetadata> findAllReferencedFieldMethods =
+                      detailServiceMetadata.getReferencedFieldsFindAllDefinedMethods();
 
                   for (Entry<JavaType, MethodMetadata> method : countMethods.entrySet()) {
                     if (method.getKey().equals(this.entity)) {
@@ -349,6 +351,22 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
                     continue;
                   }
 
+                  for (Entry<JavaType, MethodMetadata> method : findAllReferencedFieldMethods
+                      .entrySet()) {
+                    if (method.getKey().equals(this.entity)) {
+                      findAllByReferencedFieldMethod = method.getValue();
+                      break;
+                    }
+                  }
+
+                  if (findAllByReferencedFieldMethod == null) {
+                    continue;
+                  }
+
+
+                  MethodMetadata listDetailsMethod =
+                      getListDetailsMethod(detailType, detailService.getType(), detailController,
+                          findAllByReferencedFieldMethod);
                   MethodMetadata listDetailsDatatablesMethod =
                       getListDetailsDatatablesMethod(detailType, detailService.getType(),
                           detailController, countMethod);
@@ -374,10 +392,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * @param detailType
    * @param detailService
    * @param detailController
+   * @param findAllByReferencedFieldMethod
    * @return
    */
   private MethodMetadata getListDetailsMethod(JavaType detailType, JavaType detailService,
-      ClassOrInterfaceTypeDetails detailController) {
+      ClassOrInterfaceTypeDetails detailController, MethodMetadata findAllByReferencedFieldMethod) {
 
     // Calculate method path value
     // Getting identifier Fields
@@ -442,26 +461,12 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Getting serviceMetadata
-    ClassOrInterfaceTypeDetails serviceDetails =
-        getTypeLocationService().getTypeDetails(detailService);
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
-    final String serviceMetadataKey =
-        ServiceMetadata.createIdentifier(serviceDetails.getType(), logicalPath);
-    final ServiceMetadata serviceMetadata =
-        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
-
-    // Getting findAll method
-    MethodMetadata serviceFindAllGlobalSearchMethod =
-        serviceMetadata.getFindAllGlobalSearchMethod();
-
     // Page<Entity> entityField = detailService.FIND_ALL_METHOD(id, search, pageable);
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(id, search, pageable);",
         addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(detailType)
             .getSimpleTypeName(), getDetailEntityField(detailType).getFieldName().getSymbolName(),
         getServiceDetailField(detailService).getFieldName().getSymbolName(),
-        serviceFindAllGlobalSearchMethod.getMethodName().getSymbolName()));
+        findAllByReferencedFieldMethod.getMethodName().getSymbolName()));
 
     // return entityField;
     bodyBuilder.appendFormalLine(String.format("return %s;", getDetailEntityField(detailType)

@@ -276,6 +276,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     return new ServiceMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders,
         repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
+        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(),
         repositoryMetadata.getCountMethodByReferencedFields());
   }
 

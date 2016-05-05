@@ -171,6 +171,9 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
     List<MethodMetadata> methodsToBeImplemented = new ArrayList<MethodMetadata>();
     Map<JavaType, MethodMetadata> countReferencedFieldsMethodsToBeImplemented =
         new HashMap<JavaType, MethodMetadata>();
+    Map<JavaType, MethodMetadata> findAllEeferencedFieldsMethodsToBeImplemented =
+        new HashMap<JavaType, MethodMetadata>();
+
 
     final LogicalPath logicalPath =
         PhysicalTypeIdentifier.getPath(serviceInterfaceDetails.getDeclaredByMetadataId());
@@ -184,6 +187,8 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
       methodsToBeImplemented = serviceMetadata.getAllDefinedMethods();
       countReferencedFieldsMethodsToBeImplemented =
           serviceMetadata.getCountByReferenceFieldDefinedMethod();
+      findAllEeferencedFieldsMethodsToBeImplemented =
+          serviceMetadata.getReferencedFieldsFindAllDefinedMethods();
 
       // Add dependencies between modules
       for (MethodMetadata method : methodsToBeImplemented) {
@@ -222,7 +227,8 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     return new ServiceImplMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, serviceInterface, repositoryDetails.getType(), entity,
-        findAllIterableMethod, methodsToBeImplemented, countReferencedFieldsMethodsToBeImplemented);
+        findAllIterableMethod, methodsToBeImplemented, countReferencedFieldsMethodsToBeImplemented,
+        findAllEeferencedFieldsMethodsToBeImplemented);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
