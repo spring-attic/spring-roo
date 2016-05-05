@@ -194,7 +194,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
     // ROO-3687: Generates necessary Spring Boot artifacts into application module.
     createSpringBootApplicationClass(topLevelPackage, projectName);
-//    createApplicationTestsClass(topLevelPackage, projectName);
+    //    createApplicationTestsClass(topLevelPackage, projectName);
 
     // ROO-3741: Including banner.txt on application module
     addBannerFile(getPomFromModuleName("application"));
@@ -261,7 +261,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
     // ROO-3687: Generates necessary Spring Boot artifacts
     createSpringBootApplicationClass(topLevelPackage, projectName);
-//    createApplicationTestsClass(topLevelPackage, projectName);
+    //    createApplicationTestsClass(topLevelPackage, projectName);
 
     // ROO-3741: Including banner.txt
     addBannerFile(getPomFromModuleName(""));
@@ -360,41 +360,41 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
   }
 
-//  public void createApplicationTestsClass(JavaPackage topLevelPackage, String projectName) {
-//    // Set projectName if null
-//    if (projectName == null) {
-//      projectName = topLevelPackage.getLastElement();
-//    }
-//    // Uppercase projectName
-//    projectName =
-//        projectName.substring(0, 1).toUpperCase()
-//            .concat(projectName.substring(1, projectName.length()));
-//    String testClass = projectName.concat("ApplicationTests");
-//
-//    final JavaType javaType =
-//        new JavaType(topLevelPackage.getFullyQualifiedPackageName().concat(".").concat(testClass));
-//    final String physicalPath =
-//        getPathResolver().getFocusedCanonicalPath(Path.SRC_TEST_JAVA, javaType);
-//    if (getFileManager().exists(physicalPath)) {
-//      throw new RuntimeException(
-//          "ERROR: You are trying to create two Java classes annotated with @SpringApplicationConfiguration that will be used to execute JUnit tests");
-//    }
-//
-//    InputStream inputStream = null;
-//    try {
-//      inputStream = FileUtils.getInputStream(getClass(), "SpringApplicationTests-template._java");
-//      String input = IOUtils.toString(inputStream);
-//      // Replacing package
-//      input = input.replace("__PACKAGE__", topLevelPackage.getFullyQualifiedPackageName());
-//      input = input.replace("__PROJECT_NAME__", projectName);
-//      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, false);
-//    } catch (final IOException e) {
-//      throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
-//    } finally {
-//      IOUtils.closeQuietly(inputStream);
-//    }
-//
-//  }
+  //  public void createApplicationTestsClass(JavaPackage topLevelPackage, String projectName) {
+  //    // Set projectName if null
+  //    if (projectName == null) {
+  //      projectName = topLevelPackage.getLastElement();
+  //    }
+  //    // Uppercase projectName
+  //    projectName =
+  //        projectName.substring(0, 1).toUpperCase()
+  //            .concat(projectName.substring(1, projectName.length()));
+  //    String testClass = projectName.concat("ApplicationTests");
+  //
+  //    final JavaType javaType =
+  //        new JavaType(topLevelPackage.getFullyQualifiedPackageName().concat(".").concat(testClass));
+  //    final String physicalPath =
+  //        getPathResolver().getFocusedCanonicalPath(Path.SRC_TEST_JAVA, javaType);
+  //    if (getFileManager().exists(physicalPath)) {
+  //      throw new RuntimeException(
+  //          "ERROR: You are trying to create two Java classes annotated with @SpringApplicationConfiguration that will be used to execute JUnit tests");
+  //    }
+  //
+  //    InputStream inputStream = null;
+  //    try {
+  //      inputStream = FileUtils.getInputStream(getClass(), "SpringApplicationTests-template._java");
+  //      String input = IOUtils.toString(inputStream);
+  //      // Replacing package
+  //      input = input.replace("__PACKAGE__", topLevelPackage.getFullyQualifiedPackageName());
+  //      input = input.replace("__PROJECT_NAME__", projectName);
+  //      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, false);
+  //    } catch (final IOException e) {
+  //      throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
+  //    } finally {
+  //      IOUtils.closeQuietly(inputStream);
+  //    }
+  //
+  //  }
 
   public void executeMvnCommand(final String extra) throws IOException {
 
