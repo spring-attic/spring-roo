@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-href="@{/public/img/apple-touch-icon.png}" />
 
-    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">Spring Roo application</title>
+    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-title="${r"#{"}label_spring_application${r"}"}" data-th-text="${r"#{"}label_spring_application${r"}"}">Spring Roo application</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"

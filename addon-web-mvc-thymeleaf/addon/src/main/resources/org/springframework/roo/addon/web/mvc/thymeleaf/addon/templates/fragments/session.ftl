@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Información de sesión</title>
+    <title>Session</title>
   </head>
   <body>
     <!--
@@ -13,7 +13,7 @@
 
       <!-- User menu -->
       <ul class="nav navbar-nav navbar-right upper-nav session">
-          <li><a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span><span class="hidden-sm"> User</span></a></li>
+          <li><a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span><span class="hidden-sm" data-th-text="${r"#{"}label_user${r"}"}"> User</span></a></li>
       </ul>
 
     </div>

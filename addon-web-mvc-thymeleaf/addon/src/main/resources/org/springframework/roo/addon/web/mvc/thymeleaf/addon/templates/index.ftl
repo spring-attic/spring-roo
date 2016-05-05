@@ -20,7 +20,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
        data-th-remove="all" />
 
-    <title>Home</title>
+    <title data-th-text="${r"#{"}label_homepage${r"}"}">Home</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
@@ -60,8 +60,8 @@
         <div class="bg-header">
           <div class="jumbotron bg-banner">
               <div class="container">
-                <h1 class="project-name">Hello, we are Spring Roo!</h1>
-                <h2 class="project-tagline">Get start your next awesome project</h2>
+                <h1 class="project-name" data-th-text="${r"#{"}label_welcome${r"}"}">Hello, we are Spring Roo!</h1>
+                <h2 class="project-tagline" data-th-text="${r"#{"}info_startproject${r"}"}">Get start your next awesome project</h2>
               </div>
           </div>
         </div>
@@ -80,12 +80,12 @@
 
               <!-- Brand logo -->
               <div class="organization-logo navbar-brand">
-                <a title="Spring Roo Application" href="http://projects.spring.io/spring-roo/">
-                  <img alt="Spring Roo Application" data-th-src="@{/public/img/logo.png}" src="../static/public/img/logo.png" />
+                <a data-th-title="${r"#{"}label_spring_application${r"}"}" title="Spring Roo Application" href="http://projects.spring.io/spring-roo/">
+                  <img alt="Spring Roo Application" data-th-alt="${r"#{"}label_spring_application${r"}"}" data-th-src="@{/public/img/logo.png}" src="../static/public/img/logo.png" />
                 </a>
               </div>
               <!-- Name application -->
-              <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}">Spring Roo Application</a></div>
+              <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}" data-th-text="${r"#{"}label_spring_application${r"}"}">Spring Roo Application</a></div>
 
             </div>
             <!-- navbar header -->
@@ -136,14 +136,14 @@
               src="../static/public/img/springroo-logo.png" />
             </div>
             <div class="col-sm-6">
-              <h2>With Roo you can easily build full Java applications in minutes.</h2>
+              <h2 data-th-text="${r"#{"}info_homepage_header${r"}"}">With Roo you can easily build full Java applications in minutes.</h2>
 
-              <p>Spring Roo is a next-generation rapid application development tool for Java developers.
+              <p data-th-text="${r"#{"}info_homepage_paragraph${r"}"}">Spring Roo is a next-generation rapid application development tool for Java developers.
               It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and
               facilitating easy Roo removal.
               </p>
 
-              <p class="lead">Thanks for your interest in Spring Roo!</p>
+              <p class="lead" data-th-text="${r"#{"}info_homepage_thanks${r"}"}">Thanks for your interest in Spring Roo!</p>
 
               </div>
 
@@ -161,8 +161,8 @@
                      <i class="fa fa-book"></i>
                     </div>
                     <div class="text">
-                     <h2><a href="http://docs.spring.io/spring-roo/docs/current/reference/html/" title="Spring Roo reference documentation" target="_blank">Doc</a></h2>
-                     <small>If you are looking for Reference Documentation you can get it here.</small>
+                     <h2><a href="http://docs.spring.io/spring-roo/docs/current/reference/html/" data-th-title="${r"#{"}label_spring_doc${r"}"}" title="Spring Roo reference documentation" target="_blank">Doc</a></h2>
+                     <small data-th-text="${r"#{"}info_spring_doc${r"}"}">If you are looking for Reference Documentation you can get it here.</small>
                     </div>
                 </div>
             </div>
@@ -176,8 +176,8 @@
                         <i class="fa fa-envira"></i>
                       </div>
                       <div class="text">
-                        <h2><a href="http://projects.spring.io/spring-roo/" title="Spring Roo project site" target="_blank">Project Page</a></h2>
-                        <small>All the info about Spring Roo development.</small>
+                        <h2><a href="http://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site${r"}"}" title="Spring Roo project site" target="_blank">Project Page</a></h2>
+                        <small data-th-text="${r"#{"}info_spring_site${r"}"}">All the info about Spring Roo development.</small>
                     </div>
                 </div>
             </div>
@@ -191,8 +191,8 @@
                                 <i class="fa fa-stack-overflow"></i>
                               </div>
                               <div class="text">
-                                <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" title="Spring Roo Stackoverflow support" target="_blank">Support</a></h2>
-                                <small>If you have any question about the project,
+                                <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support${r"}"}" title="Spring Roo Stackoverflow support" target="_blank">Support</a></h2>
+                                <small data-th-text="${r"#{"}label_spring_support${r"}"}">If you have any question about the project,
                                 you can check it.</small>
                             </div>
                       </div>
@@ -206,8 +206,8 @@
                                 <i class="fa fa-code"></i>
                               </div>
                               <div class="text">
-                                <h2><a href="https://github.com/spring-projects/spring-roo/" title="Spring Roo source code" target="_blank">Code</a></h2>
-                                <small>Known, modify and redistribute the source code.</small>
+                                <h2><a href="https://github.com/spring-projects/spring-roo/" data-th-title="${r"#{"}label_spring_sourcecode${r"}"}" title="Spring Roo source code" target="_blank">Code</a></h2>
+                                <small data-th-text="${r"#{"}label_spring_sourcecode${r"}"}">Known, modify and redistribute the source code.</small>
                             </div>
                       </div>
                   </div>
@@ -220,7 +220,7 @@
             <div class="row">
               <div class="col-md-12">
                 <ul class="pull-right list-inline social-links">
-                  <li><small>As always, you can find us also on </small></li>
+                  <li><small data-th-text="${r"#{"}info_twitter${r"}"}">As always, you can find us also on </small></li>
                   <li>
                   <a href="http://twitter.com/springroo" class="icon-twitter" target="_blank">
                   <i class="fa fa-twitter"></i>

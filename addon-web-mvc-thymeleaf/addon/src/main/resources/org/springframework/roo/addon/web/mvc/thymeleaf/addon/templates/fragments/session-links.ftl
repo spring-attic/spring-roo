@@ -12,12 +12,12 @@
     <div data-layout-fragment="session">
 
       <ul class="nav navbar-nav navbar-right upper-nav links">
-        <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span><span class="hidden-sm"> Contact</span></a></li>
-        <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span><span class="hidden-sm"> Help</span></a></li>
+        <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span><span class="hidden-sm" data-th-text="${r"#{"}label_contact${r"}"}"> Contact</span></a></li>
+        <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span><span class="hidden-sm" data-th-text="${r"#{"}label_help${r"}"}"> Help</span></a></li>
       </ul>
 
       <ul class="nav navbar-nav navbar-right upper-nav session">
-        <li><a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span><span class="hidden-sm"> User</span></a></li>
+        <li><a href="#"><span class="glyphicon glyphicon-user" aria-hidden="true"></span><span class="hidden-sm" data-th-text="${r"#{"}label_user${r"}"}"> User</span></a></li>
       </ul>
 
 	 </div>
