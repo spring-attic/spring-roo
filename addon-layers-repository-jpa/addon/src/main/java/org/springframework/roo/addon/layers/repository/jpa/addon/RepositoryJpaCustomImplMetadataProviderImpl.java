@@ -4,9 +4,11 @@ import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTO
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +28,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
@@ -301,9 +304,35 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       }
     }
 
+    // Getting all necessary information about referencedFields
+    Map<JavaType, MethodMetadata> referencedFieldsMethods =
+        repositoryCustomMetadata.getReferencedFieldsFindAllMethods();
+
+    Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames =
+        new HashMap<JavaType, JavaSymbolName>();
+    Map<JavaType, JavaSymbolName> referencedFieldsNames = new HashMap<JavaType, JavaSymbolName>();
+
+    for (Entry<JavaType, MethodMetadata> referencedFields : referencedFieldsMethods.entrySet()) {
+      JavaType referencedField = referencedFields.getKey();
+
+      // Getting idenfierFields 
+      List<FieldMetadata> identifierFields =
+          getPersistenceMemberLocator().getIdentifierFields(referencedField);
+      referencedFieldsIdentifierNames.put(referencedField, identifierFields.get(0).getFieldName());
+
+      // Getting name
+      List<FieldMetadata> entityFields = entityMemberDetails.getFields();
+      for (FieldMetadata field : entityFields) {
+        if (field.getFieldType().equals(referencedField)) {
+          referencedFieldsNames.put(referencedField, field.getFieldName());
+        }
+      }
+    }
+
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, entity, isDTO, validIdFields, validFields,
-        repositoryCustomMetadata.getFindAllGlobalSearchMethod());
+        repositoryCustomMetadata.getFindAllGlobalSearchMethod(), referencedFieldsMethods,
+        referencedFieldsIdentifierNames, referencedFieldsNames);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

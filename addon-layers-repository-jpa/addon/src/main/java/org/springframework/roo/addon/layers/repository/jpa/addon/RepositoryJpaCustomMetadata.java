@@ -3,7 +3,10 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -20,6 +23,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
@@ -38,6 +42,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   private JavaType globalSearch;
   private JavaType entity;
   private JavaType searchResult;
+  private Map<JavaType, JavaType> referencedFields;
+  private Map<JavaType, MethodMetadata> referencedFieldsFindAllMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -75,23 +81,37 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    * @param domainType entity referenced on interface
    * @param searchResult the java type o the search result returned by findAll finder
    * @param globalSearch the class annotated with @RooGlobalSearch 
+   * @param referencedFields map that contains referenced field and its identifier field type
    */
   public RepositoryJpaCustomMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
-      final JavaType searchResult, JavaType globalSearch) {
+      final JavaType searchResult, JavaType globalSearch,
+      final Map<JavaType, JavaType> referencedFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(globalSearch, "Global search required");
     Validate.notNull(searchResult, "Search result required");
+    Validate.notNull(referencedFields, "Referenced fields could be empty but not null");
 
     this.importResolver = builder.getImportRegistrationResolver();
     this.globalSearch = globalSearch;
     this.entity = domainType;
     this.searchResult = searchResult;
+    this.referencedFields = referencedFields;
+
+    referencedFieldsFindAllMethods = new HashMap<JavaType, MethodMetadata>();
 
     // Generate findAll method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllGlobalSearchMethod()));
+
+    // Generate findAllMethod for every referencedFields
+    for (Entry<JavaType, JavaType> referencedField : referencedFields.entrySet()) {
+      MethodMetadata method =
+          getFindAllMethodByReferencedField(referencedField.getKey(), referencedField.getValue());
+      ensureGovernorHasMethod(new MethodMetadataBuilder(method));
+      referencedFieldsFindAllMethods.put(referencedField.getKey(), method);
+    }
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -133,6 +153,45 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     return methodBuilder.build(); // Build and return a MethodMetadata
   }
 
+  /**
+   * Method that generates the findAll method for provided referenced field on current interface. 
+   * 
+   * @param referencedField
+   * @param identifierType
+   * 
+   * @return
+   */
+  public MethodMetadata getFindAllMethodByReferencedField(JavaType referencedField,
+      JavaType identifierType) {
+
+    // Method name
+    JavaSymbolName methodName =
+        new JavaSymbolName(String.format("findAllBy%s", referencedField.getSimpleTypeName()));
+
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(globalSearch));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
+
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames.add(new JavaSymbolName("globalSearch"));
+    parameterNames.add(new JavaSymbolName("pageable"));
+
+    // Return type
+    JavaType returnType =
+        new JavaType(SpringJavaType.PAGE.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+            Arrays.asList(searchResult));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            returnType, parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+  }
+
   @Override
   public String toString() {
     final ToStringBuilder builder = new ToStringBuilder(this);
@@ -147,5 +206,15 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
   public JavaType getSearchResult() {
     return searchResult;
+  }
+
+  /**
+   * This method returns all findAll methods for 
+   * referenced fields
+   * 
+   * @return
+   */
+  public Map<JavaType, MethodMetadata> getReferencedFieldsFindAllMethods() {
+    return referencedFieldsFindAllMethods;
   }
 }

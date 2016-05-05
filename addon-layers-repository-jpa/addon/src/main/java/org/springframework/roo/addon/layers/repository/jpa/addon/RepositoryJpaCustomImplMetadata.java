@@ -3,6 +3,8 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -44,6 +46,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   private boolean isDTO;
 
   private MethodMetadata findAllGlobalSearchMethod;
+  private Map<JavaType, MethodMetadata> allFindAllReferencedFieldsMethods;
+  private Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames;
+  private Map<JavaType, JavaSymbolName> referencedFieldsNames;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -83,17 +88,24 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param idFields entity id fields
    * @param validFields entity fields to search for (excluded id, reference and collection fields)
    * @param findAllGlobalSearchMethod the findAll metadata 
+   * @param allFindAllReferencedFieldsMethods
    */
   public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
-      final boolean isDTO, final List<FieldMetadata> idFields, List<FieldMetadata> validFields,
-      final MethodMetadata findAllGlobalSearchMethod) {
+      final boolean isDTO, final List<FieldMetadata> idFields,
+      final List<FieldMetadata> validFields, final MethodMetadata findAllGlobalSearchMethod,
+      final Map<JavaType, MethodMetadata> allFindAllReferencedFieldsMethods,
+      final Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames,
+      final Map<JavaType, JavaSymbolName> referencedFieldsNames) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
     this.importResolver = builder.getImportRegistrationResolver();
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
+    this.allFindAllReferencedFieldsMethods = allFindAllReferencedFieldsMethods;
+    this.referencedFieldsIdentifierNames = referencedFieldsIdentifierNames;
+    this.referencedFieldsNames = referencedFieldsNames;
     this.isDTO = isDTO;
     this.entity = domainType;
 
@@ -108,6 +120,17 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // Generate findAll implementation method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllImpl(idFields, validFields)));
+
+    // Generate findAll referenced fields implementation methods
+    for (Entry<JavaType, MethodMetadata> method : allFindAllReferencedFieldsMethods.entrySet()) {
+
+      JavaSymbolName identifierFieldName = referencedFieldsIdentifierNames.get(method.getKey());
+      JavaSymbolName fieldName = referencedFieldsNames.get(method.getKey());
+
+      ensureGovernorHasMethod(new MethodMetadataBuilder(
+          getFindAllReferencedFieldsImpl(method.getKey(), method.getValue(), identifierFieldName,
+              fieldName, idFields, validFields)));
+    }
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -168,14 +191,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType pageImpl = new JavaType("org.springframework.data.domain.PageImpl");
     JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
 
-    buildVariables(bodyBuilder, ids);
+    buildVariables(bodyBuilder, ids, null, null, null, null);
 
     // QEntity qEntity = QEntity.entity;
     bodyBuilder.appendFormalLine(String.format("%1$s %2$s = %1$s.%2$s;",
         qEntity.getNameIncludingTypeParameters(false, importResolver), entityVariable));
 
     // Construct query
-    buildQuery(bodyBuilder, fields, entityVariable, globalSearch);
+    buildQuery(bodyBuilder, fields, entityVariable, globalSearch, null);
 
     bodyBuilder.appendFormalLine(String.format("long totalFound = query.count();"));
 
@@ -199,7 +222,136 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // query.orderBy(qEntity.id.asc());
     for (FieldMetadata id : ids) {
-      bodyBuilder.appendFormalLine(String.format("query.orderBy(%s.asc());", id.getFieldName()));
+      bodyBuilder.appendFormalLine(String.format("query.orderBy(id%s.asc());", entity));
+    }
+
+    bodyBuilder.appendFormalLine("");
+
+    // List<Entity> results = query.list(ConstructorExpression.create(Entity.class, qEntity.parameter1, qEntity.parameter1, ...));
+    if (!this.isDTO) {
+      bodyBuilder.appendFormalLine(String.format("%1$s<%2$s> results = query.list(%3$s);",
+          new JavaType("java.util.List").getNameIncludingTypeParameters(false, importResolver),
+          returnType.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    } else if (queryList.isEmpty()) {
+      bodyBuilder.appendFormalLine(String.format(
+          "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
+              "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
+              .getNameIncludingTypeParameters(false, importResolver), constructorExp
+              .getNameIncludingTypeParameters(false, importResolver)));
+    } else {
+      bodyBuilder.appendFormalLine(String.format(
+          "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class, %4$s ));", new JavaType(
+              "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
+              .getNameIncludingTypeParameters(false, importResolver), constructorExp
+              .getNameIncludingTypeParameters(false, importResolver), StringUtils.join(queryList,
+              ", ")));
+    }
+
+    //return new PageImpl<Entity>(results, pageable, totalFound);
+    bodyBuilder.appendFormalLine(String.format("return new %s<%s>(results, %s, totalFound);",
+        pageImpl.getNameIncludingTypeParameters(false, importResolver),
+        returnType.getNameIncludingTypeParameters(false, importResolver), pageable));
+
+    // Sets body to generated method
+    methodBuilder.setBodyBuilder(bodyBuilder);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Method that generates the findAll referenced fields implementation method
+   * 
+   * @param method to implement
+   * @param identifierFieldName
+   * @param fieldName
+   * @param ids the entity id fields
+   * @param fields the entity fields to search for 
+   *
+   * @return
+   */
+  public MethodMetadata getFindAllReferencedFieldsImpl(JavaType referencedField,
+      MethodMetadata method, JavaSymbolName identifierFieldName, JavaSymbolName fieldName,
+      List<FieldMetadata> ids, List<FieldMetadata> fields) {
+
+    // Define method name
+    JavaSymbolName methodName = method.getMethodName();
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = method.getParameterNames();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use provided findAll method to generate its implementation
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, method.getReturnType(),
+            parameterTypes, parameterNames, null);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Getting variable name to use in the code
+    JavaType referencedFieldIdentifierType = parameterTypes.get(0).getJavaType();
+    JavaSymbolName globalSearch = parameterNames.get(1);
+    JavaSymbolName pageable = parameterNames.get(2);
+    String entity = this.entity.getSimpleTypeName();
+    String entityVariable = StringUtils.uncapitalize(entity);
+
+    List<String> queryList = new ArrayList<String>();
+    for (FieldMetadata field : fields) {
+      queryList.add(String.format("%s.%s", entityVariable, field.getFieldName()));
+    }
+
+
+    // Types to import
+    JavaType qEntity =
+        new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
+            .concat(entity));
+    JavaType returnType = findAllGlobalSearchMethod.getReturnType().getParameters().get(0);
+    JavaType pageImpl = new JavaType("org.springframework.data.domain.PageImpl");
+    JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
+
+    buildVariables(bodyBuilder, ids, referencedField, fieldName, referencedFieldIdentifierType,
+        identifierFieldName);
+
+    // QEntity qEntity = QEntity.entity;
+    bodyBuilder.appendFormalLine(String.format("%1$s %2$s = %1$s.%2$s;",
+        qEntity.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+
+    // Construct query
+    buildQuery(bodyBuilder, fields, entityVariable, globalSearch, referencedField);
+
+    bodyBuilder.appendFormalLine(String.format("long totalFound = query.count();"));
+
+    // if (pageable != null) {
+    bodyBuilder.appendFormalLine(String.format("if (%s != null) {", pageable));
+
+    bodyBuilder.indent();
+
+    if (!fields.isEmpty()) {
+      buildOrderClause(fields, bodyBuilder, entityVariable, pageable);
+    }
+
+    //  query.offset(pageable.getOffset()).limit(pageable.getPageSize());}
+    bodyBuilder.appendFormalLine(String.format(
+        "query.offset(%1$s.getOffset()).limit(%1$s.getPageSize());", pageable));
+
+    bodyBuilder.indentRemove();
+
+    // End if
+    bodyBuilder.appendFormalLine("}");
+
+    // query.orderBy(qEntity.id.asc());
+    for (FieldMetadata id : ids) {
+      bodyBuilder.appendFormalLine(String.format("query.orderBy(id%s.asc());", entity));
     }
 
     bodyBuilder.appendFormalLine("");
@@ -242,17 +394,30 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param bodyBuilder method body builder
    * @param ids id fields
    */
-  private void buildVariables(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> ids) {
+  private void buildVariables(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> ids,
+      JavaType referencedFieldType, JavaSymbolName referencedFieldName,
+      JavaType referencedFieldIdentifierType, JavaSymbolName referencedFieldIdentifierName) {
     JavaType numberPath = new JavaType("com.mysema.query.types.path.NumberPath");
 
     // Getting id dynamically
     for (FieldMetadata id : ids) {
-      bodyBuilder
-          .appendFormalLine(String.format(
-              "%1$s<%3$s> %2$s = new %1$s<%3$s>(%3$s.class, \"%2$s\");",
-              numberPath.getNameIncludingTypeParameters(true, importResolver), id.getFieldName(),
-              id.getFieldType().toObjectType()
-                  .getNameIncludingTypeParameters(false, importResolver)));
+      bodyBuilder.appendFormalLine(String.format(
+          "%1$s<%3$s> id%4$s = new %1$s<%3$s>(%3$s.class, \"%2$s\");",
+          numberPath.getNameIncludingTypeParameters(true, importResolver), id.getFieldName(), id
+              .getFieldType().toObjectType().getNameIncludingTypeParameters(false, importResolver),
+          entity.getSimpleTypeName()));
+    }
+
+    if (referencedFieldType != null && referencedFieldName != null
+        && referencedFieldIdentifierName != null && referencedFieldIdentifierType != null) {
+      bodyBuilder.appendFormalLine(String.format("%s<%s> id%s = new %s<%s>(%s.class, \"%s.%s\");",
+          numberPath.getNameIncludingTypeParameters(true, importResolver),
+          referencedFieldIdentifierType.getSimpleTypeName(),
+          referencedFieldType.getSimpleTypeName(),
+          numberPath.getNameIncludingTypeParameters(true, importResolver),
+          referencedFieldIdentifierType.getSimpleTypeName(),
+          referencedFieldIdentifierType.getSimpleTypeName(), referencedFieldName,
+          referencedFieldIdentifierName));
     }
   }
 
@@ -263,9 +428,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param fields fields to search for
    * @param entityVariable name of the variable that contains the Q entity 
    * @param globalSearch global search variable name
+   * @param referencedFieldType
    */
   private void buildQuery(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> fields,
-      String entityVariable, JavaSymbolName globalSearch) {
+      String entityVariable, JavaSymbolName globalSearch, JavaType referencedFieldType) {
 
     JavaType booleanBuilder = new JavaType("com.mysema.query.BooleanBuilder");
     JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
@@ -274,9 +440,16 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.appendFormalLine(String.format("%s query = getQueryFrom(%s);",
         jpql.getNameIncludingTypeParameters(false, importResolver), entityVariable));
 
-    // BooleanBuilder where = new BooleanBuilder()
-    bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s();\n",
-        booleanBuilder.getNameIncludingTypeParameters(false, importResolver)));
+    if (referencedFieldType != null) {
+      // BooleanBuilder where = new BooleanBuilder(entityVariable.referenceField.identifierName.eq(id));
+      bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s(id%2$s.eq(id));\n",
+          booleanBuilder.getNameIncludingTypeParameters(false, importResolver),
+          referencedFieldType.getSimpleTypeName()));
+    } else {
+      // BooleanBuilder where = new BooleanBuilder()
+      bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s();\n",
+          booleanBuilder.getNameIncludingTypeParameters(false, importResolver)));
+    }
 
     // if (globalSearch != null) {
     bodyBuilder.appendFormalLine(String.format("if (%s != null) {", globalSearch));
