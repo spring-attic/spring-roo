@@ -14,7 +14,7 @@
 	<version>0.1.0.BUILD-SNAPSHOT</version>
 	<name>TO_BE_CHANGED_BY_LISTENER</name>
 	<properties>
-		<aspectj.version>1.8.1</aspectj.version>
+		<aspectj.version>ASPECTJ_VERSION</aspectj.version>
 		<java.version>JAVA_VERSION</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
