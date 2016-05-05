@@ -192,6 +192,16 @@ public interface MVCViewGenerationService {
   void addSession(String moduleName, ViewContext ctx);
 
   /**
+   * This operation will add the session-links fragment using 
+   * the provided context
+   * 
+   * @param moduleName module where session fragment will be added
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addSessionLinks(String moduleName, ViewContext ctx);
+
+  /**
    * This operation will updates menu view.
    * 
    * TODO: Maybe, instead of modify all menu view, only new generated controller should

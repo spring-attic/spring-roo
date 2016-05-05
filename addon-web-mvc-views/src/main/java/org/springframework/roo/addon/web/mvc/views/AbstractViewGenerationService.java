@@ -369,6 +369,25 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
+  public void addSessionLinks(String moduleName, ViewContext ctx) {
+    // Process elements to generate 
+    DOC newDoc = process("fragments/session-links", ctx);
+
+    // Getting new viewName
+    String viewName =
+        getFragmentsFolder(moduleName).concat("/session-links").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
   public void updateMenuView(String moduleName, ViewContext ctx) {
     // TODO: This method should update menu view with the new 
     // controller to include, instead of regenerate menu view page.

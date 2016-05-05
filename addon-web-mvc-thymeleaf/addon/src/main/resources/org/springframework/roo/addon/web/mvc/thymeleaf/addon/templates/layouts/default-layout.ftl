@@ -1,79 +1,141 @@
 <!DOCTYPE html>
 <html>
   <head>
-
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta name="description" content="${projectName}"/>
-    <meta name="author" content="Spring Roo" />
-    <link rel="icon" href="../../static/public/img/favicon.ico" data-th-href="@{/public/img/favicon.ico}" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description"
+      content="A next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes." />
+    <meta name="author"
+      content="Spring Roo team" />
 
-    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">${projectName}</title>
+    <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+      data-th-href="@{/public/img/favicon.ico}" />
+
+    <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+      data-th-href="@{/public/img/apple-touch-icon.png}" />
+
+    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">Spring Roo application</title>
 
     <!-- Bootstrap -->
-    <link rel="stylesheet" type="text/css" 
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css"></link>        
-    <link rel="stylesheet" type="text/css" 
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.css"></link>      
-
-    <!-- Spring Roo CSS -->
     <link rel="stylesheet" type="text/css"
-          href="../../static/public/css/standard.css" data-th-href="@{/public/css/standard.css}" />
-    <noscript><link rel="stylesheet" href="../../static/public/css/nojs-standard.css" data-th-href="@{/public/css/nojs-standard.css}"/></noscript>
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"></link>
+        
+    <link rel="stylesheet" type="text/css"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.css"></link>      
+         
+    <!-- Datatables -->  
+       
+    <link rel="stylesheet" type="text/css" 
+        href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
+  
+    <link rel="stylesheet" type="text/css" 
+        href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
+  
+    <link rel="stylesheet" type="text/css" 
+        href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css"></link>
+  
+    <link rel="stylesheet" type="text/css" 
+        href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"></link>
+  
+    <link rel="stylesheet" type="text/css" 
+        href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
+        
+    <!-- Select2 -->
+    <link rel="stylesheet" type="text/css"
+      data-th-href="@{/public/css/select2.css}"
+      href="../../static/public/css/select2.css" />
+    <link rel="stylesheet" type="text/css"
+      data-th-href="@{/public/css/select2-bootstrap.css}"
+      href="../../static/public/css/select2-bootstrap.css" />
+      
+      
+    <!-- DateTimePicker -->
+    <link rel="stylesheet" type="text/css"
+        data-th-href="@{/public/css/jquery.datetimepicker.css}"
+        href="../../static/public/css/jquery.datetimepicker.css" />
+    <script data-th-src="@{/public/js/jquery.min.js}"
+        src="../../static/public/js/jquery.min.js"></script>
 
-    <!-- HTML5 shim y Respond.js to support HTML5 elements and media queries -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" type="text/css"
+      href="../../static/public/css/font-awesome.min.css"
+      data-th-href="@{/public/css/font-awesome.min.css}" />
+
+    <!-- Bootswatch CSS custom -->
+    <link rel="stylesheet" type="text/css"
+      href="../../static/public/css/theme.css"
+      data-th-href="@{/public/css/theme.css}" />
+
+    <!-- Roo CSS -->
+    <link rel="stylesheet" type="text/css"
+      href="../../static/public/css/springroo.css"
+      data-th-href="@{/public/css/springroo.css}" />
+
     <!--[if lt IE 9]>
-      <script src="js/html5shiv.min.js"></script>
-      <script src="js/respond.min.js"></script>
-    <![endif]-->
+          <script src="/public/js/html5shiv.min.js"></script>
+          <script src="/public/js/respond.min.js"></script>
+        <![endif]-->
 
-   </head>
+  </head>
   <body>
-    <div data-layout-include="fragments/session :: session">
-      <span>Session</span>
-    </div>
-    <div class="container bg-container">
-      <header role="banner">
+
+     <header role="banner">
         <div data-layout-include="fragments/header :: header">
-          <h1>Sample Header</h1>
+          <!-- Content replaced by the header template fragment header.html -->
+          <h1>Sample page header for direct display of the template</h1>
         </div>
+
         <div data-layout-include="fragments/menu :: menu">
+          <!-- Content replaced by the menu template fragment menu.html -->
           <span>Application menu</span>
         </div>
-      </header>
+
+    </header>
+
+    <div class="container bg-container">
+
+
       <section data-layout-fragment="content">
-        <h2>Sample Body</h2>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        <!-- Content replaced by the content fragment of the page displayed -->
+        <h2>Sample static body for direct display of the template</h2>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent
+          scelerisque neque neque, ac elementum quam dignissim interdum. Phasellus et
+          placerat elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
           Praesent scelerisque neque neque, ac elementum quam dignissim interdum.
-          Phasellus et placerat elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-          Praesent scelerisque neque neque, ac elementum quam dignissim interdum.
-          Phasellus et placerat elit.
-        </p>
+          Phasellus et placerat elit.</p>
       </section>
     </div>
 
     <footer class="container" data-layout-include="fragments/footer :: footer">
-        &copy; 2016 Powered By Spring Roo
+      <!-- Content replaced by the footer template fragment footer.html -->
+      &copy; 2016 Spring Roo (footer for example for direct display of the template)
     </footer>
 
-    <!-- Bootstrap core JavaScript
+      <!-- Bootstrap core JavaScript
     ================================================== -->
-    <!-- JQuery -->
-    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-1.12.3.js"></script>
-    <!-- Bootstrap -->
-    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.js"></script>
-  
+  <script data-th-src="@{/public/js/jquery.min.js}"
+    src="../../static/public/js/jquery.min.js"></script>
+  <script data-th-src="@{/public/js/bootstrap.min.js}"
+    src="../../static/public/js/bootstrap.min.js"></script>
+
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-     <script src="../../static/public/js/ie10-viewport-bug-workaround.js" data-th-src="@{/public/js/ie10-viewport-bug-workaround.js}">
+    <script src="../../static/public/js/ie10-viewport-bug-workaround.js"
+      data-th-src="@{/public/js/ie10-viewport-bug-workaround.js}">
     </script>
 
-    <div data-layout-fragment="javascript">
-      <!-- Will include javascript code -->
-    </div>
+      <div data-layout-fragment="javascript">
+          <!-- Select2 -->
+          <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
+          <script src="../../static/public/js/select2.full-es.js" data-th-src="@{/public/js/select2.full-es.js}"></script>
+          <script src="../../static/public/js/select2-defaults.js" data-th-src="@{/public/js/select2-defaults.js}"></script>
+          <!-- DateTime Picker -->
+          <script src="../../static/public/js/jquery.datetimepicker.full.min.js" data-th-src="@{/public/js/jquery.datetimepicker.full.min.js}"></script>
+      </div>
 
-    <script src="../../static/public/js/main.js" data-th-src="@{/public/js/main.js}">
-    </script>
+    <!-- Application -->
+    <script src="../../static/public/js/main.js"
+      data-th-src="@{/public/js/main.js}">
+      </script>
   </body>
 </html>

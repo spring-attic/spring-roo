@@ -1,14 +1,16 @@
-(function($){
-	$(document).ready(function(){
-		$('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
+(function(jQuery){
+	jQuery(document).ready(function(){
+
+		//dropdown
+		jQuery('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
 			event.preventDefault();
 			event.stopPropagation();
-			$(this).parent().siblings().removeClass('open');
-			$(this).parent().toggleClass('open');
+			jQuery(this).parent().siblings().removeClass('open');
+			jQuery(this).parent().toggleClass('open');
 		});
 
 		//tooltip
-		 $('[data-toggle="tooltip"]').tooltip();
+		jQuery('[data-toggle="tooltip"]').tooltip();
+
 	});
 })(jQuery);
-
