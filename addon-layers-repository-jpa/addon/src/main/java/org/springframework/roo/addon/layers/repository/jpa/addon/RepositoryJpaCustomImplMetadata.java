@@ -198,7 +198,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         qEntity.getNameIncludingTypeParameters(false, importResolver), entityVariable));
 
     // Construct query
-    buildQuery(bodyBuilder, fields, entityVariable, globalSearch, null);
+    buildQuery(bodyBuilder, fields, entityVariable, globalSearch, null, null);
 
     bodyBuilder.appendFormalLine(String.format("long totalFound = query.count();"));
 
@@ -327,7 +327,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         qEntity.getNameIncludingTypeParameters(false, importResolver), entityVariable));
 
     // Construct query
-    buildQuery(bodyBuilder, fields, entityVariable, globalSearch, referencedField);
+    buildQuery(bodyBuilder, fields, entityVariable, globalSearch, referencedField, fieldName);
 
     bodyBuilder.appendFormalLine(String.format("long totalFound = query.count();"));
 
@@ -413,7 +413,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       bodyBuilder.appendFormalLine(String.format("%s<%s> id%s = new %s<%s>(%s.class, \"%s.%s\");",
           numberPath.getNameIncludingTypeParameters(true, importResolver),
           referencedFieldIdentifierType.getSimpleTypeName(),
-          referencedFieldType.getSimpleTypeName(),
+          StringUtils.capitalize(referencedFieldName.getSymbolName()),
           numberPath.getNameIncludingTypeParameters(true, importResolver),
           referencedFieldIdentifierType.getSimpleTypeName(),
           referencedFieldIdentifierType.getSimpleTypeName(), referencedFieldName,
@@ -431,7 +431,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param referencedFieldType
    */
   private void buildQuery(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> fields,
-      String entityVariable, JavaSymbolName globalSearch, JavaType referencedFieldType) {
+      String entityVariable, JavaSymbolName globalSearch, JavaType referencedFieldType,
+      JavaSymbolName referencedFieldName) {
 
     JavaType booleanBuilder = new JavaType("com.mysema.query.BooleanBuilder");
     JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
@@ -440,11 +441,11 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.appendFormalLine(String.format("%s query = getQueryFrom(%s);",
         jpql.getNameIncludingTypeParameters(false, importResolver), entityVariable));
 
-    if (referencedFieldType != null) {
+    if (referencedFieldType != null && referencedFieldName != null) {
       // BooleanBuilder where = new BooleanBuilder(entityVariable.referenceField.identifierName.eq(id));
       bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s(id%2$s.eq(id));\n",
           booleanBuilder.getNameIncludingTypeParameters(false, importResolver),
-          referencedFieldType.getSimpleTypeName()));
+          StringUtils.capitalize(referencedFieldName.getSymbolName())));
     } else {
       // BooleanBuilder where = new BooleanBuilder()
       bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s();\n",
