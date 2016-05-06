@@ -14,9 +14,12 @@ import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRep
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
@@ -170,12 +173,12 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
     // Define method parameter types and parameter names
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(referencedField));
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(globalSearch));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
 
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames.add(getReferencedFieldPropertyName(referencedField).getFieldName());
     parameterNames.add(new JavaSymbolName("globalSearch"));
     parameterNames.add(new JavaSymbolName("pageable"));
 
@@ -191,6 +194,22 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
     return methodBuilder.build(); // Build and return a MethodMetadata
   }
+
+  /**
+   * This method returns referenced entity field
+   * 
+   * @return
+   */
+  private FieldMetadata getReferencedFieldPropertyName(JavaType field) {
+
+    // Generating entity field name
+    String fieldName =
+        new JavaSymbolName(field.getSimpleTypeName()).getSymbolNameUnCapitalisedFirstLetter();
+
+    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
+        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), field).build();
+  }
+
 
   @Override
   public String toString() {

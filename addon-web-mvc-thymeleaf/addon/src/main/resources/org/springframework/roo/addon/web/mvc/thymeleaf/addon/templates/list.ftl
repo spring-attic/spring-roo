@@ -1,28 +1,70 @@
 <!DOCTYPE html>
 <html data-layout-decorator="layouts/default-layout">
-
 <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="${projectName}" data-th-remove="all" />
-  <meta name="author" content="Spring Roo" data-th-remove="all" />
+    <meta charset="UTF-8" data-th-remove="all" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"
+      data-th-remove="all" />
+    <meta name="description"
+      content="Spring Roo, a next-generation rapid application development tool for Java developers.
+      With Roo you can easily build full Java applications in minutes." data-th-remove="all" />
+    <meta name="author"
+      content="Spring Roo development team"
+      data-th-remove="all" />
+
+    <link data-th-remove="all" rel="icon" href="../static/public/img/favicon.ico" />
+
+    <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+       data-th-remove="all" />
+
+    <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+       data-th-remove="all" />
+
+    <title data-th-text="${r"#{"}label_homepage${r"}"}">Home</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+      data-th-remove="all"></link>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" type="text/css"
+    href="../static/public/css/font-awesome.min.css"
+    data-th-remove="all" />
+
+    <!-- Bootswatch CSS custom -->
+    <link rel="stylesheet" type="text/css"
+      href="../static/public/css/theme.css"
+      data-th-remove="all" />
+
+    <!-- Roo CSS -->
+    <link rel="stylesheet" type="text/css"
+      href="../static/public/css/springroo.css"
+      data-th-remove="all" />
+
+    <!--[if lt IE 9]>
+       <script src="/public/js/html5shiv.min.js"></script>
+        <script src="/public/js/respond.min.js"></script>
+    <![endif]-->
+    
+<!-- Select2 -->
+<link rel="stylesheet" type="text/css"
+  data-th-href="@{/public/css/select2.css}"
+  href="../../static/public/css/select2.css" />
+<link rel="stylesheet" type="text/css"
+  data-th-href="@{/public/css/select2-bootstrap.css}"
+  href="../../static/public/css/select2-bootstrap.css" />
   
-  <title data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</title>
   
-  <!-- Bootstrap -->
-  
-  <link rel="stylesheet" type="text/css" data-th-remove="all"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"></link>
-        
-  <link rel="stylesheet" type="text/css" data-th-remove="all"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.css"></link>      
-         
-  <!-- Datatables -->  
+<!-- DateTimePicker -->
+<link rel="stylesheet" type="text/css"
+    data-th-href="@{/public/css/jquery.datetimepicker.css}"
+    href="../../static/public/css/jquery.datetimepicker.css" />
+<script data-th-src="@{/public/js/jquery.min.js}"
+    src="../../static/public/js/jquery.min.js"></script>
+    
+<!-- Datatables -->  
        
-  <link rel="stylesheet" type="text/css" 
-        href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
-  
   <link rel="stylesheet" type="text/css" 
         href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
   
@@ -34,16 +76,7 @@
   
   <link rel="stylesheet" type="text/css" 
         href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
-  
-  <!-- Spring Roo Styles -->
-  <link rel="stylesheet" type="text/css" data-th-href="@{/public/css/standard.css}" data-th-remove="all"
-        href="../../static/public/css/standard.css"></link>
 
-  <!-- HTML5 shim and Respond.js to support HTML5 elements and media queries -->
-  <!--[if lt IE 9]>
-    <script src="js/html5shiv.min.js"></script>
-    <script src="js/respond.min.js"></script>
-  <![endif]-->
 </head>
 
 <body>
@@ -128,7 +161,7 @@
                  data-row-id="${identifierField}"
                  data-select="single"
                  data-order="[[ 0, &quot;asc&quot; ]]"
-                 data-th-attr="data-ajax-url=@{${controllerPath}/},data-create-url=@{${controllerPath}/create-form/}">
+                 data-th-attr="data-create-url=@{${controllerPath}/create-form/}">
             <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
             <thead>
               <tr>
@@ -230,6 +263,9 @@
     <script type="text/javascript" data-th-inline="javascript">
     $(document).ready( function () {
         var ${entityName}Table = jQuery('#${entityName}Table').DataTable({
+            'ajax': {
+                  'url': [[@{${controllerPath}/}]]
+              },
             'columns': [
               <#list fields as field>
               { 'data': '${field.fieldName}' },

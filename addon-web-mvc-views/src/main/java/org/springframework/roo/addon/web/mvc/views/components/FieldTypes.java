@@ -9,6 +9,6 @@ package org.springframework.roo.addon.web.mvc.views.components;
  */
 public enum FieldTypes {
 
-  TEXT, BOOLEAN, DATE, ENUM, REFERENCE;
+  TEXT, BOOLEAN, DATE, ENUM, REFERENCE, LIST;
 
 }

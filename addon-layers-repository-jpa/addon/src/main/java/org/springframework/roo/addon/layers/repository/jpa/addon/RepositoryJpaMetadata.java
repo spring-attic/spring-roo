@@ -14,6 +14,7 @@ import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRep
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -86,7 +87,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaAnnotationValues annotationValues, final JavaType identifierType,
       final boolean readOnly, final JavaType readOnlyRepository,
-      final List<JavaType> customRepositories, final Map<JavaType, JavaType> referenceFields) {
+      final List<JavaType> customRepositories, final Map<JavaType, FieldMetadata> referenceFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(identifierType, "Id type required");
@@ -121,7 +122,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     ensureGovernorIsAnnotated(transactionalAnnotation);
 
     // Adding count methods for every referenced field
-    for (Entry<JavaType, JavaType> field : referenceFields.entrySet()) {
+    for (Entry<JavaType, FieldMetadata> field : referenceFields.entrySet()) {
       MethodMetadata countMethod = getCountMethodByField(field.getKey(), field.getValue());
       ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
       countMethodByReferencedFields.put(field.getKey(), countMethod);
@@ -139,14 +140,15 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    * 
    * @return field
    */
-  public MethodMetadata getCountMethodByField(JavaType field, JavaType identifierType) {
+  public MethodMetadata getCountMethodByField(JavaType field, FieldMetadata identifierType) {
     // Define method name
     JavaSymbolName methodName =
-        new JavaSymbolName(String.format("countBy%s", field.getSimpleTypeName()));
+        new JavaSymbolName(String.format("countBy%s%s", field.getSimpleTypeName(), identifierType
+            .getFieldName().getSymbolNameCapitalisedFirstLetter()));
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType.getFieldType()));
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -162,7 +164,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
-            identifierType, parameterTypes, parameterNames, null);
+            identifierType.getFieldType(), parameterTypes, parameterNames, null);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance

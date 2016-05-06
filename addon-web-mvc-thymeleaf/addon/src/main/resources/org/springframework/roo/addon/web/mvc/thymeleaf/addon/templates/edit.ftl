@@ -6,35 +6,52 @@
 <!DOCTYPE html>
 <html data-layout-decorator="layouts/default-layout">
 <head>
-<meta charset="utf-8" data-th-remove="all" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
-<meta name="viewport" content="width=device-width, initial-scale=1"
-  data-th-remove="all" />
-<meta name="description"
-  content="${projectName}"
-  data-th-remove="all" />
-<meta name="author"
-  content="Spring Roo"
-  data-th-remove="all" />
-<link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
-  href="../../static/public/img/favicon.ico" />
+    <meta charset="UTF-8" data-th-remove="all" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"
+      data-th-remove="all" />
+    <meta name="description"
+      content="Spring Roo, a next-generation rapid application development tool for Java developers.
+      With Roo you can easily build full Java applications in minutes." data-th-remove="all" />
+    <meta name="author"
+      content="Spring Roo development team"
+      data-th-remove="all" />
 
-<title data-th-text="${r"#{"}label_edit_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${projectName}
-  - Create ${entityName}</title>
+    <link data-th-remove="all" rel="icon" href="../static/public/img/favicon.ico" />
 
-<!-- Bootstrap core CSS -->
-<link data-th-href="@{/public/css/bootstrap.min.css}" data-th-remove="all"
-  href="../../static/public/css/bootstrap.min.css" rel="stylesheet" />
-  
-<!-- Spring Roo CSS -->
-<link data-th-href="@{/public/css/standard.css}" data-th-remove="all"
-  href="../../static/public/css/standard.css" rel="stylesheet" />
-<noscript data-th-remove="all">
-  <link data-th-href="@{../../css/nojs-standard.css}"
-    data-th-remove="all" href="../../static/public/css/nojs-standard.css"
-    rel="stylesheet" />
-</noscript>
+    <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+       data-th-remove="all" />
 
+    <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+       data-th-remove="all" />
+
+    <title data-th-text="${r"#{"}label_homepage${r"}"}">Home</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+      data-th-remove="all"></link>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" type="text/css"
+    href="../static/public/css/font-awesome.min.css"
+    data-th-remove="all" />
+
+    <!-- Bootswatch CSS custom -->
+    <link rel="stylesheet" type="text/css"
+      href="../static/public/css/theme.css"
+      data-th-remove="all" />
+
+    <!-- Roo CSS -->
+    <link rel="stylesheet" type="text/css"
+      href="../static/public/css/springroo.css"
+      data-th-remove="all" />
+
+    <!--[if lt IE 9]>
+       <script src="/public/js/html5shiv.min.js"></script>
+        <script src="/public/js/respond.min.js"></script>
+    <![endif]-->
+    
 <!-- Select2 -->
 <link rel="stylesheet" type="text/css"
   data-th-href="@{/public/css/select2.css}"
@@ -42,6 +59,7 @@
 <link rel="stylesheet" type="text/css"
   data-th-href="@{/public/css/select2-bootstrap.css}"
   href="../../static/public/css/select2-bootstrap.css" />
+  
   
 <!-- DateTimePicker -->
 <link rel="stylesheet" type="text/css"
@@ -158,12 +176,12 @@
               <div class="col-md-9 col-md-offset-3">
                 <!-- TODO IE8 -->
                 <button type="reset" class="btn btn-default"
-                  onclick="location.href='list.html'"
-                  data-th-onclick="'location.href=\'' + @{${controllerPath}.html} + '\''"
+                  onclick="location.href='list'"
+                  data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
                   data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
                 <button type="submit" class="btn btn-primary"
-                  onclick="location.href='list.html'"
-                  data-th-onclick="'location.href=\'' + @{${controllerPath}.html} + '\''"
+                  onclick="location.href='list'"
+                  data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
                   value="Accept" data-th-text="${r"#{"}label_submit${r"}"}">Accept</button>
               </div>
             </div>

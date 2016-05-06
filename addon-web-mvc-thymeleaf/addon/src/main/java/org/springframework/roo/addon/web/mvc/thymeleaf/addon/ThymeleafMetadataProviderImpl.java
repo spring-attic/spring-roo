@@ -429,14 +429,13 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Define methodName
     final JavaSymbolName methodName =
-        new JavaSymbolName(String.format("list%sDetails", detailType.getSimpleTypeName()));
+        new JavaSymbolName(String.format("list%s", detailType.getSimpleTypeName()));
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     AnnotationMetadataBuilder pathVariableAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
     pathVariableAnnotation.addStringAttribute("value", "id");
-    parameterTypes.add(new AnnotatedJavaType(identifierFields.get(0).getFieldType(),
-        pathVariableAnnotation.build()));
+    parameterTypes.add(new AnnotatedJavaType(entity, pathVariableAnnotation.build()));
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
 
@@ -508,6 +507,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
       return null;
     }
 
+    MethodMetadata identifierAccessor =
+        getPersistenceMemberLocator().getIdentifierAccessor(detailType);
+
     // Getting detail controller path
     AnnotationAttributeValue<String> pathAttr =
         detailController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("path");
@@ -531,14 +533,13 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Define methodName
     final JavaSymbolName methodName =
-        new JavaSymbolName(String.format("list%sDetails", detailType.getSimpleTypeName()));
+        new JavaSymbolName(String.format("list%s", detailType.getSimpleTypeName()));
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     AnnotationMetadataBuilder pathVariableAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
     pathVariableAnnotation.addStringAttribute("value", "id");
-    parameterTypes.add(new AnnotatedJavaType(identifierFields.get(0).getFieldType(),
-        pathVariableAnnotation.build()));
+    parameterTypes.add(new AnnotatedJavaType(entity, pathVariableAnnotation.build()));
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
     AnnotationMetadataBuilder requestParamAnnotation =
@@ -568,17 +569,17 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Page<Entity> entityField = listEntityDetails(id, search, pageable);
-    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = list%sDetails(id, search, pageable);",
+    // Page<Entity> entityField = listEntity(id, search, pageable);
+    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = list%s(id, search, pageable);",
         addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(detailType)
             .getSimpleTypeName(), getDetailEntityField(detailType).getFieldName().getSymbolName(),
         detailType.getSimpleTypeName()));
 
-    // long allAvailableEntityDetails = detailService.countByMasterId(id);
-    bodyBuilder.appendFormalLine(String.format("long allAvailable%sDetails = %s.%s(%s);",
+    // long allAvailableEntityDetails = detailService.countByMasterId(id.getId());
+    bodyBuilder.appendFormalLine(String.format("long allAvailable%sDetails = %s.%s(%s.%s());",
         detailType.getSimpleTypeName(), getServiceDetailField(detailService).getFieldName()
             .getSymbolName(), countMethod.getMethodName().getSymbolName(), identifierFields.get(0)
-            .getFieldName().getSymbolName()));
+            .getFieldName().getSymbolName(), identifierAccessor.getMethodName()));
 
     // return new DatatablesData<OrderDetailInfo>(orderDetails, allAvailableOrderDetails, draw);
     bodyBuilder.appendFormalLine(String.format(

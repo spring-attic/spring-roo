@@ -426,6 +426,11 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     List<FieldMetadata> entityFields = entityDetails.getFields();
     int addedFields = 0;
 
+    // Getting all controllers
+    Set<ClassOrInterfaceTypeDetails> allControllers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_CONTROLLER);
+
     // Get the MAX_FIELDS_TO_ADD
     List<FieldItem> fieldViewItems = new ArrayList<FieldItem>();
     for (FieldMetadata entityField : entityFields) {
@@ -443,7 +448,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
         // Check if is a referenced field
         if (typeDetails != null && typeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-          boolean shouldBeAdded = getReferenceField(fieldItem, typeDetails);
+          boolean shouldBeAdded = getReferenceField(fieldItem, typeDetails, allControllers);
           if (!shouldBeAdded) {
             continue;
           }
@@ -480,8 +485,63 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           fieldItem.addConfigurationElement("format", format);
         } else if (type.getFullyQualifiedTypeName().equals("java.util.Set")
             || type.getFullyQualifiedTypeName().equals("java.util.List")) {
-          // Ignore if field type is Set or List
-          continue;
+
+          // Getting base type
+          JavaType referencedField = type.getBaseType();
+          ClassOrInterfaceTypeDetails referencedFieldDetails =
+              getTypeLocationService().getTypeDetails(referencedField);
+
+          if (referencedFieldDetails != null
+              && referencedFieldDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+
+            fieldItem.setType(FieldTypes.LIST.toString());
+
+            // Saving necessary configuration
+            fieldItem.addConfigurationElement("referencedFieldType",
+                referencedField.getSimpleTypeName());
+
+            // Getting identifier field
+            List<FieldMetadata> identifierFields =
+                getPersistenceMemberLocator().getIdentifierFields(referencedField);
+            fieldItem.addConfigurationElement("identifierField", identifierFields.get(0)
+                .getFieldName().getSymbolName());
+
+            // Getting controllerPath
+            String controllerPath = "";
+
+            Iterator<ClassOrInterfaceTypeDetails> it = allControllers.iterator();
+            while (it.hasNext()) {
+              ClassOrInterfaceTypeDetails controller = it.next();
+              AnnotationMetadata annotation = controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
+              AnnotationAttributeValue<JavaType> entity = annotation.getAttribute("entity");
+              AnnotationAttributeValue<String> path = annotation.getAttribute("path");
+              if (entity.getValue().equals(referencedField) && path != null) {
+                controllerPath = path.getValue();
+              }
+            }
+
+            if (StringUtils.isBlank(controllerPath)) {
+              continue;
+            }
+
+            fieldItem.addConfigurationElement("controllerPath", controllerPath);
+
+            // Getting referencedfield label plural
+            fieldItem.addConfigurationElement("referencedFieldLabelPlural",
+                FieldItem.buildLabel(referencedField.getSimpleTypeName(), "plural"));
+
+            // Getting all referenced fields
+            fieldItem.addConfigurationElement(
+                "referenceFieldFields",
+                getFieldViewItems(
+                    getMemberDetailsScanner().getMemberDetails(getClass().toString(),
+                        referencedFieldDetails), true, ctx));
+
+          } else {
+            // Ignore set or list which base types are not entity field
+            continue;
+          }
+
         } else {
           fieldItem.setType(FieldTypes.TEXT.toString());
         }
@@ -507,9 +567,11 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * 
    * @param fieldItem
    * @param typeDetails
+   * @param allControllers
    * @return
    */
-  private boolean getReferenceField(FieldItem fieldItem, ClassOrInterfaceTypeDetails typeDetails) {
+  private boolean getReferenceField(FieldItem fieldItem, ClassOrInterfaceTypeDetails typeDetails,
+      Set<ClassOrInterfaceTypeDetails> allControllers) {
     // Set type as REFERENCE
     fieldItem.setType(FieldTypes.REFERENCE.toString());
 
@@ -527,9 +589,6 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         .getSymbolName());
 
     // Add the controllerPath related to the referencedEntity to configuration
-    Set<ClassOrInterfaceTypeDetails> allControllers =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_CONTROLLER);
     Iterator<ClassOrInterfaceTypeDetails> it = allControllers.iterator();
     String referencedPath = "";
     while (it.hasNext()) {

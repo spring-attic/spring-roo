@@ -35,21 +35,6 @@
   <!--START CONTAINER-->
   <div class="container bg-container">
 
-    <!-- session -->
-    <div class="container upper-nav">
-      <div class="session">
-        <div data-th-text="${r"#{"}label_user${r"}"}">
-          <span class="glyphicon glyphicon-user" aria-hidden="true"></span>User
-        </div>
-        <div data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}">
-          <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000
-        </div>
-        <button type="submit" class="exit" data-th-text="${r"#{"}label_exit${r"}"}">
-          <span class="glyphicon glyphicon-off" aria-hidden="true"></span>Exit
-        </button>
-      </div>
-    </div>
-
     <!-- HEADER -->
     <header role="banner">
 
@@ -66,7 +51,6 @@
         </div>
       </div>
 
-      <!-- NAVIGATION MENU -->
       <nav class="navbar navbar-default">
         <div class="container-fluid">
 
@@ -94,41 +78,68 @@
                 </ul></li>
             </ul>
           </div>
-
         </div>
       </nav>
-
     </header>
     <!-- END HEADER -->
 
     <!--START CONTENT-->
     <section data-layout-fragment="content" data-th-object="${modelAttribute}">
+      <div class="container-fluid content">
 
         <!-- CONTENT -->
-        <h1 data-th-text="${r"${entityLabel}"}">${entityName}</h1>
-
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title" data-th-text="${r"#{"}label_show(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</h3>
-          </div>
-          <div class="panel-body">
-            <dl class="dl-horizontal">
-              <#list fields as field>
-              <dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
-              <dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
-              </#list>
-            </dl>
-
-          </div>
-        </div>
+        <h1 data-th-text="${r"#{"}label_show(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName}</h1>
+        
+        <dl class="dl-horizontal">
+          <#list fields as field>
+            <#if field.type != "LIST">
+                <dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
+                <dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
+            <#else>
+                <h3 class="panel-title" data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</h3>
+                <!--START TABLE-->
+                <div class="table-responsive">
+                  <table id="${field.configuration.referencedFieldType}Table" 
+                         class="table table-striped table-hover table-bordered" 
+                         data-row-id="${field.configuration.identifierField}"
+                         data-select="single"
+                         data-order="[[ 0, &quot;asc&quot; ]]">
+                    <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabelPlural}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
+                    <thead>
+                      <tr>
+                        <#list field.configuration.referenceFieldFields as referencedFieldField>
+                        <th>${referencedFieldField.fieldName}</th>
+                        </#list>
+                        <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                      </tr>
+                    </thead>
+                    <tbody data-th-remove="all">
+                      <tr>
+                        <#list field.configuration.referenceFieldFields as referencedFieldField>
+                        <td>${referencedFieldField.fieldName}</td>
+                        </#list>
+                        <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!--END TABLE-->
+            </#if>
+          </#list>
+        </dl>
 
         <div class="clearfix">
           <div class="pull-left">
-            <button onclick="location.href='list.html'"
+            <button onclick="location.href='list'"
               data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''" type="button"
               class="btn btn-default">
               <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span><span data-th-text="${r"#{"}label_back${r"}"}">Back</span>
             </button>
+          </div>
+          <div class="pull-right">
+            <a href="edit" class="btn btn-primary"
+              data-th-href="@{${controllerPath}/${r"{"}${identifierField}${r"}"}/edit-form(${identifierField}=${r"*{id}"})}"
+              data-th-text="${r"#{label_edit}"}">Edit</a>
           </div>
         </div>
 
@@ -143,26 +154,67 @@
     <p class="text-right">© Powered By Spring Roo </p>
   </footer>
 
-  <!-- Bootstrap core JavaScript
-  ================================================== -->
-  <script data-th-remove="all" data-th-src="@{/public/js/jquery-1.12.0.min.js}"
-    src="../../static/public/js/jquery-1.12.0.min.js">
+  <!-- JQuery -->
+  <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-1.12.3.js" data-th-remove="all"></script>
+  <!-- Bootstrap -->
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js" data-th-remove="all"></script>
 
-  </script>
-  <script data-th-remove="all" data-th-src="@{/public/js/bootstrap.min.js}"
-    src="../../static/public/js/bootstrap.min.js">
+  <div data-layout-fragment="javascript">
+    
+    <!-- Datatables -->
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"></script>
+    <!-- Datatables responsive plugin -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.0.2/js/dataTables.responsive.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.0.2/js/responsive.bootstrap.js"></script>
+    <!-- Datatables buttons plugins -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.flash.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"></script>
+    <!-- Datatables select plugin -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"></script>
+    <!-- Datatables application defaults -->
+    <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults.js" data-th-src="@{/public/js/datatables-defaults.js}"></script>
+    <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults-es.js" data-th-src="@{/public/js/datatables-defaults-es.js}"></script>
+    
+    
+    <!-- Datatables page configs -->
+    <script type="text/javascript" data-th-inline="javascript">
+    $(document).ready( function () {
+        var currentId = window.location.href.split("/")[window.location.href.split("/").length - 1];
+        <#list fields as field>
+            <#if field.type == "LIST">
+                var ${field.configuration.referencedFieldType}BaseUrl = '${controllerPath}/' + currentId +  '${field.configuration.controllerPath}/';
+                var ${field.configuration.referencedFieldType}Table = jQuery('#${field.configuration.referencedFieldType}Table').DataTable({
+                    'ajax': {
+                          'url': ${field.configuration.referencedFieldType}BaseUrl
+                     },
+                    'columns': [
+                      <#list field.configuration.referenceFieldFields as referencedFieldField>
+                      { 'data': '${referencedFieldField.fieldName}' },
+                      </#list>
+                      { 
+                        'data': '${field.configuration.identifierField}',
+                        'orderable': false,
+                        'searchable': false,
+                        'render': function ( data, type, full, meta ) {
+                            return '<a role="button" class="btn-accion show" href="${field.configuration.controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>'
+                        }
+                      }
+                    ]  
+                });
+            </#if>
+        </#list>
+    });
+    </script>
+   
+  </div>
 
-  </script>
-  <script data-th-remove="all" data-th-src="@{/public/js/main.js}"
-    src="../../static/public/js/main.js">
-
-  </script>
-  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-  <script data-th-remove="all"
-    data-th-src="@{/public/js/ie10-viewport-bug-workaround.js}"
-    src="../../static/public/js/ie10-viewport-bug-workaround.js">
-
-  </script>
+  <!-- Application -->
+  <script type="text/javascript" src="../../static/public/js/main.js" data-th-remove="all"></script>
+  
 </body>
 
 </html>

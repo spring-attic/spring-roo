@@ -22,7 +22,7 @@ public class FieldItem {
   private String fieldName;
   private String label;
   private String type;
-  private Map<String, String> configuration;
+  private Map<String, Object> configuration;
   private int z;
 
   /**
@@ -35,7 +35,7 @@ public class FieldItem {
   public FieldItem(String fieldName, String entityName) {
     this.fieldName = fieldName;
     this.label = buildLabel(entityName, fieldName);
-    this.configuration = new HashMap<String, String>();
+    this.configuration = new HashMap<String, Object>();
 
     // Calculate the Z parameter as the hash code of the other parameters
     this.z = calculateZ();
@@ -50,7 +50,7 @@ public class FieldItem {
    * @param configuration
    */
   public FieldItem(String fieldName, String entityName, String type,
-      Map<String, String> configuration) {
+      Map<String, Object> configuration) {
     this.fieldName = fieldName;
     this.label = buildLabel(entityName, fieldName);
     this.type = type;
@@ -126,11 +126,11 @@ public class FieldItem {
     this.z = z;
   }
 
-  public Map<String, String> getConfiguration() {
+  public Map<String, Object> getConfiguration() {
     return this.configuration;
   }
 
-  public void addConfigurationElement(String key, String value) {
+  public void addConfigurationElement(String key, Object value) {
     this.configuration.put(key, value);
   }
 

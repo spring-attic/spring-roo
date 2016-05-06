@@ -238,13 +238,13 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
           XmlUtils.findElements("//*[.='" + ASPECTJ_VERSION_PLACEHOLDER + "']", root);
       for (final Element aspectJVersion : aspectJVersionElements) {
         aspectJVersion.setTextContent("1.8.8");
-//        if ("1.8".equals(javaVersion)) {
-//          aspectJVersion.setTextContent("1.8.8");
-//        } else if ("1.7".equals(javaVersion)) {
-//          aspectJVersion.setTextContent("1.8.8");
-//        } else if ("1.6".equals(javaVersion)) {
-//          aspectJVersion.setTextContent("1.8.8");
-//        }
+        //        if ("1.8".equals(javaVersion)) {
+        //          aspectJVersion.setTextContent("1.8.8");
+        //        } else if ("1.7".equals(javaVersion)) {
+        //          aspectJVersion.setTextContent("1.8.8");
+        //        } else if ("1.6".equals(javaVersion)) {
+        //          aspectJVersion.setTextContent("1.8.8");
+        //        }
       }
 
       // AspectJ Plugin Versions
@@ -252,13 +252,13 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
           XmlUtils.findElements("//*[.='" + ASPECTJ_PLUGIN_VERSION_PLACEHOLDER + "']", root);
       for (final Element aspectJPluginVersion : aspectJPluginVersionElements) {
         aspectJPluginVersion.setTextContent("1.8");
-//        if ("1.8".equals(javaVersion)) {
-//          aspectJPluginVersion.setTextContent("1.8");
-//        } else if ("1.7".equals(javaVersion)) {
-//          aspectJPluginVersion.setTextContent("1.8");
-//        } else if ("1.6".equals(javaVersion)) {
-//          aspectJPluginVersion.setTextContent("1.8");
-//        }
+        //        if ("1.8".equals(javaVersion)) {
+        //          aspectJPluginVersion.setTextContent("1.8");
+        //        } else if ("1.7".equals(javaVersion)) {
+        //          aspectJPluginVersion.setTextContent("1.8");
+        //        } else if ("1.6".equals(javaVersion)) {
+        //          aspectJPluginVersion.setTextContent("1.8");
+        //        }
       }
     }
 
