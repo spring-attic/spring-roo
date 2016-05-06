@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-href="@{/public/img/apple-touch-icon.png}" />
 
-    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-title="${r"#{"}label_spring_application${r"}"}" data-th-text="${r"#{"}label_spring_application${r"}"}">Spring Roo application</title>
+    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">Spring Roo application</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
@@ -72,6 +72,7 @@
       href="../../static/public/css/springroo.css"
       data-th-href="@{/public/css/springroo.css}" />
 
+    <!-- HTML5 shim y Respond.js para soporte de elementos HTML5 en IE8 y media queries -->
     <!--[if lt IE 9]>
           <script src="/public/js/html5shiv.min.js"></script>
           <script src="/public/js/respond.min.js"></script>

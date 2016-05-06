@@ -33,20 +33,18 @@
     </head>
 <body>
   <header>
-    <h1 data-th-text="${r"#{"}label_error_page${r"}"}">Error Page</h1>
+    <h1 data-th-text="${r"#{"}label_errorpage${r"}"}">Error Page</h1>
   </header>
 
   <section data-layout-fragment="content">
 
     <div class="alert alert-danger fade in" role="alert">
-      <h4>¡Error!</h4>
-      <div>
+      <h4 data-th-text="${r"#{"}label_errorpage_header${r"}"}">¡Error!</h4>
+      <p>
         <span data-th-text="${r"#{info_error}"}">An error occurred</span>
         (type=<span data-th-text="${r"${error}"}">Bad</span>, status=<span data-th-text="${r"${status}"}">500</span>).
-      </div>
-      <hr/>
+      </p>
       <div data-text="${r"${message}"}"></div>
-      <hr/>
     </div>
 
   </section>

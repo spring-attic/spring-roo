@@ -6,13 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"
       data-th-remove="all" />
     <meta name="description"
-      content="Spring Roo, a next-generation rapid application development tool for Java developers.
-      With Roo you can easily build full Java applications in minutes." data-th-remove="all" />
-    <meta name="author"
-      content="Spring Roo development team"
+      content="${projectName}"
       data-th-remove="all" />
-
-    <link data-th-remove="all" rel="icon" href="../static/public/img/favicon.ico" />
+      
+    <meta name="author"
+      content="Spring Roo"
+      data-th-remove="all" />
+      
+    <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
+      href="../../static/public/img/favicon.ico" />
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
        data-th-remove="all" />
@@ -20,7 +22,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
        data-th-remove="all" />
 
-    <title data-th-text="${r"#{"}label_homepage${r"}"}">Home</title>
+    <title data-th-title="${r"${projectName}"}">${projectName}</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
@@ -42,6 +44,7 @@
       href="../static/public/css/springroo.css"
       data-th-remove="all" />
 
+    <!-- HTML5 shim y Respond.js para soporte de elementos HTML5 en IE8 y media queries -->
     <!--[if lt IE 9]>
        <script src="/public/js/html5shiv.min.js"></script>
         <script src="/public/js/respond.min.js"></script>
@@ -80,12 +83,12 @@
 
               <!-- Brand logo -->
               <div class="organization-logo navbar-brand">
-                <a data-th-title="${r"#{"}label_spring_application${r"}"}" title="Spring Roo Application" href="http://projects.spring.io/spring-roo/">
-                  <img alt="Spring Roo Application" data-th-alt="${r"#{"}label_spring_application${r"}"}" data-th-src="@{/public/img/logo.png}" src="../static/public/img/logo.png" />
+                <a title="${projectName}" href="/">
+                  <img alt="${projectName}" data-th-src="@{/public/img/logo.png}" src="../static/public/img/logo.png" />
                 </a>
               </div>
               <!-- Name application -->
-              <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}" data-th-text="${r"#{"}label_spring_application${r"}"}">Spring Roo Application</a></div>
+              <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}">${projectName}</a></div>
 
             </div>
             <!-- navbar header -->
@@ -132,7 +135,7 @@
           <!-- Project info -->
           <div class="row">
             <div class="hidden-xs col-sm-4 col-sm-offset-1">
-               <img alt="Spring Roo" data-th-src="@{/public/img/springroo-logo.png}"
+               <img alt=${projectName} data-th-src="@{/public/img/springroo-logo.png}"
               src="../static/public/img/springroo-logo.png" />
             </div>
             <div class="col-sm-6">
@@ -161,8 +164,8 @@
                      <i class="fa fa-book"></i>
                     </div>
                     <div class="text">
-                     <h2><a href="http://docs.spring.io/spring-roo/docs/current/reference/html/" data-th-title="${r"#{"}label_spring_doc${r"}"}" title="Spring Roo reference documentation" target="_blank">Doc</a></h2>
-                     <small data-th-text="${r"#{"}info_spring_doc${r"}"}">If you are looking for Reference Documentation you can get it here.</small>
+                     <h2><a href="http://docs.spring.io/spring-roo/docs/current/reference/html/" data-th-title="${r"#{"}label_spring_documentation${r"}"}" title="Spring Roo reference documentation" target="_blank" data-th-text="${r"#{"}label_documentation${r"}"}">Doc</a></h2>
+                     <small data-th-text="${r"#{"}info_spring_documentation${r"}"}">If you are looking for Reference Documentation you can get it here.</small>
                     </div>
                 </div>
             </div>
@@ -176,7 +179,7 @@
                         <i class="fa fa-envira"></i>
                       </div>
                       <div class="text">
-                        <h2><a href="http://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site${r"}"}" title="Spring Roo project site" target="_blank">Project Page</a></h2>
+                        <h2><a href="http://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site${r"}"}" title="Spring Roo project site" target="_blank" data-th-text="${r"#{"}label_projectpage${r"}"}">Project Page</a></h2>
                         <small data-th-text="${r"#{"}info_spring_site${r"}"}">All the info about Spring Roo development.</small>
                     </div>
                 </div>
@@ -191,7 +194,7 @@
                                 <i class="fa fa-stack-overflow"></i>
                               </div>
                               <div class="text">
-                                <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support${r"}"}" title="Spring Roo Stackoverflow support" target="_blank">Support</a></h2>
+                                <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support${r"}"}" title="Spring Roo Stackoverflow support" target="_blank" data-th-text="${r"#{"}label_support${r"}"}">Support</a></h2>
                                 <small data-th-text="${r"#{"}label_spring_support${r"}"}">If you have any question about the project,
                                 you can check it.</small>
                             </div>
@@ -206,7 +209,7 @@
                                 <i class="fa fa-code"></i>
                               </div>
                               <div class="text">
-                                <h2><a href="https://github.com/spring-projects/spring-roo/" data-th-title="${r"#{"}label_spring_sourcecode${r"}"}" title="Spring Roo source code" target="_blank">Code</a></h2>
+                                <h2><a href="https://github.com/spring-projects/spring-roo/" data-th-title="${r"#{"}label_spring_code${r"}"}" title="Spring Roo source code" target="_blank" data-th-text="${r"#{"}label_code${r"}"}">Code</a></h2>
                                 <small data-th-text="${r"#{"}label_spring_sourcecode${r"}"}">Known, modify and redistribute the source code.</small>
                             </div>
                       </div>
@@ -253,18 +256,18 @@
 
     <!-- JavaScript
     ================================================== -->
-  <script data-th-remove="all" data-th-src="@{/public/js/jquery.min.js}"
-    src="../../static/public/js/jquery.min.js"></script>
-  <script data-th-remove="all" data-th-src="@{/public/js/bootstrap.min.js}"
-    src="../../static/public/js/bootstrap.min.js"></script>
+    <!-- JQuery -->
+    <script type="text/javascript" charset="utf8"
+      src="https://code.jquery.com/jquery-1.12.3.js"></script>
+
+    <!-- Bootstrap -->
+    <script type="text/javascript"
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../static/public/js/ie10-viewport-bug-workaround.js"
+    <script src="../static/public/js/ie10-viewport-bug-workaround.js"
       data-th-src="@{/public/js/ie10-viewport-bug-workaround.js}">
     </script>
-
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../static/public/js/ie10-viewport-bug-workaround.js"></script>
 
     <!-- Application -->
     <script src="../static/public/js/main.js"></script>

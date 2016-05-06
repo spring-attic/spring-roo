@@ -1,51 +1,46 @@
 <!DOCTYPE html>
 <html data-layout-decorator="layouts/default-layout">
+
 <head>
-    <meta charset="UTF-8" data-th-remove="all" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
-    <meta name="viewport" content="width=device-width, initial-scale=1"
-      data-th-remove="all" />
-    <meta name="description"
-      content="Spring Roo, a next-generation rapid application development tool for Java developers.
-      With Roo you can easily build full Java applications in minutes." data-th-remove="all" />
-    <meta name="author"
-      content="Spring Roo development team"
-      data-th-remove="all" />
-
-    <link data-th-remove="all" rel="icon" href="../static/public/img/favicon.ico" />
-
-    <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
-       data-th-remove="all" />
-
-    <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
-       data-th-remove="all" />
-
-    <title data-th-text="${r"#{"}label_homepage${r"}"}">Home</title>
-
-    <!-- Bootstrap -->
-    <link rel="stylesheet" type="text/css"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-      data-th-remove="all"></link>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" type="text/css"
-    href="../static/public/css/font-awesome.min.css"
+  <meta charset="UTF-8" data-th-remove="all" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"
     data-th-remove="all" />
+  <meta name="description"
+    content="${projectName}"
+    data-th-remove="all" />
+  <meta name="author"
+    content="Spring Roo"
+    data-th-remove="all" />
+ <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
+    href="../../static/public/img/favicon.ico" />
 
-    <!-- Bootswatch CSS custom -->
-    <link rel="stylesheet" type="text/css"
-      href="../static/public/css/theme.css"
-      data-th-remove="all" />
+ <title data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">${projectName} - List ${entityName}</title>
 
-    <!-- Roo CSS -->
-    <link rel="stylesheet" type="text/css"
-      href="../static/public/css/springroo.css"
-      data-th-remove="all" />
+ <!-- Bootstrap -->
+ <link rel="stylesheet" type="text/css"
+  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+  data-th-remove="all"></link>
 
-    <!--[if lt IE 9]>
-       <script src="/public/js/html5shiv.min.js"></script>
-        <script src="/public/js/respond.min.js"></script>
-    <![endif]-->
+ <!-- Font Awesome -->
+ <link rel="stylesheet" type="text/css"
+  href="../static/public/css/font-awesome.min.css"
+  data-th-remove="all" />
+
+ <!-- Bootswatch CSS custom -->
+ <link rel="stylesheet" type="text/css"
+  href="../static/public/css/theme.css"
+  data-th-remove="all" />
+
+ <!-- Roo CSS -->
+ <link rel="stylesheet" type="text/css"
+  href="../static/public/css/springroo.css"
+  data-th-remove="all" />
+
+<!--[if lt IE 9]>
+<script src="/public/js/html5shiv.min.js"></script>
+<script src="/public/js/respond.min.js"></script>
+<![endif]-->
     
 <!-- Select2 -->
 <link rel="stylesheet" type="text/css"
@@ -81,21 +76,6 @@
 
 <body>
 
-  <!-- Session -->
-  <div class="container upper-nav">
-    <div class="session">
-      <div data-th-text="${r"#{"}label_user${r"}"}">
-        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>User
-      </div>
-      <div data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}">
-        <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000
-      </div>
-      <button type="submit" class="exit" data-th-text="${r"#{"}label_exit${r"}"}">
-        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>Exit
-      </button>
-    </div>
-  </div>
-
   <!--START CONTAINER-->
   <div class="container bg-container">
 
@@ -111,19 +91,20 @@
             src="../../static/public/img/logo_spring_roo.png" /></a>
         </div>
         <div class="application-name">
-          ${projectName}
+          <a href="/" data-th-href="@{/}">${projectName}</a>
         </div>
       </div>
 
-      <!-- menu -->
+      <!-- MAIN MENU -->
       <nav class="navbar navbar-default">
         <div class="container-fluid">
 
+          <!-- collapsed menu button -->
           <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed"
               data-toggle="collapse"
               data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-              <span class="sr-only">Desplegable</span>
+              <span class="sr-only">Dropdown</span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
@@ -131,20 +112,39 @@
             <a class="navbar-brand" href="#">Main Menu</a>
           </div>
 
-          <div id="bs-example-navbar-collapse-1"
+          <div id="bs-example-navbar-collapse-1" 
             class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-              <li class="active"><a href="#">Active Menu 1</a></li>
-              <li><a href="#">Menu 2</a></li>
-              <li class="dropdown"><a href="#" class="dropdown-toggle"
-                data-toggle="dropdown" role="button" aria-haspopup="true"
-                aria-expanded="false">Dropdown 3 Menu<span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Submenu 1</a></li>
-                  <li><a href="#">Submenu 2</a></li>
-                  <li><a href="#">Submenu 3</a></li>
-                </ul></li>
-            </ul>
+            <!-- Main menu -->
+            <div class="row">
+              <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Active Menu 1</a></li>
+                <li><a href="#">Menu 2</a></li>
+                <li class="dropdown"><a href="#" class="dropdown-toggle"
+                  data-toggle="dropdown" role="button" aria-haspopup="true"
+                  aria-expanded="false">Dropdown Menu 3<span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#">Submenu 1</a></li>
+                    <li><a href="#">Submenu 2</a></li>
+                    <li><a href="#">Submenu 3</a></li>
+                  </ul></li>
+              </ul>
+            </div>
+
+            <!-- User Menu -->
+            <div class="container upper-nav">
+              <ul class="nav navbar-nav navbar-right session">
+                <li><span class="glyphicon glyphicon-user" aria-hidden="true"></span>User</li>
+                <li><button type="submit" class="exit">
+                    <span class="glyphicon glyphicon-off" aria-hidden="true"></span><span>Exit</span>
+                  </button></li>
+              </ul>
+              <ul class="nav navbar-nav navbar-right links">
+                <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                    <span data-th-text="${r"#{"}label_contact${r"}"}">Contact</span></a></li>
+                <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                    <span data-th-text="${r"#{"}label_help${r"}"}">Help</span></a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </nav>
@@ -154,6 +154,8 @@
     <!--START CONTENT-->
     <section data-layout-fragment="content">
       <div class="container-fluid content">
+        <h1 data-th-text="${r"#{"}${entityLabelPlural}${r"}"}">${entityName}s</h1>
+
         <!--START TABLE-->
         <div class="table-responsive">
           <table id="${entityName}Table" 
@@ -162,7 +164,7 @@
                  data-select="single"
                  data-order="[[ 0, &quot;asc&quot; ]]"
                  data-th-attr="data-create-url=@{${controllerPath}/create-form/}">
-            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
+            <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
             <thead>
               <tr>
                 <#list fields as field>
@@ -185,9 +187,9 @@
         
         <div class="clearfix">
           <div class="pull-left">
-            <a href="../index.html" class="btn btn-default"
-               data-th-href="@{/}" data-th-text="${r"#{label_back}"}">
-               <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>Back
+            <a href="../index.html" class="btn btn-default" data-th-href="@{/}"> 
+               <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+               <span data-th-text="${r"#{label_back}"}">Back</span>
             </a>
           </div>
         </div>
@@ -261,7 +263,7 @@
     
     <!-- Datatables page configs -->
     <script type="text/javascript" data-th-inline="javascript">
-    $(document).ready( function () {
+     jQuery(document).ready( function () {
         var ${entityName}Table = jQuery('#${entityName}Table').DataTable({
             'ajax': {
                   'url': [[@{${controllerPath}/}]]
