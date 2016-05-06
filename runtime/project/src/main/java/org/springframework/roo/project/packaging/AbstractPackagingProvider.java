@@ -237,26 +237,28 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
       final List<Element> aspectJVersionElements =
           XmlUtils.findElements("//*[.='" + ASPECTJ_VERSION_PLACEHOLDER + "']", root);
       for (final Element aspectJVersion : aspectJVersionElements) {
-        if ("1.8".equals(javaVersion)) {
-          aspectJVersion.setTextContent("1.8.8");
-        } else if ("1.7".equals(javaVersion)) {
-          aspectJVersion.setTextContent("1.7.4");
-        } else if ("1.6".equals(javaVersion)) {
-          aspectJVersion.setTextContent("1.6.12");
-        }
+        aspectJVersion.setTextContent("1.8.8");
+//        if ("1.8".equals(javaVersion)) {
+//          aspectJVersion.setTextContent("1.8.8");
+//        } else if ("1.7".equals(javaVersion)) {
+//          aspectJVersion.setTextContent("1.8.8");
+//        } else if ("1.6".equals(javaVersion)) {
+//          aspectJVersion.setTextContent("1.8.8");
+//        }
       }
 
       // AspectJ Plugin Versions
       final List<Element> aspectJPluginVersionElements =
           XmlUtils.findElements("//*[.='" + ASPECTJ_PLUGIN_VERSION_PLACEHOLDER + "']", root);
       for (final Element aspectJPluginVersion : aspectJPluginVersionElements) {
-        if ("1.8".equals(javaVersion)) {
-          aspectJPluginVersion.setTextContent("1.8");
-        } else if ("1.7".equals(javaVersion)) {
-          aspectJPluginVersion.setTextContent("1.7");
-        } else if ("1.6".equals(javaVersion)) {
-          aspectJPluginVersion.setTextContent("1.6");
-        }
+        aspectJPluginVersion.setTextContent("1.8");
+//        if ("1.8".equals(javaVersion)) {
+//          aspectJPluginVersion.setTextContent("1.8");
+//        } else if ("1.7".equals(javaVersion)) {
+//          aspectJPluginVersion.setTextContent("1.8");
+//        } else if ("1.6".equals(javaVersion)) {
+//          aspectJPluginVersion.setTextContent("1.8");
+//        }
       }
     }
 
