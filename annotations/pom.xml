@@ -18,11 +18,6 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.configurable.annotations</artifactId>
         </dependency>
-        <!-- Roo Dbre Annotations -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>
-        </dependency>
         <!-- Roo Dod Annotations -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
@@ -88,5 +83,12 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.dto.annotations</artifactId>
         </dependency>
+        
+        <!-- Excluded annotations on Spring Roo 2.0.M2 -->
+        <!-- <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.dbre.annotations</artifactId>
+        </dependency>-->
+        
     </dependencies>
 </project>
