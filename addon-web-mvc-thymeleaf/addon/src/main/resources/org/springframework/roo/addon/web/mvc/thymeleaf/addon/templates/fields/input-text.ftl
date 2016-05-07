@@ -7,7 +7,6 @@
     <input data-th-field="*{${fieldName}}" type="text" class="form-control"
       placeholder="${fieldName}"
       data-th-placeholder="${r"#{"}${label}${r"}"}"
-      data-th-title="${r"#{"}label_requiredfield${r"}"}"
       data-toggle="tooltip"/> <span
       id="name-help" class="help-block alert"
       data-th-if="${r"${#fields.hasErrors"}('${fieldName}')}"

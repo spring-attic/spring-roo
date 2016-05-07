@@ -8,6 +8,8 @@
       content="A next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes." />
     <meta name="author"
       content="Spring Roo team" />
+    <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
+       href="../../static/public/img/favicon.ico" />
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
       data-th-href="@{/public/img/favicon.ico}" />
@@ -15,7 +17,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-href="@{/public/img/apple-touch-icon.png}" />
 
-    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">Spring Roo application</title>
+    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-title="${r"${projectName}"}">Spring Roo application</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
@@ -58,9 +60,8 @@
         src="../../static/public/js/jquery.min.js"></script>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" type="text/css"
-      href="../../static/public/css/font-awesome.min.css"
-      data-th-href="@{/public/css/font-awesome.min.css}" />
+    <link rel="stylesheet" type="text/css" 
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"/>
 
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"

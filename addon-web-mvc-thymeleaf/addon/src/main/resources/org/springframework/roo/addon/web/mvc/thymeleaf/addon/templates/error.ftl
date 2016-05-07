@@ -1,28 +1,36 @@
 <!DOCTYPE html>
 <html data-layout-decorator="layouts/default-layout">
-    <head>
-        <meta charset="UTF-8" data-th-remove="all" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
-        <meta name="viewport" content="width=device-width, initial-scale=1"
-          data-th-remove="all" />
-        <meta name="description"
-          content="Spring Roo"
-          data-th-remove="all" />
-        <meta name="author"
-          content="Spring Roo"
-          data-th-remove="all" />
-        <link data-th-remove="all" rel="icon" href="../static/public/img/favicon.ico" />
+<head>
+    <meta charset="UTF-8" data-th-remove="all" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"
+      data-th-remove="all" />
+    <meta name="description"
+      content="Spring Roo"
+      data-th-remove="all" />
+    <meta name="author"
+      content="Spring Roo"
+      data-th-remove="all" />
+     <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
+       href="../../static/public/img/favicon.ico" />
 
-        <title data-th-text="${r"#{"}label_error${r"}"}">Error</title>
+    <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+       data-th-remove="all" />
 
-        <!-- Bootstrap -->
+    <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+       data-th-remove="all" />
+
+    <title data-th-text="${r"#{"}label_error${r"}"}">Error</title>
+
+    <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
       data-th-remove="all"></link>
 
-    <!-- MSSSI CSS -->
+    <!-- Roo CSS -->
     <link rel="stylesheet" type="text/css"
-      href="../static/public/css/sanidad-internet.css" data-th-remove="all" />
+      href="../static/public/css/springroo.css"
+      data-th-remove="all" />
 
     <!-- HTML5 shim y Respond.js para soporte de elementos HTML5 en IE8 y media queries -->
     <!--[if lt IE 9]>
@@ -30,7 +38,7 @@
         <script src="/public/js/respond.min.js"></script>
     <![endif]-->
 
-    </head>
+</head>
 <body>
   <header>
     <h1 data-th-text="${r"#{"}label_errorpage${r"}"}">Error Page</h1>

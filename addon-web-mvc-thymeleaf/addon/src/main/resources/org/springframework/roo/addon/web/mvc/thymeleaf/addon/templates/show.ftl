@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html data-layout-decorator="layouts/default-layout">
 <head>
-<meta charset="utf-8" data-th-remove="all" />
+<meta charset="UTF-8" data-th-remove="all" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
 <meta name="viewport" content="width=device-width, initial-scale=1"
   data-th-remove="all" />
@@ -14,11 +14,23 @@
 <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
   href="../../static/public/img/favicon.ico" />
 
-<title data-th-text="${r"#{"}label_show(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</title>
+<link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+       data-th-remove="all" />
+
+<link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+       data-th-remove="all" />
+
+<title data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${projectName} - Show ${entityName}</title>
 
 <!-- Bootstrap core CSS -->
-<link data-th-href="@{/public/css/bootstrap.min.css}" data-th-remove="all"
-  href="../../static/public/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css"
+  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+  data-th-remove="all"></link>
+
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<link rel="stylesheet" type="text/css"
+  href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
+  data-th-remove="all"></link>
 
 <!-- Spring Roo CSS -->
 <link data-th-href="@{/public/css/standard.css}" data-th-remove="all"
@@ -47,13 +59,15 @@
             src="../../static/public/img/logo_spring_roo.png" /></a>
         </div>
         <div class="application-name">
-          ${projectName}
+          <a href="/" data-th-href="@{/}">${projectName}</a>
         </div>
       </div>
 
+      <!-- MAIN MENU -->
       <nav class="navbar navbar-default">
         <div class="container-fluid">
 
+          <!-- collapsed menu button -->
           <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed"
               data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
@@ -65,18 +79,40 @@
           </div>
 
           <div id="bs-example-navbar-collapse-1" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-              <li class="active"><a href="#">Active Menu 1</a></li>
-              <li><a href="#">Menu 2</a></li>
-              <li class="dropdown"><a href="#" class="dropdown-toggle"
-                data-toggle="dropdown" role="button" aria-haspopup="true"
-                aria-expanded="false">Dropdown Menu 3<span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Submenu 1</a></li>
-                  <li><a href="#">Submenu 2</a></li>
-                  <li><a href="#">Submenu 3</a></li>
-                </ul></li>
-            </ul>
+
+            <!-- main menu -->
+            <div class="row">
+              <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Active Menu 1</a></li>
+                <li><a href="#">Menu 2</a></li>
+                <li class="dropdown"><a href="#" class="dropdown-toggle"
+                  data-toggle="dropdown" role="button" aria-haspopup="true"
+                  aria-expanded="false">Dropdown Menu 3<span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="#">Submenu 1</a></li>
+                    <li><a href="#">Submenu 2</a></li>
+                    <li><a href="#">Submenu 3</a></li>
+                  </ul></li>
+              </ul>
+            </div>
+
+            <!-- user menu -->
+            <div class="container upper-nav">
+                <ul class="nav navbar-nav navbar-right session">
+                  <li><span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                      <span data-th-text="${r"#{"}label_user${r"}"}">User</span></li>
+                  <li data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}">
+                       <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000</li>
+                  <li><button type="submit" class="exit"><span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                       <span data-th-text="${r"#{"}label_exit${r"}"}">Exit</span></button></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right links">
+                  <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                      <span data-th-text="${r"#{"}label_contact${r"}"}">Contact</span></a></li>
+                  <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                      <span data-th-text="${r"#{"}label_help${r"}"}">Help</span></a></li>
+                </ul>
+            </div>
           </div>
         </div>
       </nav>
@@ -88,7 +124,7 @@
       <div class="container-fluid content">
 
         <!-- CONTENT -->
-        <h1 data-th-text="${r"#{"}label_show(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName}</h1>
+        <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</h1>
         
         <dl class="dl-horizontal">
           <#list fields as field>
@@ -108,7 +144,7 @@
                     <thead>
                       <tr>
                         <#list field.configuration.referenceFieldFields as referencedFieldField>
-                        <th>${referencedFieldField.fieldName}</th>
+                        <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
                         </#list>
                         <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
                       </tr>
@@ -137,9 +173,11 @@
             </button>
           </div>
           <div class="pull-right">
-            <a href="edit" class="btn btn-primary"
-              data-th-href="@{${controllerPath}/${r"{"}${identifierField}${r"}"}/edit-form(${identifierField}=${r"*{id}"})}"
-              data-th-text="${r"#{label_edit}"}">Edit</a>
+            <button
+              data-th-onclick="'location.href=\'' + @{${controllerPath}/${r"{"}${identifierField}${r"}"}/edit-form(${identifierField}=${r"*{id}"})} + '\''"
+              data-sec-authorize="hasAnyRole('ROLE_ADMIN','ROLE_EMPLEADO')"
+              type="button" class="btn btn-primary" onclick="location.href='edit'"
+              data-th-text="${r"#{label_edit}"}">Edit</button>
           </div>
         </div>
 
@@ -154,10 +192,15 @@
     <p class="text-right">© Powered By Spring Roo </p>
   </footer>
 
+  <!-- JavaScript
+    ================================================== -->
   <!-- JQuery -->
   <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-1.12.3.js" data-th-remove="all"></script>
   <!-- Bootstrap -->
   <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js" data-th-remove="all"></script>
+
+  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+  <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js"></script>
 
   <div data-layout-fragment="javascript">
     

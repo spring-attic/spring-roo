@@ -10,7 +10,7 @@
         data-ajax--data-type="json">
           <option data-th-unless="*{${fieldName}} == null" 
             data-th-value="*{${fieldName}.${identifierField}}" 
-            data-th-text="|*{${label}.${fieldOne}} *{${label}.${fieldTwo}}|" 
+            data-th-text="|*{${fieldName}.${fieldOne}} *{${fieldName}.${fieldTwo}}|" 
          selected="selected">${referencedEntity}</option>
       </select>
       <span id="name-help" class="help-block alert"

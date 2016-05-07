@@ -82,7 +82,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addListView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, true, ctx);
+    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), true, ctx);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -108,7 +108,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addShowView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, false, ctx);
+    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -134,7 +134,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addCreateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, false, ctx);
+    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -160,7 +160,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addUpdateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, false, ctx);
+    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -415,13 +415,14 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * included on generated view.
    *  
    * @param entityDetails
+   * @param entityName
    * @param checkMaxFields
    * @param ctx
    * 
    * @return List that contains FieldMetadata that will be added to the view.
    */
-  protected List<FieldItem> getFieldViewItems(MemberDetails entityDetails, boolean checkMaxFields,
-      ViewContext ctx) {
+  protected List<FieldItem> getFieldViewItems(MemberDetails entityDetails, String entityName,
+      boolean checkMaxFields, ViewContext ctx) {
     // Getting entity fields
     List<FieldMetadata> entityFields = entityDetails.getFields();
     int addedFields = 0;
@@ -439,8 +440,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           && entityField.getAnnotation(JpaJavaType.VERSION) == null) {
 
         // Generating new FieldItem element
-        FieldItem fieldItem =
-            new FieldItem(entityField.getFieldName().getSymbolName(), ctx.getEntityName());
+        FieldItem fieldItem = new FieldItem(entityField.getFieldName().getSymbolName(), entityName);
 
         // Calculate fieldType
         JavaType type = entityField.getFieldType();
@@ -535,7 +535,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
                 "referenceFieldFields",
                 getFieldViewItems(
                     getMemberDetailsScanner().getMemberDetails(getClass().toString(),
-                        referencedFieldDetails), true, ctx));
+                        referencedFieldDetails), referencedFieldDetails.getName()
+                        .getSimpleTypeName(), true, ctx));
 
           } else {
             // Ignore set or list which base types are not entity field

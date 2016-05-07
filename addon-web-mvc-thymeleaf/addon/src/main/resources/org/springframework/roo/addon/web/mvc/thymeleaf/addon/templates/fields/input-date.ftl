@@ -7,7 +7,6 @@
     <input id="${fieldName}" data-th-field="*{${fieldName}}" type="text" class="form-control datetimepicker"
       placeholder="${fieldName}"
       data-th-placeholder="${r"#{"}${label}${r"}"}"
-      data-th-title="${r"#{"}label_requiredfield${r"}"}"
       data-toggle="tooltip"/> <span
       data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'glyphicon glyphicon-remove form-control-feedback'"
       data-th-if="${r"${#fields.hasErrors"}('${fieldName}')}" aria-hidden="true"></span>

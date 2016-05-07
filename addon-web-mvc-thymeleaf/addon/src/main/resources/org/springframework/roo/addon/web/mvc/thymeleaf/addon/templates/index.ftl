@@ -30,9 +30,8 @@
       data-th-remove="all"></link>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" type="text/css"
-    href="../static/public/css/font-awesome.min.css"
-    data-th-remove="all" />
+    <link rel="stylesheet" type="text/css" 
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"/>
 
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"

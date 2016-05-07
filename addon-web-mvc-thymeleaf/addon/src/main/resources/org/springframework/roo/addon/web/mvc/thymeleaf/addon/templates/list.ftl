@@ -14,6 +14,12 @@
     data-th-remove="all" />
  <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
     href="../../static/public/img/favicon.ico" />
+    
+ <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+    data-th-remove="all" />
+
+ <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+    data-th-remove="all" />
 
  <title data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">${projectName} - List ${entityName}</title>
 
@@ -23,9 +29,8 @@
   data-th-remove="all"></link>
 
  <!-- Font Awesome -->
- <link rel="stylesheet" type="text/css"
-  href="../static/public/css/font-awesome.min.css"
-  data-th-remove="all" />
+ <link rel="stylesheet" type="text/css" 
+   href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"/>
 
  <!-- Bootswatch CSS custom -->
  <link rel="stylesheet" type="text/css"
