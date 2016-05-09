@@ -15,6 +15,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -52,9 +53,7 @@ public class HintOperationsImpl implements HintOperations {
       return "start";
     }
 
-    if (!(fileManager.exists(pathResolver.getFocusedIdentifier(Path.SRC_MAIN_RESOURCES,
-        "META-INF/persistence.xml")) || fileManager.exists(pathResolver.getFocusedIdentifier(
-        Path.SRC_MAIN_RESOURCES, "META-INF/spring/applicationContext-mongo.xml")))) {
+    if (!projectOperations.isFeatureInstalled(FeatureNames.JPA)) {
       return "persistence";
     }
 
@@ -66,6 +65,27 @@ public class HintOperationsImpl implements HintOperations {
     if (javaBeanCount == 0) {
       return "fields";
     }
+
+    final int repositoryCount = getItdCount("Jpa_Repository");
+    if (repositoryCount == 0) {
+      return "repositories";
+    }
+
+    final int serviceCount = getItdCount("Service");
+    if (serviceCount == 0) {
+      return "services";
+    }
+
+    if (!projectOperations.isFeatureInstalled(FeatureNames.MVC)) {
+      return "mvc";
+    }
+
+    final int controllerCount = getItdCount("Controller");
+    if (controllerCount == 0) {
+      return "controllers";
+    }
+
+    // If everything is installed, return general topic
 
     return "general";
   }
