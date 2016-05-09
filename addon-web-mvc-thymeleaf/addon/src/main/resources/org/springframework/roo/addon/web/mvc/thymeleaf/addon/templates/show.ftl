@@ -127,41 +127,74 @@
         <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</h1>
         
         <dl class="dl-horizontal">
+          <#assign hasDetails=false>
           <#list fields as field>
             <#if field.type != "LIST">
                 <dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
                 <dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
             <#else>
-                <h3 class="panel-title" data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</h3>
-                <!--START TABLE-->
-                <div class="table-responsive">
-                  <table id="${field.configuration.referencedFieldType}Table" 
-                         class="table table-striped table-hover table-bordered" 
-                         data-row-id="${field.configuration.identifierField}"
-                         data-select="single"
-                         data-order="[[ 0, &quot;asc&quot; ]]">
-                    <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabelPlural}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
-                    <thead>
-                      <tr>
-                        <#list field.configuration.referenceFieldFields as referencedFieldField>
-                        <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
-                        </#list>
-                        <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                      </tr>
-                    </thead>
-                    <tbody data-th-remove="all">
-                      <tr>
-                        <#list field.configuration.referenceFieldFields as referencedFieldField>
-                        <td>${referencedFieldField.fieldName}</td>
-                        </#list>
-                        <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <!--END TABLE-->
+                <#assign hasDetails=true>
             </#if>
           </#list>
+          
+          <#if hasDetails == true>
+              <hr>
+              <ul class="nav nav-tabs">
+              <#assign firstDetail=true>
+              <#list fields as field>
+                <#if field.type == "LIST">
+                    <#if firstDetail == true>
+                      <li class="active"><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+                      <#assign firstDetail=false>
+                    <#else>
+                        <li><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+                    </#if>
+                </#if>
+              </#list>
+              </ul>
+              
+              <div class="tab-content">
+                <#assign firstDetail=true>
+                <#list fields as field>
+                    <#if field.type == "LIST">
+                    <#if firstDetail == true>
+                        <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane active">
+                        <#assign firstDetail=false>
+                    <#else>
+                        <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane">
+                    </#if>
+                            <!--START TABLE-->
+                            <div class="table-responsive">
+                              <table id="${field.configuration.referencedFieldType}Table" 
+                                     class="table table-striped table-hover table-bordered" 
+                                     data-row-id="${field.configuration.identifierField}"
+                                     data-select="single"
+                                     data-order="[[ 0, &quot;asc&quot; ]]">
+                                <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabelPlural}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
+                                <thead>
+                                  <tr>
+                                    <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                    <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
+                                    </#list>
+                                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                                  </tr>
+                                </thead>
+                                <tbody data-th-remove="all">
+                                  <tr>
+                                    <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                    <td>${referencedFieldField.fieldName}</td>
+                                    </#list>
+                                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <!--END TABLE-->
+                        </div>
+                    </#if>
+                  </#list>
+              </div>
+            </#if>
         </dl>
 
         <div class="clearfix">
@@ -234,6 +267,16 @@
                     'ajax': {
                           'url': ${field.configuration.referencedFieldType}BaseUrl
                      },
+                    'buttons' : [
+                        {
+                            'extend' : 'colvis',
+                            'className' : 'btn-accion'
+                        }, 
+                        {
+                            'extend' : 'pageLength',
+                            'className' : 'btn-accion'
+                        } 
+                    ],
                     'columns': [
                       <#list field.configuration.referenceFieldFields as referencedFieldField>
                       { 'data': '${referencedFieldField.fieldName}' },
