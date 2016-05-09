@@ -178,7 +178,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
 
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(getReferencedFieldPropertyName(referencedField).getFieldName());
+    parameterNames.add(new JavaSymbolName(String.format("%s%s",
+        getReferencedFieldPropertyName(referencedField).getFieldName(), "Field")));
     parameterNames.add(new JavaSymbolName("globalSearch"));
     parameterNames.add(new JavaSymbolName("pageable"));
 
