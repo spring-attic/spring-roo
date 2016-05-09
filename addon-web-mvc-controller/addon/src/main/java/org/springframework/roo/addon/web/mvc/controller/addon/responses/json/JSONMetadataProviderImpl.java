@@ -777,10 +777,16 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // ReturnType<ReturnTypeParams> entity = ENTITY_SERVICE_FIELD.FINDER_NAME(SEARCH_PARAMS);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(%s);",
-        addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
-        StringUtils.uncapitalize(this.entityPlural), getServiceField().getFieldName(), methodName,
-        finderParamsString));
+    if (StringUtils.isEmpty(returnTypeParamsString)) {
+      bodyBuilder.appendFormalLine(String.format("%s %s = %s.%s(%s);", addTypeToImport(returnType)
+          .getSimpleTypeName(), StringUtils.uncapitalize(this.entityPlural), getServiceField()
+          .getFieldName(), methodName, finderParamsString));
+    } else {
+      bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(%s);",
+          addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
+          StringUtils.uncapitalize(this.entityPlural), getServiceField().getFieldName(),
+          methodName, finderParamsString));
+    }
 
     // return entityService.FINDER_METHOD(%s);
     bodyBuilder.newLine();
