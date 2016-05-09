@@ -285,8 +285,8 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    */
   private FieldMetadataBuilder getTargetClassField(JavaType targetType) {
     FieldMetadataBuilder fieldBuilder =
-        new FieldMetadataBuilder(getId(), Modifier.PRIVATE, mockAnnotation, new JavaSymbolName(
-            StringUtils.uncapitalize(targetType.getSimpleTypeName())), targetType);
+        new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName(
+            StringUtils.uncapitalize(targetType.getSimpleTypeName())), targetType, null);
     return fieldBuilder;
   }
 
