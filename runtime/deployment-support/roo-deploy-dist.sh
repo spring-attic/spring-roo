@@ -713,7 +713,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
 
 		        load_roo_build_and_test script web-finder-test.roo
-		        load_roo_build_and_test script multimodule-web-finder-test.roo
+		        #load_roo_build_and_test script multimodule-web-finder-test.roo
 
             # DTO's tests
             load_roo_build_and_test script dto.roo
