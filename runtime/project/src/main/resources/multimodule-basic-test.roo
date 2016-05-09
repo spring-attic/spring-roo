@@ -299,28 +299,9 @@ repository jpa --all --package repository:org.example.repository
 #          not included again                                                          
 #====================================================================
 
-#====================================================================
-# TEST 12: Create a repository in model module                            
-#--------------------------------------------------------------------
-# Goal:    Validates that a module cannot have a dependency with itself
-#
-entity jpa --class model:~.City 
-repository jpa --entity ~.City --interface ~.repository.CityRep
-#       
-# Output:  Created model:SRC_MAIN_JAVA/org/example/model/repository
-#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep.java
-#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepCustom.java
-#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepImpl.java
-#          Updated model:ROOT/pom.xml [added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
-#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepImpl_Roo_Jpa_Repository_Impl.aj
-#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep_Roo_Jpa_Repository.aj
-#
-# Result:  Since the dependency would be with itself, it is not added                                                          
-#====================================================================
-
 
 #====================================================================
-# TEST 13: Create a service                            
+# TEST 12: Create a service                            
 #--------------------------------------------------------------------
 # Goal:    Test if module dependencies are added to service interface 
 #          and implementation modules 
@@ -341,7 +322,7 @@ service --entity model:~.Owner --repository repository:org.example.repository.Ow
 
 
 #====================================================================
-# TEST 14:  Generate service in the same module                             
+# TEST 13:  Generate service in the same module                             
 #--------------------------------------------------------------------
 # Goal:    Test if module dependencies are added to service module 
 #
@@ -360,6 +341,26 @@ service --all --apiPackage otherservice:~ --implPackage otherservice:~
 ####################################################################
 #					MANUAL TEST
 ####################################################################
+
+
+#====================================================================
+# TEST 14: Create a repository in model module                            
+#--------------------------------------------------------------------
+# Goal:    Validates that a module cannot have a dependency with itself
+#
+#entity jpa --class model:~.City 
+#repository jpa --entity ~.City --interface ~.repository.CityRep
+#       
+# Output:  Created model:SRC_MAIN_JAVA/org/example/model/repository
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep.java
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepCustom.java
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepImpl.java
+#          Updated model:ROOT/pom.xml [added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepImpl_Roo_Jpa_Repository_Impl.aj
+#          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep_Roo_Jpa_Repository.aj
+#
+# Result:  Since the dependency would be with itself, it is not added                                                          
+#====================================================================
 
 
 #====================================================================
