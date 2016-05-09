@@ -56,6 +56,7 @@ public class Dependency implements Comparable<Dependency> {
 
   private final String artifactId;
   private final String classifier;
+  private final String optional;
   private final List<Dependency> exclusions = new ArrayList<Dependency>();
   // -- Identifying
   private final String groupId;
@@ -100,6 +101,8 @@ public class Dependency implements Comparable<Dependency> {
       }
 
       classifier = DomUtils.getChildTextContent(dependency, "classifier");
+
+      optional = DomUtils.getChildTextContent(dependency, "optional");
 
       // Parsing for exclusions
       final List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
@@ -203,6 +206,7 @@ public class Dependency implements Comparable<Dependency> {
     systemPath = null;
     this.type = type;
     this.version = version;
+    this.optional = null;
   }
 
   /**
@@ -296,6 +300,10 @@ public class Dependency implements Comparable<Dependency> {
 
     if (StringUtils.isNotBlank(classifier)) {
       dependencyElement.appendChild(XmlUtils.createTextElement(document, "classifier", classifier));
+    }
+
+    if (StringUtils.isNotBlank(optional)) {
+      dependencyElement.appendChild(XmlUtils.createTextElement(document, "optional", optional));
     }
 
     // Add exclusions if any

@@ -20,6 +20,12 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Spring Roo annotations -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
@@ -35,6 +41,9 @@
 		<plugin>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-maven-plugin</artifactId>
+			<configuration>
+				<excludeDevtools>true</excludeDevtools>
+			</configuration>
 		</plugin>
 
 		<!-- Compiler plugin -->
