@@ -127,71 +127,62 @@
         <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</h1>
         
         <dl class="dl-horizontal">
-          <#assign hasDetails=false>
           <#list fields as field>
-            <#if field.type != "LIST">
-                <dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
-                <dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
-            <#else>
-                <#assign hasDetails=true>
-            </#if>
+            <dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
+            <dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
           </#list>
           
-          <#if hasDetails == true>
+          <#if details?size != 0>
               <hr>
               <ul class="nav nav-tabs">
               <#assign firstDetail=true>
-              <#list fields as field>
-                <#if field.type == "LIST">
-                    <#if firstDetail == true>
-                      <li class="active"><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
-                      <#assign firstDetail=false>
-                    <#else>
-                        <li><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
-                    </#if>
+              <#list details as field>
+                <#if firstDetail == true>
+                  <li class="active"><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+                  <#assign firstDetail=false>
+                <#else>
+                    <li><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
                 </#if>
               </#list>
               </ul>
               
               <div class="tab-content">
                 <#assign firstDetail=true>
-                <#list fields as field>
-                    <#if field.type == "LIST">
+                <#list details as field>
                     <#if firstDetail == true>
                         <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane active">
                         <#assign firstDetail=false>
                     <#else>
                         <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane">
                     </#if>
-                            <!--START TABLE-->
-                            <div class="table-responsive">
-                              <table id="${field.configuration.referencedFieldType}Table" 
-                                     class="table table-striped table-hover table-bordered" 
-                                     data-row-id="${field.configuration.identifierField}"
-                                     data-select="single"
-                                     data-order="[[ 0, &quot;asc&quot; ]]">
-                                <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabelPlural}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
-                                <thead>
-                                  <tr>
-                                    <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                    <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
-                                    </#list>
-                                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                                  </tr>
-                                </thead>
-                                <tbody data-th-remove="all">
-                                  <tr>
-                                    <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                    <td>${referencedFieldField.fieldName}</td>
-                                    </#list>
-                                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                            <!--END TABLE-->
+                        <!--START TABLE-->
+                        <div class="table-responsive">
+                          <table id="${field.configuration.referencedFieldType}Table" 
+                                 class="table table-striped table-hover table-bordered" 
+                                 data-row-id="${field.configuration.identifierField}"
+                                 data-select="single"
+                                 data-order="[[ 0, &quot;asc&quot; ]]">
+                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabelPlural}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
+                            <thead>
+                              <tr>
+                                <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
+                                </#list>
+                                <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                              </tr>
+                            </thead>
+                            <tbody data-th-remove="all">
+                              <tr>
+                                <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                <td>${referencedFieldField.fieldName}</td>
+                                </#list>
+                                <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
-                    </#if>
+                        <!--END TABLE-->
+                    </div>
                   </#list>
               </div>
             </#if>
@@ -260,38 +251,36 @@
     <script type="text/javascript" data-th-inline="javascript">
     $(document).ready( function () {
         var currentId = window.location.href.split("/")[window.location.href.split("/").length - 1];
-        <#list fields as field>
-            <#if field.type == "LIST">
-                var ${field.configuration.referencedFieldType}BaseUrl = '${controllerPath}/' + currentId +  '${field.configuration.controllerPath}/';
-                var ${field.configuration.referencedFieldType}Table = jQuery('#${field.configuration.referencedFieldType}Table').DataTable({
-                    'ajax': {
-                          'url': ${field.configuration.referencedFieldType}BaseUrl
-                     },
-                    'buttons' : [
-                        {
-                            'extend' : 'colvis',
-                            'className' : 'btn-accion'
-                        }, 
-                        {
-                            'extend' : 'pageLength',
-                            'className' : 'btn-accion'
-                        } 
-                    ],
-                    'columns': [
-                      <#list field.configuration.referenceFieldFields as referencedFieldField>
-                      { 'data': '${referencedFieldField.fieldName}' },
-                      </#list>
-                      { 
-                        'data': '${field.configuration.identifierField}',
-                        'orderable': false,
-                        'searchable': false,
-                        'render': function ( data, type, full, meta ) {
-                            return '<a role="button" class="btn-accion show" href="${field.configuration.controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>'
-                        }
-                      }
-                    ]  
-                });
-            </#if>
+        <#list details as field>
+            var ${field.configuration.referencedFieldType}BaseUrl = '${controllerPath}/' + currentId +  '${field.configuration.controllerPath}/';
+            var ${field.configuration.referencedFieldType}Table = jQuery('#${field.configuration.referencedFieldType}Table').DataTable({
+                'ajax': {
+                      'url': ${field.configuration.referencedFieldType}BaseUrl
+                 },
+                'buttons' : [
+                    {
+                        'extend' : 'colvis',
+                        'className' : 'btn-accion'
+                    }, 
+                    {
+                        'extend' : 'pageLength',
+                        'className' : 'btn-accion'
+                    } 
+                ],
+                'columns': [
+                  <#list field.configuration.referenceFieldFields as referencedFieldField>
+                  { 'data': '${referencedFieldField.fieldName}' },
+                  </#list>
+                  { 
+                    'data': '${field.configuration.identifierField}',
+                    'orderable': false,
+                    'searchable': false,
+                    'render': function ( data, type, full, meta ) {
+                        return '<a role="button" class="btn-accion show" href="${field.configuration.controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>'
+                    }
+                  }
+                ]  
+            });
         </#list>
     });
     </script>

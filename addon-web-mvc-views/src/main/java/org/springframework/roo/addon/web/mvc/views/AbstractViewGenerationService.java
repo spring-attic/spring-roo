@@ -83,8 +83,10 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Getting entity fields that should be included on view
     List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), true, ctx);
+    List<FieldItem> details = getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx);
 
     ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("details", details);
 
     // Process elements to generate 
     DOC newDoc = process("list", ctx);
@@ -109,8 +111,10 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Getting entity fields that should be included on view
     List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
+    List<FieldItem> details = getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx);
 
     ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("details", details);
 
     // Process elements to generate 
     DOC newDoc = process("show", ctx);
@@ -485,7 +489,59 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           fieldItem.addConfigurationElement("format", format);
         } else if (type.getFullyQualifiedTypeName().equals("java.util.Set")
             || type.getFullyQualifiedTypeName().equals("java.util.List")) {
+          // Ignore details. To obtain details uses getDetailsFieldViewItems method
+          continue;
+        } else {
+          fieldItem.setType(FieldTypes.TEXT.toString());
+        }
 
+        fieldViewItems.add(fieldItem);
+        addedFields++;
+      }
+
+      if (addedFields == MAX_FIELDS_TO_ADD && checkMaxFields) {
+        break;
+      }
+    }
+
+    return fieldViewItems;
+  }
+
+  /**
+   * This method obtains all necessary information about details fields from entity
+   * and returns a List of FieldItem.
+   * 
+   * @param entityDetails
+   * @param entityName
+   * @param ctx
+   * 
+   * @return List that contains FieldMetadata that will be added to the view.
+   */
+  protected List<FieldItem> getDetailsFieldViewItems(MemberDetails entityDetails,
+      String entityName, ViewContext ctx) {
+    // Getting entity fields
+    List<FieldMetadata> entityFields = entityDetails.getFields();
+
+    // Getting all controllers
+    Set<ClassOrInterfaceTypeDetails> allControllers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_CONTROLLER);
+
+    List<FieldItem> detailFieldViewItems = new ArrayList<FieldItem>();
+    for (FieldMetadata entityField : entityFields) {
+      // Exclude id and version fields
+      if (entityField.getAnnotation(JpaJavaType.ID) == null
+          && entityField.getAnnotation(JpaJavaType.VERSION) == null) {
+
+        // Generating new FieldItem element
+        FieldItem fieldItem = new FieldItem(entityField.getFieldName().getSymbolName(), entityName);
+
+        // Calculate fieldType
+        JavaType type = entityField.getFieldType();
+
+        // Check if is a referenced field
+        if (type.getFullyQualifiedTypeName().equals("java.util.Set")
+            || type.getFullyQualifiedTypeName().equals("java.util.List")) {
           // Getting base type
           JavaType referencedField = type.getBaseType();
           ClassOrInterfaceTypeDetails referencedFieldDetails =
@@ -544,18 +600,15 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           }
 
         } else {
-          fieldItem.setType(FieldTypes.TEXT.toString());
+          // Ignore not details fields
+          continue;
         }
 
-        fieldViewItems.add(fieldItem);
-        addedFields++;
-      }
-
-      if (addedFields == MAX_FIELDS_TO_ADD && checkMaxFields) {
-        break;
+        detailFieldViewItems.add(fieldItem);
       }
     }
-    return fieldViewItems;
+
+    return detailFieldViewItems;
   }
 
   /**

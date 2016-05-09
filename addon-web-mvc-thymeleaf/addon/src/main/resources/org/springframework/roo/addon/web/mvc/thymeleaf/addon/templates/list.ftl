@@ -173,7 +173,9 @@
             <thead>
               <tr>
                 <#list fields as field>
+                <#if field.type != "LIST">
                 <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
+                </#if>
                 </#list>
                 <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
               </tr>
@@ -181,7 +183,9 @@
             <tbody data-th-remove="all">
               <tr>
                 <#list fields as field>
+                <#if field.type != "LIST">
                 <td>${field.fieldName}</td>
+                </#if>
                 </#list>
                 <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
               </tr>
@@ -189,6 +193,66 @@
           </table>
         </div>
         <!--END TABLE-->
+        
+        <#if details?size != 0>
+          <hr>
+          <ul class="nav nav-tabs">
+          <#assign firstDetail=true>
+          <#list details as field>
+            <#if firstDetail == true>
+              <li class="active"><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+              <#assign firstDetail=false>
+            <#else>
+                <li><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+            </#if>
+          </#list>
+          </ul>
+          
+          <div class="tab-content">
+                <#assign firstDetail=true>
+                <#list details as field>
+                    <#if firstDetail == true>
+                        <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane active">
+                        <#assign firstDetail=false>
+                    <#else>
+                        <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane">
+                    </#if>
+                        <!--START TABLE-->
+                        <div class="table-responsive">
+                          <table id="${field.configuration.referencedFieldType}Table" 
+                            class="table table-striped table-hover table-bordered"
+                            data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
+                            data-order="[[ 0, &quot;asc&quot; ]]"
+                            data-create-url-function="create${field.configuration.referencedFieldType}Url">
+                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabelPlural}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
+                            <thead>
+                              <tr>
+                                <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                <#if referencedFieldField != entityName>
+                                    <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
+                                </#if>
+                                </#list>
+                                <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                              </tr>
+                            </thead>
+                            <tbody data-th-remove="all">
+                              <tr>
+                                <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                <#if referencedFieldField != entityName>
+                                    <td>${referencedFieldField.fieldName}</td>
+                                </#if>
+                                </#list>
+                                <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <!--END TABLE-->
+                    </div>
+                  </#list>
+              </div>
+          
+        </#if>
         
         <div class="clearfix">
           <div class="pull-left">
@@ -320,6 +384,81 @@
                 });
            }
          });
+         
+         <#if details?size != 0>
+             <#list details as field>
+                var ${field.configuration.referencedFieldType}Table = jQuery('#${field.configuration.referencedFieldType}Table').DataTable({
+                   'buttons' : [
+                        {
+                            'extend' : 'colvis',
+                            'className' : 'btn-accion'
+                        }, 
+                        {
+                            'extend' : 'pageLength',
+                            'className' : 'btn-accion'
+                        } 
+                    ],
+                    'columns': [
+                      <#list field.configuration.referenceFieldFields as referencedFieldField>
+                      <#if referencedFieldField != entityName>
+                        { 'data': '${referencedFieldField.fieldName}' },
+                      </#if>
+                      </#list>
+                      { 
+                        'data': '${field.configuration.identifierField}',
+                        'orderable': false,
+                        'searchable': false,
+                        'render': function ( data, type, full, meta ) {
+                            return '';
+                        }
+                      }
+                    ]  
+                });
+                
+                  jQuery.extend({
+                    'current${entityName}Id': undefined,
+                    '${field.configuration.referencedFieldType}BaseUrl': function() {
+                      if(jQuery.current${entityName}Id) {
+                        return [[@{${controllerPath}/}]] + jQuery.current${entityName}Id + '${field.configuration.controllerPath}/';
+                      }
+                      return undefined;
+                    },
+                    'create${field.configuration.referencedFieldType}Url': function() {
+                      if(jQuery.current${entityName}Id) {
+                        return jQuery.${field.configuration.referencedFieldType}BaseUrl() + jQuery.createUri + '/';
+                      }
+                      return undefined;
+                    },
+                    'update${field.configuration.referencedFieldType}Url': function(${field.configuration.referencedFieldType}Id) {
+                      if(jQuery.current${entityName}Id) {
+                        return jQuery.${field.configuration.referencedFieldType}BaseUrl() + ${field.configuration.referencedFieldType}Id + '/'+ jQuery.editUri + '/';
+                      }
+                      return undefined;
+                    },
+                    'delete${field.configuration.referencedFieldType}Url': function(${field.configuration.referencedFieldType}Id) {
+                      if(jQuery.current${entityName}Id) {
+                        return jQuery.${field.configuration.referencedFieldType}BaseUrl() + ${field.configuration.referencedFieldType}Id + '/'+ jQuery.deleteUri + '/';
+                      }
+                      return undefined;
+                    }
+                  });
+                  
+                  ${entityName}Table.on( 'select', function ( e, dt, type, indexes ) {
+                      if ( type === 'row' ) {
+                        var new${entityName}Id = ${entityName}Table.rows( indexes ).ids()[0];
+                        if (jQuery.current${entityName}Id != new${entityName}Id) {
+                          jQuery.current${entityName}Id = new${entityName}Id;
+                          var url = jQuery.${field.configuration.referencedFieldType}BaseUrl();
+                          ${field.configuration.referencedFieldType}Table.ajax.url( url ).load();
+                        }
+                      }
+                    });
+                  
+             </#list>
+         </#if>
+         
+         
+         
         
     });
     </script>
