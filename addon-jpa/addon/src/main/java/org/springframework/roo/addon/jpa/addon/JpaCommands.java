@@ -285,10 +285,19 @@ public class JpaCommands implements CommandMarker {
     return false;
   }
 
+  /**
+   * Indicator that provides all possible values for --class parameter
+   * 
+   * The provided results will not be validate. It will not include space 
+   * on finish.
+   * 
+   * @param shellContext
+   * @return List with all possible values for --class parameter
+   */
   @CliOptionAutocompleteIndicator(command = "entity jpa", param = "class",
       help = "Provided --class option should be a class annotated with @RooJpaEntity.",
       validate = false, includeSpaceOnFinish = false)
-  public List<String> getClassPossibleResults(ShellContext shellContext) {
+  public List<String> getClassPossibleValues(ShellContext shellContext) {
 
     // Get current value of class
     String currentText = shellContext.getParameters().get("class");
