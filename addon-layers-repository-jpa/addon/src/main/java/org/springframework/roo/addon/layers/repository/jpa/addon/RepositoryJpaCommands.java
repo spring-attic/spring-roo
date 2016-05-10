@@ -1,8 +1,10 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
+import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -51,13 +53,14 @@ public class RepositoryJpaCommands implements CommandMarker {
 
   @CliOptionAutocompleteIndicator(command = "repository jpa", param = "entity",
       help = "--entity option should be an entity.")
-  public List<String> getClassPossibleResults(ShellContext shellContext) {
+  public List<String> getEntityPossibleResults(ShellContext shellContext) {
 
     // Get current value of class
     String currentText = shellContext.getParameters().get("entity");
 
     List<String> allPossibleValues = new ArrayList<String>();
 
+    // Getting all existing entities
     Set<ClassOrInterfaceTypeDetails> entitiesInProject =
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
     for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
@@ -66,6 +69,28 @@ public class RepositoryJpaCommands implements CommandMarker {
         allPossibleValues.add(name);
       }
     }
+
+    return allPossibleValues;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "repository jpa", param = "interface",
+      help = "--interface option should be a new type.", validate = false,
+      includeSpaceOnFinish = false)
+  public List<String> getInterfacePossibleResults(ShellContext shellContext) {
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Add all modules to completions list
+    Collection<String> modules = projectOperations.getModuleNames();
+    for (String module : modules) {
+      if (StringUtils.isNotBlank(module)
+          && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
+        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+      }
+    }
+
+    // Always add base package
+    allPossibleValues.add("~.");
 
     return allPossibleValues;
   }
@@ -86,10 +111,6 @@ public class RepositoryJpaCommands implements CommandMarker {
       if (!allPossibleValues.contains(name)) {
         allPossibleValues.add(name);
       }
-    }
-
-    if (allPossibleValues.isEmpty()) {
-      allPossibleValues.add("");
     }
 
     return allPossibleValues;
@@ -114,14 +135,15 @@ public class RepositoryJpaCommands implements CommandMarker {
   /**
    * This indicator says if --interface parameter should be mandatory or not
    *
-   * If --entity parameter has been specified, --interface parameter will be mandatory.
+   * If --entity parameter has been specified and we are working under multimodule
+   * project, --interface parameter will be mandatory.
    * 
    * @param context ShellContext
    * @return
    */
   @CliOptionMandatoryIndicator(params = "interface", command = "repository jpa")
   public boolean isInterfaceParameterMandatory(ShellContext context) {
-    if (context.getParameters().containsKey("entity")) {
+    if (context.getParameters().containsKey("entity") && projectOperations.isMultimoduleProject()) {
       return true;
     }
     return false;
