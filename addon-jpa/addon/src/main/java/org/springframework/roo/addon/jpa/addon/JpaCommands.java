@@ -307,7 +307,8 @@ public class JpaCommands implements CommandMarker {
     // Add all modules to completions list
     Collection<String> modules = projectOperations.getModuleNames();
     for (String module : modules) {
-      if (StringUtils.isNotBlank(module) && !module.equals(projectOperations.getFocusedModule())) {
+      if (StringUtils.isNotBlank(module)
+          && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
         allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
       }
     }
