@@ -164,6 +164,28 @@ public class ServiceCommands implements CommandMarker {
     return allPossibleValues;
   }
 
+  @CliOptionAutocompleteIndicator(command = "service", param = "entity",
+      help = "--entity option should be an entity.")
+  public List<String> getEntityPossibleResults(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("entity");
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Getting all existing entities
+    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
+      String name = replaceTopLevelPackageString(entity, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
+  }
+
   /**
    * This indicator says if --apiPackage and --implPackage parameters should be mandatory or not
    *
@@ -224,7 +246,7 @@ public class ServiceCommands implements CommandMarker {
    * @param context ShellContext
    * @return
    */
-  @CliOptionVisibilityIndicator(params = {"entity"}, command = "service",
+  @CliOptionVisibilityIndicator(command = "service", params = {"entity"},
       help = "--all parameter is not visible if --entity parameter has been specified before.")
   public boolean isEntityParameterVisible(ShellContext context) {
     if (context.getParameters().containsKey("all")) {

@@ -7,6 +7,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -131,13 +132,57 @@ public class ServiceOperationsImpl implements ServiceOperations {
   }
 
   @Override
-  public void addService(final JavaType domainType, final JavaType repositoryType,
-      final JavaType interfaceType, final JavaType implType) {
-    Validate.notNull(interfaceType,
-        "ERROR: Interface type required to be able to generate service.");
+  public void addService(final JavaType domainType, JavaType repositoryType,
+      JavaType interfaceType, JavaType implType) {
     Validate.notNull(domainType, "ERROR: Domain type required to be able to generate service.");
-    Validate.notNull(repositoryType,
-        "ERROR: You must specify a repository type to be able to generate service.");
+    if (projectOperations.isMultimoduleProject()) {
+      Validate
+          .notNull(repositoryType,
+              "ERROR: You must specify a repository type to be able to generate service on multimodule projects.");
+    }
+
+    if (repositoryType == null) {
+      Set<ClassOrInterfaceTypeDetails> repositories =
+          typeLocationService
+              .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+
+      Iterator<ClassOrInterfaceTypeDetails> it = repositories.iterator();
+      while (it.hasNext()) {
+        ClassOrInterfaceTypeDetails repository = it.next();
+        AnnotationAttributeValue<JavaType> entityAttr =
+            repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
+
+        if (entityAttr != null && entityAttr.getValue().equals(domainType)) {
+          repositoryType = repository.getType();
+        }
+      }
+
+      if (repositoryType == null) {
+        // Is necessary at least one repository to generate service
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "ERROR: You must generate a repository to '%s' entity before to generate a new service.",
+                        domainType.getFullyQualifiedTypeName()));
+        return;
+      }
+
+    }
+
+    if (interfaceType == null) {
+      interfaceType =
+          new JavaType(String.format("%s.%sService", domainType.getPackage(),
+              domainType.getSimpleTypeName()), domainType.getModule());
+    }
+
+    if (implType == null) {
+      implType =
+          new JavaType(String.format("%s.%sServiceImpl", domainType.getPackage(),
+              domainType.getSimpleTypeName()), domainType.getModule());
+    }
+
 
     // Check if current entity is related with the repository
     ClassOrInterfaceTypeDetails repository = typeLocationService.getTypeDetails(repositoryType);
