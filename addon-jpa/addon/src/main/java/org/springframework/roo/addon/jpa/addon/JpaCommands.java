@@ -14,11 +14,13 @@ import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -36,12 +38,15 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
@@ -278,6 +283,40 @@ public class JpaCommands implements CommandMarker {
     }
 
     return false;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "entity jpa", param = "class",
+      help = "Provided --class option should be a class annotated with @RooJpaEntity.",
+      validate = false, includeSpaceOnFinish = false)
+  public List<String> getClassPossibleResults(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("class");
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Add all modules to completions list
+    Collection<String> modules = projectOperations.getModuleNames();
+    for (String module : modules) {
+      if (StringUtils.isNotBlank(module) && !module.equals(projectOperations.getFocusedModule())) {
+        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+      }
+    }
+
+    // Getting all existing entities
+    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
+      String name = replaceTopLevelPackageString(entity, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    // Always add base package
+    allPossibleValues.add("~.");
+
+    return allPossibleValues;
   }
 
   @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
@@ -549,5 +588,61 @@ public class JpaCommands implements CommandMarker {
               + "use --force to execute the command anyway.");
 
     }
+  }
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * 
+   * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(projectOperations.getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(projectOperations.getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value  
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
+    }
+
+    return javaTypeString;
   }
 }
