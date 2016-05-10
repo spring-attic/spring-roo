@@ -1,36 +1,36 @@
-package org.springframework.roo.addon.web.mvc.jsp.i18n.languages;
+package org.springframework.roo.addon.web.mvc.views.i18n.languages;
 
 import java.io.InputStream;
 import java.util.Locale;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.web.mvc.jsp.i18n.AbstractLanguage;
+import org.springframework.roo.addon.web.mvc.views.i18n.AbstractLanguage;
 import org.springframework.roo.support.util.FileUtils;
 
 /**
- * German language support.
+ * English language support.
  * 
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component
 @Service
-public class GermanLanguage extends AbstractLanguage {
+public class EnglishLanguage extends AbstractLanguage {
 
   public InputStream getFlagGraphic() {
-    return FileUtils.getInputStream(getClass(), "de.png");
+    return FileUtils.getInputStream(getClass(), "gb.png");
   }
 
   public String getLanguage() {
-    return "Deubuilderh";
+    return "English";
   }
 
   public Locale getLocale() {
-    return Locale.GERMAN;
+    return Locale.ENGLISH;
   }
 
   public InputStream getMessageBundle() {
-    return FileUtils.getInputStream(getClass(), "messages_de.properties");
+    return FileUtils.getInputStream(getClass(), "messages.properties");
   }
 }

@@ -8,8 +8,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -45,23 +43,6 @@ public class JspCommands implements CommandMarker {
   public boolean isControllerClassAvailable() {
     //return getJspOperations().isControllerAvailable();
     return false;
-  }
-
-  @CliAvailabilityIndicator({"web mvc install language", "web mvc language"})
-  public boolean isInstallLanguageAvailable() {
-    return getJspOperations().isInstallLanguageCommandAvailable();
-  }
-
-  @CliCommand(value = "web mvc language",
-      help = "Install new internationalization bundle for MVC scaffolded UI.")
-  public void language(@CliOption(key = {"", "code"}, mandatory = true,
-      help = "The language code for the desired bundle") final I18n i18n) {
-
-    if (i18n == null) {
-      LOGGER.warning("Could not parse language code");
-      return;
-    }
-    getJspOperations().installI18n(i18n, getPathResolver().getFocusedPath(Path.SRC_MAIN_WEBAPP));
   }
 
   @CliCommand(

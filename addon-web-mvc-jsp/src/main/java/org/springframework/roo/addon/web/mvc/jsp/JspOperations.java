@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
-import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
-import org.springframework.roo.model.JavaType;
+import org.springframework.roo.addon.web.mvc.views.i18n.I18n;
 import org.springframework.roo.project.LogicalPath;
 import org.w3c.dom.Document;
 
@@ -30,14 +29,6 @@ public interface JspOperations {
   void installCommonViewArtefacts(String moduleName);
 
   /**
-   * Installs additional languages into Web MVC app.
-   * 
-   * @param language the language
-   * @param webappPath
-   */
-  void installI18n(I18n language, LogicalPath webappPath);
-
-  /**
    * Installs a new Spring MVC static view.
    * 
    * @param path the static view to create in (required, ie '/foo')
@@ -61,8 +52,6 @@ public interface JspOperations {
    */
   void installView(String path, String viewName, String title, String category,
       LogicalPath webappPath);
-
-  boolean isInstallLanguageCommandAvailable();
 
   /**
    * Replaces an existing tag library with the latest version (set backup flag

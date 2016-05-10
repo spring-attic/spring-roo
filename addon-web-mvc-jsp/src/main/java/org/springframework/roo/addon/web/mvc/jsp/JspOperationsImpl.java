@@ -26,8 +26,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.backup.BackupOperations;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
-import org.springframework.roo.addon.web.mvc.jsp.i18n.I18nSupport;
+import org.springframework.roo.addon.web.mvc.views.i18n.I18n;
+import org.springframework.roo.addon.web.mvc.views.i18n.I18nSupport;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -46,7 +46,6 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -305,28 +304,28 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
     copyDirectoryContents("tags/util/*.tagx",
         getPathResolver().getIdentifier(webappPath, "WEB-INF/tags/util"), false);
 
+    // TODO: Rebuild with new views system
     // Install default language 'en'
-    installI18n(getI18nSupport().getLanguage(Locale.ENGLISH), webappPath);
-
-    final String i18nDirectory =
-        getPathResolver().getIdentifier(webappPath, "WEB-INF/i18n/application.properties");
-    if (!fileManager.exists(i18nDirectory)) {
-      try {
-        final String projectName =
-            getProjectOperations().getProjectName(getProjectOperations().getFocusedModuleName());
-        fileManager.createFile(getPathResolver().getIdentifier(webappPath,
-            "WEB-INF/i18n/application.properties"));
-        /*getPropFileOperations()
-                .addPropertyIfNotExists(webappPath,
-                        "WEB-INF/i18n/application.properties",
-                        "application_name",
-                        projectName.substring(0, 1).toUpperCase()
-                                + projectName.substring(1), true);*/
-      } catch (final Exception e) {
-        throw new IllegalStateException(
-            "Encountered an error during copying of resources for MVC JSP addon.", e);
-      }
-    }
+//    installI18n(getI18nSupport().getLanguage(Locale.ENGLISH), webappPath);
+//    final String i18nDirectory =
+//        getPathResolver().getIdentifier(webappPath, "WEB-INF/i18n/application.properties");
+//    if (!fileManager.exists(i18nDirectory)) {
+//      try {
+//        final String projectName =
+//            getProjectOperations().getProjectName(getProjectOperations().getFocusedModuleName());
+//        fileManager.createFile(getPathResolver().getIdentifier(webappPath,
+//            "WEB-INF/i18n/application.properties"));
+//        /*getPropFileOperations()
+//                .addPropertyIfNotExists(webappPath,
+//                        "WEB-INF/i18n/application.properties",
+//                        "application_name",
+//                        projectName.substring(0, 1).toUpperCase()
+//                                + projectName.substring(1), true);*/
+//      } catch (final Exception e) {
+//        throw new IllegalStateException(
+//            "Encountered an error during copying of resources for MVC JSP addon.", e);
+//      }
+//    }
   }
 
   private void installMavenPlugins(String moduleName) {
@@ -345,75 +344,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
       getProjectOperations().addBuildPlugin(moduleName, plugin);
     }
 
-  }
-
-  public void installI18n(final I18n i18n, final LogicalPath webappPath) {
-    Validate.notNull(i18n, "Language choice required");
-
-    if (i18n.getLocale() == null) {
-      LOGGER.warning("could not parse language choice");
-      return;
-    }
-
-    final String targetDirectory = getPathResolver().getIdentifier(webappPath, "");
-
-    // Install message bundle
-    String messageBundle =
-        targetDirectory + "/WEB-INF/i18n/messages_" + i18n.getLocale().getLanguage() /* + country */
-            + ".properties";
-    // Special case for english locale (default)
-    if (i18n.getLocale().equals(Locale.ENGLISH)) {
-      messageBundle = targetDirectory + "/WEB-INF/i18n/messages.properties";
-    }
-    if (!fileManager.exists(messageBundle)) {
-      InputStream inputStream = null;
-      OutputStream outputStream = null;
-      try {
-        inputStream = i18n.getMessageBundle();
-        outputStream = fileManager.createFile(messageBundle).getOutputStream();
-        IOUtils.copy(inputStream, outputStream);
-      } catch (final Exception e) {
-        throw new IllegalStateException(
-            "Encountered an error during copying of message bundle MVC JSP addon.", e);
-      } finally {
-        IOUtils.closeQuietly(inputStream);
-        IOUtils.closeQuietly(outputStream);
-      }
-    }
-
-    // Install flag
-    final String flagGraphic =
-        targetDirectory + "/images/" + i18n.getLocale().getLanguage() /* + country */+ ".png";
-    if (!fileManager.exists(flagGraphic)) {
-      InputStream inputStream = null;
-      OutputStream outputStream = null;
-      try {
-        inputStream = i18n.getFlagGraphic();
-        outputStream = fileManager.createFile(flagGraphic).getOutputStream();
-        IOUtils.copy(inputStream, outputStream);
-      } catch (final Exception e) {
-        throw new IllegalStateException(
-            "Encountered an error during copying of flag graphic for MVC JSP addon.", e);
-      } finally {
-        IOUtils.closeQuietly(inputStream);
-        IOUtils.closeQuietly(outputStream);
-      }
-    }
-
-    // Setup language definition in languages.jspx
-    final String footerFileLocation = targetDirectory + "/WEB-INF/views/footer.jspx";
-    final Document footer = XmlUtils.readXml(fileManager.getInputStream(footerFileLocation));
-
-    if (XmlUtils.findFirstElement("//span[@id='language']/language[@locale='"
-        + i18n.getLocale().getLanguage() + "']", footer.getDocumentElement()) == null) {
-      final Element span =
-          XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
-      span.appendChild(new XmlElementBuilder("util:language", footer)
-          .addAttribute("locale", i18n.getLocale().getLanguage())
-          .addAttribute("label", i18n.getLanguage()).build());
-      fileManager.createOrUpdateTextFileIfRequired(footerFileLocation,
-          XmlUtils.nodeToString(footer), false);
-    }
   }
 
   /**
@@ -628,27 +558,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
     }
   }
 
-  public I18nSupport getI18nSupport() {
-    if (i18nSupport == null) {
-      // Get all Services implement I18nSupport interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(I18nSupport.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          i18nSupport = (I18nSupport) context.getService(ref);
-          return i18nSupport;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load I18nSupport on JspOperationsImpl.");
-        return null;
-      }
-    } else {
-      return i18nSupport;
-    }
-  }
-
   public MenuOperations getMenuOperations() {
     if (menuOperations == null) {
       // Get all Services implement MenuOperations interface
@@ -772,6 +681,27 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
       }
     } else {
       return typeManagementService;
+    }
+  }
+  
+  public I18nSupport getI18nSupport() {
+    if (i18nSupport == null) {
+      // Get all Services implement I18nSupport interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(I18nSupport.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          i18nSupport = (I18nSupport) context.getService(ref);
+          return i18nSupport;
+        }
+        return null;
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load I18nSupport on JspOperationsImpl.");
+        return null;
+      }
+    } else {
+      return i18nSupport;
     }
   }
 }

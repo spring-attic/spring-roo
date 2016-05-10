@@ -16,9 +16,12 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
+import org.springframework.roo.addon.web.mvc.views.i18n.I18n;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -50,6 +53,7 @@ public class ViewCommands implements CommandMarker {
   private ViewOperations viewOperations;
   private ProjectOperations projectOperations;
   private TypeLocationService typeLocationService;
+  private PathResolver pathResolver;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -229,6 +233,25 @@ public class ViewCommands implements CommandMarker {
   }
 
 
+  @CliAvailabilityIndicator({"web mvc language"})
+  public boolean isInstallLanguageAvailable() {
+    return getViewOperations().isInstallLanguageCommandAvailable();
+  }
+
+  @CliCommand(value = "web mvc language",
+      help = "Install new internationalization bundle for MVC views.")
+  public void language(@CliOption(key = {"", "code"}, mandatory = true,
+      help = "The language code for the desired bundle") final I18n i18n) {
+
+    if (i18n == null) {
+      LOGGER.warning("Could not parse language code");
+      return;
+    }
+
+    getViewOperations().installI18n(i18n);
+  }
+
+
   // Get OSGi services
 
   public TypeLocationService getTypeLocationService() {
@@ -365,6 +388,29 @@ public class ViewCommands implements CommandMarker {
     } catch (InvalidSyntaxException e) {
       LOGGER.warning("Cannot load MVCViewGenerationService on ViewCommands.");
       return null;
+    }
+  }
+
+  public PathResolver getPathResolver() {
+    if (pathResolver == null) {
+      // Get all Services implement PathResolver interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(PathResolver.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          pathResolver = (PathResolver) this.context.getService(ref);
+          return pathResolver;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load PathResolver on ThymeleafMVCViewResponseService.");
+        return null;
+      }
+    } else {
+      return pathResolver;
     }
   }
 
