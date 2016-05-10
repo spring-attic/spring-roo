@@ -58,10 +58,10 @@ public class RepositoryJpaCommands implements CommandMarker {
 
     List<String> allPossibleValues = new ArrayList<String>();
 
-    Set<ClassOrInterfaceTypeDetails> dtosInProject =
+    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
-    for (ClassOrInterfaceTypeDetails dto : dtosInProject) {
-      String name = replaceTopLevelPackageString(dto, currentText);
+    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
+      String name = replaceTopLevelPackageString(entity, currentText);
       if (!allPossibleValues.contains(name)) {
         allPossibleValues.add(name);
       }
