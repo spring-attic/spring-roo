@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -315,8 +316,39 @@ public class ControllerOperationsImpl implements ControllerOperations {
         "ERROR: Controller class is required to be able to generate new controller");
     Validate.notNull(entity,
         "ERROR: Entity class is required to be able to generate new controller");
-    Validate.notNull(service,
-        "ERROR: Service class is required to be able to generate new controller.");
+
+    if (getProjectOperations().isMultimoduleProject()) {
+      Validate
+          .notNull(service,
+              "ERROR: Service class is required to be able to generate new controller on multimodule projects.");
+    } else if (service == null) {
+      // Getting related service
+      Set<ClassOrInterfaceTypeDetails> services =
+          getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+              RooJavaType.ROO_SERVICE);
+      Iterator<ClassOrInterfaceTypeDetails> it = services.iterator();
+
+      while (it.hasNext()) {
+        ClassOrInterfaceTypeDetails existingService = it.next();
+        AnnotationAttributeValue<Object> entityAttr =
+            existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+        if (entityAttr != null && entityAttr.getValue().equals(entity)) {
+          service = existingService.getType();
+        }
+      }
+
+      if (service == null) {
+        // Is necessary at least one service to generate controller
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "ERROR: You must generate a service to '%s' entity before to generate a new controller.",
+                        entity.getFullyQualifiedTypeName()));
+        return;
+      }
+    }
 
     // Validate that provided responseType exists and is installed
     Validate.isTrue(getInstalledControllerMVCResponseTypes().containsValue(responseType),

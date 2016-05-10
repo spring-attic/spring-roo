@@ -26,6 +26,7 @@ import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProv
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -322,7 +323,8 @@ public class ControllerCommands implements CommandMarker {
    */
   @CliOptionMandatoryIndicator(params = "service", command = "web mvc controller")
   public boolean isServiceParameterMandatory(ShellContext context) {
-    if (context.getParameters().containsKey("entity")) {
+    if (context.getParameters().containsKey("entity")
+        && getProjectOperations().isMultimoduleProject()) {
       return true;
     }
     return false;
@@ -531,7 +533,7 @@ public class ControllerCommands implements CommandMarker {
       command = "web mvc controller",
       param = "controller",
       help = "Option controller must have an existing controller value. Please, assign it a right value.",
-      validate = false)
+      validate = false, includeSpaceOnFinish = false)
   public List<String> returnControllerValues(ShellContext shellContext) {
 
     // Get current value of class
@@ -539,6 +541,15 @@ public class ControllerCommands implements CommandMarker {
 
     // Create results to return
     List<String> results = new ArrayList<String>();
+
+    // Add all modules to completions list
+    Collection<String> modules = getProjectOperations().getModuleNames();
+    for (String module : modules) {
+      if (StringUtils.isNotBlank(module)
+          && !module.equals(getProjectOperations().getFocusedModule().getModuleName())) {
+        results.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+      }
+    }
 
     // Get controller full qualified names
     Set<ClassOrInterfaceTypeDetails> controllers =
@@ -550,6 +561,9 @@ public class ControllerCommands implements CommandMarker {
         results.add(name);
       }
     }
+
+    // Always add base package
+    results.add("~.");
 
     return results;
   }
@@ -567,6 +581,10 @@ public class ControllerCommands implements CommandMarker {
     // Get current value of class
     String currentText = shellContext.getParameters().get("service");
 
+    // Getting provided entity
+    String entity = shellContext.getParameters().get("entity");
+    JavaType entityType = getJavaTypeConverter().convertFromText(entity, JavaType.class, "");
+
     // Create results to return
     List<String> results = new ArrayList<String>();
 
@@ -575,9 +593,16 @@ public class ControllerCommands implements CommandMarker {
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_SERVICE);
     for (ClassOrInterfaceTypeDetails service : services) {
-      String name = replaceTopLevelPackageString(service, currentText);
-      if (!results.contains(name)) {
-        results.add(name);
+
+      // Autocomplete with services related to specified entity
+      AnnotationAttributeValue<JavaType> entityAttr =
+          service.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+
+      if (entityAttr != null && entityAttr.getValue().equals(entityType)) {
+        String name = replaceTopLevelPackageString(service, currentText);
+        if (!results.contains(name)) {
+          results.add(name);
+        }
       }
     }
 

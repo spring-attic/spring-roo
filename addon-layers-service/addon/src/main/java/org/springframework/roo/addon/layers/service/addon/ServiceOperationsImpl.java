@@ -173,14 +173,15 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     if (interfaceType == null) {
       interfaceType =
-          new JavaType(String.format("%s.%sService", domainType.getPackage(),
-              domainType.getSimpleTypeName()), domainType.getModule());
+          new JavaType(String.format("%s.%sService", implType == null ? domainType.getPackage()
+              : implType.getPackage(), domainType.getSimpleTypeName()),
+              implType == null ? domainType.getModule() : implType.getModule());
     }
 
     if (implType == null) {
       implType =
-          new JavaType(String.format("%s.%sServiceImpl", domainType.getPackage(),
-              domainType.getSimpleTypeName()), domainType.getModule());
+          new JavaType(String.format("%s.%sServiceImpl", interfaceType.getPackage(),
+              domainType.getSimpleTypeName()), interfaceType.getModule());
     }
 
 

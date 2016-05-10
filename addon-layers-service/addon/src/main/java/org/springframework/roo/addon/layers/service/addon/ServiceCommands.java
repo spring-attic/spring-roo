@@ -82,31 +82,24 @@ public class ServiceCommands implements CommandMarker {
 
   @CliOptionVisibilityIndicator(
       command = "service",
-      params = {"interface", "class"},
-      help = "--interface and --class parameters are not available if you don't specify --entity or --repository parameters")
+      params = {"interface", "class", "repository"},
+      help = "--repository, --interface and --class parameters are not available if you don't specify --entity parameter")
   public boolean areIterfaceAndClassVisible(ShellContext shellContext) {
 
     // Get all defined parameters
     Map<String, String> parameters = shellContext.getParameters();
 
     // If --entity and --repository have been defined, show --class and --interface parameters
-    if (parameters.containsKey("entity") && StringUtils.isNotBlank(parameters.get("entity"))
-        && parameters.containsKey("repository")
-        && StringUtils.isNotBlank(parameters.get("repository"))) {
+    if (parameters.containsKey("entity") && StringUtils.isNotBlank(parameters.get("entity"))) {
       return true;
     }
     return false;
   }
 
-  @CliOptionVisibilityIndicator(command = "service", params = "repository",
-      help = "--repository parameter is not available if you don't specify --entity parameter")
-  public boolean isRepositoryVisible(ShellContext shellContext) {
-
-    // Get all defined parameters
-    Map<String, String> parameters = shellContext.getParameters();
-
-    // If --entity has been defined, show --class parameter
-    if (parameters.containsKey("entity") && StringUtils.isNotBlank(parameters.get("entity"))) {
+  @CliOptionMandatoryIndicator(command = "service", params = "repository")
+  public boolean isRepositoryParameterMandatory(ShellContext shellContext) {
+    if (shellContext.getParameters().containsKey("entity")
+        && projectOperations.isMultimoduleProject()) {
       return true;
     }
     return false;
@@ -265,7 +258,7 @@ public class ServiceCommands implements CommandMarker {
           help = "Indicates if developer wants to generate service interfaces and their implementations for every entity of current project ") boolean all,
       @CliOption(key = "entity", optionContext = PROJECT, mandatory = false,
           help = "The domain entity this service should expose") final JavaType domainType,
-      @CliOption(key = "repository", optionContext = PROJECT, mandatory = false,
+      @CliOption(key = "repository", optionContext = PROJECT, mandatory = true,
           help = "The repository this service should expose") final JavaType repositoryType,
       @CliOption(key = "interface", mandatory = false,
           help = "The service interface to be generated") final JavaType interfaceType,
@@ -375,7 +368,7 @@ public class ServiceCommands implements CommandMarker {
           @CliOption(key = "authorizedRoles", mandatory = false, help = "The role authorized the use the methods in the service") final String role,
           @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator,
           @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
-
+  
       if (classType == null) {
           classType = new JavaType(interfaceType.getFullyQualifiedTypeName()
                   + "Impl");
@@ -387,7 +380,7 @@ public class ServiceCommands implements CommandMarker {
               requireAuthentication, role, usePermissionEvaluator,
               useXmlConfiguration);
   }
-
+  
   @CliCommand(value = "service secure all", help = "Adds @RooService annotation to all entities with options for authentication, authorization, and a permission evaluator")
   public void secureServiceAll(
           @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
@@ -396,7 +389,7 @@ public class ServiceCommands implements CommandMarker {
           @CliOption(key = "authorizedRole", mandatory = false, help = "The role authorized the use the methods in the service (additional roles can be added after creation)") final String role,
           @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator,
           @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
-
+  
       if (classPackage == null) {
           classPackage = interfacePackage;
       }
