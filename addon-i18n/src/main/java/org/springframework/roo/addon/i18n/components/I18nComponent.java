@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.views.i18n;
+package org.springframework.roo.addon.i18n.components;
 
 import java.util.Collections;
 import java.util.HashSet;

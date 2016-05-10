@@ -2,20 +2,17 @@ package org.springframework.roo.addon.web.mvc.views;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.jvnet.inflector.Noun;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
+import org.springframework.roo.addon.i18n.I18nOperations;
+import org.springframework.roo.addon.i18n.I18nOperationsImpl;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
-import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -32,10 +29,8 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
-import org.springframework.roo.support.util.XmlUtils;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
@@ -67,6 +62,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
   private ProjectOperations projectOperations;
   private PropFilesManagerService propFilesManagerService;
+  private I18nOperationsImpl i18nOperationsImpl;
 
   /**
    * This operation returns the MVCViewGenerationService that should be used
@@ -177,7 +173,8 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     viewGenerationService.updateMenuView(this.controller.getType().getModule(), ctx);
 
     // Update i18n labels
-    updateI18n(entityDetails);
+    getI18nOperationsImpl().updateI18n(entityDetails, this.entity,
+        this.controller.getType().getModule());
 
     // Register dependency between JavaBeanMetadata and this one
     final LogicalPath logicalPath =
@@ -189,48 +186,6 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
     return createMetadataInstance();
-  }
-
-  /**
-   * Adds the entity properties as labels into i18n messages file 
-   * 
-   * @param entityDetails member details where entity properties are defined
-   */
-  private void updateI18n(MemberDetails entityDetails) {
-
-    final Map<String, String> properties = new LinkedHashMap<String, String>();
-
-    final LogicalPath webappPath =
-        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, controller.getType().getModule());
-
-    final String entityName = entity.getSimpleTypeName();
-
-    properties.put(FieldItem.buildLabel(entityName, ""), new JavaSymbolName(entity
-        .getSimpleTypeName().toLowerCase()).getReadableSymbolName());
-
-    final String pluralResourceId = FieldItem.buildLabel(entity.getSimpleTypeName(), "plural");
-    final String plural = Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH);
-    properties.put(pluralResourceId, new JavaSymbolName(plural).getReadableSymbolName());
-
-    final List<FieldMetadata> javaTypePersistenceMetadataDetails =
-        getPersistenceMemberLocator().getIdentifierFields(entity);
-
-    if (!javaTypePersistenceMetadataDetails.isEmpty()) {
-      for (final FieldMetadata idField : javaTypePersistenceMetadataDetails) {
-        properties.put(FieldItem.buildLabel(entityName, idField.getFieldName().getSymbolName()),
-            idField.getFieldName().getReadableSymbolName());
-      }
-    }
-
-    for (final FieldMetadata field : entityDetails.getFields()) {
-      final String fieldResourceId =
-          FieldItem.buildLabel(entityName, field.getFieldName().getSymbolName());
-
-      properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
-    }
-
-    getPropFilesManager().addProperties(webappPath, "messages.properties", properties, true, false);
-
   }
 
   protected void registerDependency(final String upstreamDependency,
@@ -338,6 +293,29 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       }
     } else {
       return propFilesManagerService;
+    }
+  }
+
+  public I18nOperationsImpl getI18nOperationsImpl() {
+    if (i18nOperationsImpl == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(I18nOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          i18nOperationsImpl = (I18nOperationsImpl) this.context.getService(ref);
+          return i18nOperationsImpl;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on AbstractViewGeneratorMetadataProvider.");
+        return null;
+      }
+    } else {
+      return i18nOperationsImpl;
     }
   }
 

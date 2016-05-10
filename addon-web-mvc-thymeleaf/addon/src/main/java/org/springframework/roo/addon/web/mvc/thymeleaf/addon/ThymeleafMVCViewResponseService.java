@@ -2,7 +2,6 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,6 +15,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.springframework.roo.addon.i18n.I18nOperations;
+import org.springframework.roo.addon.i18n.languages.EnglishLanguage;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
@@ -71,6 +72,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   private PathResolver pathResolver;
   private FileManager fileManager;
   private MVCViewGenerationService viewGenerationService;
+  private I18nOperations i18nOperations;
 
   /**
    * This operation returns the Feature name. In this case,
@@ -209,38 +211,8 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addSession(module.getModuleName(), ctx);
     getViewGenerationService().addSessionLinks(module.getModuleName(), ctx);
 
-    // Add i18n support
-    installI18n(module);
-  }
-
-  /**
-   * Create i18n message file with default labels
-   * 
-   * @param module module where message file will be created
-   */
-  private void installI18n(Pom module) {
-
-    LogicalPath resourcesPath =
-        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
-
-    final String messagesPath =
-        getPathResolver().getIdentifier(resourcesPath, "messages.properties");
-
-    if (!fileManager.exists(messagesPath)) {
-      InputStream inputStream = null;
-      OutputStream outputStream = null;
-      try {
-        inputStream = FileUtils.getInputStream(getClass(), "messages-template.properties");
-        outputStream = fileManager.createFile(messagesPath).getOutputStream();
-        IOUtils.copy(inputStream, outputStream);
-      } catch (final Exception e) {
-        throw new IllegalStateException(
-            "Error: Encountered an error copying the massages.properties file.");
-      } finally {
-        IOUtils.closeQuietly(inputStream);
-        IOUtils.closeQuietly(outputStream);
-      }
-    }
+    // Add i18n support for english language
+    getI18nOperations().installI18n(new EnglishLanguage(), module);
   }
 
   /**
@@ -927,6 +899,29 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
       }
     } else {
       return viewGenerationService;
+    }
+  }
+
+  public I18nOperations getI18nOperations() {
+    if (i18nOperations == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(I18nOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          i18nOperations = (I18nOperations) this.context.getService(ref);
+          return i18nOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on ThymeleafMvcViewResponseService.");
+        return null;
+      }
+    } else {
+      return i18nOperations;
     }
   }
 }

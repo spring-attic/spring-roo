@@ -8,10 +8,10 @@
 		<version>2.0.0.BUILD-SNAPSHOT</version>
 		<relativePath>../runtime/osgi-bundle</relativePath>
 	</parent>
-	<artifactId>org.springframework.roo.addon.web.mvc.views</artifactId>
+	<artifactId>org.springframework.roo.addon.i18n</artifactId>
 	<packaging>bundle</packaging>
-	<name>Spring Roo - Addon - Web MVC Views</name>
-	<description>Provides all necessary elements to allow to generate new views.</description>
+	<name>Spring Roo - Addon - I18n</name>
+	<description>Provides language support to presentation layer</description>
 	<dependencies>
 		<!-- OSGi -->
 		<dependency>
@@ -32,7 +32,7 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.classpath</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.file.monitor</artifactId>
         </dependency>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.process.manager</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.project</artifactId>
@@ -60,23 +60,19 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.i18n</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.web.mvc.controller.addon</artifactId>
         </dependency>
 		<!-- Template Engines Bundles -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.freemarker</artifactId>
-		</dependency>
+		</dependency>-->
 		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
