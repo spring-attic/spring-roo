@@ -36,6 +36,7 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -72,7 +73,7 @@ public class PushInOperationsImpl implements PushInOperations {
   }
 
   @Override
-  public void pushInAll(boolean force) {
+  public void pushInAll() {
 
     // Getting all JavaTypes on current project
     for (String moduleName : getProjectOperations().getModuleNames()) {
@@ -82,21 +83,13 @@ public class PushInOperationsImpl implements PushInOperations {
 
       for (JavaType declaredType : allDeclaredTypes) {
         // Push-in all content from .aj files to .java files
-        pushInClass(declaredType, force);
+        pushInClass(declaredType);
       }
     }
-
-    if (!force) {
-      LOGGER
-          .log(
-              Level.INFO,
-              "All these changes will be applied. Execute your previous push-in command using --force parameter to apply them.");
-    }
-
   }
 
   @Override
-  public void pushIn(JavaPackage specifiedPackage, JavaType klass, String method, boolean force) {
+  public void pushIn(JavaPackage specifiedPackage, JavaType klass, String method) {
 
     // Getting all JavaTypes on current project
     Collection<JavaType> allDeclaredTypes = new ArrayList<JavaType>();
@@ -126,7 +119,7 @@ public class PushInOperationsImpl implements PushInOperations {
             getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
         for (MethodMetadata classMethod : classMemberDetails.getMethods()) {
           if (methodMatch(classMethod.getMethodName().getSymbolName(), method)) {
-            pushInMethod(klass, classMethod, force);
+            pushInMethod(klass, classMethod);
             methodExists = true;
           }
         }
@@ -137,7 +130,7 @@ public class PushInOperationsImpl implements PushInOperations {
 
       } else {
         // If method is not specified, push-in entire class elements
-        pushInClass(klass, force);
+        pushInClass(klass);
       }
 
     } else if (specifiedPackage != null && method != null) {
@@ -153,7 +146,7 @@ public class PushInOperationsImpl implements PushInOperations {
               getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
           for (MethodMetadata classMethod : classMemberDetails.getMethods()) {
             if (methodMatch(classMethod.getMethodName().getSymbolName(), method)) {
-              pushInMethod(declaredType, classMethod, force);
+              pushInMethod(declaredType, classMethod);
               methodExists = true;
             }
           }
@@ -175,7 +168,7 @@ public class PushInOperationsImpl implements PushInOperations {
             getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
         for (MethodMetadata classMethod : classMemberDetails.getMethods()) {
           if (methodMatch(classMethod.getMethodName().getSymbolName(), method)) {
-            pushInMethod(declaredType, classMethod, force);
+            pushInMethod(declaredType, classMethod);
             methodExists = true;
           }
         }
@@ -187,30 +180,21 @@ public class PushInOperationsImpl implements PushInOperations {
     } else if (specifiedPackage != null) {
       for (JavaType declaredType : allDeclaredTypes) {
         if (declaredType.getPackage().equals(specifiedPackage)) {
-          pushInClass(declaredType, force);
+          pushInClass(declaredType);
         }
       }
     } else {
       LOGGER.log(Level.WARNING, "ERROR: You must specify at least one parameter. ");
       return;
     }
-
-    if (!force) {
-      LOGGER
-          .log(
-              Level.INFO,
-              "All these changes will be applied. Execute your previous push-in command using --force parameter to apply them.");
-    }
-
   }
 
   /**
    * Makes push-in of all items defined on a provided class
    * 
    * @param klass
-   * @param force
    */
-  public void pushInClass(JavaType klass, boolean force) {
+  public void pushInClass(JavaType klass) {
     // Check if current klass exists
     Validate
         .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
@@ -220,17 +204,18 @@ public class PushInOperationsImpl implements PushInOperations {
     Validate
         .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
 
-    // String builder where changes will be registered
-    StringBuilder changesToApply = new StringBuilder();
-
     // Getting member details
     MemberDetails memberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
+    // Check if the provided class is a test to be able to select valid class path
+    Path path =
+        classDetails.getAnnotation(RooJavaType.ROO_UNIT_TEST) == null ? Path.SRC_MAIN_JAVA
+            : Path.SRC_TEST_JAVA;
     // Getting current class .java file metadata ID
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(klass,
-            getPathResolver().getPath(klass.getModule(), Path.SRC_MAIN_JAVA));
+            getPathResolver().getPath(klass.getModule(), path));
 
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
@@ -251,11 +236,12 @@ public class PushInOperationsImpl implements PushInOperations {
       // Checking if is necessary to make push-in for all declared methods
       for (MethodMetadata method : allDeclaredMethods) {
         // If method exists on .aj file, add it!
-        if (!method.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
+        if (method.getDeclaredByMetadataId().split("\\?").length > 1
+            && method.getDeclaredByMetadataId().split("\\?")[1].equals(klass
+                .getFullyQualifiedTypeName())
+            && !method.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
           // Add method to .java file
           detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method));
-          changesToApply.append(String.format("Method '%s' will be pushed on '%s.java' class. \n",
-              method.getMethodName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -267,11 +253,12 @@ public class PushInOperationsImpl implements PushInOperations {
       // Checking if is necessary to make push-in for all declared fields
       for (FieldMetadata field : allDeclaredFields) {
         // If field exists on .aj file, add it!
-        if (!field.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
+        if (field.getDeclaredByMetadataId().split("\\?").length > 1
+            && field.getDeclaredByMetadataId().split("\\?")[1].equals(klass
+                .getFullyQualifiedTypeName())
+            && !field.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
           // Add field to .java file
           detailsBuilder.addField(getNewField(declaredByMetadataId, field));
-          changesToApply.append(String.format("Field '%s' will be pushed on '%s.java' class. \n",
-              field.getFieldName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -301,11 +288,6 @@ public class PushInOperationsImpl implements PushInOperations {
             constructorParametersNames =
                 constructorParametersNames.concat(paramName.getSymbolName()).concat(", ");
           }
-
-          changesToApply.append(String.format(
-              "Constructor with parameters '%s' will be pushed on '%s.java' class. \n",
-              constructorParametersNames.substring(0, constructorParametersNames.length() - 2),
-              klass.getSimpleTypeName()));
         }
 
       }
@@ -329,9 +311,6 @@ public class PushInOperationsImpl implements PushInOperations {
         if (!annotationExists) {
           // Add annotation to .java file
           detailsBuilder.addAnnotation(annotation);
-          changesToApply.append(String.format(
-              "Annotation '%s' will be pushed on '%s.java' class. \n", annotation
-                  .getAnnotationType().getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -341,9 +320,6 @@ public class PushInOperationsImpl implements PushInOperations {
         // If extends exists on .aj file, add it!
         if (!detailsBuilder.getExtendsTypes().contains(extendsType)) {
           detailsBuilder.addExtendsTypes(extendsType);
-          changesToApply.append(String.format(
-              "Extends type '%s' will be pushed on '%s.java' class. \n",
-              extendsType.getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -352,9 +328,6 @@ public class PushInOperationsImpl implements PushInOperations {
       for (JavaType implementsType : allImplementsTypes) {
         if (!detailsBuilder.getImplementsTypes().contains(implementsType)) {
           detailsBuilder.addImplementsType(implementsType);
-          changesToApply.append(String.format(
-              "Implements type '%s' will be pushed on '%s.java' class. \n",
-              implementsType.getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -365,15 +338,7 @@ public class PushInOperationsImpl implements PushInOperations {
     }
 
     // Updating .java file
-    if (!force) {
-      // Show message to be able to know which changes will be applied
-      if (changesToApply.length() > 0) {
-        LOGGER.log(Level.INFO, changesToApply.toString());
-      }
-    } else {
-      getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
-    }
-
+    getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
   }
 
   /**
@@ -381,9 +346,8 @@ public class PushInOperationsImpl implements PushInOperations {
    * 
    * @param klass
    * @param method
-   * @param force
    */
-  public void pushInMethod(JavaType klass, MethodMetadata method, boolean force) {
+  public void pushInMethod(JavaType klass, MethodMetadata method) {
     // Check if current klass exists
     Validate
         .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
@@ -395,17 +359,19 @@ public class PushInOperationsImpl implements PushInOperations {
 
     Validate.notNull(method, "ERROR: You must provide a valid method");
 
-    // String builder where changes will be registered
-    StringBuilder changesToApply = new StringBuilder();
-
     // Getting member details
     MemberDetails memberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
+    // Check if the provided class is a test to be able to select valid class path
+    Path path =
+        classDetails.getAnnotation(RooJavaType.ROO_UNIT_TEST) == null ? Path.SRC_MAIN_JAVA
+            : Path.SRC_TEST_JAVA;
+
     // Getting current class .java file metadata ID
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(klass,
-            getPathResolver().getPath(klass.getModule(), Path.SRC_MAIN_JAVA));
+            getPathResolver().getPath(klass.getModule(), path));
 
     // Getting detailsBuilder
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
@@ -430,8 +396,6 @@ public class PushInOperationsImpl implements PushInOperations {
             && declaredMethod.equals(method)) {
           // Add method to .java file
           detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method));
-          changesToApply.append(String.format("Method '%s' will be pushed on '%s.java' class.",
-              declaredMethod.getMethodName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -442,14 +406,7 @@ public class PushInOperationsImpl implements PushInOperations {
     }
 
     // Updating .java file
-    if (!force) {
-      // Show message to be able to know which changes will be applied
-      if (changesToApply.length() > 0) {
-        LOGGER.log(Level.INFO, changesToApply.toString());
-      }
-    } else {
-      getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
-    }
+    getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
 
   }
 

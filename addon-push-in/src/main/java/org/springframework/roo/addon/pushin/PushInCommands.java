@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.pushin;
 
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -8,13 +12,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -33,8 +47,21 @@ public class PushInCommands implements CommandMarker {
 
   private static final Logger LOGGER = HandlerUtils.getLogger(PushInCommands.class);
 
+  //------------ OSGi component attributes ----------------
+  private BundleContext context;
+
   @Reference
   private PushInOperations pushInOperations;
+  @Reference
+  private TypeLocationService typeLocationService;
+  @Reference
+  private MemberDetailsScanner memberDetailsScanner;
+
+  private Converter<JavaType> javaTypeConverter;
+
+  protected void activate(final ComponentContext context) {
+    this.context = context.getBundleContext();
+  }
 
   /**
    * Method that checks if push-in operation is available or not.
@@ -96,7 +123,56 @@ public class PushInCommands implements CommandMarker {
     }
 
     return true;
+  }
 
+  /**
+   * Method that returns all defined methods for provided class on --class parameter.
+   * 
+   * @param context context
+   *            ShellContext used to obtain specified parameters
+   * @return List with available methods. Empty List if class has not been specified.
+   */
+  @CliOptionAutocompleteIndicator(command = "push-in", param = "method", validate = false,
+      help = "Provides possible methods names if some class parameter has been specified")
+  public List<String> getAllPossibleMethods(ShellContext context) {
+    List<String> allPossibleMethods = new ArrayList<String>();
+
+    // Getting all introduces parameters
+    Map<String, String> specifiedParameters = context.getParameters();
+
+    // Check if class parameter has been specified
+    if (specifiedParameters.containsKey("class")) {
+      String specifiedClass = specifiedParameters.get("class");
+      JavaType klass =
+          getJavaTypeConverter().convertFromText(specifiedClass, JavaType.class, PROJECT);
+
+      // TODO: Class details should be cached to prevent load MemberDetails everytime. 
+      // The problem is that if some element is cached, and then, new  method is added 
+      // to .aj file, this parameter will not autocomplete it.
+      MemberDetails klassDetails =
+          memberDetailsScanner.getMemberDetails(getClass().getName(),
+              typeLocationService.getTypeDetails(klass));
+
+      if (klassDetails != null) {
+        List<MethodMetadata> definedMethods = klassDetails.getMethods();
+
+        for (MethodMetadata method : definedMethods) {
+          // Check if method has been defined on current class and check
+          // if current method has been pushed before.
+          String declaredByMetadataID = method.getDeclaredByMetadataId();
+          if (StringUtils.isNotBlank(declaredByMetadataID)
+              && declaredByMetadataID.split("\\?").length > 1
+              && declaredByMetadataID.split("\\#").length > 0
+              && !declaredByMetadataID.split("\\#")[0]
+                  .equals("MID:org.springframework.roo.classpath.PhysicalTypeIdentifier")
+              && declaredByMetadataID.split("\\?")[1].equals(klass.getFullyQualifiedTypeName())) {
+            allPossibleMethods.add(method.getMethodName().getSymbolName());
+          }
+        }
+      }
+    }
+
+    return allPossibleMethods;
   }
 
   /**
@@ -119,7 +195,7 @@ public class PushInCommands implements CommandMarker {
    * @param method
    *            String with the specified name of the method that
    *            developer wants to push-in
-   * @param context
+   * @param shellContext
    *            ShellContext used to know if --force parameter has been used by developer
    *    
    */
@@ -140,7 +216,7 @@ public class PushInCommands implements CommandMarker {
           key = "method",
           mandatory = false,
           help = "String with the specified name of the method that developer wants to push-in. You could use a Regular Expression to make push-in of more than one method on the same execution.") String method,
-      ShellContext context) {
+      ShellContext shellContext) {
 
     // Developer must specify at least one parameter
     if (all == null && specifiedPackage == null && klass == null && method == null) {
@@ -154,13 +230,46 @@ public class PushInCommands implements CommandMarker {
       return;
     }
 
-    // Check if developer wants to apply push-in on every component of generated project
-    if (all != null) {
-      pushInOperations.pushInAll(context.isForce());
-    } else {
-      pushInOperations.pushIn(specifiedPackage, klass, method, context.isForce());
+    if (method == null && shellContext.getParameters().get("method") != null) {
+      LOGGER
+          .log(Level.WARNING,
+              "ERROR: You must provide a valid value (method name or Regular Expression) on --method parameter.");
+      return;
     }
 
+    // Check if developer wants to apply push-in on every component of generated project
+    if (all != null) {
+      pushInOperations.pushInAll();
+    } else {
+      pushInOperations.pushIn(specifiedPackage, klass, method);
+    }
+
+  }
+
+  public Converter<JavaType> getJavaTypeConverter() {
+    if (javaTypeConverter == null) {
+      // Get all Services implement JavaTypeConverter interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(Converter.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          Converter<?> converter = (Converter<?>) this.context.getService(ref);
+          if (converter.supports(JavaType.class, PROJECT)) {
+            javaTypeConverter = (Converter<JavaType>) converter;
+            return javaTypeConverter;
+          }
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("ERROR: Cannot load JavaTypeConverter on FinderCommands.");
+        return null;
+      }
+    } else {
+      return javaTypeConverter;
+    }
   }
 
 

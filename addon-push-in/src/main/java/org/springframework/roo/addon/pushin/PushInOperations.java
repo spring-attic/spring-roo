@@ -24,10 +24,8 @@ public interface PushInOperations {
    * Method that push-in all methods, fields, annotations, imports, extends, etc.. declared 
    * on project ITDs to its .java files.
    * 
-   * @param force 
-   *            boolean used to know if --force parameter has been used by developer
    */
-  void pushInAll(boolean force);
+  void pushInAll();
 
   /**
    * Method that push-in all methods, fields, annotations, imports, extends, etc.. declared on 
@@ -43,9 +41,6 @@ public interface PushInOperations {
    * @param method
    *            String with the specified name of the method that
    *            developer wants to push-in
-   * @param force
-   *            boolean used to know if --force parameter has been used by developer
-   *    
    */
-  void pushIn(JavaPackage specifiedPackage, JavaType klass, String method, boolean force);
+  void pushIn(JavaPackage specifiedPackage, JavaType klass, String method);
 }

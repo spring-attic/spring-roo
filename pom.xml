@@ -46,8 +46,8 @@
         <module>addon-layers-service</module>
         <module>addon-layers-repository-jpa</module>
         <module>addon-oscommands</module>
-	    <module>addon-push-in</module>
-	    <module>addon-field</module>
+	      <module>addon-push-in</module>
+	      <module>addon-field</module>
         <module>annotations</module>
         <!-- Web UI -->
         <module>web-ui</module>
