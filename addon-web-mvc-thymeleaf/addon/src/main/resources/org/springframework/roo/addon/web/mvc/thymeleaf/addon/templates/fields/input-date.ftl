@@ -4,7 +4,7 @@
   <label for="${fieldName}" class="col-md-3 control-label" 
     data-th-text="${r"#{"}${label}${r"}"}">${fieldName}</label>
   <div class="col-md-3">
-    <input id="${fieldName}" data-th-field="*{${fieldName}}" type="text" class="form-control datetimepicker"
+    <input id="${fieldName}" name="${fieldName}" data-th-value="*{{${fieldName}}}" type="text" class="form-control datetimepicker"
       placeholder="${fieldName}"
       data-th-placeholder="${r"#{"}${label}${r"}"}"
       data-toggle="tooltip"/> <span
