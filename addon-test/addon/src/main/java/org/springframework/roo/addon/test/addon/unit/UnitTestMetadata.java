@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.details.comments.CommentStructure.Comme
 import org.springframework.roo.classpath.details.comments.JavadocComment;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
@@ -79,11 +80,13 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
   private final AnnotationMetadata ignoreAnnotation;
   private ClassOrInterfaceTypeDetails targetTypeDetails;
   private List<String> methodNames;
+  private MemberDetails memberDetails;
 
   public UnitTestMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final UnitTestAnnotationValues annotationValues, List<FieldMetadata> fieldDependencies,
-      List<MethodMetadata> methods, ClassOrInterfaceTypeDetails targetTypeDetails) {
+      List<MethodMetadata> methods, ClassOrInterfaceTypeDetails targetTypeDetails,
+      MemberDetails memberDetails) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
@@ -91,6 +94,7 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
     this.targetType = annotationValues.getTargetClass();
     this.targetTypeDetails = targetTypeDetails;
+    this.memberDetails = memberDetails;
     this.importResolver = builder.getImportRegistrationResolver();
     this.methodNames = new ArrayList<String>();
 
@@ -236,7 +240,7 @@ public class UnitTestMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     // this.targetType = new TargetType();
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     if (!targetTypeDetails.isInterface() && !targetTypeDetails.isAbstract()
-        && targetTypeDetails.getDeclaredConstructors().size() == 0) {
+        && memberDetails.getConstructors().size() == 0) {
       bodyBuilder.appendFormalLine(String.format("this.%s = new %s();",
           StringUtils.uncapitalize(targetType.getSimpleTypeName()),
           targetType.getNameIncludingTypeParameters(false, importResolver)));

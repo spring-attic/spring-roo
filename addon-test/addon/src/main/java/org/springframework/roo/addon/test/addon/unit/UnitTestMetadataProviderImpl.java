@@ -143,7 +143,8 @@ public class UnitTestMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
     }
 
     return new UnitTestMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, fieldDependencies, methods, cid);
+        governorPhysicalTypeMetadata, annotationValues, fieldDependencies, methods, cid,
+        getMemberDetails(cid));
   }
 
   public String getProvidesType() {
