@@ -19,6 +19,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
+import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
+import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.addon.web.mvc.views.components.FieldTypes;
 import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
@@ -60,6 +63,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   private FileManager fileManager;
   private PersistenceMemberLocator persistenceMemberLocator;
   private MemberDetailsScanner memberDetailsScanner;
+  private I18nOperationsImpl i18nOperationsImpl;
 
   // ------------ OSGi component attributes ----------------
   protected BundleContext context;
@@ -319,6 +323,12 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     }
 
     ctx.addExtraParameter("menuEntries", menuEntries);
+    
+    // Add installed languages
+    List<I18n> installedLanguages = getI18nOperationsImpl().getInstalledLanguages(moduleName);
+    for (I18n language : installedLanguages) {
+      ctx.addLanguage(language.getLanguage(), language.getLocale().getLanguage());
+    }
 
     // Process elements to generate 
     DOC newDoc = process("fragments/menu", ctx);
@@ -813,6 +823,29 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       }
     } else {
       return memberDetailsScanner;
+    }
+  }
+  
+  public I18nOperationsImpl getI18nOperationsImpl() {
+    if (i18nOperationsImpl == null) {
+      // Get all Services implement ProjectOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(I18nOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          i18nOperationsImpl = (I18nOperationsImpl) this.context.getService(ref);
+          return i18nOperationsImpl;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ProjectOperations on AbstractViewGeneratorMetadataProvider.");
+        return null;
+      }
+    } else {
+      return i18nOperationsImpl;
     }
   }
 }

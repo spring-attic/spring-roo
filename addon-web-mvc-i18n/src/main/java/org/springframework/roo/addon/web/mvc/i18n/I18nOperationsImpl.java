@@ -23,6 +23,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18nSupport;
+import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -157,9 +158,6 @@ public class I18nOperationsImpl implements I18nOperations {
         updateI18n(entityDetails, entity, controller.getType().getModule());
       }
     }
-
-    // TODO: Add flags to views via ViewContext
-
   }
 
   /**
@@ -237,7 +235,7 @@ public class I18nOperationsImpl implements I18nOperations {
     // Else, is necessary to concat fieldName to generate full field label
     return XmlUtils.convertId(entityLabel.concat(".").concat(fieldName.toLowerCase()));
   }
-  
+
   /**
    * Return a list of installed languages in the provided application module.
    * 
@@ -245,13 +243,13 @@ public class I18nOperationsImpl implements I18nOperations {
    * @return a list with the available languages.
    */
   public List<I18n> getInstalledLanguages(String moduleName) {
-    
+
     final LogicalPath resourcesPath = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
     final String targetDirectory = getPathResolver().getIdentifier(resourcesPath, "");
-    
+
     // Create list for installed languages
     List<I18n> installedLanguages = new ArrayList<I18n>();
-   
+
     // Get all available languages
     Set<I18n> supportedLanguages = getI18nSupport().getSupportedLanguages();
     for (I18n i18n : supportedLanguages) {
@@ -265,7 +263,10 @@ public class I18nOperationsImpl implements I18nOperations {
         installedLanguages.add(i18n);
       }
     }
-    
+
+    // Always add english language as default
+    installedLanguages.add(new EnglishLanguage());
+
     return installedLanguages;
   }
 

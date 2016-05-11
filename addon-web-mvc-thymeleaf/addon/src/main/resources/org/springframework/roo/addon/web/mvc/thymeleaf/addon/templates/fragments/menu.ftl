@@ -55,8 +55,9 @@
                 <!-- Content replaced by the session template fragment session-links.html -->
                 <span>User session data</span>
               </div>
-
+	        
            </div>
+           
 
           </div>
         </nav>
