@@ -73,7 +73,7 @@ public class PushInOperationsImpl implements PushInOperations {
   }
 
   @Override
-  public void pushInAll() {
+  public void pushInAll(boolean force) {
 
     // Getting all JavaTypes on current project
     for (String moduleName : getProjectOperations().getModuleNames()) {
@@ -83,8 +83,15 @@ public class PushInOperationsImpl implements PushInOperations {
 
       for (JavaType declaredType : allDeclaredTypes) {
         // Push-in all content from .aj files to .java files
-        pushInClass(declaredType);
+        pushInClass(declaredType, force);
       }
+    }
+
+    if (!force) {
+      LOGGER
+          .log(
+              Level.INFO,
+              "All these changes will be applied. Execute your previous push-in command using --force parameter to apply them.");
     }
   }
 
@@ -130,7 +137,7 @@ public class PushInOperationsImpl implements PushInOperations {
 
       } else {
         // If method is not specified, push-in entire class elements
-        pushInClass(klass);
+        pushInClass(klass, true);
       }
 
     } else if (specifiedPackage != null && method != null) {
@@ -180,7 +187,7 @@ public class PushInOperationsImpl implements PushInOperations {
     } else if (specifiedPackage != null) {
       for (JavaType declaredType : allDeclaredTypes) {
         if (declaredType.getPackage().equals(specifiedPackage)) {
-          pushInClass(declaredType);
+          pushInClass(declaredType, true);
         }
       }
     } else {
@@ -193,8 +200,9 @@ public class PushInOperationsImpl implements PushInOperations {
    * Makes push-in of all items defined on a provided class
    * 
    * @param klass
+   * @param force
    */
-  public void pushInClass(JavaType klass) {
+  public void pushInClass(JavaType klass, boolean force) {
     // Check if current klass exists
     Validate
         .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
@@ -203,6 +211,9 @@ public class PushInOperationsImpl implements PushInOperations {
     ClassOrInterfaceTypeDetails classDetails = getTypeLocationService().getTypeDetails(klass);
     Validate
         .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
+
+    // String builder where changes will be registered
+    StringBuilder changesToApply = new StringBuilder();
 
     // Getting member details
     MemberDetails memberDetails =
@@ -242,6 +253,8 @@ public class PushInOperationsImpl implements PushInOperations {
             && !method.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
           // Add method to .java file
           detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method));
+          changesToApply.append(String.format("Method '%s' will be pushed on '%s.java' class. \n",
+              method.getMethodName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -259,6 +272,8 @@ public class PushInOperationsImpl implements PushInOperations {
             && !field.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
           // Add field to .java file
           detailsBuilder.addField(getNewField(declaredByMetadataId, field));
+          changesToApply.append(String.format("Field '%s' will be pushed on '%s.java' class. \n",
+              field.getFieldName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -287,6 +302,10 @@ public class PushInOperationsImpl implements PushInOperations {
           for (JavaSymbolName paramName : constructor.getParameterNames()) {
             constructorParametersNames =
                 constructorParametersNames.concat(paramName.getSymbolName()).concat(", ");
+            changesToApply.append(String.format(
+                "Constructor with parameters '%s' will be pushed on '%s.java' class. \n",
+                constructorParametersNames.substring(0, constructorParametersNames.length() - 2),
+                klass.getSimpleTypeName()));
           }
         }
 
@@ -311,6 +330,9 @@ public class PushInOperationsImpl implements PushInOperations {
         if (!annotationExists) {
           // Add annotation to .java file
           detailsBuilder.addAnnotation(annotation);
+          changesToApply.append(String.format(
+              "Annotation '%s' will be pushed on '%s.java' class. \n", annotation
+                  .getAnnotationType().getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -320,6 +342,9 @@ public class PushInOperationsImpl implements PushInOperations {
         // If extends exists on .aj file, add it!
         if (!detailsBuilder.getExtendsTypes().contains(extendsType)) {
           detailsBuilder.addExtendsTypes(extendsType);
+          changesToApply.append(String.format(
+              "Extends type '%s' will be pushed on '%s.java' class. \n",
+              extendsType.getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -328,6 +353,9 @@ public class PushInOperationsImpl implements PushInOperations {
       for (JavaType implementsType : allImplementsTypes) {
         if (!detailsBuilder.getImplementsTypes().contains(implementsType)) {
           detailsBuilder.addImplementsType(implementsType);
+          changesToApply.append(String.format(
+              "Implements type '%s' will be pushed on '%s.java' class. \n",
+              implementsType.getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
@@ -338,7 +366,14 @@ public class PushInOperationsImpl implements PushInOperations {
     }
 
     // Updating .java file
-    getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
+    if (!force) {
+      // Show message to be able to know which changes will be applied
+      if (changesToApply.length() > 0) {
+        LOGGER.log(Level.INFO, changesToApply.toString());
+      }
+    } else {
+      getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
+    }
   }
 
   /**

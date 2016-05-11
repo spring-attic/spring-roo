@@ -239,7 +239,7 @@ public class PushInCommands implements CommandMarker {
 
     // Check if developer wants to apply push-in on every component of generated project
     if (all != null) {
-      pushInOperations.pushInAll();
+      pushInOperations.pushInAll(shellContext.isForce());
     } else {
       pushInOperations.pushIn(specifiedPackage, klass, method);
     }
