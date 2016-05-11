@@ -95,8 +95,8 @@ public class I18nOperationsImpl implements I18nOperations {
       return;
     }
 
-    LogicalPath resourcesPath =
-        getPathResolver().getPath(module.getModuleName(), Path.SRC_MAIN_RESOURCES);
+    final LogicalPath resourcesPath =
+        LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, module.getModuleName());
 
     final String targetDirectory = getPathResolver().getIdentifier(resourcesPath, "");
 
