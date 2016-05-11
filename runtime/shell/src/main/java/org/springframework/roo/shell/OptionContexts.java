@@ -16,6 +16,13 @@ public final class OptionContexts {
 
   /**
    * If this string appears in an option context, a {@link Converter} will
+   * return only enum types appearing in any module of the user's
+   * project.
+   */
+  public static final String ENUMERATION = "enumeration";
+
+  /**
+   * If this string appears in an option context, a {@link Converter} will
    * return types appearing in any module of the user's project.
    */
   public static final String PROJECT = "project";

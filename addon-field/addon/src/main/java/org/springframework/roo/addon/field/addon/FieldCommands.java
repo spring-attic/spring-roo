@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.field.addon;
 
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
+import static org.springframework.roo.shell.OptionContexts.ENUMERATION;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
@@ -423,7 +424,8 @@ public class FieldCommands implements CommandMarker {
       help = "Adds a private enum field to an existing Java source file")
   public void addFieldEnum(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-      @CliOption(key = "type", mandatory = true, help = "The enum type of this field") final JavaType fieldType,
+      @CliOption(key = "type", mandatory = true, optionContext = ENUMERATION,
+          help = "The enum type of this field") final JavaType fieldType,
       @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "column", mandatory = true, help = "The JPA @Column name") final String column,

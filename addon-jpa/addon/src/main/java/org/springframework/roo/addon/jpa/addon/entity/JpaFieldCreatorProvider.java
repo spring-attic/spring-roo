@@ -684,6 +684,10 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       JavaSymbolName fieldName, String column, boolean notNull, boolean nullRequired,
       EnumType enumType, String comment, boolean permitReservedWords, boolean transientModifier) {
 
+    ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getTypeDetails(fieldType);
+    Validate.isTrue(typeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,
+        "The field type is not an enum class.");
+
     final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
     final EnumField fieldDetails = new EnumField(physicalTypeIdentifier, fieldType, fieldName);
     if (column != null) {

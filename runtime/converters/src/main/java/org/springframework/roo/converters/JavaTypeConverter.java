@@ -2,6 +2,7 @@ package org.springframework.roo.converters;
 
 import static org.springframework.roo.converters.JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL;
 import static org.springframework.roo.project.LogicalPath.MODULE_PATH_SEPARATOR;
+import static org.springframework.roo.shell.OptionContexts.ENUMERATION;
 import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
@@ -167,7 +168,8 @@ public class JavaTypeConverter implements Converter<JavaType> {
     existingData = StringUtils.stripToEmpty(existingData);
 
     if (StringUtils.isBlank(optionContext) || optionContext.contains(PROJECT)
-        || optionContext.contains(SUPERCLASS) || optionContext.contains(INTERFACE)) {
+        || optionContext.contains(SUPERCLASS) || optionContext.contains(INTERFACE)
+        || optionContext.contains(ENUMERATION)) {
       completeProjectSpecificPaths(completions, existingData, optionContext);
     }
 
@@ -212,7 +214,8 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
   private Collection<JavaType> getTypesForModule(final String optionContext, final Pom targetModule) {
     final Collection<JavaType> typesForModule = typeLocationService.getTypesForModule(targetModule);
-    if (!(optionContext.contains(SUPERCLASS) || optionContext.contains(INTERFACE))) {
+    if (!(optionContext.contains(SUPERCLASS) || optionContext.contains(INTERFACE) || optionContext
+        .contains(ENUMERATION))) {
       return typesForModule;
     }
 
@@ -221,7 +224,8 @@ public class JavaTypeConverter implements Converter<JavaType> {
       final ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getTypeDetails(javaType);
       if ((optionContext.contains(SUPERCLASS) && (Modifier.isFinal(typeDetails.getModifier()) || typeDetails
           .getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE))
-          || (optionContext.contains(INTERFACE) && typeDetails.getPhysicalTypeCategory() != PhysicalTypeCategory.INTERFACE)) {
+          || (optionContext.contains(INTERFACE) && typeDetails.getPhysicalTypeCategory() != PhysicalTypeCategory.INTERFACE)
+          || (optionContext.contains(ENUMERATION) && typeDetails.getPhysicalTypeCategory() != PhysicalTypeCategory.ENUMERATION)) {
         continue;
       }
       types.add(javaType);
