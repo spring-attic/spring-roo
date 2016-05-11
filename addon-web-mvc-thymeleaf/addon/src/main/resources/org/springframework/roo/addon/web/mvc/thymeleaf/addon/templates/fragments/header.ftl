@@ -14,8 +14,8 @@
       <div class="bg-header">
         <div class="jumbotron bg-banner">
             <div class="container">
-              <h1 class="project-name" data-th-text="${r"#{"}label_welcome${r"}"}">Hello, we are Spring Roo!</h1>
-              <h2 class="project-tagline" data-th-text="${r"#{"}info_startproject${r"}"}">Get start your next awesome project</h2>
+              <h1 class="project-name">${projectName}</h1>
+              <h2 class="project-tagline" data-th-text="${r"#{"}info_homepage_project${r"}"}">Hello, this is your home page.</h2>
             </div>
         </div>
       </div>
