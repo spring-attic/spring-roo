@@ -182,7 +182,15 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     AnnotationMetadata controllerAnnotation = controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
 
     // Getting entity and check if is a readOnly entity or not
-    this.entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
+    AnnotationAttributeValue<JavaType> entityAttr = controllerAnnotation.getAttribute("entity");
+    if (entityAttr != null) {
+      this.entity = entityAttr.getValue();
+    }
+
+    Validate.notNull(this.entity, String.format(
+        "ERROR: You should provide a valid entity for controller '%s'", this.controller.getType()
+            .getFullyQualifiedTypeName()));
+
     AnnotationMetadata entityAnnotation =
         getTypeLocationService().getTypeDetails(this.entity).getAnnotation(
             RooJavaType.ROO_JPA_ENTITY);

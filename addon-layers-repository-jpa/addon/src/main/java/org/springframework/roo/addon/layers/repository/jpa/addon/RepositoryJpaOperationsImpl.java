@@ -114,8 +114,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     Validate.notNull(domainType, "ERROR: You must specify a valid Entity. ");
 
     if (getProjectOperations().isMultimoduleProject()) {
-      Validate.notNull(interfaceType, "ERROR: You must specify an interface repository type on multimodule projects.");
-      Validate.notNull(interfaceType.getModule(), "ERROR: interfaceType module is required on multimodule projects.");
+      Validate.notNull(interfaceType,
+          "ERROR: You must specify an interface repository type on multimodule projects.");
+      Validate.notNull(interfaceType.getModule(),
+          "ERROR: interfaceType module is required on multimodule projects.");
     } else if (interfaceType == null) {
       interfaceType =
           new JavaType(String.format("%s.%sRepository", domainType.getPackage(),

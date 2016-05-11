@@ -323,7 +323,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     }
 
     ctx.addExtraParameter("menuEntries", menuEntries);
-    
+
     // Add installed languages
     List<I18n> installedLanguages = getI18nOperationsImpl().getInstalledLanguages(moduleName);
     for (I18n language : installedLanguages) {
@@ -825,7 +825,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       return memberDetailsScanner;
     }
   }
-  
+
   public I18nOperationsImpl getI18nOperationsImpl() {
     if (i18nOperationsImpl == null) {
       // Get all Services implement ProjectOperations interface

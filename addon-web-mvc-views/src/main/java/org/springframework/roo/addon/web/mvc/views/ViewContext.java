@@ -29,7 +29,7 @@ public class ViewContext {
   // View information
   private String modelAttribute;
   private String entityName;
-  
+
   // Installed languages
   private Map<String, String> languages = new HashMap<String, String>();
 
@@ -107,11 +107,11 @@ public class ViewContext {
   public void setIdentifierField(String identifierField) {
     this.identifierField = identifierField;
   }
-  
+
   public Map<String, String> getLanguages() {
     return languages;
   }
-  
+
   public void addLanguage(String key, String value) {
     this.languages.put(key, value);
   }

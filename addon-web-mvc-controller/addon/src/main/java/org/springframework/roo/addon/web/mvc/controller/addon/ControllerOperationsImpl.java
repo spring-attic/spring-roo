@@ -274,7 +274,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
     for (ClassOrInterfaceTypeDetails entity : allEntities) {
       // Check if exists yet some controller that manages this entity
       // and if current entity is not abstract
-      if (!existsControllerForEntity(entity) && !entity.isAbstract()) {
+      JavaType entityController = getControllerForEntity(entity);
+      if (entityController == null && !entity.isAbstract()) {
         // Generate controller JavaType
         JavaType controller =
             new JavaType(String.format("%s.%sController", controllersPackage
@@ -290,8 +291,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
         // Delegate on individual create controller method
         createController(controller, entity.getType(), service, path, responseType,
             formattersPackage);
+      } else if (entityController != null) {
+        // If controller exists, update it with new responseType
+        updateController(entityController, responseType);
       }
-
     }
 
   }
@@ -643,22 +646,23 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * @param entity
    * @return
    */
-  private boolean existsControllerForEntity(ClassOrInterfaceTypeDetails entity) {
+  private JavaType getControllerForEntity(ClassOrInterfaceTypeDetails entity) {
     Set<ClassOrInterfaceTypeDetails> currentControllers =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_CONTROLLER);
 
     for (ClassOrInterfaceTypeDetails controller : currentControllers) {
-      JavaType controllerEntity =
-          (JavaType) controller.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("entity")
-              .getValue();
 
-      if (entity.getType().equals(controllerEntity)) {
-        return true;
+      AnnotationAttributeValue<JavaType> entityAttr =
+          controller.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("entity");
+
+      // Getting entity
+      if (entityAttr != null && entity.getType().equals(entityAttr.getValue())) {
+        return controller.getType();
       }
     }
 
-    return false;
+    return null;
   }
 
   /**

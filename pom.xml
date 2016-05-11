@@ -40,7 +40,7 @@
         <module>addon-web-mvc-controller</module>
         <module>addon-web-mvc-views</module>
         <module>addon-web-mvc-thymeleaf</module>
-        <module>addon-i18n</module>
+        <module>addon-web-mvc-i18n</module>
         <module>addon-security</module>
         <module>addon-creator</module>
         <module>addon-layers-service</module>
