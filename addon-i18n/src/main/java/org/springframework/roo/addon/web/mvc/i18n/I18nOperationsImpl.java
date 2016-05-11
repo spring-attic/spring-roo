@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.i18n;
+package org.springframework.roo.addon.web.mvc.i18n;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,16 +20,20 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.i18n.components.I18n;
-import org.springframework.roo.addon.i18n.components.I18nSupport;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
+import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
+import org.springframework.roo.addon.web.mvc.i18n.components.I18nSupport;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -38,6 +42,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
+import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
@@ -63,6 +68,7 @@ public class I18nOperationsImpl implements I18nOperations {
   private ProjectOperations projectOperations;
   private PropFilesManagerService propFilesManagerService;
   private PersistenceMemberLocator persistenceMemberLocator;
+  private MemberDetailsScanner memberDetailsScanner;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -94,12 +100,12 @@ public class I18nOperationsImpl implements I18nOperations {
     final String targetDirectory = getPathResolver().getIdentifier(resourcesPath, "");
 
     // Install message bundle
-    String messageBundle = targetDirectory + "/messages_" + i18n.getLocale().getLanguage() /* + country */
+    String messageBundle = targetDirectory + "messages_" + i18n.getLocale().getLanguage() /* + country */
         + ".properties";
 
     // Special case for english locale (default)
     if (i18n.getLocale().equals(Locale.ENGLISH)) {
-      messageBundle = targetDirectory + "/messages.properties";
+      messageBundle = targetDirectory + "messages.properties";
     }
     if (!getFileManager().exists(messageBundle)) {
       InputStream inputStream = null;
@@ -119,7 +125,7 @@ public class I18nOperationsImpl implements I18nOperations {
 
     // Install flag
     final String flagGraphic =
-        targetDirectory + "/public/img/" + i18n.getLocale().getLanguage() /* + country */+ ".png";
+        targetDirectory + "public/img/" + i18n.getLocale().getLanguage() /* + country */+ ".png";
     if (!getFileManager().exists(flagGraphic)) {
       InputStream inputStream = null;
       OutputStream outputStream = null;
@@ -136,22 +142,24 @@ public class I18nOperationsImpl implements I18nOperations {
       }
     }
 
-    // TODO: get all controllers and update its message bundles
+    // Get all controllers and update its message bundles
+    Set<ClassOrInterfaceTypeDetails> controllers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_CONTROLLER);
+    for (ClassOrInterfaceTypeDetails controller : controllers) {
+      AnnotationMetadata controllerAnnotation =
+          controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
+      if (controllerAnnotation.getAttribute("entity") != null) {
+        JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
+        ClassOrInterfaceTypeDetails entityCid = getTypeLocationService().getTypeDetails(entity);
+        MemberDetails entityDetails =
+            getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), entityCid);
+        updateI18n(entityDetails, entity, controller.getType().getModule());
+      }
+    }
 
-    // Setup language definition in languages.jspx
-    //    final String footerFileLocation = targetDirectory + "/WEB-INF/views/footer.jspx";
-    //    final Document footer = XmlUtils.readXml(getFileManager().getInputStream(footerFileLocation));
-    //
-    //    if (XmlUtils.findFirstElement("//span[@id='language']/language[@locale='"
-    //        + i18n.getLocale().getLanguage() + "']", footer.getDocumentElement()) == null) {
-    //      final Element span =
-    //          XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
-    //      span.appendChild(new XmlElementBuilder("util:language", footer)
-    //          .addAttribute("locale", i18n.getLocale().getLanguage())
-    //          .addAttribute("label", i18n.getLanguage()).build());
-    //      getFileManager().createOrUpdateTextFileIfRequired(footerFileLocation,
-    //          XmlUtils.nodeToString(footer), false);
-    //    }
+    // TODO: Add flags to views via ViewContext
+
   }
 
   /**
@@ -165,6 +173,7 @@ public class I18nOperationsImpl implements I18nOperations {
     final Map<String, String> properties = new LinkedHashMap<String, String>();
 
     final LogicalPath resourcesPath = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
+    final String targetDirectory = getPathResolver().getIdentifier(resourcesPath, "");
 
     final String entityName = entity.getSimpleTypeName();
 
@@ -196,7 +205,11 @@ public class I18nOperationsImpl implements I18nOperations {
     for (I18n i18n : supportedLanguages) {
       String messageBundle =
           String.format("messages_%s.properties", i18n.getLocale().getLanguage());
-      if (getFileManager().exists(messageBundle)) {
+      String bundlePath =
+          String.format("%s%s%s", targetDirectory, AntPathMatcher.DEFAULT_PATH_SEPARATOR,
+              messageBundle);
+
+      if (getFileManager().exists(bundlePath)) {
         getPropFilesManager().addProperties(resourcesPath, messageBundle, properties, true, false);
       }
     }
@@ -213,7 +226,7 @@ public class I18nOperationsImpl implements I18nOperations {
    * @param field the field name
    * @return label
    */
-  public static String buildLabel(String entityName, String fieldName) {
+  private static String buildLabel(String entityName, String fieldName) {
     String entityLabel = XmlUtils.convertId("label." + entityName.toLowerCase());
 
     // If field is blank or null, only entity label will be generated
@@ -223,6 +236,37 @@ public class I18nOperationsImpl implements I18nOperations {
 
     // Else, is necessary to concat fieldName to generate full field label
     return XmlUtils.convertId(entityLabel.concat(".").concat(fieldName.toLowerCase()));
+  }
+  
+  /**
+   * Return a list of installed languages in the provided application module.
+   * 
+   * @param moduleName the module name to search for installed languages.
+   * @return a list with the available languages.
+   */
+  public List<I18n> getInstalledLanguages(String moduleName) {
+    
+    final LogicalPath resourcesPath = LogicalPath.getInstance(Path.SRC_MAIN_RESOURCES, moduleName);
+    final String targetDirectory = getPathResolver().getIdentifier(resourcesPath, "");
+    
+    // Create list for installed languages
+    List<I18n> installedLanguages = new ArrayList<I18n>();
+   
+    // Get all available languages
+    Set<I18n> supportedLanguages = getI18nSupport().getSupportedLanguages();
+    for (I18n i18n : supportedLanguages) {
+      String messageBundle =
+          String.format("messages_%s.properties", i18n.getLocale().getLanguage());
+      String bundlePath =
+          String.format("%s%s%s", targetDirectory, AntPathMatcher.DEFAULT_PATH_SEPARATOR,
+              messageBundle);
+
+      if (getFileManager().exists(bundlePath)) {
+        installedLanguages.add(i18n);
+      }
+    }
+    
+    return installedLanguages;
   }
 
   /**
@@ -234,7 +278,7 @@ public class I18nOperationsImpl implements I18nOperations {
    * 
    * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
    */
-  public List<ControllerMVCResponseService> getControllerMVCResponseTypes(boolean installed) {
+  private List<ControllerMVCResponseService> getControllerMVCResponseTypes(boolean installed) {
     List<ControllerMVCResponseService> responseTypes =
         new ArrayList<ControllerMVCResponseService>();
 
@@ -266,7 +310,7 @@ public class I18nOperationsImpl implements I18nOperations {
 
   // Get OSGi services
 
-  public TypeLocationService getTypeLocationService() {
+  private TypeLocationService getTypeLocationService() {
     if (typeLocationService == null) {
       // Get all Services implement TypeLocationService interface
       try {
@@ -289,7 +333,7 @@ public class I18nOperationsImpl implements I18nOperations {
     }
   }
 
-  public I18nSupport getI18nSupport() {
+  private I18nSupport getI18nSupport() {
     if (i18nSupport == null) {
       // Get all Services implement I18nSupport interface
       try {
@@ -310,7 +354,7 @@ public class I18nOperationsImpl implements I18nOperations {
     }
   }
 
-  public PathResolver getPathResolver() {
+  private PathResolver getPathResolver() {
     if (pathResolver == null) {
       // Get all Services implement PathResolver interface
       try {
@@ -332,7 +376,7 @@ public class I18nOperationsImpl implements I18nOperations {
     }
   }
 
-  public FileManager getFileManager() {
+  private FileManager getFileManager() {
     if (fileManager == null) {
       // Get all Services implement FileManager interface
       try {
@@ -354,7 +398,7 @@ public class I18nOperationsImpl implements I18nOperations {
     }
   }
 
-  public ProjectOperations getProjectOperations() {
+  private ProjectOperations getProjectOperations() {
     if (projectOperations == null) {
       // Get all Services implement ProjectOperations interface
       try {
@@ -377,7 +421,7 @@ public class I18nOperationsImpl implements I18nOperations {
     }
   }
 
-  public PropFilesManagerService getPropFilesManager() {
+  private PropFilesManagerService getPropFilesManager() {
     if (propFilesManagerService == null) {
       // Get all Services implement PropFileOperations interface
       try {
@@ -400,7 +444,7 @@ public class I18nOperationsImpl implements I18nOperations {
     }
   }
 
-  public PersistenceMemberLocator getPersistenceMemberLocator() {
+  private PersistenceMemberLocator getPersistenceMemberLocator() {
     if (persistenceMemberLocator == null) {
       // Get all Services implement TypeLocationService interface
       try {
@@ -419,6 +463,27 @@ public class I18nOperationsImpl implements I18nOperations {
       }
     } else {
       return persistenceMemberLocator;
+    }
+  }
+
+  private MemberDetailsScanner getMemberDetailsScanner() {
+    if (memberDetailsScanner == null) {
+      // Get all Services implement MemberDetailsScanner interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          memberDetailsScanner = (MemberDetailsScanner) context.getService(ref);
+          return memberDetailsScanner;
+        }
+        return null;
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load MemberDetailsScanner on PushInOperationsImpl.");
+        return null;
+      }
+    } else {
+      return memberDetailsScanner;
     }
   }
 

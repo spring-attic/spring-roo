@@ -594,7 +594,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.i18n</artifactId>
+                <artifactId>org.springframework.roo.addon.web.mvc.i18n</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -8,7 +8,7 @@
 		<version>2.0.0.BUILD-SNAPSHOT</version>
 		<relativePath>../runtime/osgi-bundle</relativePath>
 	</parent>
-	<artifactId>org.springframework.roo.addon.i18n</artifactId>
+	<artifactId>org.springframework.roo.addon.web.mvc.i18n</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - I18n</name>
 	<description>Provides language support to presentation layer</description>

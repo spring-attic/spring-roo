@@ -1,6 +1,6 @@
-package org.springframework.roo.addon.i18n;
+package org.springframework.roo.addon.web.mvc.i18n;
 
-import org.springframework.roo.addon.i18n.components.I18n;
+import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.project.maven.Pom;
 
 /**

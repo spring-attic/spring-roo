@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.i18n;
+package org.springframework.roo.addon.web.mvc.i18n;
 
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
 
@@ -10,7 +10,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.i18n.components.I18n;
+import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.project.ProjectOperations;

@@ -1,11 +1,11 @@
-package org.springframework.roo.addon.i18n.languages;
+package org.springframework.roo.addon.web.mvc.i18n.languages;
 
 import java.io.InputStream;
 import java.util.Locale;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.i18n.components.AbstractLanguage;
+import org.springframework.roo.addon.web.mvc.i18n.components.AbstractLanguage;
 import org.springframework.roo.support.util.FileUtils;
 
 /**

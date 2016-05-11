@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.i18n.components;
+package org.springframework.roo.addon.web.mvc.i18n.components;
 
 import java.io.InputStream;
 import java.util.Locale;
