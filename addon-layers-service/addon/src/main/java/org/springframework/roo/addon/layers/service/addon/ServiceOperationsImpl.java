@@ -173,8 +173,9 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     if (interfaceType == null) {
       interfaceType =
-          new JavaType(String.format("%s.%sService", implType == null ? domainType.getPackage()
-              : implType.getPackage(), domainType.getSimpleTypeName()),
+          new JavaType(String.format("%s.%s%s", implType == null ? domainType.getPackage()
+              : implType.getPackage(), domainType.getSimpleTypeName(), implType == null ? "Service"
+              : implType.getSimpleTypeName().concat("Api")),
               implType == null ? domainType.getModule() : implType.getModule());
     }
 
@@ -183,6 +184,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
           new JavaType(String.format("%s.%sServiceImpl", interfaceType.getPackage(),
               domainType.getSimpleTypeName()), interfaceType.getModule());
     }
+
 
 
     // Check if current entity is related with the repository

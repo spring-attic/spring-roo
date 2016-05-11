@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.service.addon;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -175,6 +176,50 @@ public class ServiceCommands implements CommandMarker {
         allPossibleValues.add(name);
       }
     }
+
+    return allPossibleValues;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "service", param = "interface",
+      help = "--interface option should be a new interface.", validate = false,
+      includeSpaceOnFinish = false)
+  public List<String> getInterfacePossibleResults(ShellContext shellContext) {
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Add all modules to completions list
+    Collection<String> modules = projectOperations.getModuleNames();
+    for (String module : modules) {
+      if (StringUtils.isNotBlank(module)
+          && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
+        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+      }
+    }
+
+    // Always add base package
+    allPossibleValues.add("~.");
+
+    return allPossibleValues;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "service", param = "class",
+      help = "--class option should be a new class.", validate = false,
+      includeSpaceOnFinish = false)
+  public List<String> getClassPossibleResults(ShellContext shellContext) {
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Add all modules to completions list
+    Collection<String> modules = projectOperations.getModuleNames();
+    for (String module : modules) {
+      if (StringUtils.isNotBlank(module)
+          && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
+        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+      }
+    }
+
+    // Always add base package
+    allPossibleValues.add("~.");
 
     return allPossibleValues;
   }

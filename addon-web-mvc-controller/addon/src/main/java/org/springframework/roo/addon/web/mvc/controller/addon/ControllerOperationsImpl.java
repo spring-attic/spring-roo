@@ -319,8 +319,12 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     if (getProjectOperations().isMultimoduleProject()) {
       Validate
-          .notNull(service,
-              "ERROR: Service class is required to be able to generate new controller on multimodule projects.");
+          .notNull(
+              service,
+              String
+                  .format(
+                      "ERROR: Service class related with '%s' entity is required to be able to generate new controller on multimodule projects.",
+                      entity.getFullyQualifiedTypeName()));
     } else if (service == null) {
       // Getting related service
       Set<ClassOrInterfaceTypeDetails> services =
