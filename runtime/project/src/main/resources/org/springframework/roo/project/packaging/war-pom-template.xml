@@ -17,7 +17,7 @@
 	<name>TO_BE_CHANGED_BY_LISTENER</name>
 
 	<properties>
-		<roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
+		<roo.version>2.0.0.M2</roo.version>
 		<java.version>JAVA_VERSION</java.version>
 		<aspectj.version>ASPECTJ_VERSION</aspectj.version>
 		<aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
