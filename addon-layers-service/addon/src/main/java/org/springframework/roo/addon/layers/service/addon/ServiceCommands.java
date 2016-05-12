@@ -97,6 +97,15 @@ public class ServiceCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionMandatoryIndicator(command = "service", params = "interface")
+  public boolean isInterfaceParameterMandatory(ShellContext shellContext) {
+    if (shellContext.getParameters().containsKey("repository")
+        && projectOperations.isMultimoduleProject()) {
+      return true;
+    }
+    return false;
+  }
+
   @CliOptionMandatoryIndicator(command = "service", params = "repository")
   public boolean isRepositoryParameterMandatory(ShellContext shellContext) {
     if (shellContext.getParameters().containsKey("entity")
@@ -305,7 +314,7 @@ public class ServiceCommands implements CommandMarker {
           help = "The domain entity this service should expose") final JavaType domainType,
       @CliOption(key = "repository", optionContext = PROJECT, mandatory = true,
           help = "The repository this service should expose") final JavaType repositoryType,
-      @CliOption(key = "interface", mandatory = false,
+      @CliOption(key = "interface", mandatory = true,
           help = "The service interface to be generated") final JavaType interfaceType,
       @CliOption(key = "class", mandatory = false,
           help = "The service implementation to be generated") final JavaType implType,
