@@ -167,11 +167,10 @@ public class I18nOperationsImpl implements I18nOperations {
           if (responseTypDetails != null) {
             List<MemberHoldingTypeDetails> details = responseTypDetails.getDetails();
             for (MemberHoldingTypeDetails detail : details) {
-              getMetadataService().get(detail.getDeclaredByMetadataId());
+              getMetadataService().evictAndGet(detail.getDeclaredByMetadataId());
             }
             break;
           }
-          continue;
         }
       }
     }
