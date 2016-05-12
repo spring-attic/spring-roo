@@ -236,15 +236,15 @@ public class RepositoryJpaCommands implements CommandMarker {
           help = "The java Spring Data repository to generate.") final JavaType interfaceType,
       @CliOption(key = "entity", mandatory = false, optionContext = PROJECT,
           help = "The domain entity this repository should expose") final JavaType domainType,
-      @CliOption(key = "defaultSearchResult", mandatory = false, optionContext = PROJECT,
-          help = "The findAll finder return type. Should be a DTO class.") JavaType defaultSearchResult,
+      /*@CliOption(key = "defaultSearchResult", mandatory = false, optionContext = PROJECT,
+          help = "The findAll finder return type. Should be a DTO class.") JavaType defaultSearchResult,*/
       @CliOption(key = "package", mandatory = true,
           help = "The package where repositories will be generated") final JavaPackage repositoriesPackage) {
 
     if (all) {
       repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
     } else {
-      repositoryJpaOperations.addRepository(interfaceType, domainType, defaultSearchResult);
+      repositoryJpaOperations.addRepository(interfaceType, domainType, null);
     }
   }
 

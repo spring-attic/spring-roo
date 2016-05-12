@@ -187,13 +187,13 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
 
   @CliCommand(value = "finder add",
       help = "Install a finder in the given target (must be an entity)")
-  public void installFinders(
-      @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
-          optionContext = PROJECT, help = "The entity for which the finders are generated") final JavaType typeName,
+  public void installFinders(@CliOption(key = "class", mandatory = true,
+      unspecifiedDefaultValue = "*", optionContext = PROJECT,
+      help = "The entity for which the finders are generated") final JavaType typeName,
       @CliOption(key = "name", mandatory = true,
-          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName,
-      @CliOption(key = "returnType", mandatory = false, optionContext = PROJECT,
-          help = "The finder's results return type. Should be a DTO class.") JavaType returnType) {
+          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName
+  /*,@CliOption(key = "returnType", mandatory = false, optionContext = PROJECT,
+      help = "The finder's results return type. Should be a DTO class.") JavaType returnType*/) {
 
     // Check if specified finderName follows Spring Data nomenclature
     PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(typeName), this);
@@ -204,7 +204,7 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
             partTree.isValid(),
             "--name parameter must follow Spring Data nomenclature. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)");
 
-    finderOperations.installFinder(typeName, finderName, returnType);
+    finderOperations.installFinder(typeName, finderName, null);
 
   }
 
