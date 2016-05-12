@@ -134,6 +134,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
     getProjectOperations().addDependency(module.getModuleName(),
         new Dependency("org.springframework.boot", "spring-boot-starter-web", null));
 
+    // Add DateTime dependency
+    getProjectOperations().addDependency(module.getModuleName(),
+        new Dependency("joda-time", "joda-time", null));
+
     // Create WebMvcConfiguration.java class
     JavaType webMvcConfiguration =
         new JavaType(String.format("%s.config.WebMvcConfiguration", module.getGroupId()),

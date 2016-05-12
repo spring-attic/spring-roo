@@ -110,12 +110,16 @@
     </script>
 
       <div data-layout-fragment="javascript">
+          <!-- Moment.js --> 
+          <script data-th-src="@{/public/js/moment.js}" src="../../static/public/js/moment.js"></script> 
+          <script data-th-src="@{/public/js/moment-} + ${r"${application_locale}"} + .js" src="../../static/public/js/moment-en.js"></script> 
           <!-- Select2 -->
           <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
           <script src="../../static/public/js/select2.full-es.js" data-th-src="@{/public/js/select2.full-es.js}"></script>
           <script src="../../static/public/js/select2-defaults.js" data-th-src="@{/public/js/select2-defaults.js}"></script>
           <!-- DateTime Picker -->
           <script src="../../static/public/js/jquery.datetimepicker.full.min.js" data-th-src="@{/public/js/jquery.datetimepicker.full.min.js}"></script>
+          <script src="../../static/public/js/datetimepicker-defaults.js" data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
       </div>
 
     <!-- Application -->

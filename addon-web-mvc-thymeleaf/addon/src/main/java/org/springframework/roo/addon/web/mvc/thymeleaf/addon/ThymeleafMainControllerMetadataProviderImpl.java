@@ -37,6 +37,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringEnumDetails;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -64,6 +65,8 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
   private ClassOrInterfaceTypeDetails controller;
 
   private ControllerMVCService controllerMVCService;
+
+  private List<JavaType> typesToImport;
 
   /**
    * This service is being activated so setup it:
@@ -156,8 +159,10 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
     this.controller = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     this.metadataIdentificationString = metadataIdentificationString;
 
+    this.typesToImport = new ArrayList<JavaType>();
+
     return new ThymeleafMainControllerMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, getIndexMethod());
+        governorPhysicalTypeMetadata, getIndexMethod(), typesToImport);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
@@ -196,8 +201,10 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
     final JavaSymbolName methodName = new JavaSymbolName("index");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("model"));
 
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -209,6 +216,11 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    // Always save locale
+    bodyBuilder.appendFormalLine(String.format(
+        "model.addAttribute(\"application_locale\", %s.getLocale().getLanguage());",
+        addTypeToImport(SpringJavaType.LOCALE_CONTEXT_HOLDER).getSimpleTypeName()));
+
     // return "index";
     bodyBuilder.appendFormalLine("return \"index\";");
 
@@ -218,6 +230,18 @@ public class ThymeleafMainControllerMetadataProviderImpl extends
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();
+  }
+
+  /**
+   * This method registers a new type on types to import list
+   * and then returns it.
+   * 
+   * @param type
+   * @return
+   */
+  private JavaType addTypeToImport(JavaType type) {
+    typesToImport.add(type);
+    return type;
   }
 
   public ControllerMVCService getControllerMVCService() {

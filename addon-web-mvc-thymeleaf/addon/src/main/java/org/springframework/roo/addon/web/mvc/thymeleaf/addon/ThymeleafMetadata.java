@@ -41,6 +41,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private MethodMetadata deleteJSONMethod;
   private MethodMetadata showMethod;
   private MethodMetadata populateFormMethod;
+  private MethodMetadata populateFormatMethods;
   private List<MethodMetadata> detailsMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -85,6 +86,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @param showMethod MethodMetadata 
    * @param detailsMetdhos List<MethodMetadata>
    * @param populateFormMethod MethodMetadata
+   * @param populateFormatMethods MethodMetadata
    * @param readOnly boolean 
    * @param typesToImport List<JavaType>
    */
@@ -95,8 +97,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       final MethodMetadata editFormMethod, final MethodMetadata updateMethod,
       final MethodMetadata deleteMethod, final MethodMetadata deleteJSONMethod,
       final MethodMetadata showMethod, final List<MethodMetadata> detailsMethods,
-      final MethodMetadata populateFormMethod, final boolean readOnly,
-      final List<JavaType> typesToImport) {
+      final MethodMetadata populateFormMethod, final MethodMetadata populateFormatsMethod,
+      final boolean readOnly, final List<JavaType> typesToImport) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
@@ -114,6 +116,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.showMethod = showMethod;
     this.detailsMethods = detailsMethods;
     this.populateFormMethod = populateFormMethod;
+    this.populateFormatMethods = populateFormatsMethod;
 
     // Adds list and list form method
     ensureGovernorHasMethod(new MethodMetadataBuilder(listFormMethod));
@@ -140,6 +143,9 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // Always add populateForm method
     ensureGovernorHasMethod(new MethodMetadataBuilder(populateFormMethod));
+
+    // Always add addDateTimeFormatPatterns method
+    ensureGovernorHasMethod(new MethodMetadataBuilder(populateFormatsMethod));
 
     // Adding all necessary types to import
     importResolver.addImports(typesToImport);

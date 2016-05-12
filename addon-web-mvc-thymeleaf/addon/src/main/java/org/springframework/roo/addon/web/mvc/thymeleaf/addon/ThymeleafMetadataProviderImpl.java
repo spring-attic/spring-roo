@@ -5,6 +5,8 @@ import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -49,6 +52,7 @@ import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTrack
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
@@ -267,7 +271,86 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getCreateMethod(serviceSaveMethod), getEditFormMethod(),
         getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod),
         getDeleteJSONMethod(serviceDeleteMethod), getShowMethod(), getDetailsMethods(),
-        getPopulateFormMethod(), isReadOnly(), typesToImport);
+        getPopulateFormMethod(), getPopulateFormatsMethod(), isReadOnly(), typesToImport);
+  }
+
+  /**
+   * This method provides populateFomats method that allows to configure date time 
+   * format for every entity
+   * 
+   * @return
+   */
+  private MethodMetadata getPopulateFormatsMethod() {
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("populateFomats");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Check if exists other addDateTimeFormatPatterns method in this controller
+    MemberDetails controllerMemberDetails = getMemberDetails(this.controller);
+    MethodMetadata existingMethod =
+        controllerMemberDetails.getMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Always save locale
+    bodyBuilder.appendFormalLine(String.format(
+        "model.addAttribute(\"application_locale\", %s.getLocale().getLanguage());",
+        addTypeToImport(SpringJavaType.LOCALE_CONTEXT_HOLDER).getSimpleTypeName()));
+
+    // Getting all enum types from provided entity
+    MemberDetails entityDetails =
+        getMemberDetails(getTypeLocationService().getTypeDetails(this.entity));
+    List<FieldMetadata> fields = entityDetails.getFields();
+    for (FieldMetadata field : fields) {
+      JavaType type = field.getFieldType();
+      if (type.getFullyQualifiedTypeName().equals(Date.class.getName())
+          || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
+
+        // Getting annotation format
+        AnnotationMetadata dateTimeFormatAnnotation =
+            field.getAnnotation(SpringJavaType.DATE_TIME_FORMAT);
+
+        if (dateTimeFormatAnnotation != null
+            && dateTimeFormatAnnotation.getAttribute("style") != null) {
+
+          AnnotationAttributeValue<String> formatAttr =
+              dateTimeFormatAnnotation.getAttribute("style");
+
+          String format = formatAttr.getValue();
+
+          // model.addAttribute("field_date_format", DateTimeFormat.patternForStyle("M-", LocaleContextHolder.getLocale()));
+          bodyBuilder
+              .appendFormalLine(String
+                  .format(
+                      "model.addAttribute(\"%s_date_format\", %s.patternForStyle(\"%s\", %s.getLocale()));",
+                      field.getFieldName().getSymbolName(),
+                      addTypeToImport(new JavaType("org.joda.time.format.DateTimeFormat"))
+                          .getSimpleTypeName(), format,
+                      addTypeToImport(SpringJavaType.LOCALE_CONTEXT_HOLDER).getSimpleTypeName()));
+        }
+
+      }
+    }
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
   }
 
   /**
@@ -1298,6 +1381,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // populateFomats(model);
+    bodyBuilder.appendFormalLine("populateFomats(model);");
 
     // Getting all enum types from provided entity
     MemberDetails entityDetails =

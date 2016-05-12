@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafMainController;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -63,9 +65,12 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
+   * @param indexMethod MethodMetadata
+   * @param typesToImport List<JavaType>
    */
   public ThymeleafMainControllerMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, MethodMetadata indexMethod) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, MethodMetadata indexMethod,
+      final List<JavaType> typesToImport) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
@@ -76,6 +81,9 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
 
     // Add index method
     ensureGovernorHasMethod(new MethodMetadataBuilder(indexMethod));
+
+    // Adding all necessary types to import
+    importResolver.addImports(typesToImport);
 
     // Build the ITD
     itdTypeDetails = builder.build();
