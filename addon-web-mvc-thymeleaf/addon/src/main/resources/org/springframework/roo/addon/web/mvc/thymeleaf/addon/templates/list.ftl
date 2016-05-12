@@ -442,19 +442,20 @@
                       return undefined;
                     }
                   });
-                  
-                  ${entityName}Table.on( 'select', function ( e, dt, type, indexes ) {
-                      if ( type === 'row' ) {
-                        var new${entityName}Id = ${entityName}Table.rows( indexes ).ids()[0];
-                        if (jQuery.current${entityName}Id != new${entityName}Id) {
-                          jQuery.current${entityName}Id = new${entityName}Id;
-                          var url = jQuery.${field.configuration.referencedFieldType}BaseUrl();
-                          ${field.configuration.referencedFieldType}Table.ajax.url( url ).load();
-                        }
-                      }
-                    });
-                  
              </#list>
+             
+           ${entityName}Table.on( 'select', function ( e, dt, type, indexes ) {
+              if ( type === 'row' ) {
+                var new${entityName}Id = ${entityName}Table.rows( indexes ).ids()[0];
+                if (jQuery.current${entityName}Id != new${entityName}Id) {
+                  jQuery.current${entityName}Id = new${entityName}Id;
+                  <#list details as field>
+                  var url${field.configuration.referencedFieldType} = jQuery.${field.configuration.referencedFieldType}BaseUrl();
+                  ${field.configuration.referencedFieldType}Table.ajax.url( url${field.configuration.referencedFieldType} ).load();
+                  </#list>
+                }
+              }
+            });
          </#if>
          
          
