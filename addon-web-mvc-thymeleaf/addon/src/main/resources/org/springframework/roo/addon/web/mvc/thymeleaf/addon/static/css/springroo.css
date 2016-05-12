@@ -47,10 +47,10 @@ footer {
 	padding: 1em 0 3em;
   text-align: center;
 	}
-footer p{ 
+footer p{
 	font-size: 0.875em
   }
-  
+
 
 /*--HEADINGS-------------*/
 
@@ -76,17 +76,17 @@ body.home .bg-header{ display: block;}
     min-height: 20em;
     color: #fff;
     text-align: center;
-    padding: 3em;    
+    padding: 3em;
     background-image: url(../img/geo.png);
     background-repeat: no-repeat;
-    background-position: 50% 20%;    
+    background-position: 50% 20%;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
 }
 
-.jumbotron .project-name{   
+.jumbotron .project-name{
   color: #fff;
   text-align: center;
   font-size: 4em;
@@ -113,12 +113,12 @@ body.home .bg-header{ display: block;}
   box-shadow: 0 0 0 0,0 6px 12px rgba(34,34,34,.1);
 }
 
-body.home .content{ 
+body.home .content{
 	background: none;
 	padding: 0;
 	box-shadow: none;
 	}
-body.home .box-center{ 
+body.home .box-center{
 	padding: 1em 2em;
   background: #fff;
   box-shadow: 0 0 0 0,0 6px 12px rgba(34,34,34,.1);
@@ -128,6 +128,53 @@ body.home .box-center{
 .tab-content {
     padding: 25px;
 }
+
+/*--FORMS------------*/
+
+form .form-group .alert {
+    border-width: 0;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 15px 0 0;
+}
+
+form input[type="checkbox"] {
+    height: 15px;
+    width: 15px;
+    margin: 10px 0 0;
+}
+
+/*--SELECT2------------*/
+
+.select2-container--bootstrap .select2-selection {
+    border: none !important;
+    font-family: "Ubuntu", Helvetica, sans-serif !important;
+    color: rgb(85, 85, 85) !important;
+    background-color: rgb(255, 255, 255) !important;
+    background-image: none !important;
+    /* padding: 6px 12px !important; */
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: rgb(231, 231, 231) !important;
+    border-radius: 4px !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+    box-shadow: rgba(0, 0, 0, 0.0745098) 0px 2px 0px inset !important;
+}
+.select2-container--bootstrap.select2-container--focus .select2-selection,
+.select2-container--bootstrap.select2-container--open .select2-selection {
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6) !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6) !important;
+    -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+    -o-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s !important;
+    border-color: #66afe9 !important;
+}
+
+.select2-container--bootstrap .select2-dropdown{
+      margin-top: -3px !important;
+}
+
 
 /*--BTN-------------*/
 
@@ -156,11 +203,11 @@ body.home .box-center{
 
 .btn-accion + .btn-accion {
     margin: 0 0 0 0.35em;
-}   
+}
 table a.btn-accion {
     text-decoration: none;
-}    
-    
+}
+
 .btn-accion:hover,.btn-accion:focus, .btn-accion:active {
     background-color: #eeeeee;
     border-color: #e2e2e2;
@@ -177,10 +224,10 @@ table a.btn-accion {
 .btn-accion.eliminar:before {
   content:"\f014";
   }
-.btn-accion.editar:before,  
+.btn-accion.editar:before,
 .btn-accion.modificar:before {
   content:"\f040";
-  }  
+  }
 .btn-accion.aceptar:before {
   content:"\f00c";
   }
@@ -190,10 +237,6 @@ table a.btn-accion {
 .btn-accion.ver:before {
 	content:"\f06e";
 }
-
-/*--ACCIONES-------------*/
-.acciones {}
-.acciones .heading {}
 
 
 /*--TABLES-------------*/
@@ -222,7 +265,7 @@ table caption {
 /*--INDEX-------------*/
 
 
-/*--SOCIAL LINKS-------------*/  
+/*--SOCIAL LINKS-------------*/
 
 .social-links a{
   color: #999;
@@ -322,7 +365,7 @@ table caption {
   width: 100%;
 }
 
-/* 
+/*
  * Material Background Colors
  */
 
@@ -376,5 +419,14 @@ table caption {
   .navbar-nav.upper-nav > li > a {padding: 15px 5px}
 
 }
+
+@media (min-width: 768px){
+  .navbar-right.links {
+     margin-right: 0;
+  }
+}
+
+
+
 
 
