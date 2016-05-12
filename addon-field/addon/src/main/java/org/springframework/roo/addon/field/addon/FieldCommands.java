@@ -1106,10 +1106,6 @@ public class FieldCommands implements CommandMarker {
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
       @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
-      @CliOption(key = "decimalMin", mandatory = false,
-          help = "The BigDecimal string-based representation of the minimum value") final String decimalMin,
-      @CliOption(key = "decimalMax", mandatory = false,
-          help = "The BigDecimal string based representation of the maximum value") final String decimalMax,
       @CliOption(key = "sizeMin", mandatory = false, help = "The minimum string length") final Integer sizeMin,
       @CliOption(key = "sizeMax", mandatory = false, help = "The maximum string length") final Integer sizeMax,
       @CliOption(key = "regexp", mandatory = false,
@@ -1136,7 +1132,7 @@ public class FieldCommands implements CommandMarker {
     checkFieldExists(fieldName, shellContext, cid);
 
     getFieldCreatorProvider(typeName).createStringField(cid, fieldName, notNull, nullRequired,
-        decimalMin, decimalMax, sizeMin, sizeMax, regexp, column, comment, unique, value, lob,
+        null, null, sizeMin, sizeMax, regexp, column, comment, unique, value, lob,
         permitReservedWords, transientModifier);
   }
 
