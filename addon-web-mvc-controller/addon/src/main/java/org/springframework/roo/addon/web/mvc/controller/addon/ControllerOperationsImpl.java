@@ -197,7 +197,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Adding spring.jackson.serialization.indent_output property
     getApplicationConfigService().addProperty(module.getModuleName(),
-        "spring.jackson.serialization.indent_output", "true", "", true);
+        "spring.jackson.serialization.indent-output", "true", "", true);
 
     // Add server configuration
     appServer.setup(module);
