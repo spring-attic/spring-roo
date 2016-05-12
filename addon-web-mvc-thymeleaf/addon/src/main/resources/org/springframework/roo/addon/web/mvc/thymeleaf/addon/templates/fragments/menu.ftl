@@ -47,17 +47,22 @@
                   <li><a href="${entry.path }" data-th-text="${r"#{"}label_list_entity(${r"#{"}${entry.entityPluralLabel}${r"}"})${r"}"}">List ${entry.entityName}</a></li>
                   </ul>
                 </li>        
-              </#list>
+               </#list>
               </ul>
+              
+              <!-- Languages -->
+              <div data-layout-include="fragments/languages :: languages">
+              	<span>Languages</span>
+              </div>
 
               <!-- Menu -->
               <div data-layout-include="fragments/session-links :: session">
-                <!-- Content replaced by the session template fragment session-links.html -->
+                <!-- Content replaced by languages and session template fragment session-links.html -->
                 <span>User session data</span>
-              </div>
-	        
-           </div>
+              </div> 
            
+           </div>
+    
 
           </div>
         </nav>

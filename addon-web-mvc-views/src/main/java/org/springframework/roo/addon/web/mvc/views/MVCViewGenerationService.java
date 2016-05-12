@@ -202,6 +202,16 @@ public interface MVCViewGenerationService {
   void addSessionLinks(String moduleName, ViewContext ctx);
 
   /**
+   * This operation will add the languages fragment using 
+   * the provided context
+   * 
+   * @param moduleName module where session fragment will be added
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addLanguages(String moduleName, ViewContext ctx);
+
+  /**
    * This operation will updates menu view.
    * 
    * TODO: Maybe, instead of modify all menu view, only new generated controller should

@@ -24,6 +24,7 @@ import org.springframework.roo.addon.web.mvc.controller.addon.responses.Controll
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18nSupport;
 import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
+import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -70,6 +71,7 @@ public class I18nOperationsImpl implements I18nOperations {
   private PropFilesManagerService propFilesManagerService;
   private PersistenceMemberLocator persistenceMemberLocator;
   private MemberDetailsScanner memberDetailsScanner;
+  private ApplicationConfigService applicationConfigService;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -158,6 +160,10 @@ public class I18nOperationsImpl implements I18nOperations {
         updateI18n(entityDetails, entity, controller.getType().getModule());
       }
     }
+
+    // Add application property
+    getApplicationConfigService().addProperty(module.getModuleName(),
+        "spring.messages.fallback-to-system-locale", "false", "", true);
   }
 
   /**
@@ -485,6 +491,29 @@ public class I18nOperationsImpl implements I18nOperations {
       }
     } else {
       return memberDetailsScanner;
+    }
+  }
+
+  public ApplicationConfigService getApplicationConfigService() {
+    if (applicationConfigService == null) {
+      // Get all Services implement ApplicationConfigService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(ApplicationConfigService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          applicationConfigService = (ApplicationConfigService) this.context.getService(ref);
+          return applicationConfigService;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load ApplicationConfigService on ControllerOperationsImpl.");
+        return null;
+      }
+    } else {
+      return applicationConfigService;
     }
   }
 

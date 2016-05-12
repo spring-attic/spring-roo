@@ -210,6 +210,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addModal(module.getModuleName(), ctx);
     getViewGenerationService().addSession(module.getModuleName(), ctx);
     getViewGenerationService().addSessionLinks(module.getModuleName(), ctx);
+    getViewGenerationService().addLanguages(module.getModuleName(), ctx);
 
     // Add i18n support for english language
     getI18nOperations().installI18n(new EnglishLanguage(), module);

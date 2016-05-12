@@ -30,9 +30,6 @@ public class ViewContext {
   private String modelAttribute;
   private String entityName;
 
-  // Installed languages
-  private Map<String, String> languages = new HashMap<String, String>();
-
   // Custom elements
   private Map<String, Object> extraInformation = new HashMap<String, Object>();
 
@@ -106,18 +103,6 @@ public class ViewContext {
 
   public void setIdentifierField(String identifierField) {
     this.identifierField = identifierField;
-  }
-
-  public Map<String, String> getLanguages() {
-    return languages;
-  }
-
-  public void addLanguage(String key, String value) {
-    this.languages.put(key, value);
-  }
-
-  public void setLanguages(Map<String, String> languages) {
-    this.languages = languages;
   }
 
 }

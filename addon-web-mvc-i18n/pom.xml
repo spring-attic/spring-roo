@@ -32,26 +32,6 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.classpath</artifactId>
         </dependency>
-        <!--<dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.file.monitor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.file.undo</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.metadata</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.model</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.process.manager</artifactId>
-        </dependency>-->
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.project</artifactId>
@@ -68,11 +48,6 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.web.mvc.controller.addon</artifactId>
         </dependency>
-		<!-- Template Engines Bundles -->
-		<!-- <dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.freemarker</artifactId>
-		</dependency>-->
 		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>

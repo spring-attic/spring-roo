@@ -11,6 +11,14 @@ import java.util.Locale;
  */
 public abstract class AbstractLanguage implements I18n {
 
+  private String localePrefix;
+  private String language;
+
+  public AbstractLanguage() {
+    this.localePrefix = this.getLocale().getLanguage();
+    this.language = this.getLanguage();
+  }
+
   /**
    * equals compares locale only!
    */
@@ -57,4 +65,24 @@ public abstract class AbstractLanguage implements I18n {
     sb.append("Language label: ").append(getLanguage());
     return sb.toString();
   }
+
+  public String getLocalePrefix() {
+    return localePrefix;
+  }
+
+
+  public void setLocalePrefix(String localePrefix) {
+    this.localePrefix = localePrefix;
+  }
+
+
+  public String getLanguage() {
+    return language;
+  }
+
+
+  public void setLanguage(String language) {
+    this.language = language;
+  }
+
 }

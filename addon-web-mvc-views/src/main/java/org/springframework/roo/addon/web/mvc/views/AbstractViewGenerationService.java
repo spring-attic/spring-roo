@@ -324,12 +324,6 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     ctx.addExtraParameter("menuEntries", menuEntries);
 
-    // Add installed languages
-    List<I18n> installedLanguages = getI18nOperationsImpl().getInstalledLanguages(moduleName);
-    for (I18n language : installedLanguages) {
-      ctx.addLanguage(language.getLanguage(), language.getLocale().getLanguage());
-    }
-
     // Process elements to generate 
     DOC newDoc = process("fragments/menu", ctx);
 
@@ -402,11 +396,34 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
+  public void addLanguages(String moduleName, ViewContext ctx) {
+
+    // Add installed languages
+    List<I18n> installedLanguages = getI18nOperationsImpl().getInstalledLanguages(moduleName);
+    ctx.addExtraParameter("languages", installedLanguages);
+
+    // Process elements to generate 
+    DOC newDoc = process("fragments/languages", ctx);
+
+    // Getting new viewName
+    String viewName =
+        getFragmentsFolder(moduleName).concat("/languages").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(loadExistingDoc(viewName), newDoc);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+  }
+
+  @Override
   public void updateMenuView(String moduleName, ViewContext ctx) {
     // TODO: This method should update menu view with the new 
     // controller to include, instead of regenerate menu view page.
     addMenu(moduleName, ctx);
-
+    addLanguages(moduleName, ctx);
   }
 
   @Override
