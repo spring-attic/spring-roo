@@ -25,23 +25,6 @@
         
     <link rel="stylesheet" type="text/css"
         href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.css"></link>      
-         
-    <!-- Datatables -->  
-       
-    <link rel="stylesheet" type="text/css" 
-        href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
-  
-    <link rel="stylesheet" type="text/css" 
-        href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
-  
-    <link rel="stylesheet" type="text/css" 
-        href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css"></link>
-  
-    <link rel="stylesheet" type="text/css" 
-        href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"></link>
-  
-    <link rel="stylesheet" type="text/css" 
-        href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
         
     <!-- Select2 -->
     <link rel="stylesheet" type="text/css"

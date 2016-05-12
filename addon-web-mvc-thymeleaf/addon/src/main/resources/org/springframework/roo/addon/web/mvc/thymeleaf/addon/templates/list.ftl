@@ -327,7 +327,7 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"></script>
     <!-- Datatables application defaults -->
     <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults.js" data-th-src="@{/public/js/datatables-defaults.js}"></script>
-    <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults-es.js" data-th-src="@{/public/js/datatables-defaults-es.js}"></script>
+    <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults-en.js" data-th-src="@{/public/js/datatables-defaults-en.js}"></script>
     
     
     <!-- Datatables page configs -->
