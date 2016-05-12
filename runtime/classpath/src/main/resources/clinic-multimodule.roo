@@ -1,0 +1,67 @@
+project setup --topLevelPackage com.springsource.petclinic --projectName "Petclinic" --multimodule
+
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+
+enum type --class model:~.reference.PetType
+enum constant --name Dog
+enum constant --name Cat
+enum constant --name Bird
+
+enum type --class model:~.reference.Specialty
+enum constant --name Cardiology
+enum constant --name Dentistry
+enum constant --name Nutrition
+
+entity jpa --class model:~.Pet --sequenceName PET_SEQ
+entity jpa --class model:~.Visit --sequenceName VISIT_SEQ
+entity jpa --class model:~.AbstractPerson --abstract
+entity jpa --class model:~.Vet --extends model:~.AbstractPerson
+entity jpa --class model:~.Owner --extends ~.AbstractPerson
+
+focus --class model:~.AbstractPerson
+field string --fieldName firstName --sizeMin 3 --sizeMax 30 
+field string --fieldName lastName --notNull --sizeMin 3 --sizeMax 30
+field string --fieldName address --notNull --sizeMax 50 --sizeMin 1
+field string --fieldName city --notNull --sizeMax 30
+field string --fieldName telephone --notNull
+field string --fieldName homePage --sizeMax 30
+field string --fieldName email --sizeMax 30 --sizeMin 6
+field date --fieldName birthDay --type java.util.Date --notNull
+
+focus --class model:~.Visit
+field string --fieldName description --sizeMax 255 
+field date --fieldName visitDate --type java.util.Date --notNull --past
+field reference --fieldName pet --type ~.Pet --notNull
+field reference --fieldName vet --type ~.Vet
+
+focus --class model:~.Pet
+field boolean --fieldName sendReminders --notNull --primitive 
+field string --fieldName name --notNull --sizeMin 1
+field number --fieldName weight --type java.lang.Float --notNull --min 0
+field reference --fieldName owner --type model:~.Owner
+field enum --fieldName type --type model:~.reference.PetType --notNull
+
+focus --class model:~.Vet
+field date --fieldName employedSince --type java.util.Calendar --notNull --past 
+field enum --fieldName specialty --type model:~.reference.Specialty --notNull false
+
+focus --class model:~.Owner
+field set --fieldName pets --type model:~.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
+
+repository jpa --all --package repository:~.
+service --all --apiPackage service-api:~. --implPackage service-impl:~.
+
+finder add --class model:~.Pet --name findByNameAndWeight
+finder add --class model:~.Pet --name findByOwner
+finder add --class model:~.Pet --name findBySendRemindersAndWeightLessThan
+finder add --class model:~.Pet --name findByTypeAndNameLike
+
+finder add --class model:~.Visit --name findByDescriptionAndVisitDate 
+finder add --class model:~.Visit --name findByVisitDateBetween
+finder add --class model:~.Visit --name findByDescriptionLike
+
+web mvc setup
+web mvc view setup --type THYMELEAF
+web mvc controller --all --package application:~.web --formattersPackage application:~.format --responseType THYMELEAF
+
+web mvc language --code es

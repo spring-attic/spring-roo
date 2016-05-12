@@ -290,7 +290,12 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
    */
   protected String getArtifactId(final String nullableProjectName, final String module,
       final JavaPackage topLevelPackage) {
-    return getProjectName(nullableProjectName, module, topLevelPackage);
+    if (nullableProjectName == null) {
+      String packageName = StringUtils.replace(module, "-", ".");
+      return StringUtils.defaultIfEmpty(packageName, topLevelPackage.getLastElement());
+    } else {
+      return nullableProjectName.toLowerCase().replaceAll("\\s+", "");
+    }
   }
 
   /**

@@ -676,25 +676,21 @@ if [[ "$COMMAND" = "assembly" ]]; then
             # Entity and entity-field commands
             load_roo script entities-and-entity-fields.roo 
 
-	    	    # Repository test
-	    	    load_roo_build_and_test script repository-generation-test.roo
+            # Repository test
+            load_roo_build_and_test script repository-generation-test.roo
 
-	    	    # Finder tests
-	    	    load_roo_build_and_test script finder-autocomplete-test.roo
-	    	    load_roo_build_and_test script finder-generation-test.roo
+            # Finder tests
+            load_roo_build_and_test script finder-autocomplete-test.roo
+            load_roo_build_and_test script finder-generation-test.roo
 
-	    	    # Service test
-	    	    load_roo_build_and_test script service-generation-test.roo
+            # Service test
+            load_roo_build_and_test script service-generation-test.roo
 
-            # Complete application
-            load_roo_build_and_test script northwind.roo
-	          load_roo_build_and_test script northwind-multimodule.roo
-
-	          # Multimodule tests
+            # Multimodule tests
             load_roo_build_and_test script multimodule-standard-test.roo
             load_roo_build_and_test script multimodule-basic-test.roo
- 	          #load_roo_build_and_test script multimodule-jpa-layer-test.roo
- 	          load_roo_build_and_test script multimodule-service-layer-test.roo
+            #load_roo_build_and_test script multimodule-jpa-layer-test.roo
+            load_roo_build_and_test script multimodule-service-layer-test.roo
 
             # Security and audit tests
             load_roo_build_and_test script security.roo
@@ -706,45 +702,32 @@ if [[ "$COMMAND" = "assembly" ]]; then
             load_roo_build_and_test script tests.roo
             load_roo_build_and_test script tests-multimodule.roo
 
-	          # Web mvc tests
+	        # Web mvc tests
             load_roo_build_and_test script web-mvc-test.roo
             load_roo_build_and_test script multimodule-web-mvc-embedded-test.roo
             load_roo_build_and_test script multimodule-web-mvc-weblogic-test.roo
 
 
-		        load_roo_build_and_test script web-finder-test.roo
-		        #load_roo_build_and_test script multimodule-web-finder-test.roo
+		    load_roo_build_and_test script web-finder-test.roo
+		    #load_roo_build_and_test script multimodule-web-finder-test.roo
 
             # DTO's tests
             load_roo_build_and_test script dto.roo
             load_roo_build_and_test script dto-multimodule.roo
 
-        # Temporally disabled
-	    
-        #load_roo_build_and_test script vote.roo
-        #tomcat_stop_start_get_stop http://localhost:8888/vote
+        # COMPLETE APPLICATIONS TESTS
 
-        #load_roo_build_and_test script clinic.roo
-        #tomcat_stop_start_get_stop http://localhost:8888/petclinic
+            # Northwind complete application
+            load_roo_build_and_test script northwind.roo
 
-        #load_roo_build_and_test script wedding.roo
-        #tomcat_stop_start_get_stop http://localhost:8888/wedding
+            # Northwind complete multimodule application
+	        load_roo_build_and_test script northwind-multimodule.roo
 
-	      #load_roo_build_and_test script pizzashop.roo
-        #tomcat_stop_start_get_stop http://localhost:8888/pizzashop
-	      #pizzashop_tests
+            # Petclinic complete application
+            load_roo_build_and_test script clinic.roo
 
-        # JSF was removed on Spring Roo 2.0
-        #load_roo_build_and_test script bikeshop.roo
-        #jetty_stop_start_get_stop http://localhost:8888/bikeshop/pages/main.jsf
-
-        # Spring Roo multimodule project needs to be refactorized
-        #load_roo_build_and_test_multimodule script multimodule.roo
-        #tomcat_stop_start_get_stop_multimodule ui/mvc http://localhost:8888/mvc
-
-        # Spring Roo embedding project needs DS improvement
-        # load_roo_build_and_test script embedding.roo
-        # tomcat_stop_start_get_stop http://localhost:8888/embedding
+            # Petclinic multimodule application
+            load_roo_build_and_test script clinic-multimodule.roo    
 
         log "Removing Roo distribution from test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER

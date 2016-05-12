@@ -329,10 +329,11 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     if (projectName == null) {
       projectName = topLevelPackage.getLastElement();
     }
-    // Uppercase projectName
-    projectName =
-        projectName.substring(0, 1).toUpperCase()
-            .concat(projectName.substring(1, projectName.length()));
+
+    // Capitalize projectName and removing white spaces
+    projectName = StringUtils.capitalize(projectName).replaceAll("\\s+", "");
+
+    // Application class name
     String bootClass = projectName.concat("Application");
 
     final JavaType javaType =
