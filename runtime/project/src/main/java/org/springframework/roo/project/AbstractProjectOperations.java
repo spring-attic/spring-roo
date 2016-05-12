@@ -202,7 +202,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
                   removeVersionIfBlank(newDependency.getElement(document));
               dependenciesElement.insertBefore(newDependencyElement, existingDependencyElement);
               inserted = true;
-              if (!newDependency.getVersion().equals(existingDependency.getVersion())) {
+              Dependency newDependencyWithoutVersion = new Dependency(newDependencyElement);
+              if (!newDependencyWithoutVersion.getVersion().equals(existingDependency.getVersion())) {
                 // It's a genuine version change => mention the
                 // old and new versions in the message
                 finalDependencies.add(newDependency);

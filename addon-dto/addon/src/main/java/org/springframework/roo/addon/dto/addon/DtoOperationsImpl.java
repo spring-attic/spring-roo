@@ -35,6 +35,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.ShellContext;
@@ -73,6 +74,9 @@ public class DtoOperationsImpl implements DtoOperations {
 
     Validate.isTrue(!JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
         "Class name '%s' is part of java.lang", name.getSimpleTypeName());
+
+    // Set focus on dto module
+    projectOperations.setModule(projectOperations.getPomFromModuleName(name.getModule()));
 
     // Create file
     final String declaredByMetadataId =
@@ -171,6 +175,9 @@ public class DtoOperationsImpl implements DtoOperations {
     if (name == null) {
       throw new IllegalArgumentException("Use --class to select the name of the DTO.");
     }
+
+    // Set focus on dto module
+    projectOperations.setModule(projectOperations.getPomFromModuleName(name.getModule()));
 
     // Get entity details
     ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
@@ -331,8 +338,18 @@ public class DtoOperationsImpl implements DtoOperations {
         if (annotation.getAnnotationType().getFullyQualifiedTypeName()
             .contains("javax.persistence")) {
           fieldBuilder.removeAnnotation(annotation.getAnnotationType());
+
+        } else if (annotation.getAnnotationType().getFullyQualifiedTypeName()
+            .startsWith("javax.validation")) {
+
+          // Add validation dependency
+          projectOperations.addDependency(dtoBuilder.getName().getModule(), new Dependency(
+              "javax.validation", "validation-api", null));
         }
       }
+
+      projectOperations.addDependency(dtoBuilder.getName().getModule(), new Dependency(
+          "org.springframework.boot", "spring-boot-starter-data-jpa", null));
 
       fieldBuilder.setModifier(Modifier.PRIVATE);
 
