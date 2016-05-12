@@ -250,9 +250,8 @@
     <!-- Datatables page configs -->
     <script type="text/javascript" data-th-inline="javascript">
     $(document).ready( function () {
-        var currentId = window.location.href.split("/")[window.location.href.split("/").length - 1];
         <#list details as field>
-            var ${field.configuration.referencedFieldType}BaseUrl = '${controllerPath}/' + currentId +  '${field.configuration.controllerPath}/';
+            var ${field.configuration.referencedFieldType}BaseUrl = ${r"[["}@{${controllerPath}/${r"{"}${identifierField}${r"}"}${field.configuration.controllerPath}/(${identifierField}=${r"${"}${modelAttributeName}${r"."}${identifierField}${r"})}]]"} +  '';
             var ${field.configuration.referencedFieldType}Table = jQuery('#${field.configuration.referencedFieldType}Table').DataTable({
                 'ajax': {
                       'url': ${field.configuration.referencedFieldType}BaseUrl

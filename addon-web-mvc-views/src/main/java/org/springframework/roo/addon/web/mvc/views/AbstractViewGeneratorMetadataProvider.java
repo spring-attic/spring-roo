@@ -145,6 +145,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
     ctx.setEntityName(entity.getSimpleTypeName());
     ctx.setModelAttribute(getEntityField().getFieldName().getSymbolName());
+    ctx.setModelAttributeName(StringUtils.uncapitalize(entity.getSimpleTypeName()));
     ctx.setIdentifierField(identifierField.get(0).getFieldName().getSymbolName());
     fillContext(ctx);
 

@@ -78,6 +78,7 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
       }
       input.put("identifierField", ctx.getIdentifierField());
       input.put("modelAttribute", String.format("${%s}", ctx.getModelAttribute()));
+      input.put("modelAttributeName", ctx.getModelAttributeName());
 
       // Add all extra elements from ViewContext. This is useful if some
       // implementation wants to include its own information

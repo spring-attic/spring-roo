@@ -28,6 +28,7 @@ public class ViewContext {
 
   // View information
   private String modelAttribute;
+  private String modelAttributeName;
   private String entityName;
 
   // Custom elements
@@ -103,6 +104,14 @@ public class ViewContext {
 
   public void setIdentifierField(String identifierField) {
     this.identifierField = identifierField;
+  }
+
+  public String getModelAttributeName() {
+    return modelAttributeName;
+  }
+
+  public void setModelAttributeName(String modelAttributeName) {
+    this.modelAttributeName = modelAttributeName;
   }
 
 }
