@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
@@ -29,10 +30,13 @@ import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.metadata.MetadataItem;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -72,6 +76,7 @@ public class I18nOperationsImpl implements I18nOperations {
   private PersistenceMemberLocator persistenceMemberLocator;
   private MemberDetailsScanner memberDetailsScanner;
   private ApplicationConfigService applicationConfigService;
+  private MetadataService metadataService;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -142,6 +147,32 @@ public class I18nOperationsImpl implements I18nOperations {
       } finally {
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(outputStream);
+      }
+    }
+
+    // Get response types for updating views with new language
+    List<ControllerMVCResponseService> responseTypes = getControllerMVCResponseTypes(true);
+    for (ControllerMVCResponseService responseType : responseTypes) {
+      JavaType responseAnnotationType = responseType.getAnnotation();
+      if (responseAnnotationType != null) {
+        Set<ClassOrInterfaceTypeDetails> responseTypeClassesDetails =
+            getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+                responseAnnotationType);
+
+        // We only need one class to get Metadata
+        for (ClassOrInterfaceTypeDetails responseTypeClassDetails : responseTypeClassesDetails) {
+          MemberDetails responseTypDetails =
+              getMemberDetailsScanner().getMemberDetails(getClass().getName(),
+                  responseTypeClassDetails);
+          if (responseTypDetails != null) {
+            List<MemberHoldingTypeDetails> details = responseTypDetails.getDetails();
+            for (MemberHoldingTypeDetails detail : details) {
+              getMetadataService().get(detail.getDeclaredByMetadataId());
+            }
+            break;
+          }
+          continue;
+        }
       }
     }
 
@@ -514,6 +545,28 @@ public class I18nOperationsImpl implements I18nOperations {
       }
     } else {
       return applicationConfigService;
+    }
+  }
+
+  public MetadataService getMetadataService() {
+    if (metadataService == null) {
+      // Get all Services implement MetadataService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          return (MetadataService) this.context.getService(ref);
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load MetadataService on SecurityOperationsImpl.");
+        return null;
+      }
+    } else {
+      return metadataService;
     }
   }
 
