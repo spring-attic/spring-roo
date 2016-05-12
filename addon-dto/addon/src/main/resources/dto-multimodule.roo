@@ -192,7 +192,7 @@ field string --fieldName string_field3
 #-------------------------------------------------------------------------------------------------------
 # Goal:   Test reference field command creation in DTO's.
 #
-field other --fieldName reference_field --type ~.domain.Entity1
+field other --fieldName reference_field --type model:~.Entity1
 #      
 # Output: Updated repository:SRC_MAIN_JAVA/aaaa/bbb/cc/repository/domain/TestFieldDTO3.java
 #         Updated repository:SRC_MAIN_JAVA/aaaa/bbb/cc/repository/domain/TestFieldDTO3_Roo_JavaBean.aj
