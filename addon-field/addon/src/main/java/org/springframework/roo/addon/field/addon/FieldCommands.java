@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -36,11 +37,14 @@ import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
@@ -558,6 +562,28 @@ public class FieldCommands implements CommandMarker {
         permitReservedWords, transientModifier);
   }
 
+  @CliOptionAutocompleteIndicator(command = "field reference", param = "type",
+      help = "--type option should be an entity.")
+  public List<String> getReferenceTypePossibleValues(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("type");
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Getting all existing entities
+    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
+      String name = replaceTopLevelPackageString(entity, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
+  }
+
   @CliOptionMandatoryIndicator(command = "field reference", params = {"joinColumnName"})
   public boolean isColumnMandatoryForFieldReference(ShellContext shellContext) {
     JavaType type = getTypeFromCommand(shellContext);
@@ -791,6 +817,28 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
+  @CliOptionAutocompleteIndicator(command = "field set", param = "type",
+      help = "--type option should be an entity.")
+  public List<String> getFieldSetTypeAllPossibleValues(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("type");
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Getting all existing entities
+    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
+      String name = replaceTopLevelPackageString(entity, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
+  }
+
   @CliCommand(
       value = "field set",
       help = "Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)")
@@ -958,6 +1006,28 @@ public class FieldCommands implements CommandMarker {
       return true;
     }
     return false;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "field list", param = "type",
+      help = "--type option should be an entity.")
+  public List<String> getFieldListTypePossibleValues(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("type");
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Getting all existing entities
+    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
+      String name = replaceTopLevelPackageString(entity, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
   }
 
   @CliCommand(
@@ -1467,5 +1537,61 @@ public class FieldCommands implements CommandMarker {
     } else {
       return javaTypeConverter;
     }
+  }
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * 
+   * @param cid ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(projectOperations.getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(projectOperations.getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          projectOperations.getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          projectOperations.getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value  
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
+    }
+
+    return javaTypeString;
   }
 }
