@@ -566,8 +566,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     final JavaSymbolName methodName = new JavaSymbolName("delete");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(new AnnotatedJavaType(this.identifierType, new AnnotationMetadataBuilder(
-        SpringJavaType.PATH_VARIABLE).build()));
+    AnnotationMetadataBuilder pathVariable =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariable.addStringAttribute("value", "id");
+    parameterTypes.add(new AnnotatedJavaType(this.identifierType, pathVariable.build()));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("id"));
@@ -833,8 +835,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     final JavaSymbolName methodName = new JavaSymbolName("show");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(new AnnotatedJavaType(this.identifierType, new AnnotationMetadataBuilder(
-        SpringJavaType.PATH_VARIABLE).build()));
+    AnnotationMetadataBuilder pathVariable =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariable.addStringAttribute("value", "id");
+    parameterTypes.add(new AnnotatedJavaType(this.identifierType, pathVariable.build()));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("id"));
@@ -1142,9 +1146,12 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Adding parameter types 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder pathVariable =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariable.addStringAttribute("value", "ids");
     parameterTypes.add(new AnnotatedJavaType(new JavaType(JdkJavaType.COLLECTION
         .getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(this.identifierType)),
-        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE).build()));
+        pathVariable.build()));
 
     // Adding parameter names
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
