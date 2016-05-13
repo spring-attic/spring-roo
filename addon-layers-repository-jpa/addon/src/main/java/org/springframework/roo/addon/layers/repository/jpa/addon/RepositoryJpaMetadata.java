@@ -87,7 +87,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaAnnotationValues annotationValues, final JavaType identifierType,
       final boolean readOnly, final JavaType readOnlyRepository,
-      final List<JavaType> customRepositories, final Map<JavaType, FieldMetadata> referenceFields) {
+      final List<JavaType> customRepositories,
+      final Map<FieldMetadata, FieldMetadata> referenceFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(identifierType, "Id type required");
@@ -122,10 +123,10 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     ensureGovernorIsAnnotated(transactionalAnnotation);
 
     // Adding count methods for every referenced field
-    for (Entry<JavaType, FieldMetadata> field : referenceFields.entrySet()) {
+    for (Entry<FieldMetadata, FieldMetadata> field : referenceFields.entrySet()) {
       MethodMetadata countMethod = getCountMethodByField(field.getKey(), field.getValue());
       ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
-      countMethodByReferencedFields.put(field.getKey(), countMethod);
+      countMethodByReferencedFields.put(field.getKey().getFieldType(), countMethod);
     }
 
     // Build the ITD
@@ -140,11 +141,12 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    * 
    * @return field
    */
-  public MethodMetadata getCountMethodByField(JavaType field, FieldMetadata identifierType) {
+  public MethodMetadata getCountMethodByField(FieldMetadata field, FieldMetadata identifierType) {
     // Define method name
     JavaSymbolName methodName =
-        new JavaSymbolName(String.format("countBy%s%s", field.getSimpleTypeName(), identifierType
-            .getFieldName().getSymbolNameCapitalisedFirstLetter()));
+        new JavaSymbolName(String.format("countBy%s%s", field.getFieldName()
+            .getSymbolNameCapitalisedFirstLetter(), identifierType.getFieldName()
+            .getSymbolNameCapitalisedFirstLetter()));
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();

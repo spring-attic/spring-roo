@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.field.addon;
 
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -216,4 +217,8 @@ public interface FieldCreatorProvider {
       final boolean transientModifier);
 
   void formatFieldComment(FieldDetails fieldDetails);
+
+  List<String> getFieldSetTypeAllPossibleValues(ShellContext shellContext);
+
+  List<String> getFieldListTypeAllPossibleValues(ShellContext shellContext);
 }

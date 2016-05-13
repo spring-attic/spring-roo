@@ -820,23 +820,11 @@ public class FieldCommands implements CommandMarker {
   @CliOptionAutocompleteIndicator(command = "field set", param = "type",
       help = "--type option should be an entity.")
   public List<String> getFieldSetTypeAllPossibleValues(ShellContext shellContext) {
-
-    // Get current value of class
-    String currentText = shellContext.getParameters().get("type");
-
-    List<String> allPossibleValues = new ArrayList<String>();
-
-    // Getting all existing entities
-    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
-    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
-      String name = replaceTopLevelPackageString(entity, currentText);
-      if (!allPossibleValues.contains(name)) {
-        allPossibleValues.add(name);
-      }
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).getFieldSetTypeAllPossibleValues(shellContext);
     }
-
-    return allPossibleValues;
+    return new ArrayList<String>();
   }
 
   @CliCommand(
@@ -1011,23 +999,11 @@ public class FieldCommands implements CommandMarker {
   @CliOptionAutocompleteIndicator(command = "field list", param = "type",
       help = "--type option should be an entity.")
   public List<String> getFieldListTypePossibleValues(ShellContext shellContext) {
-
-    // Get current value of class
-    String currentText = shellContext.getParameters().get("type");
-
-    List<String> allPossibleValues = new ArrayList<String>();
-
-    // Getting all existing entities
-    Set<ClassOrInterfaceTypeDetails> entitiesInProject =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
-    for (ClassOrInterfaceTypeDetails entity : entitiesInProject) {
-      String name = replaceTopLevelPackageString(entity, currentText);
-      if (!allPossibleValues.contains(name)) {
-        allPossibleValues.add(name);
-      }
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).getFieldListTypeAllPossibleValues(shellContext);
     }
-
-    return allPossibleValues;
+    return new ArrayList<String>();
   }
 
   @CliCommand(

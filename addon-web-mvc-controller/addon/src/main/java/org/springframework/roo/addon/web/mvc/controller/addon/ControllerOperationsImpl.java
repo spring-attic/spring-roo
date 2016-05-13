@@ -203,8 +203,73 @@ public class ControllerOperationsImpl implements ControllerOperations {
     getApplicationConfigService().addProperty(module.getModuleName(),
         "spring.jackson.serialization.indent-output", "true", "", true);
 
+    // Add GlobalSearchHandlerMethodArgumentResolver.java
+    addGlobalSearchHandlerMethodArgumentResolverClass(module);
+
     // Add server configuration
     appServer.setup(module);
+  }
+
+  /**
+   * This method adds new GlobalSearchHandlerMethodArgumentResolver.java class
+   * annotated with @RooGlobalSearchHandler
+   * 
+   * @param module
+   */
+  private void addGlobalSearchHandlerMethodArgumentResolverClass(Pom module) {
+    // First of all, check if already exists a @RooThymeleafGlobalSearchHandler
+    // class on current project
+    Set<JavaType> globalSearchHandlerClasses =
+        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH_HANDLER);
+
+    if (!globalSearchHandlerClasses.isEmpty()) {
+      return;
+    }
+
+    // Getting generated global class
+    Set<ClassOrInterfaceTypeDetails> gobalSearchClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_GLOBAL_SEARCH);
+    if (gobalSearchClasses.isEmpty()) {
+      throw new RuntimeException(
+          "ERROR: GlobalSearch.java class doesn't exists or has been deleted.");
+    }
+    JavaType globalSearchClass = null;
+    Iterator<ClassOrInterfaceTypeDetails> it = gobalSearchClasses.iterator();
+    while (it.hasNext()) {
+      globalSearchClass = it.next().getType();
+      break;
+    }
+
+    JavaPackage modulePackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
+
+    final JavaType javaType =
+        new JavaType(String.format(
+            "%s.web.method.support.GlobalSearchHandlerMethodArgumentResolver", modulePackage),
+            module.getModuleName());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+    // Including GlobalSearchHandlerMethodArgumentResolver class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream =
+          FileUtils.getInputStream(getClass(),
+              "GlobalSearchHandlerMethodArgumentResolver-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
+      input = input.replace("__GLOBAL_SEARCH__", globalSearchClass.getFullyQualifiedTypeName());
+
+
+      // Creating GlobalSearchHandlerMethodArgumentResolver class
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
   }
 
   /**

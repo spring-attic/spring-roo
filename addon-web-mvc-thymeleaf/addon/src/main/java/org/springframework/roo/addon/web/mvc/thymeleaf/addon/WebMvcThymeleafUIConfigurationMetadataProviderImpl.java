@@ -137,22 +137,6 @@ public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    // Looking for a valid GlobalSearchHandlerMethodArgumentResolver
-    JavaType globalSearchHandler = null;
-    Set<ClassOrInterfaceTypeDetails> globalSearchHandlerClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_THYMELEAF_DATATABLES_GLOBAL_SEARCH_HANDLER);
-    if (globalSearchHandlerClasses.isEmpty()) {
-      throw new RuntimeException(
-          "ERROR: GlobalSearchHandlerMethodArgumentResolver class doesn't exists or has been deleted.");
-    }
-    Iterator<ClassOrInterfaceTypeDetails> globalSearchHandlerIterator =
-        globalSearchHandlerClasses.iterator();
-    while (globalSearchHandlerIterator.hasNext()) {
-      globalSearchHandler = globalSearchHandlerIterator.next().getType();
-      break;
-    }
-
     // Looking for a valid DatatablesSortHandlerMethodArgumentResolver
     JavaType datatablesSortHandler = null;
     Set<ClassOrInterfaceTypeDetails> datatablesSortHandlerClasses =
@@ -186,8 +170,7 @@ public class WebMvcThymeleafUIConfigurationMetadataProviderImpl extends
     }
 
     return new WebMvcThymeleafUIConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, datatablesPageableHandler, datatablesSortHandler,
-        globalSearchHandler);
+        governorPhysicalTypeMetadata, datatablesPageableHandler, datatablesSortHandler);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

@@ -226,7 +226,7 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
     }
 
     // Getting reference fields to be able to generate countsByReferences
-    Map<JavaType, FieldMetadata> referenceFields = new HashMap<JavaType, FieldMetadata>();
+    Map<FieldMetadata, FieldMetadata> referenceFields = new HashMap<FieldMetadata, FieldMetadata>();
 
     // Getting all entity fields
     MemberDetails entityMemberDetails = getMemberDetails(entity);
@@ -245,7 +245,7 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
           continue;
         }
 
-        referenceFields.put(field.getFieldType(), identifierFields.get(0));
+        referenceFields.put(field, identifierFields.get(0));
       }
     }
 

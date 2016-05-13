@@ -43,7 +43,6 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
   private ImportRegistrationResolver importResolver;
   private JavaType datatablesPageableHandler;
   private JavaType datatablesSortHandler;
-  private JavaType globalSearchHandler;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -78,14 +77,12 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
    */
   public WebMvcThymeleafUIConfigurationMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final JavaType datatablesPageableHandler, final JavaType datatablesSortHandler,
-      final JavaType globalSearchHandler) {
+      final JavaType datatablesPageableHandler, final JavaType datatablesSortHandler) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
     this.datatablesPageableHandler = datatablesPageableHandler;
     this.datatablesSortHandler = datatablesSortHandler;
-    this.globalSearchHandler = globalSearchHandler;
 
     // Add @Configuration
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONFIGURATION));
@@ -100,50 +97,8 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
     // Add datatablesPageableResolver() 
     ensureGovernorHasMethod(new MethodMetadataBuilder(getDatatablesPageableResolver()));
 
-    // Add globalSearchResolver() 
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getGlobalSearchResolver()));
-
     // Build the ITD
     itdTypeDetails = builder.build();
-  }
-
-  /**
-   * This method returns globalSearchResolver() method annotated with @Bean
-   * 
-   * @return MethodMetadata that contains all information about globalSearchResolver 
-   * method.
-   */
-  public MethodMetadata getGlobalSearchResolver() {
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("globalSearchResolver");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // return new GLOBAL_SEARCH_HANDLER(sortResolver());
-    bodyBuilder.appendFormalLine(String.format("return new %s();",
-        this.globalSearchHandler.getNameIncludingTypeParameters(false, importResolver)));
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.globalSearchHandler,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
   }
 
   /**
@@ -217,10 +172,6 @@ public class WebMvcThymeleafUIConfigurationMetadata extends
 
     // argumentResolvers.add(datatablesPageableResolver());
     bodyBuilder.appendFormalLine("argumentResolvers.add(datatablesPageableResolver());");
-
-    // argumentResolvers.add(globalSearchResolver());
-    bodyBuilder.appendFormalLine("argumentResolvers.add(globalSearchResolver());");
-
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =

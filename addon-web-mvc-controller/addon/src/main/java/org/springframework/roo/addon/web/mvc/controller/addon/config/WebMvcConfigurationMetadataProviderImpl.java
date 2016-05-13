@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -138,8 +139,24 @@ public class WebMvcConfigurationMetadataProviderImpl extends
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_FORMATTER);
 
+    // Looking for a valid GlobalSearchHandlerMethodArgumentResolver
+    JavaType globalSearchHandler = null;
+    Set<ClassOrInterfaceTypeDetails> globalSearchHandlerClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_GLOBAL_SEARCH_HANDLER);
+    if (globalSearchHandlerClasses.isEmpty()) {
+      throw new RuntimeException(
+          "ERROR: GlobalSearchHandlerMethodArgumentResolver class doesn't exists or has been deleted.");
+    }
+    Iterator<ClassOrInterfaceTypeDetails> globalSearchHandlerIterator =
+        globalSearchHandlerClasses.iterator();
+    while (globalSearchHandlerIterator.hasNext()) {
+      globalSearchHandler = globalSearchHandlerIterator.next().getType();
+      break;
+    }
+
     return new WebMvcConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, formatters);
+        governorPhysicalTypeMetadata, formatters, globalSearchHandler);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

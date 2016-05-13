@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +19,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -44,6 +46,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
   private ImportRegistrationResolver importResolver;
   private Set<ClassOrInterfaceTypeDetails> formatters;
+  private JavaType globalSearchHandler;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -80,11 +83,12 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
    */
   public WebMvcConfigurationMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      Set<ClassOrInterfaceTypeDetails> formatters) {
+      Set<ClassOrInterfaceTypeDetails> formatters, final JavaType globalSearchHandler) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
     this.formatters = formatters;
+    this.globalSearchHandler = globalSearchHandler;
 
     // Add @Configuration
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONFIGURATION));
@@ -118,8 +122,99 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     // Add addInterceptors
     ensureGovernorHasMethod(new MethodMetadataBuilder(getAddInterceptors()));
 
+    // Add addArgumentResolvers() @Override method
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getAddArgumentResolvers()));
+
+    // Add globalSearchResolver() 
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getGlobalSearchResolver()));
+
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * This method returns addArgumentResolvers() method annotated with @Override
+   * 
+   * @return MethodMetadata that contains all information about addArgumentResolvers 
+   * method.
+   */
+  public MethodMetadata getAddArgumentResolvers() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("addArgumentResolvers");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.util.List", 0,
+        DataType.TYPE, null, Arrays.asList(new JavaType(
+            "org.springframework.web.method.support.HandlerMethodArgumentResolver")))));
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("argumentResolvers"));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // argumentResolvers.add(globalSearchResolver());
+    bodyBuilder.appendFormalLine("argumentResolvers.add(globalSearchResolver());");
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
+            parameterTypes, parameterNames, bodyBuilder);
+
+    // Add @Override annotation
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+
+  /**
+   * This method returns globalSearchResolver() method annotated with @Bean
+   * 
+   * @return MethodMetadata that contains all information about globalSearchResolver 
+   * method.
+   */
+  public MethodMetadata getGlobalSearchResolver() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("globalSearchResolver");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return new GLOBAL_SEARCH_HANDLER(sortResolver());
+    bodyBuilder.appendFormalLine(String.format("return new %s();",
+        this.globalSearchHandler.getNameIncludingTypeParameters(false, importResolver)));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.globalSearchHandler,
+            parameterTypes, parameterNames, bodyBuilder);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
   }
 
   /**

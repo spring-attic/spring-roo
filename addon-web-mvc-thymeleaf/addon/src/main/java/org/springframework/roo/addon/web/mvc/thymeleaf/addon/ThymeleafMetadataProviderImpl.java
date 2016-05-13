@@ -324,22 +324,30 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
             field.getAnnotation(SpringJavaType.DATE_TIME_FORMAT);
 
         if (dateTimeFormatAnnotation != null
-            && dateTimeFormatAnnotation.getAttribute("style") != null) {
+            && (dateTimeFormatAnnotation.getAttribute("style") != null || dateTimeFormatAnnotation
+                .getAttribute("pattern") != null)) {
 
           AnnotationAttributeValue<String> formatAttr =
               dateTimeFormatAnnotation.getAttribute("style");
-
-          String format = formatAttr.getValue();
-
-          // model.addAttribute("field_date_format", DateTimeFormat.patternForStyle("M-", LocaleContextHolder.getLocale()));
-          bodyBuilder
-              .appendFormalLine(String
-                  .format(
-                      "model.addAttribute(\"%s_date_format\", %s.patternForStyle(\"%s\", %s.getLocale()));",
-                      field.getFieldName().getSymbolName(),
-                      addTypeToImport(new JavaType("org.joda.time.format.DateTimeFormat"))
-                          .getSimpleTypeName(), format,
-                      addTypeToImport(SpringJavaType.LOCALE_CONTEXT_HOLDER).getSimpleTypeName()));
+          if (formatAttr != null) {
+            String format = formatAttr.getValue();
+            // model.addAttribute("field_date_format", DateTimeFormat.patternForStyle("M-", LocaleContextHolder.getLocale()));
+            bodyBuilder
+                .appendFormalLine(String
+                    .format(
+                        "model.addAttribute(\"%s_date_format\", %s.patternForStyle(\"%s\", %s.getLocale()));",
+                        field.getFieldName().getSymbolName(),
+                        addTypeToImport(new JavaType("org.joda.time.format.DateTimeFormat"))
+                            .getSimpleTypeName(), format,
+                        addTypeToImport(SpringJavaType.LOCALE_CONTEXT_HOLDER).getSimpleTypeName()));
+          } else {
+            formatAttr = dateTimeFormatAnnotation.getAttribute("pattern");
+            String format = formatAttr.getValue();
+            // model.addAttribute("field_date_format", "pattern");
+            bodyBuilder.appendFormalLine(String.format(
+                "model.addAttribute(\"%s_date_format\", \"%s\");", field.getFieldName()
+                    .getSymbolName(), format));
+          }
         }
 
       }
