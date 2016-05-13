@@ -369,7 +369,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       input = input.replace("__PACKAGE__", repositoryPackage.getFullyQualifiedPackageName());
 
       // Creating ReadOnlyRepository interface
-      fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
+      fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, true);
     } catch (final IOException e) {
       throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
     } finally {
