@@ -77,10 +77,9 @@ or newer installed. Java JDK 7 is recommended.
 
 We always recommend you use the latest version of Java
 and Maven that are available for your platform. We also recommend that
-you use http://spring.io/tools/sts[Spring Tool Suite (STS) 3.7] which 
+you use http://spring.io/tools/sts[Spring Tool Suite (STS)] which 
 includes a number of features that make working with Roo even
-easier (you can of course use Roo with normal Eclipse or without an
-IDE at all if you prefer).
+easier (you can of course use Roo without an IDE at all if you prefer).
 
 [[preface-download]]
 === 3. Download Spring Roo
@@ -130,7 +129,7 @@ compile that particular build of Roo.
 [[command-index]]
 === 5. Command Index
 
-This appendix was automatically built from Roo 2.0.0.M2 [rev 3e03de9].
+This appendix was automatically built from Roo 2.0.0.M2
 
 Commands are listed in alphabetic order, and are shown in monospaced
 font with any mandatory options you must specify when using the command.
