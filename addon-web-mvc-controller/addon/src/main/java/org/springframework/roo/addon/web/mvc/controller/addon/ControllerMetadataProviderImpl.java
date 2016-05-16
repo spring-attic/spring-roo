@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -189,6 +190,15 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
       }
     }
+
+    // Register dependency between JavaBeanMetadata and this one
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(entity)
+            .getDeclaredByMetadataId());
+    final String javaBeanMetadataKey =
+        JavaBeanMetadata.createIdentifier(
+            getTypeLocationService().getTypeDetails(entity).getType(), logicalPath);
+    registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
     return new ControllerMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, service, detailsService, path);
