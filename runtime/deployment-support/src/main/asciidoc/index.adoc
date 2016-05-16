@@ -21,7 +21,7 @@
 //
 = {title}
 :title:			Spring Roo - Reference Documentation
-:author: 		DISID Corporation S.L. - Pivotal Software, Inc
+:author: 		DISID Corporation S.L.
 :authorsite: 		www.disid.com
 :description: 		Spring Roo - Reference Documentation
 :version:		2.0.0.M2
@@ -44,7 +44,7 @@ endif::[]
 _{version}_
 
 [abstract]
-_© 2015 The original authors._ +
+_© 2016 The original authors._ +
 _Copies of this document may be made for your own use and for distribution to others,
 provided that you do not charge any fee for such copies and further provided that
 each copy contains this Copyright Notice, whether distributed in print or
@@ -60,15 +60,9 @@ electronically._
 [[preface-overview]]
 === 1. Overview
 
-Spring Roo is an easy-to-use productivity tool for rapidly building
-enterprise applications in the Java programming language. It allows
-you to build high-quality, high-performance, lock-in-free enterprise
-applications in just minutes. Best of all, Roo works alongside your
-existing Java knowledge, skills and experience. You probably won’t
-need to learn anything new to use Roo, as there’s no new language
-or runtime platform needed. You simply program in your normal Java
-way and Roo just works, sitting in the background taking care of the
-things you don’t want to worry about.
+Spring Roo is an easy-to-use development tool for quickly building web applications in the Java programming language, which can be used as an standalone application or as an Eclipse or STS plugin. It allows you to build high-quality, high-performance, lock-in-free enterprise applications in just minutes.
+
+Best of all, Roo works alongside your existing Java and Spring knowledge, skills and experience. You probably won’t need to learn anything new to use Roo, as there’s no new language or runtime platform needed. You simply program in your normal Java way and Roo just works, sitting in the background taking care of the things you don’t want to worry about.
 
 [[preface-requirements]]
 === 2. Requirements
@@ -81,10 +75,7 @@ systems may work but are not guaranteed).
 or newer installed. Java JDK 7 is recommended.
 * https://maven.apache.org/download.cgi[Apache Maven 3.0] or above installed and in the path.
 
-We have listed various considerations concerning the Java Development
-Kit (JDK) and operating systems in the
-link:#upgrade-known-issues[known issues section] of this
-documentation. We always recommend you use the latest version of Java
+We always recommend you use the latest version of Java
 and Maven that are available for your platform. We also recommend that
 you use http://spring.io/tools/sts[Spring Tool Suite (STS) 3.7] which 
 includes a number of features that make working with Roo even
@@ -95,12 +86,10 @@ IDE at all if you prefer).
 === 3. Download Spring Roo
 
 You can download the current release from Spring Roo project page
-http://projects.spring.io/spring-roo/#download-widget[downloads section]
-and the
-http://projects.spring.io/spring-roo/#instant-results---making-java-fun[related documentation].
+http://projects.spring.io/spring-roo/#download-widget[downloads section].
 
 You can also build a distribution ZIP yourself from our
-link:#resources-source-repository[source control repository.]
+link:http://github.com/spring-projects/spring-roo#resources-source-repository[source control repository.]
 
 [[preface-install]]
 === 4. Install Spring Roo
@@ -141,7 +130,7 @@ compile that particular build of Roo.
 [[command-index]]
 === 5. Command Index
 
-This appendix was automatically built from Roo 2.0.0.M2 [rev 925a8dd].
+This appendix was automatically built from Roo 2.0.0.M2 [rev 3e03de9].
 
 Commands are listed in alphabetic order, and are shown in monospaced
 font with any mandatory options you must specify when using the command.
@@ -2497,8 +2486,8 @@ http://projects.spring.io/spring-roo/#running-from-shell[Spring Roo Home Page].
 We publish all Roo modules to Maven Central, the default repository from which
 Maven will download the Spring Roo artifacts automatically.
 
-[[resources-forums]]
-==== Community Forum
+[[resources-stackoverflow]]
+==== StackOverFlow
 
 Because Roo is an official top-level Spring project, of course you'll find there is a
 dedicated "Spring Roo" tag at Stack Overflow for all your questions, comments
@@ -2578,7 +2567,7 @@ development team. If you're a Twitter user, you're welcome to follow the
 Roo development team (using the Twitter IDs above) to receive
 up-to-the-minute Tweets on Roo activities, usage and events.
 
-We do request that you use the link:#resources-forums[Community Forums]
+We do request that you use the link:#resources-stackoverflow[StackOverFlow]
 if you have a question or issue with Roo, as 140 characters doesn't
 allow us to provide in-depth technical support or provide a growing
 archive of historical answers that people can search against.
@@ -2593,9 +2582,9 @@ feature requests and tasks. Roo uses a public Jira instance you're
 welcome to use in order to log issues, watch existing issues, vote for
 existing issues and review the changes made between particular versions.
 
-As discussed in the link:#resources-forums[Community Forums] section, we
+As discussed in the link:#resources-stackoverflow[StackOverFlow] section, we
 ask that you refrain from logging bug reports until you've first
-discussed them on the forum. This allows others to comment on whether a
+discussed them on stackoverflow. This allows others to comment on whether a
 bug actually exists. When logging an issue in Jira, there is a field
 explicitly provided so you can link the forum discussion to the Jira
 issue.
