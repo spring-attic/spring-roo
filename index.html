@@ -105,14 +105,13 @@ roo
 roo> hint
 roo> project setup --topLevelPackage com.foo
 roo> jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
-roo> entity jpa --class ~.domain.Timer --testAutomatically
+roo> entity jpa --class ~.domain.Timer
 roo> field string --fieldName message --notNull
-roo> hint web mvc
+roo> repository jpa --all --package ~.repository
+roo> service --all --apiPackage ~.service.api --implPackage ~.service.impl
 roo> web mvc setup
-roo> web mvc all --package ~.web
-roo> selenium test --controller ~.web.TimerController
-roo> security setup
-roo> perform tests
+roo> web mvc view setup --type THYMELEAF
+roo> web mvc controller --all --package ~.web --responseType THYMELEAF
 roo> quit
 ```
 
