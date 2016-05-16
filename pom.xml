@@ -936,9 +936,6 @@
                             <goals>
                                 <goal>jar</goal>
                             </goals>
-                            <!-- To compile ROO using Java 8 uncomment this -->
-                            <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam> 
-                                </configuration> -->
                         </execution>
                     </executions>
                 </plugin>
@@ -1050,6 +1047,20 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>jdk7</id>
+            <activation>
+                <jdk>1.7</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+	                    <groupId>org.apache.maven.plugins</groupId>
+	                    <artifactId>maven-javadoc-plugin</artifactId>
+	                </plugin>
                 </plugins>
             </build>
         </profile>
