@@ -67,7 +67,22 @@ finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 #========================================================================================
 
 #========================================================================================
-# TEST 4: Define order clause  
+# TEST 4: Generate a count finder              
+#----------------------------------------------------------------------------------------
+# Goal:   Create a finder that returns the count of results
+#
+finder add --class ~.Owner --name countByAge
+#      
+# Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
+#          Created SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
+#
+# Result:  OwnerRepository is annotated with @RooFinder(finders = { "countByAge" }), 
+#          and its aspect contains: 
+#          Long OwnerRepository.countByAge(int age)                                                                 
+#========================================================================================
+
+#========================================================================================
+# TEST 5: Define order clause  
 #----------------------------------------------------------------------------------------
 # Goal:   Create a finder that orders the results by several properties
 #
@@ -83,7 +98,7 @@ finder add --class ~.Owner --name findByAgeOrderByAgeAscPetNameDesc
 #========================================================================================
  
 #========================================================================================
-# TEST 5:  Generate a finder with an order clause and all ignore case option
+# TEST 6:  Generate a finder with an order clause and all ignore case option
 #----------------------------------------------------------------------------------------
 # Goal:    Create a finder that orders the results by several properties and all ignore
 #          case options is enabled
@@ -101,7 +116,7 @@ finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
  
  
 #========================================================================================
-# TEST 6:  Define condition operators
+# TEST 7:  Define condition operators
 #----------------------------------------------------------------------------------------
 # Goal:    Create a finder which condition properties have operators
 #
@@ -120,7 +135,7 @@ finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPe
 
 
 #========================================================================================
-# TEST 7:  Max results limited to one
+# TEST 8:  Max results limited to one
 #----------------------------------------------------------------------------------------
 # Goal:    Create a finder with a limiting expression that returns an unique Owner
 #
@@ -141,7 +156,7 @@ finder add --class ~.Owner --name findDistinctFirst1ByPet
 #========================================================================================
 
 #========================================================================================
-# TEST 8:  Unlimited number of results
+# TEST 9:  Unlimited number of results
 #----------------------------------------------------------------------------------------
 # Goal:    Check that finders return a list of Owners
 #
@@ -165,7 +180,7 @@ finder add --class ~.Owner --name findByPet
   
 
 #========================================================================================
-# TEST 9:  Return an entity property list
+# TEST 10:  Return an entity property list
 #----------------------------------------------------------------------------------------
 # Goal:    Check that finders return a list of subject property java type
 #
@@ -189,7 +204,7 @@ finder add --class ~.Owner --name findFirst10AgeByAge
 
 
 #========================================================================================
-# TEST 10:  Return an entity property result
+# TEST 11:  Return an entity property result
 #----------------------------------------------------------------------------------------
 # Goal:    Check that finders return a subject property java type
 #
@@ -206,7 +221,7 @@ finder add --class ~.Owner --name findTop1TelephoneByAge
 #========================================================================================
   
 #========================================================================================
-# TEST 11: Generate a finder without parameters
+# TEST 12: Generate a finder without parameters
 #----------------------------------------------------------------------------------------
 # Goal:   Check that any parameter is included into the finder
 #
@@ -221,7 +236,7 @@ finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsN
   
 
 #========================================================================================
-# TEST 12: Generate a finder without operators
+# TEST 13: Generate a finder without operators
 #----------------------------------------------------------------------------------------
 # Goal:    Check that for every condition a parameter is added, which type is the 
 #          condition property type
@@ -239,7 +254,7 @@ finder add --class ~.Owner --name findByFirstNameAndActiveAndBirthdayAndPetOrAge
 
  
 #========================================================================================
-# TEST 13: Generate a finder which operators need a parameter
+# TEST 14: Generate a finder which operators need a parameter
 #----------------------------------------------------------------------------------------
 # Goal:    Check that for every condition a parameter is added, which type is the 
 #          condition property type
@@ -255,7 +270,7 @@ finder add --class ~.Owner --name findByActiveEqualsAndBirthdayBeforeOrFirstName
 #======================================================================================== 
  
 #========================================================================================
-# TEST 14: Generate a finder which operators need several parameter
+# TEST 15: Generate a finder which operators need several parameter
 #----------------------------------------------------------------------------------------
 # Goal:    Check that for every condition several parameters are added, which type is the 
 #          condition property type, and a counter is added as suffix
@@ -272,7 +287,7 @@ finder add --class ~.Owner --name findByAgeBetweenAndBirthdayBetween
 #======================================================================================== 
   
 #========================================================================================
-# TEST 15: Generate finders with a property with several operators
+# TEST 16: Generate finders with a property with several operators
 #----------------------------------------------------------------------------------------
 # Goal:    Check that for every condition a parameter is added, which type is the 
 #          condition property type, and a counter is added as suffix
@@ -290,7 +305,7 @@ finder add --class ~.Owner --name findByAgeBetweenAndAgeIsOrAgeLessThan
 
 
 #========================================================================================
-# TEST 16: Expression with In operator
+# TEST 17: Expression with In operator
 #----------------------------------------------------------------------------------------
 # Goal:    Check that finder parameters are a List of condition property type
 #
@@ -313,7 +328,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #################################################################
 
 #========================================================================================
-# TEST 17: Empty finder            
+# TEST 18: Empty finder            
 #----------------------------------------------------------------------------------------
 # Goal:  Checks that a finder with an empty name cannot be created
 #
@@ -327,7 +342,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 
 
 #========================================================================================
-# TEST 18: Incomplete finders             
+# TEST 19: Incomplete finders             
 #----------------------------------------------------------------------------------------
 # Goal:  Fail finder creation if it does not contain at least an operation+By+property
 #
@@ -351,7 +366,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 
 
 #========================================================================================
-# TEST 19: Unsupported operation            
+# TEST 20: Unsupported operation            
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if operation is not read, find or query
 #
@@ -364,7 +379,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 20: Incorrect Distinct expression           
+# TEST 21: Incorrect Distinct expression           
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if Distinct expression is located in an incorrect position
 #
@@ -373,6 +388,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 # finder add --class ~.Owner --name findAgeDistinctByAge
 # finder add --class ~.Owner --name findDistinctBy
 # finder add --class ~.Owner --name DistinctBy
+# finder add --class ~.Owner --name countDistinctByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -381,7 +397,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 21: Incorrect limiting expression              
+# TEST 22: Incorrect limiting expression              
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if limiting expression is not placed in a correct location
 #
@@ -393,6 +409,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 # finder add --class ~.Owner --name findTopaAgeByAge
 # finder add --class ~.Owner --name findTopaByAge
 # finder add --class ~.Owner --name find1TopByAge
+# finder add --class ~.Owner --name countTopByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -401,7 +418,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 22: Incorrect max results number           
+# TEST 23: Incorrect max results number           
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if max  results number is 0
 #
@@ -415,7 +432,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 23: Subject with several properties             
+# TEST 24: Subject with several properties             
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has several properties to return
 #
@@ -428,7 +445,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 24: Several Ignore Case associated to a property              
+# TEST 25: Several Ignore Case associated to a property              
 #----------------------------------------------------------------------------------------
 # Goal:  Fail if a finder contains several IgnoreCase options for the same property
 #
@@ -441,7 +458,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 25: Property with an unsupported operator  
+# TEST 26: Property with an unsupported operator  
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if a property is associated to an unsupported operator 
 #
@@ -455,7 +472,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 26: Empty expressions before Or           
+# TEST 27: Empty expressions before Or           
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an Or
 #
@@ -470,7 +487,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 27: Empty expressions before And           
+# TEST 28: Empty expressions before And           
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an And
 #
@@ -485,7 +502,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 28: Empty expressions after Or/And         
+# TEST 29: Empty expressions after Or/And         
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions after an Or/And
 #
@@ -499,7 +516,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 29: Empty expressions before OrderBy          
+# TEST 30: Empty expressions before OrderBy          
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an order clause
 #
@@ -514,7 +531,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 30: Empty order clause         
+# TEST 31: Empty order clause         
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if order clause is empty
 #
@@ -527,7 +544,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 31: Several order clauses             
+# TEST 32: Several order clauses             
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if there are several OrderBy
 #
@@ -541,7 +558,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 32: Order expressions joined with And/Or              
+# TEST 33: Order expressions joined with And/Or              
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if order expressions are joined with And/Or
 #
@@ -555,7 +572,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #========================================================================================
 
 #========================================================================================
-# TEST 33: Several order directions             
+# TEST 34: Several order directions             
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if order expressions have several directions
 #
@@ -571,7 +588,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 
 
 #========================================================================================
-# TEST 34: Several AllIgnoreCase options         
+# TEST 35: Several AllIgnoreCase options         
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if AllIgnoreCase is included several times
 #
