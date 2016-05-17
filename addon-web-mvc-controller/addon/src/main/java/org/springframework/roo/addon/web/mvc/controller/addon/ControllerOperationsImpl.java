@@ -347,8 +347,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
       if (entityController == null && !entity.isAbstract()) {
         // Generate controller JavaType
         JavaType controller =
-            new JavaType(String.format("%s.%sController", controllersPackage
-                .getFullyQualifiedPackageName(), entity.getType().getSimpleTypeName()),
+            new JavaType(String.format("%s.%sController",
+                controllersPackage.getFullyQualifiedPackageName(),
+                Noun.pluralOf(entity.getType().getSimpleTypeName(), Locale.ENGLISH)),
                 controllersPackage.getModule());
 
         // Generate path
