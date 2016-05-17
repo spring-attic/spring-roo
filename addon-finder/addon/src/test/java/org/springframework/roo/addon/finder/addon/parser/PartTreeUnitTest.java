@@ -35,7 +35,8 @@ import org.springframework.roo.model.JavaType;
 public class PartTreeUnitTest {
 
 
-  private String[] PREFIXES = {"find", "read", "query"};
+  private String[] PREFIXES = {"find", "read", "query", "count"};
+  private String[] QUERIES = {"find", "read", "query"};
   private String[] DISTINCT = {"", "Distinct"};
   private String[] LIMIT = {"Top", "First"};
   private String[] TEST_LIMIT = {"Top", "First", "", "Top10", "First10"};
@@ -131,7 +132,7 @@ public class PartTreeUnitTest {
   }
 
   @Test
-  public void returnsQuerys() throws Exception {
+  public void returnsOperations() throws Exception {
     test("", PREFIXES);
   }
 
@@ -157,6 +158,11 @@ public class PartTreeUnitTest {
   }
 
   @Test
+  public void badDistinctCount() throws Exception {
+    assertEquals(new PartTree("countDistinctByText", memberDetails).isValid(), false);
+  }
+
+  @Test
   public void badLimit() throws Exception {
     assertFalse(new PartTree("Topfind", memberDetails).isValid());
     assertFalse(new PartTree("findTopDistinctBy", memberDetails).isValid());
@@ -166,6 +172,12 @@ public class PartTreeUnitTest {
     assertFalse(new PartTree("findTopaBy", memberDetails).isValid());
   }
 
+  @Test
+  public void badLimitCount() throws Exception {
+    assertFalse(new PartTree("countDistinctTopByText", memberDetails).isValid());
+    assertFalse(new PartTree("countFirstByText", memberDetails).isValid());
+    assertFalse(new PartTree("countTop1ByText", memberDetails).isValid());
+  }
 
   @Test
   public void badSubjectField() throws Exception {
@@ -406,6 +418,15 @@ public class PartTreeUnitTest {
   }
 
   @Test
+  public void identifiesCount() {
+    PartTree partTree = new PartTree("countByText", memberDetails);
+    assertTrue(partTree.isValid() && partTree.isCountProjection());
+
+    partTree = new PartTree("countTextByText", memberDetails);
+    assertTrue(partTree.isValid() && partTree.isCountProjection());
+  }
+
+  @Test
   public void identifiesFindFirstImplicit() {
     PartTree partTree = new PartTree("findFirstByText", memberDetails);
     assertTrue(partTree.isValid() && partTree.getMaxResults() == 1);
@@ -465,7 +486,7 @@ public class PartTreeUnitTest {
 
   @Test
   public void detectsDistinctCorrectly() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       PartTree partTree = new PartTree(prefix + "DistinctByText", memberDetails);
       assertTrue(partTree.isValid() && partTree.isDistinct());
       partTree = new PartTree(prefix + "DistinctTextByText", memberDetails);
@@ -594,6 +615,17 @@ public class PartTreeUnitTest {
         memberDetails).getReturnType());
   }
 
+  @Test
+  public void validateReturnsCount() throws Exception {
+
+    assertEquals(JavaType.LONG_OBJECT,
+        new PartTree("countPrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(JavaType.LONG_OBJECT,
+        new PartTree("countNumberByText", memberDetails).getReturnType());
+    assertEquals(JavaType.LONG_OBJECT, new PartTree("countByText", memberDetails).getReturnType());
+    assertEquals(JavaType.LONG_OBJECT,
+        new PartTree("countDateByText", memberDetails).getReturnType());
+  }
 
   @Test
   public void validateOneParameter() throws Exception {
@@ -602,7 +634,7 @@ public class PartTreeUnitTest {
     parameters.add(new FinderParameter(JavaType.STRING, new JavaSymbolName("text")));
 
     assertEqualsParameters(parameters,
-        new PartTree("findByTextContaining", memberDetails).getParameters());
+        new PartTree("countByTextContaining", memberDetails).getParameters());
 
     parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number")));
     assertEqualsParameters(parameters, new PartTree("findByTextContainingAndNumberIsLessThan",
@@ -631,7 +663,7 @@ public class PartTreeUnitTest {
     parameters.add(new FinderParameter(JavaType.INT_OBJECT, new JavaSymbolName("number5")));
 
     assertEqualsParameters(parameters, new PartTree(
-        "findByNumberBetweenAndNumberBetweenAndNumberLessThan", memberDetails).getParameters());
+        "countByNumberBetweenAndNumberBetweenAndNumberLessThan", memberDetails).getParameters());
 
 
   }
@@ -662,15 +694,19 @@ public class PartTreeUnitTest {
 
   @Test
   public void optionsAfterQueryPrefix() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       test(prefix, ArrayUtils.addAll(PROPERTIES, new String[] {"Distinct", "First", "Top", "By"}));
     }
   }
 
+  @Test
+  public void optionsAfterCountPrefix() throws Exception {
+    test("count", ArrayUtils.addAll(PROPERTIES, "By"));
+  }
 
   @Test
   public void optionsAfterDistinct() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       prefix += "Distinct";
       test(prefix, ArrayUtils.addAll(PROPERTIES, new String[] {"First", "Top", "By"}));
     }
@@ -678,7 +714,7 @@ public class PartTreeUnitTest {
 
   @Test
   public void optionsAfterLimit() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       for (String distinct : DISTINCT) {
         for (String limit : LIMIT) {
           String query = prefix + distinct + limit;
@@ -690,7 +726,7 @@ public class PartTreeUnitTest {
 
   @Test
   public void optionsAfterLimitNumber() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       for (String distinct : DISTINCT) {
         for (String limit : LIMIT) {
           for (String number : NUMBERS) {
@@ -709,7 +745,7 @@ public class PartTreeUnitTest {
 
   @Test
   public void optionsAfterField() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       for (String distinct : DISTINCT) {
         for (String limit : TEST_LIMIT) {
           for (String field : PROPERTIES) {
@@ -718,17 +754,17 @@ public class PartTreeUnitTest {
         }
       }
     }
+
+    for (String field : PROPERTIES) {
+      test("count" + field, new String[] {"By"});
+    }
   }
 
   @Test
   public void optionsAfterBy() throws Exception {
     for (String prefix : PREFIXES) {
-      for (String distinct : DISTINCT) {
-        for (String limit : TEST_LIMIT) {
-          for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
-            test(prefix + distinct + limit + field + "By", PROPERTIES);
-          }
-        }
+      for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
+        test(prefix + field + "By", PROPERTIES);
       }
     }
   }
@@ -738,21 +774,17 @@ public class PartTreeUnitTest {
   @Test
   public void optionsAfterPredicateStringField() throws Exception {
     for (String prefix : PREFIXES) {
-      for (String distinct : DISTINCT) {
-        for (String limit : TEST_LIMIT) {
-          for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
-            test(prefix + distinct + limit + field + "ByText", ArrayUtils.addAll(
-                ArrayUtils.addAll(STRING_OP, ArrayUtils.addAll(CONJUCTIONS, "")),
-                ArrayUtils.addAll(ArrayUtils.addAll(IGNORE_CASE, ALL_IGNORE_CASE), "OrderBy")));
-          }
-        }
+      for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
+        test(prefix + field + "ByText", ArrayUtils.addAll(
+            ArrayUtils.addAll(STRING_OP, ArrayUtils.addAll(CONJUCTIONS, "")),
+            ArrayUtils.addAll(ArrayUtils.addAll(IGNORE_CASE, ALL_IGNORE_CASE), "OrderBy")));
       }
     }
   }
 
   @Test
   public void optionsAfterPredicateNumberField() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       for (String distinct : DISTINCT) {
         for (String limit : TEST_LIMIT) {
           for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
@@ -770,7 +802,7 @@ public class PartTreeUnitTest {
 
   @Test
   public void optionsAfterPredicateDateField() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       for (String distinct : DISTINCT) {
         for (String limit : TEST_LIMIT) {
           for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
@@ -786,7 +818,7 @@ public class PartTreeUnitTest {
 
   @Test
   public void optionsAfterPredicateprimitiveNumberField() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       for (String distinct : DISTINCT) {
         for (String limit : TEST_LIMIT) {
           for (String field : ArrayUtils.addAll(PROPERTIES, "")) {
@@ -802,7 +834,7 @@ public class PartTreeUnitTest {
 
   @Test
   public void optionsAfterOperator() throws Exception {
-    for (String prefix : PREFIXES) {
+    for (String prefix : QUERIES) {
       for (String distinct : DISTINCT) {
         for (String limit : TEST_LIMIT) {
           for (String field : ArrayUtils.addAll(PROPERTIES, "")) {

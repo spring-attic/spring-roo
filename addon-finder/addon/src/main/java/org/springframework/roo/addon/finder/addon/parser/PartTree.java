@@ -40,11 +40,11 @@ import org.springframework.roo.model.JavaType;
 public class PartTree {
 
   private static final String KEYWORD_TEMPLATE = "(%s)(?=(\\p{Lu}|\\z))";
-  private static final Pattern PREFIX_TEMPLATE = Pattern.compile("^(" + Subject.QUERY_PATTERN
-      + ")((\\p{Lu}.*?))??By");
+  private static final Pattern PREFIX_TEMPLATE = Pattern.compile("^(" + Subject.QUERY_PATTERN + "|"
+      + Subject.COUNT_PATTERN + ")((\\p{Lu}.*?))??By");
 
   /**
-   * Subject is delimited by the query prefix (find, read or query) and {@literal By} delimiter, for
+   * Subject is delimited by a prefix (find, read , query or count) and {@literal By} delimiter, for
    * example "findDistinctUserByNameOrderByAge" would have the subject
    * "DistinctUser".
    */
@@ -138,6 +138,10 @@ public class PartTree {
     Pair<FieldMetadata, String> property = subject.getProperty();
     JavaType type = null;
 
+    // Count subject returns Long
+    if (subject.isCountProjection()) {
+      return JavaType.LONG_OBJECT;
+    }
 
     if (property != null && property.getLeft() != null) {
       // Returns the property type if it is specified
@@ -345,6 +349,15 @@ public class PartTree {
    */
   public boolean isDistinct() {
     return subject.isDistinct();
+  }
+
+  /**
+   * Returns whether a count projection shall be applied.
+   * 
+   * @return
+   */
+  public Boolean isCountProjection() {
+    return subject.isCountProjection();
   }
 
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,20 +37,30 @@ public class Subject {
   private static final String[] QUERY_TYPE = {"find", "query", "read"};
 
   public static final String QUERY_PATTERN = StringUtils.join(QUERY_TYPE, "|");
+  public static final String COUNT_PATTERN = "count";
   private static final String DISTINCT = "Distinct";
   private static final String LIMITING_QUERY_PATTERN = "((First|Top)(\\d+)?)?";
 
+  // Complete subject structures
+  private static final Pattern COMPLETE_COUNT_BY_TEMPLATE = Pattern.compile("^" + COUNT_PATTERN
+      + "(\\p{Lu}.*?)??By");
   private static final Pattern COMPLETE_QUERY_TEMPLATE = Pattern.compile("^(" + QUERY_PATTERN
       + ")(" + DISTINCT + ")?" + LIMITING_QUERY_PATTERN + "(\\p{Lu}.*?)??By");
 
-  private static final Pattern CORRECT_QUERY_TEMPLATE = Pattern.compile("^(" + QUERY_PATTERN
-      + ")?(" + DISTINCT + ")?(First|Top)?(\\d*)?(\\p{Lu}.*)?");
+  // Accepted subject structure to extract parameters
+  private static final Pattern CORRECT_SUBJECT_TEMPLATE = Pattern.compile("^(" + QUERY_PATTERN
+      + "|" + COUNT_PATTERN + ")?(" + DISTINCT + ")?(First|Top)?(\\d*)?(\\p{Lu}.*)?");
+
+  // Template to check if subject is a count projection
+  private static final Pattern COUNT_BY_TEMPLATE = Pattern.compile("^" + COUNT_PATTERN
+      + "(\\p{Lu}.*)?");
 
   private boolean distinct;
   private Integer maxResults;
   private String operation = "";
   private String limit = "";
   private boolean isComplete = false;
+  private boolean isCount = false;
   private Pair<FieldMetadata, String> property = null;
   private List<FieldMetadata> fields;
 
@@ -69,9 +80,47 @@ public class Subject {
 
     this.currentPartTreeInstance = partTree;
     this.fields = fields;
-    this.isComplete = isComplete(source);
+    this.isComplete = isValid(source);
+    this.isCount = PartTree.matches(source, COUNT_BY_TEMPLATE);
 
-    Matcher grp = CORRECT_QUERY_TEMPLATE.matcher(source);
+    if (isCount) {
+      buildCountSubject(source);
+    } else {
+      buildQuerySubject(source);
+    }
+  }
+
+  /**
+   * Extract count parameters from subject
+   * 
+   * @param subject
+   */
+  private void buildCountSubject(String subject) {
+    Matcher grp = CORRECT_SUBJECT_TEMPLATE.matcher(subject);
+
+    // Checks if query format and parameters are correct (not complete)
+    if (!grp.find()) {
+      return;
+    }
+
+    // Extract query type
+    operation = grp.group(1);
+
+    // Extract property
+    property = extractValidField(grp.group(5), fields);
+
+    distinct = false;
+    limit = null;
+    maxResults = null;
+  }
+
+  /**
+   * Extract query parameters from subject
+   * 
+   * @param subject
+   */
+  private void buildQuerySubject(String subject) {
+    Matcher grp = CORRECT_SUBJECT_TEMPLATE.matcher(subject);
 
     // Checks if query format and parameters are correct (not complete)
     if (!grp.find()) {
@@ -82,7 +131,7 @@ public class Subject {
     operation = grp.group(1);
 
     // Extract Distinct
-    this.distinct = source == null ? false : source.contains(DISTINCT);
+    this.distinct = subject == null ? false : subject.contains(DISTINCT);
 
     // Extract if there is a limitation  expression
     limit = grp.group(3);
@@ -142,20 +191,6 @@ public class Subject {
     return currentPartTreeInstance.extractValidProperty(source, fields);
   }
 
-  /**
-   * Checks if subject is completed. A completed subject has
-   * all their expressions well-defined, starts with read,
-   * query or find, and ends with "By" token.
-   * 
-   * @param subject
-   * @return true if subject is completed. Otherwise returns false.
-   */
-  private boolean isComplete(String subject) {
-    if (PartTree.matches(subject, COMPLETE_QUERY_TEMPLATE)) {
-      return true;
-    }
-    return false;
-  }
 
   /**
    * Returns whether we indicate distinct lookup of entities.
@@ -164,6 +199,15 @@ public class Subject {
    */
   public boolean isDistinct() {
     return distinct;
+  }
+
+  /**
+   * Returns whether a count projection shall be applied.
+   * 
+   * @return
+   */
+  public Boolean isCountProjection() {
+    return isCount;
   }
 
   /**
@@ -224,13 +268,14 @@ public class Subject {
   /**
    * Returns true if source is a well-defined subject. However, it does not validate if the property exist in the entity domain
    * @param source
-   * @return . 
+   * @return  
    */
   public static boolean isValid(String source) {
-    if (PartTree.matches(source, COMPLETE_QUERY_TEMPLATE)) {
-      return true;
+    if (PartTree.matches(source, COUNT_BY_TEMPLATE)) {
+      return PartTree.matches(source, COMPLETE_COUNT_BY_TEMPLATE);
+    } else {
+      return PartTree.matches(source, COMPLETE_QUERY_TEMPLATE);
     }
-    return false;
   }
 
   /**
@@ -248,7 +293,7 @@ public class Subject {
 
     // Checks if subject has an operation
     if (StringUtils.isBlank(operation)) {
-      return Arrays.asList(QUERY_TYPE);
+      return Arrays.asList(ArrayUtils.add(QUERY_TYPE, COUNT_PATTERN));
     }
 
     // Once operation is included subject definition can end, so "By" option is always available
@@ -263,7 +308,7 @@ public class Subject {
       }
 
       // Check if subject has a limiting expression. It can only be added before the property
-      if (StringUtils.isBlank(limit)) {
+      if (StringUtils.isBlank(limit) && !isCountProjection()) {
         options.add(query.concat("First"));
         options.add(query.concat("Top"));
 
@@ -280,7 +325,7 @@ public class Subject {
           }
         }
 
-      } else if (maxResults == null) {
+      } else if (maxResults == null && !isCountProjection()) {
 
         // Optionally, a limiting expression can have a number as parameter
         options.add(query + "[Number]");
