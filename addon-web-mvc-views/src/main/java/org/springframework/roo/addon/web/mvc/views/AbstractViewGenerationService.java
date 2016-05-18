@@ -549,11 +549,6 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     // Getting entity fields
     List<FieldMetadata> entityFields = entityDetails.getFields();
 
-    // Getting all controllers
-    Set<ClassOrInterfaceTypeDetails> allControllers =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_CONTROLLER);
-
     List<FieldItem> detailFieldViewItems = new ArrayList<FieldItem>();
     for (FieldMetadata entityField : entityFields) {
       // Exclude id and version fields
@@ -589,37 +584,25 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
             fieldItem.addConfigurationElement("identifierField", identifierFields.get(0)
                 .getFieldName().getSymbolName());
 
-            // Getting controllerPath
-            String controllerPath = "";
 
-            Iterator<ClassOrInterfaceTypeDetails> it = allControllers.iterator();
-            while (it.hasNext()) {
-              ClassOrInterfaceTypeDetails controller = it.next();
-              AnnotationMetadata annotation = controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
-              AnnotationAttributeValue<JavaType> entity = annotation.getAttribute("entity");
-              AnnotationAttributeValue<String> path = annotation.getAttribute("path");
-              if (entity.getValue().equals(referencedField) && path != null) {
-                controllerPath = path.getValue();
-              }
-            }
-
-            if (StringUtils.isBlank(controllerPath)) {
-              continue;
-            }
-
-            fieldItem.addConfigurationElement("controllerPath", controllerPath);
+            fieldItem.addConfigurationElement(
+                "controllerPath",
+                "/"
+                    + Noun.pluralOf(referencedField.getSimpleTypeName().toLowerCase(),
+                        Locale.ENGLISH));
 
             // Getting referencedfield label plural
-            fieldItem.addConfigurationElement("referencedFieldLabelPlural",
-                FieldItem.buildLabel(referencedField.getSimpleTypeName(), "plural"));
+            fieldItem.addConfigurationElement("referencedFieldLabelPlural", FieldItem.buildLabel(
+                entityName,
+                Noun.pluralOf(referencedField.getSimpleTypeName().toLowerCase(), Locale.ENGLISH)));
 
             // Getting all referenced fields
             fieldItem.addConfigurationElement(
                 "referenceFieldFields",
                 getFieldViewItems(
                     getMemberDetailsScanner().getMemberDetails(getClass().toString(),
-                        referencedFieldDetails), referencedFieldDetails.getName()
-                        .getSimpleTypeName(), true, ctx));
+                        referencedFieldDetails), entityName + "."
+                        + entityField.getFieldName().getSymbolName(), true, ctx));
 
           } else {
             // Ignore set or list which base types are not entity field

@@ -371,11 +371,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     List<MethodMetadata> detailsMethods = new ArrayList<MethodMetadata>();
 
-    // Getting all defined controllers and services. This controllers will be used on 
-    // next steps
-    Set<ClassOrInterfaceTypeDetails> allDefinedControllers =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_CONTROLLER);
+    // Getting all defined services. 
     Set<ClassOrInterfaceTypeDetails> allDefinedServices =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_SERVICE);
@@ -399,73 +395,62 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
             && getTypeLocationService().getTypeDetails(detailType) != null
             && getTypeLocationService().getTypeDetails(detailType).getAnnotation(
                 RooJavaType.ROO_JPA_ENTITY) != null) {
-          // Check if exists some controller associated to current entity before
-          // continue
-          Iterator<ClassOrInterfaceTypeDetails> it = allDefinedControllers.iterator();
-          while (it.hasNext()) {
-            ClassOrInterfaceTypeDetails detailController = it.next();
-            AnnotationAttributeValue<JavaType> entityAttr =
-                detailController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("entity");
-            if (entityAttr != null && entityAttr.getValue().equals(detailType)) {
 
-              // Getting service that manages detail type
-              for (ClassOrInterfaceTypeDetails detailService : allDefinedServices) {
+          // Getting service that manages detail type
+          for (ClassOrInterfaceTypeDetails detailService : allDefinedServices) {
 
-                AnnotationAttributeValue<JavaType> entityServiceAttr =
-                    detailService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
-                if (entityServiceAttr != null && entityServiceAttr.getValue().equals(detailType)) {
+            AnnotationAttributeValue<JavaType> entityServiceAttr =
+                detailService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+            if (entityServiceAttr != null && entityServiceAttr.getValue().equals(detailType)) {
 
-                  // Getting count method for current detailType
-                  MethodMetadata countMethod = null;
-                  MethodMetadata findAllByReferencedFieldMethod = null;
-                  final LogicalPath logicalPath =
-                      PhysicalTypeIdentifier.getPath(detailService.getDeclaredByMetadataId());
-                  final String detailServiceMetadataKey =
-                      ServiceMetadata.createIdentifier(detailService.getType(), logicalPath);
-                  final ServiceMetadata detailServiceMetadata =
-                      (ServiceMetadata) getMetadataService().get(detailServiceMetadataKey);
+              // Getting count method for current detailType
+              MethodMetadata countMethod = null;
+              MethodMetadata findAllByReferencedFieldMethod = null;
+              final LogicalPath logicalPath =
+                  PhysicalTypeIdentifier.getPath(detailService.getDeclaredByMetadataId());
+              final String detailServiceMetadataKey =
+                  ServiceMetadata.createIdentifier(detailService.getType(), logicalPath);
+              final ServiceMetadata detailServiceMetadata =
+                  (ServiceMetadata) getMetadataService().get(detailServiceMetadataKey);
 
-                  Map<JavaType, MethodMetadata> countMethods =
-                      detailServiceMetadata.getCountByReferenceFieldDefinedMethod();
+              Map<JavaType, MethodMetadata> countMethods =
+                  detailServiceMetadata.getCountByReferenceFieldDefinedMethod();
 
-                  Map<JavaType, MethodMetadata> findAllReferencedFieldMethods =
-                      detailServiceMetadata.getReferencedFieldsFindAllDefinedMethods();
+              Map<JavaType, MethodMetadata> findAllReferencedFieldMethods =
+                  detailServiceMetadata.getReferencedFieldsFindAllDefinedMethods();
 
-                  for (Entry<JavaType, MethodMetadata> method : countMethods.entrySet()) {
-                    if (method.getKey().equals(this.entity)) {
-                      countMethod = method.getValue();
-                      break;
-                    }
-                  }
-
-                  if (countMethod == null) {
-                    continue;
-                  }
-
-                  for (Entry<JavaType, MethodMetadata> method : findAllReferencedFieldMethods
-                      .entrySet()) {
-                    if (method.getKey().equals(this.entity)) {
-                      findAllByReferencedFieldMethod = method.getValue();
-                      break;
-                    }
-                  }
-
-                  if (findAllByReferencedFieldMethod == null) {
-                    continue;
-                  }
-
-
-                  MethodMetadata listDetailsMethod =
-                      getListDetailsMethod(detailType, detailService.getType(), detailController,
-                          findAllByReferencedFieldMethod);
-                  MethodMetadata listDetailsDatatablesMethod =
-                      getListDetailsDatatablesMethod(detailType, detailService.getType(),
-                          detailController, countMethod);
-                  if (listDetailsMethod != null && listDetailsDatatablesMethod != null) {
-                    detailsMethods.add(listDetailsMethod);
-                    detailsMethods.add(listDetailsDatatablesMethod);
-                  }
+              for (Entry<JavaType, MethodMetadata> method : countMethods.entrySet()) {
+                if (method.getKey().equals(this.entity)) {
+                  countMethod = method.getValue();
+                  break;
                 }
+              }
+
+              if (countMethod == null) {
+                continue;
+              }
+
+              for (Entry<JavaType, MethodMetadata> method : findAllReferencedFieldMethods
+                  .entrySet()) {
+                if (method.getKey().equals(this.entity)) {
+                  findAllByReferencedFieldMethod = method.getValue();
+                  break;
+                }
+              }
+
+              if (findAllByReferencedFieldMethod == null) {
+                continue;
+              }
+
+
+              MethodMetadata listDetailsMethod =
+                  getListDetailsMethod(detailType, detailService.getType(),
+                      findAllByReferencedFieldMethod);
+              MethodMetadata listDetailsDatatablesMethod =
+                  getListDetailsDatatablesMethod(detailType, detailService.getType(), countMethod);
+              if (listDetailsMethod != null && listDetailsDatatablesMethod != null) {
+                detailsMethods.add(listDetailsMethod);
+                detailsMethods.add(listDetailsDatatablesMethod);
               }
             }
           }
@@ -482,12 +467,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * 
    * @param detailType
    * @param detailService
-   * @param detailController
    * @param findAllByReferencedFieldMethod
    * @return
    */
   private MethodMetadata getListDetailsMethod(JavaType detailType, JavaType detailService,
-      ClassOrInterfaceTypeDetails detailController, MethodMetadata findAllByReferencedFieldMethod) {
+      MethodMetadata findAllByReferencedFieldMethod) {
 
     // Calculate method path value
     // Getting identifier Fields
@@ -497,16 +481,10 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
       return null;
     }
 
-    // Getting detail controller path
-    AnnotationAttributeValue<String> pathAttr =
-        detailController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("path");
-    if (pathAttr == null) {
-      return null;
-    }
 
     String listDetailsPath =
-        String.format("/{%s}%s/", identifierFields.get(0).getFieldName().getSymbolName(),
-            pathAttr.getValue());
+        String.format("/{%s}/%s/", identifierFields.get(0).getFieldName().getSymbolName(),
+            Noun.pluralOf(detailType.getSimpleTypeName().toLowerCase(), Locale.ENGLISH));
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
@@ -582,13 +560,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * 
    * @param detailType
    * @param detailService
-   * @param detailController
    * @param countMethod
    * @return
    */
   private MethodMetadata getListDetailsDatatablesMethod(JavaType detailType,
-      JavaType detailService, ClassOrInterfaceTypeDetails detailController,
-      MethodMetadata countMethod) {
+      JavaType detailService, MethodMetadata countMethod) {
 
     // Calculate method path value
     // Getting identifier Fields
@@ -601,16 +577,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     MethodMetadata identifierAccessor =
         getPersistenceMemberLocator().getIdentifierAccessor(detailType);
 
-    // Getting detail controller path
-    AnnotationAttributeValue<String> pathAttr =
-        detailController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("path");
-    if (pathAttr == null) {
-      return null;
-    }
-
     String listDetailsPath =
-        String.format("/{%s}%s/", identifierFields.get(0).getFieldName().getSymbolName(),
-            pathAttr.getValue());
+        String.format("/{%s}/%s/", identifierFields.get(0).getFieldName().getSymbolName(),
+            Noun.pluralOf(detailType.getSimpleTypeName().toLowerCase(), Locale.ENGLISH));
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =

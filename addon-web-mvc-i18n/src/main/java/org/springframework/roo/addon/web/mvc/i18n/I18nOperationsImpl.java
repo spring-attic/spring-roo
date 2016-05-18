@@ -211,7 +211,7 @@ public class I18nOperationsImpl implements I18nOperations {
 
     final String entityName = entity.getSimpleTypeName();
 
-    properties.put(buildLabel(entityName, ""), new JavaSymbolName(entity.getSimpleTypeName()
+    properties.put(buildLabel(entityName), new JavaSymbolName(entity.getSimpleTypeName()
         .toLowerCase()).getReadableSymbolName());
 
     final String pluralResourceId = buildLabel(entity.getSimpleTypeName(), "plural");
@@ -232,6 +232,31 @@ public class I18nOperationsImpl implements I18nOperations {
       final String fieldResourceId = buildLabel(entityName, field.getFieldName().getSymbolName());
 
       properties.put(fieldResourceId, field.getFieldName().getReadableSymbolName());
+
+      // Add related entity fields
+      if (field.getFieldType().getFullyQualifiedTypeName().equals(Set.class.getName())
+          || field.getFieldType().getFullyQualifiedTypeName().equals(List.class.getName())) {
+
+        // Getting inner type
+        JavaType referencedEntity = field.getFieldType().getBaseType();
+
+        ClassOrInterfaceTypeDetails referencedEntityDetails =
+            getTypeLocationService().getTypeDetails(referencedEntity);
+
+        if (referencedEntityDetails != null
+            && referencedEntityDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+
+          for (final FieldMetadata referencedEntityField : getMemberDetailsScanner()
+              .getMemberDetails(this.getClass().getName(), referencedEntityDetails).getFields()) {
+
+            final String referenceEntityFieldResourceId =
+                buildLabel(entityName, field.getFieldName().getSymbolName(), referencedEntityField
+                    .getFieldName().getSymbolName());
+            properties.put(referenceEntityFieldResourceId, referencedEntityField.getFieldName()
+                .getReadableSymbolName());
+          }
+        }
+      }
     }
 
     // Update messages bundles of each installed language
@@ -254,22 +279,19 @@ public class I18nOperationsImpl implements I18nOperations {
   }
 
   /**
-   * Builds the label of the specified field and adds it to the entity label
+   * Builds the label of the specified field by joining its names and adding it to the entity label
    * 
    * @param entity the entity name
-   * @param field the field name
+   * @param fieldNames list of fields
    * @return label
    */
-  private static String buildLabel(String entityName, String fieldName) {
-    String entityLabel = XmlUtils.convertId("label." + entityName.toLowerCase());
+  private static String buildLabel(String entityName, String... fieldNames) {
+    String label = XmlUtils.convertId("label." + entityName.toLowerCase());
 
-    // If field is blank or null, only entity label will be generated
-    if (fieldName != null && StringUtils.isBlank(fieldName)) {
-      return entityLabel;
+    for (String fieldName : fieldNames) {
+      label = XmlUtils.convertId(label.concat(".").concat(fieldName.toLowerCase()));
     }
-
-    // Else, is necessary to concat fieldName to generate full field label
-    return XmlUtils.convertId(entityLabel.concat(".").concat(fieldName.toLowerCase()));
+    return label;
   }
 
   /**
