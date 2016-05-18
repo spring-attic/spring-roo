@@ -109,6 +109,13 @@ public interface ApplicationConfigService {
   void updateProperties(String moduleName, String prefix, Map<String, String> properties,
       String profile, boolean force);
 
+  /**
+   * Retrieves all profiles that have created an application config file in the specified module,
+   *  
+   * @param moduleName module where configurations will be located. 
+   * @return the list of profiles
+   */
+  List<String> getApplicationProfiles(String moduleName);
 
   /**
    * Retrieves all property key/value pairs from the application config file of the specified module,

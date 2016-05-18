@@ -1,5 +1,6 @@
 package org.springframework.roo.application.config;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -12,6 +13,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
@@ -111,6 +113,35 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
       final Map<String, String> properties, String profile, boolean force) {
     propFilesManager.changeProperties(getApplicationConfigFileLocation(moduleName),
         getAppliCationConfigFileName(profile), prefix, properties, true, force);
+  }
+
+  @Override
+  public List<String> getApplicationProfiles(String moduleName) {
+
+    List<String> profiles = new ArrayList<String>();
+    
+    final String applicationConfigFilename =
+        StringUtils.removeEnd(getSpringConfigLocation(moduleName),
+            DEFAULT_APPLICATION_CONFIG_FILE_EXTENSION);
+
+    // Find application config files
+    for (final FileDetails applicationConfig : fileManager
+        .findMatchingAntPath(applicationConfigFilename + "*"
+            + DEFAULT_APPLICATION_CONFIG_FILE_EXTENSION)) {
+
+      final String applicationConfigPath = applicationConfig.getCanonicalPath();
+      if (!fileManager.exists(applicationConfigPath)) {
+        continue;
+      }
+
+      // Extract profile
+      String profile =
+          StringUtils.substringBetween(applicationConfigPath, applicationConfigFilename,
+              ".properties");
+      profiles.add(StringUtils.removeStart(profile, "-"));
+    }
+
+    return profiles;
   }
 
   @Override

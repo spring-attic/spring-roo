@@ -110,7 +110,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
     // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
     updateDependencies(module, configuration, ormProvider, jdbcDatabase, stratersXPath,
-        providersXPath, databaseXPath);
+        providersXPath, databaseXPath, profile);
 
     // Update Spring Config File with spring.datasource.* domain properties
     updateApplicationProperties(module.getModuleName(), ormProvider, jdbcDatabase, hostName,
@@ -426,10 +426,11 @@ public class JpaOperationsImpl implements JpaOperations {
    * @param ormProvider
    * @param jdbcDatabase
    * @param startersXPath
+   * @param profile
    */
   private void updateDependencies(final Pom module, final Element configuration,
       final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String startersXPath,
-      final String providersXPath, final String databaseXPath) {
+      final String providersXPath, final String databaseXPath, String profile) {
 
     final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
@@ -467,6 +468,28 @@ public class JpaOperationsImpl implements JpaOperations {
         XmlUtils.findElements("/configuration/spring/dependencies/dependency", configuration);
     for (final Element dependencyElement : springDependencies) {
       requiredDependencies.add(new Dependency(dependencyElement));
+    }
+
+    // Add dependencies used by other profiles, excluding the current profile
+    List<String> profiles = applicationConfigService.getApplicationProfiles(module.getModuleName());
+    profiles.remove(profile);
+
+    for (String applicationProfile : profiles) {
+
+      // Extract database
+      final String driver =
+          applicationConfigService.getProperty(module.getModuleName(), DATASOURCE_PREFIX,
+              DATABASE_DRIVER, applicationProfile);
+
+      for (JdbcDatabase database : JdbcDatabase.values()) {
+        if (database.getDriverClassName().equals(driver)) {
+          for (final Element dependencyElement : XmlUtils.findElements(database.getConfigPrefix()
+              + "/dependencies/dependency", configuration)) {
+            requiredDependencies.add(new Dependency(dependencyElement));
+          }
+          break;
+        }
+      }
     }
 
 

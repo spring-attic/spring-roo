@@ -1,6 +1,6 @@
 # Create project, entities and fields to be able to test subsequent commands.
 project setup --topLevelPackage aaa.bb.c.test
-jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+jpa setup --provider HIBERNATE --database POSTGRES
 entity jpa --class ~.domain.Entity1
 entity jpa --class ~.domain.Entity2
 
@@ -211,6 +211,62 @@ field set --fieldName list_field_join_table --type ~.domain.Extended_Entity2 --c
 #====================================================================================================================
 
 
+#====================================================================================================================
+# TEST 15: Create a new profile
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test postgres dependency is not removed when a new profile is added
+#
+jpa setup --provider HIBERNATE --database ORACLE --profile dev
+#      
+# Output: Updated ROOT/pom.xml [added dependency com.oracle:ojdbc14:10.2.0.5; 
+#            skipped dependencies org.springframework.boot:spring-boot-starter-data-jpa:, org.postgresql:postgresql:]
+#
+# Result: Oracle dependency is added and postgres dependency is skipped  
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 16: Update database of a profile
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test profile old dependency is removed and other profiles dependencies are not removed
+#
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT  --profile dev --force
+#      
+# Output: Updated ROOT/pom.xml [removed dependency com.oracle:ojdbc14:10.2.0.5;
+#           added dependency org.hsqldb:hsqldb:; 
+#           skipped dependencies org.springframework.boot:spring-boot-starter-data-jpa:, org.postgresql:postgresql:]
+#
+# Result: Removes Oracle dependency and adds hsql dependency, while postgres dependency is skipped   
+#====================================================================================================================
+
+#====================================================================================================================
+# TEST 17: Update database of default profile
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test profile old dependency is removed and other profiles dependencies are not removed
+#
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT --force
+#      
+# Output: Updated ROOT/pom.xml [removed dependency org.postgresql:postgresql:; 
+#            skipped dependencies org.springframework.boot:spring-boot-starter-data-jpa:, org.hsqldb:hsqldb:, org.hsqldb:hsqldb:]
+#
+# Result: Removes postgres dependency and hsql is skipped since it is already added
+#====================================================================================================================
+
+
+#====================================================================================================================
+# TEST 18:  Update database, shared by several profiles, of a profile 
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test profile old dependency is not removed 
+#
+jpa setup --provider HIBERNATE --database POSTGRES  --profile dev --force
+#      
+# Output: Updated ROOT/pom.xml [added dependency org.postgresql:postgresql:; 
+#            skipped dependencies org.springframework.boot:spring-boot-starter-data-jpa:, org.hsqldb:hsqldb:]
+#
+# Result: Adds postgres dependency and skips hsql since other profile uses it    
+#====================================================================================================================
+
+
 ##########################################################################
 #######                      MANUAL TESTS                        #########
 ##########################################################################
@@ -222,10 +278,11 @@ field set --fieldName list_field_join_table --type ~.domain.Extended_Entity2 --c
 
 
 #====================================================================================================================
-# TEST 15: Try to create set field with wrong CascadeType
+# TEST 19: Try to create set field with wrong CascadeType
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test field set command with the optional parameter --cascadeType with a wrong value.
 #
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT --force
 #field set --fieldName entity1_wrong_cascade --type ~.domain.Entity1 --cardinality ONE_TO_MANY --cascadeType WRONG
 #      
 # Output: java.lang.IllegalArgumentException: Failed to convert 'WRONG' to type Cascade for option 'cascadeType'
@@ -236,7 +293,7 @@ field set --fieldName list_field_join_table --type ~.domain.Extended_Entity2 --c
 
 
 #====================================================================================================================
-# TEST 16: Try to create extended entity with identifier param without using --force
+# TEST 20: Try to create extended entity with identifier param without using --force
 #--------------------------------------------------------------------------------------------------------------------
 # Goal:   Test entity jpa command with the optional parameter --extends and other identifier param.
 #
