@@ -224,7 +224,7 @@
                             data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
                             data-order="[[ 0, &quot;asc&quot; ]]"
                             data-create-url-function="create${field.configuration.referencedFieldType}Url">
-                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabelPlural}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
+                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
                             <thead>
                               <tr>
                                 <#list field.configuration.referenceFieldFields as referencedFieldField>

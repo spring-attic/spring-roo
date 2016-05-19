@@ -444,10 +444,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
 
               MethodMetadata listDetailsMethod =
-                  getListDetailsMethod(detailType, detailService.getType(),
+                  getListDetailsMethod(field.getFieldName(), detailType, detailService.getType(),
                       findAllByReferencedFieldMethod);
               MethodMetadata listDetailsDatatablesMethod =
-                  getListDetailsDatatablesMethod(detailType, detailService.getType(), countMethod);
+                  getListDetailsDatatablesMethod(field.getFieldName(), detailType,
+                      detailService.getType(), countMethod);
               if (listDetailsMethod != null && listDetailsDatatablesMethod != null) {
                 detailsMethods.add(listDetailsMethod);
                 detailsMethods.add(listDetailsDatatablesMethod);
@@ -465,13 +466,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * This method generates listDetailsMethod that will be used
    * to display relations between entities
    * 
+   * @param fieldName 
    * @param detailType
    * @param detailService
    * @param findAllByReferencedFieldMethod
    * @return
    */
-  private MethodMetadata getListDetailsMethod(JavaType detailType, JavaType detailService,
-      MethodMetadata findAllByReferencedFieldMethod) {
+  private MethodMetadata getListDetailsMethod(JavaSymbolName fieldName, JavaType detailType,
+      JavaType detailService, MethodMetadata findAllByReferencedFieldMethod) {
 
     // Calculate method path value
     // Getting identifier Fields
@@ -484,7 +486,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     String listDetailsPath =
         String.format("/{%s}/%s/", identifierFields.get(0).getFieldName().getSymbolName(),
-            Noun.pluralOf(detailType.getSimpleTypeName().toLowerCase(), Locale.ENGLISH));
+            fieldName.getSymbolName().toLowerCase());
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
@@ -558,13 +560,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * This method generates listDetailsDatatablesMethod that will be used
    * to display relations between entities using DTT component
    * 
+   * @param fieldName 
    * @param detailType
    * @param detailService
    * @param countMethod
    * @return
    */
-  private MethodMetadata getListDetailsDatatablesMethod(JavaType detailType,
-      JavaType detailService, MethodMetadata countMethod) {
+  private MethodMetadata getListDetailsDatatablesMethod(JavaSymbolName fieldName,
+      JavaType detailType, JavaType detailService, MethodMetadata countMethod) {
 
     // Calculate method path value
     // Getting identifier Fields
@@ -579,7 +582,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     String listDetailsPath =
         String.format("/{%s}/%s/", identifierFields.get(0).getFieldName().getSymbolName(),
-            Noun.pluralOf(detailType.getSimpleTypeName().toLowerCase(), Locale.ENGLISH));
+            fieldName.getSymbolName().toLowerCase());
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =

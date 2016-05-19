@@ -585,16 +585,12 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
                 .getFieldName().getSymbolName());
 
 
-            fieldItem.addConfigurationElement(
-                "controllerPath",
-                "/"
-                    + Noun.pluralOf(referencedField.getSimpleTypeName().toLowerCase(),
-                        Locale.ENGLISH));
+            fieldItem.addConfigurationElement("controllerPath", "/"
+                + entityField.getFieldName().getSymbolName().toLowerCase());
 
             // Getting referencedfield label plural
-            fieldItem.addConfigurationElement("referencedFieldLabelPlural", FieldItem.buildLabel(
-                entityName,
-                Noun.pluralOf(referencedField.getSimpleTypeName().toLowerCase(), Locale.ENGLISH)));
+            fieldItem.addConfigurationElement("referencedFieldLabel",
+                FieldItem.buildLabel(entityName, entityField.getFieldName().getSymbolName()));
 
             // Getting all referenced fields
             fieldItem.addConfigurationElement(

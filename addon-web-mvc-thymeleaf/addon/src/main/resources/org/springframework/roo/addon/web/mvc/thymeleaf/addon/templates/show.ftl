@@ -162,7 +162,7 @@
                                  data-row-id="${field.configuration.identifierField}"
                                  data-select="single"
                                  data-order="[[ 0, &quot;asc&quot; ]]">
-                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabelPlural}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
+                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
                             <thead>
                               <tr>
                                 <#list field.configuration.referenceFieldFields as referencedFieldField>
