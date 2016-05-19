@@ -157,14 +157,16 @@
           <fieldset>
             <#list fields as field>
                 <#if field.type == "TEXT">
-                    <@text.input label=field.label fieldName=field.fieldName />
+                    <@text.input label=field.label fieldName=field.fieldName z=field.z />
                 <#elseif field.type == "DATE">
                     <@date.input label=field.label 
                     fieldName=field.fieldName
+                    z=field.z
                     format=field.configuration.format />
                 <#elseif field.type == "REFERENCE">
                     <@reference.input label=field.label 
                         fieldName=field.fieldName 
+                        z=field.z
                         referencedEntity=field.configuration.referencedEntity
                         identifierField=field.configuration.identifierField
                         referencedPath=field.configuration.referencedPath
@@ -173,9 +175,10 @@
                 <#elseif field.type == "ENUM">
                     <@enum.input label=field.label 
                     fieldName=field.fieldName
+                    z=field.z
                     items=field.configuration.items />                
                 <#elseif field.type == "BOOLEAN">
-                    <@checkbox.input label=field.label fieldName=field.fieldName />                
+                    <@checkbox.input label=field.label fieldName=field.fieldName z=field.z />                
                 </#if>
             </#list>
 

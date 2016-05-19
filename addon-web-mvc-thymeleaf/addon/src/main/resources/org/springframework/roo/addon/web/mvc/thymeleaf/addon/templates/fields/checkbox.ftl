@@ -1,4 +1,4 @@
-<#macro input label fieldName>
+<#macro input label fieldName z>
 <div class="form-group"
   data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'has-error has-feedback'">
   <label for="${fieldName}" class="col-md-3 control-label" 
@@ -6,7 +6,7 @@
   <div class="col-md-3">
     <input type="checkbox" data-th-field="*{${fieldName}}" class="form-control"
       data-th-title="${r"#{"}label_requiredfield${r"}"}"
-      data-toggle="tooltip"/> 
+      data-toggle="tooltip" data-z="${z}"/> 
      <span id="name-help" class="help-block alert"
       data-th-if="${r"${#fields.hasErrors"}('${fieldName}')}"
       data-th-errors="*{${fieldName}}">Help message.</span>

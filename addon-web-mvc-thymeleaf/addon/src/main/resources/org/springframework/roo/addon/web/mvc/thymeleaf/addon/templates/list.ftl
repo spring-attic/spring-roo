@@ -167,6 +167,7 @@
                  class="table table-striped table-hover table-bordered" 
                  data-row-id="${identifierField}"
                  data-select="single"
+                 data-z="${z}"
                  data-order="[[ 0, &quot;asc&quot; ]]"
                  data-th-attr="data-create-url=@{${controllerPath}/create-form/}">
             <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
@@ -221,6 +222,7 @@
                         <div class="table-responsive">
                           <table id="${field.configuration.referencedFieldType}Table" 
                             class="table table-striped table-hover table-bordered"
+                            data-z="${field.z}"
                             data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
                             data-order="[[ 0, &quot;asc&quot; ]]"
                             data-create-url-function="create${field.configuration.referencedFieldType}Url">

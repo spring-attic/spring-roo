@@ -75,6 +75,7 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
       if (ctx.getEntityName() != null) {
         input.put("entityLabel", FieldItem.buildLabel(ctx.getEntityName(), ""));
         input.put("entityLabelPlural", FieldItem.buildLabel(ctx.getEntityName(), "plural"));
+        input.put("z", new FieldItem("", ctx.getEntityName()).getZ());
       }
       input.put("identifierField", ctx.getIdentifierField());
       input.put("modelAttribute", String.format("${%s}", ctx.getModelAttribute()));

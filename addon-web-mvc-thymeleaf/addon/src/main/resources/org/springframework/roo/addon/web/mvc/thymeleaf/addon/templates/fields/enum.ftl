@@ -1,10 +1,10 @@
-<#macro input label fieldName items>
+<#macro input label fieldName z items>
 <div class="form-group" data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'has-error has-feedback'">
     <label for="${fieldName}" class="col-md-3 control-label" data-th-text="${r"#{"}${label}${r"}"}">${fieldName}</label>
     <div class="col-md-6">
       <!-- Select2 -->
       <select data-th-field="*{${fieldName}}" class="dropdown-select-simple" style="width: 50%" 
-        data-placeholder="Select an option" data-allow-clear="true">
+        data-placeholder="Select an option" data-allow-clear="true" data-z="${z}">
          <option data-th-each="item : ${r"${"}${items}${r"}"}" 
               data-th-value="${r"${item}"}"
               data-th-text="${r"${item}"}">Value</option>

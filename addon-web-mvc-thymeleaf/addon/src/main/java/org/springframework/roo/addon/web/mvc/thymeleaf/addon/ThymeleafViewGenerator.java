@@ -1,11 +1,16 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.parser.Parser;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
 import org.springframework.roo.project.Path;
@@ -66,8 +71,17 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
 
   @Override
   public Document merge(Document existingDoc, Document newDoc) {
-    // TODO: Merge existing document and new document. Now, return always
-    // new document.
+    final List<Element> updatedElements = existingDoc.select("[data-z=user-managed]");
+
+    for (Element updatedElement : updatedElements) {
+      if (updatedElement.hasAttr("id")) {
+
+        final Element element = newDoc.select("#" + updatedElement.attr("id")).first();
+        if (element != null) {
+          element.replaceWith(updatedElement);
+        }
+      }
+    }
     return newDoc;
   }
 

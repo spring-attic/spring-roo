@@ -128,8 +128,10 @@
         
         <dl class="dl-horizontal">
           <#list fields as field>
-            <dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
-            <dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
+          	<div data-th-id="*{{${field.fieldName}}}" data-z="${field.z}">
+            	<dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
+       			<dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
+            </div>
           </#list>
           
           <#if details?size != 0>
@@ -161,6 +163,7 @@
                                  class="table table-striped table-hover table-bordered" 
                                  data-row-id="${field.configuration.identifierField}"
                                  data-select="single"
+                                 data-z="${field.z}"
                                  data-order="[[ 0, &quot;asc&quot; ]]">
                             <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
                             <thead>
