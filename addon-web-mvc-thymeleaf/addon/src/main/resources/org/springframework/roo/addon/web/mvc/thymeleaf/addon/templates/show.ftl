@@ -128,7 +128,7 @@
         
         <dl class="dl-horizontal">
           <#list fields as field>
-          	<div data-th-id="*{{${field.fieldName}}}" data-z="${field.z}">
+          	<div id="${field.fieldName}" data-z="${field.z}">
             	<dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
        			<dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
             </div>
