@@ -569,7 +569,7 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * Find entities in project and returns a list with their fully qualified names.
+   * Find services in project and returns a list with their fully qualified names.
    * 
    * @param shellContext
    * @return List<String> with available entity full qualified names.

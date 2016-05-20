@@ -832,10 +832,10 @@ public class FieldCommands implements CommandMarker {
       help = "Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)")
   public void addFieldSetJpa(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-      @CliOption(key = "type", mandatory = true,
-          help = "The entity which will be contained within the Set") final JavaType fieldType,
       @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
+      @CliOption(key = "type", mandatory = true,
+          help = "The entity which will be contained within the Set") final JavaType fieldType,
       @CliOption(key = "mappedBy", mandatory = false,
           help = "The field name on the referenced type which owns the relationship") final JavaSymbolName mappedBy,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
@@ -1011,10 +1011,10 @@ public class FieldCommands implements CommandMarker {
       help = "Adds a private List field to an existing Java source file (eg the 'one' side of a many-to-one)")
   public void addFieldListJpa(
       @CliOption(key = {"", "fieldName"}, mandatory = true, help = "The name of the field to add") final JavaSymbolName fieldName,
-      @CliOption(key = "type", mandatory = true,
-          help = "The entity which will be contained within the Set") final JavaType fieldType,
       @CliOption(key = "class", mandatory = true, unspecifiedDefaultValue = "*",
           optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
+      @CliOption(key = "type", mandatory = true,
+          help = "The entity which will be contained within the Set") final JavaType fieldType,
       @CliOption(key = "mappedBy", mandatory = false,
           help = "The field name on the referenced type which owns the relationship") final JavaSymbolName mappedBy,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
