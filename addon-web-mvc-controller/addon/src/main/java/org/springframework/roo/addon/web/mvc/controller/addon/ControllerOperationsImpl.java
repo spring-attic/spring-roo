@@ -199,7 +199,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     createClassFromTemplate(module, "ExceptionHandlerAdvice-template._java",
         "ExceptionHandlerAdvice", "http.converter.json");
 
-    // Adding spring.jackson.serialization.indent_output property
+    // Adding spring.jackson.serialization.indent-output property
     getApplicationConfigService().addProperty(module.getModuleName(),
         "spring.jackson.serialization.indent-output", "true", "", true);
 

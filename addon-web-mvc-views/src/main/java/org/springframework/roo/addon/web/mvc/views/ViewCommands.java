@@ -61,7 +61,7 @@ public class ViewCommands implements CommandMarker {
    * This indicator checks if --module parameter should be visible or not.
    * 
    * If exists more than one module that match with the properties of ModuleFeature APPLICATION,
-   * --module parameter should be mandatory.
+   * --module parameter should be visible.
    * 
    * @param shellContext
    * @return
