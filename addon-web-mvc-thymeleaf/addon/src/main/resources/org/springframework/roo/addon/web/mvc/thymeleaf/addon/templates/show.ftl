@@ -128,10 +128,8 @@
         
         <dl class="dl-horizontal">
           <#list fields as field>
-          	<div id="${field.fieldName}" data-z="${field.z}">
-            	<dt data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</dt>
-       			<dd data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</dd>
-            </div>
+        	<dt id="${field.fieldName}Label" data-th-text="${r"#{"}${field.label}${r"}"}" data-z="${field.z}">${field.fieldName}</dt>
+   			<dd id="${field.fieldName}" data-th-text="*{{${field.fieldName}}}" data-z="${field.z}">${field.fieldName}Value</dd>
           </#list>
           
           <#if details?size != 0>
