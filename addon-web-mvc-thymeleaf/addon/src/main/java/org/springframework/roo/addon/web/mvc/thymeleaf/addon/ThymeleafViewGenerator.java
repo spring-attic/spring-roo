@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,10 +9,11 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -70,19 +72,103 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
   }
 
   @Override
-  public Document merge(Document existingDoc, Document newDoc) {
-    final List<Element> updatedElements = existingDoc.select("[data-z=user-managed]");
+  public Document merge(Document existingDoc, Document newDoc, List<String> requiredIds) {
+    List<Element> elementsNotFound = new ArrayList<Element>();
+    Element existingParent = null;
+    String existingSiblingId = null;
 
-    for (Element updatedElement : updatedElements) {
-      if (updatedElement.hasAttr("id")) {
-
-        final Element element = newDoc.select("#" + updatedElement.attr("id")).first();
-        if (element != null) {
-          element.replaceWith(updatedElement);
+    // Clean non user-managed elements
+    for (Element existingElement : existingDoc.select("[data-z]")) {
+      if (existingElement.hasAttr("id") && !existingElement.attr("data-z").equals("user-managed")) {
+        final Element newElement = newDoc.select("#" + existingElement.attr("id")).first();
+        if (newElement != null) {
+          existingElement.replaceWith(newElement.clone());
         }
       }
     }
-    return newDoc;
+
+    if (requiredIds == null) {
+      return existingDoc;
+    }
+
+    // Include required elements
+    for (String id : requiredIds) {
+
+      // Required element does not exist
+      final Element newElement = newDoc.select("#" + id).first();
+      if (newElement == null) {
+        continue;
+      }
+
+      // Check if required element exists in the existing doc
+      Element existingElement = existingDoc.select("#" + id).first();
+      if (existingElement == null) {
+
+        // Required element not found
+        elementsNotFound.add(newElement);
+      } else {
+
+        // Check if element is user-managed
+        if (!existingElement.hasAttr("data-z")
+            || !existingElement.attr("data-z").equals("user-managed")) {
+          existingElement.replaceWith(newElement.clone());
+        }
+        existingSiblingId = id;
+      }
+    }
+
+    // Find a parent element to include non-found elements as children
+    if (existingSiblingId == null) {
+      existingParent = existingDoc.select("#containerFields").first();
+    }
+
+    // Include element not found
+    for (Element elementNotFound : elementsNotFound) {
+
+      if (existingSiblingId != null) {
+        // Add sibling
+        existingDoc.select("#" + existingSiblingId).first().after(elementNotFound.clone());
+        continue;
+      }
+
+
+      if (existingParent == null) {
+        // Find some predecessor element with id
+        Element parent = elementsNotFound.get(0).parent();
+        while (!parent.tag().getName().equals("body") && parent != null) {
+          if (!parent.hasAttr("id")) {
+            parent = parent.parent();
+          } else {
+            existingParent = existingDoc.select("#" + parent.attr("id")).first();
+            if (existingParent != null) {
+              break;
+            }
+            parent = parent.parent();
+          }
+        }
+      }
+
+      if (existingParent == null) {
+        existingParent = existingDoc.select("fieldset").first();
+      }
+
+      if (existingParent == null) {
+        existingParent = existingDoc.select("div.content").first();
+      }
+
+      if (existingParent == null) {
+        existingParent = existingDoc.select("section[data-layout-fragment=content]").first();
+      }
+
+      if (existingParent == null) {
+        existingParent = existingDoc.select("body").first();
+      }
+
+      // Add child
+      existingParent.prependChild(elementNotFound);
+    }
+
+    return existingDoc;
   }
 
   @Override

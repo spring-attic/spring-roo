@@ -162,7 +162,7 @@
         <h1 data-th-text="${r"#{"}${entityLabelPlural}${r"}"}">${entityName}s</h1>
 
         <!--START TABLE-->
-        <div class="table-responsive">
+        <div class="table-responsive" id="containerFields">
           <table id="${entityName}Table" 
                  class="table table-striped table-hover table-bordered" 
                  data-row-id="${identifierField}"

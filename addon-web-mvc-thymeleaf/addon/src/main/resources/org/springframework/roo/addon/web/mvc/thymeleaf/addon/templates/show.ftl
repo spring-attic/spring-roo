@@ -126,7 +126,7 @@
         <!-- CONTENT -->
         <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</h1>
         
-        <dl class="dl-horizontal">
+        <dl class="dl-horizontal" id="containerFields">
           <#list fields as field>
         	<dt id="${field.fieldName}Label" data-th-text="${r"#{"}${field.label}${r"}"}" data-z="${field.z}">${field.fieldName}</dt>
    			<dd id="${field.fieldName}" data-th-text="*{{${field.fieldName}}}" data-z="${field.z}">${field.fieldName}Value</dd>

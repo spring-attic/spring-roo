@@ -154,7 +154,7 @@
         <form class="form-horizontal" method="POST" data-th-object="${modelAttribute}"
           data-th-action="@{${controllerPath}/{id}(id=*{id})}">
           <input type="hidden" name="_method" value="PUT" />
-          <fieldset>
+          <fieldset id="containerFields">
             <#list fields as field>
                 <#if field.type == "TEXT">
                     <@text.input label=field.label fieldName=field.fieldName z=field.z />

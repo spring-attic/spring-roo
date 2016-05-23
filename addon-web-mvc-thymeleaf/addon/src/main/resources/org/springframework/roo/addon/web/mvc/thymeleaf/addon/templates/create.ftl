@@ -160,7 +160,7 @@
         <form class="form-horizontal" method="POST" data-th-object="${modelAttribute}"
           data-th-action="@{${controllerPath}}">
 
-          <fieldset>
+          <fieldset id="containerFields">
             <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
 
             <#list fields as field>
