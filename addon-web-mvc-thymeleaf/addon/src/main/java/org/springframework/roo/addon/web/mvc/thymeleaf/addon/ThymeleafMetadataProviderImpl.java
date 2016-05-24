@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -370,6 +371,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   private List<MethodMetadata> getDetailsMethods() {
 
     List<MethodMetadata> detailsMethods = new ArrayList<MethodMetadata>();
+    List<JavaSymbolName> detailMethodNames = new ArrayList<JavaSymbolName>();
 
     // Getting all defined services. 
     Set<ClassOrInterfaceTypeDetails> allDefinedServices =
@@ -390,6 +392,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
         // Getting inner type
         JavaType detailType = field.getFieldType().getBaseType();
+
         // Check if provided inner type is an entity annotated with @RooJPAEntity
         if (detailType != null
             && getTypeLocationService().getTypeDetails(detailType) != null
@@ -413,16 +416,44 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
               final ServiceMetadata detailServiceMetadata =
                   (ServiceMetadata) getMetadataService().get(detailServiceMetadataKey);
 
-              Map<JavaType, MethodMetadata> countMethods =
+              Map<FieldMetadata, MethodMetadata> countMethods =
                   detailServiceMetadata.getCountByReferenceFieldDefinedMethod();
 
-              Map<JavaType, MethodMetadata> findAllReferencedFieldMethods =
-                  detailServiceMetadata.getReferencedFieldsFindAllDefinedMethods();
+              // First, check if we'll need field mappings
+              boolean fieldMappings = false;
+              int fieldMappingsCounter = 0;
+              for (Entry<FieldMetadata, MethodMetadata> method : countMethods.entrySet()) {
+                if (method.getKey().getFieldType().equals(this.entity)) {
+                  fieldMappingsCounter++;
+                }
+              }
+              if (fieldMappingsCounter > 1) {
+                fieldMappings = true;
+              }
 
-              for (Entry<JavaType, MethodMetadata> method : countMethods.entrySet()) {
-                if (method.getKey().equals(this.entity)) {
+              for (Entry<FieldMetadata, MethodMetadata> method : countMethods.entrySet()) {
+                if (method.getKey().getFieldType().equals(this.entity)) {
                   countMethod = method.getValue();
-                  break;
+
+                  // Get field name on the reference side
+                  String fieldNameOnReferenceSide = method.getKey().getFieldName().getSymbolName();
+
+                  // If referenced entity has more than one field of this type mapped, we need the mappedBy attribute
+                  String fieldName = null;
+                  if (fieldMappings) {
+                    fieldName = getMappedByField(entityFields, field, fieldNameOnReferenceSide);
+                  } else {
+                    fieldName = field.getFieldName().getSymbolName();
+                  }
+
+                  MethodMetadata listDetailsDatatablesMethod =
+                      getListDetailsDatatablesMethod(fieldName, detailType,
+                          detailService.getType(), countMethod);
+                  if (listDetailsDatatablesMethod != null
+                      && !detailMethodNames.contains(listDetailsDatatablesMethod.getMethodName())) {
+                    detailsMethods.add(listDetailsDatatablesMethod);
+                    detailMethodNames.add(listDetailsDatatablesMethod.getMethodName());
+                  }
                 }
               }
 
@@ -430,28 +461,38 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
                 continue;
               }
 
-              for (Entry<JavaType, MethodMetadata> method : findAllReferencedFieldMethods
+              Map<FieldMetadata, MethodMetadata> findAllReferencedFieldMethods =
+                  detailServiceMetadata.getReferencedFieldsFindAllDefinedMethods();
+
+              for (Entry<FieldMetadata, MethodMetadata> method : findAllReferencedFieldMethods
                   .entrySet()) {
-                if (method.getKey().equals(this.entity)) {
+                if (method.getKey().getFieldType().equals(this.entity)) {
                   findAllByReferencedFieldMethod = method.getValue();
-                  break;
+
+                  // Get field name on the reference side
+                  String fieldNameOnReferenceSide = method.getKey().getFieldName().getSymbolName();
+
+                  // If entity has 2 reference fields of same type, we need the mappedBy attribute
+                  String fieldName = null;
+                  if (fieldMappings) {
+                    fieldName = getMappedByField(entityFields, field, fieldNameOnReferenceSide);
+                  } else {
+                    fieldName = field.getFieldName().getSymbolName();
+                  }
+
+                  MethodMetadata listDetailsMethod =
+                      getListDetailsMethod(fieldName, detailType, detailService.getType(),
+                          findAllByReferencedFieldMethod);
+                  if (listDetailsMethod != null
+                      && !detailMethodNames.contains(listDetailsMethod.getMethodName())) {
+                    detailsMethods.add(listDetailsMethod);
+                    detailMethodNames.add(listDetailsMethod.getMethodName());
+                  }
                 }
               }
 
               if (findAllByReferencedFieldMethod == null) {
                 continue;
-              }
-
-
-              MethodMetadata listDetailsMethod =
-                  getListDetailsMethod(field.getFieldName(), detailType, detailService.getType(),
-                      findAllByReferencedFieldMethod);
-              MethodMetadata listDetailsDatatablesMethod =
-                  getListDetailsDatatablesMethod(field.getFieldName(), detailType,
-                      detailService.getType(), countMethod);
-              if (listDetailsMethod != null && listDetailsDatatablesMethod != null) {
-                detailsMethods.add(listDetailsMethod);
-                detailsMethods.add(listDetailsDatatablesMethod);
               }
             }
           }
@@ -472,7 +513,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * @param findAllByReferencedFieldMethod
    * @return
    */
-  private MethodMetadata getListDetailsMethod(JavaSymbolName fieldName, JavaType detailType,
+  private MethodMetadata getListDetailsMethod(String fieldName, JavaType detailType,
       JavaType detailService, MethodMetadata findAllByReferencedFieldMethod) {
 
     // Calculate method path value
@@ -486,7 +527,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     String listDetailsPath =
         String.format("/{%s}/%s/", identifierFields.get(0).getFieldName().getSymbolName(),
-            fieldName.getSymbolName().toLowerCase());
+            fieldName.toLowerCase());
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
@@ -500,7 +541,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Define methodName
     final JavaSymbolName methodName =
-        new JavaSymbolName(String.format("list%s", detailType.getSimpleTypeName()));
+        new JavaSymbolName(String.format("list%s", StringUtils.capitalize(fieldName)));
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     AnnotationMetadataBuilder pathVariableAnnotation =
@@ -566,8 +607,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * @param countMethod
    * @return
    */
-  private MethodMetadata getListDetailsDatatablesMethod(JavaSymbolName fieldName,
-      JavaType detailType, JavaType detailService, MethodMetadata countMethod) {
+  private MethodMetadata getListDetailsDatatablesMethod(String fieldName, JavaType detailType,
+      JavaType detailService, MethodMetadata countMethod) {
 
     // Calculate method path value
     // Getting identifier Fields
@@ -582,7 +623,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     String listDetailsPath =
         String.format("/{%s}/%s/", identifierFields.get(0).getFieldName().getSymbolName(),
-            fieldName.getSymbolName().toLowerCase());
+            fieldName.toLowerCase());
 
     // First of all, check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
@@ -596,7 +637,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Define methodName
     final JavaSymbolName methodName =
-        new JavaSymbolName(String.format("list%s", detailType.getSimpleTypeName()));
+        new JavaSymbolName(String.format("list%sDetail", StringUtils.capitalize(fieldName)));
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     AnnotationMetadataBuilder pathVariableAnnotation =
@@ -636,7 +677,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = list%s(id, search, pageable);",
         addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(detailType)
             .getSimpleTypeName(), getDetailEntityField(detailType).getFieldName().getSymbolName(),
-        detailType.getSimpleTypeName()));
+        StringUtils.capitalize(fieldName)));
 
     // long allAvailableEntityDetails = detailService.countByMasterId(id.getId());
     bodyBuilder.appendFormalLine(String.format("long allAvailable%sDetails = %s.%s(%s.%s());",
@@ -1482,6 +1523,36 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   private String getViewsPath() {
     return this.controllerPath.startsWith("/") ? this.controllerPath.substring(1)
         : this.controllerPath;
+  }
+
+  /**
+   * Returns the value of the mapped by attribute for OneToMany relations 
+   * only if it matches with the referenced side field name.
+   * 
+   * @param entityFields
+   * @param field
+   * @param fieldNameOnReferenceSide
+   * @return a String with field name on the reference side if matches 
+   * with provided field on the owning side.
+   */
+  private String getMappedByField(List<FieldMetadata> entityFields, FieldMetadata field,
+      String fieldNameOnReferenceSide) {
+    String fieldName = null;
+    for (FieldMetadata entityField : entityFields) {
+
+      if (entityField.getFieldType().equals(field.getFieldType())) {
+        AnnotationMetadata oneToManyAnnotation = entityField.getAnnotation(JpaJavaType.ONE_TO_MANY);
+        if (oneToManyAnnotation != null
+            && oneToManyAnnotation.getAttribute("mappedBy") != null
+            && oneToManyAnnotation.getAttribute("mappedBy").getValue()
+                .equals(fieldNameOnReferenceSide)) {
+          fieldName = entityField.getFieldName().getSymbolName();
+          break;
+        }
+        // TODO: Implement the same for ManyToMany relations
+      }
+    }
+    return fieldName;
   }
 
   /**

@@ -21,6 +21,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -169,10 +170,10 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
     // Getting all methods defined on service interface that should be implemented in this 
     // service implementation
     List<MethodMetadata> methodsToBeImplemented = new ArrayList<MethodMetadata>();
-    Map<JavaType, MethodMetadata> countReferencedFieldsMethodsToBeImplemented =
-        new HashMap<JavaType, MethodMetadata>();
-    Map<JavaType, MethodMetadata> findAllEeferencedFieldsMethodsToBeImplemented =
-        new HashMap<JavaType, MethodMetadata>();
+    Map<FieldMetadata, MethodMetadata> countReferencedFieldsMethodsToBeImplemented =
+        new HashMap<FieldMetadata, MethodMetadata>();
+    Map<FieldMetadata, MethodMetadata> findAllEeferencedFieldsMethodsToBeImplemented =
+        new HashMap<FieldMetadata, MethodMetadata>();
 
 
     final LogicalPath logicalPath =

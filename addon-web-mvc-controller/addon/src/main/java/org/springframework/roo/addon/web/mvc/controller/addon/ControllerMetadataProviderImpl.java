@@ -182,7 +182,8 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
           for (ClassOrInterfaceTypeDetails detailService : allDefinedServices) {
             AnnotationAttributeValue<JavaType> entityServiceAttr =
                 detailService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
-            if (entityServiceAttr != null && entityServiceAttr.getValue().equals(detailType)) {
+            if (entityServiceAttr != null && entityServiceAttr.getValue().equals(detailType)
+                && !detailsService.contains(detailService.getType())) {
               detailsService.add(detailService.getType());
             }
           }

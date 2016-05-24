@@ -16,6 +16,7 @@ import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -47,8 +48,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private MethodMetadata findAllGlobalSearchMethod;
 
   private List<MethodMetadata> allDefinedMethod;
-  private Map<JavaType, MethodMetadata> countByReferenceFieldDefinedMethod;
-  private Map<JavaType, MethodMetadata> referencedFieldsFindAllDefinedMethods;
+  private Map<FieldMetadata, MethodMetadata> countByReferenceFieldDefinedMethod;
+  private Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -94,8 +95,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
       final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders,
       final MethodMetadata findAllGlobalSearchMethod,
-      final Map<JavaType, MethodMetadata> referencedFieldsFindAllMethods,
-      final Map<JavaType, MethodMetadata> countByReferencedFieldsMethods) {
+      final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
+      final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -106,9 +107,9 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.identifierType = identifierType;
     this.finders = finders;
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
-    this.referencedFieldsFindAllDefinedMethods = new HashMap<JavaType, MethodMetadata>();
+    this.referencedFieldsFindAllDefinedMethods = new HashMap<FieldMetadata, MethodMetadata>();
     this.allDefinedMethod = new ArrayList<MethodMetadata>();
-    this.countByReferenceFieldDefinedMethod = new HashMap<JavaType, MethodMetadata>();
+    this.countByReferenceFieldDefinedMethod = new HashMap<FieldMetadata, MethodMetadata>();
 
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
@@ -159,7 +160,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     ensureGovernorHasMethod(new MethodMetadataBuilder(findAllWithGlobalSearchMethod));
 
     // Generating all findAll method for every referenced fields
-    for (Entry<JavaType, MethodMetadata> findAllReferencedFieldMethod : referencedFieldsFindAllMethods
+    for (Entry<FieldMetadata, MethodMetadata> findAllReferencedFieldMethod : referencedFieldsFindAllMethods
         .entrySet()) {
       MethodMetadata method =
           getFindAllReferencedFieldMethod(findAllReferencedFieldMethod.getValue());
@@ -168,12 +169,14 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     }
 
     // Generating all countByReferencedField methods
-    for (Entry<JavaType, MethodMetadata> countByReferencedFieldMethod : countByReferencedFieldsMethods
-        .entrySet()) {
-      MethodMetadata method =
-          getCountByReferencedFieldMethod(countByReferencedFieldMethod.getValue());
-      this.countByReferenceFieldDefinedMethod.put(countByReferencedFieldMethod.getKey(), method);
-      ensureGovernorHasMethod(new MethodMetadataBuilder(method));
+    if (countByReferencedFieldsMethods != null) {
+      for (Entry<FieldMetadata, MethodMetadata> countByReferencedFieldMethod : countByReferencedFieldsMethods
+          .entrySet()) {
+        MethodMetadata method =
+            getCountByReferencedFieldMethod(countByReferencedFieldMethod.getValue());
+        this.countByReferenceFieldDefinedMethod.put(countByReferencedFieldMethod.getKey(), method);
+        ensureGovernorHasMethod(new MethodMetadataBuilder(method));
+      }
     }
 
     // Build the ITD
@@ -616,7 +619,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * 
    * @return
    */
-  public Map<JavaType, MethodMetadata> getCountByReferenceFieldDefinedMethod() {
+  public Map<FieldMetadata, MethodMetadata> getCountByReferenceFieldDefinedMethod() {
     return this.countByReferenceFieldDefinedMethod;
   }
 
@@ -626,7 +629,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * 
    * @return
    */
-  public Map<JavaType, MethodMetadata> getReferencedFieldsFindAllDefinedMethods() {
+  public Map<FieldMetadata, MethodMetadata> getReferencedFieldsFindAllDefinedMethods() {
     return this.referencedFieldsFindAllDefinedMethods;
   }
 

@@ -305,15 +305,15 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     // Getting all necessary information about referencedFields
-    Map<JavaType, MethodMetadata> referencedFieldsMethods =
+    Map<FieldMetadata, MethodMetadata> referencedFieldsMethods =
         repositoryCustomMetadata.getReferencedFieldsFindAllMethods();
 
     Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames =
         new HashMap<JavaType, JavaSymbolName>();
     Map<JavaType, JavaSymbolName> referencedFieldsNames = new HashMap<JavaType, JavaSymbolName>();
 
-    for (Entry<JavaType, MethodMetadata> referencedFields : referencedFieldsMethods.entrySet()) {
-      JavaType referencedField = referencedFields.getKey();
+    for (Entry<FieldMetadata, MethodMetadata> referencedFields : referencedFieldsMethods.entrySet()) {
+      JavaType referencedField = referencedFields.getKey().getFieldType();
 
       // Getting idenfierFields 
       List<FieldMetadata> identifierFields =
@@ -321,12 +321,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       referencedFieldsIdentifierNames.put(referencedField, identifierFields.get(0).getFieldName());
 
       // Getting name
-      List<FieldMetadata> entityFields = entityMemberDetails.getFields();
-      for (FieldMetadata field : entityFields) {
-        if (field.getFieldType().equals(referencedField)) {
-          referencedFieldsNames.put(referencedField, field.getFieldName());
-        }
-      }
+      referencedFieldsNames.put(referencedField, referencedFields.getKey().getFieldName());
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,

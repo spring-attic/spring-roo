@@ -42,7 +42,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   private static final String SPRING_JPA_REPOSITORY =
       "org.springframework.data.jpa.repository.JpaRepository";
 
-  private Map<JavaType, MethodMetadata> countMethodByReferencedFields;
+  private Map<FieldMetadata, MethodMetadata> countMethodByReferencedFields;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -93,7 +93,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(identifierType, "Id type required");
 
-    countMethodByReferencedFields = new HashMap<JavaType, MethodMetadata>();
+    countMethodByReferencedFields = new HashMap<FieldMetadata, MethodMetadata>();
 
     if (readOnly) {
       // If readOnly, extends ReadOnlyRepository
@@ -126,7 +126,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     for (Entry<FieldMetadata, FieldMetadata> field : referenceFields.entrySet()) {
       MethodMetadata countMethod = getCountMethodByField(field.getKey(), field.getValue());
       ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
-      countMethodByReferencedFields.put(field.getKey().getFieldType(), countMethod);
+      countMethodByReferencedFields.put(field.getKey(), countMethod);
     }
 
     // Build the ITD
@@ -177,7 +177,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    * 
    * @return Map with key that identifies referenced field and method metadata
    */
-  public Map<JavaType, MethodMetadata> getCountMethodByReferencedFields() {
+  public Map<FieldMetadata, MethodMetadata> getCountMethodByReferencedFields() {
     return countMethodByReferencedFields;
   }
 

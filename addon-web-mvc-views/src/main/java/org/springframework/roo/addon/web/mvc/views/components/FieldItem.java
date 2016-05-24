@@ -20,6 +20,7 @@ import org.springframework.roo.support.util.XmlUtils;
 public class FieldItem {
 
   private String fieldName;
+  private String fieldNameCapitalized;
   private String label;
   private String type;
   private Map<String, Object> configuration;
@@ -34,6 +35,7 @@ public class FieldItem {
    */
   public FieldItem(String fieldName, String entityName) {
     this.fieldName = fieldName;
+    this.fieldNameCapitalized = StringUtils.capitalize(fieldName);
     this.label = buildLabel(entityName, fieldName);
     this.configuration = new HashMap<String, Object>();
 
@@ -52,6 +54,7 @@ public class FieldItem {
   public FieldItem(String fieldName, String entityName, String type,
       Map<String, Object> configuration) {
     this.fieldName = fieldName;
+    this.fieldNameCapitalized = StringUtils.capitalize(fieldName);
     this.label = buildLabel(entityName, fieldName);
     this.type = type;
     this.configuration = configuration;
@@ -59,7 +62,6 @@ public class FieldItem {
     // Calculate the Z parameter as the hash code of the other parameters
     this.z = calculateZ();
   }
-
 
   /**
    * Builds the label of the specified field and adds it to the entity label
@@ -132,6 +134,14 @@ public class FieldItem {
 
   public void addConfigurationElement(String key, Object value) {
     this.configuration.put(key, value);
+  }
+
+  public String getFieldNameCapitalized() {
+    return fieldNameCapitalized;
+  }
+
+  public void setFieldNameCapitalized(String fieldNameCapitalized) {
+    this.fieldNameCapitalized = fieldNameCapitalized;
   }
 
 }

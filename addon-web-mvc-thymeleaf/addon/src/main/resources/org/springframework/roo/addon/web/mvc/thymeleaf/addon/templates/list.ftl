@@ -201,10 +201,10 @@
           <#assign firstDetail=true>
           <#list details as field>
             <#if firstDetail == true>
-              <li class="active"><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+              <li class="active"><a data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
               <#assign firstDetail=false>
             <#else>
-                <li><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+                <li><a data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
             </#if>
           </#list>
           </ul>
@@ -213,20 +213,20 @@
                 <#assign firstDetail=true>
                 <#list details as field>
                     <#if firstDetail == true>
-                        <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane active">
+                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane active">
                         <#assign firstDetail=false>
                     <#else>
-                        <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane">
+                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane">
                     </#if>
                         <!--START TABLE-->
                         <div class="table-responsive">
-                          <table id="${field.configuration.referencedFieldType}Table" 
+                          <table id="${field.fieldNameCapitalized}Table" 
                             class="table table-striped table-hover table-bordered"
                             data-z="${field.z}"
                             data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
                             data-order="[[ 0, &quot;asc&quot; ]]"
                             data-create-url-function="create${field.configuration.referencedFieldType}Url">
-                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
+                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.fieldNameCapitalized}</caption>
                             <thead>
                               <tr>
                                 <#list field.configuration.referenceFieldFields as referencedFieldField>
@@ -389,7 +389,7 @@
          
          <#if details?size != 0>
              <#list details as field>
-                var ${field.configuration.referencedFieldType}Table = jQuery('#${field.configuration.referencedFieldType}Table').DataTable({
+                var ${field.fieldNameCapitalized}Table = jQuery('#${field.fieldNameCapitalized}Table').DataTable({
                    'buttons' : [
                         {
                             'extend' : 'colvis',
@@ -419,27 +419,27 @@
                 
                   jQuery.extend({
                     'current${entityName}Id': undefined,
-                    '${field.configuration.referencedFieldType}BaseUrl': function() {
+                    '${field.fieldNameCapitalized}BaseUrl': function() {
                       if(jQuery.current${entityName}Id) {
                         return [[@{${controllerPath}/}]] + jQuery.current${entityName}Id + '${field.configuration.controllerPath}/';
                       }
                       return undefined;
                     },
-                    'create${field.configuration.referencedFieldType}Url': function() {
+                    'create${field.fieldNameCapitalized}Url': function() {
                       if(jQuery.current${entityName}Id) {
-                        return jQuery.${field.configuration.referencedFieldType}BaseUrl() + jQuery.createUri + '/';
+                        return jQuery.${field.fieldNameCapitalized}BaseUrl() + jQuery.createUri + '/';
                       }
                       return undefined;
                     },
-                    'update${field.configuration.referencedFieldType}Url': function(${field.configuration.referencedFieldType}Id) {
+                    'update${field.fieldNameCapitalized}Url': function(${field.fieldNameCapitalized}Id) {
                       if(jQuery.current${entityName}Id) {
-                        return jQuery.${field.configuration.referencedFieldType}BaseUrl() + ${field.configuration.referencedFieldType}Id + '/'+ jQuery.editUri + '/';
+                        return jQuery.${field.fieldNameCapitalized}BaseUrl() + ${field.fieldNameCapitalized}Id + '/'+ jQuery.editUri + '/';
                       }
                       return undefined;
                     },
-                    'delete${field.configuration.referencedFieldType}Url': function(${field.configuration.referencedFieldType}Id) {
+                    'delete${field.fieldNameCapitalized}Url': function(${field.fieldNameCapitalized}Id) {
                       if(jQuery.current${entityName}Id) {
-                        return jQuery.${field.configuration.referencedFieldType}BaseUrl() + ${field.configuration.referencedFieldType}Id + '/'+ jQuery.deleteUri + '/';
+                        return jQuery.${field.fieldNameCapitalized}BaseUrl() + ${field.fieldNameCapitalized}Id + '/'+ jQuery.deleteUri + '/';
                       }
                       return undefined;
                     }
@@ -452,8 +452,8 @@
                 if (jQuery.current${entityName}Id != new${entityName}Id) {
                   jQuery.current${entityName}Id = new${entityName}Id;
                   <#list details as field>
-                  var url${field.configuration.referencedFieldType} = jQuery.${field.configuration.referencedFieldType}BaseUrl();
-                  ${field.configuration.referencedFieldType}Table.ajax.url( url${field.configuration.referencedFieldType} ).load();
+                  var url${field.fieldNameCapitalized} = jQuery.${field.fieldNameCapitalized}BaseUrl();
+                  ${field.fieldNameCapitalized}Table.ajax.url( url${field.fieldNameCapitalized} ).load();
                   </#list>
                 }
               }

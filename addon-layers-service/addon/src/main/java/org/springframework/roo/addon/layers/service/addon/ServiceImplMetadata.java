@@ -46,8 +46,8 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   private JavaType repository;
   private JavaType entity;
   private List<MethodMetadata> allImplementedMethods;
-  private Map<JavaType, MethodMetadata> allCountByReferencedFieldMethods;
-  private Map<JavaType, MethodMetadata> allFindAllByReferencedFieldMethods;
+  private Map<FieldMetadata, MethodMetadata> allCountByReferencedFieldMethods;
+  private Map<FieldMetadata, MethodMetadata> allFindAllByReferencedFieldMethods;
   private MethodMetadata findAllIterableMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -88,8 +88,8 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType serviceInterface,
       final JavaType repository, final JavaType entity, final MethodMetadata findAllIterableMethod,
       final List<MethodMetadata> methodsToBeImplemented,
-      final Map<JavaType, MethodMetadata> countReferencedFieldsMethods,
-      final Map<JavaType, MethodMetadata> findAllReferencedFieldsMethods) {
+      final Map<FieldMetadata, MethodMetadata> countReferencedFieldsMethods,
+      final Map<FieldMetadata, MethodMetadata> findAllReferencedFieldsMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
@@ -132,12 +132,12 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     }
 
     // Generating all count methods that should be implemented
-    for (Entry<JavaType, MethodMetadata> method : countReferencedFieldsMethods.entrySet()) {
+    for (Entry<FieldMetadata, MethodMetadata> method : countReferencedFieldsMethods.entrySet()) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method.getValue())));
     }
 
     // Generating all findAll methods for referenced fields that should be implemented
-    for (Entry<JavaType, MethodMetadata> method : findAllReferencedFieldsMethods.entrySet()) {
+    for (Entry<FieldMetadata, MethodMetadata> method : findAllReferencedFieldsMethods.entrySet()) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method.getValue())));
     }
 
@@ -272,11 +272,11 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     return allImplementedMethods;
   }
 
-  public Map<JavaType, MethodMetadata> getAllCountByReferencedFieldMethods() {
+  public Map<FieldMetadata, MethodMetadata> getAllCountByReferencedFieldMethods() {
     return allCountByReferencedFieldMethods;
   }
 
-  public Map<JavaType, MethodMetadata> getAllFindAllByReferencedFieldMethods() {
+  public Map<FieldMetadata, MethodMetadata> getAllFindAllByReferencedFieldMethods() {
     return allFindAllByReferencedFieldMethods;
   }
 

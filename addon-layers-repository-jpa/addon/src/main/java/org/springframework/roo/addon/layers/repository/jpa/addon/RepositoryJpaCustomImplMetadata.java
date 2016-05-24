@@ -46,7 +46,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   private boolean isDTO;
 
   private MethodMetadata findAllGlobalSearchMethod;
-  private Map<JavaType, MethodMetadata> allFindAllReferencedFieldsMethods;
+  private Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods;
   private Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames;
   private Map<JavaType, JavaSymbolName> referencedFieldsNames;
 
@@ -95,7 +95,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
       final boolean isDTO, final List<FieldMetadata> idFields,
       final List<FieldMetadata> validFields, final MethodMetadata findAllGlobalSearchMethod,
-      final Map<JavaType, MethodMetadata> allFindAllReferencedFieldsMethods,
+      final Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
       final Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames,
       final Map<JavaType, JavaSymbolName> referencedFieldsNames) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -122,14 +122,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllImpl(idFields, validFields)));
 
     // Generate findAll referenced fields implementation methods
-    for (Entry<JavaType, MethodMetadata> method : allFindAllReferencedFieldsMethods.entrySet()) {
+    for (Entry<FieldMetadata, MethodMetadata> method : allFindAllReferencedFieldsMethods.entrySet()) {
 
       JavaSymbolName identifierFieldName = referencedFieldsIdentifierNames.get(method.getKey());
-      JavaSymbolName fieldName = referencedFieldsNames.get(method.getKey());
+      JavaSymbolName fieldName = method.getKey().getFieldName();
 
-      ensureGovernorHasMethod(new MethodMetadataBuilder(
-          getFindAllReferencedFieldsImpl(method.getKey(), method.getValue(), identifierFieldName,
-              fieldName, idFields, validFields)));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllReferencedFieldsImpl(method
+          .getKey().getFieldType(), method.getValue(), identifierFieldName, fieldName, idFields,
+          validFields)));
     }
 
     // Build the ITD

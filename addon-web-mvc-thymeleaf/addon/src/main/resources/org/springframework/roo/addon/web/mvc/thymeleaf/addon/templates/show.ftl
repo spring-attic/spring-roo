@@ -138,10 +138,10 @@
               <#assign firstDetail=true>
               <#list details as field>
                 <#if firstDetail == true>
-                  <li class="active"><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+                  <li class="active"><a data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
                   <#assign firstDetail=false>
                 <#else>
-                    <li><a data-toggle="tab" href="#detail-${field.configuration.referencedFieldType}">${field.configuration.referencedFieldType}</a></li>
+                    <li><a data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
                 </#if>
               </#list>
               </ul>
@@ -150,20 +150,20 @@
                 <#assign firstDetail=true>
                 <#list details as field>
                     <#if firstDetail == true>
-                        <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane active">
+                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane active">
                         <#assign firstDetail=false>
                     <#else>
-                        <div id="detail-${field.configuration.referencedFieldType}" class="tab-pane">
+                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane">
                     </#if>
                         <!--START TABLE-->
                         <div class="table-responsive">
-                          <table id="${field.configuration.referencedFieldType}Table" 
+                          <table id="${field.fieldNameCapitalized}Table" 
                                  class="table table-striped table-hover table-bordered" 
                                  data-row-id="${field.configuration.identifierField}"
                                  data-select="single"
                                  data-z="${field.z}"
                                  data-order="[[ 0, &quot;asc&quot; ]]">
-                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.configuration.referencedFieldType}</caption>
+                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.fieldNameCapitalized}</caption>
                             <thead>
                               <tr>
                                 <#list field.configuration.referenceFieldFields as referencedFieldField>
@@ -252,10 +252,10 @@
     <script type="text/javascript" data-th-inline="javascript">
     $(document).ready( function () {
         <#list details as field>
-            var ${field.configuration.referencedFieldType}BaseUrl = ${r"[["}@{${controllerPath}/${r"{"}${identifierField}${r"}"}${field.configuration.controllerPath}/(${identifierField}=${r"${"}${modelAttributeName}${r"."}${identifierField}${r"})}]]"} +  '';
-            var ${field.configuration.referencedFieldType}Table = jQuery('#${field.configuration.referencedFieldType}Table').DataTable({
+            var ${field.fieldNameCapitalized}BaseUrl = ${r"[["}@{${controllerPath}/${r"{"}${identifierField}${r"}"}${field.configuration.controllerPath}/(${identifierField}=${r"${"}${modelAttributeName}${r"."}${identifierField}${r"})}]]"} +  '';
+            var ${field.fieldNameCapitalized}Table = jQuery('#${field.fieldNameCapitalized}Table').DataTable({
                 'ajax': {
-                      'url': ${field.configuration.referencedFieldType}BaseUrl
+                      'url': ${field.fieldNameCapitalized}BaseUrl
                  },
                 'buttons' : [
                     {

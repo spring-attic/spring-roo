@@ -25,8 +25,10 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
@@ -273,11 +275,15 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     final RepositoryJpaMetadata repositoryMetadata =
         (RepositoryJpaMetadata) getMetadataService().get(repositoryMetadataKey);
 
+    Map<FieldMetadata, MethodMetadata> countByReferencedFieldMethods = null;
+    if (repositoryMetadata != null) {
+      countByReferencedFieldMethods = repositoryMetadata.getCountMethodByReferencedFields();
+    }
+
     return new ServiceMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders,
         repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
-        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(),
-        repositoryMetadata.getCountMethodByReferencedFields());
+        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(), countByReferencedFieldMethods);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

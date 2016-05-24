@@ -189,7 +189,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     getTypeLocationService().addModuleDependency(cid.getName().getModule(), globalSearch);
 
     // Getting referenced fields
-    Map<JavaType, JavaType> referencedFields = new HashMap<JavaType, JavaType>();
+    Map<FieldMetadata, JavaType> referencedFields = new HashMap<FieldMetadata, JavaType>();
     MemberDetails entityDetails = getMemberDetails(entity);
     List<FieldMetadata> entityFields = entityDetails.getFields();
 
@@ -206,7 +206,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
         if (identifierFields.isEmpty()) {
           continue;
         }
-        referencedFields.put(field.getFieldType(), identifierFields.get(0).getFieldType());
+        referencedFields.put(field, identifierFields.get(0).getFieldType());
 
         // Add dependency between modules
         getTypeLocationService().addModuleDependency(cid.getName().getModule(),
