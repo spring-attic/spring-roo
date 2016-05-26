@@ -138,10 +138,10 @@
               <#assign firstDetail=true>
               <#list details as field>
                 <#if firstDetail == true>
-                  <li class="active"><a data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
+                  <li class="active"><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
                   <#assign firstDetail=false>
                 <#else>
-                    <li><a data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
+                    <li><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
                 </#if>
               </#list>
               </ul>
@@ -251,9 +251,14 @@
     <!-- Datatables page configs -->
     <script type="text/javascript" data-th-inline="javascript">
     $(document).ready( function () {
+    	<#assign firstDetail = true>
         <#list details as field>
             var ${field.fieldNameCapitalized}BaseUrl = ${r"[["}@{${controllerPath}/${r"{"}${identifierField}${r"}"}${field.configuration.controllerPath}/(${identifierField}=${r"${"}${modelAttributeName}${r"."}${identifierField}${r"})}]]"} +  '';
-            var ${field.fieldNameCapitalized}Table = jQuery('#${field.fieldNameCapitalized}Table').DataTable({
+            <#if firstDetail == false>
+            function initialize${field.fieldNameCapitalized}Table() {
+            </#if>
+            
+            jQuery('#${field.fieldNameCapitalized}Table').DataTable({
                 'ajax': {
                       'url': ${field.fieldNameCapitalized}BaseUrl
                  },
@@ -281,6 +286,15 @@
                   }
                 ]  
             });
+            <#if firstDetail == false>
+            }
+            jQuery('#${field.fieldNameCapitalized}Tab').on('shown.bs.tab', function (e) {
+				if (jQuery.fn.DataTable.isDataTable('#${field.fieldNameCapitalized}Table') === false) {
+					initialize${field.fieldNameCapitalized}Table();
+				}
+	    	});
+            </#if>
+            <#assign firstDetail = false>
         </#list>
     });
     </script>

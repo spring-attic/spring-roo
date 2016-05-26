@@ -201,10 +201,10 @@
           <#assign firstDetail=true>
           <#list details as field>
             <#if firstDetail == true>
-              <li class="active"><a data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
+              <li class="active"><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
               <#assign firstDetail=false>
             <#else>
-                <li><a data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
+                <li><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
             </#if>
           </#list>
           </ul>
@@ -388,8 +388,12 @@
          });
          
          <#if details?size != 0>
+         	<#assign firstDetail = true>
              <#list details as field>
-                var ${field.fieldNameCapitalized}Table = jQuery('#${field.fieldNameCapitalized}Table').DataTable({
+             	<#if firstDetail == false>
+             	function initialize${field.fieldNameCapitalized}Table() {
+             	</#if>
+               	jQuery('#${field.fieldNameCapitalized}Table').DataTable({
                    'buttons' : [
                         {
                             'extend' : 'colvis',
@@ -416,7 +420,18 @@
                       }
                     ]  
                 });
-                
+                  <#if firstDetail == false>
+             }
+                  	jQuery('#${field.fieldNameCapitalized}Tab').on('shown.bs.tab', function (e) {
+						if (jQuery.fn.DataTable.isDataTable('#${field.fieldNameCapitalized}Table') === false) {
+							initialize${field.fieldNameCapitalized}Table();
+							var url${field.fieldNameCapitalized} = jQuery.${field.fieldNameCapitalized}BaseUrl();
+							if (url${field.fieldNameCapitalized}) {
+								jQuery('#${field.fieldNameCapitalized}Table').DataTable().ajax.url(urlPruebaPets).load();
+							}
+						}
+	    			});
+                  </#if>
                   jQuery.extend({
                     'current${entityName}Id': undefined,
                     '${field.fieldNameCapitalized}BaseUrl': function() {
@@ -444,6 +459,7 @@
                       return undefined;
                     }
                   });
+             	<#assign firstDetail = false>
              </#list>
              
            ${entityName}Table.on( 'select', function ( e, dt, type, indexes ) {
@@ -453,7 +469,9 @@
                   jQuery.current${entityName}Id = new${entityName}Id;
                   <#list details as field>
                   var url${field.fieldNameCapitalized} = jQuery.${field.fieldNameCapitalized}BaseUrl();
-                  ${field.fieldNameCapitalized}Table.ajax.url( url${field.fieldNameCapitalized} ).load();
+                  if (jQuery.fn.DataTable.isDataTable('#${field.fieldNameCapitalized}Table') === true) {
+                 	jQuery('#${field.fieldNameCapitalized}Table').DataTable().ajax.url( url${field.fieldNameCapitalized} ).load();
+                  }
                   </#list>
                 }
               }
