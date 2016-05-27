@@ -230,19 +230,19 @@
   <div data-layout-fragment="javascript">
     
     <!-- Datatables -->
-    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.js"></script>
     <!-- Datatables responsive plugin -->
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.0.2/js/dataTables.responsive.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/responsive/2.0.2/js/responsive.bootstrap.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/responsive/2.1.0/js/dataTables.responsive.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/responsive/2.1.0/js/responsive.bootstrap.js"></script>
     <!-- Datatables buttons plugins -->
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.colVis.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.flash.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.html5.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/buttons/1.2.0/js/dataTables.buttons.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/buttons/1.2.0/js/buttons.bootstrap.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/buttons/1.2.0/js/buttons.colVis.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/buttons/1.2.0/js/buttons.flash.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/buttons/1.2.0/js/buttons.html5.js"></script>
     <!-- Datatables select plugin -->
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/select/1.2.0/js/dataTables.select.js"></script>
     <!-- Datatables application defaults -->
     <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults.js" data-th-src="@{/public/js/datatables-defaults.js}"></script>
     <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults-en.js" data-th-src="@{/public/js/datatables-defaults-en.js}"></script>
