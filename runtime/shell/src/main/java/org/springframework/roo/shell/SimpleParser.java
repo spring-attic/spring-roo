@@ -298,8 +298,8 @@ public class SimpleParser implements Parser {
         return 0;
       }
 
-      // Loading converters if needed
-      loadConverters();
+      // Loading converters and commands if needed
+      loadConvertersAndCommands();
 
       Validate.notNull(buffer, "Buffer required");
       Validate.notNull(candidates, "Candidates list required");
@@ -998,8 +998,13 @@ public class SimpleParser implements Parser {
     return cliOptions;
   }
 
-  public Set<String> getEveryCommand() {
+  /**
+   * This method loads converters and commands if needed
+   */
+  public void loadConvertersAndCommands() {
     synchronized (mutex) {
+
+      boolean someComponentChanges = false;
 
       if (commands.isEmpty() || hasToReloadComponents()) {
         // Cleaning commands
@@ -1019,10 +1024,44 @@ public class SimpleParser implements Parser {
           LOGGER.warning("Cannot load CommandMarker on SimpleParser.");
         }
 
-        setLasTimeUpdateComponents(System.currentTimeMillis());
+        someComponentChanges = true;
+      }
+
+      if (converters.isEmpty() || hasToReloadComponents()) {
+        // Cleaning converters
+        converters.clear();
+        availabilityIndicators.clear();
+        // Get all Services implement Converter interface
+        try {
+          ServiceReference<?>[] references =
+              this.context.getAllServiceReferences(Converter.class.getName(), null);
+
+          for (ServiceReference<?> ref : references) {
+            Converter<?> converter = (Converter<?>) this.context.getService(ref);
+            add(converter);
+          }
+
+        } catch (InvalidSyntaxException e) {
+          LOGGER.warning("Cannot load Converter on SimpleParser.");
+        }
+
+        someComponentChanges = true;
 
       }
 
+      if (someComponentChanges) {
+        setLasTimeUpdateComponents(System.currentTimeMillis());
+      }
+
+    }
+  }
+
+  public Set<String> getEveryCommand() {
+    synchronized (mutex) {
+
+      loadConvertersAndCommands();
+
+      // Return commands list
       final SortedSet<String> result = new TreeSet<String>(COMPARATOR);
       for (final Object o : commands) {
         final Method[] methods = o.getClass().getMethods();
@@ -1036,6 +1075,8 @@ public class SimpleParser implements Parser {
       return result;
     }
   }
+
+
 
   private Set<String> getSpecifiedUnavailableOptions(final Set<CliOption> cliOptions,
       final Map<String, String> options) {
@@ -1146,8 +1187,8 @@ public class SimpleParser implements Parser {
   public ParseResult parse(final String rawInput) {
     synchronized (mutex) {
 
-      // Load converters if needed
-      loadConverters();
+      // Load converters and commands if needed
+      loadConvertersAndCommands();
 
       Validate.notNull(rawInput, "Raw input required");
       final String input = normalise(rawInput);
@@ -1658,29 +1699,6 @@ public class SimpleParser implements Parser {
   public final void remove(final Converter<?> converter) {
     synchronized (mutex) {
       converters.remove(converter);
-    }
-  }
-
-  public final void loadConverters() {
-    if (converters.isEmpty() || hasToReloadComponents()) {
-      // Cleaning converters
-      converters.clear();
-      availabilityIndicators.clear();
-      // Get all Services implement Converter interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(Converter.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          Converter<?> converter = (Converter<?>) this.context.getService(ref);
-          add(converter);
-        }
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load Converter on SimpleParser.");
-      }
-
-      setLasTimeUpdateComponents(System.currentTimeMillis());
     }
   }
 
