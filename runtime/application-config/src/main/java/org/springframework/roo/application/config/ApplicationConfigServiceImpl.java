@@ -119,7 +119,7 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
   public List<String> getApplicationProfiles(String moduleName) {
 
     List<String> profiles = new ArrayList<String>();
-    
+
     final String applicationConfigFilename =
         StringUtils.removeEnd(getSpringConfigLocation(moduleName),
             DEFAULT_APPLICATION_CONFIG_FILE_EXTENSION);
