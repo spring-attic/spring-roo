@@ -348,8 +348,9 @@
                 'orderable': false,
                 'searchable': false,
                 'render': function ( data, type, full, meta ) {
-                    return '<a role="button" class="btn-accion ver" href="${controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
-                    '<a role="button" class="btn-accion modificar" href="${controllerPath}/' + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
+                    var baseUrl = [[@{${controllerPath}/}]];
+                    return '<a role="button" class="btn-accion ver" href="' + baseUrl + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
+                    '<a role="button" class="btn-accion modificar" href="' + baseUrl + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
                     '<a role="button" class="btn-accion eliminar" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
                 }
               }
@@ -358,8 +359,9 @@
         
         jQuery.extend({
            'delete${entityName}': function(${identifierField}) {
+               var baseUrl = [[@{${controllerPath}/}]];
                jQuery.ajax({
-                   url: '${controllerPath}/'+${identifierField},
+                   url: baseUrl + ${identifierField},
                    type: 'DELETE',
                    success: function(result) {
                      jQuery('#delete${entityName}ModalBody').empty();
