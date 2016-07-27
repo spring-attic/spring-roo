@@ -187,7 +187,36 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
     Pom pom = getProjectOperations().getPomFromModuleName("");
 
-    // Multimodule architectures have an application module where Spring Boot artifacts are created 
+    // If developer selects STANDARD multimodule project, is necessary to create first
+    // the standard modules (model, repository, integration, service-api and service-impl
+    if (multimodule == Multimodule.STANDARD) {
+      createModule(pom, "model", jarPackagingProvider, "model");
+      createModule(pom, "repository", jarPackagingProvider, "repository");
+
+      // ROO-3762: Generate integration module by default
+      createModule(pom, "integration", jarPackagingProvider, "integration");
+
+      createModule(pom, "service-api", jarPackagingProvider, "service.api");
+      createModule(pom, "service-impl", jarPackagingProvider, "service.impl");
+
+      // Add dependencies between modules
+      getProjectOperations().addDependency("repository", pom.getGroupId(), "model",
+          "${project.version}");
+      getProjectOperations().addDependency("integration", pom.getGroupId(), "model",
+          "${project.version}");
+      getProjectOperations().addDependency("service-api", pom.getGroupId(), "model",
+          "${project.version}");
+      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "repository",
+          "${project.version}");
+      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "service.api",
+          "${project.version}");
+      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "model",
+          "${project.version}");
+      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "integration",
+          "${project.version}");
+    }
+
+    // In all cases, multimodule architectures have an application module where Spring Boot artifacts are created 
     createModule(pom, "application", warPackagingProvider, "application", "");
 
     installApplicationConfiguration("application");
@@ -199,24 +228,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     // ROO-3741: Including banner.txt on application module
     addBannerFile(getPomFromModuleName("application"));
 
-    // Create standard project modules
+    // Also, if STANDARD multimodule project has been selected, is necessary to include dependencies between
+    // application module and the generated modulesm above
     if (multimodule == Multimodule.STANDARD) {
-      createModule(pom, "model", jarPackagingProvider, "model");
-      createModule(pom, "repository", jarPackagingProvider, "repository");
-      createModule(pom, "service-api", jarPackagingProvider, "service.api");
-      createModule(pom, "service-impl", jarPackagingProvider, "service.impl");
-
-      // Add dependencies between modules
-      getProjectOperations().addDependency("repository", pom.getGroupId(), "model",
-          "${project.version}");
-      getProjectOperations().addDependency("service-api", pom.getGroupId(), "model",
-          "${project.version}");
-      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "repository",
-          "${project.version}");
-      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "service.api",
-          "${project.version}");
-      getProjectOperations().addDependency("service-impl", pom.getGroupId(), "model",
-          "${project.version}");
       getProjectOperations().addDependency("application", pom.getGroupId(), "service.impl",
           "${project.version}");
       getProjectOperations().addDependency("application", pom.getGroupId(), "service.api",
