@@ -145,6 +145,12 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
       param = "class", help = "--class option should be an entity.")
   public List<String> getClassPossibleResults(ShellContext shellContext) {
 
+    // ROO-3763: Clear current cache during --class autocompletion.
+    // With that, Spring Roo will maintain cache during --name autocompletion
+    // but if --class is autocomplete, cache should be refreshed to obtain 
+    // last changes on entities
+    entitiesDetails = new HashMap<JavaType, MemberDetails>();
+
     // Get current value of class
     String currentText = shellContext.getParameters().get("class");
 
