@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -426,9 +427,47 @@ public class JpaCommands implements CommandMarker {
           identifierType, sequenceName, versionColumn, versionField, versionType);
     }
 
-    if (!permitReservedWords) {
-      ReservedWords.verifyReservedWordsNotPresent(name);
+    // ROO-3764: Check reserved words only if doesn't permit reserved words
+    // and table name has not been specified
+    if (!permitReservedWords && StringUtils.isBlank(table)) {
+      // Use try to catch exception and show custom message for this situation
+      try {
+        ReservedWords.verifyReservedWordsNotPresent(name);
+      } catch (IllegalStateException exception) {
+        LOGGER.log(Level.INFO,
+            "ERROR: You are trying to use a reserved word as entity name. You have the following options:\n"
+                + "1. Change provided entity name.\n"
+                + "2. Specify a valid table name using --table parameter.\n"
+                + "3. Use parameter --permitReservedWords to force use of reserved words.\n");
+        return;
+      }
+    } else if (!permitReservedWords && StringUtils.isNotBlank(table)) {
+      // If table name has been specified but doesn't permit reserved words,
+      // check SQL reserved words on table name and JAVA reserved words on entity name
+      // Use try to catch exception and show custom message for this situation
+      try {
+        ReservedWords.verifyReservedSqlKeywordsNotPresent(table);
+      } catch (IllegalStateException exception) {
+        LOGGER.log(Level.INFO,
+            "ERROR: You are trying to use a SQL reserved word as table name. You have the following options:\n"
+                + "1. Specify a valid table name using --table parameter.\n"
+                + "2. Use parameter --permitReservedWords to force use of reserved words.\n");
+        return;
+      }
+      // Use try to catch exception and show custom message for this situation
+      try {
+        ReservedWords.verifyReservedJavaKeywordsNotPresent(name);
+      } catch (IllegalStateException exception) {
+        LOGGER
+            .log(
+                Level.INFO,
+                "ERROR: You are trying to use a Java reserved word as entity name. You have the following options:\n"
+                    + "1. Change provided entity name.\n"
+                    + "2. Use parameter --permitReservedWords to force use of reserved words.\n");
+        return;
+      }
     }
+
 
     if (testAutomatically && createAbstract) {
       // We can't test an abstract class
