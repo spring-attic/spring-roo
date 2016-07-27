@@ -51,7 +51,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.bundlerepository</artifactId>
-                <version>2.0.4</version>
+                <version>2.0.8</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -91,7 +91,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.eventadmin</artifactId>
-                <version>1.4.4</version>
+                <version>1.4.6</version>
             </dependency>
 
             <!-- JAX-RS (JSR 339) -->
@@ -136,7 +136,7 @@
             <dependency>
                 <groupId>org.apache.aries.subsystem</groupId>
                 <artifactId>org.apache.aries.subsystem.api</artifactId>
-                <version>2.0.2</version>
+                <version>2.0.8</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.aries</groupId>
@@ -151,7 +151,7 @@
             <dependency>
                 <groupId>org.apache.aries.subsystem</groupId>
                 <artifactId>org.apache.aries.subsystem.core</artifactId>
-                <version>2.0.2</version>
+                <version>2.0.8</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.aries.subsystem</groupId>
@@ -182,7 +182,7 @@
             <dependency>
                 <groupId>org.apache.aries</groupId>
                 <artifactId>org.apache.aries.util</artifactId>
-                <version>1.1.0</version>
+                <version>1.1.1</version>
             </dependency>
 
             <!-- OSGi Configuration Admin Service -->
@@ -203,7 +203,7 @@
             <dependency>
                 <groupId>org.eclipse.equinox</groupId>
                 <artifactId>org.eclipse.equinox.region</artifactId>
-                <version>1.1.0.v20120522-1841</version>
+                <version>1.2.101.v20150831-1342</version>
             </dependency>
 
             <!-- OSGi Metatype Service -->

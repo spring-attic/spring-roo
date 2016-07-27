@@ -46,8 +46,8 @@
         <module>addon-layers-service</module>
         <module>addon-layers-repository-jpa</module>
         <module>addon-oscommands</module>
-	      <module>addon-push-in</module>
-	      <module>addon-field</module>
+        <module>addon-push-in</module>
+        <module>addon-field</module>
         <module>annotations</module>
         <!-- Web UI -->
         <module>web-ui</module>
@@ -63,8 +63,8 @@
         <module>addon-web-mvc-embedded</module>
         <module>addon-web-mvc-jsp</module>
         <module>addon-logging</module>-->
-        
     </modules>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
@@ -138,7 +138,7 @@
         <java.version>1.7</java.version>
         <junit.version>4.11</junit.version>
         <powermock.version>1.4.12</powermock.version>
-        <spring.version>3.2.8.RELEASE</spring.version>
+        <spring.version>4.3.1.RELEASE</spring.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <osgi.version>6.0.0</osgi.version>
         <slf4j.version>1.7.12</slf4j.version>
@@ -165,11 +165,10 @@
             </dependency>
 
             <!-- Apache Felix OSGi Core implementation -->
-<!--
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
-                <version>5.2.0</version>
+                <version>5.4.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -180,13 +179,6 @@
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
--->
-            <!-- Temporary wrapping until FELIX-5015 will be fixed/released -->
-            <dependency>
-                <groupId>org.springframework.roo.wrapping</groupId>
-                <artifactId>org.springframework.roo.wrapping.org.apache.felix.framework</artifactId>
-                <version>5.2.0.001</version>
             </dependency>
 
             <!-- OSGi Log Service -->
@@ -214,7 +206,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr</artifactId>
-                <version>2.0.0</version>
+                <version>2.0.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -248,7 +240,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.command</artifactId>
-                <version>0.14.0</version>
+                <version>0.16.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -817,12 +809,13 @@
             </dependency>
             <!-- FreeMarker Bundle -->
             <dependency>
-			    <groupId>org.apache.servicemix.bundles</groupId>
-			    <artifactId>org.apache.servicemix.bundles.freemarker</artifactId>
-			    <version>2.3.23_1</version>
-			</dependency>
+              <groupId>org.apache.servicemix.bundles</groupId>
+              <artifactId>org.apache.servicemix.bundles.freemarker</artifactId>
+              <version>2.3.23_1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
     <build>
         <extensions>
             <extension>
@@ -936,6 +929,9 @@
                             <goals>
                                 <goal>jar</goal>
                             </goals>
+                            <!-- To compile ROO using Java 8 uncomment this -->
+                            <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam> 
+                                </configuration> -->
                         </execution>
                     </executions>
                 </plugin>
@@ -1017,9 +1013,9 @@
                 <artifactId>maven-gpg-plugin</artifactId>
             </plugin>
             <plugin>
-	            <groupId>org.sonatype.plugins</groupId>
-	            <artifactId>nexus-staging-maven-plugin</artifactId>
-	        </plugin>
+                   <groupId>org.sonatype.plugins</groupId>
+                   <artifactId>nexus-staging-maven-plugin</artifactId>
+               </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -1028,6 +1024,20 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>jdk7</id>
+            <activation>
+                <jdk>1.7</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                           <groupId>org.apache.maven.plugins</groupId>
+                           <artifactId>maven-javadoc-plugin</artifactId>
+                       </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <!-- 
             Profile to prevent errors if Spring Roo is compiled using Java 8
@@ -1055,20 +1065,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>jdk7</id>
-            <activation>
-                <jdk>1.7</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-	                    <groupId>org.apache.maven.plugins</groupId>
-	                    <artifactId>maven-javadoc-plugin</artifactId>
-	                </plugin>
                 </plugins>
             </build>
         </profile>
