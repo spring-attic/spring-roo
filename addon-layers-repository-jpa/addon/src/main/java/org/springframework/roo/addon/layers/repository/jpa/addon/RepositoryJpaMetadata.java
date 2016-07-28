@@ -3,9 +3,11 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.Validate;
@@ -87,8 +89,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaAnnotationValues annotationValues, final JavaType identifierType,
       final boolean readOnly, final JavaType readOnlyRepository,
-      final List<JavaType> customRepositories,
-      final Map<FieldMetadata, FieldMetadata> referenceFields) {
+      final List<JavaType> customRepositories, Map<FieldMetadata, FieldMetadata> referenceFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(identifierType, "Id type required");
@@ -122,8 +123,19 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     transactionalAnnotation.addBooleanAttribute("readOnly", true);
     ensureGovernorIsAnnotated(transactionalAnnotation);
 
+    // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
+    // method is not in the same order and ITD will be regenerated.
+    Map<FieldMetadata, FieldMetadata> referencedFieldsOrderedByFieldName =
+        new TreeMap<FieldMetadata, FieldMetadata>(new Comparator<FieldMetadata>() {
+          @Override
+          public int compare(FieldMetadata field1, FieldMetadata field2) {
+            return field1.getFieldName().compareTo(field2.getFieldName());
+          }
+        });
+    referencedFieldsOrderedByFieldName.putAll(referenceFields);
+
     // Adding count methods for every referenced field
-    for (Entry<FieldMetadata, FieldMetadata> field : referenceFields.entrySet()) {
+    for (Entry<FieldMetadata, FieldMetadata> field : referencedFieldsOrderedByFieldName.entrySet()) {
       MethodMetadata countMethod = getCountMethodByField(field.getKey(), field.getValue());
       ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
       countMethodByReferencedFields.put(field.getKey(), countMethod);

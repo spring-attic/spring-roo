@@ -3,9 +3,11 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
@@ -91,7 +93,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
       final JavaType searchResult, JavaType globalSearch,
-      final Map<FieldMetadata, JavaType> referencedFields) {
+      Map<FieldMetadata, JavaType> referencedFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(globalSearch, "Global search required");
@@ -109,8 +111,20 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     // Generate findAll method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllGlobalSearchMethod()));
 
+    // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
+    // method is not in the same order and ITD will be regenerated.
+    Map<FieldMetadata, JavaType> referencedFieldsOrderedByFieldName =
+        new TreeMap<FieldMetadata, JavaType>(new Comparator<FieldMetadata>() {
+          @Override
+          public int compare(FieldMetadata field1, FieldMetadata field2) {
+            return field1.getFieldName().compareTo(field2.getFieldName());
+          }
+        });
+    referencedFieldsOrderedByFieldName.putAll(referencedFields);
+
     // Generate findAllMethod for every referencedFields
-    for (Entry<FieldMetadata, JavaType> referencedField : referencedFields.entrySet()) {
+    for (Entry<FieldMetadata, JavaType> referencedField : referencedFieldsOrderedByFieldName
+        .entrySet()) {
       MethodMetadata method =
           getFindAllMethodByReferencedField(referencedField.getKey(), referencedField.getValue());
       ensureGovernorHasMethod(new MethodMetadataBuilder(method));

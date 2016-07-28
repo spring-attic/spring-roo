@@ -3,10 +3,12 @@ package org.springframework.roo.addon.layers.service.addon;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -95,8 +97,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
       final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders,
       final MethodMetadata findAllGlobalSearchMethod,
-      final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
-      final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods) {
+      Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
+      Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -159,8 +161,19 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.allDefinedMethod.add(findAllWithGlobalSearchMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(findAllWithGlobalSearchMethod));
 
+    // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
+    // method is not in the same order and ITD will be regenerated.
+    Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethodsOrderedByFieldName =
+        new TreeMap<FieldMetadata, MethodMetadata>(new Comparator<FieldMetadata>() {
+          @Override
+          public int compare(FieldMetadata field1, FieldMetadata field2) {
+            return field1.getFieldName().compareTo(field2.getFieldName());
+          }
+        });
+    referencedFieldsFindAllMethodsOrderedByFieldName.putAll(referencedFieldsFindAllMethods);
+
     // Generating all findAll method for every referenced fields
-    for (Entry<FieldMetadata, MethodMetadata> findAllReferencedFieldMethod : referencedFieldsFindAllMethods
+    for (Entry<FieldMetadata, MethodMetadata> findAllReferencedFieldMethod : referencedFieldsFindAllMethodsOrderedByFieldName
         .entrySet()) {
       MethodMetadata method =
           getFindAllReferencedFieldMethod(findAllReferencedFieldMethod.getValue());
@@ -168,9 +181,20 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       ensureGovernorHasMethod(new MethodMetadataBuilder(method));
     }
 
+    // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
+    // method is not in the same order and ITD will be regenerated.
+    Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethodsOrderedByFieldName =
+        new TreeMap<FieldMetadata, MethodMetadata>(new Comparator<FieldMetadata>() {
+          @Override
+          public int compare(FieldMetadata field1, FieldMetadata field2) {
+            return field1.getFieldName().compareTo(field2.getFieldName());
+          }
+        });
+    countByReferencedFieldsMethodsOrderedByFieldName.putAll(countByReferencedFieldsMethods);
+
     // Generating all countByReferencedField methods
     if (countByReferencedFieldsMethods != null) {
-      for (Entry<FieldMetadata, MethodMetadata> countByReferencedFieldMethod : countByReferencedFieldsMethods
+      for (Entry<FieldMetadata, MethodMetadata> countByReferencedFieldMethod : countByReferencedFieldsMethodsOrderedByFieldName
           .entrySet()) {
         MethodMetadata method =
             getCountByReferencedFieldMethod(countByReferencedFieldMethod.getValue());

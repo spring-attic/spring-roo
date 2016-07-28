@@ -2,9 +2,11 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -95,7 +97,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
       final boolean isDTO, final List<FieldMetadata> idFields,
       final List<FieldMetadata> validFields, final MethodMetadata findAllGlobalSearchMethod,
-      final Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
+      Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
       final Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames,
       final Map<JavaType, JavaSymbolName> referencedFieldsNames) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -121,8 +123,20 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // Generate findAll implementation method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllImpl(idFields, validFields)));
 
+    // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
+    // method is not in the same order and ITD will be regenerated.
+    Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethodsOrderedByFieldName =
+        new TreeMap<FieldMetadata, MethodMetadata>(new Comparator<FieldMetadata>() {
+          @Override
+          public int compare(FieldMetadata field1, FieldMetadata field2) {
+            return field1.getFieldName().compareTo(field2.getFieldName());
+          }
+        });
+    allFindAllReferencedFieldsMethodsOrderedByFieldName.putAll(allFindAllReferencedFieldsMethods);
+
     // Generate findAll referenced fields implementation methods
-    for (Entry<FieldMetadata, MethodMetadata> method : allFindAllReferencedFieldsMethods.entrySet()) {
+    for (Entry<FieldMetadata, MethodMetadata> method : allFindAllReferencedFieldsMethodsOrderedByFieldName
+        .entrySet()) {
 
       JavaSymbolName identifierFieldName = referencedFieldsIdentifierNames.get(method.getKey());
       JavaSymbolName fieldName = method.getKey().getFieldName();
