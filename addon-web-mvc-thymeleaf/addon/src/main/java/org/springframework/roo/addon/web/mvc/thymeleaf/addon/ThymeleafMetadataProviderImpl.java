@@ -276,14 +276,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides populateFomats method that allows to configure date time 
+   * This method provides populateFormats method that allows to configure date time 
    * format for every entity
    * 
    * @return
    */
   private MethodMetadata getPopulateFormatsMethod() {
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName("populateFomats");
+    final JavaSymbolName methodName = new JavaSymbolName("populateFormats");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
@@ -1403,8 +1403,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // populateFomats(model);
-    bodyBuilder.appendFormalLine("populateFomats(model);");
+    // populateFormats(model);
+    bodyBuilder.appendFormalLine("populateFormats(model);");
 
     // Getting all enum types from provided entity
     MemberDetails entityDetails =
