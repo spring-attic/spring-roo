@@ -90,8 +90,8 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType serviceInterface,
       final JavaType repository, final JavaType entity, final MethodMetadata findAllIterableMethod,
       final List<MethodMetadata> methodsToBeImplemented,
-      Map<FieldMetadata, MethodMetadata> countReferencedFieldsMethods,
-      Map<FieldMetadata, MethodMetadata> findAllReferencedFieldsMethods) {
+      final Map<FieldMetadata, MethodMetadata> countReferencedFieldsMethods,
+      final Map<FieldMetadata, MethodMetadata> findAllReferencedFieldsMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();

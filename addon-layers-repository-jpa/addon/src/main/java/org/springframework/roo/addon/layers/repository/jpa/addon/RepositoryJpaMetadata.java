@@ -89,7 +89,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaAnnotationValues annotationValues, final JavaType identifierType,
       final boolean readOnly, final JavaType readOnlyRepository,
-      final List<JavaType> customRepositories, Map<FieldMetadata, FieldMetadata> referenceFields) {
+      final List<JavaType> customRepositories,
+      final Map<FieldMetadata, FieldMetadata> referenceFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(identifierType, "Id type required");

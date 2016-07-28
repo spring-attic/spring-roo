@@ -97,8 +97,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
       final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders,
       final MethodMetadata findAllGlobalSearchMethod,
-      Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
-      Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods) {
+      final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
+      final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");

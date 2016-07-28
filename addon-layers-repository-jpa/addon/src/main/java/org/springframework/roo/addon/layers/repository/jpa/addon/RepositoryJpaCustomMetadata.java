@@ -93,7 +93,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
       final JavaType searchResult, JavaType globalSearch,
-      Map<FieldMetadata, JavaType> referencedFields) {
+      final Map<FieldMetadata, JavaType> referencedFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(globalSearch, "Global search required");

@@ -97,7 +97,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
       final boolean isDTO, final List<FieldMetadata> idFields,
       final List<FieldMetadata> validFields, final MethodMetadata findAllGlobalSearchMethod,
-      Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
+      final Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
       final Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames,
       final Map<JavaType, JavaSymbolName> referencedFieldsNames) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
