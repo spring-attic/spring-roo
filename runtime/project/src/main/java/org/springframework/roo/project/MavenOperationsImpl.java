@@ -229,7 +229,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     addBannerFile(getPomFromModuleName("application"));
 
     // Also, if STANDARD multimodule project has been selected, is necessary to include dependencies between
-    // application module and the generated modulesm above
+    // application module and the generated modules above
     if (multimodule == Multimodule.STANDARD) {
       getProjectOperations().addDependency("application", pom.getGroupId(), "service.impl",
           "${project.version}");

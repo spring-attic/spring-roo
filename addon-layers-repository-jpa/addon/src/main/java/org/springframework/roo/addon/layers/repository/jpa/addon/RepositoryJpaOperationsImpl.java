@@ -202,9 +202,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // using QueryDSL
     addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage(), defaultSearchResult);
 
-    // Also, is necessary to include a class annotated with @RooGlobalSearch. This class
+    // Also, it is necessary to include a class annotated with @RooGlobalSearch. This class
     // will be used in some repository methods
-    generateGlobalSearch(interfaceType.getPackage());
+    generateGlobalSearch(domainType.getPackage());
 
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(interfaceType.getModule(), domainType.getModule());
@@ -381,14 +381,14 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   }
 
   /**
-   * Method that generates GlobalSearch class on current repository package. If
+   * Method that generates GlobalSearch class on current model package. If
    * GlobalSearch already exists in this or other package, will not be
    * generated.
    * 
-   * @param repositoryPackage Package where GlobalSearch should be generated
+   * @param modelPackage Package where GlobalSearch should be generated
    * @return JavaType with existing or new GlobalSearch
    */
-  private JavaType generateGlobalSearch(JavaPackage repositoryPackage) {
+  private JavaType generateGlobalSearch(JavaPackage modelPackage) {
 
     // First of all, check if already exists a @RooGlobalSearch
     // class on current project
@@ -403,8 +403,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     }
 
     final JavaType javaType =
-        new JavaType(String.format("%s.GlobalSearch", repositoryPackage),
-            repositoryPackage.getModule());
+        new JavaType(String.format("%s.GlobalSearch", modelPackage), modelPackage.getModule());
     final String physicalPath =
         getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
 
@@ -415,7 +414,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       inputStream = FileUtils.getInputStream(getClass(), "GlobalSearch-template._java");
       String input = IOUtils.toString(inputStream);
       // Replacing package
-      input = input.replace("__PACKAGE__", repositoryPackage.getFullyQualifiedPackageName());
+      input = input.replace("__PACKAGE__", modelPackage.getFullyQualifiedPackageName());
 
       // Creating GlobalSearch class
       fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
