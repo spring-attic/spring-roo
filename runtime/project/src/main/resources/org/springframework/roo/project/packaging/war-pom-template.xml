@@ -48,6 +48,7 @@
 			<artifactId>org.springframework.roo.annotations</artifactId>
 			<version>${roo.version}</version>
 			<type>pom</type>
+      <scope>provided</scope>
 		</dependency>
 
 		<!-- AspectJ dependencies -->
