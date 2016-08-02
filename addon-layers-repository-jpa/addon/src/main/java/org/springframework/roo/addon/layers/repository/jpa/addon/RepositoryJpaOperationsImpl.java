@@ -1,16 +1,5 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -37,7 +26,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.Execution;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -45,10 +33,19 @@ import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The {@link RepositoryJpaOperations} implementation.
@@ -202,10 +199,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // using QueryDSL
     addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage(), defaultSearchResult);
 
-    // Also, it is necessary to include a class annotated with @RooGlobalSearch. This class
-    // will be used in some repository methods
-    generateGlobalSearch(domainType.getPackage());
-
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(interfaceType.getModule(), domainType.getModule());
 
@@ -214,6 +207,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void generateConfiguration(JavaType interfaceType, JavaType domainType) {
 
     final Element configuration = XmlUtils.getConfiguration(getClass());
@@ -369,55 +363,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       input = input.replace("__PACKAGE__", repositoryPackage.getFullyQualifiedPackageName());
 
       // Creating ReadOnlyRepository interface
-      fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, true);
-    } catch (final IOException e) {
-      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
-    } finally {
-      IOUtils.closeQuietly(inputStream);
-    }
-
-    return javaType;
-
-  }
-
-  /**
-   * Method that generates GlobalSearch class on current model package. If
-   * GlobalSearch already exists in this or other package, will not be
-   * generated.
-   * 
-   * @param modelPackage Package where GlobalSearch should be generated
-   * @return JavaType with existing or new GlobalSearch
-   */
-  private JavaType generateGlobalSearch(JavaPackage modelPackage) {
-
-    // First of all, check if already exists a @RooGlobalSearch
-    // class on current project
-    Set<JavaType> globalSearchClasses =
-        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
-
-    if (!globalSearchClasses.isEmpty()) {
-      Iterator<JavaType> it = globalSearchClasses.iterator();
-      while (it.hasNext()) {
-        return it.next();
-      }
-    }
-
-    final JavaType javaType =
-        new JavaType(String.format("%s.GlobalSearch", modelPackage), modelPackage.getModule());
-    final String physicalPath =
-        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
-
-    // Including GlobalSearch class
-    InputStream inputStream = null;
-    try {
-      // Use defined template
-      inputStream = FileUtils.getInputStream(getClass(), "GlobalSearch-template._java");
-      String input = IOUtils.toString(inputStream);
-      // Replacing package
-      input = input.replace("__PACKAGE__", modelPackage.getFullyQualifiedPackageName());
-
-      // Creating GlobalSearch class
-      fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
     } catch (final IOException e) {
       throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
     } finally {

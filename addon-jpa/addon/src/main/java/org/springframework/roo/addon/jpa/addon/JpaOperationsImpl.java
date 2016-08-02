@@ -8,10 +8,13 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -38,8 +42,10 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -48,6 +54,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
@@ -207,6 +214,11 @@ public class JpaOperationsImpl implements JpaOperations {
     cidBuilder.setAnnotations(annotations);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+    // Also, it is necessary to include a class annotated with @RooGlobalSearch. 
+    // This Value Object is used to define global data searches in an entity or 
+    // group of entities.
+    generateGlobalSearch(name.getPackage());
 
     getProjectOperations().addDependency(getProjectOperations().getFocusedModuleName(),
         new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", null));
@@ -505,6 +517,54 @@ public class JpaOperationsImpl implements JpaOperations {
     // Update the POM
     getProjectOperations().removeDependencies(module.getModuleName(), redundantDependencies);
     getProjectOperations().addDependencies(module.getModuleName(), requiredDependencies);
+  }
+
+  /**
+   * Method that generates GlobalSearch class on current model package. If
+   * GlobalSearch already exists in this or other package, will not be
+   * generated.
+   * 
+   * @param modelPackage Package where GlobalSearch should be generated
+   * @return JavaType with existing or new GlobalSearch
+   */
+  private JavaType generateGlobalSearch(JavaPackage modelPackage) {
+
+    // First of all, check if already exists a @RooGlobalSearch
+    // class on current project
+    Set<JavaType> globalSearchClasses =
+        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
+
+    if (!globalSearchClasses.isEmpty()) {
+      Iterator<JavaType> it = globalSearchClasses.iterator();
+      while (it.hasNext()) {
+        return it.next();
+      }
+    }
+
+    final JavaType javaType =
+        new JavaType(String.format("%s.GlobalSearch", modelPackage), modelPackage.getModule());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+    // Including GlobalSearch class
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream = FileUtils.getInputStream(getClass(), "GlobalSearch-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", modelPackage.getFullyQualifiedPackageName());
+
+      // Creating GlobalSearch class
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, false);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+
+    return javaType;
+
   }
 
   private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {
