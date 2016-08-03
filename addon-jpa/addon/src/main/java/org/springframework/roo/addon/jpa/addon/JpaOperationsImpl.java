@@ -220,8 +220,18 @@ public class JpaOperationsImpl implements JpaOperations {
     // group of entities.
     generateGlobalSearch(name.getPackage());
 
-    getProjectOperations().addDependency(getProjectOperations().getFocusedModuleName(),
-        new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", null));
+    // Add persistence dependencies to entity module if necessary
+    // Don't need to add them if spring-boot-starter-data-jpa is present, often in single module project
+    if (!getProjectOperations().getFocusedModule().hasDependencyExcludingVersion(
+        new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", null))) {
+      List<Dependency> dependencies = new ArrayList<Dependency>();
+      dependencies.add(new Dependency("org.springframework", "spring-context", null));
+      dependencies.add(new Dependency("org.springframework.data", "spring-data-jpa", null));
+      dependencies.add(new Dependency("org.springframework.data", "spring-data-commons", null));
+      dependencies.add(new Dependency("org.eclipse.persistence", "javax.persistence", null));
+      getProjectOperations().addDependencies(getProjectOperations().getFocusedModuleName(),
+          dependencies);
+    }
   }
 
   @Override

@@ -1,64 +1,65 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
 
-	<dependencies>
-	
-		<!-- Common Dependencies -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
+  <dependencies>
 
-		<!-- Spring Boot starters -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+    <!-- Common Dependencies -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<optional>true</optional>
-		</dependency>
+    <!-- Spring Boot starters -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-		<!-- Spring Roo annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.annotations</artifactId>
-			<version>${roo.version}</version>
-			<type>pom</type>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- Spring Roo annotations -->
+    <dependency>
+      <groupId>org.springframework.roo</groupId>
+      <artifactId>org.springframework.roo.annotations</artifactId>
+      <version>${roo.version}</version>
+      <type>pom</type>
       <scope>provided</scope>
-		</dependency>
-	</dependencies>
+    </dependency>
+
+  </dependencies>
 
 
-	<plugins>
-		<!-- Spring Boot plugins -->
-		<plugin>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-maven-plugin</artifactId>
-			<configuration>
-				<excludeDevtools>true</excludeDevtools>
-			</configuration>
-		</plugin>
+  <plugins>
+    <!-- Spring Boot plugins -->
+    <plugin>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-maven-plugin</artifactId>
+      <configuration>
+        <excludeDevtools>true</excludeDevtools>
+      </configuration>
+    </plugin>
 
-		<!-- Compiler plugin -->
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-compiler-plugin</artifactId>
-			<configuration>
-				<source>${java.version}</source>
-				<target>${java.version}</target>
-				<encoding>${project.build.sourceEncoding}</encoding>
-				<useIncrementalCompilation>false</useIncrementalCompilation>
-			</configuration>
-		</plugin>
-	</plugins>
+    <!-- Compiler plugin -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <configuration>
+        <source>${java.version}</source>
+        <target>${java.version}</target>
+        <encoding>${project.build.sourceEncoding}</encoding>
+        <useIncrementalCompilation>false</useIncrementalCompilation>
+      </configuration>
+    </plugin>
+  </plugins>
 
 
 </configuration>
