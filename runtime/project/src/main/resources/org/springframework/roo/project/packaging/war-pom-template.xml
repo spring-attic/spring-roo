@@ -1,144 +1,146 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<!-- Spring IO Platform is the parent of the generated application to be 
-		able to use Spring Boot and all its default configuration -->
-	<parent>
-		<groupId>io.spring.platform</groupId>
-		<artifactId>platform-bom</artifactId>
-		<version>2.0.6.RELEASE</version>
-		<relativePath />
-	</parent>
-	<groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
-	<artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
-	<packaging>war</packaging>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>TO_BE_CHANGED_BY_LISTENER</name>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <!-- Spring IO Platform is the parent of the generated application to be able to 
+    use Spring Boot and all its default configuration -->
+  <parent>
+    <groupId>io.spring.platform</groupId>
+    <artifactId>platform-bom</artifactId>
+    <version>2.0.6.RELEASE</version>
+    <relativePath />
+  </parent>
+  <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
+  <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
+  <packaging>war</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>TO_BE_CHANGED_BY_LISTENER</name>
 
-	<properties>
-		<roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
-		<java.version>JAVA_VERSION</java.version>
-		<aspectj.version>ASPECTJ_VERSION</aspectj.version>
-		<aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
-		<assertj.version>2.3.0</assertj.version>
-	</properties>
+  <properties>
+    <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
+    <java.version>JAVA_VERSION</java.version>
+    <aspectj.version>ASPECTJ_VERSION</aspectj.version>
+    <aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
+    <assertj.version>2.3.0</assertj.version>
+  </properties>
 
-	<dependencies>
-		<!-- Spring Boot starters -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+  <dependencies>
+    <!-- Spring Boot starters -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<optional>true</optional>
-		</dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <optional>true</optional>
+    </dependency>
 
-		<!-- Spring Roo annotations -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.annotations</artifactId>
-			<version>${roo.version}</version>
-			<type>pom</type>
+    <!-- Spring Roo annotations -->
+    <dependency>
+      <groupId>org.springframework.roo</groupId>
+      <artifactId>org.springframework.roo.annotations</artifactId>
+      <version>${roo.version}</version>
+      <type>pom</type>
       <scope>provided</scope>
-		</dependency>
+    </dependency>
 
-		<!-- AspectJ dependencies -->
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjrt</artifactId>
-		</dependency>
+    <!-- AspectJ dependencies -->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+    </dependency>
 
-		<!-- Common Dependencies -->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-		
-		<!-- Test utils dependencies -->
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<version>${assertj.version}</version>
-	  	</dependency>
+    <!-- Common Dependencies -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
 
-		<!-- Dependencies added by Spring Roo -->
+    <!-- Test utils dependencies -->
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+    </dependency>
 
-	</dependencies>
+    <!-- Dependencies added by Spring Roo -->
 
-	<build>
-		<plugins>
-			<!-- Spring Boot plugins -->
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludeDevtools>true</excludeDevtools>
-				</configuration>
-			</plugin>
+  </dependencies>
 
-			<!-- Compiler plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-					<encoding>${project.build.sourceEncoding}</encoding>
-					<useIncrementalCompilation>false</useIncrementalCompilation>
-				</configuration>
-			</plugin>
-			
-			<!-- AspectJ plugins -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>aspectj-maven-plugin</artifactId>
-				<version>${aspectj.plugin.version}</version>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-					<Xlint>ignore</Xlint>
-					<complianceLevel>${java.version}</complianceLevel>
-					<encoding>UTF-8</encoding>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>compile</goal>
-							<goal>test-compile</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.aspectj</groupId>
-						<artifactId>aspectjtools</artifactId>
-						<version>${aspectj.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			
-			<!-- Surefire plugin configuration -->
-			<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-surefire-plugin</artifactId>
-        		<configuration>
-          			<excludes>
-            			<exclude>**/*_Roo_*</exclude>
-          			</excludes>
-        		</configuration>
-      		</plugin>
+  <build>
+    <plugins>
+      <!-- Spring Boot plugins -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>${start-class}</mainClass>
+          <classifier>exec</classifier>
+          <excludeDevtools>true</excludeDevtools>
+        </configuration>
+      </plugin>
 
-		</plugins>
-	</build>
+      <!-- Compiler plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <useIncrementalCompilation>false</useIncrementalCompilation>
+        </configuration>
+      </plugin>
+
+      <!-- AspectJ plugins -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>aspectj-maven-plugin</artifactId>
+        <version>${aspectj.plugin.version}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <Xlint>ignore</Xlint>
+          <complianceLevel>${java.version}</complianceLevel>
+          <encoding>UTF-8</encoding>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>compile</goal>
+              <goal>test-compile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjtools</artifactId>
+            <version>${aspectj.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <!-- Surefire plugin configuration -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*_Roo_*</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
 
 </project>
