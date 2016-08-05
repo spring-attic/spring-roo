@@ -339,6 +339,12 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     ctx.addExtraParameter("menuEntries", menuEntries);
 
+    // Generate ids to search when merge new and existing doc
+    List<String> requiredIds = new ArrayList<String>();
+    for (MenuEntry entry : menuEntries) {
+      requiredIds.add(entry.getEntityName() + "Entry");
+    }
+
     // Process elements to generate 
     DOC newDoc = process("fragments/menu", ctx);
 
@@ -347,7 +353,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
     }
 
     // Write newDoc on disk

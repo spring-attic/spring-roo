@@ -83,7 +83,7 @@ public class FieldItem {
   }
 
   /**
-   * Calculated the hash code of the fiendName, label and type properties
+   * Calculate the hash code of the fieldName, label and type properties
    * 
    * @return hash code
    */
