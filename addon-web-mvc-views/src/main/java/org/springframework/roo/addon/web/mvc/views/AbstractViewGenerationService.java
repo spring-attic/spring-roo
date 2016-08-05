@@ -430,9 +430,15 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     String viewName =
         getFragmentsFolder(moduleName).concat("/languages").concat(getViewsExtension());
 
+    // Generate ids to search when merge new and existing doc
+    List<String> requiredIds = new ArrayList<String>();
+    for (I18n language : installedLanguages) {
+      requiredIds.add(language.getLocale().getLanguage() + "Flag");
+    }
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
     }
 
     // Write newDoc on disk
