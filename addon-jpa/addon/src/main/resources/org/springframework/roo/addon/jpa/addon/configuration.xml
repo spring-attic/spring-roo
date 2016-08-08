@@ -1,147 +1,157 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
-	<databases>
-		<database id="H2">
-			<dependencies>
-				<dependency>
-					<groupId>com.h2database</groupId>
-					<artifactId>h2</artifactId>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="HYPERSONIC">
-			<dependencies>
-				<dependency>
-					<groupId>org.hsqldb</groupId>
-					<artifactId>hsqldb</artifactId>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="POSTGRES">
-			<dependencies>
-				<dependency>
-					<groupId>org.postgresql</groupId>
-					<artifactId>postgresql</artifactId>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="MYSQL">
-			<dependencies>
-				<dependency>
-					<groupId>mysql</groupId>
-					<artifactId>mysql-connector-java</artifactId>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="MSSQL">
-			<dependencies>
-				<dependency>
-					<groupId>net.sourceforge.jtds</groupId>
-					<artifactId>jtds</artifactId>
-					<version>1.2.4</version>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="SYBASE">
-			<dependencies>
-				<dependency>
-					<groupId>net.sourceforge.jtds</groupId>
-					<artifactId>jtds</artifactId>
-					<version>1.2.4</version>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="ORACLE">
-			<dependencies>
-				<dependency>
-					<groupId>com.oracle</groupId>
-					<artifactId>ojdbc14</artifactId>
-					<version>10.2.0.5</version>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="DB2_EXPRESS_C">
-			<dependencies>
-				<dependency>
-					<groupId>com.ibm</groupId>
-					<artifactId>db2jcc4</artifactId>
-					<version>9.7.2</version>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="DB2_400">
-			<dependencies>
-				<dependency>
-					<groupId>net.sf.jt400</groupId>
-					<artifactId>jt400</artifactId>
-					<version>6.7</version>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="DERBY_EMBEDDED">
-			<dependencies>
-				<dependency>
-					<groupId>org.apache.derby</groupId>
-					<artifactId>derby</artifactId>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="DERBY_CLIENT">
-			<dependencies>
-				<dependency>
-					<groupId>org.apache.derby</groupId>
-					<artifactId>derbyclient</artifactId>
-				</dependency>
-			</dependencies>
-		</database>
-		<database id="FIREBIRD">
-			<dependencies>
-				<dependency>
-					<groupId>org.firebirdsql.jdbc</groupId>
-					<artifactId>jaybird</artifactId>
-					<exclusions>
-						<exclusion>
-							<groupId>xalan</groupId>
-							<artifactId>xalan</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-			</dependencies>
-		</database>
-	</databases>
-	<ormProviders>
-		<provider id="HIBERNATE">
-		</provider>
-		<provider id="ECLIPSELINK">
-			<dependency>
-				<groupId>org.eclipse.persistence</groupId>
-				<artifactId>eclipselink</artifactId>
-				<version>2.6.1</version>
-			</dependency>
-		</provider>
-	</ormProviders>
-	<starter>
-		<provider id="HIBERNATE">
-			<dependencies>
-				<dependency>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-data-jpa</artifactId>
-				</dependency>
-			</dependencies>
-		</provider>
-		<provider id="ECLIPSELINK">
-			<dependencies>
-				<dependency>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-data-jpa</artifactId>
-					<exclusions>
-						<exclusion>
-							<artifactId>hibernate-entitymanager</artifactId>
-							<groupId>org.hibernate</groupId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-			</dependencies>
-		</provider>
-	</starter>
+  <databases>
+    <database id="H2">
+      <dependencies>
+        <dependency>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="HYPERSONIC">
+      <dependencies>
+        <dependency>
+          <groupId>org.hsqldb</groupId>
+          <artifactId>hsqldb</artifactId>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="POSTGRES">
+      <dependencies>
+        <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="MYSQL">
+      <dependencies>
+        <dependency>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="MSSQL">
+      <dependencies>
+        <dependency>
+          <groupId>net.sourceforge.jtds</groupId>
+          <artifactId>jtds</artifactId>
+          <version>1.2.4</version>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="SYBASE">
+      <dependencies>
+        <dependency>
+          <groupId>net.sourceforge.jtds</groupId>
+          <artifactId>jtds</artifactId>
+          <version>1.2.4</version>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="ORACLE">
+      <dependencies>
+        <dependency>
+          <groupId>com.oracle</groupId>
+          <artifactId>ojdbc14</artifactId>
+          <version>10.2.0.5</version>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="DB2_EXPRESS_C">
+      <dependencies>
+        <dependency>
+          <groupId>com.ibm</groupId>
+          <artifactId>db2jcc4</artifactId>
+          <version>9.7.2</version>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="DB2_400">
+      <dependencies>
+        <dependency>
+          <groupId>net.sf.jt400</groupId>
+          <artifactId>jt400</artifactId>
+          <version>6.7</version>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="DERBY_EMBEDDED">
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.derby</groupId>
+          <artifactId>derby</artifactId>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="DERBY_CLIENT">
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.derby</groupId>
+          <artifactId>derbyclient</artifactId>
+        </dependency>
+      </dependencies>
+    </database>
+    <database id="FIREBIRD">
+      <dependencies>
+        <dependency>
+          <groupId>org.firebirdsql.jdbc</groupId>
+          <artifactId>jaybird</artifactId>
+          <exclusions>
+            <exclusion>
+              <groupId>xalan</groupId>
+              <artifactId>xalan</artifactId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+      </dependencies>
+    </database>
+  </databases>
+  <ormProviders>
+    <provider id="HIBERNATE">
+    </provider>
+    <provider id="ECLIPSELINK">
+      <dependency>
+        <groupId>org.eclipse.persistence</groupId>
+        <artifactId>eclipselink</artifactId>
+        <version>2.6.1</version>
+      </dependency>
+    </provider>
+  </ormProviders>
+  <starter>
+    <provider id="HIBERNATE">
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-jdbc</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </provider>
+    <provider id="ECLIPSELINK">
+      <dependencies>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-data-jpa</artifactId>
+          <exclusions>
+            <exclusion>
+              <artifactId>hibernate-entitymanager</artifactId>
+              <groupId>org.hibernate</groupId>
+            </exclusion>
+          </exclusions>
+        </dependency>
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-jdbc</artifactId>
+          <scope>provided</scope>
+        </dependency>
+      </dependencies>
+    </provider>
+  </starter>
 </configuration>
