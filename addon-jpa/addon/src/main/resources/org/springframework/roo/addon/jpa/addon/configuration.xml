@@ -6,6 +6,7 @@
         <dependency>
           <groupId>com.h2database</groupId>
           <artifactId>h2</artifactId>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -14,6 +15,7 @@
         <dependency>
           <groupId>org.hsqldb</groupId>
           <artifactId>hsqldb</artifactId>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -22,6 +24,7 @@
         <dependency>
           <groupId>org.postgresql</groupId>
           <artifactId>postgresql</artifactId>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -30,6 +33,7 @@
         <dependency>
           <groupId>mysql</groupId>
           <artifactId>mysql-connector-java</artifactId>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -39,6 +43,7 @@
           <groupId>net.sourceforge.jtds</groupId>
           <artifactId>jtds</artifactId>
           <version>1.2.4</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -48,6 +53,7 @@
           <groupId>net.sourceforge.jtds</groupId>
           <artifactId>jtds</artifactId>
           <version>1.2.4</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -57,6 +63,7 @@
           <groupId>com.oracle</groupId>
           <artifactId>ojdbc14</artifactId>
           <version>10.2.0.5</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -66,6 +73,7 @@
           <groupId>com.ibm</groupId>
           <artifactId>db2jcc4</artifactId>
           <version>9.7.2</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -75,6 +83,7 @@
           <groupId>net.sf.jt400</groupId>
           <artifactId>jt400</artifactId>
           <version>6.7</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -83,6 +92,7 @@
         <dependency>
           <groupId>org.apache.derby</groupId>
           <artifactId>derby</artifactId>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -91,6 +101,7 @@
         <dependency>
           <groupId>org.apache.derby</groupId>
           <artifactId>derbyclient</artifactId>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
     </database>
@@ -99,6 +110,7 @@
         <dependency>
           <groupId>org.firebirdsql.jdbc</groupId>
           <artifactId>jaybird</artifactId>
+          <scope>provided</scope>
           <exclusions>
             <exclusion>
               <groupId>xalan</groupId>

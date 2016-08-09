@@ -8,22 +8,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -35,6 +19,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.application.config.ApplicationConfigService;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -57,6 +42,24 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link JpaOperations}.
@@ -463,6 +466,7 @@ public class JpaOperationsImpl implements JpaOperations {
       requiredDependencies.add(new Dependency(dependencyElement));
     }
 
+    // Add database dependencies
     final List<Element> databaseDependencies =
         XmlUtils.findElements(jdbcDatabase.getConfigPrefix() + "/dependencies/dependency",
             configuration);
@@ -514,7 +518,6 @@ public class JpaOperationsImpl implements JpaOperations {
       }
     }
 
-
     // Remove redundant dependencies
     final List<Dependency> redundantDependencies = new ArrayList<Dependency>();
     redundantDependencies.addAll(getDependencies(databaseXPath, configuration));
@@ -527,6 +530,23 @@ public class JpaOperationsImpl implements JpaOperations {
     // Update the POM
     getProjectOperations().removeDependencies(module.getModuleName(), redundantDependencies);
     getProjectOperations().addDependencies(module.getModuleName(), requiredDependencies);
+
+    // Add database test dependency to repository module if it is multimodule project
+    // and some repository has been already added
+    if (getProjectOperations().isMultimoduleProject()) {
+      Set<JavaType> repositoryTypes =
+          getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+      if (!repositoryTypes.isEmpty()) {
+        JavaType repositoryType = repositoryTypes.iterator().next();
+        String moduleName = repositoryType.getModule();
+
+        // Remove redundant dependencies from repository POM
+        getProjectOperations().removeDependencies(moduleName, redundantDependencies);
+
+        // Add new database dependencies
+        addDatabaseTestDependency(moduleName, profile, jdbcDatabase.getConfigPrefix());
+      }
+    }
   }
 
   /**
@@ -575,6 +595,105 @@ public class JpaOperationsImpl implements JpaOperations {
 
     return javaType;
 
+  }
+
+  /**
+   * Add datasource dependency for testing purposes in repository module. This method 
+   * can be called when installing/changing persistence database or when adding 
+   * repositories to the project.
+   * 
+   * @param repositoryModuleName the module name where the dependency should be added.
+   * @param profile the profile used to obtain the datasource property from 
+   *    spring config file.
+   * @param databaseConfigPrefix the database prefix used to find the right dependency
+   *    in the configuration file. It could be null if called from repository commands.
+   */
+  public void addDatabaseTestDependency(String repositoryModuleName, String profile,
+      String databaseConfigPrefix) {
+
+    // Get configuration Element from configuration.xml
+    final Element configuration = XmlUtils.getConfiguration(getClass());
+
+    // If databaseConfigPrefix is null, get prefix from properties file
+    if (databaseConfigPrefix == null) {
+
+      // Get application module where properties file should be located
+      List<Pom> modules =
+          (List<Pom>) getTypeLocationService().getModules(ModuleFeatureName.APPLICATION);
+      if (modules.size() == 0) {
+        throw new RuntimeException(String.format("ERROR: Not found a module with %s feature",
+            ModuleFeatureName.APPLICATION));
+      }
+
+      if (profile == null) {
+
+        // Add the database dependency of each profile 
+        List<String> profiles =
+            applicationConfigService.getApplicationProfiles(modules.get(0).getModuleName());
+
+        for (String applicationProfile : profiles) {
+
+          // // Find the driver name to obtain the right dependency to add
+          final String driver =
+              applicationConfigService.getProperty(modules.get(0).getModuleName(),
+                  DATASOURCE_PREFIX, DATABASE_DRIVER, applicationProfile);
+
+          for (JdbcDatabase database : JdbcDatabase.values()) {
+            if (database.getDriverClassName().equals(driver)) {
+              databaseConfigPrefix = database.getConfigPrefix();
+              addTestDependency(repositoryModuleName, databaseConfigPrefix, configuration);
+            }
+          }
+        }
+      } else {
+
+        // Find the driver name to obtain the right dependency to add
+        String driver =
+            applicationConfigService.getProperty(modules.get(0).getModuleName(), DATASOURCE_PREFIX,
+                DATABASE_DRIVER, profile);
+
+        // Find the prefix value from JdbcDatabase enum
+        JdbcDatabase[] jdbcDatabaseValues = JdbcDatabase.values();
+        for (JdbcDatabase database : jdbcDatabaseValues) {
+          if (database.getDriverClassName().equals(driver)) {
+            databaseConfigPrefix = database.getConfigPrefix();
+            addTestDependency(repositoryModuleName, databaseConfigPrefix, configuration);
+          }
+        }
+      }
+    } else {
+
+      // No need to find the driver name to obtain database prefix
+      addTestDependency(repositoryModuleName, databaseConfigPrefix, configuration);
+    }
+  }
+
+  /**
+   * Gets database dependency from config file and adds it with test scope
+   * 
+   * @param moduleName the module which dependency should be added
+   * @param databaseConfigPrefix the prefix name for choosing the dependency to add
+   * @param configuration the configuration file with the dependencies to copy from
+   */
+  private void addTestDependency(String moduleName, String databaseConfigPrefix,
+      final Element configuration) {
+    final List<Element> databaseDependencies =
+        XmlUtils.findElements(databaseConfigPrefix + "/dependencies/dependency", configuration);
+    for (final Element dependencyElement : databaseDependencies) {
+
+      // Change scope from provided to test
+      NodeList childNodes = dependencyElement.getChildNodes();
+      for (int i = 0; i < childNodes.getLength(); i++) {
+        final Node node = childNodes.item(i);
+        if (node != null && node.getNodeType() == Node.ELEMENT_NODE
+            && node.getNodeName().equals("scope")) {
+          node.setTextContent("test");
+        }
+      }
+
+      // Add dependency
+      getProjectOperations().addDependency(moduleName, new Dependency(dependencyElement));
+    }
   }
 
   private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {
@@ -717,7 +836,6 @@ public class JpaOperationsImpl implements JpaOperations {
 
     return applicationConfigService.existsSpringConfigFile(moduleName) && hasStarter;
   }
-
 
   public String getName() {
     return FeatureNames.JPA;

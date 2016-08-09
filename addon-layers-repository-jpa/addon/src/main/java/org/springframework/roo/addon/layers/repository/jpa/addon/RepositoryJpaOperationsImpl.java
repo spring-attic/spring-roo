@@ -8,6 +8,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.JpaOperations;
+import org.springframework.roo.addon.jpa.addon.JpaOperationsImpl;
+import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -70,6 +73,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   private TypeLocationService typeLocationService;
   private MemberDetailsScanner memberDetailsScanner;
   private MetadataService metadataService;
+  private JpaOperationsImpl jpaOperations;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -221,6 +225,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
           XmlUtils
               .findElements("/configuration/multimodule/dependencies/dependency", configuration);
       plugins = XmlUtils.findElements("/configuration/multimodule/plugins/plugin", configuration);
+
+      // Add database test dependency
+      getJpaOperationsImpl().addDatabaseTestDependency(interfaceType.getModule(), null, null);
 
     } else {
       dependencies =
@@ -684,6 +691,34 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       }
     } else {
       return metadataService;
+    }
+  }
+
+  /**
+   * Method to get JpaOperations Service implementation
+   * 
+   * @return
+   */
+  public JpaOperationsImpl getJpaOperationsImpl() {
+    if (jpaOperations == null) {
+      // Get all Services implement JpaOperations interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(JpaOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          jpaOperations = (JpaOperationsImpl) this.context.getService(ref);
+          return jpaOperations;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load JpaOperations on ProjectConfigurationController.");
+        return null;
+      }
+    } else {
+      return jpaOperations;
     }
   }
 
