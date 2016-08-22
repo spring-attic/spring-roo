@@ -355,7 +355,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     }
 
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PRIVATE, methodName,
             JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
@@ -1422,7 +1422,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     }
 
     MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PRIVATE, methodName,
             JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
