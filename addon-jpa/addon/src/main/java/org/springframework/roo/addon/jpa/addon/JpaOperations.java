@@ -3,6 +3,7 @@ package org.springframework.roo.addon.jpa.addon;
 import java.util.List;
 import java.util.SortedSet;
 
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
@@ -84,6 +85,13 @@ public interface JpaOperations extends Feature {
    */
   void newIdentifier(JavaType identifierType, String identifierField, String identifierColumn);
 
+  /**
+   * Deletes an existing entity from project.
+   * 
+   * @param entity the JavaType representing the file to be deleted from project
+   */
+  void deleteEntity(JavaType entity);
 
   SortedSet<String> getDatabaseProperties(String profile);
+
 }

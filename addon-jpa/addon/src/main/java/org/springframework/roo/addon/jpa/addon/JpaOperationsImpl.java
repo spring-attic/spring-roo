@@ -713,6 +713,16 @@ public class JpaOperationsImpl implements JpaOperations {
     return dependencies;
   }
 
+  @Override
+  public void deleteEntity(JavaType entity) {
+    final String entityFilePathIdentifier =
+        getPathResolver().getCanonicalPath(entity.getModule(), Path.SRC_MAIN_JAVA, entity);
+
+    if (getFileManager().exists(entityFilePathIdentifier)) {
+      getFileManager().delete(entityFilePathIdentifier);
+    }
+  }
+
   public FileManager getFileManager() {
     // Get all Services implement FileManager interface
     try {

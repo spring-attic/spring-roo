@@ -13,6 +13,7 @@ import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -411,6 +412,10 @@ public class JpaCommands implements CommandMarker {
                     "Entity '%s' already exists and cannot be created. Try to use a "
                         + "different entity name on --class parameter or use --force parameter to overwrite it.",
                     name));
+      } else if (name.equals(entity.getName()) && shellContext.isForce()) {
+
+        // Delete existing entity before creating the new one
+        jpaOperations.deleteEntity(entity.getType());
       }
     }
 
