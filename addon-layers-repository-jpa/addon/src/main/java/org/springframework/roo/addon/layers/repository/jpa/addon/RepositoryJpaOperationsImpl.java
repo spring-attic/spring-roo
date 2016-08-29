@@ -227,7 +227,8 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       plugins = XmlUtils.findElements("/configuration/multimodule/plugins/plugin", configuration);
 
       // Add database test dependency
-      getJpaOperationsImpl().addDatabaseTestDependency(interfaceType.getModule(), null, null);
+      getJpaOperationsImpl().addDatabaseDependencyWithTestScope(interfaceType.getModule(), null,
+          null);
 
     } else {
       dependencies =

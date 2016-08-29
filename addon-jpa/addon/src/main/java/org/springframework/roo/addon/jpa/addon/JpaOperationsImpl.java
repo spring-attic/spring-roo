@@ -22,6 +22,7 @@ import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -34,6 +35,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -537,14 +539,18 @@ public class JpaOperationsImpl implements JpaOperations {
       Set<JavaType> repositoryTypes =
           getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
       if (!repositoryTypes.isEmpty()) {
-        JavaType repositoryType = repositoryTypes.iterator().next();
-        String moduleName = repositoryType.getModule();
+        Iterator<JavaType> repositoryIterator = repositoryTypes.iterator();
+        while (repositoryIterator.hasNext()) {
+          JavaType repositoryType = repositoryIterator.next();
+          String moduleName = repositoryType.getModule();
 
-        // Remove redundant dependencies from repository POM
-        getProjectOperations().removeDependencies(moduleName, redundantDependencies);
+          // Remove redundant dependencies from modules with repository classes
+          getProjectOperations().removeDependencies(moduleName, redundantDependencies);
 
-        // Add new database dependencies
-        addDatabaseTestDependency(moduleName, profile, jdbcDatabase.getConfigPrefix());
+          // Add new database dependencies
+          addDatabaseDependencyWithTestScope(moduleName, profile, jdbcDatabase.getConfigPrefix());
+        }
+
       }
     }
   }
@@ -598,9 +604,9 @@ public class JpaOperationsImpl implements JpaOperations {
   }
 
   /**
-   * Add datasource dependency for testing purposes in repository module. This method 
-   * can be called when installing/changing persistence database or when adding 
-   * repositories to the project.
+   * Add datasource dependency for testing purposes in a module with repository classes.
+   * This method can be called when installing/changing persistence database or when 
+   * adding repositories to the project.
    * 
    * @param repositoryModuleName the module name where the dependency should be added.
    * @param profile the profile used to obtain the datasource property from 
@@ -608,7 +614,7 @@ public class JpaOperationsImpl implements JpaOperations {
    * @param databaseConfigPrefix the database prefix used to find the right dependency
    *    in the configuration file. It could be null if called from repository commands.
    */
-  public void addDatabaseTestDependency(String repositoryModuleName, String profile,
+  public void addDatabaseDependencyWithTestScope(String repositoryModuleName, String profile,
       String databaseConfigPrefix) {
 
     // Get configuration Element from configuration.xml
@@ -641,7 +647,7 @@ public class JpaOperationsImpl implements JpaOperations {
           for (JdbcDatabase database : JdbcDatabase.values()) {
             if (database.getDriverClassName().equals(driver)) {
               databaseConfigPrefix = database.getConfigPrefix();
-              addTestDependency(repositoryModuleName, databaseConfigPrefix, configuration);
+              addTestScopedDependency(repositoryModuleName, databaseConfigPrefix, configuration);
             }
           }
         }
@@ -657,14 +663,14 @@ public class JpaOperationsImpl implements JpaOperations {
         for (JdbcDatabase database : jdbcDatabaseValues) {
           if (database.getDriverClassName().equals(driver)) {
             databaseConfigPrefix = database.getConfigPrefix();
-            addTestDependency(repositoryModuleName, databaseConfigPrefix, configuration);
+            addTestScopedDependency(repositoryModuleName, databaseConfigPrefix, configuration);
           }
         }
       }
     } else {
 
       // No need to find the driver name to obtain database prefix
-      addTestDependency(repositoryModuleName, databaseConfigPrefix, configuration);
+      addTestScopedDependency(repositoryModuleName, databaseConfigPrefix, configuration);
     }
   }
 
@@ -675,7 +681,7 @@ public class JpaOperationsImpl implements JpaOperations {
    * @param databaseConfigPrefix the prefix name for choosing the dependency to add
    * @param configuration the configuration file with the dependencies to copy from
    */
-  private void addTestDependency(String moduleName, String databaseConfigPrefix,
+  private void addTestScopedDependency(String moduleName, String databaseConfigPrefix,
       final Element configuration) {
     final List<Element> databaseDependencies =
         XmlUtils.findElements(databaseConfigPrefix + "/dependencies/dependency", configuration);
