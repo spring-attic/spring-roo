@@ -13,15 +13,6 @@ import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
-import java.io.ObjectInputStream.GetField;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -41,7 +32,10 @@ import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.settings.project.ProjectSettingsService;
@@ -55,6 +49,14 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Commands for the JPA add-on to be used by the ROO shell.
@@ -101,6 +103,10 @@ public class JpaCommands implements CommandMarker {
   private TypeLocationService typeLocationService;
   @Reference
   private ProjectSettingsService projectSettings;
+  @Reference
+  private PathResolver pathResolver;
+  @Reference
+  private FileManager fileManager;
 
   protected void activate(final ComponentContext context) {
     staticFieldConverter.add(JdbcDatabase.class);
@@ -399,24 +405,18 @@ public class JpaCommands implements CommandMarker {
     Validate.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
 
     // Check if exists other entity with the same name
-    Set<ClassOrInterfaceTypeDetails> currentEntities =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JAVA_BEAN);
+    final String entityFilePathIdentifier =
+        pathResolver.getCanonicalPath(name.getModule(), Path.SRC_MAIN_JAVA, name);
 
-    for (ClassOrInterfaceTypeDetails entity : currentEntities) {
-      // If exists and developer doesn't use --force global parameter,
-      // we can't create a duplicate entity
-      if (name.equals(entity.getName()) && !shellContext.isForce()) {
-        throw new IllegalArgumentException(
-            String
-                .format(
-                    "Entity '%s' already exists and cannot be created. Try to use a "
-                        + "different entity name on --class parameter or use --force parameter to overwrite it.",
-                    name));
-      } else if (name.equals(entity.getName()) && shellContext.isForce()) {
-
-        // Delete existing entity before creating the new one
-        jpaOperations.deleteEntity(entity.getType());
-      }
+    if (fileManager.exists(entityFilePathIdentifier) && shellContext.isForce()) {
+      fileManager.delete(entityFilePathIdentifier);
+    } else if (fileManager.exists(entityFilePathIdentifier) && !shellContext.isForce()) {
+      throw new IllegalArgumentException(
+          String
+              .format(
+                  "Entity '%s' already exists and cannot be created. Try to use a "
+                      + "different entity name on --class parameter or use --force parameter to overwrite it.",
+                  name));
     }
 
     // Check valid value for --extends
