@@ -221,4 +221,6 @@ public interface FieldCreatorProvider {
   List<String> getFieldSetTypeAllPossibleValues(ShellContext shellContext);
 
   List<String> getFieldListTypeAllPossibleValues(ShellContext shellContext);
+
+  List<String> getFieldEmbeddedAllPossibleValues(ShellContext shellContext);
 }

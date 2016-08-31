@@ -5,12 +5,6 @@ import static org.springframework.roo.shell.OptionContexts.ENUMERATION;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -52,6 +46,12 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Additional shell commands for the purpose of creating fields.
@@ -337,6 +337,16 @@ public class FieldCommands implements CommandMarker {
       return true;
     }
     return false;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "field embedded", param = "type",
+      help = "--type option should be an entity.")
+  public List<String> getFieldEmbeddedAllPossibleValues(ShellContext shellContext) {
+    JavaType type = getTypeFromCommand(shellContext);
+    if (type != null) {
+      return getFieldCreatorProvider(type).getFieldEmbeddedAllPossibleValues(shellContext);
+    }
+    return new ArrayList<String>();
   }
 
   @CliCommand(value = "field embedded",

@@ -1,13 +1,7 @@
-package org.springframework.roo.addon.dto.addon;
+package org.springframework.roo.addon.jpa.addon.entity;
 
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,12 +33,10 @@ import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.operations.jsr303.StringField;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileField;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.model.RooJavaType;
@@ -52,8 +44,14 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.ShellContext;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
 /**
- * Provides field creation operations support for DTO classes by implementing
+ * Provides field creation operations support for embeddable classes by implementing
  * FieldCreatorProvider.
  * 
  * @author Sergio Clares
@@ -61,21 +59,20 @@ import org.springframework.roo.shell.ShellContext;
  */
 @Component
 @Service
-public class DtoFieldCreatorProvider implements FieldCreatorProvider {
+public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
 
   @Reference
   private TypeLocationService typeLocationService;
-  @Reference
-  private MemberDetailsScanner memberDetailsScanner;
   @Reference
   private ProjectOperations projectOperations;
   @Reference
   private TypeManagementService typeManagementService;
 
+
   @Override
   public boolean isValid(JavaType javaType) {
     ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
-    if (cid.getAnnotation(RooJavaType.ROO_DTO) != null) {
+    if (cid.getAnnotation(JpaJavaType.EMBEDDABLE) != null) {
       return true;
     }
 
@@ -84,9 +81,9 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isFieldManagementAvailable() {
-    Set<ClassOrInterfaceTypeDetails> dtoClasses =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
-    if (!dtoClasses.isEmpty()) {
+    Set<ClassOrInterfaceTypeDetails> embeddableClasses =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(JpaJavaType.EMBEDDABLE);
+    if (!embeddableClasses.isEmpty()) {
       return true;
     }
     return false;
@@ -353,9 +350,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     fieldDetails.setNullRequired(nullRequired);
     fieldDetails.setAssertFalse(assertFalse);
     fieldDetails.setAssertTrue(assertTrue);
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
@@ -379,12 +373,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     fieldDetails.setNullRequired(nullRequired);
     fieldDetails.setFuture(future);
     fieldDetails.setPast(past);
-    if (JdkJavaType.isDateField(fieldType)) {
-      fieldDetails.setPersistenceType(persistenceType);
-    }
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
@@ -408,7 +396,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   public void createEmbeddedField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
       boolean permitReservedWords) {
 
-    throw new IllegalArgumentException("'field embedded' command is not available for DTO classes.");
+    throw new IllegalArgumentException(
+        "'field embedded' command is not available for embeddable classes.");
   }
 
   @Override
@@ -418,9 +407,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
     final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
     final EnumField fieldDetails = new EnumField(physicalTypeIdentifier, fieldType, fieldName);
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
     fieldDetails.setNotNull(notNull);
     fieldDetails.setNullRequired(nullRequired);
     if (enumType != null) {
@@ -468,14 +454,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     if (max != null) {
       fieldDetails.setMax(max);
     }
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
     if (comment != null) {
       fieldDetails.setComment(comment);
-    }
-    if (unique) {
-      fieldDetails.setUnique(true);
     }
     if (value != null) {
       fieldDetails.setValue(value);
@@ -494,7 +474,7 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
       Fetch fetch, String comment, boolean permitReservedWords, boolean transientModifier) {
 
     throw new IllegalArgumentException(
-        "'field reference' command is not available for DTO classes.");
+        "'field reference' command is not available for embeddable classes.");
   }
 
   @Override
@@ -524,48 +504,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     if (sizeMax != null) {
       fieldDetails.setSizeMax(sizeMax);
     }
-    if (mappedBy != null) {
-      fieldDetails.setMappedBy(mappedBy);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
     if (comment != null) {
       fieldDetails.setComment(comment);
-    }
-    if (joinTable != null) {
-
-      // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = null;
-      String[] referencedColumnsArray = null;
-      String[] inverseJoinColumnsArray = null;
-      String[] inverseReferencedColumnsArray = null;
-      if (joinColumns != null) {
-        joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      }
-      if (referencedColumns != null) {
-        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      }
-      if (inverseJoinColumns != null) {
-        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      }
-      if (inverseReferencedColumns != null) {
-        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
-      }
-
-      // Validate same number of elements
-      if (joinColumnsArray != null && referencedColumnsArray != null) {
-        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-            "--joinColumns and --referencedColumns must have same number of column values");
-      }
-      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate
-            .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-                "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
-      }
-
-      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
-          inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
     insertField(fieldDetails, permitReservedWords, false);
@@ -596,48 +536,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     if (sizeMax != null) {
       fieldDetails.setSizeMax(sizeMax);
     }
-    if (mappedBy != null) {
-      fieldDetails.setMappedBy(mappedBy);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
     if (comment != null) {
       fieldDetails.setComment(comment);
-    }
-    if (joinTable != null) {
-
-      // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = null;
-      String[] referencedColumnsArray = null;
-      String[] inverseJoinColumnsArray = null;
-      String[] inverseReferencedColumnsArray = null;
-      if (joinColumns != null) {
-        joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      }
-      if (referencedColumns != null) {
-        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      }
-      if (inverseJoinColumns != null) {
-        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      }
-      if (inverseReferencedColumns != null) {
-        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
-      }
-
-      // Validate same number of elements
-      if (joinColumnsArray != null && referencedColumnsArray != null) {
-        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-            "--joinColumns and --referencedColumns must have same number of column values");
-      }
-      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate.isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-            "--inverseJoinColumns and --inverseReferencedColumns must have same "
-                + "number of column values");
-      }
-
-      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
-          inverseJoinColumnsArray, inverseReferencedColumnsArray);
     }
 
     insertField(fieldDetails, permitReservedWords, false);
@@ -668,14 +568,8 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     if (regexp != null) {
       fieldDetails.setRegexp(regexp.replace("\\", "\\\\"));
     }
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
     if (comment != null) {
       fieldDetails.setComment(comment);
-    }
-    if (unique) {
-      fieldDetails.setUnique(true);
     }
     if (value != null) {
       fieldDetails.setValue(value);
@@ -706,9 +600,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
         new UploadedFileField(physicalTypeIdentifier, fieldName, contentType);
     fieldDetails.setAutoUpload(autoUpload);
     fieldDetails.setNotNull(notNull);
-    if (column != null) {
-      fieldDetails.setColumn(column);
-    }
 
     insertField(fieldDetails, permitReservedWords, false);
   }
@@ -725,9 +616,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     fieldDetails.setNullRequired(nullRequired);
     if (comment != null) {
       fieldDetails.setComment(comment);
-    }
-    if (column != null) {
-      fieldDetails.setColumn(column);
     }
 
     insertField(fieldDetails, permitReservedWords, false);
@@ -856,7 +744,7 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   @Override
   public List<String> getFieldEmbeddedAllPossibleValues(ShellContext shellContext) {
 
-    // field embedded not used for DTO's
+    // field embedded not used for embeddable classes
     return new ArrayList<String>();
   }
 
@@ -915,4 +803,5 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
     return javaTypeString;
   }
+
 }

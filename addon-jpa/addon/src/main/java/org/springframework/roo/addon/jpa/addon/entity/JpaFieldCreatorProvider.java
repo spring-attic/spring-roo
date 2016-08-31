@@ -1205,6 +1205,16 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       }
     }
 
+    // Getting all existing embeddable classes
+    Set<ClassOrInterfaceTypeDetails> embeddableClassesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(JpaJavaType.EMBEDDABLE);
+    for (ClassOrInterfaceTypeDetails embeddableClass : embeddableClassesInProject) {
+      String name = replaceTopLevelPackageString(embeddableClass, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
     return allPossibleValues;
   }
 
@@ -1230,6 +1240,36 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
     for (ClassOrInterfaceTypeDetails dto : dtosInProject) {
       String name = replaceTopLevelPackageString(dto, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    // Getting all existing embeddable classes
+    Set<ClassOrInterfaceTypeDetails> embeddableClassesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(JpaJavaType.EMBEDDABLE);
+    for (ClassOrInterfaceTypeDetails embeddableClass : embeddableClassesInProject) {
+      String name = replaceTopLevelPackageString(embeddableClass, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
+  }
+
+  @Override
+  public List<String> getFieldEmbeddedAllPossibleValues(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("type");
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Getting all existing embeddable classes
+    Set<ClassOrInterfaceTypeDetails> embeddableClassesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(JpaJavaType.EMBEDDABLE);
+    for (ClassOrInterfaceTypeDetails embeddableClass : embeddableClassesInProject) {
+      String name = replaceTopLevelPackageString(embeddableClass, currentText);
       if (!allPossibleValues.contains(name)) {
         allPossibleValues.add(name);
       }
