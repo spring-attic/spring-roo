@@ -30,6 +30,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -337,6 +338,36 @@ public class JpaCommands implements CommandMarker {
     return allPossibleValues;
   }
 
+  @CliOptionAutocompleteIndicator(
+      command = "entity jpa",
+      param = "identifierType",
+      help = "--identifierType option should be a wrapper of a primitive type or an embeddable class.")
+  public List<String> getFieldEmbeddedPossibleValues(ShellContext shellContext) {
+    String currentText = shellContext.getParameters().get("identifierType");
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    // Add java-lang and java-number classes
+    allPossibleValues.add(Number.class.getName());
+    allPossibleValues.add(Short.class.getName());
+    allPossibleValues.add(Byte.class.getName());
+    allPossibleValues.add(Integer.class.getName());
+    allPossibleValues.add(Long.class.getName());
+    allPossibleValues.add(Float.class.getName());
+    allPossibleValues.add(Double.class.getName());
+
+    // Getting all existing embeddable classes
+    Set<ClassOrInterfaceTypeDetails> embeddableClassesInProject =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(JpaJavaType.EMBEDDABLE);
+    for (ClassOrInterfaceTypeDetails embeddableClass : embeddableClassesInProject) {
+      String name = replaceTopLevelPackageString(embeddableClass, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
+  }
+
   @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
   public void newPersistenceClassJpa(
       @CliOption(key = "class", optionContext = UPDATELAST_PROJECT, mandatory = true,
@@ -364,7 +395,7 @@ public class JpaCommands implements CommandMarker {
       @CliOption(
           key = "identifierType",
           mandatory = false,
-          optionContext = "java-lang,project",
+          optionContext = "java-lang",
           unspecifiedDefaultValue = IDENTIFIER_DEFAULT_TYPE,
           specifiedDefaultValue = "java.lang.Long",
           help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType,
@@ -517,8 +548,7 @@ public class JpaCommands implements CommandMarker {
     jpaOperations.newEntity(name, createAbstract, superclass, implementsType, annotationBuilder);
 
     // Create entity identifier class if required
-    if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType
-        .equals(GAE_DATASTORE_KEY))) {
+    if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java."))) {
       jpaOperations.newIdentifier(identifierType, identifierField, identifierColumn);
     }
 
@@ -699,4 +729,5 @@ public class JpaCommands implements CommandMarker {
 
     return javaTypeString;
   }
+
 }
