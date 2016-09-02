@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.jpa.addon;
 
-import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
@@ -547,9 +546,9 @@ public class JpaCommands implements CommandMarker {
     // Produce the entity itself
     jpaOperations.newEntity(name, createAbstract, superclass, implementsType, annotationBuilder);
 
-    // Create entity identifier class if required
+    // Update entity identifier class if required (identifierClass should be only an embeddable class)
     if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java."))) {
-      jpaOperations.newIdentifier(identifierType, identifierField, identifierColumn);
+      jpaOperations.updateEmbeddableToIdentifier(identifierType, identifierField, identifierColumn);
     }
 
     if (testAutomatically) {

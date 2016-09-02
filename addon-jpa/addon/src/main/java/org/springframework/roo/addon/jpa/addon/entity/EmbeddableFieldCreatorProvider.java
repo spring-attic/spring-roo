@@ -2,6 +2,8 @@ package org.springframework.roo.addon.jpa.addon.entity;
 
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
+import static org.springframework.roo.model.JpaJavaType.ENTITY;
+import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,11 +12,16 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.field.addon.FieldCreatorProvider;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeDetails;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.comments.CommentFormatter;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -26,22 +33,29 @@ import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
 import org.springframework.roo.classpath.operations.jsr303.DateField;
 import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
+import org.springframework.roo.classpath.operations.jsr303.EmbeddedField;
 import org.springframework.roo.classpath.operations.jsr303.EnumField;
 import org.springframework.roo.classpath.operations.jsr303.ListField;
 import org.springframework.roo.classpath.operations.jsr303.NumericField;
+import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.operations.jsr303.StringField;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileField;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.ShellContext;
 
 import java.lang.reflect.Modifier;
@@ -67,12 +81,24 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   private ProjectOperations projectOperations;
   @Reference
   private TypeManagementService typeManagementService;
+  @Reference
+  private ProjectSettingsService projectSettings;
+  @Reference
+  private MetadataService metadataService;
+  @Reference
+  private MemberDetailsScanner memberDetailsScanner;
 
+  private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
+      "spring.roo.jpa.require.schema-object-name";
+
+  public static final String ROO_DEFAULT_JOIN_TABLE_NAME = "_ROO_JOIN_TABLE_";
 
   @Override
   public boolean isValid(JavaType javaType) {
     ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(javaType);
-    if (cid.getAnnotation(JpaJavaType.EMBEDDABLE) != null) {
+    MemberDetails details = memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
+    if (cid.getAnnotation(JpaJavaType.EMBEDDABLE) != null
+        || details.getAnnotation(JpaJavaType.EMBEDDABLE) != null) {
       return true;
     }
 
@@ -99,241 +125,490 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     return false;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean isColumnMandatoryForFieldBoolean(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isColumnVisibleForFieldBoolean(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isTransientVisibleForFieldBoolean(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean isColumnMandatoryForFieldDate(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isColumnVisibleForFieldDate(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isPersistenceTypeVisibleForFieldDate(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isTransientVisibleForFieldDate(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean isColumnMandatoryForFieldEnum(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isColumnVisibleForFieldEnum(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isEnumTypeVisibleForFieldEnum(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isTransientVisibleForFieldEnum(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean isColumnMandatoryForFieldNumber(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isColumnVisibleForFieldNumber(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isUniqueVisibleForFieldNumber(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isTransientVisibleForFieldNumber(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean isColumnMandatoryForFieldReference(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isJoinColumnNameVisibleForFieldReference(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isReferencedColumnNameVisibleForFieldReference(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isCardinalityVisibleForFieldReference(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isFetchVisibleForFieldReference(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isTransientVisibleForFieldReference(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isCascadeTypeVisibleForFieldReference(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean areJoinTableParamsMandatoryForFieldSet(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    // See if joinTable param has been specified
+    String joinTableParam = shellContext.getParameters().get("joinTable");
+
+    if (joinTableParam != null && requiredSchemaObjectName != null
+        && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean isJoinTableMandatoryForFieldSet(ShellContext shellContext) {
+
+    String cardinality = shellContext.getParameters().get("cardinality");
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (cardinality != null && cardinality.equals("MANY_TO_MANY")
+        && requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean areJoinTableParamsVisibleForFieldSet(ShellContext shellContext) {
+
+    String joinTableParam = shellContext.getParameters().get("joinTable");
+
+    if (joinTableParam != null) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isMappedByVisibleForFieldSet(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isCardinalityVisibleForFieldSet(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isFetchVisibleForFieldSet(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isTransientVisibleForFieldSet(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isJoinTableVisibleForFieldSet(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext) {
+
+    String joinTableParam = shellContext.getParameters().get("joinTable");
+
+    if (joinTableParam != null) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isJoinTableMandatoryForFieldList(ShellContext shellContext) {
+
+    String cardinality = shellContext.getParameters().get("cardinality");
+
+    if (cardinality != null && cardinality.equals("MANY_TO_MANY")) {
+      return true;
+    }
+
     return false;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean areJoinTableParamsMandatoryForFieldList(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    // See if joinTable param has been specified
+    String joinTableParam = shellContext.getParameters().get("joinTable");
+
+    if (joinTableParam != null && requiredSchemaObjectName != null
+        && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isMappedByVisibleForFieldList(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isCardinalityVisibleForFieldList(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isFetchVisibleForFieldList(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isTransientVisibleForFieldList(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isJoinTableVisibleForFieldList(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean isColumnMandatoryForFieldString(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isColumnVisibleForFieldString(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isUniqueVisibleForFieldString(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isTransientVisibleForFieldString(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
   public boolean isLobVisibleForFieldString(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   @Override
   public boolean isColumnMandatoryForFieldFile(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   @Override
   public boolean isColumnVisibleForFieldFile(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
+  /**
+   * ROO-3710: Indicator that checks if exists some project setting that makes
+   * table column parameter mandatory.
+   * 
+   * @param shellContext
+   * @return true if exists property
+   *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
+   *         settings and its value is "true". If not, return false.
+   */
   public boolean isColumnMandatoryForFieldOther(ShellContext shellContext) {
+
+    // Check if property 'spring.roo.jpa.require.schema-object-name' is defined
+    // on
+    // project settings
+    String requiredSchemaObjectName =
+        projectSettings.getProperty(SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME);
+
+    if (requiredSchemaObjectName != null && requiredSchemaObjectName.equals("true")) {
+      return true;
+    }
+
     return false;
   }
 
   public boolean isColumnVisibleForFieldOther(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   public boolean isTransientVisibleForFieldOther(ShellContext shellContext) {
-    return false;
+    return true;
   }
 
   @Override
@@ -350,6 +625,9 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     fieldDetails.setNullRequired(nullRequired);
     fieldDetails.setAssertFalse(assertFalse);
     fieldDetails.setAssertTrue(assertTrue);
+    if (column != null) {
+      fieldDetails.setColumn(column);
+    }
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
@@ -357,7 +635,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setValue(value);
     }
 
-    insertField(fieldDetails, permitReservedWords, false);
+    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   @Override
@@ -373,6 +651,13 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     fieldDetails.setNullRequired(nullRequired);
     fieldDetails.setFuture(future);
     fieldDetails.setPast(past);
+    if (JdkJavaType.isDateField(fieldType)) {
+      fieldDetails.setPersistenceType(persistenceType != null ? persistenceType
+          : DateFieldPersistenceType.JPA_TIMESTAMP);
+    }
+    if (column != null) {
+      fieldDetails.setColumn(column);
+    }
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
@@ -389,15 +674,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.setValue(value);
     }
 
-    insertField(fieldDetails, permitReservedWords, false);
-  }
-
-  @Override
-  public void createEmbeddedField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
-      boolean permitReservedWords) {
-
-    throw new IllegalArgumentException(
-        "'field embedded' command is not available for embeddable classes.");
+    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   @Override
@@ -405,8 +682,15 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       JavaSymbolName fieldName, String column, boolean notNull, boolean nullRequired,
       EnumType enumType, String comment, boolean permitReservedWords, boolean transientModifier) {
 
+    ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getTypeDetails(fieldType);
+    Validate.isTrue(typeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,
+        "The field type is not an enum class.");
+
     final String physicalTypeIdentifier = cid.getDeclaredByMetadataId();
     final EnumField fieldDetails = new EnumField(physicalTypeIdentifier, fieldType, fieldName);
+    if (column != null) {
+      fieldDetails.setColumn(column);
+    }
     fieldDetails.setNotNull(notNull);
     fieldDetails.setNullRequired(nullRequired);
     if (enumType != null) {
@@ -415,6 +699,39 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
+
+    insertField(fieldDetails, permitReservedWords, transientModifier);
+  }
+
+  @Override
+  public void createEmbeddedField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      boolean permitReservedWords) {
+
+    // Check if the requested entity is a JPA @Entity
+    final ClassOrInterfaceTypeDetails javaTypeDetails =
+        typeLocationService.getTypeDetails(typeName);
+    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+
+    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
+    final PhysicalTypeMetadata targetTypeMetadata =
+        (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
+    Validate
+        .notNull(targetTypeMetadata,
+            "The specified target '--class' does not exist or can not be found. Please create this type first.");
+    final PhysicalTypeDetails targetPtd = targetTypeMetadata.getMemberHoldingTypeDetails();
+    Validate.isInstanceOf(MemberHoldingTypeDetails.class, targetPtd);
+
+    final ClassOrInterfaceTypeDetails targetTypeCid = (ClassOrInterfaceTypeDetails) targetPtd;
+    final MemberDetails memberDetails =
+        memberDetailsScanner.getMemberDetails(this.getClass().getName(), targetTypeCid);
+    Validate
+        .isTrue(
+            memberDetails.getAnnotation(ENTITY) != null
+                || memberDetails.getAnnotation(PERSISTENT) != null,
+            "The field embedded command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
+
+    final EmbeddedField fieldDetails =
+        new EmbeddedField(physicalTypeIdentifier, fieldType, fieldName);
 
     insertField(fieldDetails, permitReservedWords, false);
   }
@@ -454,8 +771,14 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     if (max != null) {
       fieldDetails.setMax(max);
     }
+    if (column != null) {
+      fieldDetails.setColumn(column);
+    }
     if (comment != null) {
       fieldDetails.setComment(comment);
+    }
+    if (unique) {
+      fieldDetails.setUnique(true);
     }
     if (value != null) {
       fieldDetails.setValue(value);
@@ -464,7 +787,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     Validate.isTrue(fieldDetails.isDigitsSetCorrectly(),
         "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
 
-    insertField(fieldDetails, permitReservedWords, false);
+    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   @Override
@@ -473,8 +796,45 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       boolean notNull, boolean nullRequired, String joinColumnName, String referencedColumnName,
       Fetch fetch, String comment, boolean permitReservedWords, boolean transientModifier) {
 
-    throw new IllegalArgumentException(
-        "'field reference' command is not available for embeddable classes.");
+    // Check if the requested entity is a JPA @Entity
+    final MemberDetails memberDetails =
+        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
+    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
+    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
+    Validate
+        .isTrue(
+            entityAnnotation != null || persistentAnnotation != null,
+            "The field reference command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
+
+    Validate.isTrue(
+        cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE,
+        "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
+
+    final ClassOrInterfaceTypeDetails javaTypeDetails =
+        typeLocationService.getTypeDetails(typeName);
+    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
+
+    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
+    final ReferenceField fieldDetails =
+        new ReferenceField(physicalTypeIdentifier, fieldType, fieldName, cardinality, cascadeType);
+    fieldDetails.setNotNull(notNull);
+    fieldDetails.setNullRequired(nullRequired);
+    if (joinColumnName != null) {
+      fieldDetails.setJoinColumnName(joinColumnName);
+    }
+    if (referencedColumnName != null) {
+      Validate.notNull(joinColumnName,
+          "@JoinColumn name is required if specifying a referencedColumnName");
+      fieldDetails.setReferencedColumnName(referencedColumnName);
+    }
+    if (fetch != null) {
+      fieldDetails.setFetch(fetch);
+    }
+    if (comment != null) {
+      fieldDetails.setComment(comment);
+    }
+
+    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   @Override
@@ -485,17 +845,34 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
       boolean permitReservedWords, boolean transientModifier) {
 
+    // Check if the requested entity is a JPA @Entity
+    final MemberDetails memberDetails =
+        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
+    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
+    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
+
+    if (entityAnnotation != null) {
+      Validate.isTrue(cardinality == Cardinality.ONE_TO_MANY
+          || cardinality == Cardinality.MANY_TO_MANY,
+          "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
+    } else if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
+      cardinality = null;
+    } else if (persistentAnnotation != null) {
+      // Yes, we can deal with that
+    } else {
+      throw new IllegalStateException(
+          "The field set command is only applicable to enum, JPA @Entity or Spring Data @Persistence elements");
+    }
+
     final ClassOrInterfaceTypeDetails javaTypeDetails =
         typeLocationService.getTypeDetails(typeName);
     Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
-
-    cardinality = null;
 
     final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
     final SetField fieldDetails =
         new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0,
             DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
-            cascadeType, true);
+            cascadeType, false);
     fieldDetails.setNotNull(notNull);
     fieldDetails.setNullRequired(nullRequired);
     if (sizeMin != null) {
@@ -504,11 +881,51 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     if (sizeMax != null) {
       fieldDetails.setSizeMax(sizeMax);
     }
+    if (mappedBy != null) {
+      fieldDetails.setMappedBy(mappedBy);
+    }
+    if (fetch != null) {
+      fieldDetails.setFetch(fetch);
+    }
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
+    if (joinTable != null) {
 
-    insertField(fieldDetails, permitReservedWords, false);
+      // Create strings arrays and set @JoinTable annotation
+      String[] joinColumnsArray = null;
+      String[] referencedColumnsArray = null;
+      String[] inverseJoinColumnsArray = null;
+      String[] inverseReferencedColumnsArray = null;
+      if (joinColumns != null) {
+        joinColumnsArray = joinColumns.replace(" ", "").split(",");
+      }
+      if (referencedColumns != null) {
+        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
+      }
+      if (inverseJoinColumns != null) {
+        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
+      }
+      if (inverseReferencedColumns != null) {
+        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
+      }
+
+      // Validate same number of elements
+      if (joinColumnsArray != null && referencedColumnsArray != null) {
+        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
+            "--joinColumns and --referencedColumns must have same number of column values");
+      }
+      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
+        Validate
+            .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
+                "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
+      }
+
+      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
+          inverseJoinColumnsArray, inverseReferencedColumnsArray);
+    }
+
+    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   @Override
@@ -519,6 +936,26 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
       boolean permitReservedWords, boolean transientModifier) {
 
+    // Check if the requested entity is a JPA @Entity
+    final MemberDetails memberDetails =
+        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
+    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
+    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
+
+    if (entityAnnotation != null) {
+      Validate.isTrue(cardinality == Cardinality.ONE_TO_MANY
+          || cardinality == Cardinality.MANY_TO_MANY,
+          "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field list command");
+    } else if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
+      cardinality = null;
+    } else if (persistentAnnotation != null) {
+      // Yes, we can deal with that
+    } else {
+      throw new IllegalStateException(
+          "The field list command is only applicable to enum, JPA @Entity or Spring "
+              + "Data @Persistence elements");
+    }
+
     final ClassOrInterfaceTypeDetails javaTypeDetails =
         typeLocationService.getTypeDetails(typeName);
     Validate.notNull(javaTypeDetails, "The type specified, '%s' doesn't exist", typeName);
@@ -527,7 +964,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     final ListField fieldDetails =
         new ListField(physicalTypeIdentifier, new JavaType(LIST.getFullyQualifiedTypeName(), 0,
             DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
-            cascadeType, true);
+            cascadeType, false);
     fieldDetails.setNotNull(notNull);
     fieldDetails.setNullRequired(nullRequired);
     if (sizeMin != null) {
@@ -536,11 +973,51 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     if (sizeMax != null) {
       fieldDetails.setSizeMax(sizeMax);
     }
+    if (mappedBy != null) {
+      fieldDetails.setMappedBy(mappedBy);
+    }
+    if (fetch != null) {
+      fieldDetails.setFetch(fetch);
+    }
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
+    if (joinTable != null) {
 
-    insertField(fieldDetails, permitReservedWords, false);
+      // Create strings arrays and set @JoinTable annotation
+      String[] joinColumnsArray = null;
+      String[] referencedColumnsArray = null;
+      String[] inverseJoinColumnsArray = null;
+      String[] inverseReferencedColumnsArray = null;
+      if (joinColumns != null) {
+        joinColumnsArray = joinColumns.replace(" ", "").split(",");
+      }
+      if (referencedColumns != null) {
+        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
+      }
+      if (inverseJoinColumns != null) {
+        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
+      }
+      if (inverseReferencedColumns != null) {
+        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
+      }
+
+      // Validate same number of elements
+      if (joinColumnsArray != null && referencedColumnsArray != null) {
+        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
+            "--joinColumns and --referencedColumns must have same number of column values");
+      }
+      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
+        Validate.isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
+            "--inverseJoinColumns and --inverseReferencedColumns must have same "
+                + "number of column values");
+      }
+
+      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
+          inverseJoinColumnsArray, inverseReferencedColumnsArray);
+    }
+
+    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   @Override
@@ -568,8 +1045,14 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     if (regexp != null) {
       fieldDetails.setRegexp(regexp.replace("\\", "\\\\"));
     }
+    if (column != null) {
+      fieldDetails.setColumn(column);
+    }
     if (comment != null) {
       fieldDetails.setComment(comment);
+    }
+    if (unique) {
+      fieldDetails.setUnique(true);
     }
     if (value != null) {
       fieldDetails.setValue(value);
@@ -587,7 +1070,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       fieldDetails.getInitedAnnotations().add(basicAnnotation);
     }
 
-    insertField(fieldDetails, permitReservedWords, false);
+    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   @Override
@@ -600,6 +1083,9 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
         new UploadedFileField(physicalTypeIdentifier, fieldName, contentType);
     fieldDetails.setAutoUpload(autoUpload);
     fieldDetails.setNotNull(notNull);
+    if (column != null) {
+      fieldDetails.setColumn(column);
+    }
 
     insertField(fieldDetails, permitReservedWords, false);
   }
@@ -617,8 +1103,11 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     if (comment != null) {
       fieldDetails.setComment(comment);
     }
+    if (column != null) {
+      fieldDetails.setColumn(column);
+    }
 
-    insertField(fieldDetails, permitReservedWords, false);
+    insertField(fieldDetails, permitReservedWords, transientModifier);
   }
 
   public void insertField(final FieldDetails fieldDetails, final boolean permitReservedWords,
@@ -640,8 +1129,6 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
       module = fieldDetails.getFieldType().getModule();
     }
 
-    fieldDetails.setModifiers(Modifier.PRIVATE);
-
     String initializer = null;
     if (fieldDetails instanceof CollectionField) {
       final CollectionField collectionField = (CollectionField) fieldDetails;
@@ -651,6 +1138,11 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
         && fieldDetails.getFieldName().getSymbolName().equals("created")) {
       initializer = "new Date()";
     }
+    int modifier = Modifier.PRIVATE;
+    if (transientModifier) {
+      modifier += Modifier.TRANSIENT;
+    }
+    fieldDetails.setModifiers(modifier);
 
     // Format the passed-in comment (if given)
     formatFieldComment(fieldDetails);

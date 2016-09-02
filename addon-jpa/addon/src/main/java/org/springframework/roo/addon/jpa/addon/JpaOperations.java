@@ -1,13 +1,12 @@
 package org.springframework.roo.addon.jpa.addon;
 
-import java.util.List;
-import java.util.SortedSet;
-
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.maven.Pom;
+
+import java.util.List;
+import java.util.SortedSet;
 
 /**
  * Provides JPA configuration and entity operations.
@@ -77,13 +76,14 @@ public interface JpaOperations extends Feature {
       JavaType implementsType, List<AnnotationMetadataBuilder> annotations);
 
   /**
-   * Creates a new JPA identifier class.
+   * Updates an existing embeddable class to a JPA identifier class.
    * 
    * @param identifierType the identifier type
    * @param identifierField the identifier field name
    * @param identifierColumn the identifier column name
    */
-  void newIdentifier(JavaType identifierType, String identifierField, String identifierColumn);
+  void updateEmbeddableToIdentifier(JavaType identifierType, String identifierField,
+      String identifierColumn);
 
   /**
    * Deletes an existing entity from project.

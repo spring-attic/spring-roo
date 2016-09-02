@@ -22,7 +22,6 @@ import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -35,7 +34,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -240,25 +238,32 @@ public class JpaOperationsImpl implements JpaOperations {
   }
 
   @Override
-  public void newIdentifier(final JavaType identifierType, final String identifierField,
-      final String identifierColumn) {
+  public void updateEmbeddableToIdentifier(final JavaType identifierType,
+      final String identifierField, final String identifierColumn) {
 
     Validate.notNull(identifierType, "Identifier type required");
 
-    final String declaredByMetadataId =
-        PhysicalTypeIdentifier.createIdentifier(identifierType,
-            getPathResolver().getFocusedPath(Path.SRC_MAIN_JAVA));
+    // Get details from existing JavaType
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(getTypeLocationService().getTypeDetails(
+            identifierType));
+
+    // Create @RooIdentifier with getters and setters
+    AnnotationMetadataBuilder rooIdentifier = new AnnotationMetadataBuilder(ROO_IDENTIFIER);
+    rooIdentifier.addBooleanAttribute("settersByDefault", true);
+
     final List<AnnotationMetadataBuilder> identifierAnnotations =
         Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(
-            ROO_EQUALS), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
-    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC
-            | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
+            ROO_EQUALS), rooIdentifier);
     cidBuilder.setAnnotations(identifierAnnotations);
+
+    // Set implement Serializable
+    List<JavaType> implementTypes = new ArrayList<JavaType>();
+    implementTypes.add(JdkJavaType.SERIALIZABLE);
+    cidBuilder.setImplementsTypes(implementTypes);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
   }
-
 
   @Override
   public SortedSet<String> getDatabaseProperties(String profile) {
