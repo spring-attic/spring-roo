@@ -102,7 +102,7 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
     }
 
     return new ToStringMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues);
+        governorPhysicalTypeMetadata, annotationValues, memberDetails);
   }
 
   public String getProvidesType() {
