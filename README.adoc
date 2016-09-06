@@ -122,15 +122,61 @@ You have *several options*:
 
 * Type the password in every time
 * Include a _-Dgpg.passphrase=thephrase_ argument when calling "mvn"
++
+[source,shell]
+----
+mvn clean install -Dgpg.passphrase=thephrase
+----
 * Edit _~/.bashrc_ and add _-Dgpg.passphrase=thephrase_ to _MAVEN_OPTS_
-* Edit your active Maven profile to include a _"gpg.passphrase"_ property:
-[source, shell]
-     <profiles>
-         <profile>
-             <properties>
-                 <gpg.passphrase>roorules</gpg.passphrase>
+* Edit your active Maven profile to include a _"gpg.passphrase"_ property with readle value:
++
+[source,shell]
+----
+<profiles>
+    <profile>
+        <properties>
+            <gpg.passphrase>roorules</gpg.passphrase>
+----
+* Use an encrypted  _"gpg.passphrase"_:
+.. Create a master password
++
+[source,shell]
+----
+mvn --encrypt-master-password <password>
+----
+.. Store this password in the _~/.m2/settings-security.xml_. It should look like:
++
+[source,xml]
+----
+<settingsSecurity>
+  <master>{jSMOWnoPFgsHVpMvz5VrIt5kRbzGpI8u+9EF1iFQyJQ=}</master>
+</settingsSecurity>
+----
+.. Encrypt gpg passphrase:
++
+[source,shell]
+----
+mvn --encrypt-password <passphrase>
+----
+.. Store it into your _settings.xml_ file in the server section. This will look like:
++
+[source,xml]
+----
+<settings>
+...
+  <servers>
+  ...
+    <server>
+      <id>gpg.passphrase</id>
+      <passphrase>{COQLCE6DU6GtcS5P=}</passphrase>
+    </server>
+  ...
+  </servers>
+...
+</settings>
+----
 
-Of course the most secure option is to type the password every time. However, *if you're doing a lot of builds* you might prefer automation.
+Of course the most secure options are to type the password every time and to encrypt the password. However, the most comfortable is to encrypt the password especially *if you're doing a lot of builds*.
 
 NOTE: _if you're new to GPG: don't lose your private key! Backup the secring.gpg file, as you'll need it to ever revoke your key or sign a replacement key (the public key servers offer no way to revoke a key unless you can sign the revocation request)._
 
@@ -271,7 +317,7 @@ Roo is released on a regular basis by the *Roo project team*. To perform release
 
 Our release procedure may seem long, but that's because it includes many steps related to final testing and staging releases with other teams.
 
-=== Prerequisites:
+=== Prerequisites
 
 * *GPG setup* (probably already setup if you followed notes above)
 * *Git push privileges* (if you can commit, you have this)
@@ -284,7 +330,7 @@ Our release procedure may seem long, but that's because it includes many steps r
 * JIRA project *administrator privileges*
 * Close down your IDE before proceeding
 
-=== Release Procedure:
+=== Release Procedure
 
 . Complete a thorough testing build and assembly ZIP:
 +
@@ -368,7 +414,7 @@ git push
 
 If any problems are detected before step 8, *simply fix*, push and start from step 1 again. You have not deployed anything substantial (ie only the reference guide) until step 8, so some corrections and re-tagging can be performed without any difficulty. The critical requirement is to defer step 8 (and beyond) until you're sure everything is fine.
 
-=== Pre-notification testing:
+=== Pre-notification testing
 
 * Visit http://projects.spring.io/spring-roo/, click "Download!"
 * Ensure it unzips OK and the sha1sum matches the downloaded .sha
