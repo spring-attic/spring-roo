@@ -48,6 +48,7 @@
         <module>addon-oscommands</module>
         <module>addon-push-in</module>
         <module>addon-field</module>
+        <module>addon-cache</module>
         <module>annotations</module>
         <!-- Web UI -->
         <module>web-ui</module>

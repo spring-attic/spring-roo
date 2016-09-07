@@ -49,6 +49,8 @@ public final class SpringJavaType {
       "org.springframework.format.annotation.DateTimeFormat");
   public static final JavaType DISPATCHER_SERVLET = new JavaType(
       "org.springframework.web.servlet.DispatcherServlet");
+  public static final JavaType ENABLE_CACHING = new JavaType(
+      "org.springframework.cache.annotation.EnableCaching");
   public static final JavaType FLOW_HANDLER_MAPPING = new JavaType(
       "org.springframework.webflow.mvc.servlet.FlowHandlerMapping");
   public static final JavaType FORMATTER = new JavaType("org.springframework.format.Formatter");
@@ -124,6 +126,8 @@ public final class SpringJavaType {
       "org.springframework.web.bind.annotation.ResponseBody");
   public static final JavaType RESPONSE_ENTITY = new JavaType(
       "org.springframework.http.ResponseEntity");
+  public static final JavaType SPRING_BOOT_APPLICATION = new JavaType(
+      "org.springframework.boot.autoconfigure.SpringBootApplication");
   public static final JavaType SERVICE = new JavaType("org.springframework.stereotype.Service");
   public static final JavaType SIMPLE_MAIL_MESSAGE = new JavaType(
       "org.springframework.mail.SimpleMailMessage");
