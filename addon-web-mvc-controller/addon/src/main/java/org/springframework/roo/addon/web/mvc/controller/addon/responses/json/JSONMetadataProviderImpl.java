@@ -42,6 +42,7 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
@@ -58,7 +59,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link JSONMetadataProvider}.
- * 
+ *
  * @author Juan Carlos García
  * @author Paula Navarro
  * @author Sergio Clares
@@ -95,8 +96,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_JSON} as additional 
-   * JavaType that will trigger metadata registration.</li>
+   * <li>Registers {@link RooJavaType#ROO_JSON} as additional JavaType that
+   * will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
    */
@@ -113,9 +114,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -220,7 +221,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     ClassOrInterfaceTypeDetails serviceDetails =
         getTypeLocationService().getTypeDetails(this.service);
 
-
     final LogicalPath logicalPath =
         PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
     final String serviceMetadataKey =
@@ -300,11 +300,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This method provides the "create" method  using JSON 
-   * response type
-   * 
+   * This method provides the "create" method using JSON response type
+   *
    * @param serviceSaveMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getCreateMethod(MethodMetadata serviceSaveMethod) {
@@ -315,7 +314,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       return null;
     }
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_POST, "", null,
@@ -329,7 +329,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("create");
 
-    // Adding parameter types 
+    // Adding parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
         Jsr303JavaType.VALID).build(), new AnnotationMetadataBuilder(SpringJavaType.REQUEST_BODY)
@@ -371,7 +371,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // if (customerOrder.getId() != null) {
-    //    return new ResponseEntity(HttpStatus.CONFLICT);
+    // return new ResponseEntity(HttpStatus.CONFLICT);
     // }
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format("if (%s.%s() != null) {", getEntityField()
@@ -386,7 +386,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     bodyBuilder.appendFormalLine("}");
 
     // if (result.hasErrors()) {
-    //    return new ResponseEntity(result, HttpStatus.CONFLICT);
+    // return new ResponseEntity(result, HttpStatus.CONFLICT);
     // }
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
@@ -411,7 +411,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
             .capitalize(this.entity.getSimpleTypeName()), getPersistenceMemberLocator()
             .getIdentifierAccessor(this.entity).getMethodName()));
 
-    // return new ResponseEntity(newEntity, responseHeaders, HttpStatus.CREATED);
+    // return new ResponseEntity(newEntity, responseHeaders,
+    // HttpStatus.CREATED);
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format("return new %s(new%s, responseHeaders, %s.%s);",
         addTypeToImport(SpringJavaType.RESPONSE_ENTITY).getSimpleTypeName(),
@@ -428,11 +429,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This method provides the "update" method  using JSON 
-   * response type
-   * 
+   * This method provides the "update" method using JSON response type
+   *
    * @param serviceSaveMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getUpdateMethod(MethodMetadata serviceSaveMethod) {
@@ -447,7 +447,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     String value =
         String.format("/{%s}", StringUtils.uncapitalize(this.entity.getSimpleTypeName()));
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_PUT, value, null,
@@ -501,7 +502,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // if (result.hasErrors()) {
-    //    return new ResponseEntity(result, HttpStatus.CONFLICT);
+    // return new ResponseEntity(result, HttpStatus.CONFLICT);
     // }
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
@@ -537,11 +538,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This method provides the "delete" method  using JSON 
-   * response type
-   * 
+   * This method provides the "delete" method using JSON response type
+   *
    * @param serviceDeleteMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getDeleteMethod(MethodMetadata serviceDeleteMethod) {
@@ -552,7 +552,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       return null;
     }
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
@@ -622,16 +623,16 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This method provides the "list" method  using JSON 
-   * response type
-   * 
+   * This method provides the "list" method using JSON response type
+   *
    * @param serviceFindAllMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getListMethod(MethodMetadata serviceFindAllGlobalSearchMethod) {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
@@ -644,10 +645,28 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("list");
 
+    // Create PageableDefault annotation
+    AnnotationMetadataBuilder pageableDefaultAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PAGEABLE_DEFAULT);
+
+    String sortFieldName = "";
+    MemberDetails entityDetails =
+        getMemberDetails(getTypeLocationService().getTypeDetails(this.entity));
+    List<FieldMetadata> fields = entityDetails.getFields();
+    for (FieldMetadata field : fields) {
+      if (field.getAnnotation(new JavaType("javax.persistence.Id")) != null) {
+        sortFieldName = field.getFieldName().getSymbolName();
+      }
+    }
+    if (!sortFieldName.isEmpty()) {
+      pageableDefaultAnnotation.addStringAttribute("sort", sortFieldName);
+    }
+
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     Validate.notNull(globalSearch, "Couldn't find GlobalSearch in project.");
     parameterTypes.add(new AnnotatedJavaType(this.globalSearch));
-    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
+        .build()));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("search"));
@@ -685,7 +704,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
           returnParameterTypes.get(i));
     }
 
-    // ReturnType<ReturnTypeParams> objects = entityService.findAll(search, pageable);
+    // ReturnType<ReturnTypeParams> objects = entityService.findAll(search,
+    // pageable);
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
         addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
@@ -705,11 +725,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This method provides a finder method  using JSON 
-   * response type
-   * 
+   * This method provides a finder method using JSON response type
+   *
    * @param finderMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getFinderMethod(FinderMethod finderMethod) {
@@ -785,7 +804,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
           returnParameterTypes.get(i));
     }
 
-    // ReturnType<ReturnTypeParams> entity = ENTITY_SERVICE_FIELD.FINDER_NAME(SEARCH_PARAMS);
+    // ReturnType<ReturnTypeParams> entity =
+    // ENTITY_SERVICE_FIELD.FINDER_NAME(SEARCH_PARAMS);
     bodyBuilder.newLine();
     if (StringUtils.isEmpty(returnTypeParamsString)) {
       bodyBuilder.appendFormalLine(String.format("%s %s = %s.%s(%s);", addTypeToImport(returnType)
@@ -812,16 +832,16 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This method provides the "show" method  using JSON 
-   * response type
-   * 
+   * This method provides the "show" method using JSON response type
+   *
    * @param serviceFindOneMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getShowMethod(MethodMetadata serviceFindOneMethod) {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "/{id}", null, null,
@@ -878,7 +898,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         getServiceField().getFieldName(), serviceFindOneMethod.getMethodName()));
 
     // if (entity == null) {
-    //    return new ResponseEntity(HttpStatus.NOT_FOUND);
+    // return new ResponseEntity(HttpStatus.NOT_FOUND);
     // }
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format("if (%s == null) {",
@@ -908,8 +928,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
   /**
    * Creates create batch method
-   * 
-   * @param serviceSaveMethod the MethodMetadata of entity's service save method
+   *
+   * @param serviceSaveMethod
+   *            the MethodMetadata of entity's service save method
    * @return {@link MethodMetadata}
    */
   private MethodMetadata getCreateBatchMethod(MethodMetadata serviceSaveMethod) {
@@ -919,7 +940,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       return null;
     }
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_POST, "/batch", null,
@@ -933,7 +955,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("createBatch");
 
-    // Adding parameter types 
+    // Adding parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(new JavaType(JdkJavaType.COLLECTION
         .getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(this.entity)),
@@ -976,7 +998,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // if (result.hasErrors()) {
-    //    return new ResponseEntity(result, HttpStatus.CONFLICT);
+    // return new ResponseEntity(result, HttpStatus.CONFLICT);
     // }
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
@@ -1014,8 +1036,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
   /**
    * Creates update batch method
-   * 
-   * @param serviceSaveMethod the MethodMetadata of entity's service save method
+   *
+   * @param serviceSaveMethod
+   *            the MethodMetadata of entity's service save method
    * @return {@link MethodMetadata}
    */
   private MethodMetadata getUpdateBatchMethod(MethodMetadata serviceSaveMethod) {
@@ -1025,7 +1048,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       return null;
     }
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_PUT, "/batch", null,
@@ -1039,7 +1063,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("updateBatch");
 
-    // Adding parameter types 
+    // Adding parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(new AnnotatedJavaType(new JavaType(JdkJavaType.COLLECTION
         .getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(this.entity)),
@@ -1082,7 +1106,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // if (result.hasErrors()) {
-    //    return new ResponseEntity(result, HttpStatus.CONFLICT);
+    // return new ResponseEntity(result, HttpStatus.CONFLICT);
     // }
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
@@ -1120,8 +1144,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
   /**
    * Creates delete batch method
-   * 
-   * @param serviceSaveMethod the MethodMetadata of entity's service save method
+   *
+   * @param serviceSaveMethod
+   *            the MethodMetadata of entity's service save method
    * @return {@link MethodMetadata}
    */
   private MethodMetadata getDeleteBatchMethod(MethodMetadata serviceDeleteMethod) {
@@ -1131,7 +1156,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
       return null;
     }
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_DELETE, "/batch/{ids}", null, null,
@@ -1144,7 +1170,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("deleteBatch");
 
-    // Adding parameter types 
+    // Adding parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     AnnotationMetadataBuilder pathVariable =
         new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
@@ -1205,8 +1231,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This method provides the getPopulateHeaders() method, used by create() method
-   * 
+   * This method provides the getPopulateHeaders() method, used by create()
+   * method
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getPopulateHeadersMethod() {
@@ -1223,10 +1250,10 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-
     final String entityPluralLowercase = this.entityPlural.toLowerCase();
 
-    // UriComponents uriComponents = UriComponentsBuilder.fromUriString("/customerorders/{id}").build();
+    // UriComponents uriComponents =
+    // UriComponentsBuilder.fromUriString("/customerorders/{id}").build();
     bodyBuilder.appendFormalLine(String.format(
         "%s uriComponents = %s.fromUriString(\"/%s/{id}\").build();",
         addTypeToImport(SpringJavaType.URI_COMPONENTS).getSimpleTypeName(),
@@ -1259,7 +1286,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
   /**
    * This method returns entity field included on controller
-   * 
+   *
    * @return
    */
   private FieldMetadata getEntityField() {
@@ -1274,9 +1301,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * This method registers a new type on types to import list
-   * and then returns it.
-   * 
+   * This method registers a new type on types to import list and then returns
+   * it.
+   *
    * @param type
    * @return
    */
@@ -1290,7 +1317,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
   /**
    * This method returns service field included on controller
-   * 
+   *
    * @return
    */
   private FieldMetadata getServiceField() {
@@ -1323,10 +1350,12 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
   /**
    * Returns last JavaType found in project with provided annotation.
-   * 
-   * @param annotationType JAvaType with the annotation to search
-   * @return last JavaType found with the provided annotation or {@link IllegalArgumentException} 
-   * if a type with this annotation doesn't exist.
+   *
+   * @param annotationType
+   *            JAvaType with the annotation to search
+   * @return last JavaType found with the provided annotation or
+   *         {@link IllegalArgumentException} if a type with this annotation
+   *         doesn't exist.
    */
   private JavaType getTypeWithAnnotation(JavaType annotationType) {
     Set<JavaType> types = getTypeLocationService().findTypesWithAnnotation(annotationType);

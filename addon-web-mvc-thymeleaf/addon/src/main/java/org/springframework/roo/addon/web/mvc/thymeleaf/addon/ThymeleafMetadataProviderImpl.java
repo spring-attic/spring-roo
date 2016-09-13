@@ -62,7 +62,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link ThymeleafMetadataProvider}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -94,7 +94,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_THYMELEAF} as additional 
+   * <li>Registers {@link RooJavaType#ROO_THYMELEAF} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -113,9 +113,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -276,9 +276,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides populateFormats method that allows to configure date time 
+   * This method provides populateFormats method that allows to configure date time
    * format for every entity
-   * 
+   *
    * @return
    */
   private MethodMetadata getPopulateFormatsMethod() {
@@ -365,7 +365,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   /**
    * This method provides a list of methods that will be used to list
    * relations between entities.
-   * 
+   *
    * @return
    */
   private List<MethodMetadata> getDetailsMethods() {
@@ -373,7 +373,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     List<MethodMetadata> detailsMethods = new ArrayList<MethodMetadata>();
     List<JavaSymbolName> detailMethodNames = new ArrayList<JavaSymbolName>();
 
-    // Getting all defined services. 
+    // Getting all defined services.
     Set<ClassOrInterfaceTypeDetails> allDefinedServices =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_SERVICE);
@@ -506,8 +506,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   /**
    * This method generates listDetailsMethod that will be used
    * to display relations between entities
-   * 
-   * @param fieldName 
+   *
+   * @param fieldName
    * @param detailType
    * @param detailService
    * @param findAllByReferencedFieldMethod
@@ -600,8 +600,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   /**
    * This method generates listDetailsDatatablesMethod that will be used
    * to display relations between entities using DTT component
-   * 
-   * @param fieldName 
+   *
+   * @param fieldName
    * @param detailType
    * @param detailService
    * @param countMethod
@@ -707,11 +707,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "list" JSON method using JSON 
+   * This method provides the "list" JSON method using JSON
    * response type and returns Page element
-   * 
+   *
    * @param serviceFindAllGlobalSearchMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getListJSONMethod(MethodMetadata serviceFindAllGlobalSearchMethod) {
@@ -729,9 +729,27 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Define methodName
     final JavaSymbolName methodName = new JavaSymbolName("list");
 
+    // Create PageableDefault annotation
+    AnnotationMetadataBuilder pageableDefaultAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PAGEABLE_DEFAULT);
+
+    String sortFieldName = "";
+    MemberDetails entityDetails =
+        getMemberDetails(getTypeLocationService().getTypeDetails(this.entity));
+    List<FieldMetadata> fields = entityDetails.getFields();
+    for (FieldMetadata field : fields) {
+      if (field.getAnnotation(new JavaType("javax.persistence.Id")) != null) {
+        sortFieldName = field.getFieldName().getSymbolName();
+      }
+    }
+    if (!sortFieldName.isEmpty()) {
+      pageableDefaultAnnotation.addStringAttribute("sort", sortFieldName);
+    }
+
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
+        .build()));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("search"));
@@ -777,11 +795,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "list" Datatables JSON method  using JSON 
+   * This method provides the "list" Datatables JSON method  using JSON
    * response type and returns Datatables element
-   * 
+   *
    * @param serviceCountMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getListDatatablesJSONMethod(MethodMetadata serviceCountMethod) {
@@ -857,9 +875,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "list" form method  using Thymeleaf view 
+   * This method provides the "list" form method  using Thymeleaf view
    * response type
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getListFormMethod() {
@@ -906,9 +924,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "create" form method  using Thymeleaf view 
+   * This method provides the "create" form method  using Thymeleaf view
    * response type
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getCreateFormMethod() {
@@ -962,11 +980,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "create" method  using Thymeleaf view 
+   * This method provides the "create" method  using Thymeleaf view
    * response type
-   * 
+   *
    * @param serviceSaveMethod MethodMetadata
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getCreateMethod(MethodMetadata serviceSaveMethod) {
@@ -1045,9 +1063,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "edit" form method  using Thymeleaf view 
+   * This method provides the "edit" form method  using Thymeleaf view
    * response type
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getEditFormMethod() {
@@ -1106,11 +1124,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "update" method  using Thymeleaf view 
+   * This method provides the "update" method  using Thymeleaf view
    * response type
-   * 
+   *
    * @param serviceSaveMethod MethodMetadata
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getUpdateMethod(MethodMetadata serviceSaveMethod) {
@@ -1190,11 +1208,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "delete" method using Thymeleaf view 
+   * This method provides the "delete" method using Thymeleaf view
    * response type
-   * 
+   *
    * @param serviceDeleteMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getDeleteMethod(MethodMetadata serviceDeleteMethod) {
@@ -1253,9 +1271,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   /**
    * This method provides the "delete" method using JSPON response type
-   * 
+   *
    * @param serviceDeleteMethod
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getDeleteJSONMethod(MethodMetadata serviceDeleteMethod) {
@@ -1315,9 +1333,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "show" method  using Thymeleaf view 
+   * This method provides the "show" method  using Thymeleaf view
    * response type
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getShowMethod() {
@@ -1373,8 +1391,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "populateForm" method 
-   * 
+   * This method provides the "populateForm" method
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getPopulateFormMethod() {
@@ -1431,7 +1449,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   /**
    * This method checks if the provided type is enum or not
-   * 
+   *
    * @param fieldType
    * @return
    */
@@ -1449,7 +1467,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   /**
    * This method returns entity field included on controller
-   * 
+   *
    * @return
    */
   private FieldMetadata getEntityField() {
@@ -1465,7 +1483,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   /**
    * This method returns detail entity field included on controller
-   * 
+   *
    * @return
    */
   private FieldMetadata getDetailEntityField(JavaType detailEntity) {
@@ -1482,7 +1500,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   /**
    * This method returns service field included on controller
-   * 
+   *
    * @return
    */
   private FieldMetadata getServiceField() {
@@ -1499,7 +1517,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   /**
    * This method returns service detail field included on controller
-   * 
+   *
    * @return
    */
   private FieldMetadata getServiceDetailField(JavaType detailService) {
@@ -1517,7 +1535,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
   /**
    * This method returns the final views path to be used
-   * 
+   *
    * @return
    */
   private String getViewsPath() {
@@ -1526,13 +1544,13 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * Returns the value of the mapped by attribute for OneToMany relations 
+   * Returns the value of the mapped by attribute for OneToMany relations
    * only if it matches with the referenced side field name.
-   * 
+   *
    * @param entityFields
    * @param field
    * @param fieldNameOnReferenceSide
-   * @return a String with field name on the reference side if matches 
+   * @return a String with field name on the reference side if matches
    * with provided field on the owning side.
    */
   private String getMappedByField(List<FieldMetadata> entityFields, FieldMetadata field,
@@ -1558,7 +1576,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   /**
    * This method registers a new type on types to import list
    * and then returns it.
-   * 
+   *
    * @param type
    * @return
    */

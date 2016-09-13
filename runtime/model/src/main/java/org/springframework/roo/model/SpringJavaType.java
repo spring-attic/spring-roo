@@ -7,7 +7,7 @@ import org.apache.commons.lang3.Validate;
 /**
  * Constants for Spring-specific {@link JavaType}s. Use them in preference to
  * creating new instances of these types.
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -96,6 +96,8 @@ public final class SpringJavaType {
       "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter");
   public static final JavaType PAGE = new JavaType("org.springframework.data.domain.Page");
   public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
+  public static final JavaType PAGEABLE_DEFAULT = new JavaType(
+      "org.springframework.data.web.PageableDefault");
   public static final JavaType PATH_VARIABLE = new JavaType(
       "org.springframework.web.bind.annotation.PathVariable");
   public static final JavaType PERMISSION_EVALUATOR = new JavaType(
@@ -146,7 +148,7 @@ public final class SpringJavaType {
 
   /**
    * Returns the {@link JavaType} for a Spring converter
-   * 
+   *
    * @param fromType the type being converted from (required)
    * @param toType the type being converted to (required)
    * @return a non-<code>null</code> type
