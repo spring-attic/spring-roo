@@ -1,18 +1,10 @@
 package org.springframework.roo.addon.dto.addon;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.dto.addon.DtoOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -24,23 +16,36 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
 import org.springframework.roo.classpath.operations.jsr303.DateField;
 import org.springframework.roo.classpath.operations.jsr303.ListField;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.project.Path;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link JpaOperations}.
@@ -62,6 +67,10 @@ public class DtoOperationsImpl implements DtoOperations {
   private TypeLocationService typeLocationService;
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
+  @Reference
+  private PathResolver pathResolver;
+  @Reference
+  private FileManager fileManager;
 
   @Override
   public boolean isDtoCreationPossible() {
@@ -69,8 +78,13 @@ public class DtoOperationsImpl implements DtoOperations {
   }
 
   @Override
-  public ClassOrInterfaceTypeDetailsBuilder createDto(JavaType name, boolean immutable,
-      boolean utilityMethods, boolean serializable, boolean fromEntity) {
+  public boolean isEntityProjectionPossible() {
+    return typeLocationService.findTypesWithAnnotation(RooJavaType.ROO_JPA_ENTITY).size() > 0;
+  }
+
+  @Override
+  public void createDto(JavaType name, boolean immutable, boolean utilityMethods,
+      boolean serializable) {
 
     Validate.isTrue(!JdkJavaType.isPartOfJavaLang(name.getSimpleTypeName()),
         "Class name '%s' is part of java.lang", name.getSimpleTypeName());
@@ -114,180 +128,199 @@ public class DtoOperationsImpl implements DtoOperations {
       cidBuilder.addAnnotation(rooSerializableAnnotation);
     }
 
-    if (!fromEntity) {
-      // Write changes to disk
-      typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
-    }
-
-    return cidBuilder;
+    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
   }
 
   @Override
-  public void createDtoFromAll(boolean immutable, boolean utilityMethods, boolean serializable,
-      ShellContext shellContext) {
+  public void createProjection(JavaType entity, JavaType name, String fields, String suffix) {
+    Validate.notNull(name, "Use --class to select the name of the Projection.");
+
+    // Set focus on projection module
+    projectOperations.setModule(projectOperations.getPomFromModuleName(name.getModule()));
+
+    List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
+    if (fields != null) {
+      fieldsToAdd = buildFieldsFromString(fields, entity);
+    } else {
+      fieldsToAdd =
+          memberDetailsScanner.getMemberDetails(this.getClass().getName(),
+              typeLocationService.getTypeDetails(entity)).getFields();
+    }
+
+    // Create projection
+    final String declaredByMetadataId =
+        PhysicalTypeIdentifier.createIdentifier(name,
+            LogicalPath.getInstance(Path.SRC_MAIN_JAVA, name.getModule()));
+    final ClassOrInterfaceTypeDetailsBuilder projectionBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name,
+            PhysicalTypeCategory.CLASS);
+
+    // Add fields to projection
+    addFieldsToProjection(projectionBuilder, fieldsToAdd);
+
+    // @RooJavaBean, @RooToString and @RooEquals
+    AnnotationMetadataBuilder rooJavaBeanAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_JAVA_BEAN);
+    rooJavaBeanAnnotation.addBooleanAttribute("settersByDefault", false);
+    projectionBuilder.addAnnotation(rooJavaBeanAnnotation);
+    AnnotationMetadataBuilder rooToStringAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_TO_STRING);
+    AnnotationMetadataBuilder rooEqualsAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_EQUALS);
+    projectionBuilder.addAnnotation(rooToStringAnnotation);
+    projectionBuilder.addAnnotation(rooEqualsAnnotation);
+
+    // Add @RooEntityProjection
+    AnnotationMetadataBuilder projectionAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_ENTITY_PROJECTION);
+    projectionAnnotation.addClassAttribute("entity", entity);
+    List<StringAttributeValue> fieldNames = new ArrayList<StringAttributeValue>();
+    for (FieldMetadata field : fieldsToAdd) {
+      fieldNames.add(new StringAttributeValue(new JavaSymbolName("fields"), field.getFieldName()
+          .getSymbolName()));
+    }
+    projectionAnnotation.addAttribute(new ArrayAttributeValue<StringAttributeValue>(
+        new JavaSymbolName("fields"), fieldNames));
+    projectionBuilder.addAnnotation(projectionAnnotation);
+
+    // Build and save changes to disk
+    typeManagementService.createOrUpdateTypeOnDisk(projectionBuilder.build());
+  }
+
+  @Override
+  public void createAllProjections(String suffix, ShellContext shellContext) {
 
     // Get all entities
     Set<ClassOrInterfaceTypeDetails> entities =
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY,
             JpaJavaType.ENTITY);
-    List<String> dtoNames = new ArrayList<String>();
+    List<String> projectionNames = new ArrayList<String>();
 
-    // Get all DTO's to check names
-    Set<ClassOrInterfaceTypeDetails> currentDtos =
+    // Get all Projections to check names
+    Set<ClassOrInterfaceTypeDetails> currentProjections =
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
-    for (ClassOrInterfaceTypeDetails dto : currentDtos) {
-      dtoNames.add(dto.getType().getSimpleTypeName());
+    for (ClassOrInterfaceTypeDetails projection : currentProjections) {
+      projectionNames.add(projection.getType().getFullyQualifiedTypeName());
     }
 
-    // Create DTO for each entity
+    // Create Projection for each entity
     for (ClassOrInterfaceTypeDetails entity : entities) {
 
-      String name = entity.getType().getSimpleTypeName().concat("DTO");
+      String name = entity.getType().getFullyQualifiedTypeName().concat(suffix);
 
-      if (dtoNames.contains(name) && !shellContext.isForce()) {
-        throw new IllegalArgumentException("One or more DTO's with pre-generated names already "
-            + "exist and cannot be created. Use --force parameter to overwrite them.");
+      if (projectionNames.contains(name) && !shellContext.isForce()) {
+        throw new IllegalArgumentException(
+            "One or more Projections with pre-generated names already "
+                + "exist and cannot be created. Use --force parameter to overwrite them. Suffix for pre-generated names is "
+                    .concat(suffix));
       }
 
-      // Create DTO
-      JavaType dtoType =
-          new JavaType(String.format("%s.%s", entity.getType().getPackage()
-              .getFullyQualifiedPackageName(), name), entity.getType().getModule());
-      ClassOrInterfaceTypeDetailsBuilder dtoBuilder =
-          createDto(dtoType, immutable, utilityMethods, serializable, true);
-
-      // Get entity fields
-      MemberDetails entityDetails =
-          memberDetailsScanner.getMemberDetails(this.getClass().getName(), entity);
-      List<FieldMetadata> entityFields = entityDetails.getFields();
-      addFieldsToDto(immutable, dtoBuilder, entityFields);
-
-      // Build and save changes to disk
-      typeManagementService.createOrUpdateTypeOnDisk(dtoBuilder.build());
+      // Create Projection if doesn't exists, already
+      JavaType projectionType = new JavaType(name, entity.getType().getModule());
+      final String entityFilePathIdentifier =
+          pathResolver.getCanonicalPath(projectionType.getModule(), Path.SRC_MAIN_JAVA,
+              projectionType);
+      if (!fileManager.exists(entityFilePathIdentifier)) {
+        createProjection(entity.getType(), projectionType, null, suffix);
+      }
     }
-  }
-
-  @Override
-  public void createDtoFromEntity(JavaType name, JavaType entity, String fields,
-      String excludeFields, boolean immutable, boolean utilityMethods, boolean serializable,
-      ShellContext shellContext) {
-
-    if (name == null) {
-      throw new IllegalArgumentException("Use --class to select the name of the DTO.");
-    }
-
-    // Set focus on dto module
-    projectOperations.setModule(projectOperations.getPomFromModuleName(name.getModule()));
-
-    // Get entity details
-    ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
-    List<FieldMetadata> allFields =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid).getFields();
-    List<FieldMetadata> dtoFields = null;
-
-    boolean include = true;
-    if (fields != null) {
-      include = true;
-      dtoFields = buildFieldsFromString(allFields, fields, include);
-    } else if (excludeFields != null) {
-      include = false;
-      dtoFields = buildFieldsFromString(allFields, excludeFields, include);
-    } else {
-      dtoFields = allFields;
-    }
-
-    // Create DTO and add fields to it
-    ClassOrInterfaceTypeDetailsBuilder dtoBuilder =
-        createDto(name, immutable, utilityMethods, serializable, true);
-    addFieldsToDto(immutable, dtoBuilder, dtoFields);
-
-    // Build and save changes to disk
-    typeManagementService.createOrUpdateTypeOnDisk(dtoBuilder.build());
   }
 
   /**
-   * Returns the definitive list of fields to include in DTO.
+   * Returns the list of fields to include in Projection.
    * 
-   * @param allFields the fields of the entity
-   * @param fieldsString the fields provided by user
-   * @param includeMode whether the fields provided should be included or excluded from DTO 
-   * @return List<FieldMetadata> with the fields to add in the DTO
+   * @param fieldsString the fields provided by user.
+   * @param entity the associated entity to use for searching the fields.
+   * @return List<FieldMetadata> with the fields to add in the Projection.
    */
-  public List<FieldMetadata> buildFieldsFromString(List<FieldMetadata> allFields,
-      String fieldsString, boolean includeMode) {
+  private List<FieldMetadata> buildFieldsFromString(String fieldsString, JavaType entity) {
+
+    // Create map for returning results
+    Map<ClassOrInterfaceTypeDetails, FieldMetadata> fieldsToAdd =
+        new HashMap<ClassOrInterfaceTypeDetails, FieldMetadata>();
 
     // Create array of field names from command String
     fieldsString = fieldsString.trim();
     String[] fields = fieldsString.split(",");
 
-    // Create lists with fields which could be in DTO
-    List<FieldMetadata> dtoFields = new ArrayList<FieldMetadata>();
+    // Create lists with fields which could be in projection
+    List<FieldMetadata> projectionFields = new ArrayList<FieldMetadata>();
 
-    // Iterate over all entity fields
-    for (FieldMetadata entityField : allFields) {
-      boolean exclude = false;
-      for (int i = 0; i < fields.length; i++) {
+    ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
+    List<FieldMetadata> allFields =
+        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid).getFields();
 
-        // If entity field matches with any provided field, add it
-        if (includeMode && fields[i].equals(entityField.getFieldName().getSymbolName())) {
-          dtoFields.add(entityField);
-          break;
-        } else if (!includeMode && fields[i].equals(entityField.getFieldName().getSymbolName())) {
-          exclude = true;
-          break;
-        }
-      }
-
-      // If exclude is false and method is in exclude mode, entity field should be added
-      if (!exclude && !includeMode) {
-        dtoFields.add(entityField);
-      }
-    }
-
-    // Show a warning if one or more typed fields don't exists in the entity
-    StringBuffer wrongFields = new StringBuffer();
+    // Iterate over all specified fields
     for (int i = 0; i < fields.length; i++) {
-      boolean fieldAdded = false;
-      if (includeMode) {
-        for (FieldMetadata dtoField : dtoFields) {
-          if (dtoField.getFieldName().getSymbolName().equals(fields[i])) {
-            fieldAdded = true;
-            break;
-          }
-        }
-      } else {
-        for (FieldMetadata entityField : allFields) {
-          if (entityField.getFieldName().getSymbolName().equals(fields[i])) {
-            fieldAdded = true;
-            break;
-          }
+      boolean found = false;
+
+      // Iterate over all entity fields
+      for (FieldMetadata field : allFields) {
+        if (field.getFieldName().getSymbolName().equals(fields[i])) {
+          // If found, add field to returned map
+          fieldsToAdd.put(cid, field);
+          found = true;
+          break;
         }
       }
-      if (!fieldAdded) {
-        if (StringUtils.isNotEmpty(wrongFields)) {
-          wrongFields.append(", ");
+
+      if (!found) {
+
+        // The field isn't in the entity, should be in one of its relations
+        String[] splittedByDot = StringUtils.split(fields[i], ".");
+        JavaType currentEntity = entity;
+        if (fields[i].contains(".")) {
+
+          // Search a matching relation field
+          for (int t = 0; t < splittedByDot.length; t++) {
+            ClassOrInterfaceTypeDetails currentEntityCid =
+                typeLocationService.getTypeDetails(currentEntity);
+            List<FieldMetadata> currentEntityFields =
+                memberDetailsScanner.getMemberDetails(this.getClass().getName(), currentEntityCid)
+                    .getFields();
+
+            // Iterate to build the field-levels of the relation field
+            for (FieldMetadata field : currentEntityFields) {
+              if (field.getFieldName().getSymbolName().equals(splittedByDot[t])
+                  && t != splittedByDot.length - 1
+                  && typeLocationService.getTypeDetails(field.getFieldType()) != null
+                  && typeLocationService.getTypeDetails(field.getFieldType()).getAnnotation(
+                      RooJavaType.ROO_JPA_ENTITY) != null) {
+
+                // Field is an entity and we should look into its fields
+                currentEntity = field.getFieldType();
+                break;
+              } else if (field.getFieldName().getSymbolName().equals(splittedByDot[t])) {
+
+                // Add field to projection fields
+                fieldsToAdd.put(currentEntityCid, field);
+                break;
+              }
+            }
+          }
+        } else {
+
+          // Not written as a relation field
+          throw new IllegalArgumentException(String.format(
+              "Field %s couldn't be located in entity %s", fields[i],
+              entity.getFullyQualifiedTypeName()));
         }
-        wrongFields.append(fields[i]);
       }
-    }
-    if (StringUtils.isNotEmpty(wrongFields)) {
-      LOGGER.warning(String.format("%s%s",
-          "Followind fields don't exist in the entity or were wrong typed: ", wrongFields));
     }
 
-    return dtoFields;
+    return projectionFields;
   }
 
   /**
    * Removes persistence annotations of provided fields and adds them to a 
-   * ClassOrInterfaceTypeDetailsBuilder representing a DTO in construction. 
+   * ClassOrInterfaceTypeDetailsBuilder representing a Projection in construction. 
    * Also adds final modifier to fields if required.
    * 
-   * @param immutable whether the fields should be <code>final</code>
-   * @param dtoBuilder the ClassOrInterfaceTypeDetailsBuilder for building the DTO class
-   * @param entityFields the List<FieldMetadata> to add
+   * @param projectionBuilder the ClassOrInterfaceTypeDetailsBuilder for building the 
+   *            Projection class.
+   * @param entityFields the List<FieldMetadata> to add.
    */
-  private void addFieldsToDto(boolean immutable, ClassOrInterfaceTypeDetailsBuilder dtoBuilder,
+  private void addFieldsToProjection(ClassOrInterfaceTypeDetailsBuilder projectionBuilder,
       List<FieldMetadata> entityFields) {
     for (FieldMetadata field : entityFields) {
 
@@ -297,7 +330,7 @@ public class DtoOperationsImpl implements DtoOperations {
       if (field.getFieldType().getFullyQualifiedTypeName().equals("java.util.Set")) {
         JavaType fieldType = field.getFieldType().getParameters().get(0);
         fieldDetails =
-            new SetField(dtoBuilder.getDeclaredByMetadataId(), new JavaType(
+            new SetField(projectionBuilder.getDeclaredByMetadataId(), new JavaType(
                 JdkJavaType.SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
                 Arrays.asList(fieldType)), field.getFieldName(), fieldType, null, null, true);
         fieldBuilder = new FieldMetadataBuilder(fieldDetails);
@@ -306,7 +339,7 @@ public class DtoOperationsImpl implements DtoOperations {
       } else if (field.getFieldType().getFullyQualifiedTypeName().equals("java.util.List")) {
         JavaType fieldType = field.getFieldType().getParameters().get(0);
         fieldDetails =
-            new ListField(dtoBuilder.getDeclaredByMetadataId(), new JavaType(
+            new ListField(projectionBuilder.getDeclaredByMetadataId(), new JavaType(
                 JdkJavaType.LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
                 Arrays.asList(fieldType)), field.getFieldName(), fieldType, null, null, true);
         fieldBuilder = new FieldMetadataBuilder(fieldDetails);
@@ -314,11 +347,11 @@ public class DtoOperationsImpl implements DtoOperations {
         fieldBuilder.setAnnotations(field.getAnnotations());
       } else {
         // Can't just copy FieldMetadata because field.declaredByMetadataId will be the same
-        fieldBuilder = new FieldMetadataBuilder(dtoBuilder.getDeclaredByMetadataId(), field);
+        fieldBuilder = new FieldMetadataBuilder(projectionBuilder.getDeclaredByMetadataId(), field);
       }
 
       // Add dependency between modules
-      typeLocationService.addModuleDependency(dtoBuilder.getName().getModule(),
+      typeLocationService.addModuleDependency(projectionBuilder.getName().getModule(),
           field.getFieldType());
 
       // If it is a CollectionField it needs an initializer
@@ -343,21 +376,21 @@ public class DtoOperationsImpl implements DtoOperations {
             .startsWith("javax.validation")) {
 
           // Add validation dependency
-          projectOperations.addDependency(dtoBuilder.getName().getModule(), new Dependency(
+          projectOperations.addDependency(projectionBuilder.getName().getModule(), new Dependency(
               "javax.validation", "validation-api", null));
         }
       }
 
-      projectOperations.addDependency(dtoBuilder.getName().getModule(), new Dependency(
+      projectOperations.addDependency(projectionBuilder.getName().getModule(), new Dependency(
           "org.springframework.boot", "spring-boot-starter-data-jpa", null));
 
       fieldBuilder.setModifier(Modifier.PRIVATE);
 
       // Build field
-      FieldMetadata dtoField = fieldBuilder.build();
+      FieldMetadata projectionField = fieldBuilder.build();
 
       // Add field to DTO
-      dtoBuilder.addField(dtoField);
+      projectionBuilder.addField(projectionField);
     }
   }
 

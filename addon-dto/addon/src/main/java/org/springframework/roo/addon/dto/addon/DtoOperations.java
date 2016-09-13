@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dto.addon;
 
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.ShellContext;
 
@@ -20,42 +19,40 @@ public interface DtoOperations {
   boolean isDtoCreationPossible();
 
   /**
+   * Indicates whether an entity projection can be created in the project. The project 
+   * should be available and contain at least one entity.
+   * 
+   * @return <code>false</code> if entity projection creation is not possible.
+   */
+  boolean isEntityProjectionPossible();
+
+  /**
    * Creates a DTO in the project with the specified options.
    * 
    * @param name the name of the DTO
    * @param immutable whether the DTO should be immutable
    * @param utilityMethods whether the DTO should have utility methods
    * @param serializable whether the DTO should implement Serializable
-   * @param fromEntity whether the DTO is created from an entity and still shouldn't be built
-   * @return ClassOrInterfaceTypeDetailsBuilder for building the class file 
    */
-  ClassOrInterfaceTypeDetailsBuilder createDto(JavaType name, boolean immutable,
-      boolean utilityMethods, boolean serializable, boolean fromEntity);
+  void createDto(JavaType name, boolean immutable, boolean utilityMethods, boolean serializable);
 
   /**
-   * Creates one DTO for each entity in the project. 
+   * Creates a Projection class from an entity.
    * 
-   * @param immutable whether the DTO's should be immutable
-   * @param utilityMethods whether the DTO's should have utility methods
-   * @param serializable whether the DTO's should implement Serializable
-   * @param shellContext 
+   * @param entity the entity related with this Projection.
+   * @param name the name of the Projection.
+   * @param fields the related entity fields to include into the Projection.
+   * @param suffix the suffix to add to Projection name. 
    */
-  void createDtoFromAll(boolean immutable, boolean utilityMethods, boolean serializable,
-      ShellContext shellContext);
+  void createProjection(JavaType entity, JavaType name, String fields, String suffix);
 
   /**
-   * Creates a DTO from the specified fields of an entity.
+   * Creates one entity Projection for each entity in the project.
    * 
-   * @param name the name of the DTO
-   * @param entity the name of the entity from which create the DTO
-   * @param fields the entity fields to include in the DTO
-   * @param excludeFields the entity fields to exclude in the DTO
-   * @param immutable whether the DTO should be immutable
-   * @param utilityMethods whether the DTO should have utility methods
-   * @param serializable whether the DTO should implement Serializable
-   * @param shellContext
+   * @param suffix the suffix added to each projection class name, builded from each 
+   * associated entity name.
+   * @param shellContext the ShellContext for checking global parameters
    */
-  void createDtoFromEntity(JavaType name, JavaType entity, String fields, String excludeFields,
-      boolean immutable, boolean utilityMethods, boolean serializable, ShellContext shellContext);
+  void createAllProjections(String suffix, ShellContext shellContext);
 
 }

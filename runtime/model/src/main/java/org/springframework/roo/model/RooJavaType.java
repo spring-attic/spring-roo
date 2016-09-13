@@ -77,6 +77,8 @@ public final class RooJavaType {
   // Spring Roo 2.x annotations
   public static final JavaType ROO_JPA_ENTITY = new JavaType(
       "org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity");
+  public static final JavaType ROO_ENTITY_PROJECTION = new JavaType(
+      "org.springframework.roo.addon.dto.annotations.RooEntityProjection");
   public static final JavaType ROO_READ_ONLY_REPOSITORY = new JavaType(
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooReadOnlyRepository");
   public static final JavaType ROO_REPOSITORY_JPA = new JavaType(
