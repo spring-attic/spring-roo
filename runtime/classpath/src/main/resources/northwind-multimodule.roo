@@ -1,6 +1,5 @@
 // Creating Northwind project
 project setup --topLevelPackage org.springframework.roo.northwind --projectName Northwind --multimodule --java 7
-module create --moduleName integration --parent ~
 
 // Configuring settings
 settings add --name spring.roo.jpa.require.schema-object-name --value true
