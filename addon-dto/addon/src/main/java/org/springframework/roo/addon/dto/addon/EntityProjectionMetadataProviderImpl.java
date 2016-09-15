@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dto.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_ENTITY_PROJECTION;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
@@ -18,6 +19,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -101,10 +103,12 @@ public class EntityProjectionMetadataProviderImpl extends
     final EntityProjectionAnnotationValues annotationValues =
         new EntityProjectionAnnotationValues(governorPhysicalTypeMetadata);
 
-    // Get all projection fields
+    // Get CID from governor
     ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-    List<FieldMetadata> fields =
-        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), cid).getFields();
+
+    // Get all projection fields from annotation
+    String[] fieldsString = annotationValues.getFields();
+    List<FieldMetadata> fields = buildFieldMetadataFromAnnotation(fieldsString, cid);
 
     // Add dependency between modules
     for (FieldMetadata field : fields) {
@@ -113,6 +117,54 @@ public class EntityProjectionMetadataProviderImpl extends
 
     return new EntityProjectionMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, fields);
+  }
+
+  /**
+   * Builds FieldMetadata to provide {@link EntityProjectionMetadata} with the necessary 
+   * resources to create constructor.
+   * 
+   * @param fields the String[] from 'fields' annotation parameter.
+   * @param cid the governor ClassOrInterfaceTypeDetails, that is, the Projection physical type.
+   * @return the List<FieldMetadata> with the fields to build the constructor.
+   */
+  private List<FieldMetadata> buildFieldMetadataFromAnnotation(String[] fields,
+      ClassOrInterfaceTypeDetails cid) {
+    List<FieldMetadata> allFields =
+        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), cid).getFields();
+    List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
+
+    // Iterate over all specified fields
+    for (int i = 0; i < fields.length; i++) {
+      String fieldName = "";
+      boolean existsInGovernor = false;
+
+      // Build field name following Java convention
+      String[] splittedByDot = StringUtils.split(fields[i], ".");
+      for (int t = 0; t < splittedByDot.length; t++) {
+        if (t == 0) {
+          fieldName = fieldName.concat(splittedByDot[t]);
+        } else {
+          fieldName = fieldName.concat(StringUtils.capitalize(splittedByDot[t]));
+        }
+      }
+
+      // Check existence in governor
+      for (FieldMetadata field : allFields) {
+        if (field.getFieldName().getSymbolName().equals(fieldName)) {
+          existsInGovernor = true;
+          fieldsToAdd.add(field);
+        }
+      }
+
+      if (!existsInGovernor) {
+        throw new IllegalStateException(
+            String
+                .format(
+                    "Field %s couldn't be located in %s. Please, be sure that it is well written in 'fields' param of @RooEntityProjection.",
+                    fieldName, cid.getType().getFullyQualifiedTypeName()));
+      }
+    }
+    return fieldsToAdd;
   }
 
   public String getProvidesType() {

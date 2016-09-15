@@ -29,7 +29,6 @@ public class EntityProjectionMetadata extends AbstractItdTypeDetailsProvidingMet
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private final EntityProjectionAnnotationValues annotationValues;
   private final List<FieldMetadata> fields;
   private final JavaSymbolName serialField = new JavaSymbolName("serialVersionUID");
 
@@ -65,7 +64,7 @@ public class EntityProjectionMetadata extends AbstractItdTypeDetailsProvidingMet
    */
   public EntityProjectionMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final EntityProjectionAnnotationValues annotationValues, List<FieldMetadata> fields) {
+      final EntityProjectionAnnotationValues annotationValues, final List<FieldMetadata> fields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate
         .isTrue(
@@ -73,7 +72,6 @@ public class EntityProjectionMetadata extends AbstractItdTypeDetailsProvidingMet
             "Metadata identification string '%s' does not appear to be a valid physical type identifier",
             identifier);
 
-    this.annotationValues = annotationValues;
     this.fields = fields;
 
     ConstructorMetadataBuilder constructorMetadata = getConstructor();
@@ -109,5 +107,4 @@ public class EntityProjectionMetadata extends AbstractItdTypeDetailsProvidingMet
 
     return constructorBuilder;
   }
-
 }

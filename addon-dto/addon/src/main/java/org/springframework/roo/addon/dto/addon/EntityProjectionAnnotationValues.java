@@ -1,7 +1,10 @@
 package org.springframework.roo.addon.dto.addon;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.annotations.populator.*;
+import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
+import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
+import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 
 /**
@@ -13,7 +16,7 @@ import org.springframework.roo.model.RooJavaType;
 public class EntityProjectionAnnotationValues extends AbstractAnnotationValues {
 
   @AutoPopulate
-  private Class<?> entity;
+  private JavaType entity;
 
   @AutoPopulate
   private String[] fields;
@@ -28,7 +31,7 @@ public class EntityProjectionAnnotationValues extends AbstractAnnotationValues {
     AutoPopulationUtils.populate(this, annotationMetadata);
   }
 
-  public Class<?> getEntity() {
+  public JavaType getEntity() {
     return entity;
   }
 

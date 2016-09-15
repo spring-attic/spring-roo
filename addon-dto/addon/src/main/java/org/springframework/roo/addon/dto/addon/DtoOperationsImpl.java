@@ -42,8 +42,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -138,13 +140,18 @@ public class DtoOperationsImpl implements DtoOperations {
     // Set focus on projection module
     projectOperations.setModule(projectOperations.getPomFromModuleName(name.getModule()));
 
-    List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
+    Map<String, FieldMetadata> fieldsToAdd = new HashMap<String, FieldMetadata>();
+    boolean onlyMainEntityFields = true;
     if (fields != null) {
+      onlyMainEntityFields = false;
       fieldsToAdd = buildFieldsFromString(fields, entity);
     } else {
-      fieldsToAdd =
+      List<FieldMetadata> allFields =
           memberDetailsScanner.getMemberDetails(this.getClass().getName(),
               typeLocationService.getTypeDetails(entity)).getFields();
+      for (FieldMetadata field : allFields) {
+        fieldsToAdd.put(field.getFieldName().getSymbolName(), field);
+      }
     }
 
     // Create projection
@@ -175,9 +182,23 @@ public class DtoOperationsImpl implements DtoOperations {
         new AnnotationMetadataBuilder(RooJavaType.ROO_ENTITY_PROJECTION);
     projectionAnnotation.addClassAttribute("entity", entity);
     List<StringAttributeValue> fieldNames = new ArrayList<StringAttributeValue>();
-    for (FieldMetadata field : fieldsToAdd) {
-      fieldNames.add(new StringAttributeValue(new JavaSymbolName("fields"), field.getFieldName()
-          .getSymbolName()));
+
+    if (onlyMainEntityFields) {
+
+      // Should add all entity fields
+      for (FieldMetadata field : fieldsToAdd.values()) {
+        fieldNames.add(new StringAttributeValue(new JavaSymbolName("fields"), field.getFieldName()
+            .getSymbolName()));
+      }
+    } else {
+
+      // --fields option has been completed and validated, so build annotation 'fields' 
+      // param from selected fields
+      String[] fieldsFromCommand = StringUtils.split(fields, ",");
+      for (int i = 0; i < fieldsFromCommand.length; i++) {
+        fieldNames
+            .add(new StringAttributeValue(new JavaSymbolName("fields"), fieldsFromCommand[i]));
+      }
     }
     projectionAnnotation.addAttribute(new ArrayAttributeValue<StringAttributeValue>(
         new JavaSymbolName("fields"), fieldNames));
@@ -233,18 +254,14 @@ public class DtoOperationsImpl implements DtoOperations {
    * @param entity the associated entity to use for searching the fields.
    * @return List<FieldMetadata> with the fields to add in the Projection.
    */
-  private List<FieldMetadata> buildFieldsFromString(String fieldsString, JavaType entity) {
+  private Map<String, FieldMetadata> buildFieldsFromString(String fieldsString, JavaType entity) {
 
-    // Create map for returning results
-    Map<ClassOrInterfaceTypeDetails, FieldMetadata> fieldsToAdd =
-        new HashMap<ClassOrInterfaceTypeDetails, FieldMetadata>();
+    // Create Map for storing FieldMetadata and it's future new name
+    Map<String, FieldMetadata> fieldsToAdd = new HashMap<String, FieldMetadata>();
 
     // Create array of field names from command String
     fieldsString = fieldsString.trim();
     String[] fields = fieldsString.split(",");
-
-    // Create lists with fields which could be in projection
-    List<FieldMetadata> projectionFields = new ArrayList<FieldMetadata>();
 
     ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(entity);
     List<FieldMetadata> allFields =
@@ -252,13 +269,14 @@ public class DtoOperationsImpl implements DtoOperations {
 
     // Iterate over all specified fields
     for (int i = 0; i < fields.length; i++) {
+      String fieldName = "";
       boolean found = false;
 
       // Iterate over all entity fields
       for (FieldMetadata field : allFields) {
         if (field.getFieldName().getSymbolName().equals(fields[i])) {
           // If found, add field to returned map
-          fieldsToAdd.put(cid, field);
+          fieldsToAdd.put(field.getFieldName().getSymbolName(), field);
           found = true;
           break;
         }
@@ -278,6 +296,7 @@ public class DtoOperationsImpl implements DtoOperations {
             List<FieldMetadata> currentEntityFields =
                 memberDetailsScanner.getMemberDetails(this.getClass().getName(), currentEntityCid)
                     .getFields();
+            boolean relationFieldFound = false;
 
             // Iterate to build the field-levels of the relation field
             for (FieldMetadata field : currentEntityFields) {
@@ -289,13 +308,33 @@ public class DtoOperationsImpl implements DtoOperations {
 
                 // Field is an entity and we should look into its fields
                 currentEntity = field.getFieldType();
+                found = true;
+                relationFieldFound = true;
+                if (t == 0) {
+                  fieldName = fieldName.concat(field.getFieldName().getSymbolName());
+                } else {
+                  fieldName =
+                      fieldName
+                          .concat(StringUtils.capitalize(field.getFieldName().getSymbolName()));
+                }
                 break;
               } else if (field.getFieldName().getSymbolName().equals(splittedByDot[t])) {
 
                 // Add field to projection fields
-                fieldsToAdd.put(currentEntityCid, field);
+                fieldName =
+                    fieldName.concat(StringUtils.capitalize(field.getFieldName().getSymbolName()));
+                fieldsToAdd.put(fieldName, field);
+                found = true;
+                relationFieldFound = true;
                 break;
               }
+            }
+
+            // If not found, relation field is bad written
+            if (!relationFieldFound) {
+              throw new IllegalArgumentException(String.format(
+                  "Field %s couldn't be located in %s. Please, be sure that it is well written.",
+                  splittedByDot[t], currentEntity.getFullyQualifiedTypeName()));
             }
           }
         } else {
@@ -306,9 +345,15 @@ public class DtoOperationsImpl implements DtoOperations {
               entity.getFullyQualifiedTypeName()));
         }
       }
+
+      // If still not found, field is bad written
+      if (!found) {
+        throw new IllegalArgumentException(String.format(
+            "Field %s couldn't be located. Please, be sure that it is well written.", fields[i]));
+      }
     }
 
-    return projectionFields;
+    return fieldsToAdd;
   }
 
   /**
@@ -318,11 +363,14 @@ public class DtoOperationsImpl implements DtoOperations {
    * 
    * @param projectionBuilder the ClassOrInterfaceTypeDetailsBuilder for building the 
    *            Projection class.
-   * @param entityFields the List<FieldMetadata> to add.
+   * @param fieldsToAdd the List<FieldMetadata> to add.
    */
   private void addFieldsToProjection(ClassOrInterfaceTypeDetailsBuilder projectionBuilder,
-      List<FieldMetadata> entityFields) {
-    for (FieldMetadata field : entityFields) {
+      Map<String, FieldMetadata> fieldsToAdd) {
+    Iterator<Entry<String, FieldMetadata>> iterator = fieldsToAdd.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Entry<String, FieldMetadata> entry = iterator.next();
+      FieldMetadata field = entry.getValue();
 
       // List and Set types require special management
       FieldMetadataBuilder fieldBuilder = null;
@@ -353,6 +401,9 @@ public class DtoOperationsImpl implements DtoOperations {
       // Add dependency between modules
       typeLocationService.addModuleDependency(projectionBuilder.getName().getModule(),
           field.getFieldType());
+
+      // Set new fieldName
+      fieldBuilder.setFieldName(new JavaSymbolName(entry.getKey()));
 
       // If it is a CollectionField it needs an initializer
       String initializer = null;
