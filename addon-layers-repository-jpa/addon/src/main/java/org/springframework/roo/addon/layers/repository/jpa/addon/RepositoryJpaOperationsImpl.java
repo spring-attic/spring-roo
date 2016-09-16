@@ -10,7 +10,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.JpaOperations;
 import org.springframework.roo.addon.jpa.addon.JpaOperationsImpl;
-import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;

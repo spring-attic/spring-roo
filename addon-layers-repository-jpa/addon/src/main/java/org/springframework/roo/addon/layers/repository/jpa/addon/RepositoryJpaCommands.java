@@ -1,16 +1,8 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
-import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -21,7 +13,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.field.addon.FieldCommands;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.converters.JavaTypeConverter;
 import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -38,6 +29,12 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Commands for the JPA repository add-on.

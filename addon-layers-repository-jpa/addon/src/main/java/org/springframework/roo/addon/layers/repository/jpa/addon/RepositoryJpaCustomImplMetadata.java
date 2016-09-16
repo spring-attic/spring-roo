@@ -1,13 +1,5 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -28,6 +20,14 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooJpaRepositoryCustomImpl}.
