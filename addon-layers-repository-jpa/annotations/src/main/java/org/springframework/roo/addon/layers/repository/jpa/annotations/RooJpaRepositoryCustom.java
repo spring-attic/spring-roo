@@ -25,7 +25,7 @@ public @interface RooJpaRepositoryCustom {
    * The name of this annotation's attribute that specifies the findAll search results
    * type.
    */
-  String DTO_ATTRIBUTE = "defaultSearchResult";
+  String DEFAULT_RETURN_TYPE_ATTRIBUTE = "defaultReturnType";
 
   /**
    * The entity managed by the annotated repository
@@ -39,6 +39,6 @@ public @interface RooJpaRepositoryCustom {
    * 
    * @return a non-<code>null</code> type
    */
-  Class<?> defaultSearchResult(); // No default => mandatory
+  Class<?> defaultReturnType(); // No default => mandatory
 
 }

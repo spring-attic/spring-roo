@@ -7,13 +7,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.field.addon.FieldCommands;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.converters.JavaTypeConverter;
+import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -26,7 +35,9 @@ import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Commands for the JPA repository add-on.
@@ -39,12 +50,29 @@ import org.springframework.roo.shell.ShellContext;
 @Service
 public class RepositoryJpaCommands implements CommandMarker {
 
+  protected final static Logger LOGGER = HandlerUtils.getLogger(FieldCommands.class);
+
+  //------------ OSGi component attributes ----------------
+  private BundleContext context;
+
   @Reference
   private RepositoryJpaOperations repositoryJpaOperations;
   @Reference
   private ProjectOperations projectOperations;
   @Reference
   private TypeLocationService typeLocationService;
+  @Reference
+  private LastUsed lastUsed;
+
+  private Converter<JavaType> javaTypeConverter;
+
+  protected void activate(final ComponentContext context) {
+    this.context = context.getBundleContext();
+  }
+
+  protected void deactivate(final ComponentContext context) {
+    this.context = null;
+  }
 
   @CliAvailabilityIndicator({"repository jpa"})
   public boolean isRepositoryCommandAvailable() {
@@ -95,25 +123,79 @@ public class RepositoryJpaCommands implements CommandMarker {
     return allPossibleValues;
   }
 
-  @CliOptionAutocompleteIndicator(command = "repository jpa", param = "defaultSearchResult",
-      help = "--defaultSearchResult option should be a DTO class.")
-  public List<String> getDTOResults(ShellContext shellContext) {
-
-    // Get current value of class
-    String currentText = shellContext.getParameters().get("defaultSearchResult");
-
+  /**
+   * This indicator return all Projection classes associated to an entity specified
+   * in the 'entity' parameter.
+   * 
+   * @param shellContext the Roo ShellContext.
+   * @return List<String> with fullyQualifiedNames of each associated Projection. 
+   */
+  @CliOptionAutocompleteIndicator(
+      command = "repository jpa",
+      param = "defaultReturnType",
+      help = "--defaultReturnType option should be a Projection class associated to the entity specified in --entity.")
+  public List<String> getAssociatedProjectionResults(ShellContext shellContext) {
     List<String> allPossibleValues = new ArrayList<String>();
 
-    Set<ClassOrInterfaceTypeDetails> dtosInProject =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
-    for (ClassOrInterfaceTypeDetails dto : dtosInProject) {
-      String name = replaceTopLevelPackageString(dto, currentText);
-      if (!allPossibleValues.contains(name)) {
-        allPossibleValues.add(name);
+    // Get current value of 'defaultReturnType'
+    String currentText = shellContext.getParameters().get("defaultReturnType");
+
+    // Get current value of 'entity'
+    JavaType entity = getTypeFromEntityParam(shellContext);
+
+    Set<ClassOrInterfaceTypeDetails> projectionsInProject =
+        typeLocationService
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
+    for (ClassOrInterfaceTypeDetails projection : projectionsInProject) {
+
+      // Add only projections associated to the entity specified in the command
+      if (projection.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION).getAttribute("entity")
+          .getValue().equals(entity)) {
+        String name = replaceTopLevelPackageString(projection, currentText);
+        if (!allPossibleValues.contains(name)) {
+          allPossibleValues.add(name);
+        }
       }
     }
 
     return allPossibleValues;
+  }
+
+  /**
+   * This indicator says if --package parameter should be visible or not
+   *
+   * If --all parameter has not been specified, --package parameter will not be visible
+   * to prevent conflicts.
+   * 
+   * @param context ShellContext
+   * @return
+   */
+  @CliOptionVisibilityIndicator(
+      params = "defaultReturnType",
+      command = "repository jpa",
+      help = "--defaultReturnType parameter is not visible if domain entity specified in --entity parameter has no associated Projections.")
+  public boolean isDefaultReturnTypeParameterVisible(ShellContext shellContext) {
+
+    // Get current value of 'entity'
+    JavaType entity = getTypeFromEntityParam(shellContext);
+    if (entity == null) {
+      return false;
+    }
+
+    Set<ClassOrInterfaceTypeDetails> projectionsInProject =
+        typeLocationService
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
+    boolean visible = false;
+    for (ClassOrInterfaceTypeDetails projection : projectionsInProject) {
+
+      // Add only projections associated to the entity specified in the command
+      if (projection.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION).getAttribute("entity")
+          .getValue().equals(entity)) {
+        visible = true;
+      }
+    }
+
+    return visible;
   }
 
   /**
@@ -158,10 +240,8 @@ public class RepositoryJpaCommands implements CommandMarker {
    * @param context ShellContext
    * @return
    */
-  @CliOptionVisibilityIndicator(
-      params = "package",
-      command = "repository jpa",
-      help = "--package parameter is not be visible if --all parameter has not been specified before.")
+  @CliOptionVisibilityIndicator(params = "package", command = "repository jpa",
+      help = "--package parameter is not visible if --all parameter has not been specified before.")
   public boolean isPackageParameterVisible(ShellContext context) {
     if (context.getParameters().containsKey("all")) {
       return true;
@@ -236,15 +316,16 @@ public class RepositoryJpaCommands implements CommandMarker {
           help = "The java Spring Data repository to generate.") final JavaType interfaceType,
       @CliOption(key = "entity", mandatory = false, optionContext = PROJECT,
           help = "The domain entity this repository should expose") final JavaType domainType,
-      /*@CliOption(key = "defaultSearchResult", mandatory = false, optionContext = PROJECT,
-          help = "The findAll finder return type. Should be a DTO class.") JavaType defaultSearchResult,*/
+      @CliOption(key = "defaultReturnType", mandatory = false,
+          help = "The findAll finder return type. Should be a Projection class associated "
+              + "to the entity specified in '--entity'.") JavaType defaultReturnType,
       @CliOption(key = "package", mandatory = true,
           help = "The package where repositories will be generated") final JavaPackage repositoriesPackage) {
 
     if (all) {
       repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
     } else {
-      repositoryJpaOperations.addRepository(interfaceType, domainType, null);
+      repositoryJpaOperations.addRepository(interfaceType, domainType, defaultReturnType);
     }
   }
 
@@ -302,5 +383,54 @@ public class RepositoryJpaCommands implements CommandMarker {
     }
 
     return javaTypeString;
+  }
+
+  /**
+   * Tries to obtain JavaType indicated in command or which has the focus 
+   * in the Shell
+   * 
+   * @param shellContext the Roo Shell context
+   * @return JavaType or null if no class has the focus or no class is 
+   * specified in the command
+   */
+  private JavaType getTypeFromEntityParam(ShellContext shellContext) {
+    // Try to get 'class' from ShellContext
+    String typeString = shellContext.getParameters().get("entity");
+    JavaType type = null;
+    if (typeString != null) {
+      type = getJavaTypeConverter().convertFromText(typeString, JavaType.class, PROJECT);
+    } else {
+      type = lastUsed.getJavaType();
+    }
+
+    return type;
+  }
+
+  @SuppressWarnings("unchecked")
+  public Converter<JavaType> getJavaTypeConverter() {
+    if (javaTypeConverter == null) {
+
+      // Get all Services implement JavaTypeConverter interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(Converter.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          Converter<?> converter = (Converter<?>) this.context.getService(ref);
+          if (converter.supports(JavaType.class, PROJECT)) {
+            javaTypeConverter = (Converter<JavaType>) converter;
+            return javaTypeConverter;
+          }
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("ERROR: Cannot load JavaTypeConverter on FieldCommands.");
+        return null;
+      }
+    } else {
+      return javaTypeConverter;
+    }
   }
 }

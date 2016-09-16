@@ -45,12 +45,13 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   private ImportRegistrationResolver importResolver;
   private JavaType entity;
-  private boolean isDTO;
+  private boolean returnTypeIsProjection;
 
   private MethodMetadata findAllGlobalSearchMethod;
   private Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods;
   private Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames;
   private Map<JavaType, JavaSymbolName> referencedFieldsNames;
+  private List<String> constructorFields;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -90,16 +91,21 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param idFields entity id fields
    * @param validFields entity fields to search for (excluded id, reference and collection fields)
    * @param findAllGlobalSearchMethod the findAll metadata 
-   * @param allFindAllReferencedFieldsMethods
+   * @param allFindAllReferencedFieldsMethods the metadata for al findAllByReference methods.
+   * @param referencedFieldsIdentifierNames
+   * @param referencedFieldsNames 
+   * @param constructorFields list of field names to add to ConstructorExpression while 
+   *            building findAll methods when return type is a projection.
    */
   public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomImplAnnotationValues annotationValues, final JavaType domainType,
-      final boolean isDTO, final List<FieldMetadata> idFields,
+      final boolean returnTypeIsProjection, final List<FieldMetadata> idFields,
       final List<FieldMetadata> validFields, final MethodMetadata findAllGlobalSearchMethod,
       final Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
       final Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames,
-      final Map<JavaType, JavaSymbolName> referencedFieldsNames) {
+      final Map<JavaType, JavaSymbolName> referencedFieldsNames,
+      final List<String> constructorFields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
@@ -108,8 +114,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     this.allFindAllReferencedFieldsMethods = allFindAllReferencedFieldsMethods;
     this.referencedFieldsIdentifierNames = referencedFieldsIdentifierNames;
     this.referencedFieldsNames = referencedFieldsNames;
-    this.isDTO = isDTO;
+    this.returnTypeIsProjection = returnTypeIsProjection;
     this.entity = domainType;
+    this.constructorFields = constructorFields;
 
     // Get repository that needs to be implemented
     ensureGovernorImplements(annotationValues.getRepository());
@@ -241,30 +248,31 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     bodyBuilder.appendFormalLine("");
 
-    // List<Entity> results = query.list(ConstructorExpression.create(Entity.class, qEntity.parameter1, qEntity.parameter1, ...));
-    if (!this.isDTO) {
-      bodyBuilder.appendFormalLine(String.format("%1$s<%2$s> results = query.list(%3$s);",
-          new JavaType("java.util.List").getNameIncludingTypeParameters(false, importResolver),
-          returnType.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    // List<ReturnType> results = query.list(ConstructorExpression.create(ReturnType.class, qEntity.parameter1, qEntity.parameter1, ...));
+    if (!this.returnTypeIsProjection) {
+      bodyBuilder.appendFormalLine(String
+          .format("%1$s<%2$s> results = query.list(%3$s);", new JavaType("java.util.List")
+              .getNameIncludingTypeParameters(false, this.importResolver), returnType
+              .getNameIncludingTypeParameters(false, this.importResolver), entityVariable));
     } else if (queryList.isEmpty()) {
       bodyBuilder.appendFormalLine(String.format(
           "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
-              "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
-              .getNameIncludingTypeParameters(false, importResolver), constructorExp
-              .getNameIncludingTypeParameters(false, importResolver)));
+              "java.util.List").getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver), constructorExp
+              .getNameIncludingTypeParameters(false, this.importResolver)));
     } else {
       bodyBuilder.appendFormalLine(String.format(
           "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class, %4$s ));", new JavaType(
-              "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
-              .getNameIncludingTypeParameters(false, importResolver), constructorExp
-              .getNameIncludingTypeParameters(false, importResolver), StringUtils.join(queryList,
-              ", ")));
+              "java.util.List").getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver), constructorExp
+              .getNameIncludingTypeParameters(false, this.importResolver), StringUtils.join(
+              this.constructorFields, ", ")));
     }
 
     //return new PageImpl<Entity>(results, pageable, totalFound);
     bodyBuilder.appendFormalLine(String.format("return new %s<%s>(results, %s, totalFound);",
-        pageImpl.getNameIncludingTypeParameters(false, importResolver),
-        returnType.getNameIncludingTypeParameters(false, importResolver), pageable));
+        pageImpl.getNameIncludingTypeParameters(false, this.importResolver),
+        returnType.getNameIncludingTypeParameters(false, this.importResolver), pageable));
 
     // Sets body to generated method
     methodBuilder.setBodyBuilder(bodyBuilder);
@@ -372,23 +380,24 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.appendFormalLine("");
 
     // List<Entity> results = query.list(ConstructorExpression.create(Entity.class, qEntity.parameter1, qEntity.parameter1, ...));
-    if (!this.isDTO) {
-      bodyBuilder.appendFormalLine(String.format("%1$s<%2$s> results = query.list(%3$s);",
-          new JavaType("java.util.List").getNameIncludingTypeParameters(false, importResolver),
-          returnType.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    if (!this.returnTypeIsProjection) {
+      bodyBuilder.appendFormalLine(String
+          .format("%1$s<%2$s> results = query.list(%3$s);", new JavaType("java.util.List")
+              .getNameIncludingTypeParameters(false, this.importResolver), returnType
+              .getNameIncludingTypeParameters(false, this.importResolver), entityVariable));
     } else if (queryList.isEmpty()) {
       bodyBuilder.appendFormalLine(String.format(
           "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
-              "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
-              .getNameIncludingTypeParameters(false, importResolver), constructorExp
-              .getNameIncludingTypeParameters(false, importResolver)));
+              "java.util.List").getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver), constructorExp
+              .getNameIncludingTypeParameters(false, this.importResolver)));
     } else {
       bodyBuilder.appendFormalLine(String.format(
           "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class, %4$s ));", new JavaType(
-              "java.util.List").getNameIncludingTypeParameters(false, importResolver), returnType
-              .getNameIncludingTypeParameters(false, importResolver), constructorExp
-              .getNameIncludingTypeParameters(false, importResolver), StringUtils.join(queryList,
-              ", ")));
+              "java.util.List").getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver), constructorExp
+              .getNameIncludingTypeParameters(false, this.importResolver), StringUtils.join(
+              this.constructorFields, ", ")));
     }
 
     //return new PageImpl<Entity>(results, pageable, totalFound);
@@ -577,8 +586,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   }
 
 
-  public boolean isDTO() {
-    return this.isDTO;
+  public boolean isProjection() {
+    return this.returnTypeIsProjection;
   }
 
 

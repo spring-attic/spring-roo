@@ -20,7 +20,7 @@ public class RepositoryJpaCustomAnnotationValues extends AbstractAnnotationValue
   private JavaType entity;
 
   @AutoPopulate
-  private JavaType defaultSearchResult;
+  private JavaType defaultReturnType;
 
   /**
    * Constructor
@@ -37,8 +37,8 @@ public class RepositoryJpaCustomAnnotationValues extends AbstractAnnotationValue
    * 
    * @return a non-<code>null</code> type
    */
-  public JavaType getDefaultSearchResult() {
-    return defaultSearchResult;
+  public JavaType getDefaultReturnType() {
+    return defaultReturnType;
   }
 
   /**

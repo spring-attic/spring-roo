@@ -111,7 +111,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
   @Override
   public void addRepository(JavaType interfaceType, final JavaType domainType,
-      JavaType defaultSearchResult) {
+      JavaType defaultReturnType) {
     Validate.notNull(domainType, "ERROR: You must specify a valid Entity. ");
 
     if (getProjectOperations().isMultimoduleProject()) {
@@ -134,22 +134,22 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     Validate.notNull(entityAnnotation,
         "ERROR: Provided entity should be annotated with @RooJpaEntity");
 
-    if (defaultSearchResult != null) {
+    if (defaultReturnType != null) {
 
-      ClassOrInterfaceTypeDetails defaultSearchResultDetails =
-          getTypeLocationService().getTypeDetails(defaultSearchResult);
-      AnnotationMetadata defaultSearchResultAnnotation =
-          defaultSearchResultDetails.getAnnotation(RooJavaType.ROO_DTO);
+      ClassOrInterfaceTypeDetails defaultReturnTypeDetails =
+          getTypeLocationService().getTypeDetails(defaultReturnType);
+      AnnotationMetadata defaultReturnTypeAnnotation =
+          defaultReturnTypeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
 
-      // Show an error indicating that defaultSearchResult should be annotated with
-      // @RooDTO
-      Validate.notNull(defaultSearchResultAnnotation,
+      // Show an error indicating that defaultReturnType should be annotated with
+      // @RooEntityProjection
+      Validate.notNull(defaultReturnTypeAnnotation,
           "ERROR: Provided defaultSearchResult should be annotated with @RooDTO");
     } else {
-      defaultSearchResult = domainType;
+      defaultReturnType = domainType;
     }
 
-    // Check if the new interface to be created exists yet
+    // Check if the new interface to be created already exists
     final String interfaceIdentifier =
         getPathResolver().getCanonicalPath(interfaceType.getModule(), Path.SRC_MAIN_JAVA,
             interfaceType);
@@ -201,7 +201,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // By default, generate RepositoryCustom interface and its
     // implementation that allow developers to include its dynamic queries
     // using QueryDSL
-    addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage(), defaultSearchResult);
+    addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage(), defaultReturnType);
 
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(interfaceType.getModule(), domainType.getModule());
@@ -481,11 +481,12 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
    * @param domainType
    * @param repositoryType
    * @param repositoryPackage
+   * @param defaultReturnType 
    * 
    * @return JavaType with new RepositoryCustom interface.
    */
   private JavaType addRepositoryCustom(JavaType domainType, JavaType repositoryType,
-      JavaPackage repositoryPackage, JavaType defaultSearchResult) {
+      JavaPackage repositoryPackage, JavaType defaultReturnType) {
 
     // Getting RepositoryCustom interface JavaTYpe
     JavaType interfaceType =
@@ -517,11 +518,11 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         "entity"), domainType));
 
     repositoryCustomAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
-        "defaultSearchResult"), defaultSearchResult));
+        "defaultReturnType"), defaultReturnType));
 
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(interfaceType.getModule(),
-        defaultSearchResult.getModule());
+        defaultReturnType.getModule());
 
     interfaceBuilder.addAnnotation(repositoryCustomAnnotationMetadata);
 

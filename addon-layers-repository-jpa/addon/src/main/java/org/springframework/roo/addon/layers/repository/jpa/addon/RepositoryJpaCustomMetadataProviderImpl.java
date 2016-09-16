@@ -163,7 +163,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
             "ERROR: Repository custom interface should be contain an entity on @RooJpaRepositoryCustom annotation");
 
     // Getting findAll results type
-    JavaType searchResult = annotationValues.getDefaultSearchResult();
+    JavaType searchResult = annotationValues.getDefaultReturnType();
 
     Validate
         .notNull(

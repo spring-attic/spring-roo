@@ -22,11 +22,11 @@ public interface RepositoryJpaOperations extends Feature {
   /**
    * Add new repository related with some existing entity.
    * 
-   * @param interfaceType new interface that will be generated
-   * @param domainType The domain entity this repository should expose
-   * @param defaultSearchResult The java type of the findAll search reuslt
+   * @param interfaceType new JavaType representing the interface that will be generated.
+   * @param domainType the JavaType representing the domain entity this repository should expose.
+   * @param defaultReturnType the JavaType of the findAll search results.
    */
-  void addRepository(JavaType interfaceType, JavaType domainType, JavaType defaultSearchResult);
+  void addRepository(JavaType interfaceType, JavaType domainType, JavaType defaultReturnType);
 
   /**
    * Add new repository for all existing entities.

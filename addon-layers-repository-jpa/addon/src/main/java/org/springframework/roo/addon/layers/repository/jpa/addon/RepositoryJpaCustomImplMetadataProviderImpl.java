@@ -3,14 +3,6 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -31,6 +23,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
@@ -43,6 +36,14 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link RepositoryJpaCustomImplMetadataProvider}.
@@ -189,8 +190,39 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
 
-    // Check if current entity is a DTO or entiy
-    boolean isDTO = entityDetails.getAnnotation(RooJavaType.ROO_DTO) != null;
+    // Check if default return type is a Projection
+    JavaType returnType =
+        (JavaType) repositoryCustomAnnotation.getAttribute("defaultReturnType").getValue();
+    ClassOrInterfaceTypeDetails returnTypeDetails =
+        getTypeLocationService().getTypeDetails(returnType);
+    AnnotationMetadata entityProjectionAnnotation =
+        returnTypeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
+    boolean returnTypeIsProjection = entityProjectionAnnotation != null;
+    List<String> constructorFields = new ArrayList<String>();
+
+    // Get projection constructor fields from @RooEntityProjection
+    if (returnTypeIsProjection) {
+      AnnotationAttributeValue<?> projectionFields =
+          entityProjectionAnnotation.getAttribute("fields");
+      if (projectionFields != null) {
+        @SuppressWarnings("unchecked")
+        List<StringAttributeValue> values =
+            (List<StringAttributeValue>) projectionFields.getValue();
+
+
+        // Get entity name as a variable name for building constructor expression
+        String entityVariableName = StringUtils.uncapitalize(entity.getSimpleTypeName());
+        for (StringAttributeValue field : values) {
+
+          // By now, only fields of entity will be valid. Exclude fields from relation fields.
+          if (StringUtils.contains(field.getValue(), ".")) {
+            continue;
+          } else {
+            constructorFields.add(entityVariableName.concat(".").concat(field.getValue()));
+          }
+        }
+      }
+    }
 
     // Getting repository metadata
     final LogicalPath logicalPath =
@@ -325,9 +357,10 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, isDTO, validIdFields, validFields,
-        repositoryCustomMetadata.getFindAllGlobalSearchMethod(), referencedFieldsMethods,
-        referencedFieldsIdentifierNames, referencedFieldsNames);
+        governorPhysicalTypeMetadata, annotationValues, entity, returnTypeIsProjection,
+        validIdFields, validFields, repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
+        referencedFieldsMethods, referencedFieldsIdentifierNames, referencedFieldsNames,
+        constructorFields);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
