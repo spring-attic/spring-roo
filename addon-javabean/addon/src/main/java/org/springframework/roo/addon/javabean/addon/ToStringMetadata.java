@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.javabean.annotations.RooToString;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -114,7 +115,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
     // Get excludeFields attribute value
     final String[] excludeFields = annotationValues.getExcludeFields();
 
-    //    builder.getImportRegistrationResolver().addImports(TO_STRING_BUILDER, TO_STRING_STYLE);
+    // Get all fields from class
     List<FieldMetadata> affectedFields = new ArrayList<FieldMetadata>();
     for (FieldMetadata field : memberDetails.getFields()) {
 
@@ -170,8 +171,13 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       if (i != 0) {
         fieldString.append(", ");
       }
+
+      // Get getter for field
+      final String accesorMethodName =
+          BeanInfoUtils.getAccessorMethodName(affectedFields.get(i).getFieldName(),
+              affectedFields.get(i).getFieldType()).getSymbolName();
       fieldString.append(affectedFields.get(i).getFieldName()).append("='\"").append(" + ")
-          .append(affectedFields.get(i).getFieldName()).append(" + '\\''").append(" + ");
+          .append(accesorMethodName).append("()").append(" + '\\''").append(" + ");
       if (i == affectedFields.size() - 1) {
         fieldString.append("\"}\" + ").append("super.toString();");
       }
