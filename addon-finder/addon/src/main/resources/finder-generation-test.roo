@@ -23,7 +23,7 @@ repository jpa --all --package ~.repository
 # Goal:   Create a finder in the repository that returns OwnerList and accepts an 
 #         int parameter
 #
-finder add --class ~.Owner --name findByAge
+finder add --entity ~.Owner --name findByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Created SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -38,7 +38,7 @@ finder add --class ~.Owner --name findByAge
 #----------------------------------------------------------------------------------------
 # Goal:   Create a finder that searches by several conditions. 
 #
-finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
+finder add --entity ~.Owner --name findByFirstNameAndPetOrBirthday
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -55,7 +55,7 @@ finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
 #----------------------------------------------------------------------------------------
 # Goal:   Create a finder that has ignore case and all ignore case options enabled
 #
-finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
+finder add --entity ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -71,7 +71,7 @@ finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 #----------------------------------------------------------------------------------------
 # Goal:   Create a finder that returns the count of results
 #
-finder add --class ~.Owner --name countByAge
+finder add --entity ~.Owner --name countByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Created SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -86,7 +86,7 @@ finder add --class ~.Owner --name countByAge
 #----------------------------------------------------------------------------------------
 # Goal:   Create a finder that orders the results by several properties
 #
-finder add --class ~.Owner --name findByAgeOrderByAgeAscPetNameDesc
+finder add --entity ~.Owner --name findByAgeOrderByAgeAscPetNameDesc
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -103,7 +103,7 @@ finder add --class ~.Owner --name findByAgeOrderByAgeAscPetNameDesc
 # Goal:    Create a finder that orders the results by several properties and all ignore
 #          case options is enabled
 #
-finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
+finder add --entity ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -120,7 +120,7 @@ finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
 #----------------------------------------------------------------------------------------
 # Goal:    Create a finder which condition properties have operators
 #
-finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith
+finder add --entity ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -139,10 +139,10 @@ finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPe
 #----------------------------------------------------------------------------------------
 # Goal:    Create a finder with a limiting expression that returns an unique Owner
 #
-finder add --class ~.Owner --name findFirstByAge
-finder add --class ~.Owner --name findDistinctFirstByActive
-finder add --class ~.Owner --name findFirst1ByFirstName
-finder add --class ~.Owner --name findDistinctFirst1ByPet
+finder add --entity ~.Owner --name findFirstByAge
+finder add --entity ~.Owner --name findDistinctFirstByActive
+finder add --entity ~.Owner --name findFirst1ByFirstName
+finder add --entity ~.Owner --name findDistinctFirst1ByPet
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -160,11 +160,11 @@ finder add --class ~.Owner --name findDistinctFirst1ByPet
 #----------------------------------------------------------------------------------------
 # Goal:    Check that finders return a list of Owners
 #
-finder add --class ~.Owner --name findFirst2ByAge
-finder add --class ~.Owner --name findDistinctFirst2ByAge
-finder add --class ~.Owner --name findFirst100ByAge
-finder add --class ~.Owner --name findDistinctByAge
-finder add --class ~.Owner --name findByPet
+finder add --entity ~.Owner --name findFirst2ByAge
+finder add --entity ~.Owner --name findDistinctFirst2ByAge
+finder add --entity ~.Owner --name findFirst100ByAge
+finder add --entity ~.Owner --name findDistinctByAge
+finder add --entity ~.Owner --name findByPet
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -184,11 +184,11 @@ finder add --class ~.Owner --name findByPet
 #----------------------------------------------------------------------------------------
 # Goal:    Check that finders return a list of subject property java type
 #
-finder add --class ~.Owner --name findDistinctActiveByAge
-finder add --class ~.Owner --name findBirthdayByAge
-finder add --class ~.Owner --name findTop100FirstNameByAge
-finder add --class ~.Owner --name findDistinctFirst100PetByAge
-finder add --class ~.Owner --name findFirst10AgeByAge
+finder add --entity ~.Owner --name findDistinctActiveByAge
+finder add --entity ~.Owner --name findBirthdayByAge
+finder add --entity ~.Owner --name findTop100FirstNameByAge
+finder add --entity ~.Owner --name findDistinctFirst100PetByAge
+finder add --entity ~.Owner --name findFirst10AgeByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -208,8 +208,8 @@ finder add --class ~.Owner --name findFirst10AgeByAge
 #----------------------------------------------------------------------------------------
 # Goal:    Check that finders return a subject property java type
 #
-finder add --class ~.Owner --name findDistinctTopPetNameByAge
-finder add --class ~.Owner --name findTop1TelephoneByAge
+finder add --entity ~.Owner --name findDistinctTopPetNameByAge
+finder add --entity ~.Owner --name findTop1TelephoneByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -225,7 +225,7 @@ finder add --class ~.Owner --name findTop1TelephoneByAge
 #----------------------------------------------------------------------------------------
 # Goal:   Check that any parameter is included into the finder
 #
-finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull
+finder add --entity ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -241,7 +241,7 @@ finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsN
 # Goal:    Check that for every condition a parameter is added, which type is the 
 #          condition property type
 #
-finder add --class ~.Owner --name findByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains
+finder add --entity ~.Owner --name findByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -259,7 +259,7 @@ finder add --class ~.Owner --name findByFirstNameAndActiveAndBirthdayAndPetOrAge
 # Goal:    Check that for every condition a parameter is added, which type is the 
 #          condition property type
 #
-finder add --class ~.Owner --name findByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains
+finder add --entity ~.Owner --name findByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -275,7 +275,7 @@ finder add --class ~.Owner --name findByActiveEqualsAndBirthdayBeforeOrFirstName
 # Goal:    Check that for every condition several parameters are added, which type is the 
 #          condition property type, and a counter is added as suffix
 #
-finder add --class ~.Owner --name findByAgeBetweenAndBirthdayBetween
+finder add --entity ~.Owner --name findByAgeBetweenAndBirthdayBetween
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -292,7 +292,7 @@ finder add --class ~.Owner --name findByAgeBetweenAndBirthdayBetween
 # Goal:    Check that for every condition a parameter is added, which type is the 
 #          condition property type, and a counter is added as suffix
 #
-finder add --class ~.Owner --name findByAgeBetweenAndAgeIsOrAgeLessThan
+finder add --entity ~.Owner --name findByAgeBetweenAndAgeIsOrAgeLessThan
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -309,8 +309,8 @@ finder add --class ~.Owner --name findByAgeBetweenAndAgeIsOrAgeLessThan
 #----------------------------------------------------------------------------------------
 # Goal:    Check that finder parameters are a List of condition property type
 #
-finder add --class ~.Owner --name findByFirstNameInAndActiveInAndAgeInAndPetInAndPetNameInOrBirthdayNotInAndTelephoneIn
-finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
+finder add --entity ~.Owner --name findByFirstNameInAndActiveInAndAgeInAndPetInAndPetNameInOrBirthdayNotInAndTelephoneIn
+finder add --entity ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -332,7 +332,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Checks that a finder with an empty name cannot be created
 #
-# finder add --class ~.Owner --name 
+# finder add --entity ~.Owner --name 
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -346,17 +346,17 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fail finder creation if it does not contain at least an operation+By+property
 #
-# finder add --class ~.Owner --name find
-# finder add --class ~.Owner --name findBy
-# finder add --class ~.Owner --name findAge
-# finder add --class ~.Owner --name Age
-# finder add --class ~.Owner --name AgeBy
-# finder add --class ~.Owner --name By
-# finder add --class ~.Owner --name ByAge
-# finder add --class ~.Owner --name findTByAge
-# finder add --class ~.Owner --name findTeByAge
-# finder add --class ~.Owner --name findByByAge
-# finder add --class ~.Owner --name findByAgeAge
+# finder add --entity ~.Owner --name find
+# finder add --entity ~.Owner --name findBy
+# finder add --entity ~.Owner --name findAge
+# finder add --entity ~.Owner --name Age
+# finder add --entity ~.Owner --name AgeBy
+# finder add --entity ~.Owner --name By
+# finder add --entity ~.Owner --name ByAge
+# finder add --entity ~.Owner --name findTByAge
+# finder add --entity ~.Owner --name findTeByAge
+# finder add --entity ~.Owner --name findByByAge
+# finder add --entity ~.Owner --name findByAgeAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -370,7 +370,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if operation is not read, find or query
 #
-# finder add --class ~.Owner --name deleteByAge
+# finder add --entity ~.Owner --name deleteByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -383,12 +383,12 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if Distinct expression is located in an incorrect position
 #
-# finder add --class ~.Owner --name DistinctfindByAge
-# finder add --class ~.Owner --name findByDistinctAge
-# finder add --class ~.Owner --name findAgeDistinctByAge
-# finder add --class ~.Owner --name findDistinctBy
-# finder add --class ~.Owner --name DistinctBy
-# finder add --class ~.Owner --name countDistinctByAge
+# finder add --entity ~.Owner --name DistinctfindByAge
+# finder add --entity ~.Owner --name findByDistinctAge
+# finder add --entity ~.Owner --name findAgeDistinctByAge
+# finder add --entity ~.Owner --name findDistinctBy
+# finder add --entity ~.Owner --name DistinctBy
+# finder add --entity ~.Owner --name countDistinctByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -401,15 +401,15 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if limiting expression is not placed in a correct location
 #
-# finder add --class ~.Owner --name TopfindByAge
-# finder add --class ~.Owner --name findDistinctTopBy
-# finder add --class ~.Owner --name findTopDistinctByAge
-# finder add --class ~.Owner --name findTopFirstByAge
-# finder add --class ~.Owner --name findTopAgeAgeByAge
-# finder add --class ~.Owner --name findTopaAgeByAge
-# finder add --class ~.Owner --name findTopaByAge
-# finder add --class ~.Owner --name find1TopByAge
-# finder add --class ~.Owner --name countTopByAge
+# finder add --entity ~.Owner --name TopfindByAge
+# finder add --entity ~.Owner --name findDistinctTopBy
+# finder add --entity ~.Owner --name findTopDistinctByAge
+# finder add --entity ~.Owner --name findTopFirstByAge
+# finder add --entity ~.Owner --name findTopAgeAgeByAge
+# finder add --entity ~.Owner --name findTopaAgeByAge
+# finder add --entity ~.Owner --name findTopaByAge
+# finder add --entity ~.Owner --name find1TopByAge
+# finder add --entity ~.Owner --name countTopByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -422,7 +422,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if max  results number is 0
 #
-# finder add --class ~.Owner --name findTop0ByAge
+# finder add --entity ~.Owner --name findTop0ByAge
 #      
 # Output:  ERROR: Query max results cannot be 0.
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -436,7 +436,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has several properties to return
 #
-# finder add --class ~.Owner --name findActiveAndAgeByAge
+# finder add --entity ~.Owner --name findActiveAndAgeByAge
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -449,7 +449,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fail if a finder contains several IgnoreCase options for the same property
 #
-# finder add --class ~.Owner --name findByAgeIgnoreCaseIgnoreCase
+# finder add --entity ~.Owner --name findByAgeIgnoreCaseIgnoreCase
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -462,8 +462,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if a property is associated to an unsupported operator 
 #
-# finder add --class ~.Owner --name findByFirstNameFalse
-# finder add --class ~.Owner --name  findByAgeNull
+# finder add --entity ~.Owner --name findByFirstNameFalse
+# finder add --entity ~.Owner --name  findByAgeNull
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -476,8 +476,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an Or
 #
-# finder add --class ~.Owner --name findByOr
-# finder add --class ~.Owner --name findByAgeOrOr
+# finder add --entity ~.Owner --name findByOr
+# finder add --entity ~.Owner --name findByAgeOrOr
 #      
 # Output:  ERROR: Missing expression before Or
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -491,8 +491,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an And
 #
-# finder add --class ~.Owner --name findByAnd
-# finder add --class ~.Owner --name findByAgeAndAnd
+# finder add --entity ~.Owner --name findByAnd
+# finder add --entity ~.Owner --name findByAgeAndAnd
 #      
 # Output:  ERROR: Missing property in a search condition before And operator
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -506,8 +506,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions after an Or/And
 #
-# finder add --class ~.Owner --name findByAgeOr
-# finder add --class ~.Owner --name findByAgeAnd
+# finder add --entity ~.Owner --name findByAgeOr
+# finder add --entity ~.Owner --name findByAgeAnd
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -520,8 +520,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if finder has an empty expressions before an order clause
 #
-# finder add --class ~.Owner --name findByAgeOrOrderByActiveDesc 
-# finder add --class ~.Owner --name findByAgeAndOrderByActiveDesc 
+# finder add --entity ~.Owner --name findByAgeOrOrderByActiveDesc 
+# finder add --entity ~.Owner --name findByAgeAndOrderByActiveDesc 
 #      
 # Output:  ERROR: Missing expression before OrderBy
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -535,7 +535,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if order clause is empty
 #
-# finder add --class ~.Owner --name findByAgeOrderBy
+# finder add --entity ~.Owner --name findByAgeOrderBy
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -548,7 +548,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if there are several OrderBy
 #
-# finder add --class ~.Owner --name findByAgeOrderByAgeOrderByNumber
+# finder add --entity ~.Owner --name findByAgeOrderByAgeOrderByNumber
 #      
 # Output:  ERROR: OrderBy must not be used more than once in a method name
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -562,8 +562,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if order expressions are joined with And/Or
 #
-# finder add --class ~.Owner --name findByAgeOrderByAgeAscOrActiveDesc
-# finder add --class ~.Owner --name findByAgeOrderByAgeAscAndActiveDesc
+# finder add --entity ~.Owner --name findByAgeOrderByAgeAscOrActiveDesc
+# finder add --entity ~.Owner --name findByAgeOrderByAgeAscAndActiveDesc
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)
@@ -576,8 +576,8 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if order expressions have several directions
 #
-# finder add --class ~.Owner --name findByAgeOrderByAgeAscDesc
-# finder add --class ~.Owner --name findByAgeOrderByDesc
+# finder add --entity ~.Owner --name findByAgeOrderByAgeAscDesc
+# finder add --entity ~.Owner --name findByAgeOrderByDesc
 #      
 # Output:  ERROR: Missing property before Desc direction
 #          --name parameter must follow Spring Data nomenclature. Please, 
@@ -592,7 +592,7 @@ finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #----------------------------------------------------------------------------------------
 # Goal:  Fails if AllIgnoreCase is included several times
 #
-# finder add --class ~.Owner --name findByAgeIgnoreCaseAllIgnoreCaseAllIgnoreCase
+# finder add --entity ~.Owner --name findByAgeIgnoreCaseAllIgnoreCaseAllIgnoreCase
 #      
 # Output:  --name parameter must follow Spring Data nomenclature. Please, 
 #          write a valid value using autocomplete feature (TAB or CTRL + Space)

@@ -25,7 +25,7 @@ logging setup --level ERROR --package WEB
 security setup
 
 //web mvc controller --class ~.web.PublicRsvpController
-finder add --class ~.domain.Rsvp --name findByCodeEquals
+finder add --entity ~.domain.Rsvp --name findByCodeEquals
 
 //email sender setup --hostServer 127.0.0.1
 //field email template --class ~.web.PublicRsvpController

@@ -421,11 +421,11 @@ repository jpa --all --package repository:~
 service --all --apiPackage service-api:~ --implPackage service-impl:~
 
 // Create finders
-finder add --class model:~.UserLogin --name findByUsername
-finder add --class model:~.Shipper --name findByCompanyName
-finder add --class model:~.Region --name findByCountryIdOrderByDescriptionAsc
-finder add --class model:~.City --name findByRegionIdOrderByDescriptionAsc
-finder add --class model:~.Product --name findByDiscontinuedOrderByNameAsc
+finder add --entity model:~.UserLogin --name findByUsername
+finder add --entity model:~.Shipper --name findByCompanyName
+finder add --entity model:~.Region --name findByCountryIdOrderByDescriptionAsc
+finder add --entity model:~.City --name findByRegionIdOrderByDescriptionAsc
+finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
 
 // Install security
 security setup

@@ -83,7 +83,7 @@ service --all --apiPackage ~.service --implPackage ~.service.impl
 #---------------------------------------------------------------------------------------------------------
 # Goal:   Create a service operation to use the generated finder 
 #
-finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
+finder add --entity ~.Owner --name findByFirstNameAndPetOrBirthday
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Created SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -106,7 +106,7 @@ finder add --class ~.Owner --name findByFirstNameAndPetOrBirthday
 #---------------------------------------------------------------------------------------------------------
 # Goal:  Create a service operation to use a finder with ignore case and all ignore case options enabled
 #
-finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
+finder add --entity ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -131,7 +131,7 @@ finder add --class ~.Owner --name findByFirstNameIgnoreCaseAllIgnoreCase
 # Goal:    Create a service operation to use a finder that orders the results by several 
 #          properties and all ignore case option is enabled
 #
-finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
+finder add --entity ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -155,7 +155,7 @@ finder add --class ~.Owner --name findByBirthdayAllIgnoreCaseOrderByFirstNameAsc
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with property operators
 #
-finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith
+finder add --entity ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPetNameStartsWith
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -183,7 +183,7 @@ finder add --class ~.Owner --name findByAgeIsLessThanEqualAndBirthdayIsAfterOrPe
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with a limiting expression that returns an Owner
 #
-finder add --class ~.Owner --name findDistinctFirst1ByPet
+finder add --entity ~.Owner --name findDistinctFirst1ByPet
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -206,7 +206,7 @@ finder add --class ~.Owner --name findDistinctFirst1ByPet
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finders that returns a list of Owners
 #
-finder add --class ~.Owner --name findFirst100ByAge
+finder add --entity ~.Owner --name findFirst100ByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -230,7 +230,7 @@ finder add --class ~.Owner --name findFirst100ByAge
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder that returns a list of subject property java type
 #
-finder add --class ~.Owner --name findDistinctActiveByAge
+finder add --entity ~.Owner --name findDistinctActiveByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -254,7 +254,7 @@ finder add --class ~.Owner --name findDistinctActiveByAge
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder that returns the property java type
 #
-finder add --class ~.Owner --name findTopPetNameByAge
+finder add --entity ~.Owner --name findTopPetNameByAge
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -277,7 +277,7 @@ finder add --class ~.Owner --name findTopPetNameByAge
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder that does not receive any parameter
 #
-finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull
+finder add --entity ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsNotNullAndPetIsNullAndPetNameNull
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -302,7 +302,7 @@ finder add --class ~.Owner --name findByActiveFalseAndBirthdayNullOrFirstNameIsN
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder without condition operators
 #
-finder add --class ~.Owner --name findPetByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains
+finder add --entity ~.Owner --name findPetByFirstNameAndActiveAndBirthdayAndPetOrAgeAndPetNameContains
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -331,7 +331,7 @@ finder add --class ~.Owner --name findPetByFirstNameAndActiveAndBirthdayAndPetOr
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with condition operators
 #
-finder add --class ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains
+finder add --entity ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstNameStartsWithAndPetIsOrAgeLessThanAndPetNameContains
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -358,7 +358,7 @@ finder add --class ~.Owner --name findTopByActiveEqualsAndBirthdayBeforeOrFirstN
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder which condition operators need several parameters
 #
-finder add --class ~.Owner --name findFirstAgeByAgeBetweenAndBirthdayBetween
+finder add --entity ~.Owner --name findFirstAgeByAgeBetweenAndBirthdayBetween
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -384,7 +384,7 @@ finder add --class ~.Owner --name findFirstAgeByAgeBetweenAndBirthdayBetween
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder which condition property has several operators
 #
-finder add --class ~.Owner --name findAgeByAgeBetweenAndAgeIsOrAgeLessThan
+finder add --entity ~.Owner --name findAgeByAgeBetweenAndAgeIsOrAgeLessThan
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -411,7 +411,7 @@ finder add --class ~.Owner --name findAgeByAgeBetweenAndAgeIsOrAgeLessThan
 #---------------------------------------------------------------------------------------------------------
 # Goal:    Create a service operation to use a finder with an In operator
 #
-finder add --class ~.Owner --name findByBirthdayInOrBirthdayNotIn
+finder add --entity ~.Owner --name findByBirthdayInOrBirthdayNotIn
 #      
 # Output:  Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj

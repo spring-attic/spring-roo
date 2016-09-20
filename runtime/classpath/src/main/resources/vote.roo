@@ -27,6 +27,6 @@ web mvc controller --controller ~.web.VoteController --entity ~.domain.Vote --se
 
 security setup
 
-finder add --class ~.domain.Vote --name findChoiceByRegistered
+finder add --entity ~.domain.Vote --name findChoiceByRegistered
 
 //logging setup --level INFO

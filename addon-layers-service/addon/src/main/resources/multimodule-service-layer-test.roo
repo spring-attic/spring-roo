@@ -13,7 +13,7 @@ field number --fieldName age --type int
 field reference --fieldName pet --type ~.Pet
 
 repository jpa --all --package repository:org.example.repository
-#finder add --class model:~.Owner --name findByName
+#finder add --entity model:~.Owner --name findByName
 
 #====================================================================
 # TEST 1:  Generate a service       
@@ -107,13 +107,13 @@ service --all --apiPackage ~ --implPackage service-impl:~
 # Goal:    Test if finder are added to the services
 #
 module focus --moduleName repository
-finder add --class model:~.Owner --name findPetByName
+finder add --entity model:~.Owner --name findPetByName
 module focus --moduleName model
-finder add --class ~.Owner --name findByAge
+finder add --entity ~.Owner --name findByAge
 module focus --moduleName service-api
-finder add --class model:~.Owner --name findFirstByAge
+finder add --entity model:~.Owner --name findFirstByAge
 module focus --moduleName service-impl
-finder add --class model:~.Owner --name findTopByAge
+finder add --entity model:~.Owner --name findTopByAge
 #       
 # Output:  Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj

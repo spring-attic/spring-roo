@@ -43,7 +43,7 @@ web mvc controller --all --package ~.web
 #--------------------------------------------------------------------
 # Goal:    Test if finder is added
 #
-finder add --class ~.Owner --name findById
+finder add --entity ~.Owner --name findById
 web mvc finder --controller ~.web.OwnerController --finder findById --responseType JSON
 #       
 # Output:  Updated SRC_MAIN_JAVA/org/example/rep/OwnerRepository.java
@@ -81,8 +81,8 @@ web mvc finder --controller ~.web.OwnerController --all --responseType JSON
 #--------------------------------------------------------------------
 # Goal:    Test if all finders are added into controller
 #
-finder add --class ~.Owner --name findByNameAndPet
-finder add --class ~.Owner --name queryFirst1ByBirthdayBetween
+finder add --entity ~.Owner --name findByNameAndPet
+finder add --entity ~.Owner --name queryFirst1ByBirthdayBetween
 web mvc finder --controller ~.web.OwnerController --all --responseType JSON
 #       
 # Output:  ...
@@ -142,7 +142,7 @@ web mvc finder --controller ~.web.OwnerController --all --responseType JSON
 #--------------------------------------------------------------------
 # Goal:    Test if a finder is added manually
 #
-finder add --class ~.Owner --name findByIdOrderByNameAsc
+finder add --entity ~.Owner --name findByIdOrderByNameAsc
 # Open OwnerController.java
 # Add "findByIdOrderByNameAsc" to @RooJSON finders and save
 #       

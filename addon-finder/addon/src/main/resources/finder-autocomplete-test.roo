@@ -21,7 +21,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:    Checks autocomplete options shown when name parameter is empty
 #
-# Write finder add --class ~.Owner --name
+# Write finder add --entity ~.Owner --name
 # Autocomplete
 #      
 # Output:  find query read
@@ -35,11 +35,11 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after find, query or read are defined
 #
-# Write finder add --class ~.Owner --name find
+# Write finder add --entity ~.Owner --name find
 # Autocomplete
-# Write finder add --class ~.Owner --name query
+# Write finder add --entity ~.Owner --name query
 # Autocomplete
-# Write finder add --class ~.Owner --name read
+# Write finder add --entity ~.Owner --name read
 # Autocomplete
 #      
 # Output:  findActive findAge findBirthday findBy findDistinct findFirst findFirstName 
@@ -60,7 +60,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after Distinct option
 #
-# Write finder add --class ~.Owner --name findDistinct
+# Write finder add --entity ~.Owner --name findDistinct
 # Autocomplete
 #      
 # Output:  findDistinctActive findDistinctAge findDistinctBirthday  findDistinctBy 
@@ -75,9 +75,9 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after a limit expression First/Top
 #
-# Write finder add --class ~.Owner --name findTop
+# Write finder add --entity ~.Owner --name findTop
 # Autocomplete
-# Write finder add --class ~.Owner --name findDistinctFirst
+# Write finder add --entity ~.Owner --name findDistinctFirst
 # Autocomplete
 #      
 # Output:  findTopActive findTopAge findTopBirthday findTopBy findTopFirstName   
@@ -98,7 +98,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after limit expression number
 #
-# Write finder add --class ~.Owner --name findTop1
+# Write finder add --entity ~.Owner --name findTop1
 # Autocomplete
 #      
 # Output:  findTop1Active findTop1Age findTop1Birthday findTop1By findTop1FirstName 
@@ -113,13 +113,13 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after a property
 #
-# Write finder add --class ~.Owner --name findAge
+# Write finder add --entity ~.Owner --name findAge
 # Autocomplete
-# Write finder add --class ~.Owner --name findDistinctAge
+# Write finder add --entity ~.Owner --name findDistinctAge
 # Autocomplete
-# Write finder add --class ~.Owner --name findFirstAge
+# Write finder add --entity ~.Owner --name findFirstAge
 # Autocomplete
-# Write finder add --class ~.Owner --name findTop10Age
+# Write finder add --entity ~.Owner --name findTop10Age
 # Autocomplete
 #      
 # Output:  findAgeBy
@@ -136,7 +136,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after By
 #
-# Write finder add --class ~.Owner --name findBy
+# Write finder add --entity ~.Owner --name findBy
 # Autocomplete
 #      
 # Output:  findByActive findByAge findByBirthday findByFirstName findById findByPet 
@@ -151,7 +151,7 @@ field reference --fieldName pet --type ~.Pet
 # Goal:  Checks autocomplete options shown after a string property defined as query 
 #        search condition
 #
-# Write finder add --class ~.Owner --name findByFirstName
+# Write finder add --entity ~.Owner --name findByFirstName
 # Autocomplete
 #      
 # Output:  findByFirstNameAllIgnoreCase findByFirstNameAllIgnoringCase  
@@ -175,7 +175,7 @@ field reference --fieldName pet --type ~.Pet
 # Goal:  Checks autocomplete options shown after a number property defined as query
 #        search condition
 #
-# Write finder add --class ~.Owner --name findByTelephone
+# Write finder add --entity ~.Owner --name findByTelephone
 # Autocomplete
 #      
 # Output:  findByTelephoneAllIgnoreCase findByTelephoneAllIgnoringCase findByTelephoneAnd 
@@ -195,7 +195,7 @@ field reference --fieldName pet --type ~.Pet
 # Goal:  Checks autocomplete options shown after a date property defined as query 
 #        search condition
 #
-# Write finder add --class ~.Owner --name findByBirthday
+# Write finder add --entity ~.Owner --name findByBirthday
 # Autocomplete
 #      
 # Output:  findByBirthdayAfter findByBirthdayAllIgnoreCase findByBirthdayAllIgnoringCase
@@ -214,7 +214,7 @@ field reference --fieldName pet --type ~.Pet
 # Goal:  Checks autocomplete options shown after a primitive number property 
 #        defined as query search condition
 #
-# Write finder add --class ~.Owner --name findByAge
+# Write finder add --entity ~.Owner --name findByAge
 # Autocomplete
 #      
 # Output:  findByAgeAllIgnoreCase findByAgeAllIgnoringCase findByAgeAnd findByAgeBetween 
@@ -233,7 +233,7 @@ field reference --fieldName pet --type ~.Pet
 # Goal:  Checks autocomplete options shown after a boolean property defined as  query 
 #        search condition
 #
-# Write finder add --class ~.Owner --name findByActive
+# Write finder add --entity ~.Owner --name findByActive
 # Autocomplete
 #      
 # Output:  findByActiveAllIgnoreCase findByActiveAllIgnoringCase  findByActiveAnd 
@@ -252,7 +252,7 @@ field reference --fieldName pet --type ~.Pet
 # Goal:  Validate none option is shown after a list property defined as query search 
 #        condition
 #
-# Write finder add --class ~.Owner --name findByHobbies
+# Write finder add --entity ~.Owner --name findByHobbies
 # Autocomplete
 #      
 # Output:  
@@ -267,7 +267,7 @@ field reference --fieldName pet --type ~.Pet
 # Goal:  Checks autocomplete options shown after a reference property to other entity,
 #        defined as query search condition
 #
-# Write finder add --class ~.Owner --name findByPet
+# Write finder add --entity ~.Owner --name findByPet
 # Autocomplete
 #      
 # Output:  findByPetAllIgnoreCase findByPetAllIgnoringCase findByPetAnd findByPetEquals  
@@ -286,7 +286,7 @@ field reference --fieldName pet --type ~.Pet
 # Goal:  Checks autocomplete options shown after a string property of a related 
 #        entity, defined as query search condition
 #
-# Write finder add --class ~.Owner --name findByPetName
+# Write finder add --entity ~.Owner --name findByPetName
 # Autocomplete
 #      
 # Output:  findByPetNameAllIgnoreCase findByFirstPetNameAllIgnoringCase findByPetNameAnd 
@@ -308,7 +308,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after an operator
 #
-# Write finder add --class ~.Owner --name findByActiveNull
+# Write finder add --entity ~.Owner --name findByActiveNull
 # Autocomplete
 #      
 # Output:  findByActiveNullAllIgnoreCase findByActiveNullAllIgnoringCase  
@@ -323,7 +323,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after Is operator
 #
-# Write finder add --class ~.Owner --name findByFirstNameIs
+# Write finder add --entity ~.Owner --name findByFirstNameIs
 # Autocomplete
 #      
 # Output:  findByFirstNameIsAllIgnoreCase findByFirstNameIsAllIgnoringCase 
@@ -344,7 +344,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after Or conjunction
 #
-# Write finder add --class ~.Owner --name findByAgeOr
+# Write finder add --entity ~.Owner --name findByAgeOr
 # Autocomplete
 #      
 # Output:  findByAgeOrActive findByAgeOrAge findByAgeOrBirthday findByAgeOrFirstName    
@@ -360,7 +360,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after And conjunction
 #
-# Write finder add --class ~.Owner --name findByAgeAnd
+# Write finder add --entity ~.Owner --name findByAgeAnd
 # Autocomplete
 #      
 # Output:  findByAgeAndActive findByAgeAndAge findByAgeAndBirthday findByAgeAndFirstName 
@@ -374,7 +374,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after IgnoreCase option
 #
-# Write finder add --class ~.Owner --name findByAgeIgnoreCase
+# Write finder add --entity ~.Owner --name findByAgeIgnoreCase
 # Autocomplete
 #      
 # Output:  findByAgeIgnoreCaseAllIgnoreCase findByAgeIgnoreCaseAllIgnoringCase    
@@ -392,7 +392,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after AllIgnoreCase option
 #
-# Write finder add --class ~.Owner --name findByAgeAllIgnoreCase
+# Write finder add --entity ~.Owner --name findByAgeAllIgnoreCase
 # Autocomplete
 #      
 # Output:  findByAgeAllIgnoreCaseOrderBy 
@@ -406,7 +406,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Checks autocomplete options shown after OrderBy option
 #
-# Write finder add --class ~.Owner --name findByAgeOrderBy
+# Write finder add --entity ~.Owner --name findByAgeOrderBy
 # Autocomplete
 #      
 # Output:  findByAgeOrderByActive findByAgeOrderByAge findByAgeOrderByBirthday
@@ -422,7 +422,7 @@ field reference --fieldName pet --type ~.Pet
 #----------------------------------------------------------------------------------------
 # Goal:  Check autocomplete options shown after an order property
 #
-# Write finder add --class ~.Owner --name findByAgeOrderByAge
+# Write finder add --entity ~.Owner --name findByAgeOrderByAge
 # Autocomplete
 #      
 # Output:  findByAgeOrderByAgeAsc findByAgeOrderByAgeDesc  

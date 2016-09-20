@@ -287,7 +287,7 @@ repository jpa --all --package repository:org.example.repository
 #--------------------------------------------------------------------
 # Goal:    Add finders to an entity in other module
 #
-finder add --class model:~.Owner --name findPetByName
+finder add --entity model:~.Owner --name findPetByName
 #       
 # Output:  Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
@@ -302,7 +302,7 @@ finder add --class model:~.Owner --name findPetByName
 # Goal:    Add finders to an entity in the focused module
 #
 module focus --moduleName model
-finder add --class ~.Owner --name findByAge
+finder add --entity ~.Owner --name findByAge
 #       
 # Output:  Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj

@@ -141,6 +141,11 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
         continue;
       }
 
+      // Exclude fields which are in superclass
+      if (field.getDeclaredByMetadataId().equals(governorPhysicalTypeMetadata.getId())) {
+        continue;
+      }
+
       // Check if field must be excluded manually by "excludeFields" attribute
       boolean exclude = false;
       if (excludeFields != null && excludeFields.length > 0) {
@@ -171,13 +176,8 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       if (i != 0) {
         fieldString.append(", ");
       }
-
-      // Get getter for field
-      final String accesorMethodName =
-          BeanInfoUtils.getAccessorMethodName(affectedFields.get(i).getFieldName(),
-              affectedFields.get(i).getFieldType()).getSymbolName();
       fieldString.append(affectedFields.get(i).getFieldName()).append("='\"").append(" + ")
-          .append(accesorMethodName).append("()").append(" + '\\''").append(" + ");
+          .append(affectedFields.get(i).getFieldName()).append(" + '\\''").append(" + ");
       if (i == affectedFields.size() - 1) {
         fieldString.append("\"}\" + ").append("super.toString();");
       }

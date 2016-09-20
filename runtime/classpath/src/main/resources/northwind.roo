@@ -420,11 +420,11 @@ repository jpa --all --package ~.repository
 service --all --apiPackage ~.service.api --implPackage ~.service.impl
 
 // Create finders
-finder add --class ~.domain.UserLogin --name findByUsername
-finder add --class ~.domain.Shipper --name findByCompanyName
-finder add --class ~.domain.Region --name findByCountryIdOrderByDescriptionAsc
-finder add --class ~.domain.City --name findByRegionIdOrderByDescriptionAsc
-finder add --class ~.domain.Product --name findByDiscontinuedOrderByNameAsc
+finder add --entity ~.domain.UserLogin --name findByUsername
+finder add --entity ~.domain.Shipper --name findByCompanyName
+finder add --entity ~.domain.Region --name findByCountryIdOrderByDescriptionAsc
+finder add --entity ~.domain.City --name findByRegionIdOrderByDescriptionAsc
+finder add --entity ~.domain.Product --name findByDiscontinuedOrderByNameAsc
 
 // Install security
 security setup

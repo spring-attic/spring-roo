@@ -52,9 +52,9 @@ module focus --moduleName model
 field reference --fieldName pet --type pet:~.Pet --class ~.Owner 
 field reference --fieldName city --type city:~.City
 field reference --fieldName address --type address:~.Address
-finder add --class model:~.Owner --name findByNameAndPet
-finder add --class model:~.Owner --name findAddressById
-finder add --class model:~.Owner --name findFirst1CityById
+finder add --entity model:~.Owner --name findByNameAndPet
+finder add --entity model:~.Owner --name findAddressById
+finder add --entity model:~.Owner --name findFirst1CityById
 web mvc finder --controller application:~.web.OwnerController --all --responseType JSON
 #       
 # Output:  ...
@@ -74,7 +74,7 @@ web mvc finder --controller application:~.web.OwnerController --all --responseTy
 #--------------------------------------------------------------------
 # Goal:    Test if finder is added
 #
-finder add --class model:~.Owner --name findById
+finder add --entity model:~.Owner --name findById
 module focus --moduleName application
 web mvc finder --controller ~.web.OwnerController --finder findById --responseType JSON
 #       
@@ -101,7 +101,7 @@ web mvc finder --controller ~.web.OwnerController --finder findById --responseTy
 #--------------------------------------------------------------------
 # Goal:    Test if finder is added
 #
-finder add --class model:~.Owner --name findNameById
+finder add --entity model:~.Owner --name findNameById
 module focus --moduleName ~
 web mvc finder --controller application:~.web.OwnerController --finder findNameById --responseType JSON
 #       
@@ -143,8 +143,8 @@ web mvc finder --controller ~.web.OwnerController --all --responseType JSON
 #--------------------------------------------------------------------
 # Goal:    Test if all finders are added into controller
 #
-finder add --class model:~.Owner --name findByName
-finder add --class model:~.Owner --name queryFirst1ByBirthdayBetween
+finder add --entity model:~.Owner --name findByName
+finder add --entity model:~.Owner --name queryFirst1ByBirthdayBetween
 module focus --moduleName application
 web mvc finder --controller ~.web.OwnerController --all --responseType JSON
 #       
@@ -173,8 +173,8 @@ web mvc finder --controller ~.web.OwnerController --all --responseType JSON
 #--------------------------------------------------------------------
 # Goal:    Test if all finders are added to the controller
 #
-finder add --class model:~.Owner --name findByNameOrId
-finder add --class model:~.Owner --name queryFirst1ByBirthdayIn
+finder add --entity model:~.Owner --name findByNameOrId
+finder add --entity model:~.Owner --name queryFirst1ByBirthdayIn
 module focus --moduleName model
 web mvc finder --controller application:~.web.OwnerController --all --responseType JSON
 #       
@@ -206,7 +206,7 @@ web mvc finder --controller application:~.web.OwnerController --all --responseTy
 # Goal:    Test if finder and its dependencies are added
 #
 dto --entity model:~.Owner --fields pet --class dto:~.OwnerDTO
-finder add --class model:~.Owner --name findByPet --returnType dto:~.OwnerDTO
+finder add --entity model:~.Owner --name findByPet --returnType dto:~.OwnerDTO
 web mvc finder --controller application:~.web.OwnerController --finder findByPet --responseType JSON
 #       
 # Output:  Created dto:SRC_MAIN_JAVA/org/example/dto/OwnerDTO.java
@@ -268,7 +268,7 @@ web mvc finder --controller application:~.web.OwnerController --finder findByPet
 #--------------------------------------------------------------------
 # Goal:     Test if a finder is added manually
 #
-finder add --class model:~.Owner --name findByIdOrderByNameAsc
+finder add --entity model:~.Owner --name findByIdOrderByNameAsc
 # Open OwnerController.java
 # Add "findByIdOrderByNameAsc" to @RooJSON finders and save
 #       
