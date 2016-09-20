@@ -209,17 +209,10 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         List<StringAttributeValue> values =
             (List<StringAttributeValue>) projectionFields.getValue();
 
-
         // Get entity name as a variable name for building constructor expression
         String entityVariableName = StringUtils.uncapitalize(entity.getSimpleTypeName());
         for (StringAttributeValue field : values) {
-
-          // By now, only fields of entity will be valid. Exclude fields from relation fields.
-          if (StringUtils.contains(field.getValue(), ".")) {
-            continue;
-          } else {
-            constructorFields.add(entityVariableName.concat(".").concat(field.getValue()));
-          }
+          constructorFields.add(entityVariableName.concat(".").concat(field.getValue()));
         }
       }
     }
@@ -344,6 +337,9 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         new HashMap<JavaType, JavaSymbolName>();
     Map<JavaType, JavaSymbolName> referencedFieldsNames = new HashMap<JavaType, JavaSymbolName>();
 
+    List<MethodMetadata> projectionFinderMethods =
+        repositoryCustomMetadata.getProjectionFinderMethods();
+
     for (Entry<FieldMetadata, MethodMetadata> referencedFields : referencedFieldsMethods.entrySet()) {
       JavaType referencedField = referencedFields.getKey().getFieldType();
 
@@ -360,7 +356,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         governorPhysicalTypeMetadata, annotationValues, entity, returnTypeIsProjection,
         validIdFields, validFields, repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
         referencedFieldsMethods, referencedFieldsIdentifierNames, referencedFieldsNames,
-        constructorFields);
+        constructorFields, projectionFinderMethods);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

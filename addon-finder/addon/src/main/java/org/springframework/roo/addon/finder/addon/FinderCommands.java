@@ -2,13 +2,6 @@ package org.springframework.roo.addon.finder.addon;
 
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -25,6 +18,7 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -36,8 +30,16 @@ import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Commands for the 'finder' add-on to be used by the ROO shell.
@@ -62,10 +64,14 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
 
   @Reference
   private FinderOperations finderOperations;
+  @Reference
+  private LastUsed lastUsed;
+
   private TypeLocationService typeLocationService;
   private TypeManagementService typeManagementService;
   private MemberDetailsScanner memberDetailsScanner;
   private ProjectOperations projectOperations;
+  private Converter<JavaType> javaTypeConverter;
 
   // Map where entity details will be cached
   private Map<JavaType, MemberDetails> entitiesDetails;
@@ -82,15 +88,15 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
   }
 
   @CliOptionVisibilityIndicator(command = "finder add", params = {"name"},
-      help = "You must define --class to be able to define --name parameter.")
+      help = "You must define --entity to be able to define --name parameter.")
   public boolean isNameVisible(ShellContext shellContext) {
 
     // Getting all defined parameters on autocompleted command
     Map<String, String> params = shellContext.getParameters();
 
-    // If mandatory parameter class is not defined, name parameter should not
+    // If mandatory parameter entity is not defined, name parameter should not
     // be visible
-    String entity = params.get("class");
+    String entity = params.get("entity");
     if (StringUtils.isBlank(entity)) {
       return false;
     }
@@ -106,12 +112,45 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     return true;
   }
 
+  /**
+   * This indicator says if --defaultReturnType parameter should be visible or not.
+   * 
+   * @param context ShellContext
+   * @return false if domain entity specified in --entity parameter has no associated Projections.
+   */
+  @CliOptionVisibilityIndicator(params = "defaultReturnType", command = "finder add",
+      help = "--defaultReturnType parameter is not visible if --entity parameter hasn't "
+          + "been specified before or if there aren't exist any Projection class associated "
+          + "to the current entity.")
+  public boolean isDefaultReturnTypeParameterVisible(ShellContext shellContext) {
 
-  @CliOptionAutocompleteIndicator(
-      command = "finder add",
-      includeSpaceOnFinish = false,
+    // Get current value of 'entity'
+    JavaType entity = getTypeFromEntityParam(shellContext);
+    if (entity == null) {
+      return false;
+    }
+
+    Set<ClassOrInterfaceTypeDetails> projectionsInProject =
+        typeLocationService
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
+    boolean visible = false;
+    for (ClassOrInterfaceTypeDetails projection : projectionsInProject) {
+
+      // Add only projections associated to the entity specified in the command
+      if (projection.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION).getAttribute("entity")
+          .getValue().equals(entity)) {
+        visible = true;
+        break;
+      }
+    }
+
+    return visible;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
       param = "name",
-      help = "--name parameter must follow Spring Data nomenclature. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)")
+      help = "--name parameter must follow Spring Data nomenclature. Please, write a "
+          + "valid value using autocomplete feature (TAB or CTRL + Space)")
   public List<String> returnOptions(ShellContext shellContext) {
 
     List<String> allPossibleValues = new ArrayList<String>();
@@ -125,7 +164,7 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     try {
 
       // Use PartTree class to obtain all possible values
-      PartTree part = new PartTree(name, getEntityDetails(contextParameters.get("class")), this);
+      PartTree part = new PartTree(name, getEntityDetails(contextParameters.get("entity")), this);
 
       // Check if part has value
       if (part != null) {
@@ -142,17 +181,17 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
   }
 
   @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
-      param = "class", help = "--class option should be an entity.")
+      param = "entity", help = "--entity option should be an entity.")
   public List<String> getClassPossibleResults(ShellContext shellContext) {
 
-    // ROO-3763: Clear current cache during --class autocompletion.
+    // ROO-3763: Clear current cache during --entity autocompletion.
     // With that, Spring Roo will maintain cache during --name autocompletion
-    // but if --class is autocomplete, cache should be refreshed to obtain 
+    // but if --entity is autocomplete, cache should be refreshed to obtain 
     // last changes on entities
     entitiesDetails = new HashMap<JavaType, MemberDetails>();
 
-    // Get current value of class
-    String currentText = shellContext.getParameters().get("class");
+    // Get current value of entity
+    String currentText = shellContext.getParameters().get("entity");
 
     List<String> allPossibleValues = new ArrayList<String>();
 
@@ -169,13 +208,37 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     return allPossibleValues;
   }
 
-  @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
-      param = "returnType",
-      help = "--returnType option should be a DTO class, annotated with @RooDTO.")
+  @CliOptionAutocompleteIndicator(
+      command = "finder add",
+      includeSpaceOnFinish = false,
+      param = "defaultReturnType",
+      help = "--defaultReturnType option should be a Projection class related with the specified entity.")
   public List<String> getReturnTypePossibleResults(ShellContext shellContext) {
 
-    // Get current value of class
-    String currentText = shellContext.getParameters().get("returnType");
+    // Get current value of defaultReturnType
+    String currentText = shellContext.getParameters().get("defaultReturnType");
+
+    List<String> allPossibleValues = new ArrayList<String>();
+
+    Set<ClassOrInterfaceTypeDetails> entityProjections =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_ENTITY_PROJECTION);
+    for (ClassOrInterfaceTypeDetails projection : entityProjections) {
+      String name = replaceTopLevelPackageString(projection, currentText);
+      if (!allPossibleValues.contains(name)) {
+        allPossibleValues.add(name);
+      }
+    }
+
+    return allPossibleValues;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
+      param = "formBean", help = "--formBean option should be a DTO.")
+  public List<String> getFormBeanPossibleResults(ShellContext shellContext) {
+
+    // Get current value of entity
+    String currentText = shellContext.getParameters().get("formBean");
 
     List<String> allPossibleValues = new ArrayList<String>();
 
@@ -191,15 +254,37 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     return allPossibleValues;
   }
 
+  /**
+   * Indicates if 'formBean' option should be visible. It checks the existence of 
+   * DTO's in project.
+   * 
+   * @param shellContext
+   * @return true if project contains at least one DTO, false otherwise.
+   */
+  @CliOptionVisibilityIndicator(command = "finder add",
+      help = "--formBean parameter is not visible if --entity parameter hasn't been specified "
+          + "before or if there aren't exist any DTO in generated project", params = {"formBean"})
+  public boolean isFormBeanVisible(ShellContext shellContext) {
+    Set<ClassOrInterfaceTypeDetails> dtosInProject =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DTO);
+    if (dtosInProject.isEmpty()) {
+      return false;
+    }
+    return true;
+  }
+
   @CliCommand(value = "finder add",
       help = "Install a finder in the given target (must be an entity)")
-  public void installFinders(@CliOption(key = "class", mandatory = true,
-      unspecifiedDefaultValue = "*", optionContext = PROJECT,
-      help = "The entity for which the finders are generated") final JavaType typeName,
+  public void installFinders(
+      @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*",
+          optionContext = PROJECT, help = "The entity for which the finders are generated") final JavaType typeName,
       @CliOption(key = "name", mandatory = true,
-          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName
-  /*,@CliOption(key = "returnType", mandatory = false, optionContext = PROJECT,
-      help = "The finder's results return type. Should be a DTO class.") JavaType returnType*/) {
+          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName,
+      @CliOption(key = "formBean", mandatory = false,
+          help = "The finder's search parameter. Should be a DTO.") final JavaType formBean,
+      @CliOption(key = "defaultReturnType", mandatory = false, optionContext = PROJECT,
+          help = "The finder's results return type. Should be a Projection class related "
+              + "with the specified entity in --entity parameter.") JavaType defaultReturnType) {
 
     // Check if specified finderName follows Spring Data nomenclature
     PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(typeName), this);
@@ -210,7 +295,7 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
             partTree.isValid(),
             "--name parameter must follow Spring Data nomenclature. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)");
 
-    finderOperations.installFinder(typeName, finderName, null);
+    finderOperations.installFinder(typeName, finderName, formBean, defaultReturnType);
 
   }
 
@@ -268,6 +353,27 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     }
 
     return javaTypeString;
+  }
+
+  /**
+   * Tries to obtain JavaType indicated in command or which has the focus 
+   * in the Shell
+   * 
+   * @param shellContext the Roo Shell context
+   * @return JavaType or null if no class has the focus or no class is 
+   * specified in the command
+   */
+  private JavaType getTypeFromEntityParam(ShellContext shellContext) {
+    // Try to get 'entity' from ShellContext
+    String typeString = shellContext.getParameters().get("entity");
+    JavaType type = null;
+    if (typeString != null) {
+      type = getJavaTypeConverter().convertFromText(typeString, JavaType.class, PROJECT);
+    } else {
+      type = lastUsed.getJavaType();
+    }
+
+    return type;
   }
 
   /**
@@ -414,6 +520,34 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
       }
     } else {
       return memberDetailsScanner;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public Converter<JavaType> getJavaTypeConverter() {
+    if (javaTypeConverter == null) {
+
+      // Get all Services implement JavaTypeConverter interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(Converter.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          Converter<?> converter = (Converter<?>) this.context.getService(ref);
+          if (converter.supports(JavaType.class, PROJECT)) {
+            javaTypeConverter = (Converter<JavaType>) converter;
+            return javaTypeConverter;
+          }
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("ERROR: Cannot load JavaTypeConverter on FieldCommands.");
+        return null;
+      }
+    } else {
+      return javaTypeConverter;
     }
   }
 

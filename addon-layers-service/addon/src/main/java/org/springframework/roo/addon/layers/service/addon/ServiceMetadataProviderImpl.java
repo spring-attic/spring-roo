@@ -283,7 +283,8 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     return new ServiceMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders,
         repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
-        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(), countByReferencedFieldMethods);
+        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(),
+        countByReferencedFieldMethods, repositoryCustomMetadata.getProjectionFinderMethods());
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

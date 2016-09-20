@@ -52,6 +52,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   private Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames;
   private Map<JavaType, JavaSymbolName> referencedFieldsNames;
   private List<String> constructorFields;
+  private List<MethodMetadata> projectionFinderMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -96,6 +97,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param referencedFieldsNames 
    * @param constructorFields list of field names to add to ConstructorExpression while 
    *            building findAll methods when return type is a projection.
+   * @param projectionFinderMethods 
    */
   public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
@@ -105,7 +107,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
       final Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames,
       final Map<JavaType, JavaSymbolName> referencedFieldsNames,
-      final List<String> constructorFields) {
+      final List<String> constructorFields, List<MethodMetadata> projectionFinderMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
@@ -117,6 +119,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     this.returnTypeIsProjection = returnTypeIsProjection;
     this.entity = domainType;
     this.constructorFields = constructorFields;
+    this.projectionFinderMethods = projectionFinderMethods;
 
     // Get repository that needs to be implemented
     ensureGovernorImplements(annotationValues.getRepository());
@@ -151,6 +154,13 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllReferencedFieldsImpl(method
           .getKey().getFieldType(), method.getValue(), identifierFieldName, fieldName, idFields,
           validFields)));
+    }
+
+    // Generate projection finder methods implementations
+    if (projectionFinderMethods != null) {
+      for (MethodMetadata method : projectionFinderMethods) {
+        ensureGovernorHasMethod(new MethodMetadataBuilder(getProjectionfindersImpl(method)));
+      }
     }
 
     // Build the ITD
@@ -203,7 +213,6 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       queryList.add(String.format("%s.%s", entityVariable, field.getFieldName()));
     }
 
-
     // Types to import
     JavaType qEntity =
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
@@ -211,6 +220,11 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType returnType = findAllGlobalSearchMethod.getReturnType().getParameters().get(0);
     JavaType pageImpl = new JavaType("org.springframework.data.domain.PageImpl");
     JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
+
+    // Temporally unactive code. This implementation will change in near future
+    bodyBuilder
+        .appendFormalLine("// TODO: Temporally unactive code. This implementation will change in near future");
+    bodyBuilder.appendFormalLine("/*");
 
     buildVariables(bodyBuilder, ids);
 
@@ -273,6 +287,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.appendFormalLine(String.format("return new %s<%s>(results, %s, totalFound);",
         pageImpl.getNameIncludingTypeParameters(false, this.importResolver),
         returnType.getNameIncludingTypeParameters(false, this.importResolver), pageable));
+
+    bodyBuilder.appendFormalLine("*/");
+    bodyBuilder.appendFormalLine("return null;");
 
     // Sets body to generated method
     methodBuilder.setBodyBuilder(bodyBuilder);
@@ -342,6 +359,11 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType pageImpl = new JavaType("org.springframework.data.domain.PageImpl");
     JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
 
+    // Temporally unactive code. This implementation will change in near future
+    bodyBuilder
+        .appendFormalLine("// TODO: Temporally unactive code. This implementation will change in near future.");
+    bodyBuilder.appendFormalLine("/*");
+
     buildVariables(bodyBuilder, ids);
 
     // QEntity qEntity = QEntity.entity;
@@ -405,11 +427,54 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         pageImpl.getNameIncludingTypeParameters(false, importResolver),
         returnType.getNameIncludingTypeParameters(false, importResolver), pageable));
 
+    bodyBuilder.appendFormalLine("*/");
+    bodyBuilder.appendFormalLine("return null;");
+
     // Sets body to generated method
     methodBuilder.setBodyBuilder(bodyBuilder);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
+  }
+
+  /**
+   * Method that generates implementation methods for each finder which return type 
+   * is a projection.
+   * 
+   * @param method
+   * @return
+   */
+  private MethodMetadata getProjectionfindersImpl(MethodMetadata method) {
+
+    // Define method name
+    JavaSymbolName methodName = method.getMethodName();
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = method.getParameterNames();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // This implementation will be available soon
+    bodyBuilder.appendFormalLine("// TODO: To be implemented");
+    bodyBuilder.appendFormalLine("return null;");
+
+    // Use provided finder method to generate its implementation
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, method.getReturnType(),
+            parameterTypes, parameterNames, bodyBuilder);
+
+    return methodBuilder.build();
   }
 
   /**

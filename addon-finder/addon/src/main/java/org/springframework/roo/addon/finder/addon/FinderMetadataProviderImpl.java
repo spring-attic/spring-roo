@@ -2,28 +2,17 @@ package org.springframework.roo.addon.finder.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_FINDERS;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.finder.addon.parser.FinderAutocomplete;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.finder.addon.parser.PartTree;
-import org.springframework.roo.addon.finder.annotations.RooFinder;
 import org.springframework.roo.addon.finder.annotations.RooFinders;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomImplMetadata;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -33,7 +22,6 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -46,6 +34,16 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link FinderMetadataProvider}.
@@ -213,46 +211,93 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 
           // Get finder return type
           JavaType returnType =
-              (JavaType) finderAnnotation.getValue().getAttribute("returnType").getValue();
+              (JavaType) finderAnnotation.getValue().getAttribute("defaultReturnType").getValue();
+          Validate.notNull(returnType, "@RooFinder must have a 'defaultReturnType' parameter.");
 
-          // Create FinderMethod
-          PartTree finder = new PartTree(finderName, entityMemberDetails, this, returnType);
+          // If defaultReturnType is a Projection, finder creation should be avoided here and let 
+          // RepositoryJpaCustomMetadata create it on RepositoryCustom classes.
+          if (getTypeLocationService().getTypeDetails(returnType) == null
+              || (getTypeLocationService().getTypeDetails(returnType) != null && getTypeLocationService()
+                  .getTypeDetails(returnType).getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) == null)) {
 
-          Validate
-              .notNull(
-                  finder,
-                  String
-                      .format(
-                          "ERROR: '%s' is not a valid finder. Use autocomplete feature (TAB or CTRL + Space) to include finder that follows Spring Data nomenclature.",
-                          finderName));
+            // Create FinderMethods
+            PartTree finder = new PartTree(finderName, entityMemberDetails, this, returnType);
 
-          FinderMethod finderMethod =
-              new FinderMethod(finder.getReturnType(), new JavaSymbolName(finderName),
-                  finder.getParameters());
+            Validate
+                .notNull(
+                    finder,
+                    String
+                        .format(
+                            "ERROR: '%s' is not a valid finder. Use autocomplete feature (TAB or CTRL + Space) to include finder that follows Spring Data nomenclature.",
+                            finderName));
 
-          // Add dependencies between modules
-          List<JavaType> types = new ArrayList<JavaType>();
-          types.add(finder.getReturnType());
-          types.addAll(finder.getReturnType().getParameters());
+            FinderMethod finderMethod =
+                new FinderMethod(finder.getReturnType(), new JavaSymbolName(finderName),
+                    finder.getParameters());
 
-          for (FinderParameter parameter : finder.getParameters()) {
-            types.add(parameter.getType());
-            types.addAll(parameter.getType().getParameters());
+            // Add dependencies between modules
+            List<JavaType> types = new ArrayList<JavaType>();
+            types.add(finder.getReturnType());
+            types.addAll(finder.getReturnType().getParameters());
+
+            for (FinderParameter parameter : finder.getParameters()) {
+              types.add(parameter.getType());
+              types.addAll(parameter.getType().getParameters());
+            }
+
+            for (JavaType parameter : types) {
+              getTypeLocationService().addModuleDependency(
+                  governorPhysicalTypeMetadata.getType().getModule(), parameter);
+            }
+
+            // Add to finder methods list
+            findersToAdd.add(finderMethod);
           }
-
-          for (JavaType parameter : types) {
-            getTypeLocationService().addModuleDependency(
-                governorPhysicalTypeMetadata.getType().getModule(), parameter);
-          }
-
-          // Add to finder methods list
-          findersToAdd.add(finderMethod);
         }
       }
     } else {
       LOGGER.log(Level.SEVERE,
           "ERROR: You must include 'finders' attribute on @RooFinders annotation");
       return null;
+    }
+
+    // Evict and get RepositoryJpaCustomMetadata to update projection finders 
+    Set<ClassOrInterfaceTypeDetails> repositoryCustomClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
+    JavaType referencedEntity = (JavaType) repositoryAnnotation.getAttribute("entity").getValue();
+    JavaType repositoryCustomInterface = null;
+    for (ClassOrInterfaceTypeDetails repositoryClass : repositoryCustomClasses) {
+      if (repositoryClass.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM)
+          .getAttribute("entity").getValue().equals(referencedEntity)) {
+        repositoryCustomInterface = repositoryClass.getType();
+        LogicalPath repositoryLogicalPath =
+            PhysicalTypeIdentifier.getPath(repositoryClass.getDeclaredByMetadataId());
+        String repositoryCustomMetadataKey =
+            RepositoryJpaCustomMetadata.createIdentifier(repositoryClass.getType(),
+                repositoryLogicalPath);
+        getMetadataService().evictAndGet(repositoryCustomMetadataKey);
+        break;
+      }
+    }
+
+    // Evict and get RepositoryJpaCustomImplMetadata to update projection finders implementations
+    Set<ClassOrInterfaceTypeDetails> repositoryCustomImplClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+    if (repositoryCustomInterface != null) {
+      for (ClassOrInterfaceTypeDetails repositoryCustomImpl : repositoryCustomImplClasses) {
+        if (repositoryCustomImpl.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL)
+            .getAttribute("repository").getValue().equals(repositoryCustomInterface)) {
+          LogicalPath repositoryImplLogicalPath =
+              PhysicalTypeIdentifier.getPath(repositoryCustomImpl.getDeclaredByMetadataId());
+          String repositoryCustomImplMetadataKey =
+              RepositoryJpaCustomImplMetadata.createIdentifier(repositoryCustomImpl.getType(),
+                  repositoryImplLogicalPath);
+          getMetadataService().evictAndGet(repositoryCustomImplMetadataKey);
+          break;
+        }
+      }
     }
 
     return new FinderMetadata(metadataIdentificationString, aspectName,

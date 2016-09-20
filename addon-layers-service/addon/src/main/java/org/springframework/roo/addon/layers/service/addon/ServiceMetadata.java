@@ -46,6 +46,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private JavaType entity;
   private JavaType identifierType;
   private List<FinderMethod> finders;
+  private List<MethodMetadata> projectionFinderMethods;
 
   private MethodMetadata findAllGlobalSearchMethod;
 
@@ -91,6 +92,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @param findAllGlobalSearchMethod MethodMetadata with findAllGlobalSearch method
    * @param referencedFieldsFindAllMethods
    * @param countByReferencedFieldsMethods
+   * @param list 
    * 
    */
   public ServiceMetadata(final String identifier, final JavaType aspectName,
@@ -98,7 +100,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders,
       final MethodMetadata findAllGlobalSearchMethod,
       final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
-      final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods) {
+      final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods,
+      List<MethodMetadata> projectionFinderMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -112,6 +115,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.referencedFieldsFindAllDefinedMethods = new HashMap<FieldMetadata, MethodMetadata>();
     this.allDefinedMethod = new ArrayList<MethodMetadata>();
     this.countByReferenceFieldDefinedMethod = new HashMap<FieldMetadata, MethodMetadata>();
+    this.projectionFinderMethods = projectionFinderMethods;
 
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
@@ -199,6 +203,15 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         MethodMetadata method =
             getCountByReferencedFieldMethod(countByReferencedFieldMethod.getValue());
         this.countByReferenceFieldDefinedMethod.put(countByReferencedFieldMethod.getKey(), method);
+        ensureGovernorHasMethod(new MethodMetadataBuilder(method));
+      }
+    }
+
+    // Generate projection finders
+    if (projectionFinderMethods != null) {
+      for (MethodMetadata projectionFinderMethod : projectionFinderMethods) {
+        MethodMetadata method = getProjectionFinderMethod(projectionFinderMethod);
+        this.allDefinedMethod.add(method);
         ensureGovernorHasMethod(new MethodMetadataBuilder(method));
       }
     }
@@ -626,6 +639,28 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
+  }
+
+  private MethodMetadata getProjectionFinderMethod(MethodMetadata method) {
+
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    List<AnnotatedJavaType> methodParamTypes = method.getParameterTypes();
+    List<JavaSymbolName> methodParamNames = method.getParameterNames();
+    for (int i = 0; i < method.getParameterTypes().size(); i++) {
+      parameterTypes.add(methodParamTypes.get(i));
+      parameterNames.add(methodParamNames.get(i));
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT,
+            method.getMethodName(), method.getReturnType(), parameterTypes, parameterNames, null);
+
+    // Build and return a MethodMetadata instance
+    return methodBuilder.build();
   }
 
   /**

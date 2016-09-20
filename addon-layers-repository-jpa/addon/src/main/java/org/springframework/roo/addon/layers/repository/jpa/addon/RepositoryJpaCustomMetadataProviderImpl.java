@@ -17,6 +17,8 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
@@ -30,7 +32,9 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -156,20 +160,17 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
 
     // Getting repository custom
     JavaType entity = annotationValues.getEntity();
-
     Validate
         .notNull(
             entity,
             "ERROR: Repository custom interface should be contain an entity on @RooJpaRepositoryCustom annotation");
 
     // Getting findAll results type
-    JavaType searchResult = annotationValues.getDefaultReturnType();
-
+    JavaType defaultReturnType = annotationValues.getDefaultReturnType();
     Validate
         .notNull(
-            searchResult,
-            "ERROR: Repository custom interface should contain a defaultSearchResult on @RooJpaRepositoryCustom annotation");
-
+            defaultReturnType,
+            "ERROR: Repository custom interface should contain a defaultReturnType on @RooJpaRepositoryCustom annotation");
 
     // Getting the class annotated with @RooGlobalSearch
     Set<ClassOrInterfaceTypeDetails> globalSearchDetails =
@@ -185,7 +186,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     // Add dependency between modules
     ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     getTypeLocationService().addModuleDependency(cid.getName().getModule(), entity);
-    getTypeLocationService().addModuleDependency(cid.getName().getModule(), searchResult);
+    getTypeLocationService().addModuleDependency(cid.getName().getModule(), defaultReturnType);
     getTypeLocationService().addModuleDependency(cid.getName().getModule(), globalSearch);
 
     // Getting referenced fields
@@ -223,9 +224,92 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
             getTypeLocationService().getTypeDetails(entity).getType(), logicalPath);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
+    // Get data for those finders whose return type is a projection
+    Set<ClassOrInterfaceTypeDetails> repositoryJpaClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA);
+    ClassOrInterfaceTypeDetails associatedRepositoryInterface = null;
+    for (ClassOrInterfaceTypeDetails repositoryClass : repositoryJpaClasses) {
+      if (repositoryClass.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity")
+          .getValue().equals(annotationValues.getEntity())) {
+        associatedRepositoryInterface = repositoryClass;
+        break;
+      }
+    }
+
+    // Create a list of finder methods which must be in the repository custom, not Jpa interface
+    // (those finders whose defaultReturnType are projections)
+    List<ProjectionFinderMethod> findersToAdd = new ArrayList<ProjectionFinderMethod>();
+
+    // Get @RooFinders from associated repository interface
+    if (associatedRepositoryInterface != null
+        && associatedRepositoryInterface.getAnnotation(RooJavaType.ROO_FINDERS) != null) {
+      AnnotationAttributeValue<?> currentFinders =
+          associatedRepositoryInterface.getAnnotation(RooJavaType.ROO_FINDERS).getAttribute(
+              "finders");
+      if (currentFinders != null) {
+
+        // Get implementation of current repository
+        Set<ClassOrInterfaceTypeDetails> repositoryImplementations =
+            getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+                RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
+        ClassOrInterfaceTypeDetails associatedRepositoryImplementation = null;
+        for (ClassOrInterfaceTypeDetails repositoryImplementation : repositoryImplementations) {
+          if (repositoryImplementation.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL)
+              .getAttribute("repository") != null
+              && repositoryImplementation.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL)
+                  .getAttribute("repository").getValue()
+                  .equals(governorPhysicalTypeMetadata.getType())) {
+            associatedRepositoryImplementation = repositoryImplementation;
+          }
+        }
+
+        List<?> values = (List<?>) currentFinders.getValue();
+        Iterator<?> it = values.iterator();
+
+        while (it.hasNext()) {
+
+          // Get each finder value
+          NestedAnnotationAttributeValue finderAnnotation =
+              (NestedAnnotationAttributeValue) it.next();
+          if (finderAnnotation.getValue() != null
+              && finderAnnotation.getValue().getAttribute("finder") != null) {
+
+            // Get finder return type
+            JavaType finderReturnType =
+                (JavaType) finderAnnotation.getValue().getAttribute("defaultReturnType").getValue();
+            Validate.notNull(finderReturnType,
+                "@RooFinder must have a 'defaultReturnType' parameter.");
+
+            // Check if default type is a Roo Projection
+            if (getTypeLocationService().getTypeDetails(finderReturnType) != null
+                && getTypeLocationService().getTypeDetails(finderReturnType).getAnnotation(
+                    RooJavaType.ROO_ENTITY_PROJECTION) != null) {
+
+              // Get finder name
+              String finderName = null;
+              if (finderAnnotation.getValue().getAttribute("finder").getValue() instanceof String) {
+                finderName = (String) finderAnnotation.getValue().getAttribute("finder").getValue();
+              }
+              Validate.notNull(finderName, "'finder' attribute in @RooFinder must be a String");
+
+              // Get finder form bean
+              JavaType finderFormBean =
+                  (JavaType) finderAnnotation.getValue().getAttribute("formBean").getValue();
+              Validate.notNull(finderFormBean, "@RooFinder must have a 'formBean' parameter.");
+
+              // Add to finder methods list
+              findersToAdd.add(new ProjectionFinderMethod(finderReturnType, new JavaSymbolName(
+                  finderName), finderFormBean));
+            }
+          }
+        }
+      }
+    }
+
     return new RepositoryJpaCustomMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, searchResult, globalSearch,
-        referencedFields);
+        governorPhysicalTypeMetadata, annotationValues, entity, defaultReturnType, globalSearch,
+        referencedFields, findersToAdd);
   }
 
   protected void registerDependency(final String upstreamDependency,
@@ -240,7 +324,6 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
       getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
     }
   }
-
 
   public String getProvidesType() {
     return RepositoryJpaCustomMetadata.getMetadataIdentiferType();

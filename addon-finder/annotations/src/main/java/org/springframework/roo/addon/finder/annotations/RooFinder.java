@@ -25,6 +25,11 @@ public @interface RooFinder {
   /**
    * The class which the finder will return as result.
    */
-  Class<?> returnType();
+  Class<?> defaultReturnType();
+
+  /**
+   * The class which the finder will receive as argument.
+   */
+  Class<?> formBean();
 
 }

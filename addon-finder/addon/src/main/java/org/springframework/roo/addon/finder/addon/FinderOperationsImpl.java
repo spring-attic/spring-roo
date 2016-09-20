@@ -1,13 +1,5 @@
 package org.springframework.roo.addon.finder.addon;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -33,6 +25,14 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link FinderOperations}.
@@ -69,7 +69,7 @@ public class FinderOperationsImpl implements FinderOperations {
   }
 
   public void installFinder(final JavaType entity, final JavaSymbolName finderName,
-      JavaType returnType) {
+      JavaType formBean, JavaType defaultReturnType) {
     Validate.notNull(entity, "ERROR: Entity type required to generate finder.");
     Validate.notNull(finderName, "ERROR: Finder name required to generate finder.");
 
@@ -153,15 +153,26 @@ public class FinderOperationsImpl implements FinderOperations {
     // Add finder attribute
     singleFinderAnnotation.addStringAttribute("finder", finderName.getSymbolName());
 
-    // Add returnType attribute
-    if (returnType == null) {
-      singleFinderAnnotation.addClassAttribute("returnType", entity);
+    // Add defaultReturnType attribute
+    if (defaultReturnType == null) {
+      singleFinderAnnotation.addClassAttribute("defaultReturnType", entity);
       getProjectOperations().addModuleDependency(repository.getName().getModule(),
           entity.getModule());
     } else {
-      singleFinderAnnotation.addClassAttribute("returnType", returnType);
+      singleFinderAnnotation.addClassAttribute("defaultReturnType", defaultReturnType);
       getProjectOperations().addModuleDependency(repository.getName().getModule(),
-          returnType.getModule());
+          defaultReturnType.getModule());
+    }
+
+    // Add formBean attribute
+    if (formBean != null) {
+      singleFinderAnnotation.addClassAttribute("formBean", formBean);
+      getProjectOperations().addModuleDependency(repository.getName().getModule(),
+          formBean.getModule());
+    } else {
+      singleFinderAnnotation.addClassAttribute("formBean", entity);
+      getProjectOperations().addModuleDependency(repository.getName().getModule(),
+          entity.getModule());
     }
 
     NestedAnnotationAttributeValue newFinder =

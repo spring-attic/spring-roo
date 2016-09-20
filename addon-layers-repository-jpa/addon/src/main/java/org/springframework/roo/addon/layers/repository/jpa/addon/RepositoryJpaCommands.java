@@ -159,13 +159,10 @@ public class RepositoryJpaCommands implements CommandMarker {
   }
 
   /**
-   * This indicator says if --package parameter should be visible or not
-   *
-   * If --all parameter has not been specified, --package parameter will not be visible
-   * to prevent conflicts.
+   * This indicator says if --defaultReturnType parameter should be visible or not.
    * 
    * @param context ShellContext
-   * @return
+   * @return false if domain entity specified in --entity parameter has no associated Projections.
    */
   @CliOptionVisibilityIndicator(
       params = "defaultReturnType",
@@ -189,6 +186,7 @@ public class RepositoryJpaCommands implements CommandMarker {
       if (projection.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION).getAttribute("entity")
           .getValue().equals(entity)) {
         visible = true;
+        break;
       }
     }
 

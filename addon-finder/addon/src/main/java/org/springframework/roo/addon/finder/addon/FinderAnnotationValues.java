@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.finder.addon;
 
-import org.springframework.roo.addon.finder.annotations.RooFinder;
+import org.springframework.roo.addon.finder.annotations.RooFinders;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;

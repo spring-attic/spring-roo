@@ -1,10 +1,5 @@
 package org.springframework.roo.addon.finder.addon;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
@@ -19,6 +14,10 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Metadata for {@link RooFinder}.
@@ -72,9 +71,6 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
   public FinderMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, List<FinderMethod> finders) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
-
-    Validate.notEmpty(finders,
-        "ERROR: You should provide a list of finders on @RooFinder annotation");
 
     this.finders = finders;
 

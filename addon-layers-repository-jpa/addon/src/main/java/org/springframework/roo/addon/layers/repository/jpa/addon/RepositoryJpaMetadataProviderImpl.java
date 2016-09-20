@@ -14,9 +14,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.bouncycastle.crypto.params.GOST3410ValidationParameters;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -33,6 +35,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -256,5 +259,18 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
 
   public String getProvidesType() {
     return RepositoryJpaMetadata.getMetadataIdentiferType();
+  }
+
+  protected void registerDependency(final String upstreamDependency,
+      final String downStreamDependency) {
+
+    if (getMetadataDependencyRegistry() != null
+        && StringUtils.isNotBlank(upstreamDependency)
+        && StringUtils.isNotBlank(downStreamDependency)
+        && !upstreamDependency.equals(downStreamDependency)
+        && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(
+            MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
+      getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
+    }
   }
 }
