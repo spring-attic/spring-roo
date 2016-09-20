@@ -7,6 +7,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -16,6 +18,9 @@ import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTrack
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides {@link ToStringMetadata}.
@@ -101,8 +106,33 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
       return null;
     }
 
+    // Exclude fields which are in superclass
+    ClassOrInterfaceTypeDetails superclass =
+        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getSuperclass();
+    List<FieldMetadata> toStringFields = new ArrayList<FieldMetadata>();
+    if (superclass != null && superclass != JavaType.OBJECT) {
+      List<FieldMetadata> superclassFields =
+          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), superclass)
+              .getFields();
+      for (FieldMetadata field : memberDetails.getFields()) {
+        boolean alreadyInSuperclass = false;
+        for (FieldMetadata superclassField : superclassFields) {
+          if (superclassField.getDeclaredByMetadataId().equals(field.getDeclaredByMetadataId())
+              && superclassField.getFieldName().equals(field.getFieldName())) {
+            alreadyInSuperclass = true;
+            break;
+          }
+        }
+        if (!alreadyInSuperclass) {
+          toStringFields.add(field);
+        }
+      }
+    } else {
+      toStringFields.addAll(memberDetails.getFields());
+    }
+
     return new ToStringMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, memberDetails);
+        governorPhysicalTypeMetadata, annotationValues, toStringFields);
   }
 
   public String getProvidesType() {

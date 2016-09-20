@@ -8,12 +8,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.javabean.annotations.RooToString;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -61,7 +59,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
   }
 
   private final ToStringAnnotationValues annotationValues;
-  private final MemberDetails memberDetails;
+  private final List<FieldMetadata> fields;
 
   /**
    * Constructor
@@ -73,14 +71,14 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    */
   public ToStringMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final ToStringAnnotationValues annotationValues, MemberDetails memberDetails) {
+      final ToStringAnnotationValues annotationValues, List<FieldMetadata> fields) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.isTrue(isValid(identifier),
         "Metadata identification string '%s' does not appear to be a valid", identifier);
     Validate.notNull(annotationValues, "Annotation values required");
 
     this.annotationValues = annotationValues;
-    this.memberDetails = memberDetails;
+    this.fields = fields;
 
     // Generate the toString() method
     builder.addMethod(getToStringMethod());
@@ -117,7 +115,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
     // Get all fields from class
     List<FieldMetadata> affectedFields = new ArrayList<FieldMetadata>();
-    for (FieldMetadata field : memberDetails.getFields()) {
+    for (FieldMetadata field : fields) {
 
       // Exclude non-common java. fields
       if (!field.getFieldType().getFullyQualifiedTypeName().startsWith("java.math")
@@ -138,11 +136,6 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
           || field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
           || field.getAnnotation(JpaJavaType.ONE_TO_MANY) != null
           || field.getAnnotation(JpaJavaType.ONE_TO_ONE) != null) {
-        continue;
-      }
-
-      // Exclude fields which are in superclass
-      if (field.getDeclaredByMetadataId().equals(governorPhysicalTypeMetadata.getId())) {
         continue;
       }
 
@@ -184,6 +177,9 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
       // Append next field line
       bodyBuilder.appendFormalLine(fieldString.toString());
+    }
+    if (affectedFields.isEmpty()) {
+      bodyBuilder.appendFormalLine("\"}\" + super.toString();");
     }
 
     return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
