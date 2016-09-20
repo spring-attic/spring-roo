@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * MVC controllers. Importantly, such code does NOT depend on any singletons and
  * is intended to safely serialise. In the current release this code will be
  * emitted to an ITD.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -21,21 +21,23 @@ import java.lang.annotation.Target;
 public @interface RooController {
 
   /**
-   * Every controller is responsible for a single entity. 
+   * Every controller is responsible for a single entity.
    */
   Class<?> entity();
 
   /**
-   * Every controller should be related with a service, to be able to work with 
-   * negotiation layer. 
+   * This parameter defines the @RequestMapping prefix of annotated Controller
+   *
+   * @return The path prefix of the view.
    */
-  Class<?> service();
+  String pathPrefix() default "";
+
 
   /**
-   * This parameter defines the @RequestMapping of annotated Controller
-   * 
-   * @return The view path.
+   * This parameter defines the controller type
+   *
+   * @return The controller type
    */
-  String path();
+  ControllerType type();
 
 }

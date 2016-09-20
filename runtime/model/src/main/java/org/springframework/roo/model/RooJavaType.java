@@ -3,7 +3,7 @@ package org.springframework.roo.model;
 /**
  * Constants for Roo-specific {@link JavaType}s. Use them in preference to
  * creating new instances of these types.
- * 
+ *
  * @author Andrew Swan
  * @author Juan Carlos García
  * @since 1.2.0
@@ -101,6 +101,7 @@ public final class RooJavaType {
       "org.springframework.roo.addon.test.annotations.RooUnitTest");
   public static final JavaType ROO_CONTROLLER = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.RooController");
+
   public static final JavaType ROO_WEB_MVC_CONFIGURATION = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcConfiguration");
   public static final JavaType ROO_WEB_MVC_JSON_CONFIGURATION =
@@ -159,6 +160,9 @@ public final class RooJavaType {
   public static final JavaType ROO_JSON_JSONP_ADVICE =
       new JavaType(
           "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONJsonpAdvice");
+
+  public static final JavaType ROO_ENUM_CONTROLLERTYPE = new JavaType(
+      "org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType");
 
   /**
    * Constructor is private to prevent instantiation
