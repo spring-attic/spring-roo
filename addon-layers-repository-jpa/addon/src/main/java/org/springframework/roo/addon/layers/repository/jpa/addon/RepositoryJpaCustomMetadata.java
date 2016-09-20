@@ -253,7 +253,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     // Return type
     JavaType returnType =
         new JavaType(SpringJavaType.PAGE.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
-            Arrays.asList(defaultReturnType));
+            Arrays.asList(finderReturnType));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =

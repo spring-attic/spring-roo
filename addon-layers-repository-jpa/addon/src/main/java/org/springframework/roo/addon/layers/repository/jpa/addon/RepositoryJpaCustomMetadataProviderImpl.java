@@ -249,21 +249,6 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
               "finders");
       if (currentFinders != null) {
 
-        // Get implementation of current repository
-        Set<ClassOrInterfaceTypeDetails> repositoryImplementations =
-            getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-                RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
-        ClassOrInterfaceTypeDetails associatedRepositoryImplementation = null;
-        for (ClassOrInterfaceTypeDetails repositoryImplementation : repositoryImplementations) {
-          if (repositoryImplementation.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL)
-              .getAttribute("repository") != null
-              && repositoryImplementation.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL)
-                  .getAttribute("repository").getValue()
-                  .equals(governorPhysicalTypeMetadata.getType())) {
-            associatedRepositoryImplementation = repositoryImplementation;
-          }
-        }
-
         List<?> values = (List<?>) currentFinders.getValue();
         Iterator<?> it = values.iterator();
 
@@ -281,10 +266,16 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
             Validate.notNull(finderReturnType,
                 "@RooFinder must have a 'defaultReturnType' parameter.");
 
-            // Check if default type is a Roo Projection
-            if (getTypeLocationService().getTypeDetails(finderReturnType) != null
-                && getTypeLocationService().getTypeDetails(finderReturnType).getAnnotation(
-                    RooJavaType.ROO_ENTITY_PROJECTION) != null) {
+            // Get finder form bean
+            JavaType formBean =
+                (JavaType) finderAnnotation.getValue().getAttribute("formBean").getValue();
+            Validate.notNull(formBean, "@RooFinder must have a 'formBean' parameter.");
+
+            // Check if default type is a Roo Projection or form bean is a DTO
+            if ((getTypeLocationService().getTypeDetails(finderReturnType) != null && getTypeLocationService()
+                .getTypeDetails(finderReturnType).getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) != null)
+                || (getTypeLocationService().getTypeDetails(formBean) != null && getTypeLocationService()
+                    .getTypeDetails(formBean).getAnnotation(RooJavaType.ROO_DTO) != null)) {
 
               // Get finder name
               String finderName = null;

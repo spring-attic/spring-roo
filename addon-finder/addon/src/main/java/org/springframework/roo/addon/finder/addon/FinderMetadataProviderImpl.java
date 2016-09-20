@@ -214,11 +214,18 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
               (JavaType) finderAnnotation.getValue().getAttribute("defaultReturnType").getValue();
           Validate.notNull(returnType, "@RooFinder must have a 'defaultReturnType' parameter.");
 
-          // If defaultReturnType is a Projection, finder creation should be avoided here and let 
-          // RepositoryJpaCustomMetadata create it on RepositoryCustom classes.
-          if (getTypeLocationService().getTypeDetails(returnType) == null
-              || (getTypeLocationService().getTypeDetails(returnType) != null && getTypeLocationService()
-                  .getTypeDetails(returnType).getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) == null)) {
+          // Get finder return type
+          JavaType formBean =
+              (JavaType) finderAnnotation.getValue().getAttribute("formBean").getValue();
+          Validate.notNull(formBean, "@RooFinder must have a 'formBean' parameter.");
+
+          // If defaultReturnType is a Projection or formBean is a DTO, finder creation 
+          // should be avoided here and let RepositoryJpaCustomMetadata create it on 
+          // RepositoryCustom classes.
+          if ((getTypeLocationService().getTypeDetails(returnType) != null && getTypeLocationService()
+              .getTypeDetails(returnType).getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) == null)
+              && (getTypeLocationService().getTypeDetails(formBean) != null && getTypeLocationService()
+                  .getTypeDetails(formBean).getAnnotation(RooJavaType.ROO_DTO) == null)) {
 
             // Create FinderMethods
             PartTree finder = new PartTree(finderName, entityMemberDetails, this, returnType);
