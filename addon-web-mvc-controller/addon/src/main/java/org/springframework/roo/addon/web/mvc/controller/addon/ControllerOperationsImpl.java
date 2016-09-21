@@ -35,6 +35,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -416,15 +417,52 @@ public class ControllerOperationsImpl implements ControllerOperations {
       }
     }
 
-    // Check controlllersPackage value
+    // Check controllersPackage value
     if (controllerPackage == null) {
       String module = "";
+      String topLevelPackage = "";
       if (getProjectOperations().isMultimoduleProject()) {
-        module = "application";
+        // scan all modules to get that modules that contains a class annotated with @SpringBootApplication
+        Set<ClassOrInterfaceTypeDetails> applicationClasses =
+            getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+                SpringJavaType.SPRING_BOOT_APPLICATION);
+
+        // Compare the focus module. If it is an 'application' module, set it like controllerPackage
+        boolean controllersPackageNotSet = true;
+        String focusedModuleName = getProjectOperations().getFocusedModuleName();
+        for (ClassOrInterfaceTypeDetails applicationClass : applicationClasses) {
+          if (focusedModuleName.equals(applicationClass.getType().getModule())) {
+            module = focusedModuleName;
+            topLevelPackage =
+                applicationClass.getType().getPackage().getFullyQualifiedPackageName();
+            controllersPackageNotSet = false;
+            break;
+          }
+        }
+
+        if (controllersPackageNotSet) {
+          // if exists more than one module, show error message
+          if (applicationClasses.size() > 1) {
+            LOGGER
+                .log(
+                    Level.INFO,
+                    String
+                        .format(
+                            "ERROR: Exists more than one module 'application'. Specify --package parameter to set the indicated",
+                            entity.getSimpleTypeName(), pathPrefix));
+            return;
+          } else {
+            ClassOrInterfaceTypeDetails applicationClass = applicationClasses.iterator().next();
+            module = applicationClass.getType().getModule();
+            topLevelPackage =
+                applicationClass.getType().getPackage().getFullyQualifiedPackageName();
+          }
+        }
+      } else {
+        topLevelPackage =
+            getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
       }
-      controllerPackage =
-          new JavaPackage(getProjectOperations().getFocusedTopLevelPackage()
-              .getFullyQualifiedPackageName().concat(".web"), module);
+      controllerPackage = new JavaPackage(topLevelPackage.concat(".web"), module);
     }
 
     Iterator<ClassOrInterfaceTypeDetails> it = controllers.iterator();

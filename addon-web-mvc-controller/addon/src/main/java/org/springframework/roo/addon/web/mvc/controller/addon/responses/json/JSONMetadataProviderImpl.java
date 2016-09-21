@@ -85,7 +85,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   private JavaType identifierType;
   private JavaType service;
   private ControllerType type;
-  // private String path;
   private String metadataIdentificationString;
   private ClassOrInterfaceTypeDetails controller;
   private final JavaType URI = new JavaType("java.net.URI");
