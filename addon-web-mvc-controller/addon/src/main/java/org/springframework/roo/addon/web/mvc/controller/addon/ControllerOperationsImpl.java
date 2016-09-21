@@ -333,15 +333,17 @@ public class ControllerOperationsImpl implements ControllerOperations {
       JavaPackage controllerPackage, String pathPrefix) {
 
     // Getting all entities annotated with @RooJpaEntity
-    Set<JavaType> entities =
-        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_JPA_ENTITY);
-    for (JavaType entity : entities) {
-      createOrUpdateControllerForEntity(entity, responseType, controllerPackage, pathPrefix);
+    Set<ClassOrInterfaceTypeDetails> entities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : entities) {
+      if (!entity.isAbstract()) {
+        createOrUpdateControllerForEntity(entity.getType(), responseType, controllerPackage,
+            pathPrefix);
+      }
     }
 
   }
-
-
 
   @Override
   public void createOrUpdateControllerForEntity(JavaType entity,

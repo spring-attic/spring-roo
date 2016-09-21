@@ -2,18 +2,14 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_CONTROLLER;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.jvnet.inflector.Noun;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -30,14 +26,24 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
  * Implementation of {@link ControllerMetadataProvider}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -60,7 +66,7 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_CONTROLLER} as additional 
+   * <li>Registers {@link RooJavaType#ROO_CONTROLLER} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -79,9 +85,9 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -149,11 +155,46 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     // Getting entity
     JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
 
-    // Getting service
-    JavaType service = (JavaType) controllerAnnotation.getAttribute("service").getValue();
+    // Getting type
+    ControllerType type =
+        ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
+            .getValue()).getField().getSymbolName());
 
-    // Getting path
-    String path = (String) controllerAnnotation.getAttribute("path").getValue();
+    // Getting pathPrefix
+    AnnotationAttributeValue<Object> pathPrefixAttr =
+        controllerAnnotation.getAttribute("pathPrefix");
+    String pathPrefix = "";
+    if (pathPrefixAttr != null) {
+      pathPrefix = (String) pathPrefixAttr.getValue();
+    }
+
+    // Getting related service
+    JavaType service = null;
+    Set<ClassOrInterfaceTypeDetails> services =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_SERVICE);
+    Iterator<ClassOrInterfaceTypeDetails> itServices = services.iterator();
+
+    while (itServices.hasNext()) {
+      ClassOrInterfaceTypeDetails existingService = itServices.next();
+      AnnotationAttributeValue<Object> entityAttr =
+          existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+      if (entityAttr != null && entityAttr.getValue().equals(entity)) {
+        service = existingService.getType();
+      }
+    }
+
+    // Getting identifierType
+    JavaType identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
+
+    // Generate path
+    String path = "/".concat(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH));
+    if (StringUtils.isNotEmpty(pathPrefix)) {
+      if (!pathPrefix.startsWith("/")) {
+        pathPrefix = "/".concat(pathPrefix);
+      }
+      path = pathPrefix.concat(path);
+    }
 
     // Check if is necessary to include service fields of Set and List fields
     Set<ClassOrInterfaceTypeDetails> allDefinedServices =
@@ -201,8 +242,18 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
             getTypeLocationService().getTypeDetails(entity).getType(), logicalPath);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
+    // Getting service metadata
+    ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService().getTypeDetails(service);
+    final LogicalPath serviceLogicalPath =
+        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
+    final String serviceMetadataKey =
+        ServiceMetadata.createIdentifier(serviceDetails.getType(), serviceLogicalPath);
+    final ServiceMetadata serviceMetadata =
+        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+
     return new ControllerMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, entity, service, detailsService, path);
+        governorPhysicalTypeMetadata, entity, service, detailsService, path, type, identifierType,
+        serviceMetadata);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

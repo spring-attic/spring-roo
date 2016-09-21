@@ -1,10 +1,9 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.controller.annotations.RooController;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -13,6 +12,9 @@ import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -22,9 +24,13 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Metadata for {@link RooController}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -41,6 +47,10 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
   private JavaType service;
   private List<JavaType> detailsServices;
+  private ControllerType type;
+  private JavaType entity;
+  private JavaType identifierType;
+  private ServiceMetadata serviceMetadata;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -67,24 +77,42 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
   /**
    * Constructor
-   * 
-   * @param identifier the identifier for this item of metadata (required)
-   * @param aspectName the Java type of the ITD (required)
-   * @param governorPhysicalTypeMetadata the governor, which is expected to
-   *            contain a {@link ClassOrInterfaceTypeDetails} (required)
-   * @param entity Javatype with entity managed by controller
-   * @param service JavaType with service used by controller
-   * @param detailsServices List with all services of every field that will be used
-   *        as detail
-   * @param path controllerPath
+   *
+   * @param identifier
+   *            the identifier for this item of metadata (required)
+   * @param aspectName
+   *            the Java type of the ITD (required)
+   * @param governorPhysicalTypeMetadata
+   *            the governor, which is expected to contain a
+   *            {@link ClassOrInterfaceTypeDetails} (required)
+   * @param entity
+   *            Javatype with entity managed by controller
+   * @param service
+   *            JavaType with service used by controller
+   * @param detailsServices
+   *            List with all services of every field that will be used as
+   *            detail
+   * @param path
+   *            controllerPath
+   * @param type
+   *            Indicate the controller type
+   * @param identifierType
+   *            Indicates the identifier type of the entity which represents this controller
+  * @param serviceMetadata
+  *         ServiceMetadata of the service used by controller
    */
   public ControllerMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
-      final JavaType service, final List<JavaType> detailsServices, final String path) {
+      final JavaType service, final List<JavaType> detailsServices, final String path,
+      final ControllerType type, final JavaType identifierType, ServiceMetadata serviceMetadata) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
+    this.type = type;
     this.service = service;
     this.detailsServices = detailsServices;
+    this.entity = entity;
+    this.identifierType = identifierType;
+    this.serviceMetadata = serviceMetadata;
 
     // Add @Controller annotation
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONTROLLER_ANNOTATION));
@@ -92,7 +120,13 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     // Add @RequestMapping annotation
     AnnotationMetadataBuilder requesMappingAnnotation =
         new AnnotationMetadataBuilder(REQUEST_MAPPING_ANNOTATION);
-    requesMappingAnnotation.addStringAttribute("value", path);
+
+    if (this.type == ControllerType.ITEM) {
+      requesMappingAnnotation.addStringAttribute("value",
+          StringUtils.lowerCase(path).concat("/{id}"));
+    } else if (this.type == ControllerType.COLLECTION) {
+      requesMappingAnnotation.addStringAttribute("value", StringUtils.lowerCase(path));
+    }
     ensureGovernorIsAnnotated(requesMappingAnnotation);
 
     // Adding service reference
@@ -109,13 +143,18 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     ConstructorMetadata constructor = getConstructor();
     ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
 
+    // Adding ModelAttribute method
+    if (this.type == ControllerType.ITEM) {
+      ensureGovernorHasMethod(getModelAttributeMethod());
+    }
+
     // Build the ITD
     itdTypeDetails = builder.build();
   }
 
   /**
-   * This method returns the controller constructor 
-   * 
+   * This method returns the controller constructor
+   *
    * @return
    */
   public ConstructorMetadata getConstructor() {
@@ -149,7 +188,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
   /**
    * This method returns service field included on controller
-   * 
+   *
    * @return
    */
   public FieldMetadata getServiceField() {
@@ -166,7 +205,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
   /**
    * This method returns service field included on controller
-   * 
+   *
    * @param service
    * @return
    */
@@ -182,6 +221,59 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
         .build();
   }
 
+  /**
+   * This method returns the model attribute method
+   *
+   * @return
+   */
+  public MethodMetadataBuilder getModelAttributeMethod() {
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder pathVariable =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariable.addStringAttribute("value", "id");
+    parameterTypes.add(new AnnotatedJavaType(this.identifierType, pathVariable.build()));
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("id"));
+
+    JavaSymbolName methodName = new JavaSymbolName("get".concat(this.entity.getSimpleTypeName()));
+
+    // Check if method exists
+    if (governorHasMethod(methodName,
+        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
+      return new MethodMetadataBuilder(getGovernorMethod(methodName,
+          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes)));
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return entityNameService.findOne(id);
+    // Getting serviceFieldName
+    String serviceFieldName = getServiceField().getFieldName().getSymbolName();
+    // Getting findOneMethod
+
+    MethodMetadata serviceFindOneMethod = serviceMetadata.getFindOneMethod();
+
+    bodyBuilder.appendFormalLine(String.format("return this.%s.%s(id);", serviceFieldName,
+        serviceFindOneMethod.getMethodName()));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodMetadataBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.entity,
+            parameterTypes, parameterNames, bodyBuilder);
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE));
+    methodMetadataBuilder.setAnnotations(annotations);
+
+    return methodMetadataBuilder;
+  }
+
   @Override
   public String toString() {
     final ToStringBuilder builder = new ToStringBuilder(this);
@@ -193,4 +285,17 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     builder.append("itdTypeDetails", itdTypeDetails);
     return builder.toString();
   }
+
+  public JavaType getEntity() {
+    return entity;
+  }
+
+  public ControllerType getType() {
+    return type;
+  }
+
+  public JavaType getService() {
+    return service;
+  }
+
 }

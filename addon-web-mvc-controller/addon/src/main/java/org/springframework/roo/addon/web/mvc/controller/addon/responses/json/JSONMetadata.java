@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.controller.annotations.responses.json.RooJSON;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -16,7 +17,7 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Metadata for {@link RooJSON}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -63,23 +64,23 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
-   * @param listMethod MethodMetadata 
-   * @param createMethod MethodMetadata 
-   * @param updateMethod MethodMetadata 
-   * @param deleteMethod MethodMetadata 
-   * @param showMethod MethodMetadata 
+   * @param listMethod MethodMetadata
+   * @param createMethod MethodMetadata
+   * @param updateMethod MethodMetadata
+   * @param deleteMethod MethodMetadata
+   * @param showMethod MethodMetadata
    * @param populateHeadersMethod MethodMetadata
-   * @param methodMetadata3 
-   * @param methodMetadata2 
-   * @param methodMetadata 
+   * @param methodMetadata3
+   * @param methodMetadata2
+   * @param methodMetadata
    * @param finderMethods List of MethodMetadata
-   * @param readOnly boolean 
-   * @param convertersJavaPackage 
+   * @param readOnly boolean
+  * @param type  Controller type
    */
   public JSONMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listMethod,
@@ -87,7 +88,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       final MethodMetadata deleteMethod, final MethodMetadata showMethod,
       final MethodMetadata createBatchMethod, MethodMetadata updateBatchMethod,
       MethodMetadata deleteBatchMethod, MethodMetadata populateHeadersMethod,
-      List<MethodMetadata> finderMethods, boolean readOnly, List<JavaType> typesToImport) {
+      List<MethodMetadata> finderMethods, boolean readOnly, List<JavaType> typesToImport,
+      ControllerType type) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = readOnly;
@@ -102,17 +104,27 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     this.finderMethods = finderMethods;
     this.populateHeadersMethod = populateHeadersMethod;
 
-    ensureGovernorHasMethod(new MethodMetadataBuilder(listMethod));
-    if (!readOnly) {
-      ensureGovernorHasMethod(new MethodMetadataBuilder(createMethod));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(updateMethod));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(createBatchMethod));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(updateBatchMethod));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(deleteBatchMethod));
-      ensureGovernorHasMethod(new MethodMetadataBuilder(populateHeadersMethod));
+    if (type == ControllerType.COLLECTION) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(listMethod));
     }
-    ensureGovernorHasMethod(new MethodMetadataBuilder(showMethod));
+
+    if (!readOnly) {
+      if (type == ControllerType.COLLECTION) {
+        ensureGovernorHasMethod(new MethodMetadataBuilder(createMethod));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(createBatchMethod));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(updateBatchMethod));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(deleteBatchMethod));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(populateHeadersMethod));
+      }
+      if (type == ControllerType.ITEM) {
+        ensureGovernorHasMethod(new MethodMetadataBuilder(updateMethod));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
+      }
+
+    }
+    if (type == ControllerType.ITEM) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(showMethod));
+    }
 
     for (MethodMetadata finderMethod : finderMethods) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
@@ -127,7 +139,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns list JSON method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getListMethod() {
@@ -137,7 +149,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns create JSON method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getCreateMethod() {
@@ -146,7 +158,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns update JSON method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getUpdateMethod() {
@@ -155,7 +167,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns delete JSON method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getDeleteMethod() {
@@ -164,7 +176,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns delete batch JSON method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getDeleteBatchMethod() {
@@ -173,7 +185,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns create batch JSON method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getCreateBatchMethod() {
@@ -182,7 +194,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns update batch JSON method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getUpdateBatchMethod() {
@@ -191,7 +203,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns show JSON method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getShowMethod() {
@@ -200,7 +212,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns finder JSON methods
-   * 
+   *
    * @return {@link List<MethodMetadata>}
    */
   public List<MethodMetadata> getFinderMethods() {
@@ -209,7 +221,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   /**
    * Method that returns populateHeaders method
-   * 
+   *
    * @return {@link MethodMetadata}
    */
   public MethodMetadata getPopulateHeaders() {
@@ -219,7 +231,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Method that returns if related entity is
    * readOnly or not.
-   * 
+   *
    * @return
    */
   public boolean isReadOnly() {
