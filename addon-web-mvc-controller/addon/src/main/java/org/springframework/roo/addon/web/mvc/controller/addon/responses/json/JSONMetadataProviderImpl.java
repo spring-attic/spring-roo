@@ -92,6 +92,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   private List<JavaType> typesToImport = new ArrayList<JavaType>();
   private JavaType globalSearch;
   private String entityPlural;
+  private String path;
 
   /**
    * This service is being activated so setup it:
@@ -195,6 +196,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Getting entity and check if is a readOnly entity or not
     this.entity = controllerMetadata.getEntity();
+
+    this.path = controllerMetadata.getPath();
 
     Validate.notNull(this.entity, String.format(
         "ERROR: You should provide a valid entity for controller '%s'", this.controller.getType()
@@ -556,10 +559,18 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
           && field.getAnnotation(JpaJavaType.ONE_TO_ONE) == null
           && field.getAnnotation(JpaJavaType.ID) == null
           && field.getAnnotation(JpaJavaType.VERSION) == null) {
-        bodyBuilder.appendFormalLine(String.format("stored%s.set%s(%s.get%s());", this.entity
+
+        String preffixGetMethod = "get";
+
+        if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)
+            || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+          preffixGetMethod = "is";
+        }
+
+        bodyBuilder.appendFormalLine(String.format("stored%s.set%s(%s.%s());", this.entity
             .getSimpleTypeName(), field.getFieldName().getSymbolNameCapitalisedFirstLetter(),
-            StringUtils.uncapitalize(this.entity.getSimpleTypeName()), field.getFieldName()
-                .getSymbolNameCapitalisedFirstLetter()));
+            StringUtils.uncapitalize(this.entity.getSimpleTypeName()), preffixGetMethod
+                .concat(field.getFieldName().getSymbolNameCapitalisedFirstLetter())));
 
       }
     }
@@ -1298,15 +1309,12 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    final String entityPluralLowercase = this.entityPlural.toLowerCase();
-
     // UriComponents uriComponents =
     // UriComponentsBuilder.fromUriString("/customerorders/{id}").build();
     bodyBuilder.appendFormalLine(String.format(
-        "%s uriComponents = %s.fromUriString(\"/%s/{id}\").build();",
+        "%s uriComponents = %s.fromUriString(\"%s/{id}\").build();",
         addTypeToImport(SpringJavaType.URI_COMPONENTS).getSimpleTypeName(),
-        addTypeToImport(SpringJavaType.URI_COMPONENTS_BUILDER).getSimpleTypeName(),
-        entityPluralLowercase));
+        addTypeToImport(SpringJavaType.URI_COMPONENTS_BUILDER).getSimpleTypeName(), this.path));
 
     // URI uri = uriComponents.expand(id).encode().toUri();
     bodyBuilder.appendFormalLine(String.format(

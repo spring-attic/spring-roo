@@ -347,6 +347,8 @@ public class ControllerCommands implements CommandMarker {
       return;
     }
 
+    pathPrefix = StringUtils.lowerCase(pathPrefix);
+
     // Check --all parameter
     if (all) {
       getControllerOperations().createOrUpdateControllerForAllEntities(

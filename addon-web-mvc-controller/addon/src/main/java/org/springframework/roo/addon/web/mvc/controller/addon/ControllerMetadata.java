@@ -51,6 +51,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   private JavaType entity;
   private JavaType identifierType;
   private ServiceMetadata serviceMetadata;
+  private String path;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -97,9 +98,10 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
    * @param type
    *            Indicate the controller type
    * @param identifierType
-   *            Indicates the identifier type of the entity which represents this controller
-  * @param serviceMetadata
-  *         ServiceMetadata of the service used by controller
+   *            Indicates the identifier type of the entity which represents
+   *            this controller
+   * @param serviceMetadata
+   *            ServiceMetadata of the service used by controller
    */
   public ControllerMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
@@ -113,6 +115,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     this.entity = entity;
     this.identifierType = identifierType;
     this.serviceMetadata = serviceMetadata;
+    this.path = path;
 
     // Add @Controller annotation
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONTROLLER_ANNOTATION));
@@ -287,15 +290,19 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   }
 
   public JavaType getEntity() {
-    return entity;
+    return this.entity;
   }
 
   public ControllerType getType() {
-    return type;
+    return this.type;
   }
 
   public JavaType getService() {
-    return service;
+    return this.service;
+  }
+
+  public String getPath() {
+    return this.path;
   }
 
 }

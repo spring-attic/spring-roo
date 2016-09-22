@@ -165,7 +165,7 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
         controllerAnnotation.getAttribute("pathPrefix");
     String pathPrefix = "";
     if (pathPrefixAttr != null) {
-      pathPrefix = (String) pathPrefixAttr.getValue();
+      pathPrefix = StringUtils.lowerCase((String) pathPrefixAttr.getValue());
     }
 
     // Getting related service
@@ -188,7 +188,8 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     JavaType identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
 
     // Generate path
-    String path = "/".concat(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH));
+    String path =
+        "/".concat(StringUtils.lowerCase(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)));
     if (StringUtils.isNotEmpty(pathPrefix)) {
       if (!pathPrefix.startsWith("/")) {
         pathPrefix = "/".concat(pathPrefix);

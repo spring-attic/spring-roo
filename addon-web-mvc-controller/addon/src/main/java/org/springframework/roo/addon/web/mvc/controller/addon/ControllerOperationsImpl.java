@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -405,13 +406,14 @@ public class ControllerOperationsImpl implements ControllerOperations {
         pathPrefixAttrValue = pathPrefixAttr.getValue();
       }
       if (entityAttr != null && entityAttr.getValue().equals(entity)
-          && pathPrefixAttrValue.equals(pathPrefix)) {
+          && pathPrefixAttrValue.equals(pathPrefix)
+          && existingController.getAnnotation(responseType.getAnnotation()) != null) {
         LOGGER
             .log(
                 Level.INFO,
                 String
                     .format(
-                        "ERROR: Already exists a controller associated to entity '%s' with the pathPrefix '%s'. Specify different one using --pathPrefix parameter.",
+                        "ERROR: Already exists a controller associated to entity '%s' with the pathPrefix '%s' for this responseType. Specify different one using --pathPrefix or --responseType parameter.",
                         entity.getSimpleTypeName(), pathPrefix));
         return;
       }
@@ -495,7 +497,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
             // If the controller exists but the specified responseType has not been applied to it yet, is time to update the controller to include
             // a new responseType
             updateControllerWithResponseType(existingController.getType(), responseType);
-            return;
           }
         }
       }
@@ -539,7 +540,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
     cidBuilder.setAnnotations(annotations);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
-
 
     // Same operation to itemController
 

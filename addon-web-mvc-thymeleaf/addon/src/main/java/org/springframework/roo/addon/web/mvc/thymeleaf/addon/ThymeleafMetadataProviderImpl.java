@@ -27,6 +27,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGeneratorMetadataProvider;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -44,6 +45,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -51,9 +53,12 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
+import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
@@ -88,14 +93,16 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   private MVCViewGenerationService viewGenerationService;
 
   private List<JavaType> typesToImport;
+  private ControllerType type;
+  private String entityPlural;
 
   /**
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_THYMELEAF} as additional
-   * JavaType that will trigger metadata registration.</li>
+   * <li>Registers {@link RooJavaType#ROO_THYMELEAF} as additional JavaType
+   * that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
    */
@@ -258,6 +265,15 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
       break;
     }
 
+    // Getting type
+    AnnotationMetadata controllerAnnotation = controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
+    this.type =
+        ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
+            .getValue()).getField().getSymbolName());
+
+    this.entityPlural =
+        StringUtils.uncapitalize(Noun.pluralOf(this.entity.getSimpleTypeName(), Locale.ENGLISH));
+
     // Getting methods from related service
     MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
     MethodMetadata serviceDeleteMethod = serviceMetadata.getDeleteMethod();
@@ -270,14 +286,15 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getListJSONMethod(serviceFindAllGlobalSearchMethod),
         getListDatatablesJSONMethod(serviceCountMethod), getCreateFormMethod(),
         getCreateMethod(serviceSaveMethod), getEditFormMethod(),
-        getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod),
-        getDeleteJSONMethod(serviceDeleteMethod), getShowMethod(), getDetailsMethods(),
-        getPopulateFormMethod(), getPopulateFormatsMethod(), isReadOnly(), typesToImport);
+        getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod), getShowMethod(),
+        getDetailsMethods(), getPopulateFormMethod(), getPopulateFormatsMethod(),
+        getDeleteBatchMethod(serviceDeleteMethod), getCreateBatchMethod(serviceSaveMethod),
+        getUpdateBatchMethod(serviceSaveMethod), isReadOnly(), typesToImport, this.type);
   }
 
   /**
-   * This method provides populateFormats method that allows to configure date time
-   * format for every entity
+   * This method provides populateFormats method that allows to configure date
+   * time format for every entity
    *
    * @return
    */
@@ -291,7 +308,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("model"));
 
-    // Check if exists other addDateTimeFormatPatterns method in this controller
+    // Check if exists other addDateTimeFormatPatterns method in this
+    // controller
     MemberDetails controllerMemberDetails = getMemberDetails(this.controller);
     MethodMetadata existingMethod =
         controllerMemberDetails.getMethod(methodName,
@@ -332,7 +350,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
               dateTimeFormatAnnotation.getAttribute("style");
           if (formatAttr != null) {
             String format = formatAttr.getValue();
-            // model.addAttribute("field_date_format", DateTimeFormat.patternForStyle("M-", LocaleContextHolder.getLocale()));
+            // model.addAttribute("field_date_format",
+            // DateTimeFormat.patternForStyle("M-",
+            // LocaleContextHolder.getLocale()));
             bodyBuilder
                 .appendFormalLine(String
                     .format(
@@ -386,14 +406,16 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     for (FieldMetadata field : entityFields) {
 
-      // If entity has some Set or List field, maybe is necessary to generate details method
+      // If entity has some Set or List field, maybe is necessary to
+      // generate details method
       if (field.getFieldType().getFullyQualifiedTypeName().equals(Set.class.getName())
           || field.getFieldType().getFullyQualifiedTypeName().equals(List.class.getName())) {
 
         // Getting inner type
         JavaType detailType = field.getFieldType().getBaseType();
 
-        // Check if provided inner type is an entity annotated with @RooJPAEntity
+        // Check if provided inner type is an entity annotated with
+        // @RooJPAEntity
         if (detailType != null
             && getTypeLocationService().getTypeDetails(detailType) != null
             && getTypeLocationService().getTypeDetails(detailType).getAnnotation(
@@ -438,7 +460,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
                   // Get field name on the reference side
                   String fieldNameOnReferenceSide = method.getKey().getFieldName().getSymbolName();
 
-                  // If referenced entity has more than one field of this type mapped, we need the mappedBy attribute
+                  // If referenced entity has more than one
+                  // field of this type mapped, we need the
+                  // mappedBy attribute
                   String fieldName = null;
                   if (fieldMappings) {
                     fieldName = getMappedByField(entityFields, field, fieldNameOnReferenceSide);
@@ -472,7 +496,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
                   // Get field name on the reference side
                   String fieldNameOnReferenceSide = method.getKey().getFieldName().getSymbolName();
 
-                  // If entity has 2 reference fields of same type, we need the mappedBy attribute
+                  // If entity has 2 reference fields of same
+                  // type, we need the mappedBy attribute
                   String fieldName = null;
                   if (fieldMappings) {
                     fieldName = getMappedByField(entityFields, field, fieldNameOnReferenceSide);
@@ -504,8 +529,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method generates listDetailsMethod that will be used
-   * to display relations between entities
+   * This method generates listDetailsMethod that will be used to display
+   * relations between entities
    *
    * @param fieldName
    * @param detailType
@@ -524,12 +549,12 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
       return null;
     }
 
-
     String listDetailsPath =
         String.format("/{%s}/%s/", identifierFields.get(0).getFieldName().getSymbolName(),
             fieldName.toLowerCase());
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(this.controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, listDetailsPath, null, null,
@@ -572,7 +597,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Page<Entity> entityField = detailService.FIND_ALL_METHOD(id, search, pageable);
+    // Page<Entity> entityField = detailService.FIND_ALL_METHOD(id, search,
+    // pageable);
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(id, search, pageable);",
         addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(detailType)
             .getSimpleTypeName(), getDetailEntityField(detailType).getFieldName().getSymbolName(),
@@ -582,7 +608,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // return entityField;
     bodyBuilder.appendFormalLine(String.format("return %s;", getDetailEntityField(detailType)
         .getFieldName()));
-
 
     // Generating returnType
     JavaType returnType =
@@ -598,8 +623,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method generates listDetailsDatatablesMethod that will be used
-   * to display relations between entities using DTT component
+   * This method generates listDetailsDatatablesMethod that will be used to
+   * display relations between entities using DTT component
    *
    * @param fieldName
    * @param detailType
@@ -625,7 +650,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         String.format("/{%s}/%s/", identifierFields.get(0).getFieldName().getSymbolName(),
             fieldName.toLowerCase());
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(this.controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, listDetailsPath, null, null,
@@ -679,19 +705,20 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
             .getSimpleTypeName(), getDetailEntityField(detailType).getFieldName().getSymbolName(),
         StringUtils.capitalize(fieldName)));
 
-    // long allAvailableEntityDetails = detailService.countByMasterId(id.getId());
+    // long allAvailableEntityDetails =
+    // detailService.countByMasterId(id.getId());
     bodyBuilder.appendFormalLine(String.format("long allAvailable%sDetails = %s.%s(%s.%s());",
         detailType.getSimpleTypeName(), getServiceDetailField(detailService).getFieldName()
             .getSymbolName(), countMethod.getMethodName().getSymbolName(), identifierFields.get(0)
             .getFieldName().getSymbolName(), identifierAccessor.getMethodName()));
 
-    // return new DatatablesData<OrderDetailInfo>(orderDetails, allAvailableOrderDetails, draw);
+    // return new DatatablesData<OrderDetailInfo>(orderDetails,
+    // allAvailableOrderDetails, draw);
     bodyBuilder.appendFormalLine(String.format(
         "return new %s<%s>(%s, allAvailable%sDetails, draw);", addTypeToImport(datatablesDataType)
             .getSimpleTypeName(), addTypeToImport(detailType).getSimpleTypeName(),
         getDetailEntityField(detailType).getFieldName().getSymbolName(), detailType
             .getSimpleTypeName()));
-
 
     // Generating returnType
     JavaType returnType =
@@ -707,8 +734,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "list" JSON method using JSON
-   * response type and returns Page element
+   * This method provides the "list" JSON method using JSON response type and
+   * returns Page element
    *
    * @param serviceFindAllGlobalSearchMethod
    *
@@ -716,7 +743,15 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    */
   private MethodMetadata getListJSONMethod(MethodMetadata serviceFindAllGlobalSearchMethod) {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.type != ControllerType.COLLECTION) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(this.controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
@@ -771,15 +806,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Page<Entity> entityField = serviceField.findAll(search, pageable);
+    // Page<Entity> entityNamePlural = serviceField.findAll(search, pageable);
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(search, pageable);",
         addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(this.entity)
-            .getSimpleTypeName(), getEntityField().getFieldName(),
-        getServiceField().getFieldName(), serviceFindAllGlobalSearchMethod.getMethodName()));
+            .getSimpleTypeName(), this.entityPlural, getServiceField().getFieldName(),
+        serviceFindAllGlobalSearchMethod.getMethodName()));
 
-    // return entityField;
-    bodyBuilder.appendFormalLine(String.format("return %s;", getEntityField().getFieldName()));
-
+    // return entityNamePlural;
+    bodyBuilder.appendFormalLine(String.format("return %s;", this.entityPlural));
 
     // Generating returnType
     JavaType returnType =
@@ -795,7 +829,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "list" Datatables JSON method  using JSON
+   * This method provides the "list" Datatables JSON method using JSON
    * response type and returns Datatables element
    *
    * @param serviceCountMethod
@@ -804,7 +838,15 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    */
   private MethodMetadata getListDatatablesJSONMethod(MethodMetadata serviceCountMethod) {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.type != ControllerType.COLLECTION) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, "", "application/vnd.datatables+json",
@@ -845,21 +887,22 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // Page<Entity> entityField = list(search, pageable);
+    // Page<Entity> entityNamePlural = list(search, pageable);
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = list(search, pageable);",
         addTypeToImport(SpringJavaType.PAGE).getSimpleTypeName(), addTypeToImport(this.entity)
-            .getSimpleTypeName(), getEntityField().getFieldName()));
+            .getSimpleTypeName(), this.entityPlural));
 
-    // long allAvailableEntity = serviceField.count();
+    // long allAvailableentityNamePlural = serviceField.count();
     bodyBuilder.appendFormalLine(String.format("long allAvailable%s = %s.%s();",
-        this.entity.getSimpleTypeName(), getServiceField().getFieldName(),
+        StringUtils.capitalize(this.entityPlural), getServiceField().getFieldName(),
         serviceCountMethod.getMethodName()));
 
-    // return new DatatablesData<Entity>(entityField, allAvailableEntity, draw);
+    // return new DatatablesData<Entity>(entityNamePlural, allAvailableentityNamePlural,
+    // draw);
     bodyBuilder.appendFormalLine(String.format("return new %s<%s>(%s, allAvailable%s, draw);",
         addTypeToImport(this.datatablesDataType).getSimpleTypeName(),
-        this.entity.getSimpleTypeName(), getEntityField().getFieldName(),
-        this.entity.getSimpleTypeName()));
+        this.entity.getSimpleTypeName(), this.entityPlural,
+        StringUtils.capitalize(this.entityPlural)));
 
     // Generating returnType
     JavaType returnType =
@@ -875,14 +918,22 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "list" form method  using Thymeleaf view
-   * response type
+   * This method provides the "list" form method using Thymeleaf view response
+   * type
    *
    * @return MethodMetadata
    */
   private MethodMetadata getListFormMethod() {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.type != ControllerType.COLLECTION) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
@@ -924,14 +975,22 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "create" form method  using Thymeleaf view
+   * This method provides the "create" form method using Thymeleaf view
    * response type
    *
    * @return MethodMetadata
    */
   private MethodMetadata getCreateFormMethod() {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.readOnly || this.type != ControllerType.COLLECTION) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET, "/create-form", null, null,
@@ -965,9 +1024,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     bodyBuilder.appendFormalLine(String.format("model.addAttribute(new %s());",
         this.entity.getSimpleTypeName()));
 
-    // populateForm(model);
-    bodyBuilder.appendFormalLine("populateForm(model);");
-
     // return "path/create";
     bodyBuilder.appendFormalLine(String.format("return \"%s/create\";", getViewsPath()));
 
@@ -980,16 +1036,25 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "create" method  using Thymeleaf view
-   * response type
+   * This method provides the "create" method using Thymeleaf view response
+   * type
    *
-   * @param serviceSaveMethod MethodMetadata
+   * @param serviceSaveMethod
+   *            MethodMetadata
    *
    * @return MethodMetadata
    */
   private MethodMetadata getCreateMethod(MethodMetadata serviceSaveMethod) {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.readOnly || this.type != ControllerType.COLLECTION) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_POST, "", null, null,
@@ -1031,9 +1096,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
     bodyBuilder.indent();
 
-    // populateForm(model);
-    bodyBuilder.appendFormalLine("populateForm(model);");
-
     // return "path/create";
     bodyBuilder.appendFormalLine(String.format("return \"%s/create\";", getViewsPath()));
     bodyBuilder.indentRemove();
@@ -1045,7 +1107,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     bodyBuilder.appendFormalLine(String.format("%s new%s = %s.%s(%s);", this.entity
         .getSimpleTypeName(), this.entity.getSimpleTypeName(), getServiceField().getFieldName(),
         serviceSaveMethod.getMethodName(), getEntityField().getFieldName()));
-
 
     // redirectAttrs.addAttribute("id", newEntity.ACCESSOR_METHOD());
     bodyBuilder.appendFormalLine(String.format("redirectAttrs.addAttribute(\"id\", new%s.%s());",
@@ -1063,18 +1124,26 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "edit" form method  using Thymeleaf view
-   * response type
+   * This method provides the "edit" form method using Thymeleaf view response
+   * type
    *
    * @return MethodMetadata
    */
   private MethodMetadata getEditFormMethod() {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.readOnly || this.type != ControllerType.ITEM) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
             SpringEnumDetails.REQUEST_METHOD_GET,
-            String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null,
+            String.format("/edit-form", getEntityField().getFieldName()), null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null
         && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
@@ -1085,12 +1154,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     final JavaSymbolName methodName = new JavaSymbolName("editForm");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    final List<AnnotationAttributeValue<?>> annotationAttributes =
-        new ArrayList<AnnotationAttributeValue<?>>();
-    annotationAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), getEntityField()
-        .getFieldName().getSymbolName()));
-    parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
-        SpringJavaType.PATH_VARIABLE, annotationAttributes).build()));
+    AnnotationMetadataBuilder modelAttributeAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    parameterTypes.add(new AnnotatedJavaType(this.entity, modelAttributeAnnotation.build()));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -1103,14 +1169,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
         SpringEnumDetails.REQUEST_METHOD_GET,
-        String.format("/{%s}/edit-form", getEntityField().getFieldName()), null, null,
+        String.format("/edit-form", getEntityField().getFieldName()), null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // populateForm(model);
-    bodyBuilder.appendFormalLine("populateForm(model);");
 
     // return "path/create";
     bodyBuilder.appendFormalLine(String.format("return \"%s/edit\";", getViewsPath()));
@@ -1124,20 +1187,28 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "update" method  using Thymeleaf view
-   * response type
+   * This method provides the "update" method using Thymeleaf view response
+   * type
    *
-   * @param serviceSaveMethod MethodMetadata
+   * @param serviceSaveMethod
+   *            MethodMetadata
    *
    * @return MethodMetadata
    */
   private MethodMetadata getUpdateMethod(MethodMetadata serviceSaveMethod) {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.readOnly || this.type != ControllerType.ITEM) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_PUT,
-            String.format("/{%s}", getEntityField().getFieldName()), null, null,
+            SpringEnumDetails.REQUEST_METHOD_PUT, null, null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null
         && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
@@ -1166,8 +1237,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_PUT,
-        String.format("/{%s}", getEntityField().getFieldName()), null, null,
+        SpringEnumDetails.REQUEST_METHOD_PUT, null, null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -1176,9 +1246,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // if (result.hasErrors()) {
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
     bodyBuilder.indent();
-
-    // populateForm(model);
-    bodyBuilder.appendFormalLine("populateForm(model);");
 
     // return "path/create";
     bodyBuilder.appendFormalLine(String.format("return \"%s/edit\";", getViewsPath()));
@@ -1208,8 +1275,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "delete" method using Thymeleaf view
-   * response type
+   * This method provides the "delete" method using Thymeleaf view response
+   * type
    *
    * @param serviceDeleteMethod
    *
@@ -1217,10 +1284,18 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    */
   private MethodMetadata getDeleteMethod(MethodMetadata serviceDeleteMethod) {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.readOnly || this.type != ControllerType.ITEM) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
+            SpringEnumDetails.REQUEST_METHOD_DELETE, null, null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null
         && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
@@ -1232,11 +1307,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 
-    AnnotationMetadataBuilder pathVariableAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
-    pathVariableAnnotation.addStringAttribute("value", "id");
-
-    parameterTypes.add(new AnnotatedJavaType(this.identifierType, pathVariableAnnotation.build()));
+    AnnotationMetadataBuilder modelAttributeAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    parameterTypes.add(new AnnotatedJavaType(this.entity, modelAttributeAnnotation.build()));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -1248,7 +1321,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
+        SpringEnumDetails.REQUEST_METHOD_DELETE, null, null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -1270,18 +1343,25 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "delete" method using JSPON response type
+   * Creates create batch method
    *
-   * @param serviceDeleteMethod
-   *
-   * @return MethodMetadata
+   * @param serviceSaveMethod
+   *            the MethodMetadata of entity's service save method
+   * @return {@link MethodMetadata}
    */
-  private MethodMetadata getDeleteJSONMethod(MethodMetadata serviceDeleteMethod) {
+  private MethodMetadata getCreateBatchMethod(MethodMetadata serviceSaveMethod) {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly, create method is not available
+    if (this.readOnly || this.type != ControllerType.COLLECTION) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
+            SpringEnumDetails.REQUEST_METHOD_POST, "/batch", null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(),
             SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
     if (existingMVCMethod != null
         && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
@@ -1289,40 +1369,78 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     }
 
     // Define methodName
-    final JavaSymbolName methodName = new JavaSymbolName("delete");
+    final JavaSymbolName methodName = new JavaSymbolName("createBatch");
 
+    // Adding parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(new JavaType(JdkJavaType.COLLECTION
+        .getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(this.entity)),
+        new AnnotationMetadataBuilder(Jsr303JavaType.VALID).build(), new AnnotationMetadataBuilder(
+            SpringJavaType.REQUEST_BODY).build()));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
 
-    AnnotationMetadataBuilder pathVariableAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
-    pathVariableAnnotation.addStringAttribute("value", "id");
-
-    parameterTypes.add(new AnnotatedJavaType(this.identifierType, pathVariableAnnotation.build()));
-
+    // Adding parameter names
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(this.entityPlural)));
+    parameterNames.add(new JavaSymbolName("result"));
 
     // Adding annotations
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_DELETE, "/{id}", null, null,
+        SpringEnumDetails.REQUEST_METHOD_POST, "/batch", null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE,
         SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
 
     // Adding @ResponseBody annotation
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY));
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Adding @SuppressWarnings annotation
+    AnnotationMetadataBuilder suppressWarningsAnnotation =
+        new AnnotationMetadataBuilder(JdkJavaType.SUPPRESS_WARNINGS);
+    List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+    attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "rawtypes"));
+    attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
+    ArrayAttributeValue<AnnotationAttributeValue<?>> supressWarningsAtributes =
+        new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("value"),
+            attributes);
+    suppressWarningsAnnotation.addAttribute(supressWarningsAtributes);
+    annotations.add(suppressWarningsAnnotation);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-    // entityService.DELETE_METHOD(id);
-    bodyBuilder.appendFormalLine(String.format("%s.%s(id);", getServiceField().getFieldName(),
-        serviceDeleteMethod.getMethodName()));
+    // if (result.hasErrors()) {
+    // return new ResponseEntity(result, HttpStatus.CONFLICT);
+    // }
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine(String.format("return new %s(result, %s.%s);",
+        addTypeToImport(SpringJavaType.RESPONSE_ENTITY).getSimpleTypeName(),
+        addTypeToImport(SpringEnumDetails.HTTP_STATUS_CONFLICT.getType()).getSimpleTypeName(),
+        SpringEnumDetails.HTTP_STATUS_CONFLICT.getField().getSymbolName()));
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
 
-    // return new ResponseEntity(HttpStatus.OK);
-    bodyBuilder.appendFormalLine(String.format("return new ResponseEntity(%s.OK);",
-        addTypeToImport(SpringJavaType.HTTP_STATUS).getSimpleTypeName()));
+    // List<Entity> newEntities = entityService.saveMethodName(entities);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("%s<%s> new%s = %s.%s(%s);",
+        addTypeToImport(JdkJavaType.LIST).getSimpleTypeName(), addTypeToImport(this.entity)
+            .getSimpleTypeName(), StringUtils.capitalize(this.entityPlural), getServiceField()
+            .getFieldName(), serviceSaveMethod.getMethodName(), StringUtils
+            .uncapitalize(this.entityPlural)));
+
+    // return new ResponseEntity(newEntities, HttpStatus.CREATED);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("return new %s(new%s, %s.%s);",
+        addTypeToImport(SpringJavaType.RESPONSE_ENTITY).getSimpleTypeName(),
+        StringUtils.capitalize(this.entityPlural),
+        addTypeToImport(SpringEnumDetails.HTTP_STATUS_CREATED.getType()).getSimpleTypeName(),
+        SpringEnumDetails.HTTP_STATUS_CREATED.getField().getSymbolName()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
@@ -1333,18 +1451,220 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method provides the "show" method  using Thymeleaf view
-   * response type
+   * Creates delete batch method
+   *
+   * @param serviceSaveMethod
+   *            the MethodMetadata of entity's service save method
+   * @return {@link MethodMetadata}
+   */
+  private MethodMetadata getDeleteBatchMethod(MethodMetadata serviceDeleteMethod) {
+
+    // If provided entity is readOnly, create method is not available
+    if (this.readOnly || this.type != ControllerType.COLLECTION) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_DELETE, "/batch/{ids}", null, null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("deleteBatch");
+
+    // Adding parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder pathVariable =
+        new AnnotationMetadataBuilder(SpringJavaType.PATH_VARIABLE);
+    pathVariable.addStringAttribute("value", "ids");
+    parameterTypes.add(new AnnotatedJavaType(new JavaType(JdkJavaType.COLLECTION
+        .getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(this.identifierType)),
+        pathVariable.build()));
+
+    // Adding parameter names
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("ids"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_DELETE, "/batch/{ids}", null, null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Adding @SuppressWarnings annotation
+    AnnotationMetadataBuilder suppressWarningsAnnotation =
+        new AnnotationMetadataBuilder(JdkJavaType.SUPPRESS_WARNINGS);
+    List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+    attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "rawtypes"));
+    ArrayAttributeValue<AnnotationAttributeValue<?>> supressWarningsAtributes =
+        new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("value"),
+            attributes);
+    suppressWarningsAnnotation.addAttribute(supressWarningsAtributes);
+    annotations.add(suppressWarningsAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // serviceField.SERVICE_DELETE_METHOD(ids);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("%s.%s(ids);", getServiceField().getFieldName(),
+        serviceDeleteMethod.getMethodName()));
+
+    // return new ResponseEntity(HttpStatus.OK);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("return new %s(%s.%s);",
+        addTypeToImport(SpringJavaType.RESPONSE_ENTITY).getSimpleTypeName(),
+        addTypeToImport(SpringEnumDetails.HTTP_STATUS_OK.getType()).getSimpleTypeName(),
+        SpringEnumDetails.HTTP_STATUS_OK.getField().getSymbolName()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            SpringJavaType.RESPONSE_ENTITY, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Creates update batch method
+   *
+   * @param serviceSaveMethod
+   *            the MethodMetadata of entity's service save method
+   * @return {@link MethodMetadata}
+   */
+  private MethodMetadata getUpdateBatchMethod(MethodMetadata serviceSaveMethod) {
+
+    // If provided entity is readOnly, create method is not available
+    if (this.readOnly || this.type != ControllerType.COLLECTION) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_PUT, "/batch", null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(),
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("updateBatch");
+
+    // Adding parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(new AnnotatedJavaType(new JavaType(JdkJavaType.COLLECTION
+        .getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(this.entity)),
+        new AnnotationMetadataBuilder(Jsr303JavaType.VALID).build(), new AnnotationMetadataBuilder(
+            SpringJavaType.REQUEST_BODY).build()));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.BINDING_RESULT));
+
+    // Adding parameter names
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(this.entityPlural)));
+    parameterNames.add(new JavaSymbolName("result"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_PUT, "/batch", null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Adding @SuppressWarnings annotation
+    AnnotationMetadataBuilder suppressWarningsAnnotation =
+        new AnnotationMetadataBuilder(JdkJavaType.SUPPRESS_WARNINGS);
+    List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+    attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "rawtypes"));
+    attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
+    ArrayAttributeValue<AnnotationAttributeValue<?>> supressWarningsAtributes =
+        new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("value"),
+            attributes);
+    suppressWarningsAnnotation.addAttribute(supressWarningsAtributes);
+    annotations.add(suppressWarningsAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // if (result.hasErrors()) {
+    // return new ResponseEntity(result, HttpStatus.CONFLICT);
+    // }
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine(String.format("return new %s(result, %s.%s);",
+        addTypeToImport(SpringJavaType.RESPONSE_ENTITY).getSimpleTypeName(),
+        addTypeToImport(SpringEnumDetails.HTTP_STATUS_CONFLICT.getType()).getSimpleTypeName(),
+        SpringEnumDetails.HTTP_STATUS_CONFLICT.getField().getSymbolName()));
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
+
+    // List<Entity> newEntities = entityService.saveMethodName(entities);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("%s<%s> saved%s = %s.%s(%s);",
+        addTypeToImport(JdkJavaType.LIST).getSimpleTypeName(), addTypeToImport(this.entity)
+            .getSimpleTypeName(), StringUtils.capitalize(this.entityPlural), getServiceField()
+            .getFieldName(), serviceSaveMethod.getMethodName(), StringUtils
+            .uncapitalize(this.entityPlural)));
+
+    // return new ResponseEntity(newEntities, HttpStatus.OK);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("return new %s(saved%s, %s.%s);",
+        addTypeToImport(SpringJavaType.RESPONSE_ENTITY).getSimpleTypeName(),
+        StringUtils.capitalize(this.entityPlural),
+        addTypeToImport(SpringEnumDetails.HTTP_STATUS_OK.getType()).getSimpleTypeName(),
+        SpringEnumDetails.HTTP_STATUS_OK.getField().getSymbolName()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            SpringJavaType.RESPONSE_ENTITY, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "show" method using Thymeleaf view response type
    *
    * @return MethodMetadata
    */
   private MethodMetadata getShowMethod() {
 
-    // First of all, check if exists other method with the same @RequesMapping to generate
+    // If provided entity is readOnly or annotated controller is not a
+    // Collection controller
+    // create method will not be available
+    if (this.readOnly || this.type != ControllerType.ITEM) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
     MethodMetadata existingMVCMethod =
         getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
-            SpringEnumDetails.REQUEST_METHOD_GET,
-            String.format("/{%s}", getEntityField().getFieldName()), null, null,
+            SpringEnumDetails.REQUEST_METHOD_GET, null, null, null,
             SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
     if (existingMVCMethod != null
         && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
@@ -1355,12 +1675,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     final JavaSymbolName methodName = new JavaSymbolName("show");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    final List<AnnotationAttributeValue<?>> annotationAttributes =
-        new ArrayList<AnnotationAttributeValue<?>>();
-    annotationAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), getEntityField()
-        .getFieldName().getSymbolName()));
-    parameterTypes.add(new AnnotatedJavaType(this.entity, new AnnotationMetadataBuilder(
-        SpringJavaType.PATH_VARIABLE, annotationAttributes).build()));
+    AnnotationMetadataBuilder modelAttributeAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    parameterTypes.add(new AnnotatedJavaType(this.entity, modelAttributeAnnotation.build()));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.MODEL));
 
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -1372,8 +1689,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Adding @RequestMapping annotation
     annotations.add(getControllerMVCService().getRequestMappingAnnotation(
-        SpringEnumDetails.REQUEST_METHOD_GET,
-        String.format("/{%s}", getEntityField().getFieldName()), null, null,
+        SpringEnumDetails.REQUEST_METHOD_GET, null, null, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
     // Generate body
@@ -1430,10 +1746,10 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     List<FieldMetadata> fields = entityDetails.getFields();
     for (FieldMetadata field : fields) {
       if (isEnumType(field.getFieldType())) {
-        // model.addAttribute("enumField", Arrays.asList(Enum.values()));
+        // model.addAttribute("enumField",
+        // Arrays.asList(Enum.values()));
         bodyBuilder.appendFormalLine(String.format(
-            "model.addAttribute(\"%s\", %s.asList(%s.values()));",
-            Noun.pluralOf(field.getFieldName().getSymbolName(), Locale.ENGLISH),
+            "model.addAttribute(\"%s\", %s.asList(%s.values()));", this.entityPlural,
             addTypeToImport(new JavaType("java.util.Arrays")).getSimpleTypeName(),
             addTypeToImport(field.getFieldType()).getSimpleTypeName()));
       }
@@ -1532,7 +1848,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     return controllerMetadata.getServiceDetailField(detailService);
   }
 
-
   /**
    * This method returns the final views path to be used
    *
@@ -1544,14 +1859,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * Returns the value of the mapped by attribute for OneToMany relations
-   * only if it matches with the referenced side field name.
+   * Returns the value of the mapped by attribute for OneToMany relations only
+   * if it matches with the referenced side field name.
    *
    * @param entityFields
    * @param field
    * @param fieldNameOnReferenceSide
-   * @return a String with field name on the reference side if matches
-   * with provided field on the owning side.
+   * @return a String with field name on the reference side if matches with
+   *         provided field on the owning side.
    */
   private String getMappedByField(List<FieldMetadata> entityFields, FieldMetadata field,
       String fieldNameOnReferenceSide) {
@@ -1574,8 +1889,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   }
 
   /**
-   * This method registers a new type on types to import list
-   * and then returns it.
+   * This method registers a new type on types to import list and then returns
+   * it.
    *
    * @param type
    * @return

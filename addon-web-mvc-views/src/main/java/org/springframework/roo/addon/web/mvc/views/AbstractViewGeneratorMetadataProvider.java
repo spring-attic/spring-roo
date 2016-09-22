@@ -2,11 +2,15 @@ package org.springframework.roo.addon.web.mvc.views;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
+import org.jvnet.inflector.Noun;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
@@ -19,6 +23,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
@@ -34,9 +39,9 @@ import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
- * view generation. 
- * 
- * As a result, it will be possible that all MetadataProviders that manages 
+ * view generation.
+ *
+ * As a result, it will be possible that all MetadataProviders that manages
  * view generation follows the same steps and the same operations to do it.
  *
  * @author Juan Carlos García
@@ -66,27 +71,27 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
   /**
    * This operation returns the MVCViewGenerationService that should be used
-   * to generate views. 
-   * 
-   * Implements this operations in you views metadata providers to be able to 
+   * to generate views.
+   *
+   * Implements this operations in you views metadata providers to be able to
    * generate all necessary views.
-   * 
+   *
    * @return MVCViewGenerationService
    */
   protected abstract MVCViewGenerationService getViewGenerationService();
 
   /**
    * This operations returns the necessary Metadata that will generate .aj file.
-   * 
-   * This operation is called from getMetadata operation to obtain the return 
+   *
+   * This operation is called from getMetadata operation to obtain the return
    * element.
-   * 
+   *
    * @return ItdTypeDetailsProvidingMetadataItem
    */
   protected abstract ItdTypeDetailsProvidingMetadataItem createMetadataInstance();
 
   protected void fillContext(ViewContext ctx) {
-    // To be overridden if needed 
+    // To be overridden if needed
   }
 
   @Override
@@ -133,10 +138,37 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     this.identifierAccessor = getPersistenceMemberLocator().getIdentifierAccessor(entity);
 
     // Getting service
-    this.service = (JavaType) controllerAnnotation.getAttribute("service").getValue();
+    Set<ClassOrInterfaceTypeDetails> services =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_SERVICE);
+    Iterator<ClassOrInterfaceTypeDetails> itServices = services.iterator();
 
-    // Getting path
-    this.controllerPath = (String) controllerAnnotation.getAttribute("path").getValue();
+    while (itServices.hasNext()) {
+      ClassOrInterfaceTypeDetails existingService = itServices.next();
+      AnnotationAttributeValue<Object> entityAttr =
+          existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+      if (entityAttr != null && entityAttr.getValue().equals(entity)) {
+        this.service = existingService.getType();
+      }
+    }
+
+    // Getting pathPrefix
+    AnnotationAttributeValue<Object> pathPrefixAttr =
+        controllerAnnotation.getAttribute("pathPrefix");
+    String pathPrefix = "";
+    if (pathPrefixAttr != null) {
+      pathPrefix = StringUtils.lowerCase((String) pathPrefixAttr.getValue());
+    }
+    // Generate path
+    String path =
+        "/".concat(StringUtils.lowerCase(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)));
+    if (StringUtils.isNotEmpty(pathPrefix)) {
+      if (!pathPrefix.startsWith("/")) {
+        pathPrefix = "/".concat(pathPrefix);
+      }
+      path = pathPrefix.concat(path);
+    }
+    this.controllerPath = path;
 
     // Fill view context
     ViewContext ctx = new ViewContext();
@@ -236,7 +268,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
   /**
    * This method returns entity field included on controller
-   * 
+   *
    * @return
    */
   private FieldMetadata getEntityField() {

@@ -43,12 +43,12 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
- * 
+ *
  * This abstract class implements MVCViewGenerationService interface
  * that provides all necessary elements to generate views inside project.
- * 
+ *
  * @param <DOC>
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -93,7 +93,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     ctx.addExtraParameter("fields", fields);
     ctx.addExtraParameter("details", details);
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("list", ctx);
 
     // Getting new viewName
@@ -122,7 +122,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     ctx.addExtraParameter("fields", fields);
     ctx.addExtraParameter("details", details);
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("show", ctx);
 
     // Getting new viewName
@@ -153,7 +153,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     ctx.addExtraParameter("fields", fields);
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("create", ctx);
 
     // Getting new viewName
@@ -183,7 +183,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     ctx.addExtraParameter("fields", fields);
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("edit", ctx);
 
     // Getting new viewName
@@ -215,7 +215,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   @Override
   public void addIndexView(String moduleName, ViewContext ctx) {
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("index", ctx);
 
     // Getting new viewName
@@ -234,7 +234,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   @Override
   public void addErrorView(String moduleName, ViewContext ctx) {
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("error", ctx);
 
     // Getting new viewName
@@ -253,7 +253,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   @Override
   public void addDefaultLayout(String moduleName, ViewContext ctx) {
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("layouts/default-layout", ctx);
 
     // Getting new viewName
@@ -272,7 +272,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addFooter(String moduleName, ViewContext ctx) {
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("fragments/footer", ctx);
 
     // Getting new viewName
@@ -290,7 +290,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addHeader(String moduleName, ViewContext ctx) {
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("fragments/header", ctx);
 
     // Getting new viewName
@@ -325,7 +325,22 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       AnnotationMetadata controllerAnnotation =
           controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
       JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
-      String path = (String) controllerAnnotation.getAttribute("path").getValue();
+
+      // Getting pathPrefix
+      AnnotationAttributeValue<Object> pathPrefixAttr =
+          controllerAnnotation.getAttribute("pathPrefix");
+      String pathPrefix = "";
+      if (pathPrefixAttr != null) {
+        pathPrefix = (String) pathPrefixAttr.getValue();
+      }
+      // Generate path
+      String path = "/".concat(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH));
+      if (StringUtils.isNotEmpty(pathPrefix)) {
+        if (!pathPrefix.startsWith("/")) {
+          pathPrefix = "/".concat(pathPrefix);
+        }
+        path = pathPrefix.concat(path);
+      }
 
       // Include info inside menuEntry
       menuEntry.setEntityName(entity.getSimpleTypeName());
@@ -345,7 +360,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       requiredIds.add(entry.getEntityName() + "Entry");
     }
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("fragments/menu", ctx);
 
     // Getting new viewName
@@ -363,7 +378,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addModal(String moduleName, ViewContext ctx) {
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("fragments/modal", ctx);
 
     // Getting new viewName
@@ -381,7 +396,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addSession(String moduleName, ViewContext ctx) {
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("fragments/session", ctx);
 
     // Getting new viewName
@@ -399,7 +414,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addSessionLinks(String moduleName, ViewContext ctx) {
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("fragments/session-links", ctx);
 
     // Getting new viewName
@@ -423,7 +438,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     List<I18n> installedLanguages = getI18nOperationsImpl().getInstalledLanguages(moduleName);
     ctx.addExtraParameter("languages", installedLanguages);
 
-    // Process elements to generate 
+    // Process elements to generate
     DOC newDoc = process("fragments/languages", ctx);
 
     // Getting new viewName
@@ -447,7 +462,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void updateMenuView(String moduleName, ViewContext ctx) {
-    // TODO: This method should update menu view with the new 
+    // TODO: This method should update menu view with the new
     // controller to include, instead of regenerate menu view page.
     addMenu(moduleName, ctx);
     addLanguages(moduleName, ctx);
@@ -468,15 +483,15 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   /**
    * This method obtains all necessary information about fields from entity
    * and returns a List of FieldItem.
-   * 
+   *
    * If provided entity has more than 5 fields, only the first 5 ones will be
    * included on generated view.
-   *  
+   *
    * @param entityDetails
    * @param entityName
    * @param checkMaxFields
    * @param ctx
-   * 
+   *
    * @return List that contains FieldMetadata that will be added to the view.
    */
   protected List<FieldItem> getFieldViewItems(MemberDetails entityDetails, String entityName,
@@ -564,11 +579,11 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   /**
    * This method obtains all necessary information about details fields from entity
    * and returns a List of FieldItem.
-   * 
+   *
    * @param entityDetails
    * @param entityName
    * @param ctx
-   * 
+   *
    * @return List that contains FieldMetadata that will be added to the view.
    */
   protected List<FieldItem> getDetailsFieldViewItems(MemberDetails entityDetails,
@@ -647,11 +662,11 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   /**
    * This method obtains all necessary configuration to be able to work
    * with reference fields.
-   * 
-   * Complete provided FieldItem with extra fields. If some extra configuration 
+   *
+   * Complete provided FieldItem with extra fields. If some extra configuration
    * is not available, returns false to prevent that this field will be added.
    * If everything is ok, returns true to add this field to generated view.
-   * 
+   *
    * @param fieldItem
    * @param typeDetails
    * @param allControllers
@@ -684,8 +699,22 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
       AnnotationAttributeValue<JavaType> entityAttr = controllerAnnotation.getAttribute("entity");
       if (entityAttr != null && entityAttr.getValue().equals(typeDetails.getType())) {
-        AnnotationAttributeValue<String> controllerPath = controllerAnnotation.getAttribute("path");
-        referencedPath = controllerPath.getValue();
+        AnnotationAttributeValue<String> pathPrefixAttr =
+            controllerAnnotation.getAttribute("pathPrefix");
+        String pathPrefix = "";
+        if (pathPrefixAttr != null) {
+          pathPrefix = (String) pathPrefixAttr.getValue();
+        }
+        // Generate path
+        String path =
+            "/".concat(Noun.pluralOf(entityAttr.getValue().getSimpleTypeName(), Locale.ENGLISH));
+        if (StringUtils.isNotEmpty(pathPrefix)) {
+          if (!pathPrefix.startsWith("/")) {
+            pathPrefix = "/".concat(pathPrefix);
+          }
+          path = pathPrefix.concat(path);
+        }
+        referencedPath = path;
       }
     }
 
@@ -725,9 +754,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   /**
    * This method load the provided file and get its content in String format.
-   * 
+   *
    * After that, uses parse method to generate a valid DOC object.
-   * 
+   *
    * @param path
    * @return
    */
@@ -747,7 +776,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   /**
    * This method check if the provided viewPath file exists
-   * 
+   *
    * @param viewName
    * @return true if exists the provided view path
    */
