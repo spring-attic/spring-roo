@@ -29,7 +29,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link WebMvcConfigurationMetadataProvider}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -52,7 +52,7 @@ public class WebMvcConfigurationMetadataProviderImpl extends
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_WEB_MVC_CONFIGURATION} as additional 
+   * <li>Registers {@link RooJavaType#ROO_WEB_MVC_CONFIGURATION} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -71,9 +71,9 @@ public class WebMvcConfigurationMetadataProviderImpl extends
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -134,11 +134,6 @@ public class WebMvcConfigurationMetadataProviderImpl extends
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    // Get all registered formatters
-    Set<ClassOrInterfaceTypeDetails> formatters =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_FORMATTER);
-
     // Looking for a valid GlobalSearchHandlerMethodArgumentResolver
     JavaType globalSearchHandler = null;
     Set<ClassOrInterfaceTypeDetails> globalSearchHandlerClasses =
@@ -156,7 +151,7 @@ public class WebMvcConfigurationMetadataProviderImpl extends
     }
 
     return new WebMvcConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, formatters, globalSearchHandler);
+        governorPhysicalTypeMetadata, globalSearchHandler);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

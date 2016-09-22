@@ -107,8 +107,6 @@ public final class RooJavaType {
   public static final JavaType ROO_WEB_MVC_JSON_CONFIGURATION =
       new JavaType(
           "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcJSONConfiguration");
-  public static final JavaType ROO_FORMATTER = new JavaType(
-      "org.springframework.roo.addon.web.mvc.controller.annotations.formatters.RooFormatter");
   public static final JavaType ROO_JSON = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.responses.json.RooJSON");
   public static final JavaType ROO_THYMELEAF = new JavaType(

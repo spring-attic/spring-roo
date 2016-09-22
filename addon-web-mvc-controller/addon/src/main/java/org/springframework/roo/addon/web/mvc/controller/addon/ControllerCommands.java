@@ -295,13 +295,10 @@ public class ControllerCommands implements CommandMarker {
    * new Controllers on current project.
    *
    * @param all
-   * @param package
-   * @param controller
    * @param entity
-   * @param service
-   * @param path
    * @param responseType
-   * @param formattersPackage
+   * @param package
+   * @param pathPrefix
    */
   @CliCommand(value = "web mvc controller",
       help = "Generates new @RooController inside current project")

@@ -27,7 +27,7 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Metadata for {@link RooWebMvcJSONConfiguration}.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -82,13 +82,12 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *          contain a {@link ClassOrInterfaceTypeDetails} (required)
    * @param convertersJavaPackage
-   * @param formatters list with registered formatters
    */
   public WebMvcJSONConfigurationMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaPackage convertersJavaPackage) {
@@ -115,7 +114,7 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Creates FormattingConversionService field with @Autowired
-   * 
+   *
    * @return FieldMetadataBuilder
    */
   private FieldMetadataBuilder getFormattingConversionServiceField() {
@@ -128,7 +127,7 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Creates LocalValidatorFactoryBean field with @Autowired
-   * 
+   *
    * @return FieldMetadataBuilder
    */
   private FieldMetadataBuilder getLocalValidatorFactoryBeanField() {
@@ -141,7 +140,7 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Method that generates "jacksonDatabindModule" method.
-   * 
+   *
    * @return MethodMetadataBuilder
    */
   public MethodMetadata getJacksonDatabindModule() {
@@ -225,7 +224,7 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
   /**
    * This method uses the provided service JavaType to generate a serviceField
    * FieldMetadataBuilder
-   * 
+   *
    * @param service
    * @return
    */
@@ -246,7 +245,7 @@ public class WebMvcJSONConfigurationMetadata extends AbstractItdTypeDetailsProvi
   /**
    * This method uses the provided service JavaType to generate a serviceField
    * name
-   * 
+   *
    * @param service
    * @return
    */

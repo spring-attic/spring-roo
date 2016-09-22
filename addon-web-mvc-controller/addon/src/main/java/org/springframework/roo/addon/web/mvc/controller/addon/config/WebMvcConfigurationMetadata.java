@@ -1,11 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -23,13 +17,17 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Metadata for {@link RooWebMVCConfiguration}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -45,7 +43,6 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
       "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean");
 
   private ImportRegistrationResolver importResolver;
-  private Set<ClassOrInterfaceTypeDetails> formatters;
   private JavaType globalSearchHandler;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -73,21 +70,18 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
-   * @param formatters list with registered formatters
-   * 
+   *
    */
   public WebMvcConfigurationMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      Set<ClassOrInterfaceTypeDetails> formatters, final JavaType globalSearchHandler) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType globalSearchHandler) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
-    this.formatters = formatters;
     this.globalSearchHandler = globalSearchHandler;
 
     // Add @Configuration
@@ -97,21 +91,8 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     ensureGovernorExtends(new JavaType(
         "org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter"));
 
-    // Add necessary services
-    for (ClassOrInterfaceTypeDetails formatter : this.formatters) {
-      // Getting service
-      JavaType service =
-          (JavaType) formatter.getAnnotation(RooJavaType.ROO_FORMATTER).getAttribute("service")
-              .getValue();
-      ensureGovernorHasField(getServiceField(service));
-    }
-
     // Add validator method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getValidatorMethod()));
-
-
-    // Add addFormatters method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getAddFormattersMethod()));
 
     // Add localResolver
     ensureGovernorHasMethod(new MethodMetadataBuilder(getLocaleResolver()));
@@ -125,7 +106,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     // Add addArgumentResolvers() @Override method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getAddArgumentResolvers()));
 
-    // Add globalSearchResolver() 
+    // Add globalSearchResolver()
     ensureGovernorHasMethod(new MethodMetadataBuilder(getGlobalSearchResolver()));
 
     // Build the ITD
@@ -134,8 +115,8 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * This method returns addArgumentResolvers() method annotated with @Override
-   * 
-   * @return MethodMetadata that contains all information about addArgumentResolvers 
+   *
+   * @return MethodMetadata that contains all information about addArgumentResolvers
    * method.
    */
   public MethodMetadata getAddArgumentResolvers() {
@@ -180,8 +161,8 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * This method returns globalSearchResolver() method annotated with @Bean
-   * 
-   * @return MethodMetadata that contains all information about globalSearchResolver 
+   *
+   * @return MethodMetadata that contains all information about globalSearchResolver
    * method.
    */
   public MethodMetadata getGlobalSearchResolver() {
@@ -219,7 +200,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * Method that generates "validator" method.
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getValidatorMethod() {
@@ -259,117 +240,10 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     return methodBuilder.build();
   }
 
-  /**
-   * Method that generates "addFormatters" method.
-   * 
-   * @return MethodMetadata
-   */
-  public MethodMetadata getAddFormattersMethod() {
-
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("addFormatters");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType(
-        "org.springframework.format.FormatterRegistry")));
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("registry"));
-
-    if (governorHasMethod(methodName,
-        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
-      return getGovernorMethod(methodName,
-          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    //  if (!(registry instanceof FormattingConversionService)) {
-    bodyBuilder.appendFormalLine(String.format("if (!(registry instanceof %s)) {", new JavaType(
-        "org.springframework.format.support.FormattingConversionService")
-        .getNameIncludingTypeParameters(false, importResolver)));
-    bodyBuilder.indent();
-
-    // return;
-    bodyBuilder.appendFormalLine("return;");
-    bodyBuilder.indentRemove();
-
-    bodyBuilder.appendFormalLine("}");
-
-    // FormattingConversionService conversionService = (FormattingConversionService) registry;
-    bodyBuilder
-        .appendFormalLine("FormattingConversionService conversionService = (FormattingConversionService) registry;");
-
-    // // Entity Formatters
-    bodyBuilder.appendFormalLine("");
-    bodyBuilder.appendFormalLine("// Entity Formatters");
-
-    // Register formatters
-    for (ClassOrInterfaceTypeDetails formatter : this.formatters) {
-
-      // Getting service
-      JavaType service =
-          (JavaType) formatter.getAnnotation(RooJavaType.ROO_FORMATTER).getAttribute("service")
-              .getValue();
-
-      // conversionService.addFormatter(new EntityFormatter(entityService, conversionService));
-      bodyBuilder.appendFormalLine(String.format(
-          "conversionService.addFormatter(new %s(%s, conversionService));", formatter.getType()
-              .getNameIncludingTypeParameters(false, this.importResolver),
-          getServiceFieldName(service)));
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    // Add Override annotation
-    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
-  }
-
-  /**
-   * This method uses the provided service JavaType to generate
-   * a serviceField FieldMetadataBuilder
-   * 
-   * @param service
-   * @return
-   */
-  private FieldMetadataBuilder getServiceField(JavaType service) {
-    List<AnnotationMetadataBuilder> serviceAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-
-    AnnotationMetadataBuilder autowiredAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.AUTOWIRED);
-    serviceAnnotations.add(autowiredAnnotation);
-
-    FieldMetadataBuilder serviceField =
-        new FieldMetadataBuilder(getId(), Modifier.PRIVATE, serviceAnnotations, new JavaSymbolName(
-            getServiceFieldName(service)), service);
-
-    return serviceField;
-  }
-
-  /**
-   * This method uses the provided service JavaType to generate
-   * a serviceField name
-   * 
-   * @param service
-   * @return
-   */
-  private String getServiceFieldName(JavaType service) {
-    return StringUtils.uncapitalize(service.getSimpleTypeName());
-  }
-
 
   /**
    * Method that generates "localeResolver" method.
-   * 
+   *
    * @return MethodMetadata
    */
   public MethodMetadata getLocaleResolver() {
@@ -423,7 +297,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * Method that generates "localeChangeInterceptor" method.
-   * 
+   *
    * @return MethodMetadata
    */
   public MethodMetadata getLocaleChangeInterceptor() {
@@ -473,7 +347,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * Method that generates "addInterceptors" method.
-   * 
+   *
    * @return MethodMetadata
    */
   public MethodMetadata getAddInterceptors() {
