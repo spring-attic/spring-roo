@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
@@ -436,7 +437,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   /**
    * Method that generates "delete" method.
    * 
-   * @return MethodMetadataBuilder with public void delete(Long id); structure
+   * @return MethodMetadataBuilder with public void delete(Entity entity); structure
    */
   public MethodMetadata getDeleteMethod() {
     // Define method name
@@ -444,11 +445,12 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.entity));
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames
+        .add(new JavaSymbolName(StringUtils.uncapitalize(this.entity.getSimpleTypeName())));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
