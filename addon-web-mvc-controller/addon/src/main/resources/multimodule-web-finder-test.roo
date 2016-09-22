@@ -9,39 +9,39 @@ field string --fieldName name
 field date --fieldName birthday --type java.util.Calendar
 repository jpa --all --package repository:~
 service --all --apiPackage service-api:~ --implPackage service-impl:~
-web mvc setup 
+web mvc setup
 web mvc controller --all --package application:~.web
 
 
 
 #====================================================================
-# TEST 1:  Try to create a finder without generate one                  
+# TEST 1:  Try to create a finder without generate one
 #--------------------------------------------------------------------
 # Goal:    Fail if not exists a finder in the repository
 #
 #web mvc finder --controller application:~.web.OwnerController --finder findById
-#       
+#
 # Output:  ERROR: Repository related to controller does not have any finder generated. Use 'finder add' command to solve this.
 #          --finder parameter should be completed with related service finders.
-#          
-# Result:  Inform us that OwnerRepository does not have any finder                                              
+#
+# Result:  Inform us that OwnerRepository does not have any finder
 #====================================================================
 
-  
+
 #====================================================================
-# TEST 2:  Try to create all finders without generate one                   
+# TEST 2:  Try to create all finders without generate one
 #--------------------------------------------------------------------
 # Goal:    Fail if not exists a finder in the repository
 #
 #web mvc finder --controller application:~.web.OwnerController --all --responseType JSON
-#       
+#
 # Output:  ERROR: Repository related to controller does not have any finder generated. Use 'finder add' command to solve this.
-#          
-# Result:  Inform us that OwnerRepository does not have any finder                                                  
+#
+# Result:  Inform us that OwnerRepository does not have any finder
 #====================================================================
 
 #====================================================================
-# TEST 3:  Include dependencies   
+# TEST 3:  Include dependencies
 #--------------------------------------------------------------------
 # Goal:    Test if dependencies between modules are added
 #
@@ -49,81 +49,81 @@ entity jpa --class pet:~.Pet
 entity jpa --class city:~.City
 entity jpa --class address:~.Address
 module focus --moduleName model
-field reference --fieldName pet --type pet:~.Pet --class ~.Owner 
+field reference --fieldName pet --type pet:~.Pet --class ~.Owner
 field reference --fieldName city --type city:~.City
 field reference --fieldName address --type address:~.Address
 finder add --entity model:~.Owner --name findByNameAndPet
 finder add --entity model:~.Owner --name findAddressById
 finder add --entity model:~.Owner --name findFirst1CityById
 web mvc finder --controller application:~.web.OwnerController --all --responseType JSON
-#       
+#
 # Output:  ...
 #          Updated application:SRC_MAIN_JAVA/org/example/application/web/OwnerController.java
 #          Updated application:ROOT/pom.xml [added dependency org.example:pet:0.1.0.BUILD-SNAPSHOT; added dependency org.example:address:0.1.0.BUILD-SNAPSHOT; added dependency org.example:city:0.1.0.BUILD-SNAPSHOT]
 #          Updated application:SRC_MAIN_JAVA/org/example/application/web/OwnerController_Roo_JSON.aj
-#          
+#
 # Result:  After generate the finder, pet, city and address modules
-#          are included as dependencies into model module                                        
+#          are included as dependencies into model module
 #====================================================================
 
 
 
 
 #====================================================================
-# TEST 4:  Generate a finder             
+# TEST 4:  Generate a finder
 #--------------------------------------------------------------------
 # Goal:    Test if finder is added
 #
 finder add --entity model:~.Owner --name findById
 module focus --moduleName application
 web mvc finder --controller ~.web.OwnerController --finder findById --responseType JSON
-#       
+#
 # Output:  Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
 #          Updated service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService_Roo_Service.aj
 #          Updated application:SRC_MAIN_JAVA/org/example/application/web/OwnerController.java
 #          Updated application:SRC_MAIN_JAVA/org/example/application/web/OwnerController_Roo_JSON.aj
-#          
+#
 # Result:  Adds finders to @RooJSON annotation @RooJSON(finders = { "findById" }),
 #          and generates findById method in the JSON aj:
 #		   @RequestMapping(method = RequestMethod.GET, value = "/findById", produces = produces = MediaType.APPLICATION_JSON_VALUE)
 #		   @ResponseBody
 #		   public List<Owner> OwnerController.findById(@RequestParam Long id) {
 #			 return ownerService.findById(id);
-#		   }                                    
+#		   }
 #====================================================================
 
 
 
 #====================================================================
-# TEST 5:  Generate a finder from other module           
+# TEST 5:  Generate a finder from other module
 #--------------------------------------------------------------------
 # Goal:    Test if finder is added
 #
 finder add --entity model:~.Owner --name findNameById
 module focus --moduleName ~
 web mvc finder --controller application:~.web.OwnerController --finder findNameById --responseType JSON
-#       
+#
 # Output:  Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository.java
 #          Updated repository:SRC_MAIN_JAVA/org/example/repository/OwnerRepository_Roo_Finder.aj
 #          Updated service-impl:SRC_MAIN_JAVA/org/example/service/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated service-api:SRC_MAIN_JAVA/org/example/service/api/OwnerService_Roo_Service.aj
 #          Updated application:SRC_MAIN_JAVA/org/example/application/web/OwnerController.java
 #          Updated application:SRC_MAIN_JAVA/org/example/application/web/OwnerController_Roo_JSON.aj
-#          
+#
 # Result:  Adds finders to @RooJSON annotation @RooJSON(finders = { "findNameById" }),
 #          and generates findById method in the JSON aj:
 #		   @RequestMapping(method = RequestMethod.GET, value = "/findNameById", produces = MediaType.APPLICATION_JSON_VALUE)
 #			  @ResponseBody
 #			  public List<String> OwnerController.findNameById(@RequestParam Long id) {
 #			      return ownerService.findNameById(id);
-#			  }                                    
+#			  }
 #====================================================================
 
 
 #====================================================================
-# TEST 6:  Generate a finder that already exists         
+# TEST 6:  Generate a finder that already exists
 #--------------------------------------------------------------------
 # Goal:    Check that nothing happens if a finder is already added
 #
@@ -131,15 +131,15 @@ module focus --moduleName model
 web mvc finder --controller application:org.example.application.web.OwnerController --finder findById --responseType JSON
 module focus --moduleName application
 web mvc finder --controller ~.web.OwnerController --all --responseType JSON
-#       
-# Output:  
-#          
-# Result:  Since finder is already generated, nothing happens                                                
+#
+# Output:
+#
+# Result:  Since finder is already generated, nothing happens
 #====================================================================
 
 
 #====================================================================
-# TEST 7:  Generate all finders    
+# TEST 7:  Generate all finders
 #--------------------------------------------------------------------
 # Goal:    Test if all finders are added into controller
 #
@@ -147,12 +147,12 @@ finder add --entity model:~.Owner --name findByName
 finder add --entity model:~.Owner --name queryFirst1ByBirthdayBetween
 module focus --moduleName application
 web mvc finder --controller ~.web.OwnerController --all --responseType JSON
-#       
+#
 # Output:  ...
 #          Updated SRC_MAIN_JAVA/org/example/web/OwnerController.java
 #          Updated SRC_MAIN_JAVA/org/example/web/OwnerController_Roo_JSON.aj
-#          
-# Result:  Adds finders to @RooJSON annotation, 
+#
+# Result:  Adds finders to @RooJSON annotation,
 #              @RooJSON(finders = { ..., "findByName", "queryFirst1ByBirthdayBetween" })
 #
 #          and generates methods in the JSON aj:
@@ -160,16 +160,16 @@ web mvc finder --controller ~.web.OwnerController --all --responseType JSON
 #		        @ResponseBody
 #		        public List<Owner> OwnerController.findByName(@RequestParam String name) {
 #		            return ownerService.findByName(name);
-#		        }    
+#		        }
 #		        @RequestMapping(method = RequestMethod.GET, value = "/queryFirst1ByBirthdayBetween", produces = MediaType.APPLICATION_JSON_VALUE)
 #		        @ResponseBody
 #		        public Owner OwnerController.queryFirst1ByBirthdayBetween(@RequestParam Calendar birthday1, @RequestParam Calendar birthday2) {
 #		           return ownerService.queryFirst1ByBirthdayBetween(birthday1, birthday2);
-#		       }                                               
+#		       }
 #====================================================================
 
 #====================================================================
-# TEST 8:  Generate all finders from other module   
+# TEST 8:  Generate all finders from other module
 #--------------------------------------------------------------------
 # Goal:    Test if all finders are added to the controller
 #
@@ -177,12 +177,12 @@ finder add --entity model:~.Owner --name findByNameOrId
 finder add --entity model:~.Owner --name queryFirst1ByBirthdayIn
 module focus --moduleName model
 web mvc finder --controller application:~.web.OwnerController --all --responseType JSON
-#       
+#
 # Output:  ...
 #          Updated SRC_MAIN_JAVA/org/example/web/OwnerController.java
 #          Updated SRC_MAIN_JAVA/org/example/web/OwnerController_Roo_JSON.aj
-#          
-# Result:  Adds finders to @RooJSON annotation, 
+#
+# Result:  Adds finders to @RooJSON annotation,
 #              @RooJSON(finders = { ..., "findByNameOrId", "queryFirst1ByBirthdayIn" })
 #
 #          and generates methods in the JSON aj:
@@ -190,25 +190,25 @@ web mvc finder --controller application:~.web.OwnerController --all --responseTy
 #		        @ResponseBody
 #		        public List<Owner> OwnerController.findByNameOrId(@RequestParam String name, @RequestParam Long id) {
 #		            return ownerService.findByNameOrId(name, id);
-#		        }    
+#		        }
 #		        @RequestMapping(method = RequestMethod.GET, value = "/queryFirst1ByBirthdayIn", produces = MediaType.APPLICATION_JSON_VALUE)
 #		        @ResponseBody
 #		        public Owner OwnerController.queryFirst1ByBirthdayIn(@RequestParam List<Calendar> birthdayList) {
 #		            return ownerService.queryFirst1ByBirthdayIn(birthdayList);
-#		        }                                             
+#		        }
 #====================================================================
 
 
 
 #====================================================================
-# TEST 9:  Generate a DTO finder             
+# TEST 9:  Generate a DTO finder
 #--------------------------------------------------------------------
 # Goal:    Test if finder and its dependencies are added
 #
 dto --entity model:~.Owner --fields pet --class dto:~.OwnerDTO
 finder add --entity model:~.Owner --name findByPet --returnType dto:~.OwnerDTO
 web mvc finder --controller application:~.web.OwnerController --finder findByPet --responseType JSON
-#       
+#
 # Output:  Created dto:SRC_MAIN_JAVA/org/example/dto/OwnerDTO.java
 #          Updated dto:ROOT/pom.xml [added dependency org.example:pet:0.1.0.BUILD-SNAPSHOT]
 #          Created dto:SRC_MAIN_JAVA/org/example/dto/OwnerDTO_Roo_JavaBean.aj
@@ -222,14 +222,14 @@ web mvc finder --controller application:~.web.OwnerController --finder findByPet
 #          Updated application:SRC_MAIN_JAVA/org/example/application/web/OwnerController.java
 #          Updated application:ROOT/pom.xml [added dependency org.example:dto:0.1.0.BUILD-SNAPSHOT]
 #          Updated application:SRC_MAIN_JAVA/org/example/application/web/OwnerController_Roo_JSON.aj
-# 
+#
 # Result:  Adds finders to @RooJSON annotation @RooJSON(finders = { "findById" }),
 #          and generates findById method in the JSON aj:
 #		   @RequestMapping(method = RequestMethod.GET, value = "/findByPet", produces = MediaType.APPLICATION_JSON_VALUE)
 #          @ResponseBody
 #          public List<OwnerDTO> OwnerController.findByPet(@RequestParam Pet pet) {
 #             return ownerService.findByPet(pet);
-#          }                                   
+#          }
 #====================================================================
 
 #####################################################################
@@ -237,55 +237,54 @@ web mvc finder --controller application:~.web.OwnerController --finder findByPet
 #####################################################################
 
 #====================================================================
-# TEST 10: Create a finder with an invalid response type       
+# TEST 10: Create a finder with an invalid response type
 #--------------------------------------------------------------------
 # Goal:    Fail if response type is not supported by the controller
 #
 # web mvc finder --controller application:~.web.OwnerController --finder findById --responseType THYMELEAF
-#       
+#
 # Output:  --responseType parameter should be completed with the provided response types.
-#          
-# Result:  Since OwnerController only support JSON responses, the 
-#          generation fails                                                
+#
+# Result:  Since OwnerController only support JSON responses, the
+#          generation fails
 #====================================================================
 
 
 #====================================================================
-# TEST 11: Add a non-existent finder                  
+# TEST 11: Add a non-existent finder
 #--------------------------------------------------------------------
 # Goal:    Fail if finder does not exist in the controller service
 #
 # Open OwnerController.java
 # Add "findByActive" to @RooJSON finder and save
-#       
-# Output:  ERROR: Service org.example.service.api.OwnerService does not have these finder methods: findByActive  
-#          
-# Result:  Informs us that OwnerService does not have the method                                               
+#
+# Output:  ERROR: Service org.example.service.api.OwnerService does not have these finder methods: findByActive
+#
+# Result:  Informs us that OwnerService does not have the method
 #====================================================================
 
 #====================================================================
-# TEST 12:  Add an existent finder               
+# TEST 12:  Add an existent finder
 #--------------------------------------------------------------------
 # Goal:     Test if a finder is added manually
 #
 finder add --entity model:~.Owner --name findByIdOrderByNameAsc
 # Open OwnerController.java
 # Add "findByIdOrderByNameAsc" to @RooJSON finders and save
-#       
+#
 # Output:  Updated SRC_MAIN_JAVA/org/example/rep/OwnerRepository.java
 #          Updated SRC_MAIN_JAVA/org/example/rep/OwnerRepository_Roo_Finder.aj
 #          Updated SRC_MAIN_JAVA/org/example/api/OwnerService_Roo_Service.aj
 #          Updated SRC_MAIN_JAVA/org/example/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Updated SRC_MAIN_JAVA/org/example/web/OwnerController_Roo_JSON.aj
-#          
+#
 # Result:  Since OwnerService has this method, generates it in the JSON aj:
 #	       @RequestMapping(method = RequestMethod.GET, value = "/findByIdOrderByNameAsc", produces = MediaType.APPLICATION_JSON_VALUE)
 #          @ResponseBody
 #          public List<Owner> OwnerController.findByIdOrderByNameAsc(@RequestParam Long id) {
 #             return ownerService.findByIdOrderByNameAsc(id);
-#          }  
+#          }
 #====================================================================
 
 
- 
- 
+

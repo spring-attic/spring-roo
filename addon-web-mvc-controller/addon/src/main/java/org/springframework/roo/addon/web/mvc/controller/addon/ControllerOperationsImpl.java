@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -464,7 +463,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
         topLevelPackage =
             getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
       }
-      controllerPackage = new JavaPackage(topLevelPackage.concat(".web"), module);
+      String packageStr = topLevelPackage;
+      if (StringUtils.isNotEmpty(module)) {
+        packageStr = packageStr.concat(".").concat(module);
+      }
+      controllerPackage = new JavaPackage(packageStr.concat(".web"), module);
     }
 
     Iterator<ClassOrInterfaceTypeDetails> it = controllers.iterator();

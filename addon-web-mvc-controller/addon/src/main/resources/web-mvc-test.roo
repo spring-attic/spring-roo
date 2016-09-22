@@ -1,4 +1,4 @@
-project setup --topLevelPackage org.example 
+project setup --topLevelPackage org.example
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class ~.Owner
 field string --fieldName name
@@ -8,12 +8,12 @@ service --all --apiPackage ~.api --implPackage ~.impl
 
 
 #====================================================================
-# TEST 1:  Install web layer for Weblogic servers                   
+# TEST 1:  Install web layer for Weblogic servers
 #--------------------------------------------------------------------
 # Goal:    Check if artifacts are created
 #
 web mvc setup --appServer WEBLOGIC
-#       
+#
 # Output:  Created SRC_MAIN_JAVA/org/example/config
 #          Created SRC_MAIN_JAVA/org/example/config/WebMvcConfiguration.java
 #          Updated SRC_MAIN_RESOURCES/application.properties
@@ -22,63 +22,65 @@ web mvc setup --appServer WEBLOGIC
 #          Created ROOT/src/main/webapp/WEB-INF/web.xml
 #          Updated ROOT/pom.xml [added dependency org.springframework.boot:spring-boot-starter-web:null; added plugin org.apache.maven.plugins:maven-war-plugin:-]
 #          Created SRC_MAIN_JAVA/org/example/config/WebMvcConfiguration_Roo_WebMvcConfiguration.aj
-#          
-# Result:  Creates a WebMvcConfiguration class, adds the starter 
-#          web dependency and maven war plugin, and creates weblogic 
-#          and web configuration files                                                  
+#
+# Result:  Creates a WebMvcConfiguration class, adds the starter
+#          web dependency and maven war plugin, and creates weblogic
+#          and web configuration files
 #====================================================================
 
-  
+
 #====================================================================
-# TEST 2:  Create controller                
+# TEST 2:  Create controller
 #--------------------------------------------------------------------
 # Goal:    Test if controller artifacts are created
 #
-web mvc controller --controller ~.web.OwnerController  --entity ~.Owner --service ~.api.OwnerService --path myowners --responseType JSON --formattersPackage ~.web.formatters
-#       
-# Output:  Created SRC_MAIN_JAVA/org/example/web
-#          Created SRC_MAIN_JAVA/org/example/web/OwnerController.java
-#          Created SRC_MAIN_JAVA/org/example/web/formatters
-#          Created SRC_MAIN_JAVA/org/example/web/formatters/OwnerFormatter.java
-#          Created SRC_MAIN_JAVA/org/example/web/OwnerController_Roo_Controller.aj
-#          Created SRC_MAIN_JAVA/org/example/web/OwnerController_Roo_Response_Type_JSON.aj
-#          Created SRC_MAIN_JAVA/org/example/web/formatters/OwnerFormatter_Roo_Formatter.aj
-#          Updated SRC_MAIN_JAVA/org/example/config/WebMvcConfiguration_Roo_WebMvcConfiguration.aj
-#          
-# Result:  Creates controller and formatter classes and aj                                                  
+web mvc controller --entity ~.Owner --responseType JSON
+#
+# Output:  Created SRC_MAIN_JAVA/org/example/web/OwnersCollectionController.java
+#          Created SRC_MAIN_JAVA/org/example/web/OwnersItemController.java
+#          Created SRC_MAIN_JAVA/org/example/web/OwnersCollectionController_Roo_Controller.aj
+#          Created SRC_MAIN_JAVA/org/example/web/OwnersCollectionController_Roo_JSON.aj
+#          Created SRC_MAIN_JAVA/org/example/web/OwnersItemController_Roo_Controller.aj
+#          Created SRC_MAIN_JAVA/org/example/web/OwnersItemController_Roo_JSON.aj
+#
+# Result:  Creates controller and formatter classes and aj
 #====================================================================
 
 
 #====================================================================
-# TEST 3:  Create a second controller for the same entity               
+# TEST 3:  Create a second controller for the same entity
 #--------------------------------------------------------------------
 # Goal:    Test if several controllers are created for the same entity
 #
-web mvc controller --controller ~.web.OwnerOtherController  --entity ~.Owner --service ~.api.OwnerService --path otherowners --formattersPackage ~.web.formatters
-#       
-# Output:  Created SRC_MAIN_JAVA/org/example/web/OwnerOtherController.java
-#          Created SRC_MAIN_JAVA/org/example/web/OwnerOtherController_Roo_Controller.aj
-#          Created SRC_MAIN_JAVA/org/example/web/OwnerOtherController_Roo_Response_Type_JSON.aj
-#          
-# Result:  Creates controller class and aj                                                  
+web mvc controller --entity ~.Owner --pathPrefix otherowners --package ~.otherweb
+#
+# Output:  Created SRC_MAIN_JAVA/org/example/otherweb
+#          Created SRC_MAIN_JAVA/org/example/otherweb/OwnersCollectionController.java
+#          Created SRC_MAIN_JAVA/org/example/otherweb/OwnersItemController.java
+#          Created SRC_MAIN_JAVA/org/example/otherweb/OwnersItemController_Roo_Controller.aj
+#          Created SRC_MAIN_JAVA/org/example/otherweb/OwnersItemController_Roo_JSON.aj
+#          Created SRC_MAIN_JAVA/org/example/otherweb/OwnersCollectionController_Roo_Controller.aj
+#          Created SRC_MAIN_JAVA/org/example/otherweb/OwnersCollectionController_Roo_JSON.aj
+#
+# Result:  Creates controller class and aj
 #====================================================================
 
 
 #====================================================================
-# TEST 4:  Generate all controller            
+# TEST 4:  Generate all controller
 #--------------------------------------------------------------------
-# Goal:    Test if all controllers are created 
+# Goal:    Test if all controllers are created
 #
 web mvc controller --all --package ~.web
-#       
-# Output:  Created SRC_MAIN_JAVA/org/example/web/PetController.java
-#          Created SRC_MAIN_JAVA/org/example/web/PetFormatter.java
-#          Created SRC_MAIN_JAVA/org/example/web/PetController_Roo_Controller.aj
-#          Created SRC_MAIN_JAVA/org/example/web/PetController_Roo_Response_Type_JSON.aj
-#          Created SRC_MAIN_JAVA/org/example/web/PetFormatter_Roo_Formatter.aj
-#          Updated SRC_MAIN_JAVA/org/example/config/WebMvcConfiguration_Roo_WebMvcConfiguration.aj
-#          
-# Result:  Creates controller classes and aj for all entities                                               
+#
+# Output:  Created SRC_MAIN_JAVA/org/example/web/PetsCollectionController.java
+#          Created SRC_MAIN_JAVA/org/example/web/PetsItemController.java
+#          Created SRC_MAIN_JAVA/org/example/web/PetsItemController_Roo_Controller.aj
+#          Created SRC_MAIN_JAVA/org/example/web/PetsItemController_Roo_JSON.aj
+#          Created SRC_MAIN_JAVA/org/example/web/PetsCollectionController_Roo_Controller.aj
+#          Created SRC_MAIN_JAVA/org/example/web/PetsCollectionController_Roo_JSON.aj
+#
+# Result:  Creates controller classes and aj for all entities
 #====================================================================
 
 
@@ -89,44 +91,30 @@ web mvc controller --all --package ~.web
 
 
 #====================================================================
-# TEST 5:  Reinstall web layer                  
+# TEST 5:  Reinstall web layer
 #--------------------------------------------------------------------
 # Goal:    Fail to install web layer
 #
 # web mvc setup --appServer WEBLOGIC
-#       
+#
 # Output:  Command 'web mvc setup --appServer WEBLOGIC' was found but is not currently available (type 'help' then ENTER to learn about this command)
-#          
-# Result:  Since web layer has been installed, it cannot be updated                                                  
+#
+# Result:  Since web layer has been installed, it cannot be updated
 #====================================================================
 
 #====================================================================
-# TEST 6:  Reinstall web layer if WebMvcConfiguration does not exit                 
+# TEST 6:  Reinstall web layer if WebMvcConfiguration does not exit
 #--------------------------------------------------------------------
-# Goal:    Test if WebMvcConfiguration class is created 
+# Goal:    Test if WebMvcConfiguration class is created
 #
 # Delete WebMvcConfiguration class
 # Close and open roo console
 # web mvc setup --appServer WEBLOGIC
-#       
+#
 # Output:  Created application:SRC_MAIN_JAVA/org/example/config/WebMvcConfiguration.java
 #          Created application:SRC_MAIN_JAVA/org/example/config/WebMvcConfiguration_Roo_WebMvcConfiguration.aj
-#          
-# Result:  Since the project does not have a class annotated with 
+#
+# Result:  Since the project does not have a class annotated with
 #          @RooWvcConfiguration, web layer is installed again
 #====================================================================
 
-#====================================================================
-# TEST 7:  Create controller with an invalid service            
-#--------------------------------------------------------------------
-# Goal:    Fail if the service is not related to the entity
-#
-# web mvc controller --controller ~.web.OwnerExtraController --entity ~.Owner --path extra --service ~.api.PetService
-#       
-# Output:  ERROR: Provided service 'org.example.api.PetService' is not related with provided entity 'org.example.Owner' class. 
-#          
-# Result:  Inform us that the service is not related to the entity                                              
-#====================================================================
-
- 
- 
