@@ -511,35 +511,32 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     ClassOrInterfaceTypeDetails collectionControllerDetails =
         getTypeLocationService().getTypeDetails(collectionController);
-    if (collectionControllerDetails != null) {
-      LOGGER.log(Level.INFO, String.format(
-          "ERROR: Class '%s' already exists inside your generated project.",
-          collectionController.getFullyQualifiedTypeName()));
+    if (collectionControllerDetails == null) {
+      List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+      annotations.add(getRooControllerAnnotation(entity, pathPrefix, ControllerType.COLLECTION));
+
+      // Add responseType annotation. Don't use responseTypeService annotate to
+      // prevent multiple
+      // updates of the .java file. Annotate operation will be used during
+      // controller update.
+      annotations.add(new AnnotationMetadataBuilder(responseType.getAnnotation()));
+
+      final LogicalPath controllerPath =
+          getPathResolver().getPath(collectionController.getModule(), Path.SRC_MAIN_JAVA);
+      final String resourceIdentifier =
+          getTypeLocationService().getPhysicalTypeCanonicalPath(collectionController,
+              controllerPath);
+      final String declaredByMetadataId =
+          PhysicalTypeIdentifier.createIdentifier(collectionController,
+              getPathResolver().getPath(resourceIdentifier));
+
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC,
+              collectionController, PhysicalTypeCategory.CLASS);
+      cidBuilder.setAnnotations(annotations);
+
+      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
     }
-
-    List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-    annotations.add(getRooControllerAnnotation(entity, pathPrefix, ControllerType.COLLECTION));
-
-    // Add responseType annotation. Don't use responseTypeService annotate to
-    // prevent multiple
-    // updates of the .java file. Annotate operation will be used during
-    // controller update.
-    annotations.add(new AnnotationMetadataBuilder(responseType.getAnnotation()));
-
-    final LogicalPath controllerPath =
-        getPathResolver().getPath(collectionController.getModule(), Path.SRC_MAIN_JAVA);
-    final String resourceIdentifier =
-        getTypeLocationService().getPhysicalTypeCanonicalPath(collectionController, controllerPath);
-    final String declaredByMetadataId =
-        PhysicalTypeIdentifier.createIdentifier(collectionController,
-            getPathResolver().getPath(resourceIdentifier));
-
-    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC,
-            collectionController, PhysicalTypeCategory.CLASS);
-    cidBuilder.setAnnotations(annotations);
-
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
     // Same operation to itemController
 
@@ -552,35 +549,31 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     ClassOrInterfaceTypeDetails itemControllerDetails =
         getTypeLocationService().getTypeDetails(itemController);
-    if (itemControllerDetails != null) {
-      LOGGER.log(Level.INFO, String.format(
-          "ERROR: Class '%s' already exists inside your generated project.",
-          itemController.getFullyQualifiedTypeName()));
+    if (itemControllerDetails == null) {
+      List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+      annotations = new ArrayList<AnnotationMetadataBuilder>();
+      annotations.add(getRooControllerAnnotation(entity, pathPrefix, ControllerType.ITEM));
+
+      // Add responseType annotation. Don't use responseTypeService annotate to
+      // prevent multiple
+      // updates of the .java file. Annotate operation will be used during
+      // controller update.
+      annotations.add(new AnnotationMetadataBuilder(responseType.getAnnotation()));
+
+      final LogicalPath controllerPathItem =
+          getPathResolver().getPath(itemController.getModule(), Path.SRC_MAIN_JAVA);
+      final String resourceIdentifierItem =
+          getTypeLocationService().getPhysicalTypeCanonicalPath(itemController, controllerPathItem);
+      final String declaredByMetadataIdItem =
+          PhysicalTypeIdentifier.createIdentifier(itemController,
+              getPathResolver().getPath(resourceIdentifierItem));
+      ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+          new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataIdItem, Modifier.PUBLIC,
+              itemController, PhysicalTypeCategory.CLASS);
+      cidBuilder.setAnnotations(annotations);
+
+      getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
     }
-
-    annotations = new ArrayList<AnnotationMetadataBuilder>();
-    annotations.add(getRooControllerAnnotation(entity, pathPrefix, ControllerType.ITEM));
-
-    // Add responseType annotation. Don't use responseTypeService annotate to
-    // prevent multiple
-    // updates of the .java file. Annotate operation will be used during
-    // controller update.
-    annotations.add(new AnnotationMetadataBuilder(responseType.getAnnotation()));
-
-    final LogicalPath controllerPathItem =
-        getPathResolver().getPath(itemController.getModule(), Path.SRC_MAIN_JAVA);
-    final String resourceIdentifierItem =
-        getTypeLocationService().getPhysicalTypeCanonicalPath(itemController, controllerPathItem);
-    final String declaredByMetadataIdItem =
-        PhysicalTypeIdentifier.createIdentifier(itemController,
-            getPathResolver().getPath(resourceIdentifierItem));
-
-    cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataIdItem, Modifier.PUBLIC,
-            itemController, PhysicalTypeCategory.CLASS);
-    cidBuilder.setAnnotations(annotations);
-
-    getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
     // Check multimodule project
     if (getProjectOperations().isMultimoduleProject()) {
