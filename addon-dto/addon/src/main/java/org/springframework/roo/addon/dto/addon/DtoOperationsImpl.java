@@ -252,9 +252,10 @@ public class DtoOperationsImpl implements DtoOperations {
    * 
    * @param fieldsString the fields provided by user.
    * @param entity the associated entity to use for searching the fields.
-   * @return List<FieldMetadata> with the fields to add in the Projection.
+   * @return Map<String, FieldMetadata> with the field name to add in the Projection 
+   *            and its metadata.
    */
-  private Map<String, FieldMetadata> buildFieldsFromString(String fieldsString, JavaType entity) {
+  public Map<String, FieldMetadata> buildFieldsFromString(String fieldsString, JavaType entity) {
 
     // Create Map for storing FieldMetadata and it's future new name
     Map<String, FieldMetadata> fieldsToAdd = new HashMap<String, FieldMetadata>();

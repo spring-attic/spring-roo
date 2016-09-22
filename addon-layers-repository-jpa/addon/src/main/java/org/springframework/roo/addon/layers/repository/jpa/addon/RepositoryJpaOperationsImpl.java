@@ -197,6 +197,9 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // Generates repository interface
     addRepositoryInterface(interfaceType, domainType, entityDetails, interfaceIdentifier);
 
+    // Generate QueryDslRepositorySupportExt
+    generateQueryDslRepositorySupportExt(interfaceType.getPackage());
+
     // By default, generate RepositoryCustom interface and its
     // implementation that allow developers to include its dynamic queries
     // using QueryDSL
@@ -531,6 +534,59 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     generateRepositoryCustomImpl(interfaceType, repositoryType, domainType);
 
     return interfaceType;
+
+  }
+
+  /**
+   * Method that generates QueryDslRepositorySupportExt on current package. 
+   * If it already exists in this or other package, it will not be generated.
+   * 
+   * @param repositoryPackage Package where QueryDslRepositorySupportExt should 
+   *            be generated
+   * @return JavaType with existing or new QueryDslRepositorySupportExt
+   */
+  private JavaType generateQueryDslRepositorySupportExt(JavaPackage repositoryPackage) {
+
+    // Create JavaType in repositoryPackage
+    final JavaType javaType =
+        new JavaType(String.format("%s.QueryDslRepositorySupportExt", repositoryPackage),
+            repositoryPackage.getModule());
+    final String physicalPath =
+        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
+
+    // Find GlobalSearch and get fully qualified name
+    Set<JavaType> globalSearchTypes =
+        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
+    JavaType globalSearch = null;
+    if (!globalSearchTypes.isEmpty()) {
+      for (JavaType type : globalSearchTypes) {
+        globalSearch = type;
+      }
+    }
+    Validate.notNull(globalSearch,
+        "The project must have a GlobalSearch class to work properly with repositories.");
+
+    // Including ReadOnlyRepository interface
+    InputStream inputStream = null;
+    try {
+      // Use defined template
+      inputStream =
+          FileUtils.getInputStream(getClass(), "QueryDslRepositorySupportExt-template._java");
+      String input = IOUtils.toString(inputStream);
+      // Replacing package
+      input = input.replace("__PACKAGE__", repositoryPackage.getFullyQualifiedPackageName());
+      // Replacing GlobalSerach import
+      input = input.replace("__GLOBAL_SEARCH_IMPORT__", globalSearch.getFullyQualifiedTypeName());
+
+      // Creating ReadOnlyRepository interface
+      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
+    } catch (final IOException e) {
+      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
+    } finally {
+      IOUtils.closeQuietly(inputStream);
+    }
+
+    return javaType;
 
   }
 

@@ -24,6 +24,12 @@ public class LogicalPath {
   public static final String MODULE_PATH_SEPARATOR = ":";
 
   /**
+   * The character that separates "folders" in the textual representation of a 
+   * {@link LogicalPath}.
+   */
+  public static final String PATH_SEPARATOR = ".";
+
+  /**
    * Creates an instance with the given path in the given module
    * 
    * @param path the path to set (required)

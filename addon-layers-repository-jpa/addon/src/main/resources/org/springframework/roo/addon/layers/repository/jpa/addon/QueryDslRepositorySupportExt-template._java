@@ -1,0 +1,160 @@
+package __PACKAGE__;
+
+import __GLOBAL_SEARCH_IMPORT__;
+
+import com.mysema.query.BooleanBuilder;
+import com.mysema.query.jpa.JPQLQuery;
+import com.mysema.query.types.Expression;
+import com.mysema.query.types.Order;
+import com.mysema.query.types.OrderSpecifier;
+import com.mysema.query.types.OrderSpecifier.NullHandling;
+import com.mysema.query.types.Path;
+import com.mysema.query.types.expr.NumberExpression;
+import com.mysema.query.types.path.PathBuilder;
+import com.mysema.query.types.path.StringPath;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.support.QueryDslRepositorySupport;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Type;
+
+/**
+ * Support class with additional utilities to implement repositories using QueryDsl.
+ *
+ * @param <T> entity class to manage.
+ */
+public class QueryDslRepositorySupportExt<T> extends QueryDslRepositorySupport {
+
+  private final Class<T> domainClass;
+
+  public QueryDslRepositorySupportExt(Class<T> domainClass) {
+    super(domainClass);
+    this.domainClass = domainClass;
+  }
+
+  protected JPQLQuery applyPagination(Pageable pageable, JPQLQuery query) {
+    return getQuerydsl().applyPagination(pageable, query);
+  }
+
+  protected JPQLQuery applyPagination(Pageable pageable, JPQLQuery query,
+      AttributeMappingBuilder mapping) {
+    return applyPagination(pageable, query, mapping.asMap());
+  }
+
+  protected JPQLQuery applyPagination(Pageable pageable, JPQLQuery query,
+      Map<String, Path<?>[]> attributeMapping) {
+
+    Pageable mappedPageable = null;
+    Sort sort = pageable.getSort();
+    if (sort != null) {
+      List<Sort.Order> mappedOrders = new ArrayList<Sort.Order>();
+      for (Sort.Order order : sort) {
+        Path<?>[] paths = attributeMapping.get(order.getProperty());
+        for (Path<?> path : paths) {
+          Sort.Order mappedOrder = new Sort.Order(order.getDirection(), preparePropertyPath(path));
+          mappedOrders.add(mappedOrder);
+        }
+      }
+      mappedPageable =
+          new PageRequest(pageable.getPageNumber(), pageable.getPageSize(), new Sort(mappedOrders));
+      return applyPagination(mappedPageable, query);
+    } else {
+      return applyPagination(pageable, query);
+    }
+
+  }
+
+  protected AttributeMappingBuilder buildMapper() {
+    return new AttributeMappingBuilder();
+  }
+
+  protected JPQLQuery applySorting(Sort sort, JPQLQuery query) {
+    return getQuerydsl().applySorting(sort, query);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  protected JPQLQuery applyOrderById(JPQLQuery query) {
+    EntityType<T> entity = getEntityMetaModel();
+    SingularAttribute<?, ?> id = entity.getId(entity.getIdType().getJavaType());
+    PathBuilder<Object> idPath = getBuilder().get(id.getName());
+
+    return query.orderBy(new OrderSpecifier(Order.ASC, idPath, NullHandling.NullsFirst));
+  }
+
+  private EntityType<T> getEntityMetaModel() {
+    Metamodel metamodel = getEntityManager().getMetamodel();
+    EntityType<T> entity = metamodel.entity(domainClass);
+    return entity;
+  }
+  
+  protected SingularAttribute<? super T, ?> getEntityId() {
+    EntityType<T> entity = getEntityMetaModel();
+    Type<?> idType = entity.getIdType();
+    if (entity.hasSingleIdAttribute()) {
+      return entity.getId(idType.getJavaType());
+    }
+    return null;
+  }
+
+  protected JPQLQuery applyGlobalSearch(GlobalSearch globalSearch, JPQLQuery query,
+      Path<?>... globalSearchAttributes) {
+    if (globalSearch != null && !StringUtils.isEmpty(globalSearch.getText())
+        && globalSearchAttributes.length > 0) {
+      String txt = globalSearch.getText();
+      BooleanBuilder searchCondition = new BooleanBuilder();
+      for (int i = 0; i < globalSearchAttributes.length; i++) {
+        Path<?> path = globalSearchAttributes[i];
+        if (path instanceof StringPath) {
+          StringPath stringPath = (StringPath) path;
+          searchCondition.or(stringPath.containsIgnoreCase(txt));
+        } else if (path instanceof NumberExpression) {
+          searchCondition.or(((NumberExpression<?>) path).like("%".concat(txt).concat("%")));
+        }
+      }
+      return query.where(searchCondition);
+    }
+    return query;
+  }
+
+  protected <M> Page<M> loadPage(JPQLQuery query, Pageable pageable, Expression<M> expression) {
+    long totalFound = query.count();
+    List<M> results = query.list(expression);
+    return new PageImpl<M>(results, pageable, totalFound);
+  }
+
+  private static String preparePropertyPath(Path<?> path) {
+
+    Path<?> root = path.getRoot();
+
+    return root == null || path.equals(root) ? path.toString()
+        : path.toString().substring(root.toString().length() + 1);
+  }
+
+  public static class AttributeMappingBuilder {
+
+    private final Map<String, Path<?>[]> attrMapping = new HashMap<String, Path<?>[]>();
+
+    public AttributeMappingBuilder map(String attribute, Path<?>... realAttributes) {
+      attrMapping.put(attribute, realAttributes);
+      return this;
+    }
+
+    public Map<String, Path<?>[]> asMap() {
+      return Collections.unmodifiableMap(attrMapping);
+    }
+  }
+}

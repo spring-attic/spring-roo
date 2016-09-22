@@ -7,7 +7,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.dto.addon.DtoOperations;
+import org.springframework.roo.addon.dto.addon.DtoOperationsImpl;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
@@ -40,6 +44,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -198,23 +203,16 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     AnnotationMetadata entityProjectionAnnotation =
         returnTypeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
     boolean returnTypeIsProjection = entityProjectionAnnotation != null;
-    List<String> constructorFields = new ArrayList<String>();
 
-    // Get projection constructor fields from @RooEntityProjection
+    // Get projection constructor fields from @RooEntityProjection and add it to a Map with 
+    // projection's variable names
+    Map<JavaType, Map<String, String>> allProjectionFieldMaps =
+        new LinkedHashMap<JavaType, Map<String, String>>();
+    Map<JavaType, Map<String, String>> allProjectionsIdFieldMaps =
+        new LinkedHashMap<JavaType, Map<String, String>>();
     if (returnTypeIsProjection) {
-      AnnotationAttributeValue<?> projectionFields =
-          entityProjectionAnnotation.getAttribute("fields");
-      if (projectionFields != null) {
-        @SuppressWarnings("unchecked")
-        List<StringAttributeValue> values =
-            (List<StringAttributeValue>) projectionFields.getValue();
-
-        // Get entity name as a variable name for building constructor expression
-        String entityVariableName = StringUtils.uncapitalize(entity.getSimpleTypeName());
-        for (StringAttributeValue field : values) {
-          constructorFields.add(entityVariableName.concat(".").concat(field.getValue()));
-        }
-      }
+      buildProjectionFieldNamesMap(entity, returnType, entityProjectionAnnotation,
+          allProjectionFieldMaps);
     }
 
     // Getting repository metadata
@@ -333,9 +331,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     Map<FieldMetadata, MethodMetadata> referencedFieldsMethods =
         repositoryCustomMetadata.getReferencedFieldsFindAllMethods();
 
-    Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames =
-        new HashMap<JavaType, JavaSymbolName>();
-    Map<JavaType, JavaSymbolName> referencedFieldsNames = new HashMap<JavaType, JavaSymbolName>();
+    Map<FieldMetadata, String> referencedFieldsIdentifierNames =
+        new HashMap<FieldMetadata, String>();
 
     List<MethodMetadata> projectionFinderMethods =
         repositoryCustomMetadata.getProjectionFinderMethods();
@@ -343,20 +340,140 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     for (Entry<FieldMetadata, MethodMetadata> referencedFields : referencedFieldsMethods.entrySet()) {
       JavaType referencedField = referencedFields.getKey().getFieldType();
 
-      // Getting idenfierFields 
-      List<FieldMetadata> identifierFields =
-          getPersistenceMemberLocator().getIdentifierFields(referencedField);
-      referencedFieldsIdentifierNames.put(referencedField, identifierFields.get(0).getFieldName());
+      // Get identifier field name in path format
+      String fieldPathName =
+          String.format("%s.%s", StringUtils.uncapitalize(entity.getSimpleTypeName()),
+              StringUtils.uncapitalize(referencedField.getSimpleTypeName()));
 
-      // Getting name
-      referencedFieldsNames.put(referencedField, referencedFields.getKey().getFieldName());
+      // Put keys and values in map
+      referencedFieldsIdentifierNames.put(referencedFields.getKey(), fieldPathName);
+    }
+
+    // Make a list with all projection types
+    List<JavaType> projections = new ArrayList<JavaType>();
+    projections.add(returnType);
+    for (MethodMetadata method : projectionFinderMethods) {
+
+      // Get projection from first parameter of method return type (Page)
+      JavaType projection = method.getReturnType().getParameters().get(0);
+      projections.add(projection);
+    }
+
+    // Add allProjectionFieldMaps for each projection finder and check for id fields
+    for (JavaType projection : projections) {
+      ClassOrInterfaceTypeDetails projectionDetails =
+          getTypeLocationService().getTypeDetails(projection);
+      AnnotationMetadata projectionAnnotation =
+          projectionDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
+      if (projectionAnnotation != null) {
+
+        // Get associated entity from @RooEntityProjection
+        JavaType associatedEntity =
+            (JavaType) entityProjectionAnnotation.getAttribute("entity").getValue();
+
+        // Check if projection fields has been added already
+        if (allProjectionFieldMaps.containsKey(associatedEntity)) {
+          continue;
+        }
+
+        // Get field values in "path" format from annotation
+        AnnotationAttributeValue<?> projectionFields =
+            entityProjectionAnnotation.getAttribute("fields");
+        @SuppressWarnings("unchecked")
+        List<StringAttributeValue> values =
+            (List<StringAttributeValue>) projectionFields.getValue();
+        String projectionFieldsString = "";
+        for (int i = 0; i < values.size(); i++) {
+          if (i == 0) {
+            projectionFieldsString = values.get(i).getValue();
+          } else {
+            projectionFieldsString =
+                projectionFieldsString.concat(",").concat(values.get(i).getValue());
+          }
+
+        }
+
+        // Add fields to allProjectionFieldMaps
+        buildProjectionFieldNamesMap(associatedEntity, projection, projectionAnnotation,
+            allProjectionFieldMaps);
+
+        // Get the original FieldMetadata with its Java name in Projection
+        Map<String, FieldMetadata> projectionOriginalFieldMetadataValues =
+            getDtoOperations().buildFieldsFromString(projectionFieldsString, associatedEntity);
+        List<FieldMetadata> projectionIdentifierFields =
+            getPersistenceMemberLocator().getIdentifierFields(associatedEntity);
+        if (!getPersistenceMemberLocator().getEmbeddedIdentifierFields(associatedEntity).isEmpty()) {
+          projectionIdentifierFields.addAll(getPersistenceMemberLocator()
+              .getEmbeddedIdentifierFields(associatedEntity));
+        }
+
+        // Check if any projection field is an identifier field
+        for (Entry<String, FieldMetadata> projectionOriginalValue : projectionOriginalFieldMetadataValues
+            .entrySet()) {
+          for (FieldMetadata field : projectionIdentifierFields) {
+            if (field.getFieldName().equals(projectionOriginalValue.getValue().getFieldName())
+                && field.getDeclaredByMetadataId().equals(
+                    projectionOriginalValue.getValue().getDeclaredByMetadataId())) {
+
+              // The projection contains identifier fields, so modify them and add them to 
+              // specific Map
+              String originalFieldPathName =
+                  allProjectionFieldMaps.get(projection).get(projectionOriginalValue.getKey());
+              String fieldPathName = "getEntityId()";
+              allProjectionFieldMaps.get(projection).replace(projectionOriginalValue.getKey(),
+                  fieldPathName);
+            }
+          }
+        }
+      }
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, entity, returnTypeIsProjection,
         validIdFields, validFields, repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
-        referencedFieldsMethods, referencedFieldsIdentifierNames, referencedFieldsNames,
-        constructorFields, projectionFinderMethods);
+        referencedFieldsMethods, referencedFieldsIdentifierNames, allProjectionFieldMaps,
+        projectionFinderMethods);
+  }
+
+  /**
+   * Build a Map<String, String> with projection field names and "path" field names 
+   * and adds it to the projectionsFieldMaps Map.
+   * 
+   * @param entity
+   * @param projection
+   * @param entityProjectionAnnotation
+   * @param projectionsFieldMaps
+   */
+  private void buildProjectionFieldNamesMap(JavaType entity, JavaType projection,
+      AnnotationMetadata entityProjectionAnnotation,
+      Map<JavaType, Map<String, String>> projectionsFieldMaps) {
+    Map<String, String> projectionFieldNames = new LinkedHashMap<String, String>();
+    if (!projectionsFieldMaps.containsKey(projection)) {
+      AnnotationAttributeValue<?> projectionFields =
+          entityProjectionAnnotation.getAttribute("fields");
+      if (projectionFields != null) {
+        @SuppressWarnings("unchecked")
+        List<StringAttributeValue> values =
+            (List<StringAttributeValue>) projectionFields.getValue();
+
+        // Get entity name as a variable name for building constructor expression
+        String entityVariableName = StringUtils.uncapitalize(entity.getSimpleTypeName());
+        for (StringAttributeValue field : values) {
+          String[] splittedByDot = StringUtils.split(field.getValue(), ".");
+          StringBuffer propertyName = new StringBuffer();
+          for (int i = 0; i < splittedByDot.length; i++) {
+            if (i == 0) {
+              propertyName.append(splittedByDot[i]);
+            } else {
+              propertyName.append(StringUtils.capitalize(splittedByDot[i]));
+            }
+          }
+          String pathName = entityVariableName.concat(".").concat(field.getValue());
+          projectionFieldNames.put(propertyName.toString(), pathName);
+          projectionsFieldMaps.put(projection, projectionFieldNames);
+        }
+      }
+    }
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
@@ -373,5 +490,24 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
   public String getProvidesType() {
     return RepositoryJpaCustomImplMetadata.getMetadataIdentiferType();
+  }
+
+  public DtoOperationsImpl getDtoOperations() {
+
+    // Get all Services implement DtoOperations interface
+    try {
+      ServiceReference<?>[] references =
+          context.getAllServiceReferences(DtoOperations.class.getName(), null);
+
+      for (ServiceReference<?> ref : references) {
+        return (DtoOperationsImpl) context.getService(ref);
+      }
+
+      return null;
+
+    } catch (InvalidSyntaxException e) {
+      LOGGER.warning("Cannot load DtoOperationsImpl on AbstractIdMetadataProvider.");
+      return null;
+    }
   }
 }

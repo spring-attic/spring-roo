@@ -15,6 +15,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -23,7 +24,9 @@ import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,10 +52,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   private MethodMetadata findAllGlobalSearchMethod;
   private Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods;
-  private Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames;
-  private Map<JavaType, JavaSymbolName> referencedFieldsNames;
-  private List<String> constructorFields;
+  private Map<FieldMetadata, String> referencedFieldsIdentifierNames;
+  private Map<JavaType, Map<String, String>> projectionsFieldMaps;
   private List<MethodMetadata> projectionFinderMethods;
+  private JavaType returnType;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -94,9 +97,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param findAllGlobalSearchMethod the findAll metadata 
    * @param allFindAllReferencedFieldsMethods the metadata for al findAllByReference methods.
    * @param referencedFieldsIdentifierNames
-   * @param referencedFieldsNames 
-   * @param constructorFields list of field names to add to ConstructorExpression while 
-   *            building findAll methods when return type is a projection.
+   * @param projectionsFieldMaps the Map<JavaType, Map<String, String>> of each associated 
+   *            projection (parent Map JavaType), property names (keys) and path names (values) 
+   *            for building finders which return a projection.
+   * @param allProjectionsIdFieldMaps the Map<JavaType, Map<String, String>> of each associated 
+   *            projection (parent Map JavaType), property names (keys) and path names (values) 
+   *            for each identifier field.
    * @param projectionFinderMethods 
    */
   public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
@@ -105,9 +111,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final boolean returnTypeIsProjection, final List<FieldMetadata> idFields,
       final List<FieldMetadata> validFields, final MethodMetadata findAllGlobalSearchMethod,
       final Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
-      final Map<JavaType, JavaSymbolName> referencedFieldsIdentifierNames,
-      final Map<JavaType, JavaSymbolName> referencedFieldsNames,
-      final List<String> constructorFields, List<MethodMetadata> projectionFinderMethods) {
+      final Map<FieldMetadata, String> referencedFieldsIdentifierNames,
+      final Map<JavaType, Map<String, String>> projectionsFieldMaps,
+      final List<MethodMetadata> projectionFinderMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
@@ -115,11 +121,13 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
     this.allFindAllReferencedFieldsMethods = allFindAllReferencedFieldsMethods;
     this.referencedFieldsIdentifierNames = referencedFieldsIdentifierNames;
-    this.referencedFieldsNames = referencedFieldsNames;
     this.returnTypeIsProjection = returnTypeIsProjection;
     this.entity = domainType;
-    this.constructorFields = constructorFields;
+    this.projectionsFieldMaps = projectionsFieldMaps;
     this.projectionFinderMethods = projectionFinderMethods;
+
+    // Get inner parameter of default return type (enclosed inside Page);
+    this.returnType = findAllGlobalSearchMethod.getReturnType().getParameters().get(0);
 
     // Get repository that needs to be implemented
     ensureGovernorImplements(annotationValues.getRepository());
@@ -148,12 +156,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     for (Entry<FieldMetadata, MethodMetadata> method : allFindAllReferencedFieldsMethodsOrderedByFieldName
         .entrySet()) {
 
-      JavaSymbolName identifierFieldName = referencedFieldsIdentifierNames.get(method.getKey());
-      JavaSymbolName fieldName = method.getKey().getFieldName();
+      String referencedPathFieldName = referencedFieldsIdentifierNames.get(method.getKey());
 
       ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllReferencedFieldsImpl(method
-          .getKey().getFieldType(), method.getValue(), identifierFieldName, fieldName, idFields,
-          validFields)));
+          .getKey().getFieldType(), method.getValue(), referencedPathFieldName, validFields)));
     }
 
     // Generate projection finder methods implementations
@@ -162,6 +168,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         ensureGovernorHasMethod(new MethodMetadataBuilder(getProjectionfindersImpl(method)));
       }
     }
+
+    // Add QueryDslRepositorySupportExt as superclass
+    JavaType queryDslExtension =
+        new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
+            .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
+            .concat("QueryDslRepositorySupportExt"), 0, DataType.TYPE, null,
+            Arrays.asList(this.entity));
+    builder.addExtendsTypes(queryDslExtension);
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -195,9 +209,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // Use provided findAll method to generate its implementation
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-            findAllGlobalSearchMethod.getMethodName(), findAllGlobalSearchMethod.getReturnType(),
-            findAllGlobalSearchMethod.getParameterTypes(),
-            findAllGlobalSearchMethod.getParameterNames(), null);
+            this.findAllGlobalSearchMethod.getMethodName(),
+            this.findAllGlobalSearchMethod.getReturnType(),
+            this.findAllGlobalSearchMethod.getParameterTypes(),
+            this.findAllGlobalSearchMethod.getParameterNames(), null);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -218,78 +233,95 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
     JavaType returnType = findAllGlobalSearchMethod.getReturnType().getParameters().get(0);
-    JavaType pageImpl = new JavaType("org.springframework.data.domain.PageImpl");
     JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
 
-    // Temporally unactive code. This implementation will change in near future
-    bodyBuilder
-        .appendFormalLine("// TODO: Temporally unactive code. This implementation will change in near future");
-    bodyBuilder.appendFormalLine("/*");
-
-    buildVariables(bodyBuilder, ids);
+    bodyBuilder.newLine();
 
     // QEntity qEntity = QEntity.entity;
     bodyBuilder.appendFormalLine(String.format("%1$s %2$s = %1$s.%2$s;",
         qEntity.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    bodyBuilder.newLine();
 
     // Construct query
     buildQuery(bodyBuilder, fields, entityVariable, globalSearch, null, null);
+    bodyBuilder.newLine();
 
-    bodyBuilder.appendFormalLine(String.format("long totalFound = query.count();"));
-
-    // if (pageable != null) {
-    bodyBuilder.appendFormalLine(String.format("if (%s != null) {", pageable));
-
-    bodyBuilder.indent();
-
-    if (!fields.isEmpty()) {
-      buildOrderClause(fields, bodyBuilder, entityVariable, pageable);
-    }
-
-    //  query.offset(pageable.getOffset()).limit(pageable.getPageSize());}
+    // AttributeMappingBuilder mapping = buildMapper()
     bodyBuilder.appendFormalLine(String.format(
-        "query.offset(%1$s.getOffset()).limit(%1$s.getPageSize());", pageable));
+        "%s mapping = buildMapper()",
+        new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
+            .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
+            .concat("QueryDslRepositorySupportExt").concat(LogicalPath.PATH_SEPARATOR)
+            .concat("AttributeMappingBuilder")).getNameIncludingTypeParameters(false,
+            this.importResolver)));
 
-    bodyBuilder.indentRemove();
-
-    // End if
-    bodyBuilder.appendFormalLine("}");
-
-    // query.orderBy(qEntity.id.asc());
-    for (FieldMetadata id : ids) {
-      bodyBuilder.appendFormalLine(String.format("query.orderBy(id%s.asc());", entity));
-    }
-
-    bodyBuilder.appendFormalLine("");
-
-    // List<ReturnType> results = query.list(ConstructorExpression.create(ReturnType.class, qEntity.parameter1, qEntity.parameter1, ...));
+    // .map(entiyVarName, varName) ...
     if (!this.returnTypeIsProjection) {
-      bodyBuilder.appendFormalLine(String
-          .format("%1$s<%2$s> results = query.list(%3$s);", new JavaType("java.util.List")
-              .getNameIncludingTypeParameters(false, this.importResolver), returnType
-              .getNameIncludingTypeParameters(false, this.importResolver), entityVariable));
-    } else if (queryList.isEmpty()) {
-      bodyBuilder.appendFormalLine(String.format(
-          "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
-              "java.util.List").getNameIncludingTypeParameters(false, this.importResolver),
-          returnType.getNameIncludingTypeParameters(false, this.importResolver), constructorExp
-              .getNameIncludingTypeParameters(false, this.importResolver)));
+
+      // Return type is the same entity
+      Iterator<FieldMetadata> iterator = fields.iterator();
+      while (iterator.hasNext()) {
+        FieldMetadata field = iterator.next();
+        String fieldName = field.getFieldName().getSymbolName();
+        bodyBuilder.appendIndent();
+        if (iterator.hasNext()) {
+          bodyBuilder.append(String.format(".map(\"%s\", %s.%s)", fieldName, entityVariable,
+              fieldName));
+        } else {
+          bodyBuilder.append(String.format(".map(\"%s\", %s.%s);", fieldName, entityVariable,
+              fieldName));
+        }
+      }
     } else {
-      bodyBuilder.appendFormalLine(String.format(
-          "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class, %4$s ));", new JavaType(
-              "java.util.List").getNameIncludingTypeParameters(false, this.importResolver),
-          returnType.getNameIncludingTypeParameters(false, this.importResolver), constructorExp
-              .getNameIncludingTypeParameters(false, this.importResolver), StringUtils.join(
-              this.constructorFields, ", ")));
+
+      // Return type is a projection
+      Map<String, String> projectionFields = this.projectionsFieldMaps.get(returnType);
+      Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Entry<String, String> entry = iterator.next();
+        bodyBuilder.appendIndent();
+        if (iterator.hasNext()) {
+          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s)", entry.getKey(),
+              entry.getValue()));
+        } else {
+          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s);", entry.getKey(),
+              entry.getValue()));
+        }
+      }
     }
+    bodyBuilder.newLine();
 
-    //return new PageImpl<Entity>(results, pageable, totalFound);
-    bodyBuilder.appendFormalLine(String.format("return new %s<%s>(results, %s, totalFound);",
-        pageImpl.getNameIncludingTypeParameters(false, this.importResolver),
-        returnType.getNameIncludingTypeParameters(false, this.importResolver), pageable));
+    // applyPagination(pageable, query, mapping);
+    bodyBuilder.appendFormalLine(String.format("applyPagination(%s, query, mapping);", pageable));
 
-    bodyBuilder.appendFormalLine("*/");
-    bodyBuilder.appendFormalLine("return null;");
+    //applyOrderById(query);
+    bodyBuilder.appendFormalLine("applyOrderById(query);");
+    bodyBuilder.newLine();
+
+
+    if (!this.returnTypeIsProjection) {
+
+      // return loadPage(query, pageable, myEntity);
+      bodyBuilder.appendFormalLine(String.format("return loadPage(query, pageable, %s);",
+          entityVariable));
+    } else if (queryList.isEmpty()) {
+
+      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class);
+      bodyBuilder.appendFormalLine(String.format(
+          "return loadPage(query, pageable, %s.create(%s.class));",
+          constructorExp.getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver)));
+    } else {
+      Map<String, String> projectionFields = this.projectionsFieldMaps.get(returnType);
+
+      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class, 
+      //                    getEntityId(), myEntity.field1, myEntity.field2);
+      bodyBuilder.appendFormalLine(String.format(
+          "return loadPage(query, %s, %s.create(%s.class, %s ));", pageable,
+          constructorExp.getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver),
+          StringUtils.join(projectionFields.values(), ", ")));
+    }
 
     // Sets body to generated method
     methodBuilder.setBodyBuilder(bodyBuilder);
@@ -301,17 +333,17 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   /**
    * Method that generates the findAll referenced fields implementation method
    * 
+   * @param the JavaType of the referenced field
    * @param method to implement
-   * @param identifierFieldName
-   * @param fieldName
+   * @param referencedPathFieldName the String with the the referenced field name 
+   *            in "path" format.
    * @param ids the entity id fields
    * @param fields the entity fields to search for 
    *
    * @return
    */
-  public MethodMetadata getFindAllReferencedFieldsImpl(JavaType referencedField,
-      MethodMetadata method, JavaSymbolName identifierFieldName, JavaSymbolName fieldName,
-      List<FieldMetadata> ids, List<FieldMetadata> fields) {
+  public MethodMetadata getFindAllReferencedFieldsImpl(JavaType referencedFieldType,
+      MethodMetadata method, String referencedPathFieldName, List<FieldMetadata> fields) {
 
     // Define method name
     JavaSymbolName methodName = method.getMethodName();
@@ -329,7 +361,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       return existingMethod;
     }
 
-    // Use provided findAll method to generate its implementation
+    // Use provided findAllByReference method to generate its implementation
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, method.getReturnType(),
             parameterTypes, parameterNames, null);
@@ -338,8 +370,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // Getting variable name to use in the code
-    JavaType referencedFieldParameterType = parameterTypes.get(0).getJavaType();
-    JavaSymbolName referencedFieldParameterName = parameterNames.get(0);
+    JavaSymbolName referencedFieldName = parameterNames.get(0);
     JavaSymbolName globalSearch = parameterNames.get(1);
     JavaSymbolName pageable = parameterNames.get(2);
     String entity = this.entity.getSimpleTypeName();
@@ -350,85 +381,102 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       queryList.add(String.format("%s.%s", entityVariable, field.getFieldName()));
     }
 
-
     // Types to import
     JavaType qEntity =
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
     JavaType returnType = findAllGlobalSearchMethod.getReturnType().getParameters().get(0);
-    JavaType pageImpl = new JavaType("org.springframework.data.domain.PageImpl");
     JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
 
-    // Temporally unactive code. This implementation will change in near future
-    bodyBuilder
-        .appendFormalLine("// TODO: Temporally unactive code. This implementation will change in near future.");
-    bodyBuilder.appendFormalLine("/*");
-
-    buildVariables(bodyBuilder, ids);
+    bodyBuilder.newLine();
 
     // QEntity qEntity = QEntity.entity;
     bodyBuilder.appendFormalLine(String.format("%1$s %2$s = %1$s.%2$s;",
         qEntity.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    bodyBuilder.newLine();
 
     // Construct query
-    buildQuery(bodyBuilder, fields, entityVariable, globalSearch, fieldName,
-        referencedFieldParameterName);
+    buildQuery(bodyBuilder, fields, entityVariable, globalSearch, referencedFieldName,
+        referencedPathFieldName);
+    bodyBuilder.newLine();
 
-    bodyBuilder.appendFormalLine(String.format("long totalFound = query.count();"));
-
-    // if (pageable != null) {
-    bodyBuilder.appendFormalLine(String.format("if (%s != null) {", pageable));
-
-    bodyBuilder.indent();
-
-    if (!fields.isEmpty()) {
-      buildOrderClause(fields, bodyBuilder, entityVariable, pageable);
-    }
-
-    //  query.offset(pageable.getOffset()).limit(pageable.getPageSize());}
+    // AttributeMappingBuilder mapping = buildMapper()
     bodyBuilder.appendFormalLine(String.format(
-        "query.offset(%1$s.getOffset()).limit(%1$s.getPageSize());", pageable));
+        "%s mapping = buildMapper()",
+        new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
+            .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
+            .concat("QueryDslRepositorySupportExt").concat(LogicalPath.PATH_SEPARATOR)
+            .concat("AttributeMappingBuilder")).getNameIncludingTypeParameters(false,
+            this.importResolver)));
 
-    bodyBuilder.indentRemove();
-
-    // End if
-    bodyBuilder.appendFormalLine("}");
-
-    // query.orderBy(qEntity.id.asc());
-    for (FieldMetadata id : ids) {
-      bodyBuilder.appendFormalLine(String.format("query.orderBy(id%s.asc());", entity));
-    }
-
-    bodyBuilder.appendFormalLine("");
-
-    // List<Entity> results = query.list(ConstructorExpression.create(Entity.class, qEntity.parameter1, qEntity.parameter1, ...));
+    // .map(entiyVarName, varName) ...
     if (!this.returnTypeIsProjection) {
-      bodyBuilder.appendFormalLine(String
-          .format("%1$s<%2$s> results = query.list(%3$s);", new JavaType("java.util.List")
-              .getNameIncludingTypeParameters(false, this.importResolver), returnType
-              .getNameIncludingTypeParameters(false, this.importResolver), entityVariable));
-    } else if (queryList.isEmpty()) {
-      bodyBuilder.appendFormalLine(String.format(
-          "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class));", new JavaType(
-              "java.util.List").getNameIncludingTypeParameters(false, this.importResolver),
-          returnType.getNameIncludingTypeParameters(false, this.importResolver), constructorExp
-              .getNameIncludingTypeParameters(false, this.importResolver)));
+
+      // Return type is the same entity
+      Iterator<FieldMetadata> iterator = fields.iterator();
+      while (iterator.hasNext()) {
+        FieldMetadata field = iterator.next();
+        String entityFieldName = field.getFieldName().getSymbolName();
+        bodyBuilder.appendIndent();
+        if (iterator.hasNext()) {
+          bodyBuilder.append(String.format(".map(\"%s\", %s.%s)", entityFieldName, entityVariable,
+              entityFieldName));
+        } else {
+          bodyBuilder.append(String.format(".map(\"%s\", %s.%s);", entityFieldName, entityVariable,
+              entityFieldName));
+        }
+      }
     } else {
-      bodyBuilder.appendFormalLine(String.format(
-          "%1$s<%2$s> results = query.list(%3$s.create(%2$s.class, %4$s ));", new JavaType(
-              "java.util.List").getNameIncludingTypeParameters(false, this.importResolver),
-          returnType.getNameIncludingTypeParameters(false, this.importResolver), constructorExp
-              .getNameIncludingTypeParameters(false, this.importResolver), StringUtils.join(
-              this.constructorFields, ", ")));
+
+      // Return type is a projection
+      Map<String, String> projectionFields = this.projectionsFieldMaps.get(returnType);
+      Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
+      while (iterator.hasNext()) {
+        Entry<String, String> entry = iterator.next();
+        bodyBuilder.appendIndent();
+        if (iterator.hasNext()) {
+          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s)", entry.getKey(),
+              entry.getValue()));
+        } else {
+          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s);", entry.getKey(),
+              entry.getValue()));
+        }
+      }
     }
+    bodyBuilder.newLine();
 
-    //return new PageImpl<Entity>(results, pageable, totalFound);
-    bodyBuilder.appendFormalLine(String.format("return new %s<%s>(results, %s, totalFound);",
-        pageImpl.getNameIncludingTypeParameters(false, importResolver),
-        returnType.getNameIncludingTypeParameters(false, importResolver), pageable));
+    // applyPagination(pageable, query, mapping);
+    bodyBuilder.appendFormalLine(String.format("applyPagination(pageable, query, mapping);",
+        pageable));
 
-    bodyBuilder.appendFormalLine("*/");
-    bodyBuilder.appendFormalLine("return null;");
+    //applyOrderById(query);
+    bodyBuilder.appendFormalLine("applyOrderById(query);");
+    bodyBuilder.newLine();
+
+
+    if (!this.returnTypeIsProjection) {
+
+      // return loadPage(query, pageable, myEntity);
+      bodyBuilder.appendFormalLine(String.format("return loadPage(query, %s, %s);", pageable,
+          entityVariable));
+    } else if (queryList.isEmpty()) {
+
+      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class);
+      bodyBuilder.appendFormalLine(String.format(
+          "return loadPage(query, pageable, %s.create(%s.class));",
+          constructorExp.getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver)));
+    } else {
+      Map<String, String> projectionFields = this.projectionsFieldMaps.get(returnType);
+
+      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class, 
+      //                    getEntityId(), myEntity.field1, myEntity.field2);
+      bodyBuilder.appendFormalLine(String.format(
+          "return loadPage(query, pageable, %s.create(%s.class, %s ));",
+          constructorExp.getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver),
+          StringUtils.join(projectionFields.values(), ", ")));
+    }
 
     // Sets body to generated method
     methodBuilder.setBodyBuilder(bodyBuilder);
@@ -504,65 +552,63 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param entityVariable name of the variable that contains the Q entity 
    * @param globalSearch global search variable name
    * @param referencedFieldName
-   * @param referencedFieldParameterName
+   * @param referencedFieldIdentifierPathName 
    */
   private void buildQuery(InvocableMemberBodyBuilder bodyBuilder, List<FieldMetadata> fields,
       String entityVariable, JavaSymbolName globalSearch, JavaSymbolName referencedFieldName,
-      JavaSymbolName referencedFieldParameterName) {
+      String referencedFieldIdentifierPathName) {
 
-    JavaType booleanBuilder = new JavaType("com.mysema.query.BooleanBuilder");
     JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
 
     //JPQLQuery query = getQueryFrom(qEntity);
     bodyBuilder.appendFormalLine(String.format("%s query = getQueryFrom(%s);",
         jpql.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    bodyBuilder.newLine();
 
-    if (referencedFieldName != null && referencedFieldParameterName != null) {
-      // BooleanBuilder where = new BooleanBuilder(entityVariable.referenceField.eq(referencedField));
-      bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s(%2$s.%3$s.eq(%4$s));\n",
-          booleanBuilder.getNameIncludingTypeParameters(false, importResolver), entityVariable,
-          referencedFieldName, referencedFieldParameterName.getSymbolName()));
-    } else {
-      // BooleanBuilder where = new BooleanBuilder()
-      bodyBuilder.appendFormalLine(String.format("%1$s where = new %1$s();\n",
-          booleanBuilder.getNameIncludingTypeParameters(false, importResolver)));
+    if (referencedFieldName != null && referencedFieldIdentifierPathName != null) {
+
+      // Query should include a where clause
+      // query.where(referencedFieldPath.eq(referencedFieldName));
+      bodyBuilder.appendFormalLine(String.format("query.where(%s.eq(%s));\n",
+          referencedFieldIdentifierPathName, referencedFieldName));
     }
 
-    // if (globalSearch != null) {
-    bodyBuilder.appendFormalLine(String.format("if (%s != null) {", globalSearch));
+    // applyGlobalSearch(search, query, ...
+    bodyBuilder.appendIndent();
+    bodyBuilder.append("applyGlobalSearch(globalSearch, query,");
+    // ... returnType.field1, returnType.field2);
+    if (!this.returnTypeIsProjection) {
 
-    bodyBuilder.indent();
-
-    // String txt = globalSearch.getText();
-    bodyBuilder.appendFormalLine(String.format("String txt = %s.getText();", globalSearch));
-
-    boolean isFirst = true;
-    String expression;
-
-    for (FieldMetadata field : fields) {
-
-      expression = buildExpression(entityVariable, field);
-
-      if (isFirst) {
-        bodyBuilder.appendFormalLine(String.format("where.and("));
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine(String.format("%s", expression));
-      } else {
-        bodyBuilder.appendFormalLine(String.format(".or(%s)", expression));
+      // Return type is the same entity
+      Iterator<FieldMetadata> iterator = fields.iterator();
+      while (iterator.hasNext()) {
+        FieldMetadata field = iterator.next();
+        String fieldName = field.getFieldName().getSymbolName();
+        if (iterator.hasNext()) {
+          bodyBuilder.append(String.format(" %s.%s,", entityVariable, fieldName));
+        } else {
+          bodyBuilder.append(String.format(" %s.%s);", entityVariable, fieldName));
+        }
       }
-      isFirst = false;
+    } else {
+
+      // Return type is a projection
+      Map<String, String> projectionFields = this.projectionsFieldMaps.get(this.returnType);
+      Validate.notNull(projectionFields, "Couldn't get projection fields for %s", this.returnType);
+      Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
+      while (iterator.hasNext()) {
+
+        // Check if it is an identifierField
+
+        Entry<String, String> entry = iterator.next();
+        if (iterator.hasNext()) {
+          bodyBuilder.append(String.format(" %s,", entry.getValue()));
+        } else {
+          bodyBuilder.append(String.format(" %s);", entry.getValue()));
+        }
+      }
     }
-
-    if (!isFirst) {
-      bodyBuilder.indentRemove();
-      bodyBuilder.appendFormalLine(String.format(");\n"));
-    }
-
-    // End if 
-    bodyBuilder.indentRemove();
-    bodyBuilder.appendFormalLine(String.format("}"));
-
-    bodyBuilder.appendFormalLine(String.format("query.where(where);\n"));
+    bodyBuilder.newLine();
   }
 
 
