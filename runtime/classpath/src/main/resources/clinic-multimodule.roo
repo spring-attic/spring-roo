@@ -62,6 +62,6 @@ finder add --entity model:~.Visit --name findByDescriptionLike
 
 web mvc setup
 web mvc view setup --type THYMELEAF
-web mvc controller --all
+web mvc controller --all --responseType THYMELEAF
 
 web mvc language --code es
