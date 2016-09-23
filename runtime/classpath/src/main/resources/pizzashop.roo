@@ -17,17 +17,17 @@ field number --fieldName price --type java.math.BigDecimal
 field set --fieldName toppings --type ~.domain.Topping
 field reference --fieldName base --type ~.domain.Base
 
+embeddable --class ~.domain.PizzaOrderPk
+field string --fieldName shopCountry
+field string --fieldName shopCity
+field string --fieldName shopName
+
 entity jpa --class ~.domain.PizzaOrder --testAutomatically --identifierType ~.domain.PizzaOrderPk
 field string --fieldName name --notNull --sizeMin 2
 field string --fieldName address --sizeMax 30
 field number --fieldName total --type java.math.BigDecimal
 field date --fieldName deliveryDate --type java.util.Date
 field set --fieldName pizzas --type ~.domain.Pizza
-
-focus --class ~.domain.PizzaOrderPk
-field string --fieldName shopCountry
-field string --fieldName shopCity
-field string --fieldName shopName
 
 // Define a repository layer for persistence
 repository jpa --entity ~.domain.Topping --interface ~.repository.ToppingRepository
