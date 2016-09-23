@@ -8,10 +8,11 @@ field string description --sizeMax 80
 repository jpa --entity ~.domain.Choice --interface ~.repository.ChoiceRepository
 service --entity ~.domain.Choice --repository ~.repository.ChoiceRepository --interface ~.service.api.ChoiceService --class ~.service.impl.ChoiceServiceImpl
 web mvc setup
+web mvc view setup --type THYMELEAF
 web mvc controller --entity ~.domain.Choice --responseType THYMELEAF
 
 entity jpa --class Vote --testAutomatically
-field reference choice --type Choice
+field reference choice --type ~.domain.Choice
 field string ip --notNull --sizeMin 7 --sizeMax 15
 field date registered --type java.util.Date --notNull --past
 repository jpa --entity ~.domain.Vote --interface ~.repository.VoteRepository

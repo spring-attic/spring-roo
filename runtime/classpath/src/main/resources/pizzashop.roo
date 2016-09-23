@@ -31,9 +31,9 @@ field string --fieldName shopName
 
 // Define a repository layer for persistence
 repository jpa --entity ~.domain.Topping --interface ~.repository.ToppingRepository
-repository jpa --entity ~.domain.Base --interface ~.repository.BaseRepository 
-repository jpa --entity ~.domain.Pizza --interface ~.repository.PizzaRepository 
-repository jpa --entity ~.domain.PizzaOrder --interface ~.repository.PizzaOrderRepository 
+repository jpa --entity ~.domain.Base --interface ~.repository.BaseRepository
+repository jpa --entity ~.domain.Pizza --interface ~.repository.PizzaRepository
+repository jpa --entity ~.domain.PizzaOrder --interface ~.repository.PizzaOrderRepository
 
 // Define a service/facade layer
 service --entity ~.domain.Topping --repository ~.repository.ToppingRepository --interface ~.service.ToppingService
@@ -47,7 +47,7 @@ service --entity ~.domain.PizzaOrder --repository ~.repository.PizzaOrderReposit
 //web mvc json all --package ~.web
 
 web mvc setup
-web mvc controller --all --package com.springsource.pizzashop.web --responseType JSON
+web mvc controller --all
 
 // Example scripts for JSON remoting:
 // curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name: "Thin Crust"}' http://localhost:8080/pizzashop/bases
