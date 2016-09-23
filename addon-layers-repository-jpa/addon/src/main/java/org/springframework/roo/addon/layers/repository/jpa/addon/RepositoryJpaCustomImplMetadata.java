@@ -632,7 +632,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
         // Get path field name from field mappings
         String pathFieldName = this.typesFieldMaps.get(finderParam).get(field.getKey());
-        // query.where(myEntity.field.eq(formSearch.getField()));
+        // query.where(myEntity.field.eq(formBean.getField()));
         bodyBuilder.appendIndent();
         bodyBuilder.appendIndent();
         if (pathFieldName.equals("getEntityId()")) {

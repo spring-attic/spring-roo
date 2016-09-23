@@ -1,21 +1,19 @@
 package org.springframework.roo.addon.finder.addon.parser;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaType;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.JavaType;
 
 /**
  * This class is based on PartTree.java class from Spring Data commons project.

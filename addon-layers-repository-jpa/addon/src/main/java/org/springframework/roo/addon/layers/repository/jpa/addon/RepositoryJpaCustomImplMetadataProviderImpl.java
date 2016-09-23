@@ -459,16 +459,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
         // Type is a DTO
         typesAreProjections.put(type, false);
-        Map<String, String> fieldsMappings = new LinkedHashMap<String, String>();
-        for (FieldMetadata field : typeFieldList) {
-          fieldMetadataMap.put(field.getFieldName().getSymbolName(), field);
-          fieldsMappings.put(
-              field.getFieldName().getSymbolName(),
-              StringUtils.uncapitalize(entity.getSimpleTypeName()).concat(".")
-                  .concat(field.getFieldName().getSymbolName()));
-        }
-        typesFieldsMetadata.put(type, fieldMetadataMap);
-        typesFieldMaps.put(type, fieldsMappings);
+        buildDtoFieldNamesMap(entity, type, typesFieldMaps, typesFieldsMetadata, typeFieldList);
       }
     }
 
@@ -481,18 +472,18 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
   /**
    * Build a Map<String, String> with projection field names and "path" field names 
-   * and adds it to the projectionsFieldMaps Map.
+   * and adds it to the typesFieldMaps Map.
    * 
    * @param entity
    * @param projection
    * @param entityProjectionAnnotation
-   * @param projectionsFieldMaps
+   * @param typesFieldMaps
    */
   private void buildProjectionFieldNamesMap(JavaType entity, JavaType projection,
       AnnotationMetadata entityProjectionAnnotation,
-      Map<JavaType, Map<String, String>> projectionsFieldMaps) {
+      Map<JavaType, Map<String, String>> typesFieldMaps) {
     Map<String, String> projectionFieldNames = new LinkedHashMap<String, String>();
-    if (!projectionsFieldMaps.containsKey(projection)) {
+    if (!typesFieldMaps.containsKey(projection)) {
       AnnotationAttributeValue<?> projectionFields =
           entityProjectionAnnotation.getAttribute("fields");
       if (projectionFields != null) {
@@ -514,10 +505,144 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
           }
           String pathName = entityVariableName.concat(".").concat(field.getValue());
           projectionFieldNames.put(propertyName.toString(), pathName);
-          projectionsFieldMaps.put(projection, projectionFieldNames);
+          typesFieldMaps.put(projection, projectionFieldNames);
         }
       }
     }
+  }
+
+  /**
+   * Build a Map<String, String> with DTO field names and "path" field names 
+   * and adds it to the projectionsFieldMaps Map.
+   * 
+   * @param entity
+   * @param dto
+   * @param typesFieldMaps
+   * @param typeFieldMetadataMap
+   * @param allDtoFields
+   */
+  private void buildDtoFieldNamesMap(JavaType entity, JavaType dto,
+      Map<JavaType, Map<String, String>> typesFieldMaps,
+      Map<JavaType, Map<String, FieldMetadata>> typeFieldMetadataMap,
+      List<FieldMetadata> allDtoFields) {
+
+    // Get all entity fields
+    ClassOrInterfaceTypeDetails entityCid = getTypeLocationService().getTypeDetails(entity);
+    List<FieldMetadata> allEntityFields =
+        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), entityCid)
+            .getFields();
+
+    // Create inner Maps
+    Map<String, String> fieldNamesMap = new HashMap<String, String>();
+    Map<String, FieldMetadata> fieldMetadataMap = new HashMap<String, FieldMetadata>();
+
+    // Iterate over all specified fields
+    for (int i = 0; i < allDtoFields.size(); i++) {
+      String fieldName = "";
+      boolean found = false;
+
+      // Iterate over all entity fields
+      for (FieldMetadata field : allEntityFields) {
+        if (field.getFieldName().equals(allDtoFields.get(i).getFieldName())
+            && field.getFieldType().equals(allDtoFields.get(i).getFieldType())) {
+
+          // Field found, build field "path" name and add it to map
+          String fieldPathName = "";
+
+          // Check if field is @Id or @EmbeddedId field
+          if (field.getAnnotation(JpaJavaType.ID) != null
+              || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
+            fieldPathName = "getEntityId()";
+          } else {
+
+            // Path name for DTO's should be the path to entity's fields
+            fieldPathName =
+                String.format("%s.%s", StringUtils.uncapitalize(entity.getSimpleTypeName()),
+                    field.getFieldName());
+          }
+
+          fieldNamesMap.put(allDtoFields.get(i).getFieldName().getSymbolName(), fieldPathName);
+          fieldMetadataMap.put(allDtoFields.get(i).getFieldName().getSymbolName(),
+              allDtoFields.get(i));
+          found = true;
+          break;
+        }
+      }
+    }
+
+    typesFieldMaps.put(dto, fieldNamesMap);
+    typeFieldMetadataMap.put(dto, fieldMetadataMap);
+
+    //      if (!found) {
+    //
+    //        // The field isn't in the entity, should be in one of its relations
+    //        String[] splittedByDot = StringUtils.split(fields[i], ".");
+    //        JavaType currentEntity = entity;
+    //        if (fields[i].contains(".")) {
+    //
+    //          // Search a matching relation field
+    //          for (int t = 0; t < splittedByDot.length; t++) {
+    //            ClassOrInterfaceTypeDetails currentEntityCid =
+    //                typeLocationService.getTypeDetails(currentEntity);
+    //            List<FieldMetadata> currentEntityFields = memberDetailsScanner
+    //                .getMemberDetails(this.getClass().getName(), currentEntityCid).getFields();
+    //            boolean relationFieldFound = false;
+    //
+    //            // Iterate to build the field-levels of the relation field
+    //            for (FieldMetadata field : currentEntityFields) {
+    //              if (field.getFieldName().getSymbolName().equals(splittedByDot[t])
+    //                  && t != splittedByDot.length - 1
+    //                  && typeLocationService.getTypeDetails(field.getFieldType()) != null
+    //                  && typeLocationService.getTypeDetails(field.getFieldType())
+    //                      .getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
+    //
+    //                // Field is an entity and we should look into its fields
+    //                currentEntity = field.getFieldType();
+    //                found = true;
+    //                relationFieldFound = true;
+    //                if (t == 0) {
+    //                  fieldName = fieldName.concat(field.getFieldName().getSymbolName());
+    //                } else {
+    //                  fieldName = fieldName
+    //                      .concat(StringUtils.capitalize(field.getFieldName().getSymbolName()));
+    //                }
+    //                break;
+    //              } else if (field.getFieldName().getSymbolName().equals(splittedByDot[t])) {
+    //
+    //                // Add field to projection fields
+    //                fieldName =
+    //                    fieldName.concat(StringUtils.capitalize(field.getFieldName().getSymbolName()));
+    //                fieldsToAdd.put(fieldName, field);
+    //                found = true;
+    //                relationFieldFound = true;
+    //                break;
+    //              }
+    //            }
+    //
+    //            // If not found, relation field is bad written
+    //            if (!relationFieldFound) {
+    //              throw new IllegalArgumentException(String.format(
+    //                  "Field %s couldn't be located in %s. Please, be sure that it is well written.",
+    //                  splittedByDot[t], currentEntity.getFullyQualifiedTypeName()));
+    //            }
+    //          }
+    //        } else {
+    //
+    //          // Not written as a relation field
+    //          throw new IllegalArgumentException(
+    //              String.format("Field %s couldn't be located in entity %s", fields[i],
+    //                  entity.getFullyQualifiedTypeName()));
+    //        }
+    //      }
+    //
+    //      // If still not found, field is bad written
+    //      if (!found) {
+    //        throw new IllegalArgumentException(String.format(
+    //            "Field %s couldn't be located. Please, be sure that it is well written.", fields[i]));
+    //      }
+    //    }
+    //
+    //    return fieldsToAdd;
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

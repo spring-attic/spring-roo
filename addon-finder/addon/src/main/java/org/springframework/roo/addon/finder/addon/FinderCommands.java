@@ -12,10 +12,12 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.finder.addon.parser.FinderAutocomplete;
+import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.finder.addon.parser.PartTree;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.converters.LastUsed;
@@ -294,6 +296,31 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
         .isTrue(
             partTree.isValid(),
             "--name parameter must follow Spring Data nomenclature. Please, write a valid value using autocomplete feature (TAB or CTRL + Space)");
+
+    // Validate if formBean DTO has the necessary parameters
+    if (formBean != null) {
+      List<FinderParameter> parameters = partTree.getParameters();
+      ClassOrInterfaceTypeDetails formBeanDetails =
+          getTypeLocationService().getTypeDetails(formBean);
+      List<FieldMetadata> formBeanFields =
+          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), formBeanDetails)
+              .getFields();
+
+      // Check for DTO's fields against finder params
+      for (FinderParameter param : parameters) {
+        boolean fieldFoundInDto = false;
+        for (FieldMetadata field : formBeanFields) {
+          if (param.getName().equals(field.getFieldName())
+              && param.getType().equals(field.getFieldType())) {
+            fieldFoundInDto = true;
+          }
+        }
+        Validate.isTrue(fieldFoundInDto, "Field names and types of DTO %s used in "
+            + "'formBean' param must have the same name and type of Entity %s fields "
+            + "or its relations fields.", formBean.getSimpleTypeName(),
+            typeName.getSimpleTypeName());
+      }
+    }
 
     finderOperations.installFinder(typeName, finderName, formBean, defaultReturnType);
 
