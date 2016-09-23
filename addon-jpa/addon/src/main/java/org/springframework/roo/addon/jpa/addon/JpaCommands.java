@@ -511,6 +511,13 @@ public class JpaCommands implements CommandMarker {
               + "--testAutomatically or --abstract option");
     }
 
+    if (testAutomatically && mappedSuperclass) {
+      // We can't test a mapped super class
+      throw new IllegalArgumentException(
+          "Automatic tests cannot be created for an Entity SuperClass (@MappedSuperclass); remove the "
+              + "--testAutomatically or --mappedSuperclass option");
+    }
+
     // Reject attempts to name the entity "Test", due to possible clashes
     // with data on demand (see ROO-50)
     // We will allow this to happen, though if the user insists on it via
