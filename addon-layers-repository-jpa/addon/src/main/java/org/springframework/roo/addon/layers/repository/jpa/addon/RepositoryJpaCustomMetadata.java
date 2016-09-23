@@ -14,7 +14,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
@@ -42,13 +41,9 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private ImportRegistrationResolver importResolver;
   private JavaType globalSearch;
-  private JavaType entity;
   private JavaType defaultReturnType;
-  private Map<FieldMetadata, JavaType> referencedFields;
   private Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods;
-  private List<ProjectionFinderMethod> findersToAdd;
   private List<MethodMetadata> projectionFinderMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -101,12 +96,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     Validate.notNull(defaultReturnType, "Search result required");
     Validate.notNull(referencedFields, "Referenced fields could be empty but not null");
 
-    this.importResolver = builder.getImportRegistrationResolver();
     this.globalSearch = globalSearch;
-    this.entity = domainType;
     this.defaultReturnType = defaultReturnType;
-    this.referencedFields = referencedFields;
-    this.findersToAdd = findersToAdd;
     this.projectionFinderMethods = new ArrayList<MethodMetadata>();
 
     referencedFieldsFindAllMethods = new HashMap<FieldMetadata, MethodMetadata>();
@@ -245,8 +236,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
 
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(parameterType
-        .getSimpleTypeName())));
+    parameterNames.add(new JavaSymbolName("formSearch"));
     parameterNames.add(new JavaSymbolName("globalSearch"));
     parameterNames.add(new JavaSymbolName("pageable"));
 

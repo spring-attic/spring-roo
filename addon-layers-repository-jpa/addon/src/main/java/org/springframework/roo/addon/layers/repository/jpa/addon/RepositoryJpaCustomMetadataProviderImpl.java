@@ -270,6 +270,11 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
             JavaType formBean =
                 (JavaType) finderAnnotation.getValue().getAttribute("formBean").getValue();
             Validate.notNull(formBean, "@RooFinder must have a 'formBean' parameter.");
+            if (formBean.equals(entity)) {
+
+              // formBean hasn't been specified, so use repository defaultReturnType
+              formBean = defaultReturnType;
+            }
 
             // Check if default type is a Roo Projection or form bean is a DTO
             if ((getTypeLocationService().getTypeDetails(finderReturnType) != null && getTypeLocationService()

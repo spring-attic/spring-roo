@@ -37,6 +37,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -44,7 +45,6 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -66,8 +66,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
   private final Map<JavaType, String> domainTypeToRepositoryMidMap =
       new LinkedHashMap<JavaType, String>();
-  private final Map<String, JavaType> repositoryMidToDomainTypeMap =
-      new LinkedHashMap<String, JavaType>();
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
@@ -205,14 +203,13 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     boolean returnTypeIsProjection = entityProjectionAnnotation != null;
 
     // Get projection constructor fields from @RooEntityProjection and add it to a Map with 
-    // projection's variable names
-    Map<JavaType, Map<String, String>> allProjectionFieldMaps =
+    // domain type's variable names
+    Map<JavaType, Map<String, String>> typesFieldMaps =
         new LinkedHashMap<JavaType, Map<String, String>>();
-    Map<JavaType, Map<String, String>> allProjectionsIdFieldMaps =
-        new LinkedHashMap<JavaType, Map<String, String>>();
+    Map<JavaType, Boolean> typesAreProjections = new HashMap<JavaType, Boolean>();
     if (returnTypeIsProjection) {
-      buildProjectionFieldNamesMap(entity, returnType, entityProjectionAnnotation,
-          allProjectionFieldMaps);
+      buildProjectionFieldNamesMap(entity, returnType, entityProjectionAnnotation, typesFieldMaps);
+      typesAreProjections.put(returnType, true);
     }
 
     // Getting repository metadata
@@ -265,7 +262,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     MemberDetails entityMemberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), entityDetails);
 
-
     // Removing duplicates in persistent properties
     boolean duplicated;
     List<FieldMetadata> validIdFields = new ArrayList<FieldMetadata>();
@@ -296,12 +292,13 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       }
 
       // Exclude version field
-      if (field.getAnnotation(new JavaType("javax.persistence.Version")) != null) {
+      if (field.getAnnotation(JpaJavaType.VERSION) != null) {
         continue;
       }
 
       // Exclude id fields
-      if (field.getAnnotation(new JavaType("javax.persistence.Id")) != null) {
+      if (field.getAnnotation(JpaJavaType.ID) != null
+          || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
         continue;
       }
 
@@ -349,36 +346,73 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       referencedFieldsIdentifierNames.put(referencedFields.getKey(), fieldPathName);
     }
 
-    // Make a list with all projection types
-    List<JavaType> projections = new ArrayList<JavaType>();
-    projections.add(returnType);
+    // Add valid entity fields to mappings
+    Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadata =
+        new HashMap<JavaType, Map<String, FieldMetadata>>();
+    Map<String, FieldMetadata> entityFieldMetadata = new LinkedHashMap<String, FieldMetadata>();
+    Map<String, String> entityFieldMappings = new LinkedHashMap<String, String>();
+    typesAreProjections.put(entity, false);
+    for (FieldMetadata field : validFields) {
+      entityFieldMetadata.put(field.getFieldName().getSymbolName(), field);
+      if (field.getAnnotation(JpaJavaType.ID) != null
+          || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
+        entityFieldMappings.put(field.getFieldName().getSymbolName(), "getEntityId()");
+      } else {
+        entityFieldMappings.put(
+            field.getFieldName().getSymbolName(),
+            StringUtils.uncapitalize(entity.getSimpleTypeName()).concat(".")
+                .concat(field.getFieldName().getSymbolName()));
+      }
+    }
+    typesFieldsMetadata.put(entity, entityFieldMetadata);
+    typesFieldMaps.put(entity, entityFieldMappings);
+
+    // Make a list with all domain types, excepting entities
+    List<JavaType> domainTypes = new ArrayList<JavaType>();
+    domainTypes.add(returnType);
     for (MethodMetadata method : projectionFinderMethods) {
 
       // Get projection from first parameter of method return type (Page)
       JavaType projection = method.getReturnType().getParameters().get(0);
-      projections.add(projection);
+      domainTypes.add(projection);
+
+      // Add search parameter type if it is a DTO
+      JavaType parameterType = method.getParameterTypes().get(0).getJavaType();
+      if (getTypeLocationService().getTypeDetails(parameterType).getAnnotation(RooJavaType.ROO_DTO) != null) {
+        domainTypes.add(parameterType);
+      }
     }
 
-    // Add allProjectionFieldMaps for each projection finder and check for id fields
-    for (JavaType projection : projections) {
-      ClassOrInterfaceTypeDetails projectionDetails =
-          getTypeLocationService().getTypeDetails(projection);
+    // Add typesFieldMaps for each projection finder and check for id fields
+    for (JavaType type : domainTypes) {
+
+      // Check if projection fields has been added already
+      if (typesFieldMaps.containsKey(type)) {
+        continue;
+      }
+
+      // Build Map with FieldMetadata of each projection
+      ClassOrInterfaceTypeDetails typeDetails = getTypeLocationService().getTypeDetails(type);
+      List<FieldMetadata> typeFieldList =
+          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), typeDetails)
+              .getFields();
+      Map<String, FieldMetadata> fieldMetadataMap = new LinkedHashMap<String, FieldMetadata>();
+      for (FieldMetadata field : typeFieldList) {
+        fieldMetadataMap.put(field.getFieldName().getSymbolName(), field);
+      }
+      typesFieldsMetadata.put(type, fieldMetadataMap);
+
       AnnotationMetadata projectionAnnotation =
-          projectionDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
+          typeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
       if (projectionAnnotation != null) {
+        typesAreProjections.put(type, true);
 
-        // Get associated entity from @RooEntityProjection
+        // Type is a Projection
         JavaType associatedEntity =
-            (JavaType) entityProjectionAnnotation.getAttribute("entity").getValue();
-
-        // Check if projection fields has been added already
-        if (allProjectionFieldMaps.containsKey(associatedEntity)) {
-          continue;
-        }
+            (JavaType) projectionAnnotation.getAttribute("entity").getValue();
 
         // Get field values in "path" format from annotation
-        AnnotationAttributeValue<?> projectionFields =
-            entityProjectionAnnotation.getAttribute("fields");
+        AnnotationAttributeValue<?> projectionFields = projectionAnnotation.getAttribute("fields");
         @SuppressWarnings("unchecked")
         List<StringAttributeValue> values =
             (List<StringAttributeValue>) projectionFields.getValue();
@@ -393,9 +427,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
         }
 
-        // Add fields to allProjectionFieldMaps
-        buildProjectionFieldNamesMap(associatedEntity, projection, projectionAnnotation,
-            allProjectionFieldMaps);
+        // Add fields to typesFieldMaps
+        buildProjectionFieldNamesMap(associatedEntity, type, projectionAnnotation, typesFieldMaps);
 
         // Get the original FieldMetadata with its Java name in Projection
         Map<String, FieldMetadata> projectionOriginalFieldMetadataValues =
@@ -417,22 +450,33 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
               // The projection contains identifier fields, so modify them and add them to 
               // specific Map
-              String originalFieldPathName =
-                  allProjectionFieldMaps.get(projection).get(projectionOriginalValue.getKey());
               String fieldPathName = "getEntityId()";
-              allProjectionFieldMaps.get(projection).replace(projectionOriginalValue.getKey(),
-                  fieldPathName);
+              typesFieldMaps.get(type).replace(projectionOriginalValue.getKey(), fieldPathName);
             }
           }
         }
+      } else {
+
+        // Type is a DTO
+        typesAreProjections.put(type, false);
+        Map<String, String> fieldsMappings = new LinkedHashMap<String, String>();
+        for (FieldMetadata field : typeFieldList) {
+          fieldMetadataMap.put(field.getFieldName().getSymbolName(), field);
+          fieldsMappings.put(
+              field.getFieldName().getSymbolName(),
+              StringUtils.uncapitalize(entity.getSimpleTypeName()).concat(".")
+                  .concat(field.getFieldName().getSymbolName()));
+        }
+        typesFieldsMetadata.put(type, fieldMetadataMap);
+        typesFieldMaps.put(type, fieldsMappings);
       }
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, returnTypeIsProjection,
-        validIdFields, validFields, repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
-        referencedFieldsMethods, referencedFieldsIdentifierNames, allProjectionFieldMaps,
-        projectionFinderMethods);
+        governorPhysicalTypeMetadata, annotationValues, entity, validIdFields, validFields,
+        repositoryCustomMetadata.getFindAllGlobalSearchMethod(), referencedFieldsMethods,
+        referencedFieldsIdentifierNames, typesFieldMaps, projectionFinderMethods,
+        typesFieldsMetadata, typesAreProjections);
   }
 
   /**
