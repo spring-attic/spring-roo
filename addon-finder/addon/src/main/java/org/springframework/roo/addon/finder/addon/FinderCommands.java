@@ -313,6 +313,7 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
           if (param.getName().equals(field.getFieldName())
               && param.getType().equals(field.getFieldType())) {
             fieldFoundInDto = true;
+            break;
           }
         }
         Validate.isTrue(fieldFoundInDto, "Field names and types of DTO %s used in "

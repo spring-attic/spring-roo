@@ -538,7 +538,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     // Iterate over all specified fields
     for (int i = 0; i < allDtoFields.size(); i++) {
-      String fieldName = "";
       boolean found = false;
 
       // Iterate over all entity fields
@@ -568,81 +567,68 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
           break;
         }
       }
+
+      if (!found) {
+
+        // The field isn't in the entity, should be in one of its relations
+        FieldMetadata dtoField = allDtoFields.get(i);
+        for (FieldMetadata field : allEntityFields) {
+          found =
+              findDtoFieldRecursivelyAndAddToMappings(entity, fieldNamesMap, fieldMetadataMap,
+                  found, dtoField, field);
+        }
+      }
+
+      if (!found) {
+        // Field not found in its 
+        throw new IllegalArgumentException(String.format(
+            "Field %s couldn't be located in DTO %s. Please, be sure that it is well "
+                + "written and exists in %s or its related entities.", allDtoFields.get(i),
+            dto.getSimpleTypeName(), entity.getSimpleTypeName()));
+      }
     }
 
+    // Add dto mappings to domain type mappings
     typesFieldMaps.put(dto, fieldNamesMap);
     typeFieldMetadataMap.put(dto, fieldMetadataMap);
+  }
 
-    //      if (!found) {
-    //
-    //        // The field isn't in the entity, should be in one of its relations
-    //        String[] splittedByDot = StringUtils.split(fields[i], ".");
-    //        JavaType currentEntity = entity;
-    //        if (fields[i].contains(".")) {
-    //
-    //          // Search a matching relation field
-    //          for (int t = 0; t < splittedByDot.length; t++) {
-    //            ClassOrInterfaceTypeDetails currentEntityCid =
-    //                typeLocationService.getTypeDetails(currentEntity);
-    //            List<FieldMetadata> currentEntityFields = memberDetailsScanner
-    //                .getMemberDetails(this.getClass().getName(), currentEntityCid).getFields();
-    //            boolean relationFieldFound = false;
-    //
-    //            // Iterate to build the field-levels of the relation field
-    //            for (FieldMetadata field : currentEntityFields) {
-    //              if (field.getFieldName().getSymbolName().equals(splittedByDot[t])
-    //                  && t != splittedByDot.length - 1
-    //                  && typeLocationService.getTypeDetails(field.getFieldType()) != null
-    //                  && typeLocationService.getTypeDetails(field.getFieldType())
-    //                      .getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-    //
-    //                // Field is an entity and we should look into its fields
-    //                currentEntity = field.getFieldType();
-    //                found = true;
-    //                relationFieldFound = true;
-    //                if (t == 0) {
-    //                  fieldName = fieldName.concat(field.getFieldName().getSymbolName());
-    //                } else {
-    //                  fieldName = fieldName
-    //                      .concat(StringUtils.capitalize(field.getFieldName().getSymbolName()));
-    //                }
-    //                break;
-    //              } else if (field.getFieldName().getSymbolName().equals(splittedByDot[t])) {
-    //
-    //                // Add field to projection fields
-    //                fieldName =
-    //                    fieldName.concat(StringUtils.capitalize(field.getFieldName().getSymbolName()));
-    //                fieldsToAdd.put(fieldName, field);
-    //                found = true;
-    //                relationFieldFound = true;
-    //                break;
-    //              }
-    //            }
-    //
-    //            // If not found, relation field is bad written
-    //            if (!relationFieldFound) {
-    //              throw new IllegalArgumentException(String.format(
-    //                  "Field %s couldn't be located in %s. Please, be sure that it is well written.",
-    //                  splittedByDot[t], currentEntity.getFullyQualifiedTypeName()));
-    //            }
-    //          }
-    //        } else {
-    //
-    //          // Not written as a relation field
-    //          throw new IllegalArgumentException(
-    //              String.format("Field %s couldn't be located in entity %s", fields[i],
-    //                  entity.getFullyQualifiedTypeName()));
-    //        }
-    //      }
-    //
-    //      // If still not found, field is bad written
-    //      if (!found) {
-    //        throw new IllegalArgumentException(String.format(
-    //            "Field %s couldn't be located. Please, be sure that it is well written.", fields[i]));
-    //      }
-    //    }
-    //
-    //    return fieldsToAdd;
+  private boolean findDtoFieldRecursivelyAndAddToMappings(JavaType entity,
+      Map<String, String> fieldNamesMap, Map<String, FieldMetadata> fieldMetadataMap,
+      boolean found, FieldMetadata dtoField, FieldMetadata field) {
+    JavaType currentEntity;
+    if (getTypeLocationService().getTypeDetails(field.getFieldType()) != null
+        && getTypeLocationService().getTypeDetails(field.getFieldType()).getAnnotation(
+            RooJavaType.ROO_JPA_ENTITY) != null) {
+
+      // Change current entity
+      currentEntity = field.getFieldType();
+
+      // Modify pathName with one more level
+      String pathName =
+          StringUtils.uncapitalize(entity.getSimpleTypeName()).concat(".")
+              .concat(field.getFieldName().getSymbolName());
+
+      List<FieldMetadata> relatedEntityFields =
+          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+              getTypeLocationService().getTypeDetails(currentEntity)).getFields();
+      for (FieldMetadata relatedField : relatedEntityFields) {
+        if (relatedField.getFieldName().equals(dtoField.getFieldName())
+            && relatedField.getFieldType().equals(dtoField.getFieldType())) {
+
+          // Add field to mappings
+          fieldMetadataMap.put(dtoField.getFieldName().getSymbolName(), dtoField);
+          fieldNamesMap.put(dtoField.getFieldName().getSymbolName(),
+              pathName.concat(".").concat(relatedField.getFieldName().getSymbolName()));
+          found = true;
+          break;
+        } else {
+          findDtoFieldRecursivelyAndAddToMappings(currentEntity, fieldNamesMap, fieldMetadataMap,
+              found, dtoField, relatedField);
+        }
+      }
+    }
+    return found;
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
