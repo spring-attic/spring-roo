@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -29,6 +30,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
@@ -42,6 +44,7 @@ import org.w3c.dom.Element;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +57,7 @@ import java.util.logging.Logger;
  * 
  * @author Stefan Schmidt
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.2.0
  */
 @Component
@@ -449,9 +453,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
           new JavaType(String.format("%s.Q%s", entity.getPackage(), entity.getSimpleTypeName()),
               entity.getModule());
 
-      // Replacing qEntity import
-      input = input.replace("__QENTITY_IMPORT__", qEntity.getFullyQualifiedTypeName());
-
       // Replacing interface .class
       input = input.replace("__REPOSITORY_CUSTOM_INTERFACE__", interfaceType.getSimpleTypeName());
 
@@ -460,9 +461,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
       // Replacing entity name
       input = input.replace("__ENTITY_NAME__", entity.getSimpleTypeName());
-
-      // Replacing qEntity name
-      input = input.replace("__QENTITY_NAME__", qEntity.getSimpleTypeName());
 
       // Creating RepositoryCustomImpl class
       fileManager.createOrUpdateTextFileIfRequired(implIdentifier, input, false);

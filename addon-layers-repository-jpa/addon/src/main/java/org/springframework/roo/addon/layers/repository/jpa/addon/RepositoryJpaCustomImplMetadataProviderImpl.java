@@ -12,6 +12,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dto.addon.DtoOperations;
 import org.springframework.roo.addon.dto.addon.DtoOperationsImpl;
+import org.springframework.roo.addon.finder.addon.FinderCommands;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.finder.addon.parser.PartTree;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
@@ -571,7 +572,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     // Get finder fields
-    PartTree partTree = new PartTree(finderName.getSymbolName(), entityMemberDetails);
+    PartTree partTree =
+        new PartTree(finderName.getSymbolName(), entityMemberDetails, getFinderCommands());
     List<FinderParameter> finderParameters = partTree.getParameters();
 
     // Get all DTO fields
@@ -735,7 +737,32 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       return null;
 
     } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load DtoOperationsImpl on AbstractIdMetadataProvider.");
+      LOGGER
+          .warning("Cannot load DtoOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
+      return null;
+    }
+  }
+
+  /**
+   * Getter needed to obtain FinderAutocomplete implementation
+   * 
+   * @return
+   */
+  public FinderCommands getFinderCommands() {
+
+    // Get all Services implement DtoOperations interface
+    try {
+      ServiceReference<?>[] references =
+          context.getAllServiceReferences(FinderCommands.class.getName(), null);
+
+      for (ServiceReference<?> ref : references) {
+        return (FinderCommands) context.getService(ref);
+      }
+
+      return null;
+
+    } catch (InvalidSyntaxException e) {
+      LOGGER.warning("Cannot load FinderCommands on RepositoryJpaCustomImplMetadataProviderImpl.");
       return null;
     }
   }

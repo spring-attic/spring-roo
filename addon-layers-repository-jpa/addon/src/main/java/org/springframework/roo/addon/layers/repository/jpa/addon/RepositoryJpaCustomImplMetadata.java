@@ -174,14 +174,6 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       }
     }
 
-    // Add QueryDslRepositorySupportExt as superclass
-    JavaType queryDslExtension =
-        new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
-            .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
-            .concat("QueryDslRepositorySupportExt"), 0, DataType.TYPE, null,
-            Arrays.asList(this.entity));
-    builder.addExtendsTypes(queryDslExtension);
-
     // Build the ITD
     itdTypeDetails = builder.build();
   }
@@ -247,7 +239,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.newLine();
 
     // AttributeMappingBuilder mapping = buildMapper()
-    bodyBuilder.appendFormalLine(String.format(
+    StringBuffer mappingBuilderLine = new StringBuffer();
+    mappingBuilderLine.append(String.format(
         "%s mapping = buildMapper()",
         new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
             .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
@@ -262,16 +255,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String fieldName = field.getFieldName().getSymbolName();
-        bodyBuilder.appendIndent();
-
-        // .map(entiyVarName, varName) ...
-        if (iterator.hasNext()) {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s.%s)", fieldName,
-              entityVariable, fieldName));
-        } else {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s.%s);", fieldName,
-              entityVariable, fieldName));
-        }
+        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s.%s)", fieldName,
+            entityVariable, fieldName));
       }
     } else {
 
@@ -280,16 +265,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        bodyBuilder.appendIndent();
-        if (iterator.hasNext()) {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s)", entry.getKey(),
-              entry.getValue()));
-        } else {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s);", entry.getKey(),
-              entry.getValue()));
-        }
+        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s)", entry.getKey(),
+            entry.getValue()));
       }
     }
+    mappingBuilderLine.append(";");
+    bodyBuilder.appendFormalLine(mappingBuilderLine.toString());
     bodyBuilder.newLine();
 
     // applyPagination(pageable, query, mapping);
@@ -389,7 +370,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.newLine();
 
     // AttributeMappingBuilder mapping = buildMapper()
-    bodyBuilder.appendFormalLine(String.format(
+    StringBuffer mappingBuilderLine = new StringBuffer();
+    mappingBuilderLine.append(String.format(
         "%s mapping = buildMapper()",
         new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
             .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
@@ -405,14 +387,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String entityFieldName = field.getFieldName().getSymbolName();
-        bodyBuilder.appendIndent();
-        if (iterator.hasNext()) {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s.%s)", entityFieldName,
-              entityVariable, entityFieldName));
-        } else {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s.%s);", entityFieldName,
-              entityVariable, entityFieldName));
-        }
+        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s.%s)", entityFieldName,
+            entityVariable, entityFieldName));
       }
     } else {
 
@@ -421,16 +397,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        bodyBuilder.appendIndent();
-        if (iterator.hasNext()) {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s)", entry.getKey(),
-              entry.getValue()));
-        } else {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s);", entry.getKey(),
-              entry.getValue()));
-        }
+        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s)", entry.getKey(),
+            entry.getValue()));
       }
     }
+    mappingBuilderLine.append(";");
+    bodyBuilder.appendFormalLine(mappingBuilderLine.toString());
     bodyBuilder.newLine();
 
     // applyPagination(pageable, query, mapping);
@@ -522,7 +494,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.newLine();
 
     // AttributeMappingBuilder mapping = buildMapper()
-    bodyBuilder.appendFormalLine(String.format(
+    StringBuffer mappingBuilderLine = new StringBuffer();
+    mappingBuilderLine.append(String.format(
         "%s mapping = buildMapper()",
         new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
             .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
@@ -538,14 +511,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String fieldName = field.getFieldName().getSymbolName();
-        bodyBuilder.appendIndent();
-        if (iterator.hasNext()) {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s.%s)", fieldName,
-              entityVariable, fieldName));
-        } else {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s.%s);", fieldName,
-              entityVariable, fieldName));
-        }
+        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s.%s)", fieldName,
+            entityVariable, fieldName));
       }
     } else {
 
@@ -554,16 +521,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        bodyBuilder.appendIndent();
-        if (iterator.hasNext()) {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s)", entry.getKey(),
-              entry.getValue()));
-        } else {
-          bodyBuilder.appendFormalLine(String.format(".map(\"%s\", %s);", entry.getKey(),
-              entry.getValue()));
-        }
+        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s)", entry.getKey(),
+            entry.getValue()));
       }
     }
+    mappingBuilderLine.append(";");
+    bodyBuilder.appendFormalLine(mappingBuilderLine.toString());
     bodyBuilder.newLine();
 
     // applyPagination(pageable, query, mapping);
@@ -621,8 +584,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
 
-    //JPQLQuery query = getQueryFrom(qEntity);
-    bodyBuilder.appendFormalLine(String.format("%s query = getQueryFrom(%s);",
+    //JPQLQuery query = from(qEntity);
+    bodyBuilder.appendFormalLine(String.format("%s query = from(%s);",
         jpql.getNameIncludingTypeParameters(false, importResolver), entityVariable));
     bodyBuilder.newLine();
 
@@ -712,7 +675,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // applyGlobalSearch(search, query, ...
     bodyBuilder.appendIndent();
-    bodyBuilder.append("applyGlobalSearch(globalSearch, query,");
+    bodyBuilder.append("applyGlobalSearch(globalSearch, query");
     // ... returnType.field1, returnType.field2);
     if (!this.typesAreProjections.get(returnType)) {
 
@@ -722,11 +685,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         Entry<String, FieldMetadata> field = iterator.next();
         String fieldName = field.getValue().getFieldName().getSymbolName();
-        if (iterator.hasNext()) {
-          bodyBuilder.append(String.format(" %s.%s,", entityVariable, fieldName));
-        } else {
-          bodyBuilder.append(String.format(" %s.%s);", entityVariable, fieldName));
-        }
+        bodyBuilder.append(String.format(", %s.%s", entityVariable, fieldName));
       }
     } else {
 
@@ -737,13 +696,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        if (iterator.hasNext()) {
-          bodyBuilder.append(String.format(" %s,", entry.getValue()));
-        } else {
-          bodyBuilder.append(String.format(" %s);", entry.getValue()));
-        }
+        bodyBuilder.append(String.format(", %s", entry.getValue()));
       }
     }
+    bodyBuilder.append(");");
     bodyBuilder.newLine();
   }
 

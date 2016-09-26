@@ -47,6 +47,7 @@ import java.util.logging.Logger;
  * 
  * @author Paula Navarro
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 2.0
  */
 @Component

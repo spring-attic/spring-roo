@@ -1,19 +1,13 @@
 package __PACKAGE__;
 
-import org.springframework.data.jpa.repository.support.QueryDslRepositorySupport;
+import __PACKAGE__.QueryDslRepositorySupportExt;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import __ENTITY_IMPORT__;
-import __QENTITY_IMPORT__;
-import com.mysema.query.jpa.JPQLQuery;
 
 @RooJpaRepositoryCustomImpl(repository = __REPOSITORY_CUSTOM_INTERFACE__.class)
-public class __REPOSITORY_CUSTOM_IMPL__ extends QueryDslRepositorySupport{
+public class __REPOSITORY_CUSTOM_IMPL__ extends QueryDslRepositorySupportExt<__ENTITY_NAME__> {
 
     __REPOSITORY_CUSTOM_IMPL__() {
         super(__ENTITY_NAME__.class);
-    }
-    
-    private JPQLQuery getQueryFrom(__QENTITY_NAME__ qEntity){
-        return from(qEntity);
     }
 }
