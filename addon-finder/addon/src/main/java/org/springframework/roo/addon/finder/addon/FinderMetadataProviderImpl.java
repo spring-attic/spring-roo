@@ -11,8 +11,6 @@ import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.finder.addon.parser.PartTree;
 import org.springframework.roo.addon.finder.annotations.RooFinders;
-import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomImplMetadata;
-import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -41,7 +39,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -268,44 +265,8 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
       return null;
     }
 
-    // Evict and get RepositoryJpaCustomMetadata to update projection finders 
-    Set<ClassOrInterfaceTypeDetails> repositoryCustomClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
-    JavaType referencedEntity = (JavaType) repositoryAnnotation.getAttribute("entity").getValue();
-    JavaType repositoryCustomInterface = null;
-    for (ClassOrInterfaceTypeDetails repositoryClass : repositoryCustomClasses) {
-      if (repositoryClass.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM)
-          .getAttribute("entity").getValue().equals(referencedEntity)) {
-        repositoryCustomInterface = repositoryClass.getType();
-        LogicalPath repositoryLogicalPath =
-            PhysicalTypeIdentifier.getPath(repositoryClass.getDeclaredByMetadataId());
-        String repositoryCustomMetadataKey =
-            RepositoryJpaCustomMetadata.createIdentifier(repositoryClass.getType(),
-                repositoryLogicalPath);
-        getMetadataService().evictAndGet(repositoryCustomMetadataKey);
-        break;
-      }
-    }
-
-    // Evict and get RepositoryJpaCustomImplMetadata to update projection finders implementations
-    Set<ClassOrInterfaceTypeDetails> repositoryCustomImplClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL);
-    if (repositoryCustomInterface != null) {
-      for (ClassOrInterfaceTypeDetails repositoryCustomImpl : repositoryCustomImplClasses) {
-        if (repositoryCustomImpl.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL)
-            .getAttribute("repository").getValue().equals(repositoryCustomInterface)) {
-          LogicalPath repositoryImplLogicalPath =
-              PhysicalTypeIdentifier.getPath(repositoryCustomImpl.getDeclaredByMetadataId());
-          String repositoryCustomImplMetadataKey =
-              RepositoryJpaCustomImplMetadata.createIdentifier(repositoryCustomImpl.getType(),
-                  repositoryImplLogicalPath);
-          getMetadataService().evictAndGet(repositoryCustomImplMetadataKey);
-          break;
-        }
-      }
-    }
+    // Notify downstream dependencies for updating repository custom if necessary
+    getMetadataDependencyRegistry().notifyDownstream(metadataIdentificationString);
 
     return new FinderMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, findersToAdd);

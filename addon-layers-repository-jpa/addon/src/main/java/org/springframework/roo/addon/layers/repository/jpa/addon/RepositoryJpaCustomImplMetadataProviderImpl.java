@@ -12,6 +12,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dto.addon.DtoOperations;
 import org.springframework.roo.addon.dto.addon.DtoOperationsImpl;
+import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
+import org.springframework.roo.addon.finder.addon.parser.PartTree;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
@@ -48,12 +50,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
  * Implementation of {@link RepositoryJpaCustomImplMetadataProvider}.
  * 
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 2.0
  */
 @Component
@@ -190,6 +194,23 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
             "ERROR: Repository interface should be contain an entity on @RooJpaRepositoryCustom annotation");
 
     JavaType entity = entityAttribute.getValue();
+
+    // Register downstream dependency for RepositoryJpaCustomImplMetadata to update projection 
+    // finders implementations
+    Set<ClassOrInterfaceTypeDetails> repositoryCustomClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
+    for (ClassOrInterfaceTypeDetails repositoryJpaCustom : repositoryCustomClasses) {
+      if (repositoryCustom.equals(repositoryJpaCustom.getType())) {
+        LogicalPath repositoryLogicalPath =
+            PhysicalTypeIdentifier.getPath(repositoryJpaCustom.getDeclaredByMetadataId());
+        String repositoryCustomMetadataKey =
+            RepositoryJpaCustomMetadata.createIdentifier(repositoryJpaCustom.getType(),
+                repositoryLogicalPath);
+        registerDependency(repositoryCustomMetadataKey, metadataIdentificationString);
+        break;
+      }
+    }
 
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
 
@@ -347,7 +368,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     // Add valid entity fields to mappings
-    Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadata =
+    Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadataMap =
         new HashMap<JavaType, Map<String, FieldMetadata>>();
     Map<String, FieldMetadata> entityFieldMetadata = new LinkedHashMap<String, FieldMetadata>();
     Map<String, String> entityFieldMappings = new LinkedHashMap<String, String>();
@@ -364,22 +385,28 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
                 .concat(field.getFieldName().getSymbolName()));
       }
     }
-    typesFieldsMetadata.put(entity, entityFieldMetadata);
+    typesFieldsMetadataMap.put(entity, entityFieldMetadata);
     typesFieldMaps.put(entity, entityFieldMappings);
 
     // Make a list with all domain types, excepting entities
     List<JavaType> domainTypes = new ArrayList<JavaType>();
     domainTypes.add(returnType);
+    Map<JavaSymbolName, List<FinderParameter>> finderParametersMap =
+        new HashMap<JavaSymbolName, List<FinderParameter>>();
     for (MethodMetadata method : projectionFinderMethods) {
 
       // Get projection from first parameter of method return type (Page)
       JavaType projection = method.getReturnType().getParameters().get(0);
       domainTypes.add(projection);
 
-      // Add search parameter type if it is a DTO
+      // If type is a DTO, add finder fields to mappings
       JavaType parameterType = method.getParameterTypes().get(0).getJavaType();
       if (getTypeLocationService().getTypeDetails(parameterType).getAnnotation(RooJavaType.ROO_DTO) != null) {
-        domainTypes.add(parameterType);
+        typesAreProjections.put(parameterType, false);
+
+        // Build DTO field mappings
+        buildDtoFieldNamesMap(entity, parameterType, typesFieldMaps, typesFieldsMetadataMap,
+            method.getMethodName(), finderParametersMap);
       }
     }
 
@@ -400,7 +427,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       for (FieldMetadata field : typeFieldList) {
         fieldMetadataMap.put(field.getFieldName().getSymbolName(), field);
       }
-      typesFieldsMetadata.put(type, fieldMetadataMap);
+      typesFieldsMetadataMap.put(type, fieldMetadataMap);
 
       AnnotationMetadata projectionAnnotation =
           typeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
@@ -455,11 +482,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
             }
           }
         }
-      } else {
-
-        // Type is a DTO
-        typesAreProjections.put(type, false);
-        buildDtoFieldNamesMap(entity, type, typesFieldMaps, typesFieldsMetadata, typeFieldList);
       }
     }
 
@@ -467,7 +489,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         governorPhysicalTypeMetadata, annotationValues, entity, validIdFields, validFields,
         repositoryCustomMetadata.getFindAllGlobalSearchMethod(), referencedFieldsMethods,
         referencedFieldsIdentifierNames, typesFieldMaps, projectionFinderMethods,
-        typesFieldsMetadata, typesAreProjections);
+        typesFieldsMetadataMap, typesAreProjections, finderParametersMap);
   }
 
   /**
@@ -519,31 +541,56 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
    * @param dto
    * @param typesFieldMaps
    * @param typeFieldMetadataMap
-   * @param allDtoFields
+   * @param finderParametersList 
+   * @param javaSymbolName
    */
   private void buildDtoFieldNamesMap(JavaType entity, JavaType dto,
       Map<JavaType, Map<String, String>> typesFieldMaps,
-      Map<JavaType, Map<String, FieldMetadata>> typeFieldMetadataMap,
-      List<FieldMetadata> allDtoFields) {
+      Map<JavaType, Map<String, FieldMetadata>> typeFieldMetadataMap, JavaSymbolName finderName,
+      Map<JavaSymbolName, List<FinderParameter>> finderParametersMap) {
 
     // Get all entity fields
     ClassOrInterfaceTypeDetails entityCid = getTypeLocationService().getTypeDetails(entity);
-    List<FieldMetadata> allEntityFields =
-        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), entityCid)
-            .getFields();
+    MemberDetails entityMemberDetails =
+        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), entityCid);
+    List<FieldMetadata> allEntityFields = entityMemberDetails.getFields();
 
     // Create inner Maps
-    Map<String, String> fieldNamesMap = new HashMap<String, String>();
-    Map<String, FieldMetadata> fieldMetadataMap = new HashMap<String, FieldMetadata>();
+    Map<String, String> fieldNamesMap = null;
+    if (typesFieldMaps.get(dto) == null) {
+      fieldNamesMap = new HashMap<String, String>();
+    } else {
+      fieldNamesMap = typesFieldMaps.get(dto);
+    }
+
+    Map<String, FieldMetadata> fieldMetadataMap = null;
+    if (typeFieldMetadataMap.get(dto) == null) {
+      fieldMetadataMap = new HashMap<String, FieldMetadata>();
+    } else {
+      fieldMetadataMap = typeFieldMetadataMap.get(dto);
+    }
+
+    // Get finder fields
+    PartTree partTree = new PartTree(finderName.getSymbolName(), entityMemberDetails);
+    List<FinderParameter> finderParameters = partTree.getParameters();
+
+    // Get all DTO fields
+    List<FieldMetadata> allDtoFields =
+        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+            getTypeLocationService().getTypeDetails(dto)).getFields();
+
+    // Create list of parameters for this finder
+    List<FinderParameter> finderParametersList = new ArrayList<FinderParameter>();
 
     // Iterate over all specified fields
-    for (int i = 0; i < allDtoFields.size(); i++) {
+    for (FinderParameter finderParameter : finderParameters) {
+      JavaSymbolName fieldName = finderParameter.getName();
+      JavaType fieldType = finderParameter.getType();
       boolean found = false;
 
       // Iterate over all entity fields
       for (FieldMetadata field : allEntityFields) {
-        if (field.getFieldName().equals(allDtoFields.get(i).getFieldName())
-            && field.getFieldType().equals(allDtoFields.get(i).getFieldType())) {
+        if (field.getFieldName().equals(fieldName) && field.getFieldType().equals(fieldType)) {
 
           // Field found, build field "path" name and add it to map
           String fieldPathName = "";
@@ -560,9 +607,21 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
                     field.getFieldName());
           }
 
-          fieldNamesMap.put(allDtoFields.get(i).getFieldName().getSymbolName(), fieldPathName);
-          fieldMetadataMap.put(allDtoFields.get(i).getFieldName().getSymbolName(),
-              allDtoFields.get(i));
+          fieldNamesMap.put(fieldName.getSymbolName(), fieldPathName);
+
+          // Add FieldMetadata from DTO to fieldMetadataMap
+          boolean fieldFoundInDto = false;
+          for (FieldMetadata dtoField : allDtoFields) {
+            if (dtoField.getFieldName().equals(fieldName)
+                && dtoField.getFieldType().equals(fieldType)) {
+              fieldMetadataMap.put(fieldName.getSymbolName(), dtoField);
+              fieldFoundInDto = true;
+            }
+          }
+          Validate.isTrue(fieldFoundInDto,
+              "Couldn't find a field with same name and type that %s on DTO %s",
+              fieldName.getSymbolName(), dto.getSimpleTypeName());
+
           found = true;
           break;
         }
@@ -571,11 +630,10 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       if (!found) {
 
         // The field isn't in the entity, should be in one of its relations
-        FieldMetadata dtoField = allDtoFields.get(i);
         for (FieldMetadata field : allEntityFields) {
           found =
               findDtoFieldRecursivelyAndAddToMappings(entity, fieldNamesMap, fieldMetadataMap,
-                  found, dtoField, field);
+                  found, field, fieldName, fieldType, allDtoFields, dto.getSimpleTypeName());
         }
       }
 
@@ -583,19 +641,25 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         // Field not found in its 
         throw new IllegalArgumentException(String.format(
             "Field %s couldn't be located in DTO %s. Please, be sure that it is well "
-                + "written and exists in %s or its related entities.", allDtoFields.get(i),
+                + "written and exists in %s or its related entities.", fieldName,
             dto.getSimpleTypeName(), entity.getSimpleTypeName()));
       }
+
+      finderParametersList.add(finderParameter);
     }
 
     // Add dto mappings to domain type mappings
     typesFieldMaps.put(dto, fieldNamesMap);
     typeFieldMetadataMap.put(dto, fieldMetadataMap);
+
+    // Add finder params to Map
+    finderParametersMap.put(finderName, finderParametersList);
   }
 
   private boolean findDtoFieldRecursivelyAndAddToMappings(JavaType entity,
       Map<String, String> fieldNamesMap, Map<String, FieldMetadata> fieldMetadataMap,
-      boolean found, FieldMetadata dtoField, FieldMetadata field) {
+      boolean found, FieldMetadata field, JavaSymbolName finderFieldName, JavaType finderFieldType,
+      List<FieldMetadata> allDtoFields, String dtoSimpleName) {
     JavaType currentEntity;
     if (getTypeLocationService().getTypeDetails(field.getFieldType()) != null
         && getTypeLocationService().getTypeDetails(field.getFieldType()).getAnnotation(
@@ -613,18 +677,28 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
           getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
               getTypeLocationService().getTypeDetails(currentEntity)).getFields();
       for (FieldMetadata relatedField : relatedEntityFields) {
-        if (relatedField.getFieldName().equals(dtoField.getFieldName())
-            && relatedField.getFieldType().equals(dtoField.getFieldType())) {
+        if (relatedField.getFieldName().equals(finderFieldName)
+            && relatedField.getFieldType().equals(finderFieldType)) {
 
-          // Add field to mappings
-          fieldMetadataMap.put(dtoField.getFieldName().getSymbolName(), dtoField);
-          fieldNamesMap.put(dtoField.getFieldName().getSymbolName(),
+          // Add FieldMetadata from DTO to fieldMetadataMap
+          boolean fieldFoundInDto = false;
+          for (FieldMetadata dtoField : allDtoFields) {
+            if (dtoField.getFieldName().equals(finderFieldName)
+                && dtoField.getFieldType().equals(finderFieldType)) {
+              fieldMetadataMap.put(finderFieldName.getSymbolName(), dtoField);
+              fieldFoundInDto = true;
+            }
+          }
+          Validate.isTrue(fieldFoundInDto,
+              "Couldn't find a field with same name and type that %s on DTO %s",
+              finderFieldName.getSymbolName(), dtoSimpleName);
+          fieldNamesMap.put(finderFieldName.getSymbolName(),
               pathName.concat(".").concat(relatedField.getFieldName().getSymbolName()));
           found = true;
           break;
         } else {
           findDtoFieldRecursivelyAndAddToMappings(currentEntity, fieldNamesMap, fieldMetadataMap,
-              found, dtoField, relatedField);
+              found, relatedField, finderFieldName, finderFieldType, allDtoFields, dtoSimpleName);
         }
       }
     }

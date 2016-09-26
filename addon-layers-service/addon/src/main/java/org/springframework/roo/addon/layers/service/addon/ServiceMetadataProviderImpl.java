@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.service.addon;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -275,7 +276,8 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     final RepositoryJpaMetadata repositoryMetadata =
         (RepositoryJpaMetadata) getMetadataService().get(repositoryMetadataKey);
 
-    Map<FieldMetadata, MethodMetadata> countByReferencedFieldMethods = null;
+    Map<FieldMetadata, MethodMetadata> countByReferencedFieldMethods =
+        new HashMap<FieldMetadata, MethodMetadata>();
     if (repositoryMetadata != null) {
       countByReferencedFieldMethods = repositoryMetadata.getCountMethodByReferencedFields();
     }

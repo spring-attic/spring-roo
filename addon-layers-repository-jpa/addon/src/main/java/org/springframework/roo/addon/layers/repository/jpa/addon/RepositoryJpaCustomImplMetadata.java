@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -53,6 +54,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   private JavaType defaultReturnType;
   private Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadata;
   private Map<JavaType, Boolean> typesAreProjections;
+  private Map<JavaSymbolName, List<FinderParameter>> finderParametersMap;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -102,6 +104,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    *            the fields of each domain type.
    * @param typesAreProjections the Map<JavaType, Boolean> which tells if each type is 
    *            a projection and must use a ConstructorExpression in finders implementations.
+   * @param finderParametersMap the Map with all projection finder names and its list 
+   *            of finder params.
    */
   public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
@@ -113,7 +117,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final Map<JavaType, Map<String, String>> typesFieldMaps,
       final List<MethodMetadata> projectionFinderMethods,
       final Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadata,
-      final Map<JavaType, Boolean> typesAreProjections) {
+      final Map<JavaType, Boolean> typesAreProjections,
+      final Map<JavaSymbolName, List<FinderParameter>> finderParametersMap) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
@@ -123,6 +128,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     this.typesFieldMaps = typesFieldMaps;
     this.typesFieldsMetadata = typesFieldsMetadata;
     this.typesAreProjections = typesAreProjections;
+    this.finderParametersMap = finderParametersMap;
 
     // Get inner parameter of default return type (enclosed inside Page);
     this.defaultReturnType = findAllGlobalSearchMethod.getReturnType().getParameters().get(0);
@@ -237,7 +243,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // Construct query
     buildQuery(bodyBuilder, entityVariable, globalSearch, null, null, null, null,
-        this.defaultReturnType);
+        this.defaultReturnType, null);
     bodyBuilder.newLine();
 
     // AttributeMappingBuilder mapping = buildMapper()
@@ -379,7 +385,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // Construct query
     buildQuery(bodyBuilder, entityVariable, globalSearch, referencedFieldName,
-        referencedPathFieldName, null, null, this.defaultReturnType);
+        referencedPathFieldName, null, null, this.defaultReturnType, null);
     bodyBuilder.newLine();
 
     // AttributeMappingBuilder mapping = buildMapper()
@@ -512,7 +518,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // Construct query
     buildQuery(bodyBuilder, entityVariable, globalSearch, null, null, finderParamType,
-        finderParamName, returnType);
+        finderParamName, returnType, method.getMethodName());
     bodyBuilder.newLine();
 
     // AttributeMappingBuilder mapping = buildMapper()
@@ -604,12 +610,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param referencedFieldIdentifierPathName 
    * @param finderParam the JavaType which contains the fields to use for filtering. 
    *            Can be null in findAll queries.
-   * @param paramName the name of the search param.
+   * @param formBean the name of the search param.
+   * @param finderName the name of the finder. Only available when method is a 
+   *            projection/DTO finder.
    */
   private void buildQuery(InvocableMemberBodyBuilder bodyBuilder, String entityVariable,
       JavaSymbolName globalSearch, JavaSymbolName referencedFieldName,
-      String referencedFieldIdentifierPathName, JavaType finderParam, String paramName,
-      JavaType returnType) {
+      String referencedFieldIdentifierPathName, JavaType finderParam, String formBean,
+      JavaType returnType, JavaSymbolName finderName) {
 
     JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
 
@@ -620,34 +628,73 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     if (finderParam != null) {
       // if (formSearch != null) {
-      bodyBuilder.appendFormalLine(String.format("if (%s != null) {", paramName));
+      bodyBuilder.appendFormalLine(String.format("if (%s != null) {", formBean));
       Map<String, FieldMetadata> map = this.typesFieldsMetadata.get(finderParam);
-      for (Entry<String, FieldMetadata> field : map.entrySet()) {
-        // if (formSearch.getField() != null) {
-        String accessorMethodName =
-            BeanInfoUtils.getAccessorMethodName(field.getValue()).getSymbolName();
-        bodyBuilder.appendIndent();
-        bodyBuilder.appendFormalLine(String.format("if (%s.%s() != null) {", paramName,
-            accessorMethodName));
+      if (this.finderParametersMap != null && !this.finderParametersMap.isEmpty()
+          && this.finderParametersMap.get(finderName) != null) {
 
-        // Get path field name from field mappings
-        String pathFieldName = this.typesFieldMaps.get(finderParam).get(field.getKey());
-        // query.where(myEntity.field.eq(formBean.getField()));
-        bodyBuilder.appendIndent();
-        bodyBuilder.appendIndent();
-        if (pathFieldName.equals("getEntityId()")) {
+        // formBean is a DTO, filter only by finder params
+        List<FinderParameter> finderParamsList = this.finderParametersMap.get(finderName);
+        for (FinderParameter finderParameter : finderParamsList) {
 
-          // Field is an id field
-          bodyBuilder.appendFormalLine(String.format("query.where(getEntityId().eq(%s.%s()));",
-              paramName, accessorMethodName));
-        } else {
-          bodyBuilder.appendFormalLine(String.format("query.where(%s.eq(%s.%s()));", pathFieldName,
-              paramName, accessorMethodName));
+          // if (formSearch.getField() != null) {
+          String accessorMethodName =
+              BeanInfoUtils.getAccessorMethodName(finderParameter.getName(),
+                  finderParameter.getType()).getSymbolName();
+          bodyBuilder.appendIndent();
+          bodyBuilder.appendFormalLine(String.format("if (%s.%s() != null) {", formBean,
+              accessorMethodName));
+
+          // Get path field name from field mappings
+          String pathFieldName =
+              this.typesFieldMaps.get(finderParam).get(finderParameter.getName().getSymbolName());
+          // query.where(myEntity.field.eq(formBean.getField()));
+          bodyBuilder.appendIndent();
+          bodyBuilder.appendIndent();
+          if (pathFieldName.equals("getEntityId()")) {
+
+            // Field is an id field
+            bodyBuilder.appendFormalLine(String.format("query.where(getEntityId().eq(%s.%s()));",
+                formBean, accessorMethodName));
+          } else {
+            bodyBuilder.appendFormalLine(String.format("query.where(%s.eq(%s.%s()));",
+                pathFieldName, formBean, accessorMethodName));
+          }
+
+          // }
+          bodyBuilder.appendIndent();
+          bodyBuilder.appendFormalLine("}");
         }
+      } else {
 
-        // }
-        bodyBuilder.appendIndent();
-        bodyBuilder.appendFormalLine("}");
+        // formBean is an entity, filter by all its fields
+        for (Entry<String, FieldMetadata> field : map.entrySet()) {
+          // if (formSearch.getField() != null) {
+          String accessorMethodName =
+              BeanInfoUtils.getAccessorMethodName(field.getValue()).getSymbolName();
+          bodyBuilder.appendIndent();
+          bodyBuilder.appendFormalLine(String.format("if (%s.%s() != null) {", formBean,
+              accessorMethodName));
+
+          // Get path field name from field mappings
+          String pathFieldName = this.typesFieldMaps.get(finderParam).get(field.getKey());
+          // query.where(myEntity.field.eq(formBean.getField()));
+          bodyBuilder.appendIndent();
+          bodyBuilder.appendIndent();
+          if (pathFieldName.equals("getEntityId()")) {
+
+            // Field is an id field
+            bodyBuilder.appendFormalLine(String.format("query.where(getEntityId().eq(%s.%s()));",
+                formBean, accessorMethodName));
+          } else {
+            bodyBuilder.appendFormalLine(String.format("query.where(%s.eq(%s.%s()));",
+                pathFieldName, formBean, accessorMethodName));
+          }
+
+          // }
+          bodyBuilder.appendIndent();
+          bodyBuilder.appendFormalLine("}");
+        }
       }
 
       // }

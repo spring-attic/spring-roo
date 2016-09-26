@@ -7,6 +7,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.finder.addon.FinderMetadata;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -164,6 +165,22 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
         .notNull(
             entity,
             "ERROR: Repository custom interface should be contain an entity on @RooJpaRepositoryCustom annotation");
+
+    // Register upstream dependency for FinderMetadata to update projection finders
+    Set<ClassOrInterfaceTypeDetails> repositoryClasses =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_REPOSITORY_JPA);
+    for (ClassOrInterfaceTypeDetails repositoryClass : repositoryClasses) {
+      if (repositoryClass.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity")
+          .getValue().equals(entity)) {
+        LogicalPath repositoryLogicalPath =
+            PhysicalTypeIdentifier.getPath(repositoryClass.getDeclaredByMetadataId());
+        String finderMetadataKey =
+            FinderMetadata.createIdentifier(repositoryClass.getType(), repositoryLogicalPath);
+        registerDependency(finderMetadataKey, metadataIdentificationString);
+        break;
+      }
+    }
 
     // Getting findAll results type
     JavaType defaultReturnType = annotationValues.getDefaultReturnType();
