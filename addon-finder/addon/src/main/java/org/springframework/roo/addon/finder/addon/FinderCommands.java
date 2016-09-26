@@ -135,18 +135,16 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
     Set<ClassOrInterfaceTypeDetails> projectionsInProject =
         typeLocationService
             .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
-    boolean visible = false;
     for (ClassOrInterfaceTypeDetails projection : projectionsInProject) {
 
       // Add only projections associated to the entity specified in the command
       if (projection.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION).getAttribute("entity")
           .getValue().equals(entity)) {
-        visible = true;
-        break;
+        return true;
       }
     }
 
-    return visible;
+    return false;
   }
 
   @CliOptionAutocompleteIndicator(command = "finder add", includeSpaceOnFinish = false,
@@ -222,13 +220,20 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
 
     List<String> allPossibleValues = new ArrayList<String>();
 
+    // Get current value of 'entity'
+    JavaType entity = getTypeFromEntityParam(shellContext);
+
     Set<ClassOrInterfaceTypeDetails> entityProjections =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_ENTITY_PROJECTION);
     for (ClassOrInterfaceTypeDetails projection : entityProjections) {
-      String name = replaceTopLevelPackageString(projection, currentText);
-      if (!allPossibleValues.contains(name)) {
-        allPossibleValues.add(name);
+      if (entity != null
+          && projection.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION).getAttribute("entity")
+              .getValue().equals(entity)) {
+        String name = replaceTopLevelPackageString(projection, currentText);
+        if (!allPossibleValues.contains(name)) {
+          allPossibleValues.add(name);
+        }
       }
     }
 
