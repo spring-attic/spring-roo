@@ -573,7 +573,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     // Get finder fields
     PartTree partTree =
-        new PartTree(finderName.getSymbolName(), entityMemberDetails, getFinderCommands());
+        new PartTree(finderName.getSymbolName(), entityMemberDetails);
     List<FinderParameter> finderParameters = partTree.getParameters();
 
     // Get all DTO fields
@@ -739,30 +739,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     } catch (InvalidSyntaxException e) {
       LOGGER
           .warning("Cannot load DtoOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
-      return null;
-    }
-  }
-
-  /**
-   * Getter needed to obtain FinderAutocomplete implementation
-   * 
-   * @return
-   */
-  public FinderCommands getFinderCommands() {
-
-    // Get all Services implement DtoOperations interface
-    try {
-      ServiceReference<?>[] references =
-          context.getAllServiceReferences(FinderCommands.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (FinderCommands) context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load FinderCommands on RepositoryJpaCustomImplMetadataProviderImpl.");
       return null;
     }
   }
