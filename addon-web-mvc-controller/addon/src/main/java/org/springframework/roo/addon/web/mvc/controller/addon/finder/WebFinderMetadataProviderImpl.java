@@ -1,11 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
-import static org.springframework.roo.model.RooJavaType.ROO_WEB_FINDER;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.logging.Logger;
+import static org.springframework.roo.model.RooJavaType.ROO_SEARCH;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -33,6 +28,11 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.logging.Logger;
+
 
 /**
  * Implementation of {@link WebFinderMetadataProvider}.
@@ -57,7 +57,7 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_WEB_FINDER} as additional 
+   * <li>Registers {@link RooJavaType#ROO_SEARCH} as additional 
    * JavaType that will trigger metadata registration.</li>
    * </ul>
    */
@@ -68,7 +68,7 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
         new MetadataDependencyRegistryTracker(context, null,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
-    addMetadataTrigger(ROO_WEB_FINDER);
+    addMetadataTrigger(ROO_SEARCH);
   }
 
   /**
@@ -82,7 +82,7 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
     registry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(),
         getProvidesType());
     this.registryTracker.close();
-    removeMetadataTrigger(ROO_WEB_FINDER);
+    removeMetadataTrigger(ROO_SEARCH);
   }
 
   @Override

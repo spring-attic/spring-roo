@@ -67,8 +67,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.javabean.annotations.RooToString");
   public static final JavaType ROO_UPLOADED_FILE = new JavaType(
       "org.springframework.roo.classpath.operations.jsr303.RooUploadedFile");
-  public static final JavaType ROO_WEB_FINDER = new JavaType(
-      "org.springframework.roo.addon.web.mvc.controller.annotations.finder.RooWebFinder");
+  public static final JavaType ROO_SEARCH = new JavaType(
+      "org.springframework.roo.addon.web.mvc.controller.annotations.finder.RooSearch");
   public static final JavaType ROO_WEB_JSON = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.json.RooWebJson");
   public static final JavaType ROO_WEB_SCAFFOLD = new JavaType(

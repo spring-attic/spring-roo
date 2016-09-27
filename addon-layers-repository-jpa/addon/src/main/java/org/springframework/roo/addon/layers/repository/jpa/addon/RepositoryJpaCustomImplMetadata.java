@@ -255,7 +255,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String fieldName = field.getFieldName().getSymbolName();
-        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s.%s)", fieldName,
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s.%s)", fieldName,
             entityVariable, fieldName));
       }
     } else {
@@ -265,7 +265,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s)", entry.getKey(),
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
             entry.getValue()));
       }
     }
@@ -387,7 +387,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String entityFieldName = field.getFieldName().getSymbolName();
-        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s.%s)", entityFieldName,
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s.%s)", entityFieldName,
             entityVariable, entityFieldName));
       }
     } else {
@@ -397,7 +397,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s)", entry.getKey(),
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
             entry.getValue()));
       }
     }
@@ -511,7 +511,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         FieldMetadata field = iterator.next();
         String fieldName = field.getFieldName().getSymbolName();
-        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s.%s)", fieldName,
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s.%s)", fieldName,
             entityVariable, fieldName));
       }
     } else {
@@ -521,7 +521,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        mappingBuilderLine.append(String.format("\n\t.map(\"%s\", %s)", entry.getKey(),
+        mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
             entry.getValue()));
       }
     }

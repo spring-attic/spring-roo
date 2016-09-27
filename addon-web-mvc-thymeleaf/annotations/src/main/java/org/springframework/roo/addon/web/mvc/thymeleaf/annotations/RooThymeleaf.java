@@ -18,13 +18,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface RooThymeleaf {
-
-  /**
-   * This parameter defines the finders that should be published on 
-   * annotated Controller
-   * 
-   * @return The finders names list
-   */
-  String[] finders() default "";
-
 }

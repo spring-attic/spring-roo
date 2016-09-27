@@ -572,8 +572,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     // Get finder fields
-    PartTree partTree =
-        new PartTree(finderName.getSymbolName(), entityMemberDetails);
+    PartTree partTree = new PartTree(finderName.getSymbolName(), entityMemberDetails);
     List<FinderParameter> finderParameters = partTree.getParameters();
 
     // Get all DTO fields

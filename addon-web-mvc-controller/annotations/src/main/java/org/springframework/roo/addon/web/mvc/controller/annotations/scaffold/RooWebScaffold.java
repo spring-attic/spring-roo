@@ -57,7 +57,7 @@ public @interface RooWebScaffold {
   /**
    * This flag is not used any more as of Roo 1.2.0. Please annotate
    * controller types with
-   * {@link org.springframework.roo.addon.web.mvc.controller.annotations.finder.RooWebFinder}
+   * {@link org.springframework.roo.addon.web.mvc.controller.annotations.finder.RooSearch}
    * instead. (Was: Will scan the formBackingObjects for installed finder
    * methods and expose them when configured.)
    * 

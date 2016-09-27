@@ -12,9 +12,18 @@ import java.lang.annotation.Target;
  * finders to the Web UI.
  * 
  * @author Stefan Schmidt
+ * @author Sergio Clares
  * @since 1.2.0
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-public @interface RooWebFinder {
+public @interface RooSearch {
+
+  /**
+   * The list with the name of finders to expose to web layer.
+   * 
+   * @return
+   */
+  String[] finders();
+
 }
