@@ -35,7 +35,7 @@ import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooJpaRepositoryCustomImpl}.
- * 
+ *
  * @author Juan Carlos García
  * @author Paula Navarro
  * @since 2.0
@@ -81,7 +81,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
@@ -93,16 +93,16 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param isDTO indicates if the provided domainType is a DTO or an entity
    * @param idFields entity id fields
    * @param validFields entity fields to search for (excluded id, reference and collection fields)
-   * @param findAllGlobalSearchMethod the findAll metadata 
+   * @param findAllGlobalSearchMethod the findAll metadata
    * @param allFindAllReferencedFieldsMethods the metadata for al findAllByReference methods.
    * @param referencedFieldsIdentifierNames
-   * @param typesFieldMaps the Map<JavaType, Map<String, String>> of each associated 
-   *            domain type (parent Map JavaType), property names (keys) and path names (values) 
+   * @param typesFieldMaps the Map<JavaType, Map<String, String>> of each associated
+   *            domain type (parent Map JavaType), property names (keys) and path names (values)
    *            for building finders which return a projection.
    * @param projectionFinderMethods list of projection or DTO finder methods
-   * @param typesFieldsMetadata the Map<JavaType, Map<String, FieldMetadata>> with 
+   * @param typesFieldsMetadata the Map<JavaType, Map<String, FieldMetadata>> with
    *            the fields of each domain type.
-   * @param typesAreProjections the Map<JavaType, Boolean> which tells if each type is 
+   * @param typesAreProjections the Map<JavaType, Boolean> which tells if each type is
    *            a projection and must use a ConstructorExpression in finders implementations.
    * @param finderParametersMap the Map with all projection finder names and its list 
    *            of finder params.
@@ -181,7 +181,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   /**
    * Method that generates the findAll implementation method
    * @param ids the entity id fields
-   * @param fields the entity fields to search for 
+   * @param fields the entity fields to search for
    *
    * @return
    */
@@ -224,7 +224,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType qEntity =
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
-    JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
+    JavaType constructorExp = new JavaType("com.querydsl.core.types.ConstructorExpression");
 
     bodyBuilder.newLine();
 
@@ -289,7 +289,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     } else {
       Map<String, String> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
 
-      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class, 
+      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class,
       //                    getEntityId(), myEntity.field1, myEntity.field2);
       bodyBuilder.appendFormalLine(String.format(
           "return loadPage(query, %s, %s.create(%s.class, %s ));", pageable,
@@ -307,13 +307,13 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Method that generates the findAll referenced fields implementation method
-   * 
+   *
    * @param the JavaType of the referenced field
    * @param method to implement
-   * @param referencedPathFieldName the String with the the referenced field name 
+   * @param referencedPathFieldName the String with the the referenced field name
    *            in "path" format.
    * @param ids the entity id fields
-   * @param fields the entity fields to search for 
+   * @param fields the entity fields to search for
    *
    * @return
    */
@@ -355,7 +355,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType qEntity =
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
-    JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
+    JavaType constructorExp = new JavaType("com.querydsl.core.types.ConstructorExpression");
 
     bodyBuilder.newLine();
 
@@ -422,7 +422,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     } else {
       Map<String, String> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
 
-      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class, 
+      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class,
       //                    getEntityId(), myEntity.field1, myEntity.field2);
       bodyBuilder.appendFormalLine(String.format(
           "return loadPage(query, pageable, %s.create(%s.class, %s ));",
@@ -439,9 +439,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   }
 
   /**
-   * Method that generates implementation methods for each finder which return type 
+   * Method that generates implementation methods for each finder which return type
    * is a projection.
-   * 
+   *
    * @param method
    * @return
    */
@@ -479,7 +479,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
     JavaType returnType = method.getReturnType().getParameters().get(0);
-    JavaType constructorExp = new JavaType("com.mysema.query.types.ConstructorExpression");
+    JavaType constructorExp = new JavaType("com.querydsl.core.types.ConstructorExpression");
 
     bodyBuilder.newLine();
 
@@ -545,7 +545,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     } else {
       Map<String, String> projectionFields = this.typesFieldMaps.get(returnType);
 
-      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class, 
+      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class,
       //                    getEntityId(), myEntity.field1, myEntity.field2);
       bodyBuilder.appendFormalLine(String.format(
           "return loadPage(query, %s, %s.create(%s.class, %s ));", pageable,
@@ -564,14 +564,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Builds the search query
-   * 
+   *
    * @param bodyBuilder method body builder
    * @param fields fields to search for
-   * @param entityVariable name of the variable that contains the Q entity 
+   * @param entityVariable name of the variable that contains the Q entity
    * @param globalSearch global search variable name
    * @param referencedFieldName
-   * @param referencedFieldIdentifierPathName 
-   * @param finderParam the JavaType which contains the fields to use for filtering. 
+   * @param referencedFieldIdentifierPathName
+   * @param finderParam the JavaType which contains the fields to use for filtering.
    *            Can be null in findAll queries.
    * @param formBean the name of the search param.
    * @param finderName the name of the finder. Only available when method is a 
@@ -582,7 +582,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       String referencedFieldIdentifierPathName, JavaType finderParam, String formBean,
       JavaType returnType, JavaSymbolName finderName) {
 
-    JavaType jpql = new JavaType("com.mysema.query.jpa.JPQLQuery");
+    JavaType jpql = new JavaType("com.querydsl.jpa.JPQLQuery");
 
     //JPQLQuery query = from(qEntity);
     bodyBuilder.appendFormalLine(String.format("%s query = from(%s);",

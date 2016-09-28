@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.spring.platform</groupId>
     <artifactId>platform-bom</artifactId>
-    <version>2.0.6.RELEASE</version>
+    <version>Athens-RELEASE</version>
     <relativePath />
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -14,13 +14,10 @@
   <version>0.1.0.BUILD-SNAPSHOT</version>
   <name>TO_BE_CHANGED_BY_LISTENER</name>
   <properties>
-    <aspectj.version>ASPECTJ_VERSION</aspectj.version>
     <java.version>JAVA_VERSION</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
     <aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
-    <assertj.version>2.3.0</assertj.version>
-    <hibernate.jpa.version>1.0.0.Final</hibernate.jpa.version>
   </properties>
 
   <dependencyManagement>

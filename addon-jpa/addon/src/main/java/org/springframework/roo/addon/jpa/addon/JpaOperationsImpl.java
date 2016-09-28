@@ -63,7 +63,7 @@ import java.util.logging.Logger;
 
 /**
  * Implementation of {@link JpaOperations}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @author Juan Carlos García
@@ -218,8 +218,8 @@ public class JpaOperationsImpl implements JpaOperations {
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
-    // Also, it is necessary to include a class annotated with @RooGlobalSearch. 
-    // This Value Object is used to define global data searches in an entity or 
+    // Also, it is necessary to include a class annotated with @RooGlobalSearch.
+    // This Value Object is used to define global data searches in an entity or
     // group of entities.
     generateGlobalSearch(name.getPackage());
 
@@ -228,6 +228,7 @@ public class JpaOperationsImpl implements JpaOperations {
     if (!getProjectOperations().getFocusedModule().hasDependencyExcludingVersion(
         new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", null))) {
       List<Dependency> dependencies = new ArrayList<Dependency>();
+      dependencies.add(new Dependency("org.springframework", "spring-aspects", null));
       dependencies.add(new Dependency("org.springframework", "spring-context", null));
       dependencies.add(new Dependency("org.springframework.data", "spring-data-jpa", null));
       dependencies.add(new Dependency("org.springframework.data", "spring-data-commons", null));
@@ -369,7 +370,7 @@ public class JpaOperationsImpl implements JpaOperations {
       final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName,
       String userName, final String password, String jndi, String profile, boolean force) {
 
-    // Check if jndi is blank. If is blank, include database properties on 
+    // Check if jndi is blank. If is blank, include database properties on
     // application.properties file
     if (StringUtils.isBlank(jndi)) {
 
@@ -453,7 +454,7 @@ public class JpaOperationsImpl implements JpaOperations {
   /**
    * Updates the POM with the dependencies required for the given database and
    * ORM provider, removing any other persistence-related dependencies
-   * 
+   *
    * @param configuration
    * @param ormProvider
    * @param jdbcDatabase
@@ -564,7 +565,7 @@ public class JpaOperationsImpl implements JpaOperations {
    * Method that generates GlobalSearch class on current model package. If
    * GlobalSearch already exists in this or other package, will not be
    * generated.
-   * 
+   *
    * @param modelPackage Package where GlobalSearch should be generated
    * @return JavaType with existing or new GlobalSearch
    */
@@ -610,11 +611,11 @@ public class JpaOperationsImpl implements JpaOperations {
 
   /**
    * Add datasource dependency for testing purposes in a module with repository classes.
-   * This method can be called when installing/changing persistence database or when 
+   * This method can be called when installing/changing persistence database or when
    * adding repositories to the project.
-   * 
+   *
    * @param repositoryModuleName the module name where the dependency should be added.
-   * @param profile the profile used to obtain the datasource property from 
+   * @param profile the profile used to obtain the datasource property from
    *    spring config file.
    * @param databaseConfigPrefix the database prefix used to find the right dependency
    *    in the configuration file. It could be null if called from repository commands.
@@ -638,7 +639,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
       if (profile == null) {
 
-        // Add the database dependency of each profile 
+        // Add the database dependency of each profile
         List<String> profiles =
             applicationConfigService.getApplicationProfiles(modules.get(0).getModuleName());
 
@@ -681,7 +682,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
   /**
    * Gets database dependency from config file and adds it with test scope
-   * 
+   *
    * @param moduleName the module which dependency should be added
    * @param databaseConfigPrefix the prefix name for choosing the dependency to add
    * @param configuration the configuration file with the dependencies to copy from

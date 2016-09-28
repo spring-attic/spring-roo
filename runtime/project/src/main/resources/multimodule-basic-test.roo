@@ -1,10 +1,10 @@
 #====================================================================
-# TEST 1:  Create multimodule project                              
+# TEST 1:  Create multimodule project
 #--------------------------------------------------------------------
 # Goal:    Test if multimodule basic structure is generated
 #
 project setup --topLevelPackage org.example --multimodule BASIC
-#      
+#
 # Output:  Created ROOT/pom.xml
 #          Created ROOT/application
 #          Created ROOT/application/pom.xml
@@ -15,7 +15,7 @@ project setup --topLevelPackage org.example --multimodule BASIC
 #          Created application:SRC_TEST_JAVA/org/example
 #          Created application:SRC_TEST_JAVA/org/example/ExampleApplicationTests.java
 #
-# Result:  Creates the next structure:  
+# Result:  Creates the next structure:
 #          .
 #          ├── application
 #          │   ├── pom.xml
@@ -29,7 +29,7 @@ project setup --topLevelPackage org.example --multimodule BASIC
 #			<modules>
 #			  <module>application</module>
 #			</modules>
-#       
+#
 #          and application module points towards its parent:
 #			<parent>
 #			  <groupId>org.example</groupId>
@@ -44,12 +44,12 @@ project setup --topLevelPackage org.example --multimodule BASIC
 
 
 #====================================================================
-# TEST 2:  Create a module inside parent pom                         
+# TEST 2:  Create a module inside parent pom
 #--------------------------------------------------------------------
 # Goal:    Create a module inside parent pom using parent parameter
 #
-module create --moduleName model --parent ~ 
-#       
+module create --moduleName model --parent ~
+#
 # Output:  Created ROOT/model
 #          Created ROOT/model/pom.xml
 #          Created model/org/example/model
@@ -68,19 +68,19 @@ module create --moduleName model --parent ~
 #            <modules>
 #			   ...
 #			   <module>model</module>
-#			 </modules>                                                            
+#			 </modules>
 #====================================================================
 
 #====================================================================
-# TEST 3:  Create a module inside focused module                         
+# TEST 3:  Create a module inside focused module
 #--------------------------------------------------------------------
 # Goal:    Create a new module inside parent pom without using parent
 #          parameter
 #
 module focus --moduleName ~
-module create --moduleName repository 
-#       
-# Output:  module create --moduleName repository 
+module create --moduleName repository
+#
+# Output:  module create --moduleName repository
 #          Created ROOT/repository
 #          Created ROOT/repository/pom.xml
 #          Created repository:SRC_MAIN_JAVA/org/example/repository
@@ -99,19 +99,19 @@ module create --moduleName repository
 #            <modules>
 #			   ...
 #			   <module>repository</module>
-#			 </modules>                                                            
+#			 </modules>
 #====================================================================
 
 
 
 
 #====================================================================
-# TEST 4: Create a POM module inside parent module                          
+# TEST 4: Create a POM module inside parent module
 #--------------------------------------------------------------------
 # Goal:    Add a POM module inside parent module
 #
 module create --moduleName service --parent ~ --packaging POM
-#       
+#
 # Output:  Created ROOT/service
 #          Created ROOT/service/pom.xml
 #          Created pomparent:ROOT/src/main/java/org/example/service
@@ -130,16 +130,16 @@ module create --moduleName service --parent ~ --packaging POM
 #            <modules>
 #			   ...
 #			   <module>service</module>
-#			 </modules>                                                           
+#			 </modules>
 #====================================================================
 
 #====================================================================
-# TEST 5: Create a module inside focused POM module                          
+# TEST 5: Create a module inside focused POM module
 #--------------------------------------------------------------------
-# Goal:    Add a module inside the focused POM module 
+# Goal:    Add a module inside the focused POM module
 #
-module create --moduleName api 
-#       
+module create --moduleName api
+#
 # Output:  Created service:ROOT/api
 #          Created service:ROOT/api/pom.xml
 #          Created api:SRC_MAIN_JAVA/org/example/api
@@ -161,17 +161,17 @@ module create --moduleName api
 #          and adds the new module inside pomparent pom:
 #            <modules>
 #			   <module>api</module>
-#			 </modules>                                                           
+#			 </modules>
 #====================================================================
 
 
 #====================================================================
-# TEST 6: Create a module inside a POM module                          
+# TEST 6: Create a module inside a POM module
 #--------------------------------------------------------------------
 # Goal:    Add a module into a POM module using parent option
 #
 module create --moduleName impl --parent service
-#       
+#
 # Output:  Created service:ROOT/impl
 #          Created service:ROOT/impl/pom.xml
 #          Created impl:SRC_MAIN_JAVA/org/example/impl
@@ -196,17 +196,17 @@ module create --moduleName impl --parent service
 #            <modules>
 #			   <module>api</module>
 #			   <module>impl</module>
-#			 </modules>                                                           
+#			 </modules>
 #====================================================================
 
 #====================================================================
-# TEST 7: Create a WAR module with an artefactId inside parent POM                          
+# TEST 7: Create a WAR module with an artefactId inside parent POM
 #--------------------------------------------------------------------
 # Goal:    Add a WAR module inside parent module with an artefactId
 #
 module focus --moduleName ~
 module create --moduleName integration-impl --packaging WAR --artifactId integration.impl
-#       
+#
 # Output:  Created ROOT/integration-impl
 #          Created ROOT/integration-impl/pom.xml
 #          Created someparent:SRC_MAIN_JAVA/org/example/some/integration/impl
@@ -236,58 +236,58 @@ module create --moduleName integration-impl --packaging WAR --artifactId integra
 #            <modules>
 #              ...
 #			   <module>integration-impl</module>
-#			 </modules>                                                           
+#			 </modules>
 #====================================================================
 
 #====================================================================
-# TEST 8:  Focus on a module                                
+# TEST 8:  Focus on a module
 #--------------------------------------------------------------------
 # Goal:    Set the focus on a module
 #
 module focus --moduleName application
-#       
-# Output:  application roo> 
 #
-# Result:  Shell prompt changes with the focused module name                                                               
+# Output:  application roo>
+#
+# Result:  Shell prompt changes with the focused module name
 #====================================================================
 
 #====================================================================
-# TEST 9:  Focus on parent project                                
+# TEST 9:  Focus on parent project
 #--------------------------------------------------------------------
 # Goal:    Set the focus on parent pom
 #
 module focus --moduleName ~
-#       
-# Output:  roo> 
 #
-# Result:  Shell prompt removes any module name                                                               
+# Output:  roo>
+#
+# Result:  Shell prompt removes any module name
 #====================================================================
 
 #====================================================================
-# TEST 10: Generate a repository                            
+# TEST 10: Generate a repository
 #--------------------------------------------------------------------
 # Goal:    Test if model dependency is added to repository module pom
 #
 jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity jpa --class model:~.Owner
 repository jpa --entity model:~.Owner --interface repository:org.example.repository.OwnerRep
-#       
+#
 # Output:  ...
-#          Updated repository:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT; added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
+#          Updated repository:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT; added dependency com.querydsl:querydsl-jpa:; added plugin com.querydsl:querydsl-maven-plugin:${querydsl.version}]
 #          ...
 #
-# Result:  Adds model module as a dependency in repository pom.xml                                                            
+# Result:  Adds model module as a dependency in repository pom.xml
 #====================================================================
 
 #====================================================================
-# TEST 11:  Generate all repositories                              
+# TEST 11:  Generate all repositories
 #--------------------------------------------------------------------
-# Goal:    Validate that model dependency is not added again to  
+# Goal:    Validate that model dependency is not added again to
 #          repository module pom
 #
 entity jpa --class model:~.Pet
 repository jpa --all --package repository:org.example.repository
-#       
+#
 # Output:  INFO: Already exists a repository associated to the entity 'Owner'. Only one repository per entity is allowed.
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepository.java
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepositoryCustom.java
@@ -295,19 +295,19 @@ repository jpa --all --package repository:org.example.repository
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepository_Roo_Jpa_Repository.aj
 #          Created repository:SRC_MAIN_JAVA/org/example/repository/PetRepositoryImpl_Roo_Jpa_Repository_Impl.aj
 #
-# Result:  Since model dependency is already in repository, it is 
-#          not included again                                                          
+# Result:  Since model dependency is already in repository, it is
+#          not included again
 #====================================================================
 
 
 #====================================================================
-# TEST 12: Create a service                            
+# TEST 12: Create a service
 #--------------------------------------------------------------------
-# Goal:    Test if module dependencies are added to service interface 
-#          and implementation modules 
+# Goal:    Test if module dependencies are added to service interface
+#          and implementation modules
 #
 service --entity model:~.Owner --repository repository:org.example.repository.OwnerRep --interface api:~.OwnerService --class impl:~.OwnerServiceImpl
-#       
+#
 # Output:  Created api:SRC_MAIN_JAVA/org/example/api/OwnerService.java
 #          Created impl:SRC_MAIN_JAVA/org/example/impl/OwnerServiceImpl.java
 #          Updated api:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT]
@@ -315,27 +315,27 @@ service --entity model:~.Owner --repository repository:org.example.repository.Ow
 #          Created impl:SRC_MAIN_JAVA/org/example/impl/OwnerServiceImpl_Roo_Service_Impl.aj
 #          Created api:SRC_MAIN_JAVA/org/example/api/OwnerService_Roo_Service.aj
 #
-# Result:  Model dependency is added to service-api and service-impl 
-#          modules. Repository and service-api are included as 
-#          dependencies into service-impl module                                                              
+# Result:  Model dependency is added to service-api and service-impl
+#          modules. Repository and service-api are included as
+#          dependencies into service-impl module
 #====================================================================
 
 
 #====================================================================
-# TEST 13:  Generate service in the same module                             
+# TEST 13:  Generate service in the same module
 #--------------------------------------------------------------------
-# Goal:    Test if module dependencies are added to service module 
+# Goal:    Test if module dependencies are added to service module
 #
 module create --moduleName otherservice --parent ~
 service --all --apiPackage otherservice:~ --implPackage otherservice:~
-#       
+#
 # Output:  ...
 #          Updated otherservice:ROOT/pom.xml [added dependency org.example:model:0.1.0.BUILD-SNAPSHOT; added dependency org.example:repository:0.1.0.BUILD-SNAPSHOT;]
-#          ... 
+#          ...
 #
 # Result:  Model and repository dependencies are added to otherservice
-#          module. Since api and implementation are in the same 
-#          module a dependency between them is not added                                                               
+#          module. Since api and implementation are in the same
+#          module a dependency between them is not added
 #====================================================================
 
 ####################################################################
@@ -344,114 +344,114 @@ service --all --apiPackage otherservice:~ --implPackage otherservice:~
 
 
 #====================================================================
-# TEST 14: Create a repository in model module                            
+# TEST 14: Create a repository in model module
 #--------------------------------------------------------------------
 # Goal:    Validates that a module cannot have a dependency with itself
 #
-#entity jpa --class model:~.City 
+#entity jpa --class model:~.City
 #repository jpa --entity ~.City --interface ~.repository.CityRep
-#       
+#
 # Output:  Created model:SRC_MAIN_JAVA/org/example/model/repository
 #          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep.java
 #          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepCustom.java
 #          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepImpl.java
-#          Updated model:ROOT/pom.xml [added dependency com.mysema.querydsl:querydsl-jpa:; added plugin com.mysema.querydsl:querydsl-maven-plugin:${querydsl.version}]
+#          Updated model:ROOT/pom.xml [added dependency com.querydsl:querydsl-jpa:; added plugin com.querydsl:querydsl-maven-plugin:${querydsl.version}]
 #          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRepImpl_Roo_Jpa_Repository_Impl.aj
 #          Created model:SRC_MAIN_JAVA/org/example/model/repository/CityRep_Roo_Jpa_Repository.aj
 #
-# Result:  Since the dependency would be with itself, it is not added                                                          
+# Result:  Since the dependency would be with itself, it is not added
 #====================================================================
 
 
 #====================================================================
-# TEST 15:  Create a module that is already defined                            
+# TEST 15:  Create a module that is already defined
 #--------------------------------------------------------------------
-# Goal:    Avoid to create a module with a name that already is used 
+# Goal:    Avoid to create a module with a name that already is used
 #          to refer other module
 #
 # module focus --moduleName ~
 # module create --moduleName model
-#       
+#
 # Output:  Module model already exists
 #
-# Result:  Informs us that this module already exists                                                            
+# Result:  Informs us that this module already exists
 #====================================================================
 
 #====================================================================
-# TEST 16:  Focus on an incorrect module                                
+# TEST 16:  Focus on an incorrect module
 #--------------------------------------------------------------------
 # Goal:    Fails if module does not exist
 #
 # module focus --moduleName other
-#       
+#
 # Output:  java.lang.NullPointerException: Failed to convert 'other' to type Pom for option 'moduleName'
 #          Module other not found
 #
-# Result:  Informs us that module pom does not exist                                                                
+# Result:  Informs us that module pom does not exist
 #====================================================================
 
 #====================================================================
-# TEST 17:  Create a module inside a JAR/WAR module without using  
-#          parent option                         
+# TEST 17:  Create a module inside a JAR/WAR module without using
+#          parent option
 #--------------------------------------------------------------------
-# Goal:    Fails to create a module inside a JAR/WAR module if parent 
+# Goal:    Fails to create a module inside a JAR/WAR module if parent
 #          option is not specified
 #
 # module focus --moduleName application
-# module create --moduleName other 
-#       
+# module create --moduleName other
+#
 # Output:  You must specify option 'parent' for this command
 #
-# Result:  Informs us that parent option is necessary since focused 
-#          module is not a POM module                                                          
+# Result:  Informs us that parent option is necessary since focused
+#          module is not a POM module
 #====================================================================
 
 
 #====================================================================
-# TEST 18:  Create a module inside a JAR module                          
+# TEST 18:  Create a module inside a JAR module
 #--------------------------------------------------------------------
 # Goal:    Fails to create a module inside a JAR module
 #
 # module create --moduleName other --parent model
-#       
+#
 # Output:  --parent parameter must be a POM module
 #
-# Result:  Informs us that parent option must be a POM module                                                          
+# Result:  Informs us that parent option must be a POM module
 #====================================================================
 
 #====================================================================
-# TEST 19:  Create a module inside a WAR module                          
+# TEST 19:  Create a module inside a WAR module
 #--------------------------------------------------------------------
 # Goal:    Fails to create a module inside a WAR module
 #
 # module create --moduleName other --parent application
-#       
+#
 # Output:  --parent parameter must be a POM module
 #
-# Result:  Informs us that parent option must be a POM module                                                          
+# Result:  Informs us that parent option must be a POM module
 #====================================================================
 
 #====================================================================
-# TEST 20:  Create a module with incorrect parent                         
+# TEST 20:  Create a module with incorrect parent
 #--------------------------------------------------------------------
 # Goal:    Fails to create a module if parent does not exist
 #
 # module create --moduleName other --parent other
-#       
+#
 # Output:  --parent parameter must be a POM module
 #
-# Result:  Informs us that parent option must be a POM module                                                          
+# Result:  Informs us that parent option must be a POM module
 #====================================================================
 
 
 #====================================================================
-# TEST 21: Create a service in the same module as its entity                       
+# TEST 21: Create a service in the same module as its entity
 #--------------------------------------------------------------------
-# Goal:    Validate that a circular dependency between modules is 
-#          not allowed 
-# 
+# Goal:    Validate that a circular dependency between modules is
+#          not allowed
+#
 # service --entity model:~.Pet --repository repository:org.example.repository.PetRepository  --interface model:~.api.PetService --class model:~.impl.PetServiceImpl
-#       
+#
 # Output:  Created model:SRC_MAIN_JAVA/org/example/model/api
 #          Created model:SRC_MAIN_JAVA/org/example/model/api/PetService.java
 #          Created model:SRC_MAIN_JAVA/org/example/model/impl
@@ -463,6 +463,6 @@ service --all --apiPackage otherservice:~ --implPackage otherservice:~
 #          Undo manage ROOT/.roo/config/project.properties
 #          ERROR: Circular dependency detected, 'repository' already depends on 'model'.
 #
-# Result:  Informs that since repository has a dependency with 
-#          module, module can not have a dependency with repository                                                              
+# Result:  Informs that since repository has a dependency with
+#          module, module can not have a dependency with repository
 #====================================================================

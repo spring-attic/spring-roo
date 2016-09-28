@@ -430,9 +430,6 @@ finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
 // Install security
 security setup
 
-// Install audit
-audit setup
-
 // Add audit to Category entity
 audit add --entity ~.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
 

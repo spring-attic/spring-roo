@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <!-- Spring IO Platform is the parent of the generated application to be able to 
+  <!-- Spring IO Platform is the parent of the generated application to be able to
     use Spring Boot and all its default configuration -->
   <parent>
     <groupId>io.spring.platform</groupId>
     <artifactId>platform-bom</artifactId>
-    <version>2.0.6.RELEASE</version>
+    <version>Athens-RELEASE</version>
     <relativePath />
   </parent>
   <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
@@ -19,9 +19,7 @@
   <properties>
     <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
     <java.version>JAVA_VERSION</java.version>
-    <aspectj.version>ASPECTJ_VERSION</aspectj.version>
     <aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
-    <assertj.version>2.3.0</assertj.version>
   </properties>
 
   <dependencies>
@@ -67,7 +65,6 @@
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>${assertj.version}</version>
     </dependency>
 
     <!-- Dependencies added by Spring Roo -->

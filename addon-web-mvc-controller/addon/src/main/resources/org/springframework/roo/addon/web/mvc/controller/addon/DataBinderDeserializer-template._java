@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ import org.springframework.roo.addon.web.mvc.controller.annotations.http.convert
 
 /**
  * Jackson 2 {@link JsonDeserializer} based on Spring DataBinder.
- * 
+ *
  */
 @RooJSONDataBinderDeserializer
 public class DataBinderDeserializer extends BeanDeserializerBase {
@@ -60,13 +60,13 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
     super(source, objectIdReader);
   }
 
-  public DataBinderDeserializer(BeanDeserializerBase source, HashSet<String> ignorableProps) {
+  public DataBinderDeserializer(BeanDeserializerBase source, Set<String> ignorableProps) {
     super(source, ignorableProps);
   }
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * Uses {@link DataBinderDeserializer}
    */
   @Override
@@ -76,11 +76,11 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * Uses {@link DataBinderDeserializer}
    */
   @Override
-  public BeanDeserializerBase withIgnorableProperties(HashSet<String> ignorableProps) {
+  public BeanDeserializerBase withIgnorableProperties(Set<String> ignorableProps) {
     return new DataBinderDeserializer(this, ignorableProps);
   }
 
@@ -88,11 +88,11 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
    * Deserializes JSON content into Map<String, String> format and then uses a
    * Spring {@link DataBinder} to bind the data from JSON message to JavaBean
    * objects.
-   * 
+   *
    * @param parser Parsed used for reading JSON content
    * @param ctxt Context that can be used to access information about this
    *        deserialization activity.
-   * 
+   *
    * @return Deserializer value
    */
   @Override
@@ -152,7 +152,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
    * <p/>
    * Iterate over every object's property and delegates on
    * {@link #readField(JsonParser, DeserializationContext, JsonToken, String)}
-   * 
+   *
    * @param parser JSON parser
    * @param ctxt context
    * @param prefix object DataBinder path
@@ -185,7 +185,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
    * Iterate over every array's item to generate a prefix for property names
    * on DataBinder style (
    * <em>{prefix}[{index}].<em>) and delegates on {@link #readField(JsonParser, DeserializationContext, JsonToken, String)}
-   * 
+   *
    * @param parser JSON parser
    * @param ctxt context
    * @param prefix array dataBinder path
@@ -227,7 +227,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
    * <li>If it's an array, calls to
    * {@link #readArray(JsonParser, DeserializationContext, String)}</li>
    * </ul>
-   * 
+   *
    * @param parser
    * @param ctxt
    * @param token current token
@@ -312,7 +312,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * Not used
    */
   @Override
@@ -324,7 +324,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * Not used
    */
   @Override
@@ -335,7 +335,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * Not used
    */
   @Override
@@ -347,7 +347,7 @@ public class DataBinderDeserializer extends BeanDeserializerBase {
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * Not used
    */
   @Override
