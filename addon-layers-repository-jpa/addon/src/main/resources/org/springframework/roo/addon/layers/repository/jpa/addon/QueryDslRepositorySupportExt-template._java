@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Type;
 
 /**
  * Base class with additional utilities for implementing repositories using QueryDsl library.
@@ -157,6 +158,15 @@ public class QueryDslRepositorySupportExt<T> extends QueryDslRepositorySupport {
     Metamodel metamodel = getEntityManager().getMetamodel();
     EntityType<T> entity = metamodel.entity(domainClass);
     return entity;
+  }
+  
+  protected SingularAttribute<? super T, ?> getEntityId() {
+    EntityType<T> entity = getEntityMetaModel();
+    Type<?> idType = entity.getIdType();
+    if (entity.hasSingleIdAttribute()) {
+      return entity.getId(idType.getJavaType());
+    }
+    return null;
   }
 
   /**

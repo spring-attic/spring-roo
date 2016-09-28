@@ -56,7 +56,7 @@ import java.util.logging.Logger;
 
 /**
  * Implementation of {@link RepositoryJpaCustomImplMetadataProvider}.
- * 
+ *
  * @author Juan Carlos García
  * @author Sergio Clares
  * @since 2.0
@@ -80,7 +80,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA_CUSTOM_IMPL} as additional 
+   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA_CUSTOM_IMPL} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -105,9 +105,9 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -196,7 +196,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     JavaType entity = entityAttribute.getValue();
 
-    // Register downstream dependency for RepositoryJpaCustomImplMetadata to update projection 
+    // Register downstream dependency for RepositoryJpaCustomImplMetadata to update projection
     // finders implementations
     Set<ClassOrInterfaceTypeDetails> repositoryCustomClasses =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
@@ -224,7 +224,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         returnTypeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
     boolean returnTypeIsProjection = entityProjectionAnnotation != null;
 
-    // Get projection constructor fields from @RooEntityProjection and add it to a Map with 
+    // Get projection constructor fields from @RooEntityProjection and add it to a Map with
     // domain type's variable names
     Map<JavaType, Map<String, String>> typesFieldMaps =
         new LinkedHashMap<JavaType, Map<String, String>>();
@@ -357,12 +357,11 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         repositoryCustomMetadata.getProjectionFinderMethods();
 
     for (Entry<FieldMetadata, MethodMetadata> referencedFields : referencedFieldsMethods.entrySet()) {
-      JavaType referencedField = referencedFields.getKey().getFieldType();
 
       // Get identifier field name in path format
       String fieldPathName =
           String.format("%s.%s", StringUtils.uncapitalize(entity.getSimpleTypeName()),
-              StringUtils.uncapitalize(referencedField.getSimpleTypeName()));
+              referencedFields.getKey().getFieldName().getSymbolNameUnCapitalisedFirstLetter());
 
       // Put keys and values in map
       referencedFieldsIdentifierNames.put(referencedFields.getKey(), fieldPathName);
@@ -476,7 +475,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
                 && field.getDeclaredByMetadataId().equals(
                     projectionOriginalValue.getValue().getDeclaredByMetadataId())) {
 
-              // The projection contains identifier fields, so modify them and add them to 
+              // The projection contains identifier fields, so modify them and add them to
               // specific Map
               String fieldPathName = "getEntityId()";
               typesFieldMaps.get(type).replace(projectionOriginalValue.getKey(), fieldPathName);
@@ -494,9 +493,9 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   }
 
   /**
-   * Build a Map<String, String> with projection field names and "path" field names 
+   * Build a Map<String, String> with projection field names and "path" field names
    * and adds it to the typesFieldMaps Map.
-   * 
+   *
    * @param entity
    * @param projection
    * @param entityProjectionAnnotation
@@ -535,14 +534,14 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   }
 
   /**
-   * Build a Map<String, String> with DTO field names and "path" field names 
+   * Build a Map<String, String> with DTO field names and "path" field names
    * and adds it to the projectionsFieldMaps Map.
-   * 
+   *
    * @param entity
    * @param dto
    * @param typesFieldMaps
    * @param typeFieldMetadataMap
-   * @param finderParametersList 
+   * @param finderParametersList
    * @param javaSymbolName
    */
   private void buildDtoFieldNamesMap(JavaType entity, JavaType dto,
@@ -639,7 +638,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       }
 
       if (!found) {
-        // Field not found in its 
+        // Field not found in its
         throw new IllegalArgumentException(String.format(
             "Field %s couldn't be located in DTO %s. Please, be sure that it is well "
                 + "written and exists in %s or its related entities.", fieldName,
