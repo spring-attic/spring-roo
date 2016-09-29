@@ -180,7 +180,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
               .getValue()).getField().getSymbolName());
       if (controllerAnnotation.getAttribute("type") != null
           && controllerType.equals(ControllerType.getControllerType(new EnumDetails(
-              RooJavaType.ROO_ENUM_CONTROLLERTYPE, new JavaSymbolName("SEARCH")).getField()
+              RooJavaType.ROO_ENUM_CONTROLLER_TYPE, new JavaSymbolName("SEARCH")).getField()
               .getSymbolName())) && controllerAnnotation.getAttribute("entity") != null
           && controllerAnnotation.getAttribute("entity").getValue().equals(entity)) {
 
@@ -254,7 +254,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
       controllerAnnotation.addClassAttribute("entity", entity);
       controllerAnnotation.addStringAttribute("pathPrefix", pathPrefix);
       controllerAnnotation.addEnumAttribute("type", new EnumDetails(
-          RooJavaType.ROO_ENUM_CONTROLLERTYPE, new JavaSymbolName("SEARCH")));
+          RooJavaType.ROO_ENUM_CONTROLLER_TYPE, new JavaSymbolName("SEARCH")));
       controllerBuilder.addAnnotation(controllerAnnotation.build());
 
       // Create @RooSearch

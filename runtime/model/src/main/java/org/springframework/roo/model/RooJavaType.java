@@ -159,7 +159,7 @@ public final class RooJavaType {
       new JavaType(
           "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONJsonpAdvice");
 
-  public static final JavaType ROO_ENUM_CONTROLLERTYPE = new JavaType(
+  public static final JavaType ROO_ENUM_CONTROLLER_TYPE = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType");
 
   /**

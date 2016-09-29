@@ -612,7 +612,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
           pathPrefix));
     }
     rooControllerAttributes.add(new EnumAttributeValue(new JavaSymbolName("type"), new EnumDetails(
-        RooJavaType.ROO_ENUM_CONTROLLERTYPE, new JavaSymbolName(controllerType.name()))));
+        RooJavaType.ROO_ENUM_CONTROLLER_TYPE, new JavaSymbolName(controllerType.name()))));
     return new AnnotationMetadataBuilder(RooJavaType.ROO_CONTROLLER, rooControllerAttributes);
   }
 
