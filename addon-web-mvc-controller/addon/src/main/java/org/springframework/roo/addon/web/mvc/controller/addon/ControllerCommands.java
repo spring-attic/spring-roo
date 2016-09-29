@@ -5,6 +5,7 @@ import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_I
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -15,8 +16,13 @@ import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProv
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
@@ -41,10 +47,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
- * This class provides necessary commands to be able to include Spring MVC on generated
- * project and generate new controllers.
+ * This class provides necessary commands to be able to include Spring MVC on
+ * generated project and generate new controllers.
  *
  * @author Stefan Schmidt
  * @author Juan Carlos García
@@ -68,6 +73,8 @@ public class ControllerCommands implements CommandMarker {
   private ProjectOperations projectOperations;
   private TypeLocationService typeLocationService;
   private Converter<JavaType> javaTypeConverter;
+  @Reference
+  private MemberDetailsScanner memberDetailsScanner;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -76,8 +83,8 @@ public class ControllerCommands implements CommandMarker {
   /**
    * This indicator checks if --module parameter should be visible or not.
    *
-   * If exists more than one module that match with the properties of ModuleFeature APPLICATION,
-   * --module parameter should be mandatory.
+   * If exists more than one module that match with the properties of
+   * ModuleFeature APPLICATION, --module parameter should be mandatory.
    *
    * @param shellContext
    * @return
@@ -94,8 +101,8 @@ public class ControllerCommands implements CommandMarker {
   /**
    * This indicator checks if --module parameter should be mandatory or not.
    *
-   * If focused module doesn't match with the properties of ModuleFeature APPLICATION,
-   * --module parameter should be mandatory.
+   * If focused module doesn't match with the properties of ModuleFeature
+   * APPLICATION, --module parameter should be mandatory.
    *
    * @param shellContext
    * @return
@@ -112,6 +119,7 @@ public class ControllerCommands implements CommandMarker {
 
   /**
    * This indicator returns the servers where the application can be deployed
+   *
    * @param context
    * @return
    */
@@ -121,12 +129,11 @@ public class ControllerCommands implements CommandMarker {
     return new ArrayList<String>(getServerProviders().keySet());
   }
 
-
   /**
    * This indicator checks if Spring MVC setup is available
    *
-   * If a valid project has been generated and Spring MVC has not been installed yet,
-   * this command will be available.
+   * If a valid project has been generated and Spring MVC has not been
+   * installed yet, this command will be available.
    *
    * @return
    */
@@ -136,8 +143,8 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * This method provides the Command definition to be able to include
-   * Spring MVC on generated project.
+   * This method provides the Command definition to be able to include Spring
+   * MVC on generated project.
    *
    * @param module
    * @param appServer
@@ -160,8 +167,8 @@ public class ControllerCommands implements CommandMarker {
   /**
    * This indicator says if --all parameter should be visible or not
    *
-   * If --entity parameter has been specified, --all parameter will not be visible
-   * to prevent conflicts.
+   * If --entity parameter has been specified, --all parameter will not be
+   * visible to prevent conflicts.
    *
    * @return
    */
@@ -174,12 +181,11 @@ public class ControllerCommands implements CommandMarker {
     return true;
   }
 
-
   /**
    * This indicator says if --entity parameter should be visible or not
    *
-   * If --all parameter has been specified, --entity parameter will not be visible
-   * to prevent conflicts.
+   * If --all parameter has been specified, --entity parameter will not be
+   * visible to prevent conflicts.
    *
    * @return
    */
@@ -193,9 +199,11 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * This indicator says if --package, --pathPrefix and --responseType parameters should be visible or not
+   * This indicator says if --package, --pathPrefix and --responseType
+   * parameters should be visible or not
    *
-   * If --all or --entity parameters have not been specified, --package, --pathPrefix and --responseType parameters will not be visible.
+   * If --all or --entity parameters have not been specified, --package,
+   * --pathPrefix and --responseType parameters will not be visible.
    *
    * @return
    */
@@ -211,7 +219,8 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * Find entities in project and returns a list with their fully qualified names.
+   * Find entities in project and returns a list with their fully qualified
+   * names.
    *
    * @param shellContext
    * @return List<String> with available entity full qualified names.
@@ -244,14 +253,12 @@ public class ControllerCommands implements CommandMarker {
     return results;
   }
 
-
-
   /**
    * This indicator returns all possible values for --responseType parameter.
    *
-   * Depends of the specified --controller, responseTypes will be filtered to provide only that
-   * responseTypes that doesn't exists on current controller. Also, only installed response types
-   * will be provided.
+   * Depends of the specified --controller, responseTypes will be filtered to
+   * provide only that responseTypes that doesn't exists on current
+   * controller. Also, only installed response types will be provided.
    *
    * @param context
    * @return
@@ -260,7 +267,8 @@ public class ControllerCommands implements CommandMarker {
       help = "--responseType parameter should be completed with the provided response types.")
   public List<String> getAllResponseTypeValues(ShellContext context) {
 
-    // Getting all installed services that implements ControllerMVCResponseService
+    // Getting all installed services that implements
+    // ControllerMVCResponseService
     Map<String, ControllerMVCResponseService> installedResponseTypes =
         getInstalledControllerMVCResponseTypes();
 
@@ -269,7 +277,8 @@ public class ControllerCommands implements CommandMarker {
 
     for (Entry<String, ControllerMVCResponseService> responseType : installedResponseTypes
         .entrySet()) {
-      // If specified controller doesn't have this response type installed. Add to responseTypes
+      // If specified controller doesn't have this response type
+      // installed. Add to responseTypes
       // possible values
       responseTypes.add(responseType.getKey());
     }
@@ -291,8 +300,8 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * This method provides the Command definition to be able to generate
-   * new Controllers on current project.
+   * This method provides the Command definition to be able to generate new
+   * Controllers on current project.
    *
    * @param all
    * @param entity
@@ -356,12 +365,14 @@ public class ControllerCommands implements CommandMarker {
     }
   }
 
-
   /**
-   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
    *
-   * @param cid ClassOrInterfaceTypeDetails of a JavaType
-   * @param currentText String current text for option value
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText
+   *            String current text for option value
    * @return the String representing a JavaType with its name shortened
    */
   private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
@@ -414,10 +425,11 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * This method gets all implementations of ServerProvider interface to be able
-   * to locate all availbale appServers
+   * This method gets all implementations of ServerProvider interface to be
+   * able to locate all availbale appServers
    *
-   * @return Map with appServer identifier and the ServerProvider implementation
+   * @return Map with appServer identifier and the ServerProvider
+   *         implementation
    */
   public Map<String, ServerProvider> getServerProviders() {
     if (serverProviders.isEmpty()) {
@@ -441,10 +453,11 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * This method gets all implementations of ControllerMVCResponseService interface to be able
-   * to locate all installed ControllerMVCResponseService
+   * This method gets all implementations of ControllerMVCResponseService
+   * interface to be able to locate all installed ControllerMVCResponseService
    *
-   * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
+   * @return Map with responseTypes identifier and the
+   *         ControllerMVCResponseService implementation
    */
   public Map<String, ControllerMVCResponseService> getInstalledControllerMVCResponseTypes() {
     try {
@@ -471,6 +484,251 @@ public class ControllerCommands implements CommandMarker {
       LOGGER.warning("Cannot load ControllerMVCResponseService on ControllerCommands.");
       return null;
     }
+  }
+
+  // Detail commands
+  /**
+   * This method provides the Command definition to be able to generate new
+   * Controllers on current project.
+   *
+   * @param all
+   * @param entity
+   * @param responseType
+   * @param package
+   * @param pathPrefix
+   */
+
+  @CliCommand(value = "web mvc detail",
+      help = "Generates new @RooController inside current project")
+  public void addDetailController(
+      @CliOption(
+          key = "all",
+          mandatory = false,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "This param will be visible if --entity parameter hasn't been specified. Indicates if developer wants to generate first detail controllers for every entity that has a controller of current project") boolean all,
+      @CliOption(
+          key = "entity",
+          mandatory = false,
+          help = "This param will be visible if --all parameter hasn't been specified. Indicates the entity on which the detail controller is generated.") JavaType entity,
+      @CliOption(
+          key = "field",
+          mandatory = false,
+          specifiedDefaultValue = "",
+          unspecifiedDefaultValue = "",
+          help = "This param will be visible if --all or --entity parameters have been specified. Indicates the entity's field on which the detail controller is generated.") String field,
+      @CliOption(
+          key = "package",
+          mandatory = false,
+          optionContext = APPLICATION_FEATURE,
+          help = "This param will be visible if --all or --entity parameters have been specified. Indicates which package has the controllers on which the detail controllers are generated.") JavaPackage controllersPackage,
+      @CliOption(
+          key = "responseType",
+          mandatory = false,
+          unspecifiedDefaultValue = "JSON",
+          specifiedDefaultValue = "JSON",
+          help = "This param will be visible if --all or --entity parameters have been specified. Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary.") String responseType) {
+
+    // Getting --responseType service
+    Map<String, ControllerMVCResponseService> responseTypeServices =
+        getInstalledControllerMVCResponseTypes();
+
+    // Validate that provided responseType is a valid provided
+    if (!responseTypeServices.containsKey(responseType)) {
+      LOGGER
+          .log(
+              Level.SEVERE,
+              "ERROR: Provided responseType is not valid. Use autocomplete feature to obtain valid responseTypes.");
+      return;
+    }
+
+    // Check --all parameter
+    if (all) {
+      getControllerOperations().createOrUpdateDetailControllersForAllEntities(
+          responseTypeServices.get(responseType), controllersPackage);
+    } else {
+      getControllerOperations().createOrUpdateDetailControllerForEntity(entity, field,
+          responseTypeServices.get(responseType), controllersPackage);
+    }
+  }
+
+  @CliOptionVisibilityIndicator(params = "all", command = "web mvc detail",
+      help = "--all parameter is not be visible if --entity parameter has been specified before.")
+  public boolean isAllParameterOfDetailCommandVisible(ShellContext context) {
+    if (context.getParameters().containsKey("entity")) {
+      return false;
+    }
+    return true;
+  }
+
+  @CliOptionVisibilityIndicator(params = "entity", command = "web mvc detail",
+      help = "--entity parameter is not be visible if --all parameter has been specified before.")
+  public boolean isEntityParameterOfDetailCommandVisible(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return false;
+    }
+    return true;
+  }
+
+  @CliOptionAutocompleteIndicator(
+      command = "web mvc detail",
+      param = "entity",
+      help = "--entity parameter must be an existing class annotated with @RooJpaEntity. Please, assign a valid one.")
+  public List<String> getAllEntitiesForDetailCommands(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("entity");
+
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    // Get entity full qualified names
+    Set<ClassOrInterfaceTypeDetails> entities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY);
+
+    for (ClassOrInterfaceTypeDetails entity : entities) {
+      String name = replaceTopLevelPackageString(entity, currentText);
+      if (!results.contains(name)) {
+        results.add(name);
+      }
+    }
+
+    return results;
+  }
+
+  @CliOptionVisibilityIndicator(params = {"field"}, command = "web mvc detail",
+      help = "--field parameter is visible if --entity parameter has been specified before.")
+  public boolean isFieldParameterVisible(ShellContext context) {
+    if (context.getParameters().containsKey("entity")) {
+      return true;
+    }
+    return false;
+  }
+
+  @CliOptionAutocompleteIndicator(
+      command = "web mvc detail",
+      param = "field",
+      help = "--field parameter must be an existing @OneToMany field of the specified entity in parameter --entity.")
+  public List<String> getDetailFieldsRelatedToEntity(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentEntity = shellContext.getParameters().get("entity");
+
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    // Get entity full qualified names
+    Set<ClassOrInterfaceTypeDetails> entities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY);
+    for (ClassOrInterfaceTypeDetails entity : entities) {
+      if (replaceTopLevelPackageString(entity, entity.getType().getModule()).equals(currentEntity)) {
+        results.addAll(getDetailFieldsRelatedToEntity(entity, "", entity.getType()
+            .getSimpleTypeName()));
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Get a field list recursively that can be selected to do a detail controller.
+   *
+   * @param entity Entity on which create the detail controller
+   * @param parentFieldName The parent's field name used to construct the field name related with the original entity
+   * @param entityDetailController The root entity name of the detail controllers
+   * @return the related field list
+   */
+  private List<String> getDetailFieldsRelatedToEntity(ClassOrInterfaceTypeDetails entity,
+      String parentFieldName, String entityDetailController) {
+    List<String> results = new ArrayList<String>();
+
+    MemberDetails entityDetails =
+        memberDetailsScanner.getMemberDetails(entity.getType().getSimpleTypeName(), entity);
+    List<FieldMetadata> fields = entityDetails.getFields();
+
+    for (FieldMetadata field : fields) {
+      boolean detailNotWasCreated = true;
+      AnnotationMetadata oneToManyAnnotation = field.getAnnotation(JpaJavaType.ONE_TO_MANY);
+      if (oneToManyAnnotation != null
+          && (field.getFieldType().getFullyQualifiedTypeName()
+              .equals(JavaType.LIST.getFullyQualifiedTypeName()) || field.getFieldType()
+              .getFullyQualifiedTypeName().equals(JavaType.SET.getFullyQualifiedTypeName()))) {
+
+        // Get all controllers with ROO_DETAIL annotation
+        Set<ClassOrInterfaceTypeDetails> listRooDetailController =
+            getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+                RooJavaType.ROO_DETAIL);
+        for (ClassOrInterfaceTypeDetails detailController : listRooDetailController) {
+          // Get entity value
+          AnnotationMetadata annotationRooController =
+              detailController.getAnnotation(RooJavaType.ROO_CONTROLLER);
+          JavaType entityAnnotationController =
+              (JavaType) annotationRooController.getAttribute("entity").getValue();
+          // Get relation field value
+          String relationField =
+              (String) detailController.getAnnotation(RooJavaType.ROO_DETAIL)
+                  .getAttribute("relationField").getValue();
+          // if entity and relation field are the same, the detail controller of this field was created
+          if (entityDetailController.equals(entityAnnotationController.getSimpleTypeName())
+              && parentFieldName.concat(field.getFieldName().getSymbolName()).equals(relationField)) {
+            ClassOrInterfaceTypeDetails entityField =
+                getTypeLocationService()
+                    .getTypeDetails(field.getFieldType().getParameters().get(0));
+            // This detail has been created, check if it has more levels
+            // and offer them including.
+            results.addAll(getDetailFieldsRelatedToEntity(entityField,
+                parentFieldName.concat(field.getFieldName().getSymbolName()).concat("."),
+                entityDetailController));
+            detailNotWasCreated = false;
+            break;
+          }
+        }
+        // If the detail controller was not created, add field to the result list.
+        if (detailNotWasCreated) {
+          results.add(parentFieldName.concat(field.getFieldName().getSymbolName()));
+        }
+
+      }
+
+    }
+
+    return results;
+  }
+
+  @CliOptionAutocompleteIndicator(param = "responseType", command = "web mvc detail",
+      help = "--responseType parameter should be completed with an installed response type.")
+  public List<String> getAllResponseTypeForDetailCommandValues(ShellContext context) {
+
+    // Getting all installed services that implements
+    // ControllerMVCResponseService
+    Map<String, ControllerMVCResponseService> installedResponseTypes =
+        getInstalledControllerMVCResponseTypes();
+
+    // Generating all possible values
+    List<String> responseTypes = new ArrayList<String>();
+
+    for (Entry<String, ControllerMVCResponseService> responseType : installedResponseTypes
+        .entrySet()) {
+      // If specified controller doesn't have this response type
+      // installed. Add to responseTypes
+      // possible values
+      responseTypes.add(responseType.getKey());
+    }
+
+    return responseTypes;
+  }
+
+  @CliOptionVisibilityIndicator(
+      params = {"package", "responseType"},
+      command = "web mvc detail",
+      help = "--package, --pathPrefix and --responseType parameters are not visible if --all parameter or --entity parameter has been specified before.")
+  public boolean areDetailParametersVisibles(ShellContext context) {
+    if (context.getParameters().containsKey("all") || context.getParameters().containsKey("entity")) {
+      return true;
+    }
+    return false;
   }
 
   // Gets OSGi Services
@@ -545,8 +803,8 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * This method obtains JavaType converter to be able to obtain JavaType
-   * from strings
+   * This method obtains JavaType converter to be able to obtain JavaType from
+   * strings
    *
    * @return
    */

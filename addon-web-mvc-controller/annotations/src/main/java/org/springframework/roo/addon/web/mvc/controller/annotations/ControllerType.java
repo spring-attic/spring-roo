@@ -7,7 +7,7 @@ package org.springframework.roo.addon.web.mvc.controller.annotations;
  * @since 2.0
  */
 public enum ControllerType {
-  COLLECTION, ITEM, SEARCH;
+  COLLECTION, DETAIL, ITEM, SEARCH;
 
   public static ControllerType getControllerType(final String typeName) {
     try {

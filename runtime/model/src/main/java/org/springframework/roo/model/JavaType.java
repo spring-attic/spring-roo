@@ -28,7 +28,7 @@ import org.apache.commons.lang3.Validate;
  * provides convenient ways to determine the type's simple name and package
  * name. A related {@link org.springframework.core.convert.converter.Converter}
  * is also offered.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -58,11 +58,13 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer");
   public static final JavaType INT_PRIMITIVE = new JavaType("java.lang.Integer", 0,
       DataType.PRIMITIVE, null, null);
+  public static final JavaType LIST = new JavaType("java.util.List");
   public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long");
   public static final JavaType LONG_PRIMITIVE = new JavaType("java.lang.Long", 0,
       DataType.PRIMITIVE, null, null);
   public static final JavaType OBJECT = new JavaType("java.lang.Object");
   public static final JavaType SERIALIZABLE = new JavaType("java.io.Serializable");
+  public static final JavaType SET = new JavaType("java.util.Set");
   public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
   public static final JavaType SHORT_PRIMITIVE = new JavaType("java.lang.Short", 0,
       DataType.PRIMITIVE, null, null);
@@ -107,7 +109,7 @@ public class JavaType implements Comparable<JavaType> {
    * setting these non-default values. This is a factory method rather than a
    * constructor so as not to cause ambiguity problems for existing callers of
    * {@link #JavaType(String, int, DataType, JavaSymbolName, List)}
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the rules above)
    * @param arrayDimensions the number of array dimensions (0 = not an array,
    *            1 = one-dimensional array, etc.)
@@ -132,7 +134,7 @@ public class JavaType implements Comparable<JavaType> {
    * setting these non-default values. This is a factory method rather than a
    * constructor so as not to cause ambiguity problems for existing callers of
    * {@link #JavaType(String, int, DataType, JavaSymbolName, List)}
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the rules above)
    * @param enclosingType the type's enclosing type
    * @param arrayDimensions the number of array dimensions (0 = not an array,
@@ -154,7 +156,7 @@ public class JavaType implements Comparable<JavaType> {
 
   /**
    * Returns a {@link JavaType} for a list of the given element type
-   * 
+   *
    * @param elementType the type of element in the list (required)
    * @return a non-<code>null</code> type
    * @since 1.2.0
@@ -176,7 +178,7 @@ public class JavaType implements Comparable<JavaType> {
   /**
    * Constructor equivalent to {@link #JavaType(String)}, but takes a Class
    * for convenience and type safety.
-   * 
+   *
    * @param type the class for which to create an instance (required)
    * @since 1.2.0
    */
@@ -195,7 +197,7 @@ public class JavaType implements Comparable<JavaType> {
    * </ul>
    * <p>
    * A fully qualified type name may include or exclude a package designator.
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the above rules;
    *            mandatory)
    */
@@ -214,7 +216,7 @@ public class JavaType implements Comparable<JavaType> {
    * </ul>
    * <p>
    * A fully qualified type name may include or exclude a package designator.
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the above rules;
    *            mandatory)
    * @param module the module where is created (optional)
@@ -227,7 +229,7 @@ public class JavaType implements Comparable<JavaType> {
    * Construct a {@link JavaType} with full details. Recall that
    * {@link JavaType} is immutable and therefore this is the only way of
    * setting these non-default values.
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the rules above)
    * @param arrayDimensions the number of array dimensions (0 = not an array,
    *            1 = one-dimensional array, etc.)
@@ -247,7 +249,7 @@ public class JavaType implements Comparable<JavaType> {
    * Construct a {@link JavaType} with full details. Recall that
    * {@link JavaType} is immutable and therefore this is the only way of
    * setting these non-default values.
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the rules above)
    * @param arrayDimensions the number of array dimensions (0 = not an array,
    *            1 = one-dimensional array, etc.)
@@ -275,7 +277,7 @@ public class JavaType implements Comparable<JavaType> {
    * </ul>
    * <p>
    * A fully qualified type name may include or exclude a package designator.
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the above rules;
    *            mandatory)
    * @param enclosingType the type's enclosing type
@@ -296,7 +298,7 @@ public class JavaType implements Comparable<JavaType> {
    * </ul>
    * <p>
    * A fully qualified type name may include or exclude a package designator.
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the above rules;
    *            mandatory)
    * @param enclosingType the type's enclosing type
@@ -312,7 +314,7 @@ public class JavaType implements Comparable<JavaType> {
    * Construct a {@link JavaType} with full details. Recall that
    * {@link JavaType} is immutable and therefore this is the only way of
    * setting these non-default values.
-   * 
+   *
    * @param fullyQualifiedTypeName the name (as per the rules above)
    * @param enclosingType the type's enclosing type
    * @param arrayDimensions the number of array dimensions (0 = not an array,
@@ -432,7 +434,7 @@ public class JavaType implements Comparable<JavaType> {
   /**
    * Returns this type's base type, being <code>this</code> for single-valued
    * types, otherwise the element type for collection types.
-   * 
+   *
    * @return <code>null</code> for an untyped collection
    * @since 1.2.1
    */
@@ -470,7 +472,7 @@ public class JavaType implements Comparable<JavaType> {
    * Obtains the name of this type, including type parameters. It will be
    * formatted in a manner compatible with non-static use. No type name import
    * resolution will take place. This is a side-effect free method.
-   * 
+   *
    * @return the type name, including parameters, as legal Java code (never
    *         null or empty)
    */
@@ -484,7 +486,7 @@ public class JavaType implements Comparable<JavaType> {
    * as per the passed argument. Type names will attempt to be resolved (and
    * automatically registered) using the passed resolver. This method will
    * have side-effects on the passed resolver.
-   * 
+   *
    * @param staticForm true if the output should be compatible with static use
    * @param resolver the resolver to use (may be null in which case no import
    *            resolution will occur)
@@ -620,7 +622,7 @@ public class JavaType implements Comparable<JavaType> {
    * from its base package. For example, for a type called "com.example.Foo",
    * this method returns "com/example/Foo.java", delimited by the platform-
    * specific separator ("/" in this example).
-   * 
+   *
    * @return a non-blank path
    */
   public String getRelativeFileName() {
@@ -658,7 +660,7 @@ public class JavaType implements Comparable<JavaType> {
 
   /**
    * Indicates whether this type is any kind of boolean.
-   * 
+   *
    * @return see above
    * @since 1.2.1
    */
@@ -672,7 +674,7 @@ public class JavaType implements Comparable<JavaType> {
 
   /**
    * Indicates whether this type is part of core Java.
-   * 
+   *
    * @return see above
    */
   public boolean isCoreType() {
@@ -691,7 +693,7 @@ public class JavaType implements Comparable<JavaType> {
   /**
    * Indicates whether a field or variable of this type can contain multiple
    * values
-   * 
+   *
    * @return see above
    * @since 1.2.0
    */
@@ -701,7 +703,7 @@ public class JavaType implements Comparable<JavaType> {
 
   /**
    * Indicates whether this type is any kind of number
-   * 
+   *
    * @return see above
    * @since 2.0
    */
@@ -716,7 +718,7 @@ public class JavaType implements Comparable<JavaType> {
   /**
    * Indicates whether this type is a primitive, or in the case of an array,
    * whether its elements are primitive.
-   * 
+   *
    * @return see above
    */
   public boolean isPrimitive() {

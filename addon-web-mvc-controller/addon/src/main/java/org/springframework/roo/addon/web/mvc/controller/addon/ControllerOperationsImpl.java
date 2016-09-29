@@ -914,4 +914,18 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
     return false;
   }
+
+  @Override
+  public void createOrUpdateDetailControllersForAllEntities(
+      ControllerMVCResponseService responseType, JavaPackage controllerPackage) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void createOrUpdateDetailControllerForEntity(JavaType entity, String relationField,
+      ControllerMVCResponseService responseType, JavaPackage controllerPackage) {
+    // TODO Auto-generated method stub
+
+  }
 }

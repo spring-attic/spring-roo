@@ -101,6 +101,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.test.annotations.RooUnitTest");
   public static final JavaType ROO_CONTROLLER = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.RooController");
+  public static final JavaType ROO_DETAIL = new JavaType(
+      "org.springframework.roo.addon.web.mvc.controller.annotations.RooDetail");
 
   public static final JavaType ROO_WEB_MVC_CONFIGURATION = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcConfiguration");
