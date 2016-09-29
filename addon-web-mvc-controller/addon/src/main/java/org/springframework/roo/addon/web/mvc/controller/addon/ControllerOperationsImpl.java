@@ -34,6 +34,7 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooEnumDetails;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -400,20 +401,28 @@ public class ControllerOperationsImpl implements ControllerOperations {
           existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("entity");
       AnnotationAttributeValue<String> pathPrefixAttr =
           existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("pathPrefix");
+      AnnotationAttributeValue<Object> typeAttribute =
+          existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("type");
+      ControllerType existingControllerType =
+          ControllerType.getControllerType(((EnumDetails) typeAttribute.getValue()).getField()
+              .getSymbolName());
       String pathPrefixAttrValue = "";
       if (pathPrefixAttr != null) {
         pathPrefixAttrValue = pathPrefixAttr.getValue();
       }
-      if (entityAttr != null && entityAttr.getValue().equals(entity)
+      if (entityAttr != null
+          && entityAttr.getValue().equals(entity)
           && pathPrefixAttrValue.equals(pathPrefix)
-          && existingController.getAnnotation(responseType.getAnnotation()) != null) {
-        LOGGER
-            .log(
-                Level.INFO,
-                String
-                    .format(
-                        "ERROR: Already exists a controller associated to entity '%s' with the pathPrefix '%s' for this responseType. Specify different one using --pathPrefix or --responseType parameter.",
-                        entity.getSimpleTypeName(), pathPrefix));
+          && existingController.getAnnotation(responseType.getAnnotation()) != null
+          && (existingControllerType.equals(ControllerType
+              .getControllerType(RooEnumDetails.CONTROLLER_TYPE_COLLECTION.getField()
+                  .getSymbolName())) || existingControllerType.equals(ControllerType
+              .getControllerType(RooEnumDetails.CONTROLLER_TYPE_ITEM.getField().getSymbolName())))) {
+        LOGGER.log(Level.INFO, String.format(
+            "ERROR: Already exists a controller associated to entity '%s' with the "
+                + "pathPrefix '%s' for this responseType. Specify different one "
+                + "using --pathPrefix or --responseType parameter.", entity.getSimpleTypeName(),
+            pathPrefix));
         return;
       }
     }
@@ -475,29 +484,39 @@ public class ControllerOperationsImpl implements ControllerOperations {
     while (it.hasNext()) {
       ClassOrInterfaceTypeDetails existingController = it.next();
 
-      // Only check controllers from the specified package
+      // Only check controllers from the specified package and its ControllerType
       if (existingController.getType().getPackage().equals(controllerPackage)) {
 
         // Getting entity attribute
         AnnotationAttributeValue<Object> entityAttr =
             existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("entity");
-        if (entityAttr != null && entityAttr.getValue().equals(entity)) {
+
+        // Get controller type
+        AnnotationAttributeValue<Object> typeAttribute =
+            existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("type");
+        ControllerType existingControllerType =
+            ControllerType.getControllerType(((EnumDetails) typeAttribute.getValue()).getField()
+                .getSymbolName());
+        if (entityAttr != null
+            && entityAttr.getValue().equals(entity)
+            && (existingControllerType.equals(ControllerType
+                .getControllerType(RooEnumDetails.CONTROLLER_TYPE_COLLECTION.getField()
+                    .getSymbolName())) || existingControllerType.equals(ControllerType
+                .getControllerType(RooEnumDetails.CONTROLLER_TYPE_ITEM.getField().getSymbolName())))) {
 
           // Exists a controller for the same entity in the same provided package.
           // Let's check if also have the same responseType.
           if (existingController.getAnnotation(responseType.getAnnotation()) != null) {
-            LOGGER
-                .log(
-                    Level.INFO,
-                    String
-                        .format(
-                            "ERROR: Already exists a controller associated to entity '%s' in '%s' package with response type '%s'. If you want to update the existing controller, provide a different value in --responseType parameter.",
-                            entity.getSimpleTypeName(),
-                            controllerPackage.getFullyQualifiedPackageName(),
-                            responseType.getName()));
+            LOGGER.log(Level.INFO, String.format(
+                "ERROR: Already exists a controller associated to entity '%s' in '%s' "
+                    + "package with response type '%s'. If you want to update the existing "
+                    + "controller, provide a different value in --responseType parameter.",
+                entity.getSimpleTypeName(), controllerPackage.getFullyQualifiedPackageName(),
+                responseType.getName()));
             return;
           } else {
-            // If the controller exists but the specified responseType has not been applied to it yet, is time to update the controller to include
+            // If the controller exists but the specified responseType has not been 
+            // applied to it yet, is time to update the controller to include
             // a new responseType
             updateControllerWithResponseType(existingController.getType(), responseType);
           }

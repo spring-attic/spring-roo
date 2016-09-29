@@ -26,6 +26,7 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooEnumDetails;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -179,9 +180,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
           ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
               .getValue()).getField().getSymbolName());
       if (controllerAnnotation.getAttribute("type") != null
-          && controllerType.equals(ControllerType.getControllerType(new EnumDetails(
-              RooJavaType.ROO_ENUM_CONTROLLER_TYPE, new JavaSymbolName("SEARCH")).getField()
-              .getSymbolName())) && controllerAnnotation.getAttribute("entity") != null
+          && controllerType.equals(ControllerType
+              .getControllerType(RooEnumDetails.CONTROLLER_TYPE_SEARCH.getField().getSymbolName()))
+          && controllerAnnotation.getAttribute("entity") != null
           && controllerAnnotation.getAttribute("entity").getValue().equals(entity)) {
 
         // The controller is a search controller of the current entity
