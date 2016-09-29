@@ -17,7 +17,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -25,7 +24,6 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -169,7 +167,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // Generate projection finder methods implementations
     if (projectionFinderMethods != null) {
       for (MethodMetadata method : projectionFinderMethods) {
-        ensureGovernorHasMethod(new MethodMetadataBuilder(getProjectionfindersImpl(method,
+        ensureGovernorHasMethod(new MethodMetadataBuilder(getProjectionFindersImpl(method,
             validFields)));
       }
     }
@@ -224,7 +222,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType qEntity =
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
-    JavaType constructorExp = new JavaType("com.querydsl.core.types.ConstructorExpression");
+    JavaType projection = new JavaType("com.querydsl.core.types.Projections");
 
     bodyBuilder.newLine();
 
@@ -281,7 +279,27 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.newLine();
 
 
-    if (!this.typesAreProjections.get(this.defaultReturnType)) {
+    buildQueryResult(bodyBuilder, pageable, entityVariable, projection, this.defaultReturnType);
+
+    // Sets body to generated method
+    methodBuilder.setBodyBuilder(bodyBuilder);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Builds the query return sentence
+   * 
+   * @param bodyBuilder ITD boidy builder
+   * @param pageable the Page implementation variable name
+   * @param entityVariable the name of the variable owning the query
+   * @param projection the projection expression for returning the query
+   */
+  private void buildQueryResult(InvocableMemberBodyBuilder bodyBuilder, JavaSymbolName pageable,
+      String entityVariable, JavaType projection, JavaType returnType) {
+
+    if (!this.typesAreProjections.get(returnType)) {
 
       // return loadPage(query, pageable, myEntity);
       bodyBuilder.appendFormalLine(String.format("return loadPage(query, pageable, %s);",
@@ -289,20 +307,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     } else {
       Map<String, String> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
 
-      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class,
+      // return loadPage(query, pageable, Projection.constructor(MyProjection.class,
       //                    getEntityId(), myEntity.field1, myEntity.field2);
       bodyBuilder.appendFormalLine(String.format(
-          "return loadPage(query, %s, %s.create(%s.class, %s ));", pageable,
-          constructorExp.getNameIncludingTypeParameters(false, this.importResolver),
+          "return loadPage(query, %s, %s.constructor(%s.class, %s ));", pageable,
+          projection.getNameIncludingTypeParameters(false, this.importResolver),
           this.defaultReturnType.getNameIncludingTypeParameters(false, this.importResolver),
           StringUtils.join(projectionFields.values(), ", ")));
     }
-
-    // Sets body to generated method
-    methodBuilder.setBodyBuilder(bodyBuilder);
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
   }
 
   /**
@@ -355,7 +367,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     JavaType qEntity =
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
-    JavaType constructorExp = new JavaType("com.querydsl.core.types.ConstructorExpression");
+    JavaType projection = new JavaType("com.querydsl.core.types.Projections");
 
     bodyBuilder.newLine();
 
@@ -413,23 +425,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.appendFormalLine("applyOrderById(query);");
     bodyBuilder.newLine();
 
-
-    if (!this.typesAreProjections.get(this.defaultReturnType)) {
-
-      // return loadPage(query, pageable, myEntity);
-      bodyBuilder.appendFormalLine(String.format("return loadPage(query, %s, %s);", pageable,
-          entityVariable));
-    } else {
-      Map<String, String> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
-
-      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class,
-      //                    getEntityId(), myEntity.field1, myEntity.field2);
-      bodyBuilder.appendFormalLine(String.format(
-          "return loadPage(query, pageable, %s.create(%s.class, %s ));",
-          constructorExp.getNameIncludingTypeParameters(false, this.importResolver),
-          this.defaultReturnType.getNameIncludingTypeParameters(false, this.importResolver),
-          StringUtils.join(projectionFields.values(), ", ")));
-    }
+    buildQueryResult(bodyBuilder, pageable, entityVariable, projection, this.defaultReturnType);
 
     // Sets body to generated method
     methodBuilder.setBodyBuilder(bodyBuilder);
@@ -445,7 +441,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param method
    * @return
    */
-  private MethodMetadata getProjectionfindersImpl(MethodMetadata method, List<FieldMetadata> fields) {
+  private MethodMetadata getProjectionFindersImpl(MethodMetadata method, List<FieldMetadata> fields) {
 
     // Define method name
     JavaSymbolName methodName = method.getMethodName();
@@ -479,7 +475,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
         new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
             .concat(entity));
     JavaType returnType = method.getReturnType().getParameters().get(0);
-    JavaType constructorExp = new JavaType("com.querydsl.core.types.ConstructorExpression");
+    JavaType projection = new JavaType("com.querydsl.core.types.Projections");
 
     bodyBuilder.newLine();
 
@@ -536,23 +532,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.appendFormalLine("applyOrderById(query);");
     bodyBuilder.newLine();
 
-
-    if (!this.typesAreProjections.get(returnType)) {
-
-      // return loadPage(query, pageable, myEntity);
-      bodyBuilder.appendFormalLine(String.format("return loadPage(query, pageable, %s);",
-          entityVariable));
-    } else {
-      Map<String, String> projectionFields = this.typesFieldMaps.get(returnType);
-
-      // return loadPage(query, pageable, ConstructorExpression.create(MyProjection.class,
-      //                    getEntityId(), myEntity.field1, myEntity.field2);
-      bodyBuilder.appendFormalLine(String.format(
-          "return loadPage(query, %s, %s.create(%s.class, %s ));", pageable,
-          constructorExp.getNameIncludingTypeParameters(false, this.importResolver),
-          returnType.getNameIncludingTypeParameters(false, this.importResolver),
-          StringUtils.join(projectionFields.values(), ", ")));
-    }
+    buildQueryResult(bodyBuilder, pageable, entityVariable, projection, returnType);
 
     // Use provided finder method to generate its implementation
     MethodMetadataBuilder methodBuilder =

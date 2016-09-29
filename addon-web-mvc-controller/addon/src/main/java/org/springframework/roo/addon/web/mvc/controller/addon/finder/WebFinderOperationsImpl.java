@@ -11,7 +11,6 @@ import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerTy
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -116,6 +115,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
                           + "need at least an associated repository with finders to publish them to the web layer."
                           + "Please, create one associated repository with 'repository jpa' command.",
                       entity.getSimpleTypeName()));
+      return;
     }
 
     // Get repository finder methods
@@ -189,30 +189,50 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
       }
     }
 
-    // Check if any of the search controllers have the same pathPrefix
+    // Check if any of the search controllers have the same pathPrefix.
+    // If so, and controllerPackage is as well the same, update the controller.
+    ClassOrInterfaceTypeDetails controllerToUpdateOrCreate = null;
     for (ClassOrInterfaceTypeDetails entitySearchController : entitySearchControllers) {
       AnnotationMetadata controllerAnnotation =
           entitySearchController.getAnnotation(RooJavaType.ROO_CONTROLLER);
       if (controllerAnnotation.getAttribute("pathPrefix") != null
           && controllerAnnotation.getAttribute("pathPrefix").getValue().equals(pathPrefix)) {
+        if (controllerPackage.equals(entitySearchController.getType().getPackage())) {
 
-        // A related controller already exists with the same 'pathPrefix'
-        LOGGER.log(Level.INFO, String.format("ERROR: Already exists a controller associated "
-            + "to entity '%s' with the pathPrefix '%s'. Specify different one using --pathPrefix "
-            + "parameter.", entity.getSimpleTypeName(), pathPrefix));
+          // The controller exists, so choose it for updating.
+          controllerToUpdateOrCreate = entitySearchController;
+          break;
+        } else {
+
+          // A related controller already exists for the same entity, with the same 'pathPrefix',
+          // but in a different package.
+          LOGGER.log(Level.INFO, String.format("ERROR: Already exists a controller associated "
+              + "to entity '%s' with the pathPrefix '%s', in a different package. Specify "
+              + "a different pathPrefix to create a new one, or the same 'package' and "
+              + "'pathPrefix' to update the existing controller.", entity.getSimpleTypeName(),
+              pathPrefix));
+          return;
+        }
+      } else if (entitySearchController.getType().getPackage().equals(controllerPackage)) {
+
+        // A related controller already exists for the same entity, in the same package
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "ERROR: Already exists a controller associated to entity '%s' in the "
+                            + "same package '%s', with different 'pathPrefix'. Specify a different 'pathPrefix' "
+                            + "and a different package that the existing one to create a new one, or the same "
+                            + "'package' and 'pathPrefix' to update the existing controller.",
+                        entity.getSimpleTypeName(),
+                        controllerPackage.getFullyQualifiedPackageName()));
         return;
       }
     }
 
-    // Check if an entity related search controller already exists in the specified package
-    ClassOrInterfaceTypeDetails controllerToUpdateOrCreate = null;
+    // Update or create the search controller
     ClassOrInterfaceTypeDetailsBuilder controllerBuilder = null;
-    for (ClassOrInterfaceTypeDetails entitySearchController : entitySearchControllers) {
-      if (entitySearchController.getType().getPackage().equals(controllerPackage)) {
-        controllerToUpdateOrCreate = entitySearchController;
-        break;
-      }
-    }
     if (controllerToUpdateOrCreate == null) {
 
       // Create controller builder for a new file
@@ -274,6 +294,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
         while (it.hasNext()) {
           StringAttributeValue attributeValue = (StringAttributeValue) it.next();
           findersToAdd.add(attributeValue);
+          finderNames.add(attributeValue.getValue());
         }
 
         // Add new finders to new attributes array
@@ -303,7 +324,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
           // Controller already had same response type annotation and same finders added
           LOGGER.log(Level.WARNING, String.format(
               "Controller %s already has specified finders and specified response type.",
-              controllerToUpdateOrCreate.getType().getSimpleTypeName()));
+              controllerToUpdateOrCreate.getType().getFullyQualifiedTypeName()));
           return;
         }
       } else {
@@ -315,20 +336,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     }
 
     // Add dependencies between modules if required
-    if (projectOperations.isMultimoduleProject()) {
-
-      // Add service module dependency
-      projectOperations.addModuleDependency(controllerToUpdateOrCreate.getType().getModule(),
-          relatedService.getModule());
-
-      // Add repository module dependency
-      projectOperations.addModuleDependency(controllerToUpdateOrCreate.getType().getModule(),
-          relatedRepository.getType().getModule());
-
-      // Add model module dependency
-      projectOperations.addModuleDependency(controllerToUpdateOrCreate.getType().getModule(),
-          entity.getModule());
-    }
+    addModuleDependencies(entity, relatedRepository, relatedService, controllerToUpdateOrCreate);
 
     // Write changes to disk
     typeManagementService.createOrUpdateTypeOnDisk(controllerBuilder.build());
@@ -402,6 +410,33 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
                             + "finder generation won't have effects. Use 'repository jpa' command to create repositories.",
                         entity.getSimpleTypeName()));
       }
+    }
+  }
+
+  /**
+   * Add dependencies between modules if needed
+   * 
+   * @param entity
+   * @param relatedRepository
+   * @param relatedService
+   * @param controllerToUpdateOrCreate
+   */
+  private void addModuleDependencies(JavaType entity,
+      ClassOrInterfaceTypeDetails relatedRepository, JavaType relatedService,
+      ClassOrInterfaceTypeDetails controllerToUpdateOrCreate) {
+    if (projectOperations.isMultimoduleProject()) {
+
+      // Add service module dependency
+      projectOperations.addModuleDependency(controllerToUpdateOrCreate.getType().getModule(),
+          relatedService.getModule());
+
+      // Add repository module dependency
+      projectOperations.addModuleDependency(controllerToUpdateOrCreate.getType().getModule(),
+          relatedRepository.getType().getModule());
+
+      // Add model module dependency
+      projectOperations.addModuleDependency(controllerToUpdateOrCreate.getType().getModule(),
+          entity.getModule());
     }
   }
 }

@@ -2,14 +2,6 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -30,6 +22,8 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
@@ -43,6 +37,15 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ServiceMetadataProvider}.
@@ -214,12 +217,26 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     final FinderMetadata finderMetadata =
         (FinderMetadata) getMetadataService().get(finderMetadataKey);
 
-    List<FinderMethod> finders = new ArrayList<FinderMethod>();
+    List<MethodMetadata> finders = new ArrayList<MethodMetadata>();
     if (finderMetadata != null) {
-      finders = finderMetadata.getFinders();
 
-      // Add dependencies between modules
-      for (FinderMethod finder : finders) {
+      // Add dependencies between modules and convert to MethodMetadata
+      for (FinderMethod finder : finderMetadata.getFinders()) {
+
+        // Convert to MethodMetadata
+        List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+        for (FinderParameter param : finder.getParameters()) {
+          parameterTypes.add(AnnotatedJavaType.convertFromJavaType(param.getType()));
+          parameterNames.add(param.getName());
+        }
+        MethodMetadataBuilder methodBuilder =
+            new MethodMetadataBuilder(metadataIdentificationString, Modifier.PUBLIC
+                + Modifier.ABSTRACT, finder.getMethodName(), finder.getReturnType(),
+                parameterTypes, parameterNames, null);
+        finders.add(methodBuilder.build());
+
+        // Add dependencies between modules
         List<JavaType> types = new ArrayList<JavaType>();
         types.add(finder.getReturnType());
         types.addAll(finder.getReturnType().getParameters());
@@ -282,11 +299,12 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
       countByReferencedFieldMethods = repositoryMetadata.getCountMethodByReferencedFields();
     }
 
+    finders.addAll(repositoryCustomMetadata.getProjectionFinderMethods());
+
     return new ServiceMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders,
         repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
-        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(),
-        countByReferencedFieldMethods, repositoryCustomMetadata.getProjectionFinderMethods());
+        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(), countByReferencedFieldMethods);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

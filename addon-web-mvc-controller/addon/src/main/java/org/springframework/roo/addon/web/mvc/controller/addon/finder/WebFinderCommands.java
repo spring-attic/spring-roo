@@ -331,16 +331,16 @@ public class WebFinderCommands implements CommandMarker {
       controllerResponseType = responseTypeServices.get("JSON");
     }
 
-    // Create queryMethods list
-    List<String> queryMethods = new ArrayList<String>();
-    if (queryMethod == null) {
-      queryMethods = getFinders(entity);
-    } else {
-      queryMethods.add(queryMethod);
-    }
-
     // Execute finder operation
     if (!all) {
+
+      // Create queryMethods list
+      List<String> queryMethods = new ArrayList<String>();
+      if (queryMethod != null) {
+        queryMethods.add(queryMethod);
+      } else {
+        queryMethods = getFinders(entity);
+      }
       webFinderOperations.createOrUpdateSearchControllerForEntity(entity, queryMethods,
           controllerResponseType, controllerPackage, pathPrefix);
     } else {

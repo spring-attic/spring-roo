@@ -6,8 +6,6 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.RooJavaType;
 
-import java.util.List;
-
 /**
  *
  * Annotation values for @RooSearch
@@ -18,14 +16,14 @@ import java.util.List;
 public class SearchAnnotationValues extends AbstractAnnotationValues {
 
   @AutoPopulate
-  private List<String> finders;
+  private String[] finders;
 
   public SearchAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     super(governorPhysicalTypeMetadata, RooJavaType.ROO_SEARCH);
     AutoPopulationUtils.populate(this, annotationMetadata);
   }
 
-  public List<String> getFinders() {
+  public String[] getFinders() {
     return finders;
   }
 }

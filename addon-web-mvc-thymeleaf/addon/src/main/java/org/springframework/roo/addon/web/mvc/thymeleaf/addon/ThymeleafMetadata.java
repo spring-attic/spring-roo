@@ -46,6 +46,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private MethodMetadata deleteBatchMethod;
   private MethodMetadata createBatchMethod;
   private MethodMetadata updateBatchMethod;
+  private List<MethodMetadata> finderMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -116,6 +117,9 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    *            List<JavaType>
    * @param type
    *            Controller type
+   * @param finderRedirectMethods 
+   * @param finderListMethods 
+   * @param finderFormMethods 
    */
   public ThymeleafMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listFormMethod,
@@ -126,7 +130,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       final List<MethodMetadata> detailsMethods, final MethodMetadata populateFormMethod,
       final MethodMetadata populateFormatsMethod, final MethodMetadata deleteBatchMethod,
       final MethodMetadata createBatchMethod, final MethodMetadata updateBatchMethod,
-      final boolean readOnly, final List<JavaType> typesToImport, ControllerType type) {
+      final boolean readOnly, final List<JavaType> typesToImport, final ControllerType type,
+      final List<MethodMetadata> finderMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
@@ -147,6 +152,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.detailsMethods = detailsMethods;
     this.populateFormMethod = populateFormMethod;
     this.populateFormatMethods = populateFormatsMethod;
+    this.finderMethods = finderMethods;
 
     // Adds list and list form method
     if (type == ControllerType.COLLECTION) {
@@ -177,16 +183,22 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       ensureGovernorHasMethod(new MethodMetadataBuilder(showMethod));
     }
 
+    // Add finder methods and finder support methods
+    for (MethodMetadata finderMethod : finderMethods) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
+    }
+
     // Adds details methods
     for (MethodMetadata detailMethod : detailsMethods) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(detailMethod));
     }
 
-    // Always add populateForm method
+    // Add populateForm method if controller isn't a search controller
     ensureGovernorHasMethod(new MethodMetadataBuilder(populateFormMethod));
 
-    // Always add addDateTimeFormatPatterns method
+    // Add addDateTimeFormatPatterns method if controller isn't a search controller
     ensureGovernorHasMethod(new MethodMetadataBuilder(populateFormatsMethod));
+
 
     // Adding all necessary types to import
     importResolver.addImports(typesToImport);
@@ -319,6 +331,15 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public MethodMetadata getPopulateFormMethod() {
     return this.populateFormMethod;
+  }
+
+  /**
+   * Method that returns finder Thymeleaf methods
+   *
+   * @return
+   */
+  public List<MethodMetadata> getFinderMethods() {
+    return this.finderMethods;
   }
 
   /**

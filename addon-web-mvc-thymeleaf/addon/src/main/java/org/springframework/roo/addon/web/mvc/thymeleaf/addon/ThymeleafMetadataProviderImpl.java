@@ -2,20 +2,6 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -27,6 +13,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.views.AbstractViewGeneratorMetadataProvider;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
@@ -65,6 +52,20 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
  * Implementation of {@link ThymeleafMetadataProvider}.
  *
@@ -95,6 +96,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   private List<JavaType> typesToImport;
   private ControllerType type;
   private String entityPlural;
+  private String pathPrefix;
 
   /**
    * This service is being activated so setup it:
@@ -107,7 +109,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * </ul>
    */
   @Override
-  @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
     super.setDependsOnGovernorBeingAClass(false);
@@ -274,12 +275,69 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     this.entityPlural =
         StringUtils.uncapitalize(Noun.pluralOf(this.entity.getSimpleTypeName(), Locale.ENGLISH));
 
+    if (controllerAnnotation.getAttribute("pathPrefix") != null) {
+      this.pathPrefix = (String) controllerAnnotation.getAttribute("pathPrefix").getValue();
+    }
+
     // Getting methods from related service
     MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
     MethodMetadata serviceDeleteMethod = serviceMetadata.getDeleteMethod();
     MethodMetadata serviceFindAllGlobalSearchMethod =
         serviceMetadata.getFindAllGlobalSearchMethod();
     MethodMetadata serviceCountMethod = serviceMetadata.getCountMethod();
+
+    // Add finder methods
+    List<MethodMetadata> findersToAdd = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> finderFormMethods = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> finderRedirectMethods = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> finderListMethods = new ArrayList<MethodMetadata>();
+
+    // Getting annotated finders
+    final SearchAnnotationValues annotationValues =
+        new SearchAnnotationValues(governorPhysicalTypeMetadata);
+
+    // Add finders only if controller is of search type
+    if (this.type == ControllerType.getControllerType(ControllerType.SEARCH.name())
+        && annotationValues != null && annotationValues.getFinders() != null) {
+      List<String> finders = new ArrayList<String>(Arrays.asList(annotationValues.getFinders()));
+
+      // Search indicated finders in its related service
+      for (MethodMetadata serviceFinder : serviceMetadata.getFinders()) {
+        if (finders.contains(serviceFinder.getMethodName().toString())) {
+          MethodMetadata finderMethod = getFinderMethod(serviceFinder);
+          findersToAdd.add(finderMethod);
+
+          // Add each finder support methods
+          findersToAdd.add(getFinderFormMethod(finderMethod));
+          findersToAdd.add(getFinderRedirectMethod(finderMethod));
+          findersToAdd.add(getFinderListMethod(finderMethod));
+
+          // Add dependencies between modules
+          List<JavaType> types = new ArrayList<JavaType>();
+          types.add(serviceFinder.getReturnType());
+          types.addAll(serviceFinder.getReturnType().getParameters());
+
+          for (AnnotatedJavaType parameter : serviceFinder.getParameterTypes()) {
+            types.add(parameter.getJavaType());
+            types.addAll(parameter.getJavaType().getParameters());
+          }
+
+          for (JavaType parameter : types) {
+            getTypeLocationService().addModuleDependency(
+                governorPhysicalTypeMetadata.getType().getModule(), parameter);
+          }
+
+          finders.remove(serviceFinder.getMethodName().toString());
+        }
+      }
+
+      // Check all finders have its service method
+      if (!finders.isEmpty()) {
+        throw new IllegalArgumentException(String.format(
+            "ERROR: Service %s does not have these finder methods: %s ",
+            service.getFullyQualifiedTypeName(), StringUtils.join(finders, ", ")));
+      }
+    }
 
     return new ThymeleafMetadata(metadataIdentificationString, this.aspectName,
         this.governorPhysicalTypeMetadata, getListFormMethod(),
@@ -289,7 +347,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod), getShowMethod(),
         getDetailsMethods(), getPopulateFormMethod(), getPopulateFormatsMethod(),
         getDeleteBatchMethod(serviceDeleteMethod), getCreateBatchMethod(serviceSaveMethod),
-        getUpdateBatchMethod(serviceSaveMethod), isReadOnly(), typesToImport, this.type);
+        getUpdateBatchMethod(serviceSaveMethod), isReadOnly(), typesToImport, this.type,
+        findersToAdd);
   }
 
   /**
@@ -1333,6 +1392,442 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // return "redirect:/path";
     bodyBuilder.appendFormalLine(String.format("return \"redirect:/%s\";", getViewsPath()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides a finder method using THYMELEAF response type
+   *
+   * @param finderMethod
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getFinderMethod(MethodMetadata finderMethod) {
+    final List<AnnotatedJavaType> originalParameterTypes = finderMethod.getParameterTypes();
+
+    // Get finder parameter names
+    final List<JavaSymbolName> originalParameterNames = finderMethod.getParameterNames();
+    List<String> stringParameterNames = new ArrayList<String>();
+    for (JavaSymbolName parameterName : originalParameterNames) {
+      stringParameterNames.add(parameterName.getSymbolName());
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = finderMethod.getMethodName();
+
+    // Define path
+    String path = "";
+    if (StringUtils.startsWith(methodName.getSymbolName(), "count")) {
+      path = StringUtils.removeStart(methodName.getSymbolName(), "count");
+    } else if (StringUtils.startsWith(methodName.getSymbolName(), "find")) {
+      path = StringUtils.removeStart(methodName.getSymbolName(), "find");
+    } else if (StringUtils.startsWith(methodName.getSymbolName(), "query")) {
+      path = StringUtils.removeStart(methodName.getSymbolName(), "query");
+    } else if (StringUtils.startsWith(methodName.getSymbolName(), "read")) {
+      path = StringUtils.removeStart(methodName.getSymbolName(), "read");
+    } else {
+      path = methodName.getSymbolName();
+    }
+    path = StringUtils.uncapitalize(path);
+
+    // Check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
+            "application/vnd.datatables+json", "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Get parameters
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    StringBuffer finderParamsString = new StringBuffer();
+    for (int i = 0; i < originalParameterTypes.size(); i++) {
+
+      // Add @ModelAttribute for search param
+      if (i == 0) {
+        AnnotationMetadataBuilder requestParamAnnotation =
+            new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+        requestParamAnnotation.addStringAttribute("value", originalParameterNames.get(i)
+            .getSymbolName());
+        parameterTypes.add(new AnnotatedJavaType(originalParameterTypes.get(i).getJavaType(),
+            requestParamAnnotation.build()));
+        parameterNames.add(originalParameterNames.get(i));
+        finderParamsString.append(originalParameterNames.get(i).getSymbolName());
+      } else if (i == 1) {
+        parameterTypes.add(originalParameterTypes.get(i));
+        addTypeToImport(originalParameterTypes.get(i).getJavaType());
+        parameterNames.add(originalParameterNames.get(i));
+
+        // Build finder parameters String
+        finderParamsString.append(", ".concat(originalParameterNames.get(i).getSymbolName()));
+      }
+    }
+
+    // Add DatatablesPageable param
+    parameterTypes.add(AnnotatedJavaType
+        .convertFromJavaType(addTypeToImport(this.datatablesPageable)));
+    parameterNames.add(new JavaSymbolName("pageable"));
+    finderParamsString.append(", pageable");
+
+    // Add additional 'draw' param
+    AnnotationMetadataBuilder requestParamAnnotation =
+        new AnnotationMetadataBuilder(addTypeToImport(SpringJavaType.REQUEST_PARAM));
+    requestParamAnnotation.addStringAttribute("value", "draw");
+    parameterTypes.add(new AnnotatedJavaType(JavaType.INT_OBJECT, requestParamAnnotation.build()));
+    parameterNames.add(new JavaSymbolName("draw"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
+        "application/vnd.datatables+json", ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Generating returnType
+    JavaType returnType = finderMethod.getReturnType();
+    List<JavaType> returnParameterTypes = returnType.getParameters();
+    StringBuffer returnTypeParamsString = new StringBuffer();
+    for (int i = 0; i < returnParameterTypes.size(); i++) {
+      addTypeToImport(returnParameterTypes.get(i));
+      if (i > 0) {
+        returnTypeParamsString.append(",");
+      }
+      returnTypeParamsString.append(returnParameterTypes.get(i).getSimpleTypeName());
+
+      // Add module dependency
+      getTypeLocationService().addModuleDependency(this.controller.getType().getModule(),
+          returnParameterTypes.get(i));
+    }
+
+    // ReturnType<ReturnTypeParams> entity =
+    // ENTITY_SERVICE_FIELD.FINDER_NAME(SEARCH_PARAMS);
+    String returnParameterName =
+        StringUtils.uncapitalize(returnParameterTypes.get(0).getSimpleTypeName());
+    bodyBuilder.newLine();
+    if (StringUtils.isEmpty(returnTypeParamsString)) {
+      bodyBuilder.appendFormalLine(String.format("%s %s = %s.%s(%s);", addTypeToImport(returnType)
+          .getSimpleTypeName(), returnParameterName, getServiceField().getFieldName(), methodName,
+          finderParamsString));
+    } else {
+      bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(%s);",
+          addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString,
+          returnParameterName, getServiceField().getFieldName(), methodName, finderParamsString));
+    }
+
+    // long allAvailableEntity/Projection = entity.getTotalElements();
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("long allAvailable%s = %s.getTotalElements();",
+        StringUtils.capitalize(Noun.pluralOf(returnParameterName, Locale.ENGLISH)),
+        returnParameterName));
+    bodyBuilder.newLine();
+
+    // return new DatatablesData<Entity/Projection>(entity/projection, allAvailableEntity/Projection, draw);
+    bodyBuilder.appendFormalLine(String.format("return new %s<%s>(%s, allAvailable%s, draw);",
+        addTypeToImport(this.datatablesDataType).getSimpleTypeName(), returnTypeParamsString,
+        returnParameterName,
+        StringUtils.capitalize(Noun.pluralOf(returnParameterName, Locale.ENGLISH))));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            addTypeToImport(new JavaType(this.datatablesDataType.getFullyQualifiedTypeName(), 0,
+                DataType.TYPE, null, returnParameterTypes)), parameterTypes, parameterNames,
+            bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides a finder list method using THYMELEAF response type
+   * 
+   * @param finderMethod
+   * @return
+   */
+  private MethodMetadata getFinderListMethod(MethodMetadata finderMethod) {
+    final List<AnnotatedJavaType> originalParameterTypes = finderMethod.getParameterTypes();
+
+    // Get finder parameter names
+    final List<JavaSymbolName> originalParameterNames = finderMethod.getParameterNames();
+    List<String> stringParameterNames = new ArrayList<String>();
+    for (JavaSymbolName parameterName : originalParameterNames) {
+      stringParameterNames.add(parameterName.getSymbolName());
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = finderMethod.getMethodName();
+
+    // Define path
+    String path = "";
+    if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
+      path = StringUtils.removeStart(finderMethod.getMethodName().getSymbolName(), "count");
+    } else if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "find")) {
+      path = StringUtils.removeStart(finderMethod.getMethodName().getSymbolName(), "find");
+    } else if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "query")) {
+      path = StringUtils.removeStart(finderMethod.getMethodName().getSymbolName(), "query");
+    } else if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "read")) {
+      path = StringUtils.removeStart(finderMethod.getMethodName().getSymbolName(), "read");
+    } else {
+      path = methodName.getSymbolName();
+    }
+    path = StringUtils.uncapitalize(path);
+
+    // Check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Get parameters
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Add form bean parameter
+    AnnotationMetadataBuilder requestParamAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    requestParamAnnotation.addStringAttribute("value", originalParameterNames.get(0)
+        .getSymbolName());
+    parameterTypes.add(new AnnotatedJavaType(originalParameterTypes.get(0).getJavaType(),
+        requestParamAnnotation.build()));
+    parameterNames.add(originalParameterNames.get(0));
+
+    // Add model parameter
+    parameterTypes
+        .add(AnnotatedJavaType.convertFromJavaType(addTypeToImport(SpringJavaType.MODEL)));
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
+        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // return "PATH_PREFIX/ENTITY_PLURAL/FINDER_NAMEList";
+    bodyBuilder.appendFormalLine(String.format("return \"%s/%s/%sList\";",
+        StringUtils.removeStart(this.pathPrefix, "/"), this.entityPlural,
+        methodName.getSymbolName()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides a finder redirect method using THYMELEAF response type
+   * 
+   * @param finderMethod
+   * @return
+   */
+  private MethodMetadata getFinderRedirectMethod(MethodMetadata finderMethod) {
+    final List<AnnotatedJavaType> originalParameterTypes = finderMethod.getParameterTypes();
+
+    // Get finder parameter names
+    final List<JavaSymbolName> originalParameterNames = finderMethod.getParameterNames();
+    List<String> stringParameterNames = new ArrayList<String>();
+    for (JavaSymbolName parameterName : originalParameterNames) {
+      stringParameterNames.add(parameterName.getSymbolName());
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName =
+        new JavaSymbolName(finderMethod.getMethodName().getSymbolName().concat("Redirect"));
+
+    // Define path
+    String path = "";
+    if (StringUtils.startsWith(methodName.getSymbolName(), "count")) {
+      path = StringUtils.removeStart(methodName.getSymbolName(), "count");
+    } else if (StringUtils.startsWith(methodName.getSymbolName(), "find")) {
+      path = StringUtils.removeStart(methodName.getSymbolName(), "find");
+    } else if (StringUtils.startsWith(methodName.getSymbolName(), "query")) {
+      path = StringUtils.removeStart(methodName.getSymbolName(), "query");
+    } else if (StringUtils.startsWith(methodName.getSymbolName(), "read")) {
+      path = StringUtils.removeStart(methodName.getSymbolName(), "read");
+    } else {
+      path = methodName.getSymbolName();
+    }
+    path = StringUtils.uncapitalize(path);
+
+    // Check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_POST, "/" + path, stringParameterNames, null,
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Get parameters
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Add form bean parameter
+    AnnotationMetadataBuilder modelAttributeAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    modelAttributeAnnotation.addStringAttribute("value", originalParameterNames.get(0)
+        .getSymbolName());
+    parameterTypes.add(new AnnotatedJavaType(originalParameterTypes.get(0).getJavaType(),
+        modelAttributeAnnotation.build()));
+    parameterNames.add(originalParameterNames.get(0));
+
+    // Add redirect parameter
+    parameterTypes.add(AnnotatedJavaType
+        .convertFromJavaType(addTypeToImport(SpringJavaType.REDIRECT_ATTRIBUTES)));
+    parameterNames.add(new JavaSymbolName("redirect"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_POST, "/" + path, stringParameterNames, null,
+        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    bodyBuilder.newLine();
+
+    // redirect.addFlashAttribute(entity/dtoSearch);
+    bodyBuilder.appendFormalLine(String.format("redirect.addFlashAttribute(%s);",
+        parameterNames.get(0)));
+    bodyBuilder.newLine();
+
+    // return "redirect:PATH_PREFIX/ENTITY_PLURAL/FINDER_NAME";
+    bodyBuilder.appendFormalLine(String.format("return \"redirect:%s/%s/%s\";", this.pathPrefix,
+        this.entityPlural, methodName.getSymbolName()));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides a finder form method using THYMELEAF response type
+   * 
+   * @param finderMethod
+   * @return
+   */
+  private MethodMetadata getFinderFormMethod(MethodMetadata finderMethod) {
+    // Get finder parameter names
+    List<String> stringParameterNames = new ArrayList<String>();
+    stringParameterNames.add("model");
+
+    // Define methodName
+    final JavaSymbolName methodName =
+        new JavaSymbolName(finderMethod.getMethodName().getSymbolName().concat("Form"));
+
+    // Define path
+    String path = "";
+    if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
+      path = StringUtils.removeStart(finderMethod.getMethodName().getSymbolName(), "count");
+    } else if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "find")) {
+      path = StringUtils.removeStart(finderMethod.getMethodName().getSymbolName(), "find");
+    } else if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "query")) {
+      path = StringUtils.removeStart(finderMethod.getMethodName().getSymbolName(), "query");
+    } else if (StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "read")) {
+      path = StringUtils.removeStart(finderMethod.getMethodName().getSymbolName(), "read");
+    } else {
+      path = methodName.getSymbolName();
+    }
+    path = StringUtils.uncapitalize(path).concat("/search-form");
+
+    // Check if exists other method with the same @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
+            SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE.toString(), "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Get parameters
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // Add model parameter
+    parameterTypes
+        .add(AnnotatedJavaType.convertFromJavaType(addTypeToImport(SpringJavaType.MODEL)));
+    parameterNames.add(new JavaSymbolName("model"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
+        SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+    bodyBuilder.newLine();
+
+    // Entity/DTO search = new Entity/DTO();
+    bodyBuilder.appendFormalLine(String.format("%1$s %2$s = new %1$s();",
+        addTypeToImport(finderMethod.getParameterTypes().get(0).getJavaType()).getSimpleTypeName(),
+        finderMethod.getParameterNames().get(0).getSymbolName()));
+    bodyBuilder.newLine();
+
+    // model.addAttribute("search", search);
+    bodyBuilder.appendFormalLine(String.format("model.addAttribute(\"%1$s\", %1$s);", finderMethod
+        .getParameterNames().get(0).getSymbolName()));
+    bodyBuilder.newLine();
+
+    // populateForm(model);
+    bodyBuilder.appendFormalLine("populateForm(model);");
+    bodyBuilder.newLine();
+
+    // return "PATH_PREFIX/ENTITY_PLURAL/FINDER_NAMEForm";
+    bodyBuilder.appendFormalLine(String.format("return \"%s/%s/%s\";",
+        StringUtils.removeStart(this.pathPrefix, "/"), this.entityPlural,
+        methodName.getSymbolName()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,

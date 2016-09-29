@@ -129,6 +129,9 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
           StringUtils.lowerCase(path).concat("/{id}"));
     } else if (this.type == ControllerType.COLLECTION) {
       requesMappingAnnotation.addStringAttribute("value", StringUtils.lowerCase(path));
+    } else if (this.type == ControllerType.SEARCH) {
+      requesMappingAnnotation.addStringAttribute("value",
+          StringUtils.lowerCase(path).concat("/search"));
     }
     ensureGovernorIsAnnotated(requesMappingAnnotation);
 

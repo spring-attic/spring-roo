@@ -1,20 +1,8 @@
 package org.springframework.roo.addon.layers.service.addon;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
-import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -32,6 +20,16 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
 /**
  * Metadata for {@link RooService}.
  * 
@@ -46,8 +44,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   private JavaType entity;
   private JavaType identifierType;
-  private List<FinderMethod> finders;
-  private List<MethodMetadata> projectionFinderMethods;
+  private List<MethodMetadata> finders;
 
   private MethodMetadata findAllGlobalSearchMethod;
 
@@ -98,11 +95,10 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    */
   public ServiceMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
-      final JavaType identifierType, final boolean readOnly, final List<FinderMethod> finders,
+      final JavaType identifierType, final boolean readOnly, final List<MethodMetadata> finders,
       final MethodMetadata findAllGlobalSearchMethod,
       final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
-      final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods,
-      List<MethodMetadata> projectionFinderMethods) {
+      final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -116,7 +112,6 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.referencedFieldsFindAllDefinedMethods = new HashMap<FieldMetadata, MethodMetadata>();
     this.allDefinedMethod = new ArrayList<MethodMetadata>();
     this.countByReferenceFieldDefinedMethod = new HashMap<FieldMetadata, MethodMetadata>();
-    this.projectionFinderMethods = projectionFinderMethods;
 
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
@@ -155,7 +150,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
 
     // Generating finders
-    for (FinderMethod finder : finders) {
+    for (MethodMetadata finder : finders) {
       MethodMetadata finderMethod = getFinderMethod(finder);
       this.allDefinedMethod.add(finderMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
@@ -204,15 +199,6 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         MethodMetadata method =
             getCountByReferencedFieldMethod(countByReferencedFieldMethod.getValue());
         this.countByReferenceFieldDefinedMethod.put(countByReferencedFieldMethod.getKey(), method);
-        ensureGovernorHasMethod(new MethodMetadataBuilder(method));
-      }
-    }
-
-    // Generate projection finders
-    if (projectionFinderMethods != null) {
-      for (MethodMetadata projectionFinderMethod : projectionFinderMethods) {
-        MethodMetadata method = getProjectionFinderMethod(projectionFinderMethod);
-        this.allDefinedMethod.add(method);
         ensureGovernorHasMethod(new MethodMetadataBuilder(method));
       }
     }
@@ -622,47 +608,16 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @param finderMethod
    * @return
    */
-  private MethodMetadata getFinderMethod(FinderMethod finderMethod) {
-
-    // Define method parameter types and parameter names
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    for (FinderParameter param : finderMethod.getParameters()) {
-      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(param.getType()));
-      parameterNames.add(param.getName());
-    }
+  private MethodMetadata getFinderMethod(MethodMetadata finderMethod) {
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT,
-            finderMethod.getMethodName(), finderMethod.getReturnType(), parameterTypes,
-            parameterNames, null);
+            finderMethod.getMethodName(), finderMethod.getReturnType(),
+            finderMethod.getParameterTypes(), finderMethod.getParameterNames(), null);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
-  }
-
-  private MethodMetadata getProjectionFinderMethod(MethodMetadata method) {
-
-    // Define method parameter types and parameter names
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    List<AnnotatedJavaType> methodParamTypes = method.getParameterTypes();
-    List<JavaSymbolName> methodParamNames = method.getParameterNames();
-    for (int i = 0; i < method.getParameterTypes().size(); i++) {
-      parameterTypes.add(methodParamTypes.get(i));
-      parameterNames.add(methodParamNames.get(i));
-    }
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT,
-            method.getMethodName(), method.getReturnType(), parameterTypes, parameterNames, null);
-
-    // Build and return a MethodMetadata instance
-    return methodBuilder.build();
   }
 
   /**
@@ -711,7 +666,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * 
    * @return a list of finder methods
    */
-  public List<FinderMethod> getFinders() {
+  public List<MethodMetadata> getFinders() {
     return finders;
   }
 }

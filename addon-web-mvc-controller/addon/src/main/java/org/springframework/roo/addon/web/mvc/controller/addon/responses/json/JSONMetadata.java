@@ -86,10 +86,10 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listMethod,
       final MethodMetadata createMethod, final MethodMetadata updateMethod,
       final MethodMetadata deleteMethod, final MethodMetadata showMethod,
-      final MethodMetadata createBatchMethod, MethodMetadata updateBatchMethod,
-      MethodMetadata deleteBatchMethod, MethodMetadata populateHeadersMethod,
-      List<MethodMetadata> finderMethods, boolean readOnly, List<JavaType> typesToImport,
-      ControllerType type) {
+      final MethodMetadata createBatchMethod, final MethodMetadata updateBatchMethod,
+      final MethodMetadata deleteBatchMethod, final MethodMetadata populateHeadersMethod,
+      final List<MethodMetadata> finderMethods, final boolean readOnly,
+      final List<JavaType> typesToImport, final ControllerType type) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = readOnly;
