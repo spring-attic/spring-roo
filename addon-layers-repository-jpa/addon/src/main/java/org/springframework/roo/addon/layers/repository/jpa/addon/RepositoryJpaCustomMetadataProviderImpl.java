@@ -257,7 +257,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
 
     // Create a list of finder methods which must be in the repository custom, not Jpa interface
     // (those finders whose defaultReturnType are projections)
-    List<ProjectionFinderMethod> findersToAdd = new ArrayList<ProjectionFinderMethod>();
+    List<CustomFinderMethod> findersToAdd = new ArrayList<CustomFinderMethod>();
 
     // Get @RooFinders from associated repository interface
     if (associatedRepositoryInterface != null
@@ -313,7 +313,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
               Validate.notNull(finderFormBean, "@RooFinder must have a 'formBean' parameter.");
 
               // Add to finder methods list
-              findersToAdd.add(new ProjectionFinderMethod(finderReturnType, new JavaSymbolName(
+              findersToAdd.add(new CustomFinderMethod(finderReturnType, new JavaSymbolName(
                   finderName), finderFormBean));
             }
           }

@@ -97,7 +97,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param typesFieldMaps the Map<JavaType, Map<String, String>> of each associated
    *            domain type (parent Map JavaType), property names (keys) and path names (values)
    *            for building finders which return a projection.
-   * @param projectionFinderMethods list of projection or DTO finder methods
+   * @param customFinderMethods list of custom methods
+   * @param customCountMethods list of count methods for custom finder methods
    * @param typesFieldsMetadata the Map<JavaType, Map<String, FieldMetadata>> with
    *            the fields of each domain type.
    * @param typesAreProjections the Map<JavaType, Boolean> which tells if each type is
@@ -113,7 +114,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final Map<FieldMetadata, MethodMetadata> allFindAllReferencedFieldsMethods,
       final Map<FieldMetadata, String> referencedFieldsIdentifierNames,
       final Map<JavaType, Map<String, String>> typesFieldMaps,
-      final List<MethodMetadata> projectionFinderMethods,
+      final List<MethodMetadata> customFinderMethods,
+      final List<MethodMetadata> customCountMethods,
       final Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadata,
       final Map<JavaType, Boolean> typesAreProjections,
       final Map<JavaSymbolName, List<FinderParameter>> finderParametersMap) {
@@ -165,11 +167,15 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     }
 
     // Generate projection finder methods implementations
-    if (projectionFinderMethods != null) {
-      for (MethodMetadata method : projectionFinderMethods) {
-        ensureGovernorHasMethod(new MethodMetadataBuilder(getProjectionFindersImpl(method,
-            validFields)));
+    if (customFinderMethods != null) {
+      for (MethodMetadata method : customFinderMethods) {
+        ensureGovernorHasMethod(new MethodMetadataBuilder(getCustomFindersImpl(method, validFields)));
       }
+    }
+
+    // generate custom couont methods
+    for (MethodMetadata method : customCountMethods) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getCustomCountImpl(method)));
     }
 
     // Build the ITD
@@ -305,14 +311,14 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       bodyBuilder.appendFormalLine(String.format("return loadPage(query, pageable, %s);",
           entityVariable));
     } else {
-      Map<String, String> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
+      Map<String, String> projectionFields = this.typesFieldMaps.get(returnType);
 
       // return loadPage(query, pageable, Projection.constructor(MyProjection.class,
       //                    getEntityId(), myEntity.field1, myEntity.field2);
       bodyBuilder.appendFormalLine(String.format(
           "return loadPage(query, %s, %s.constructor(%s.class, %s ));", pageable,
           projection.getNameIncludingTypeParameters(false, this.importResolver),
-          this.defaultReturnType.getNameIncludingTypeParameters(false, this.importResolver),
+          returnType.getNameIncludingTypeParameters(false, this.importResolver),
           StringUtils.join(projectionFields.values(), ", ")));
     }
   }
@@ -436,12 +442,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Method that generates implementation methods for each finder which return type
-   * is a projection.
+   * is a projection or argument is a DTO.
    *
    * @param method
    * @return
    */
-  private MethodMetadata getProjectionFindersImpl(MethodMetadata method, List<FieldMetadata> fields) {
+  private MethodMetadata getCustomFindersImpl(MethodMetadata method, List<FieldMetadata> fields) {
 
     // Define method name
     JavaSymbolName methodName = method.getMethodName();
@@ -533,6 +539,113 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     bodyBuilder.newLine();
 
     buildQueryResult(bodyBuilder, pageable, entityVariable, projection, returnType);
+
+    // Use provided finder method to generate its implementation
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, method.getReturnType(),
+            parameterTypes, parameterNames, bodyBuilder);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * Method that generates implementation methods for each count method, associated 
+   * to each custom finder.
+   *  
+   * @param method
+   * @param validFields
+   * @return
+   */
+  private MethodMetadata getCustomCountImpl(MethodMetadata method) {
+
+    // Define method name
+    JavaSymbolName methodName = method.getMethodName();
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = method.getParameterNames();
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Getting variable names to use in the code
+    String entity = this.entity.getSimpleTypeName();
+    String entityVariable = StringUtils.uncapitalize(entity);
+    JavaType finderParamType = parameterTypes.get(0).getJavaType();
+    String finderParamName = parameterNames.get(0).getSymbolName();
+
+    // Types to import
+    JavaType qEntity =
+        new JavaType(this.entity.getPackage().getFullyQualifiedPackageName().concat(".Q")
+            .concat(entity));
+
+    bodyBuilder.newLine();
+
+    // QEntity qEntity = QEntity.entity;
+    bodyBuilder.appendFormalLine(String.format("%1$s %2$s = %1$s.%2$s;",
+        qEntity.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+    bodyBuilder.newLine();
+
+    // JPQLQuery query = from(qEntity);
+    bodyBuilder.appendFormalLine(String.format("JPQLQuery query = from(%s);", entityVariable));
+    bodyBuilder.newLine();
+
+    // BooleanBuilder searchFormCondition = new BooleanBuilder();
+    bodyBuilder.appendFormalLine(String.format("%1$s searchFormCondition = new %1$s();",
+        new JavaType("com.querydsl.core.BooleanBuilder").getNameIncludingTypeParameters(false,
+            importResolver)));
+    bodyBuilder.newLine();
+
+    // Filter only by finder params
+    List<FinderParameter> finderParamsList = this.finderParametersMap.get(methodName);
+    for (FinderParameter finderParameter : finderParamsList) {
+
+      // if (formBean.getField() != null) {
+      String accessorMethodName =
+          BeanInfoUtils.getAccessorMethodName(finderParameter.getName(), finderParameter.getType())
+              .getSymbolName();
+      bodyBuilder.appendIndent();
+      bodyBuilder.appendFormalLine(String.format("if (%s.%s() != null) {", finderParamName,
+          accessorMethodName));
+
+      // Get path field name from field mappings
+      String pathFieldName =
+          this.typesFieldMaps.get(finderParamType).get(finderParameter.getName().getSymbolName());
+
+      bodyBuilder.appendIndent();
+      bodyBuilder.appendIndent();
+
+      // query.where(myEntity.field.eq(formBean.getField()));
+      if (pathFieldName.equals("getEntityId()")) {
+
+        // Field is an id field
+        bodyBuilder.appendFormalLine(String.format("query.where(getEntityId().eq(%s.%s()));",
+            finderParamName, accessorMethodName));
+      } else {
+        bodyBuilder.appendFormalLine(String.format("query.where(%s.eq(%s.%s()));", pathFieldName,
+            finderParamName, accessorMethodName));
+      }
+
+      // }
+      bodyBuilder.appendIndent();
+      bodyBuilder.appendFormalLine("}");
+    }
+
+    // query.where(searchFormCondition);
+    bodyBuilder.appendFormalLine("query.where(searchFormCondition);");
+    bodyBuilder.newLine();
+
+    // return query.fetchCount();
+    bodyBuilder.appendFormalLine("return query.fetchCount();");
 
     // Use provided finder method to generate its implementation
     MethodMetadataBuilder methodBuilder =

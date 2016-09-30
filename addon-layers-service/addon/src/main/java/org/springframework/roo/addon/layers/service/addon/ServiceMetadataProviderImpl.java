@@ -8,8 +8,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.finder.addon.FinderMetadata;
-import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
-import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
@@ -22,7 +20,6 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -38,7 +35,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -216,34 +212,24 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
     registerDependency(finderMetadataKey, metadataIdentificationString);
     final FinderMetadata finderMetadata =
         (FinderMetadata) getMetadataService().get(finderMetadataKey);
-
     List<MethodMetadata> finders = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> countMethods = new ArrayList<MethodMetadata>();
     if (finderMetadata != null) {
 
-      // Add dependencies between modules and convert to MethodMetadata
-      for (FinderMethod finder : finderMetadata.getFinders()) {
+      // Add dependencies between modules
+      for (MethodMetadata finder : finderMetadata.getFinders()) {
 
-        // Convert to MethodMetadata
-        List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-        List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-        for (FinderParameter param : finder.getParameters()) {
-          parameterTypes.add(AnnotatedJavaType.convertFromJavaType(param.getType()));
-          parameterNames.add(param.getName());
-        }
-        MethodMetadataBuilder methodBuilder =
-            new MethodMetadataBuilder(metadataIdentificationString, Modifier.PUBLIC
-                + Modifier.ABSTRACT, finder.getMethodName(), finder.getReturnType(),
-                parameterTypes, parameterNames, null);
-        finders.add(methodBuilder.build());
+        // Add to service finders list
+        finders.add(finder);
 
         // Add dependencies between modules
         List<JavaType> types = new ArrayList<JavaType>();
         types.add(finder.getReturnType());
         types.addAll(finder.getReturnType().getParameters());
 
-        for (FinderParameter parameter : finder.getParameters()) {
-          types.add(parameter.getType());
-          types.addAll(parameter.getType().getParameters());
+        for (AnnotatedJavaType parameter : finder.getParameterTypes()) {
+          types.add(parameter.getJavaType());
+          types.addAll(parameter.getJavaType().getParameters());
         }
 
         for (JavaType parameter : types) {
@@ -251,6 +237,9 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
               governorPhysicalTypeMetadata.getType().getModule(), parameter);
         }
       }
+
+      // Get count methods
+      countMethods.addAll(finderMetadata.getCountMethods());
     }
 
     // Getting methods declared on related RepositoryJpaCustomMetadata
@@ -299,12 +288,17 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
       countByReferencedFieldMethods = repositoryMetadata.getCountMethodByReferencedFields();
     }
 
-    finders.addAll(repositoryCustomMetadata.getProjectionFinderMethods());
+    // Add custom finders to finders list
+    finders.addAll(repositoryCustomMetadata.getCustomFinderMethods());
+
+    // Add custom count methods to count method list
+    countMethods.addAll(repositoryCustomMetadata.getCustomCountMethods());
 
     return new ServiceMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders,
         repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
-        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(), countByReferencedFieldMethods);
+        repositoryCustomMetadata.getReferencedFieldsFindAllMethods(),
+        countByReferencedFieldMethods, countMethods);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

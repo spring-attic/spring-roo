@@ -288,9 +288,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Add finder methods
     List<MethodMetadata> findersToAdd = new ArrayList<MethodMetadata>();
-    List<MethodMetadata> finderFormMethods = new ArrayList<MethodMetadata>();
-    List<MethodMetadata> finderRedirectMethods = new ArrayList<MethodMetadata>();
-    List<MethodMetadata> finderListMethods = new ArrayList<MethodMetadata>();
 
     // Getting annotated finders
     final SearchAnnotationValues annotationValues =
@@ -1462,7 +1459,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
             requestParamAnnotation.build()));
         parameterNames.add(originalParameterNames.get(i));
         finderParamsString.append(originalParameterNames.get(i).getSymbolName());
-      } else if (i == 1) {
+      } else if (originalParameterTypes.get(i).getJavaType().getSimpleTypeName()
+          .equals("GlobalSearch")) {
         parameterTypes.add(originalParameterTypes.get(i));
         addTypeToImport(originalParameterTypes.get(i).getJavaType());
         parameterNames.add(originalParameterNames.get(i));
@@ -1532,11 +1530,12 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
           returnParameterName, getServiceField().getFieldName(), methodName, finderParamsString));
     }
 
-    // long allAvailableEntity/Projection = entity.getTotalElements();
+    // long allAvailableEntity/Projection = ENTITY_SERVICE_FIELD.COUNT_METHOD(formBean);
     bodyBuilder.newLine();
-    bodyBuilder.appendFormalLine(String.format("long allAvailable%s = %s.getTotalElements();",
+    bodyBuilder.appendFormalLine(String.format("long allAvailable%s = %s.%s(%s);",
         StringUtils.capitalize(Noun.pluralOf(returnParameterName, Locale.ENGLISH)),
-        returnParameterName));
+        getServiceField().getFieldName(), "count".concat(StringUtils.capitalize(path)),
+        parameterNames.get(0)));
     bodyBuilder.newLine();
 
     // return new DatatablesData<Entity/Projection>(entity/projection, allAvailableEntity/Projection, draw);

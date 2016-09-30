@@ -337,7 +337,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     }
 
     // Add dependencies between modules if required
-    addModuleDependencies(entity, relatedRepository, relatedService, controllerToUpdateOrCreate);
+    addModuleDependencies(entity, relatedRepository, relatedService, controllerBuilder.build());
 
     // Write changes to disk
     typeManagementService.createOrUpdateTypeOnDisk(controllerBuilder.build());

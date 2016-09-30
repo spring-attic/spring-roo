@@ -4,13 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +17,13 @@ import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Unit tests for {@link PartTree}.
@@ -504,15 +504,16 @@ public class PartTreeUnitTest {
   @Test
   public void validateReturnTypeEntity() throws Exception {
     JavaType exampleType = new JavaType("Example");
-    JavaType exampleListType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(exampleType));
+    JavaType examplePageType =
+        new JavaType("org.springframework.data.domain.Page", 0, DataType.TYPE, null,
+            Arrays.asList(exampleType));
 
-    assertEquals(exampleListType, new PartTree("findDistinctByText", memberDetails).getReturnType());
-    assertEquals(exampleListType, new PartTree("findByText", memberDetails).getReturnType());
-    assertEquals(exampleListType, new PartTree("findTop2ByText", memberDetails).getReturnType());
-    assertEquals(exampleListType,
+    assertEquals(examplePageType, new PartTree("findDistinctByText", memberDetails).getReturnType());
+    assertEquals(examplePageType, new PartTree("findByText", memberDetails).getReturnType());
+    assertEquals(examplePageType, new PartTree("findTop2ByText", memberDetails).getReturnType());
+    assertEquals(examplePageType,
         new PartTree("findDistinctTop10ByText", memberDetails).getReturnType());
-    assertEquals(exampleListType, new PartTree("findFirst2ByText", memberDetails).getReturnType());
+    assertEquals(examplePageType, new PartTree("findFirst2ByText", memberDetails).getReturnType());
 
     assertEquals(exampleType, new PartTree("findTopByText", memberDetails).getReturnType());
     assertEquals(exampleType, new PartTree("findTopFirst1ByText", memberDetails).getReturnType());
@@ -524,16 +525,17 @@ public class PartTreeUnitTest {
 
   @Test
   public void validateReturnsTypeString() throws Exception {
-    JavaType stringListType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING));
+    JavaType stringPageType =
+        new JavaType("org.springframework.data.domain.Page", 0, DataType.TYPE, null,
+            Arrays.asList(JavaType.STRING));
 
-    assertEquals(stringListType,
+    assertEquals(stringPageType,
         new PartTree("findDistinctTextByText", memberDetails).getReturnType());
-    assertEquals(stringListType, new PartTree("findTextByText", memberDetails).getReturnType());
-    assertEquals(stringListType, new PartTree("findTop2TextByText", memberDetails).getReturnType());
-    assertEquals(stringListType,
+    assertEquals(stringPageType, new PartTree("findTextByText", memberDetails).getReturnType());
+    assertEquals(stringPageType, new PartTree("findTop2TextByText", memberDetails).getReturnType());
+    assertEquals(stringPageType,
         new PartTree("findDistinctTop10TextByText", memberDetails).getReturnType());
-    assertEquals(stringListType,
+    assertEquals(stringPageType,
         new PartTree("findFirst2TextByText", memberDetails).getReturnType());
 
     assertEquals(JavaType.STRING, new PartTree("findTopTextByText", memberDetails).getReturnType());
@@ -548,16 +550,17 @@ public class PartTreeUnitTest {
   @Test
   public void validateReturnsTypeDate() throws Exception {
     JavaType dateType = new JavaType(Date.class);
-    JavaType dateListType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(dateType));
+    JavaType datePageType =
+        new JavaType("org.springframework.data.domain.Page", 0, DataType.TYPE, null,
+            Arrays.asList(dateType));
 
-    assertEquals(dateListType,
+    assertEquals(datePageType,
         new PartTree("findDistinctDateByText", memberDetails).getReturnType());
-    assertEquals(dateListType, new PartTree("findDateByText", memberDetails).getReturnType());
-    assertEquals(dateListType, new PartTree("findTop2DateByText", memberDetails).getReturnType());
-    assertEquals(dateListType,
+    assertEquals(datePageType, new PartTree("findDateByText", memberDetails).getReturnType());
+    assertEquals(datePageType, new PartTree("findTop2DateByText", memberDetails).getReturnType());
+    assertEquals(datePageType,
         new PartTree("findDistinctTop10DateByText", memberDetails).getReturnType());
-    assertEquals(dateListType, new PartTree("findFirst2DateByText", memberDetails).getReturnType());
+    assertEquals(datePageType, new PartTree("findFirst2DateByText", memberDetails).getReturnType());
 
     assertEquals(dateType, new PartTree("findTopDateByText", memberDetails).getReturnType());
     assertEquals(dateType, new PartTree("findFirst1DateByText", memberDetails).getReturnType());
@@ -569,16 +572,17 @@ public class PartTreeUnitTest {
 
   @Test
   public void validateReturnsTypeInteger() throws Exception {
-    JavaType intListType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(JavaType.INT_OBJECT));
+    JavaType intPageType =
+        new JavaType("org.springframework.data.domain.Page", 0, DataType.TYPE, null,
+            Arrays.asList(JavaType.INT_OBJECT));
 
-    assertEquals(intListType,
+    assertEquals(intPageType,
         new PartTree("findDistinctNumberByText", memberDetails).getReturnType());
-    assertEquals(intListType, new PartTree("findNumberByText", memberDetails).getReturnType());
-    assertEquals(intListType, new PartTree("findTop2NumberByText", memberDetails).getReturnType());
-    assertEquals(intListType,
+    assertEquals(intPageType, new PartTree("findNumberByText", memberDetails).getReturnType());
+    assertEquals(intPageType, new PartTree("findTop2NumberByText", memberDetails).getReturnType());
+    assertEquals(intPageType,
         new PartTree("findDistinctTop10NumberByText", memberDetails).getReturnType());
-    assertEquals(intListType, new PartTree("findFirst2NumberByText", memberDetails).getReturnType());
+    assertEquals(intPageType, new PartTree("findFirst2NumberByText", memberDetails).getReturnType());
 
     assertEquals(JavaType.INT_OBJECT,
         new PartTree("findTopNumberByText", memberDetails).getReturnType());
@@ -592,17 +596,18 @@ public class PartTreeUnitTest {
 
   @Test
   public void validateReturnsTypePrimitiveInteger() throws Exception {
-    JavaType intListType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(JavaType.INT_OBJECT));
+    JavaType intPageType =
+        new JavaType("org.springframework.data.domain.Page", 0, DataType.TYPE, null,
+            Arrays.asList(JavaType.INT_OBJECT));
 
-    assertEquals(intListType,
+    assertEquals(intPageType,
         new PartTree("findDistinctPrimitiveIntByText", memberDetails).getReturnType());
-    assertEquals(intListType, new PartTree("findPrimitiveIntByText", memberDetails).getReturnType());
-    assertEquals(intListType,
+    assertEquals(intPageType, new PartTree("findPrimitiveIntByText", memberDetails).getReturnType());
+    assertEquals(intPageType,
         new PartTree("findTop2PrimitiveIntByText", memberDetails).getReturnType());
-    assertEquals(intListType,
+    assertEquals(intPageType,
         new PartTree("findDistinctTop10PrimitiveIntByText", memberDetails).getReturnType());
-    assertEquals(intListType,
+    assertEquals(intPageType,
         new PartTree("findFirst2PrimitiveIntByText", memberDetails).getReturnType());
 
     assertEquals(JavaType.INT_PRIMITIVE,

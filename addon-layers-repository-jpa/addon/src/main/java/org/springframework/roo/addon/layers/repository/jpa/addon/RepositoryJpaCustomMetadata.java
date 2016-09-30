@@ -44,7 +44,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   private JavaType globalSearch;
   private JavaType defaultReturnType;
   private Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods;
-  private List<MethodMetadata> projectionFinderMethods;
+  private List<MethodMetadata> customFinderMethods;
+  private List<MethodMetadata> customCountMethods;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -89,7 +90,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
       final JavaType defaultReturnType, JavaType globalSearch,
-      final Map<FieldMetadata, JavaType> referencedFields, List<ProjectionFinderMethod> findersToAdd) {
+      final Map<FieldMetadata, JavaType> referencedFields, List<CustomFinderMethod> findersToAdd) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(globalSearch, "Global search required");
@@ -98,7 +99,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
     this.globalSearch = globalSearch;
     this.defaultReturnType = defaultReturnType;
-    this.projectionFinderMethods = new ArrayList<MethodMetadata>();
+    this.customFinderMethods = new ArrayList<MethodMetadata>();
+    this.customCountMethods = new ArrayList<MethodMetadata>();
 
     referencedFieldsFindAllMethods = new HashMap<FieldMetadata, MethodMetadata>();
 
@@ -126,13 +128,23 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     }
 
     // Generate finder methods if any
-    for (ProjectionFinderMethod finderMethod : findersToAdd) {
+    for (CustomFinderMethod finderMethod : findersToAdd) {
       MethodMetadata method =
-          getProjectionFinder(finderMethod.getReturnType(), finderMethod.getMethodName(),
+          getCustomFinder(finderMethod.getReturnType(), finderMethod.getMethodName(),
               finderMethod.getFormBean());
       ensureGovernorHasMethod(new MethodMetadataBuilder(method));
-      if (!projectionFinderMethods.contains(method)) {
-        projectionFinderMethods.add(method);
+      if (!customFinderMethods.contains(method)) {
+        customFinderMethods.add(method);
+      }
+
+      // Generate a count method for each custom finder if they aren't count methods
+      if (!StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
+        MethodMetadata countMethod =
+            getCustomCount(finderMethod.getFormBean(), finderMethod.getMethodName());
+        ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
+        if (!customCountMethods.contains(countMethod)) {
+          customCountMethods.add(countMethod);
+        }
       }
     }
 
@@ -226,7 +238,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    *
    * @return
    */
-  public MethodMetadata getProjectionFinder(JavaType finderReturnType, JavaSymbolName finderName,
+  public MethodMetadata getCustomFinder(JavaType finderReturnType, JavaSymbolName finderName,
       JavaType parameterType) {
 
     // Define method parameter types and parameter names
@@ -249,6 +261,41 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, finderName,
             returnType, parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+  }
+
+  /**
+   * Method that generates count methods for custom finders.
+   * 
+   * @param formBean the object containing the properties to search to
+   * @param javaSymbolName the finder name
+   * @return
+   */
+  public MethodMetadata getCustomCount(JavaType formBean, JavaSymbolName finderName) {
+
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(formBean));
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("formBean"));
+
+    // Create count method name
+    String countName = finderName.getSymbolName();
+    if (StringUtils.startsWith(countName, "find")) {
+      countName = StringUtils.removeStart(countName, "find");
+    } else if (StringUtils.startsWith(countName, "query")) {
+      countName = StringUtils.removeStart(countName, "query");
+    } else if (StringUtils.startsWith(countName, "read")) {
+      countName = StringUtils.removeStart(countName, "read");
+    }
+    countName = "count".concat(countName);
+    JavaSymbolName countMethodName = new JavaSymbolName(countName);
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, countMethodName,
+            JavaType.LONG_PRIMITIVE, parameterTypes, parameterNames, null);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
   }
@@ -284,7 +331,16 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    * 
    * @return
    */
-  public List<MethodMetadata> getProjectionFinderMethods() {
-    return projectionFinderMethods;
+  public List<MethodMetadata> getCustomFinderMethods() {
+    return customFinderMethods;
+  }
+
+  /**
+   * This method returns all count methods of all custom finder methods
+   * 
+   * @return
+   */
+  public List<MethodMetadata> getCustomCountMethods() {
+    return customCountMethods;
   }
 }

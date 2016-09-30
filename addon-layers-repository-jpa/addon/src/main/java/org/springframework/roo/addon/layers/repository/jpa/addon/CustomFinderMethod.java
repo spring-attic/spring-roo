@@ -15,18 +15,18 @@ import org.springframework.roo.model.JavaType;
  * @author Sergio Clares
  * @since 2.0
  */
-public class ProjectionFinderMethod {
+public class CustomFinderMethod {
 
   private JavaType returnType;
   private JavaSymbolName methodName;
   private JavaType formBean;
 
-  public ProjectionFinderMethod(JavaType returnType, JavaSymbolName methodName) {
+  public CustomFinderMethod(JavaType returnType, JavaSymbolName methodName) {
     this.returnType = returnType;
     this.methodName = methodName;
   }
 
-  public ProjectionFinderMethod(JavaType returnType, JavaSymbolName methodName, JavaType formBean) {
+  public CustomFinderMethod(JavaType returnType, JavaSymbolName methodName, JavaType formBean) {
     this.returnType = returnType;
     this.methodName = methodName;
     this.formBean = formBean;
