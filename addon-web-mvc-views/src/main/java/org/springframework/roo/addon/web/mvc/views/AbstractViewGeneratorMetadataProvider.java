@@ -1,12 +1,5 @@
 package org.springframework.roo.addon.web.mvc.views;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -14,9 +7,11 @@ import org.jvnet.inflector.Noun;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
-import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -30,12 +25,21 @@ import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadat
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
@@ -58,12 +62,14 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
   public ClassOrInterfaceTypeDetails controller;
   public JavaType entity;
+  public ControllerType type;
   public boolean readOnly;
   public JavaType service;
   public List<FinderMethod> finders;
   public String controllerPath;
   public JavaType identifierType;
   public MethodMetadata identifierAccessor;
+  public List<String> finderNames;
 
   private ProjectOperations projectOperations;
   private PropFilesManagerService propFilesManagerService;
@@ -122,6 +128,12 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
     Validate.notNull(entityAnnotation, "ERROR: Entity should be annotated with @RooJpaEntity");
 
+    Validate.notNull(controllerAnnotation.getAttribute("type"),
+        "@RooController annotation should have 'type' attribute.");
+    this.type =
+        ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
+            .getValue()).getField().getSymbolName());
+
     // Getting identifierField
     List<FieldMetadata> identifierField = getPersistenceMemberLocator().getIdentifierFields(entity);
 
@@ -150,6 +162,16 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       if (entityAttr != null && entityAttr.getValue().equals(entity)) {
         this.service = existingService.getType();
       }
+    }
+
+    // Getting controller finders
+    final SearchAnnotationValues annotationValues =
+        new SearchAnnotationValues(governorPhysicalTypeMetadata);
+
+    // Add finders only if controller is of search type
+    if (this.type == ControllerType.getControllerType(ControllerType.SEARCH.name())
+        && annotationValues != null && annotationValues.getFinders() != null) {
+      this.finderNames = new ArrayList<String>(Arrays.asList(annotationValues.getFinders()));
     }
 
     // Getting pathPrefix
@@ -198,6 +220,16 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       // If not readOnly, add update view
       viewGenerationService
           .addUpdateView(this.controller.getType().getModule(), entityDetails, ctx);
+    }
+
+    // Add finder views
+    if (this.finderNames != null) {
+      for (String finderName : this.finderNames) {
+        viewGenerationService.addFinderFormView(this.controller.getType().getModule(),
+            entityDetails, finderName, ctx);
+        viewGenerationService.addFinderListView(this.controller.getType().getModule(),
+            entityDetails, finderName, ctx);
+      }
     }
 
     // Update menu view every time that new controller has been modified

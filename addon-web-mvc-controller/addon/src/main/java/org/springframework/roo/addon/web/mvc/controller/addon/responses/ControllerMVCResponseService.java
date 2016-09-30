@@ -40,15 +40,6 @@ public interface ControllerMVCResponseService extends Feature {
   void annotate(JavaType controller);
 
   /**
-   * This operation adds finders to the specified controller annotation.
-   * 
-   * @param controller JavaType with the controller to be updated with
-   *                   the finders.
-   * @param finders List with finder names to be added.
-   */
-  void addFinders(JavaType controller, List<String> finders);
-
-  /**
    * This operation will check if some controller has the implemented
    * response type.
    * 

@@ -206,11 +206,65 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
-  public void addFinderView(String moduleName, MemberDetails entity, String finderName,
+  public void addFinderFormView(String moduleName, MemberDetails entityDetails, String finderName,
       ViewContext ctx) {
-    // TODO Auto-generated method stub
 
+    // Getting entity fields that should be included on view
+    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
+
+    ctx.addExtraParameter("fields", fields);
+
+    // Process elements to generate
+    DOC newDoc = process("finderForm", ctx);
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
+            .concat("Form").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      List<String> requiredIds = new ArrayList<String>();
+      for (FieldItem field : fields) {
+        requiredIds.add(field.getFieldName());
+      }
+      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
   }
+
+  @Override
+  public void addFinderListView(String moduleName, MemberDetails entityDetails, String finderName,
+      ViewContext ctx) {
+
+    // Getting entity fields that should be included on view
+    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
+
+    ctx.addExtraParameter("fields", fields);
+
+    // Process elements to generate
+    DOC newDoc = process("finderList", ctx);
+
+    // Getting new viewName
+    String viewName =
+        getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
+            .concat("List").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      List<String> requiredIds = new ArrayList<String>();
+      for (FieldItem field : fields) {
+        requiredIds.add(field.getFieldName());
+      }
+      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+  }
+
 
   @Override
   public void addIndexView(String moduleName, ViewContext ctx) {
@@ -334,7 +388,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         pathPrefix = (String) pathPrefixAttr.getValue();
       }
       // Generate path
-      String path = "/".concat(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH));
+      String path =
+          "/".concat(Noun.pluralOf(StringUtils.uncapitalize(entity.getSimpleTypeName()),
+              Locale.ENGLISH));
       if (StringUtils.isNotEmpty(pathPrefix)) {
         if (!pathPrefix.startsWith("/")) {
           pathPrefix = "/".concat(pathPrefix);

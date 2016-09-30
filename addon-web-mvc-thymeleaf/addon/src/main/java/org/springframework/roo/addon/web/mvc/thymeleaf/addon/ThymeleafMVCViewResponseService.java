@@ -151,19 +151,6 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
   }
 
   /**
-   * This operation adds finders to the @RooThymeleaf annotation.
-   * 
-   * @param controller JavaType with the controller to be updated with
-   *                   the finders.
-   * @param finders List with finder names to be added.
-   */
-  @Override
-  public void addFinders(JavaType controller, List<String> finders) {
-    // TODO Auto-generated method stub
-
-  }
-
-  /**
    * This operation will check if some controller has the @RooThymeleaf annotation
    * 
    * @param controller JavaType with controller to check

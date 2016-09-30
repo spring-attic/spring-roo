@@ -101,15 +101,28 @@ public interface MVCViewGenerationService {
   void addUpdateView(String moduleName, MemberDetails entity, ViewContext ctx);
 
   /**
-   * This operation will add a finder view using entityDetails 
-   * and the provided context
+   * This operation will add a finder form view using entityDetails and the 
+   * provided context
    * 
-   * @param moduleName module where finder view will be added
-   * @param entity Details of an entity to be able to generate view
-   * @param ctx ViewContext that contains necessary information about
+   * @param moduleName the module where finder form view will be added
+   * @param entity the details of an entity to be able to generate view
+   * @param finderName the name of the finder for which this form will be created
+   * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
+  void addFinderFormView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
+
+  /**
+   * This operation will add a finder list view using entityDetails and the 
+   * provided context. This view will show finder result list
+   * 
+   * @param moduleName the module where finder list view will be added
+   * @param entity the details of an entity to be able to generate view
+   * @param finderName the name of the finder for which this form will be created
+   * @param ctx the ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addFinderListView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
 
   /**
    * This operation will add the application index view using 
