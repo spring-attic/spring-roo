@@ -94,6 +94,7 @@ public interface ControllerOperations extends Feature {
    * @param entity
    *            Entity over which create the controller
    * @param relationField
+   * 			Field that set the relationship
    * @param responseType
    *            View provider to use
    * @param controllerPackage
