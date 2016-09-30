@@ -69,7 +69,6 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
   public String controllerPath;
   public JavaType identifierType;
   public MethodMetadata identifierAccessor;
-  public List<String> finderNames;
 
   private ProjectOperations projectOperations;
   private PropFilesManagerService propFilesManagerService;
@@ -167,11 +166,12 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     // Getting controller finders
     final SearchAnnotationValues annotationValues =
         new SearchAnnotationValues(governorPhysicalTypeMetadata);
+    List<String> finderNames = new ArrayList<String>();
 
     // Add finders only if controller is of search type
     if (this.type == ControllerType.getControllerType(ControllerType.SEARCH.name())
         && annotationValues != null && annotationValues.getFinders() != null) {
-      this.finderNames = new ArrayList<String>(Arrays.asList(annotationValues.getFinders()));
+      finderNames = Arrays.asList(annotationValues.getFinders());
     }
 
     // Getting pathPrefix
@@ -223,8 +223,8 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     }
 
     // Add finder views
-    if (this.finderNames != null) {
-      for (String finderName : this.finderNames) {
+    if (finderNames != null) {
+      for (String finderName : finderNames) {
         viewGenerationService.addFinderFormView(this.controller.getType().getModule(),
             entityDetails, finderName, ctx);
         viewGenerationService.addFinderListView(this.controller.getType().getModule(),
