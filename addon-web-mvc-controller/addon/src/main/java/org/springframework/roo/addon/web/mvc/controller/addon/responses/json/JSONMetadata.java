@@ -65,22 +65,34 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   /**
    * Constructor
    *
-   * @param identifier the identifier for this item of metadata (required)
-   * @param aspectName the Java type of the ITD (required)
-   * @param governorPhysicalTypeMetadata the governor, which is expected to
-   *            contain a {@link ClassOrInterfaceTypeDetails} (required)
-   * @param listMethod MethodMetadata
-   * @param createMethod MethodMetadata
-   * @param updateMethod MethodMetadata
-   * @param deleteMethod MethodMetadata
-   * @param showMethod MethodMetadata
-   * @param populateHeadersMethod MethodMetadata
+   * @param identifier
+   *            the identifier for this item of metadata (required)
+   * @param aspectName
+   *            the Java type of the ITD (required)
+   * @param governorPhysicalTypeMetadata
+   *            the governor, which is expected to contain a
+   *            {@link ClassOrInterfaceTypeDetails} (required)
+   * @param listMethod
+   *            MethodMetadata
+   * @param createMethod
+   *            MethodMetadata
+   * @param updateMethod
+   *            MethodMetadata
+   * @param deleteMethod
+   *            MethodMetadata
+   * @param showMethod
+   *            MethodMetadata
+   * @param populateHeadersMethod
+   *            MethodMetadata
    * @param methodMetadata3
    * @param methodMetadata2
    * @param methodMetadata
-   * @param finderMethods List of MethodMetadata
-   * @param readOnly boolean
-  * @param type  Controller type
+   * @param finderMethods
+   *            List of MethodMetadata
+   * @param readOnly
+   *            boolean
+   * @param type
+   *            Controller type
    */
   public JSONMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MethodMetadata listMethod,
@@ -88,8 +100,8 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       final MethodMetadata deleteMethod, final MethodMetadata showMethod,
       final MethodMetadata createBatchMethod, final MethodMetadata updateBatchMethod,
       final MethodMetadata deleteBatchMethod, final MethodMetadata populateHeadersMethod,
-      final List<MethodMetadata> finderMethods, final boolean readOnly,
-      final List<JavaType> typesToImport, final ControllerType type) {
+      final List<MethodMetadata> finderMethods, List<MethodMetadata> detailMethods,
+      final boolean readOnly, final List<JavaType> typesToImport, final ControllerType type) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.readOnly = readOnly;
@@ -130,6 +142,10 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
       ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
     }
 
+    for (MethodMetadata detailMethod : detailMethods) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(detailMethod));
+    }
+
     // Add imports
     builder.getImportRegistrationResolver().addImports(typesToImport);
 
@@ -145,7 +161,6 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   public MethodMetadata getListMethod() {
     return this.listMethod;
   }
-
 
   /**
    * Method that returns create JSON method
@@ -229,8 +244,7 @@ public class JSONMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
   }
 
   /**
-   * Method that returns if related entity is
-   * readOnly or not.
+   * Method that returns if related entity is readOnly or not.
    *
    * @return
    */

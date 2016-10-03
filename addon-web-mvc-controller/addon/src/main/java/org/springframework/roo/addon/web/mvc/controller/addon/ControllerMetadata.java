@@ -341,8 +341,8 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     // return entityNameService.findOne(id);
     // Getting serviceFieldName
     String serviceFieldName = getServiceField().getFieldName().getSymbolName();
-    // Getting findOneMethod
 
+    // Getting findOneMethod
     MethodMetadata serviceFindOneMethod = serviceMetadata.getFindOneMethod();
 
     bodyBuilder.appendFormalLine(String.format("return this.%s.%s(id);", serviceFieldName,

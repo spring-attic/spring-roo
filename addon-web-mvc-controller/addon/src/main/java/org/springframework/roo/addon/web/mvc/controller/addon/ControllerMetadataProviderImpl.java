@@ -347,6 +347,9 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     controllerDetailInfo.setParentIdentifierType(getPersistenceMemberLocator().getIdentifierType(
         entity));
 
+    // Getting & setting parent field name
+    controllerDetailInfo
+        .setParentReferenceFieldName(relationFieldParts[relationFieldParts.length - 1]);
 
 
     return controllerDetailInfo;

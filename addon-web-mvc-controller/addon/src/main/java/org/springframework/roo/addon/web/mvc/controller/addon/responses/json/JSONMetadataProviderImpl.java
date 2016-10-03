@@ -4,11 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.jvnet.inflector.Noun;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.plural.addon.PluralMetadata;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerDetailInfo;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
@@ -52,9 +54,12 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -92,6 +97,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   private JavaType globalSearch;
   private String entityPlural;
   private String path;
+  private ControllerDetailInfo controllerDetailInfo;
 
   /**
    * This service is being activated so setup it:
@@ -195,6 +201,9 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
 
     // Getting entity and check if is a readOnly entity or not
     this.entity = controllerMetadata.getEntity();
+
+    // Getting detail controller info
+    this.controllerDetailInfo = controllerMetadata.getControllerDetailInfo();
 
     this.path = controllerMetadata.getPath();
 
@@ -305,7 +314,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod),
         getShowMethod(serviceFindOneMethod), getCreateBatchMethod(serviceSaveMethod),
         getUpdateBatchMethod(serviceSaveMethod), getDeleteBatchMethod(serviceDeleteMethod),
-        getPopulateHeadersMethod(), findersToAdd, this.readOnly, typesToImport, this.type);
+        getPopulateHeadersMethod(), findersToAdd, getDetailMethods(), this.readOnly, typesToImport,
+        this.type);
 
   }
 
@@ -1417,6 +1427,26 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     return controllerMetadata.getServiceField();
   }
 
+  /**
+   * This method returns service field included on controller that it
+   * represents the service spent as parameter
+   *
+   * @param service
+   *            Searched service
+   * @return The field that represents the service spent as parameter
+   */
+  private FieldMetadata getServiceField(JavaType service) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(this.controller.getDeclaredByMetadataId());
+    final String controllerMetadataKey =
+        ControllerMetadata.createIdentifier(this.controller.getType(), logicalPath);
+    registerDependency(controllerMetadataKey, metadataIdentificationString);
+    final ControllerMetadata controllerMetadata =
+        (ControllerMetadata) getMetadataService().get(controllerMetadataKey);
+
+    return controllerMetadata.getServiceField(service);
+  }
+
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
 
     if (getMetadataDependencyRegistry() != null
@@ -1478,6 +1508,195 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     } else {
       return controllerMVCService;
     }
+  }
+
+  /**
+   * This method provides all detail methods using JSON response type
+   *
+   * @return List of MethodMetadata
+   */
+  private List<MethodMetadata> getDetailMethods() {
+
+    List<MethodMetadata> detailMethods = new ArrayList<MethodMetadata>();
+
+    if (this.type != ControllerType.DETAIL) {
+      return detailMethods;
+    }
+
+    MethodMetadata listDetailMethod = getListDetailMethod();
+    if (listDetailMethod != null) {
+      detailMethods.add(listDetailMethod);
+    }
+
+    return detailMethods;
+  }
+
+
+  /**
+   * This method provides detail list method using JSON response type
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getListDetailMethod() {
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName =
+        new JavaSymbolName("list".concat(this.controllerDetailInfo.getEntity().getSimpleTypeName()));
+
+    // Create PageableDefault annotation
+    AnnotationMetadataBuilder pageableDefaultAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.PAGEABLE_DEFAULT);
+
+    String sortFieldName = "";
+    MemberDetails entityDetails =
+        getMemberDetails(getTypeLocationService().getTypeDetails(
+            this.controllerDetailInfo.getEntity()));
+    List<FieldMetadata> fields = entityDetails.getFields();
+    for (FieldMetadata field : fields) {
+      if (field.getAnnotation(new JavaType("javax.persistence.Id")) != null) {
+        sortFieldName = field.getFieldName().getSymbolName();
+      }
+    }
+    if (!sortFieldName.isEmpty()) {
+      pageableDefaultAnnotation.addStringAttribute("sort", sortFieldName);
+    }
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder modelAttributeAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    parameterTypes.add(new AnnotatedJavaType(this.controllerDetailInfo.getParentEntity(),
+        modelAttributeAnnotation.build()));
+    Validate.notNull(globalSearch, "Couldn't find GlobalSearch in project.");
+    parameterTypes.add(new AnnotatedJavaType(this.globalSearch));
+    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
+        .build()));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(this.controllerDetailInfo
+        .getParentEntity().getSimpleTypeName())));
+    parameterNames.add(new JavaSymbolName("search"));
+    parameterNames.add(new JavaSymbolName("pageable"));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_GET, "", null, null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Get finder method
+    ClassOrInterfaceTypeDetails serviceDetails =
+        getTypeLocationService().getTypeDetails(this.controllerDetailInfo.getService());
+
+    final LogicalPath serviceLogicalPath =
+        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
+    final String serviceMetadataKey =
+        ServiceMetadata.createIdentifier(serviceDetails.getType(), serviceLogicalPath);
+    final ServiceMetadata serviceMetadata =
+        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+
+    // Get parent field
+    FieldMetadata parentRelationField = null;
+    MemberDetails memberDetails = getMemberDetails(this.controllerDetailInfo.getParentEntity());
+    List<FieldMetadata> parentFields = memberDetails.getFields();
+    for (FieldMetadata parentField : parentFields) {
+      if (parentField.getFieldName().getSymbolName()
+          .equals(this.controllerDetailInfo.getParentReferenceFieldName())) {
+        AnnotationMetadata oneToManyAnnotation = parentField.getAnnotation(JpaJavaType.ONE_TO_MANY);
+        if (oneToManyAnnotation != null
+            && (parentField.getFieldType().getFullyQualifiedTypeName()
+                .equals(JavaType.LIST.getFullyQualifiedTypeName()) || parentField.getFieldType()
+                .getFullyQualifiedTypeName().equals(JavaType.SET.getFullyQualifiedTypeName()))) {
+          parentRelationField = parentField;
+          break;
+        }
+      }
+    }
+
+    Validate.notNull(parentRelationField, String.format(
+        "ERROR: '%s' must have a field related to '%s'", this.controllerDetailInfo
+            .getParentEntity().getSimpleTypeName(), this.controllerDetailInfo.getEntity()
+            .getSimpleTypeName()));
+
+    // Generating returnType
+    Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods =
+        serviceMetadata.getReferencedFieldsFindAllDefinedMethods();
+    AnnotationAttributeValue<Object> attributeMappedBy =
+        parentRelationField.getAnnotation(JpaJavaType.ONE_TO_MANY).getAttribute("mappedBy");
+
+    Validate.notNull(attributeMappedBy, String.format(
+        "ERROR: The field '%s' of '%s' must have 'mappedBy' value", parentRelationField
+            .getFieldName(), this.controllerDetailInfo.getParentEntity().getSimpleTypeName()));
+
+    String mappedBy = (String) attributeMappedBy.getValue();
+    MethodMetadata findByMethod = null;
+    Iterator<Entry<FieldMetadata, MethodMetadata>> it =
+        referencedFieldsFindAllDefinedMethods.entrySet().iterator();
+    while (it.hasNext()) {
+      Entry<FieldMetadata, MethodMetadata> finder = it.next();
+      if (finder.getKey().getFieldName().getSymbolName().equals(mappedBy)) {
+        findByMethod = finder.getValue();
+        break;
+      }
+    }
+
+    JavaType returnType = findByMethod.getReturnType();
+    List<JavaType> returnParameterTypes = returnType.getParameters();
+    StringBuffer returnTypeParamsString = new StringBuffer();
+    for (int i = 0; i < returnParameterTypes.size(); i++) {
+      addTypeToImport(returnParameterTypes.get(i));
+      if (i > 0) {
+        returnTypeParamsString.append(",");
+      }
+      returnTypeParamsString.append(returnParameterTypes.get(i).getSimpleTypeName());
+
+      // Add module dependency
+      getTypeLocationService().addModuleDependency(this.controller.getType().getModule(),
+          returnParameterTypes.get(i));
+    }
+
+    // Page<ENTITYREL> entityrelplural =
+    // entityRelNameService.findAllByENTITYNAME(ENTITYNAME, search,
+    // pageable);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(%s, search, pageable);",
+        addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString, StringUtils
+            .uncapitalize(StringUtils.lowerCase(Noun.pluralOf(this.controllerDetailInfo.getEntity()
+                .getSimpleTypeName(), Locale.ENGLISH))),
+        getServiceField(this.controllerDetailInfo.getService()).getFieldName()
+            .getSymbolNameUnCapitalisedFirstLetter(), findByMethod.getMethodName(), StringUtils
+            .uncapitalize(this.controllerDetailInfo.getParentEntity().getSimpleTypeName())));
+
+    // return entityrelplural;
+    bodyBuilder.appendFormalLine(String.format("return %s;", StringUtils.uncapitalize(StringUtils
+        .lowerCase(Noun.pluralOf(this.controllerDetailInfo.getEntity().getSimpleTypeName(),
+            Locale.ENGLISH)))));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            returnType, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+    return methodBuilder.build();
   }
 
 }

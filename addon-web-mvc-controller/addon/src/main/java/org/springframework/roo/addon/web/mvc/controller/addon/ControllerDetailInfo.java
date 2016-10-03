@@ -20,6 +20,8 @@ public class ControllerDetailInfo {
 
   private JavaType parentIdentifierType;
 
+  private String parentReferenceFieldName;
+
   private JavaType parentService;
 
   public String getPath() {
@@ -54,6 +56,22 @@ public class ControllerDetailInfo {
     this.parentEntity = parentEntity;
   }
 
+  public JavaType getParentIdentifierType() {
+    return parentIdentifierType;
+  }
+
+  public void setParentIdentifierType(JavaType parentIdentifierType) {
+    this.parentIdentifierType = parentIdentifierType;
+  }
+
+  public String getParentReferenceFieldName() {
+    return parentReferenceFieldName;
+  }
+
+  public void setParentReferenceFieldName(String parentReferenceFieldName) {
+    this.parentReferenceFieldName = parentReferenceFieldName;
+  }
+
   public JavaType getParentService() {
     return parentService;
   }
@@ -62,12 +80,5 @@ public class ControllerDetailInfo {
     this.parentService = parentService;
   }
 
-  public JavaType getParentIdentifierType() {
-    return parentIdentifierType;
-  }
-
-  public void setParentIdentifierType(JavaType parentIdentifierType) {
-    this.parentIdentifierType = parentIdentifierType;
-  }
 
 }
