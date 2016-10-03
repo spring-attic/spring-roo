@@ -213,15 +213,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     this.typesToImport = new ArrayList<JavaType>();
 
     // Getting service details
-    ClassOrInterfaceTypeDetails serviceDetails =
-        getTypeLocationService().getTypeDetails(getService());
-
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
-    final String serviceMetadataKey =
-        ServiceMetadata.createIdentifier(serviceDetails.getType(), logicalPath);
-    final ServiceMetadata serviceMetadata =
-        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+    final ServiceMetadata serviceMetadata = getServiceMetadata();
 
     // Getting Global search class
     Set<ClassOrInterfaceTypeDetails> globalSearchClasses =
@@ -346,6 +338,19 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getDeleteBatchMethod(serviceDeleteMethod), getCreateBatchMethod(serviceSaveMethod),
         getUpdateBatchMethod(serviceSaveMethod), isReadOnly(), typesToImport, this.type,
         findersToAdd);
+  }
+
+  private ServiceMetadata getServiceMetadata() {
+    ClassOrInterfaceTypeDetails serviceDetails =
+        getTypeLocationService().getTypeDetails(getService());
+
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
+    final String serviceMetadataKey =
+        ServiceMetadata.createIdentifier(serviceDetails.getType(), logicalPath);
+    final ServiceMetadata serviceMetadata =
+        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+    return serviceMetadata;
   }
 
   /**
@@ -1602,15 +1607,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
-    // Add form bean parameter
-    AnnotationMetadataBuilder requestParamAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
-    requestParamAnnotation.addStringAttribute("value", originalParameterNames.get(0)
-        .getSymbolName());
-    parameterTypes.add(new AnnotatedJavaType(originalParameterTypes.get(0).getJavaType(),
-        requestParamAnnotation.build()));
-    parameterNames.add(originalParameterNames.get(0));
-
     // Add model parameter
     parameterTypes
         .add(AnnotatedJavaType.convertFromJavaType(addTypeToImport(SpringJavaType.MODEL)));
@@ -1624,18 +1620,18 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
-    // Adding @ResponseBody annotation
-    AnnotationMetadataBuilder responseBodyAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
-    annotations.add(responseBodyAnnotation);
-
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // return "PATH_PREFIX/ENTITY_PLURAL/FINDER_NAMEList";
-    bodyBuilder.appendFormalLine(String.format("return \"%s/%s/%sList\";",
-        StringUtils.removeStart(this.pathPrefix, "/"), this.entityPlural,
-        methodName.getSymbolName()));
+    String pathPrefix = "";
+    if (StringUtils.isBlank(this.pathPrefix)) {
+      pathPrefix = this.pathPrefix;
+    } else {
+      pathPrefix = this.pathPrefix.concat("/");
+    }
+    bodyBuilder.appendFormalLine(String.format("return \"%s%s/%sList\";",
+        StringUtils.removeStart(pathPrefix, "/"), this.entityPlural, methodName.getSymbolName()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
@@ -1678,7 +1674,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     } else {
       path = methodName.getSymbolName();
     }
-    path = StringUtils.uncapitalize(path);
+    path = StringUtils.uncapitalize(StringUtils.removeEnd(path, "Redirect"));
 
     // Check if exists other method with the same @RequesMapping to generate
     MethodMetadata existingMVCMethod =
@@ -1716,23 +1712,18 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         SpringEnumDetails.REQUEST_METHOD_POST, "/" + path, stringParameterNames, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
-    // Adding @ResponseBody annotation
-    AnnotationMetadataBuilder responseBodyAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
-    annotations.add(responseBodyAnnotation);
-
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     bodyBuilder.newLine();
 
     // redirect.addFlashAttribute(entity/dtoSearch);
-    bodyBuilder.appendFormalLine(String.format("redirect.addFlashAttribute(%s);",
+    bodyBuilder.appendFormalLine(String.format("redirect.addFlashAttribute(\"formBean\", %s);",
         parameterNames.get(0)));
     bodyBuilder.newLine();
 
     // return "redirect:PATH_PREFIX/ENTITY_PLURAL/FINDER_NAME";
-    bodyBuilder.appendFormalLine(String.format("return \"redirect:%s/%s/%s\";", this.pathPrefix,
-        this.entityPlural, methodName.getSymbolName()));
+    bodyBuilder.appendFormalLine(String.format("return \"redirect:%s/%s/search/%s\";",
+        this.pathPrefix, this.entityPlural, path));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
@@ -1799,11 +1790,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         SpringEnumDetails.REQUEST_METHOD_GET, "/" + path, stringParameterNames, null,
         SpringEnumDetails.MEDIA_TYPE_TEXT_HTML_VALUE, ""));
 
-    // Adding @ResponseBody annotation
-    AnnotationMetadataBuilder responseBodyAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
-    annotations.add(responseBodyAnnotation);
-
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
     bodyBuilder.newLine();
@@ -1824,9 +1810,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     bodyBuilder.newLine();
 
     // return "PATH_PREFIX/ENTITY_PLURAL/FINDER_NAMEForm";
-    bodyBuilder.appendFormalLine(String.format("return \"%s/%s/%s\";",
-        StringUtils.removeStart(this.pathPrefix, "/"), this.entityPlural,
-        methodName.getSymbolName()));
+    String pathPrefix = "";
+    if (StringUtils.isBlank(this.pathPrefix)) {
+      pathPrefix = this.pathPrefix;
+    } else {
+      pathPrefix = this.pathPrefix.concat("/");
+    }
+    bodyBuilder.appendFormalLine(String.format("return \"%s%s/%s\";",
+        StringUtils.removeStart(pathPrefix, "/"), this.entityPlural, methodName.getSymbolName()));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,

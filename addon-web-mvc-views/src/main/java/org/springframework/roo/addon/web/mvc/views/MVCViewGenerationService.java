@@ -1,6 +1,9 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+
+import java.util.List;
 
 /**
  * 
@@ -107,10 +110,12 @@ public interface MVCViewGenerationService {
    * @param moduleName the module where finder form view will be added
    * @param entity the details of an entity to be able to generate view
    * @param finderName the name of the finder for which this form will be created
+   * @param fieldsToAdd 
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderFormView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
+  void addFinderFormView(String moduleName, MemberDetails entity, String finderName,
+      List<FieldMetadata> fieldsToAdd, ViewContext ctx);
 
   /**
    * This operation will add a finder list view using entityDetails and the 
@@ -119,10 +124,12 @@ public interface MVCViewGenerationService {
    * @param moduleName the module where finder list view will be added
    * @param entity the details of an entity to be able to generate view
    * @param finderName the name of the finder for which this form will be created
+   * @param fieldsToAdd 
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderListView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
+  void addFinderListView(String moduleName, MemberDetails entity, String finderName,
+      List<FieldMetadata> fieldsToAdd, ViewContext ctx);
 
   /**
    * This operation will add the application index view using 

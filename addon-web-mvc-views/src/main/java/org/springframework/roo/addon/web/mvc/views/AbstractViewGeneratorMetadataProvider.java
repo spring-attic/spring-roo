@@ -6,8 +6,13 @@ import org.apache.felix.scr.annotations.Component;
 import org.jvnet.inflector.Noun;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.springframework.roo.addon.dto.addon.DtoOperations;
+import org.springframework.roo.addon.finder.addon.FinderOperations;
+import org.springframework.roo.addon.finder.addon.FinderOperationsImpl;
 import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
+import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
@@ -36,9 +41,11 @@ import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -65,7 +72,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
   public ControllerType type;
   public boolean readOnly;
   public JavaType service;
-  public List<FinderMethod> finders;
+  public List<MethodMetadata> finders;
   public String controllerPath;
   public JavaType identifierType;
   public MethodMetadata identifierAccessor;
@@ -73,6 +80,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
   private ProjectOperations projectOperations;
   private PropFilesManagerService propFilesManagerService;
   private I18nOperationsImpl i18nOperationsImpl;
+  private FinderOperationsImpl finderOperationsImpl;
 
   /**
    * This operation returns the MVCViewGenerationService that should be used
@@ -160,6 +168,20 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
           existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
       if (entityAttr != null && entityAttr.getValue().equals(entity)) {
         this.service = existingService.getType();
+
+        ClassOrInterfaceTypeDetails serviceDetails =
+            getTypeLocationService().getTypeDetails(this.service);
+
+        final LogicalPath logicalPath =
+            PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
+        final String serviceMetadataKey =
+            ServiceMetadata.createIdentifier(serviceDetails.getType(), logicalPath);
+        final ServiceMetadata serviceMetadata =
+            (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+
+        // Get only those service finders exposed to views
+        this.finders = new ArrayList<MethodMetadata>();
+        this.finders = serviceMetadata.getFinders();
       }
     }
 
@@ -168,10 +190,26 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         new SearchAnnotationValues(governorPhysicalTypeMetadata);
     List<String> finderNames = new ArrayList<String>();
 
-    // Add finders only if controller is of search type
-    if (this.type == ControllerType.getControllerType(ControllerType.SEARCH.name())
-        && annotationValues != null && annotationValues.getFinders() != null) {
+    // Add finder names from @RooSearch to filter those exposed to views
+    if (annotationValues != null && annotationValues.getFinders() != null) {
       finderNames = Arrays.asList(annotationValues.getFinders());
+
+      // Get only those finders exposed to views
+      if (this.finders != null && !this.finders.isEmpty()) {
+        List<MethodMetadata> finderMethods = new ArrayList<MethodMetadata>();
+        for (MethodMetadata finder : this.finders) {
+          if (finderNames.contains(finder.getMethodName().getSymbolName())) {
+            finderMethods.add(finder);
+          }
+        }
+
+        // Fill finders variable only with exposed finder methods
+        this.finders = finderMethods;
+      }
+    } else {
+
+      // Entity hasn't exposed finders
+      this.finders = new ArrayList<MethodMetadata>();
     }
 
     // Getting pathPrefix
@@ -223,12 +261,51 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     }
 
     // Add finder views
-    if (finderNames != null) {
-      for (String finderName : finderNames) {
+    if (this.finders != null) {
+      for (MethodMetadata finderMethod : this.finders) {
+
+        // For each finder, create form and list view exposing only finder params 
+        // from form bean object
+        JavaType formBean = finderMethod.getParameterTypes().get(0).getJavaType();
+
+        // Check if finder is not a custom finder
+        if (getTypeLocationService().getTypeDetails(formBean) == null) {
+
+          // formBean will be the entity itself
+          formBean = this.entity;
+        }
+
+        // Add formBean to viewContext
+        ctx.addExtraParameter("formBean", "formBean");
+
+        // Get formBean details
+        MemberDetails formBeanDetails =
+            getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+                getTypeLocationService().getTypeDetails(formBean));
+
+        // Use method from FinderOperationsImpl to fill maps
+        Map<JavaType, Map<String, String>> typesFieldMaps =
+            new HashMap<JavaType, Map<String, String>>();
+        Map<JavaType, Map<String, FieldMetadata>> typeFieldMetadataMap =
+            new HashMap<JavaType, Map<String, FieldMetadata>>();
+        Map<JavaSymbolName, List<FinderParameter>> finderParametersMap =
+            new HashMap<JavaSymbolName, List<FinderParameter>>();
+        getFinderOperations().buildFormBeanFieldNamesMap(this.entity, formBean, typesFieldMaps,
+            typeFieldMetadataMap, finderMethod.getMethodName(), finderParametersMap);
+
+        // Get finder parameters for each finder method and FieldMetadata for each finder param
+        List<FinderParameter> finderParameters =
+            finderParametersMap.get(finderMethod.getMethodName());
+        Map<String, FieldMetadata> formBeanFields = typeFieldMetadataMap.get(formBean);
+        List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
+        for (FinderParameter finderParam : finderParameters) {
+          fieldsToAdd.add(formBeanFields.get(finderParam.getName().getSymbolName()));
+        }
+
         viewGenerationService.addFinderFormView(this.controller.getType().getModule(),
-            entityDetails, finderName, ctx);
+            formBeanDetails, finderMethod.getMethodName().getSymbolName(), fieldsToAdd, ctx);
         viewGenerationService.addFinderListView(this.controller.getType().getModule(),
-            entityDetails, finderName, ctx);
+            formBeanDetails, finderMethod.getMethodName().getSymbolName(), fieldsToAdd, ctx);
       }
     }
 
@@ -294,7 +371,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     return this.service;
   }
 
-  public List<FinderMethod> getFinders() {
+  public List<MethodMetadata> getFinders() {
     return this.finders;
   }
 
@@ -381,6 +458,29 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       }
     } else {
       return i18nOperationsImpl;
+    }
+  }
+
+  public FinderOperationsImpl getFinderOperations() {
+    if (finderOperationsImpl == null) {
+      // Get all Services implement DtoOperations interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(FinderOperations.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          return (FinderOperationsImpl) context.getService(ref);
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER
+            .warning("Cannot load FinderOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
+        return null;
+      }
+    } else {
+      return this.finderOperationsImpl;
     }
   }
 

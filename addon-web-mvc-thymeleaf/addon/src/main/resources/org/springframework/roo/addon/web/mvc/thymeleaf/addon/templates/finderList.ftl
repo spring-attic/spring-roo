@@ -337,7 +337,8 @@
      jQuery(document).ready( function () {
         var ${entityName}Table = jQuery('#${entityName}Table').DataTable({
             'ajax': {
-                  'url': [[@{${controllerPath}/}]]
+                  'url': [[@{${controllerPath}/search/${finderPath}}]],
+                  'data': [[${r"${formBean}"}]]
               },
             'columns': [
               <#list fields as field>

@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.views.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class contains all necessary information about a menu entry.
  * 
@@ -12,6 +15,7 @@ public class MenuEntry {
   private String path;
   private String entityLabel;
   private String entityPluralLabel;
+  private List<String> finders;
 
   public String getEntityName() {
     return entityName;
@@ -43,6 +47,14 @@ public class MenuEntry {
 
   public String getEntityPluralLabel() {
     return entityPluralLabel;
+  }
+
+  public List<String> getFinders() {
+    return finders;
+  }
+
+  public void setFinders(List<String> finders) {
+    this.finders = finders;
   }
 
 }

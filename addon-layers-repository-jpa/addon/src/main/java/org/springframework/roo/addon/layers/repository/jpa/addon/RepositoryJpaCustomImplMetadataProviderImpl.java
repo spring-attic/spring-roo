@@ -12,8 +12,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dto.addon.DtoOperations;
 import org.springframework.roo.addon.dto.addon.DtoOperationsImpl;
+import org.springframework.roo.addon.finder.addon.FinderOperations;
+import org.springframework.roo.addon.finder.addon.FinderOperationsImpl;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
-import org.springframework.roo.addon.finder.addon.parser.PartTree;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
@@ -73,6 +74,9 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
+
+  private FinderOperationsImpl finderOperationsImpl;
+  private DtoOperationsImpl dtoOperations;
 
   /**
    * This service is being activated so setup it:
@@ -397,19 +401,18 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
       // If type is a DTO, add finder fields to mappings
       JavaType parameterType = method.getParameterTypes().get(0).getJavaType();
-      //      if (getTypeLocationService().getTypeDetails(parameterType).getAnnotation(RooJavaType.ROO_DTO) != null) {
       typesAreProjections.put(parameterType, false);
 
       // Build finder formBean field mappings
-      buildFormBeanFieldNamesMap(entity, parameterType, typesFieldMaps, typesFieldsMetadataMap,
-          method.getMethodName(), finderParametersMap);
-      //      }
+      getFinderOperations().buildFormBeanFieldNamesMap(entity, parameterType, typesFieldMaps,
+          typesFieldsMetadataMap, method.getMethodName(), finderParametersMap);
     }
 
     // Add custom count methods to mappings
     for (MethodMetadata countMethod : customCountMethods) {
-      buildFormBeanFieldNamesMap(entity, countMethod.getParameterTypes().get(0).getJavaType(),
-          typesFieldMaps, typesFieldsMetadataMap, countMethod.getMethodName(), finderParametersMap);
+      getFinderOperations().buildFormBeanFieldNamesMap(entity,
+          countMethod.getParameterTypes().get(0).getJavaType(), typesFieldMaps,
+          typesFieldsMetadataMap, countMethod.getMethodName(), finderParametersMap);
     }
 
     // Add typesFieldMaps for each projection finder and check for id fields
@@ -535,179 +538,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
   }
 
-  /**
-   * Build a Map<String, String> with form bean type field names and "path" field names
-   * and adds it to the projectionsFieldMaps Map.
-   *
-   * @param entity
-   * @param formBeanType
-   * @param typesFieldMaps
-   * @param typeFieldMetadataMap
-   * @param finderParametersList
-   * @param javaSymbolName
-   */
-  private void buildFormBeanFieldNamesMap(JavaType entity, JavaType formBeanType,
-      Map<JavaType, Map<String, String>> typesFieldMaps,
-      Map<JavaType, Map<String, FieldMetadata>> typeFieldMetadataMap, JavaSymbolName finderName,
-      Map<JavaSymbolName, List<FinderParameter>> finderParametersMap) {
-
-    // Get all entity fields
-    ClassOrInterfaceTypeDetails entityCid = getTypeLocationService().getTypeDetails(entity);
-    MemberDetails entityMemberDetails =
-        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), entityCid);
-    List<FieldMetadata> allEntityFields = entityMemberDetails.getFields();
-
-    // Create inner Maps
-    Map<String, String> fieldNamesMap = null;
-    if (typesFieldMaps.get(formBeanType) == null) {
-      fieldNamesMap = new HashMap<String, String>();
-    } else {
-      fieldNamesMap = typesFieldMaps.get(formBeanType);
-    }
-
-    Map<String, FieldMetadata> fieldMetadataMap = null;
-    if (typeFieldMetadataMap.get(formBeanType) == null) {
-      fieldMetadataMap = new HashMap<String, FieldMetadata>();
-    } else {
-      fieldMetadataMap = typeFieldMetadataMap.get(formBeanType);
-    }
-
-    // Get finder fields
-    PartTree partTree = new PartTree(finderName.getSymbolName(), entityMemberDetails);
-    List<FinderParameter> finderParameters = partTree.getParameters();
-
-    // Get all DTO fields
-    List<FieldMetadata> allDtoFields =
-        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
-            getTypeLocationService().getTypeDetails(formBeanType)).getFields();
-
-    // Create list of parameters for this finder
-    List<FinderParameter> finderParametersList = new ArrayList<FinderParameter>();
-
-    // Iterate over all specified fields
-    for (FinderParameter finderParameter : finderParameters) {
-      JavaSymbolName fieldName = finderParameter.getName();
-      JavaType fieldType = finderParameter.getType();
-      boolean found = false;
-
-      // Iterate over all entity fields
-      for (FieldMetadata field : allEntityFields) {
-        if (field.getFieldName().equals(fieldName) && field.getFieldType().equals(fieldType)) {
-
-          // Field found, build field "path" name and add it to map
-          String fieldPathName = "";
-
-          // Check if field is @Id or @EmbeddedId field
-          if (field.getAnnotation(JpaJavaType.ID) != null
-              || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
-            fieldPathName = "getEntityId()";
-          } else {
-
-            // Path name for DTO's should be the path to entity's fields
-            fieldPathName =
-                String.format("%s.%s", StringUtils.uncapitalize(entity.getSimpleTypeName()),
-                    field.getFieldName());
-          }
-
-          fieldNamesMap.put(fieldName.getSymbolName(), fieldPathName);
-
-          // Add FieldMetadata from DTO to fieldMetadataMap
-          boolean fieldFoundInDto = false;
-          for (FieldMetadata dtoField : allDtoFields) {
-            if (dtoField.getFieldName().equals(fieldName)
-                && dtoField.getFieldType().equals(fieldType)) {
-              fieldMetadataMap.put(fieldName.getSymbolName(), dtoField);
-              fieldFoundInDto = true;
-            }
-          }
-          Validate.isTrue(fieldFoundInDto,
-              "Couldn't find a field with same name and type that %s on DTO %s",
-              fieldName.getSymbolName(), formBeanType.getSimpleTypeName());
-
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-
-        // The field isn't in the entity, should be in one of its relations
-        for (FieldMetadata field : allEntityFields) {
-          found =
-              findDtoFieldRecursivelyAndAddToMappings(entity, fieldNamesMap, fieldMetadataMap,
-                  found, field, fieldName, fieldType, allDtoFields,
-                  formBeanType.getSimpleTypeName());
-        }
-      }
-
-      if (!found) {
-        // Field not found in its
-        throw new IllegalArgumentException(String.format(
-            "Field %s couldn't be located in DTO %s. Please, be sure that it is well "
-                + "written and exists in %s or its related entities.", fieldName,
-            formBeanType.getSimpleTypeName(), entity.getSimpleTypeName()));
-      }
-
-      finderParametersList.add(finderParameter);
-    }
-
-    // Add dto mappings to domain type mappings
-    typesFieldMaps.put(formBeanType, fieldNamesMap);
-    typeFieldMetadataMap.put(formBeanType, fieldMetadataMap);
-
-    // Add finder params to Map
-    finderParametersMap.put(finderName, finderParametersList);
-  }
-
-  private boolean findDtoFieldRecursivelyAndAddToMappings(JavaType entity,
-      Map<String, String> fieldNamesMap, Map<String, FieldMetadata> fieldMetadataMap,
-      boolean found, FieldMetadata field, JavaSymbolName finderFieldName, JavaType finderFieldType,
-      List<FieldMetadata> allDtoFields, String dtoSimpleName) {
-    JavaType currentEntity;
-    if (getTypeLocationService().getTypeDetails(field.getFieldType()) != null
-        && getTypeLocationService().getTypeDetails(field.getFieldType()).getAnnotation(
-            RooJavaType.ROO_JPA_ENTITY) != null) {
-
-      // Change current entity
-      currentEntity = field.getFieldType();
-
-      // Modify pathName with one more level
-      String pathName =
-          StringUtils.uncapitalize(entity.getSimpleTypeName()).concat(".")
-              .concat(field.getFieldName().getSymbolName());
-
-      List<FieldMetadata> relatedEntityFields =
-          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
-              getTypeLocationService().getTypeDetails(currentEntity)).getFields();
-      for (FieldMetadata relatedField : relatedEntityFields) {
-        if (relatedField.getFieldName().equals(finderFieldName)
-            && relatedField.getFieldType().equals(finderFieldType)) {
-
-          // Add FieldMetadata from DTO to fieldMetadataMap
-          boolean fieldFoundInDto = false;
-          for (FieldMetadata dtoField : allDtoFields) {
-            if (dtoField.getFieldName().equals(finderFieldName)
-                && dtoField.getFieldType().equals(finderFieldType)) {
-              fieldMetadataMap.put(finderFieldName.getSymbolName(), dtoField);
-              fieldFoundInDto = true;
-            }
-          }
-          Validate.isTrue(fieldFoundInDto,
-              "Couldn't find a field with same name and type that %s on DTO %s",
-              finderFieldName.getSymbolName(), dtoSimpleName);
-          fieldNamesMap.put(finderFieldName.getSymbolName(),
-              pathName.concat(".").concat(relatedField.getFieldName().getSymbolName()));
-          found = true;
-          break;
-        } else {
-          findDtoFieldRecursivelyAndAddToMappings(currentEntity, fieldNamesMap, fieldMetadataMap,
-              found, relatedField, finderFieldName, finderFieldType, allDtoFields, dtoSimpleName);
-        }
-      }
-    }
-    return found;
-  }
-
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
 
     if (getMetadataDependencyRegistry() != null
@@ -725,22 +555,49 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   }
 
   public DtoOperationsImpl getDtoOperations() {
+    if (dtoOperations == null) {
 
-    // Get all Services implement DtoOperations interface
-    try {
-      ServiceReference<?>[] references =
-          context.getAllServiceReferences(DtoOperations.class.getName(), null);
+      // Get all Services implement DtoOperations interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(DtoOperations.class.getName(), null);
 
-      for (ServiceReference<?> ref : references) {
-        return (DtoOperationsImpl) context.getService(ref);
+        for (ServiceReference<?> ref : references) {
+          return (DtoOperationsImpl) context.getService(ref);
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER
+            .warning("Cannot load DtoOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
+        return null;
       }
+    } else {
+      return dtoOperations;
+    }
+  }
 
-      return null;
+  public FinderOperationsImpl getFinderOperations() {
+    if (finderOperationsImpl == null) {
+      // Get all Services implement DtoOperations interface
+      try {
+        ServiceReference<?>[] references =
+            context.getAllServiceReferences(FinderOperations.class.getName(), null);
 
-    } catch (InvalidSyntaxException e) {
-      LOGGER
-          .warning("Cannot load DtoOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
-      return null;
+        for (ServiceReference<?> ref : references) {
+          return (FinderOperationsImpl) context.getService(ref);
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER
+            .warning("Cannot load FinderOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
+        return null;
+      }
+    } else {
+      return this.finderOperationsImpl;
     }
   }
 }

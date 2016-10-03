@@ -148,12 +148,11 @@
     <section data-layout-fragment="content">
       <div class="container-fluid content">
 
-        <h1 data-th-text="${r"#{"}label_edit_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Edit ${entityName}</h1>
+        <h1 data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Search ${entityName}</h1>
 
         <!--START FORM-->
-        <form class="form-horizontal" method="POST" data-th-object="${modelAttribute}"
-          data-th-action="@{${controllerPath}/{id}(id=*{id})}">
-          <input type="hidden" name="_method" value="PUT" />
+        <form class="form-horizontal" method="POST" data-th-object="${r"${formBean}"}"
+          data-th-action="@{${controllerPath}/search/${action}}">
           <fieldset id="containerFields">
             <#list fields as field>
                 <#if field.type == "TEXT">

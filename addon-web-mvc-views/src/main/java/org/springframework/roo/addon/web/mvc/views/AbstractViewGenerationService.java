@@ -1,5 +1,39 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.annotations.Component;
+import org.jvnet.inflector.Noun;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
+import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
+import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
+import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
+import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
+import org.springframework.roo.addon.web.mvc.views.components.FieldTypes;
+import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.support.logging.HandlerUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,36 +45,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Component;
-import org.jvnet.inflector.Noun;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
-import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
-import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
-import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
-import org.springframework.roo.addon.web.mvc.views.components.FieldTypes;
-import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
-import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.model.SpringJavaType;
-import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  *
@@ -87,7 +91,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addListView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), true, ctx);
+    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldItem> fields = getFieldViewItems(entityFields, ctx.getEntityName(), true, ctx);
     List<FieldItem> details = getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx);
 
     ctx.addExtraParameter("fields", fields);
@@ -116,7 +121,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addShowView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
+    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldItem> fields = getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx);
     List<FieldItem> details = getDetailsFieldViewItems(entityDetails, ctx.getEntityName(), ctx);
 
     ctx.addExtraParameter("fields", fields);
@@ -149,7 +155,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addCreateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
+    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldItem> fields = getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -179,7 +186,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addUpdateView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
+    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldItem> fields = getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx);
 
     ctx.addExtraParameter("fields", fields);
 
@@ -207,12 +215,28 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addFinderFormView(String moduleName, MemberDetails entityDetails, String finderName,
-      ViewContext ctx) {
+      List<FieldMetadata> fieldsToAdd, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
+    List<FieldItem> fields = getFieldViewItems(fieldsToAdd, ctx.getEntityName(), false, ctx);
 
     ctx.addExtraParameter("fields", fields);
+
+    // Build action path
+    String path = "";
+    if (StringUtils.startsWith(finderName, "count")) {
+      path = StringUtils.removeStart(finderName, "count");
+    } else if (StringUtils.startsWith(finderName, "find")) {
+      path = StringUtils.removeStart(finderName, "find");
+    } else if (StringUtils.startsWith(finderName, "query")) {
+      path = StringUtils.removeStart(finderName, "query");
+    } else if (StringUtils.startsWith(finderName, "read")) {
+      path = StringUtils.removeStart(finderName, "read");
+    } else {
+      path = finderName;
+    }
+    path = StringUtils.uncapitalize(path);
+    ctx.addExtraParameter("action", path);
 
     // Process elements to generate
     DOC newDoc = process("finderForm", ctx);
@@ -237,12 +261,28 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addFinderListView(String moduleName, MemberDetails entityDetails, String finderName,
-      ViewContext ctx) {
+      List<FieldMetadata> fieldsToAdd, ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(entityDetails, ctx.getEntityName(), false, ctx);
+    List<FieldItem> fields = getFieldViewItems(fieldsToAdd, ctx.getEntityName(), false, ctx);
 
     ctx.addExtraParameter("fields", fields);
+
+    // Build URL path to get data
+    String path = "";
+    if (StringUtils.startsWith(finderName, "count")) {
+      path = StringUtils.removeStart(finderName, "count");
+    } else if (StringUtils.startsWith(finderName, "find")) {
+      path = StringUtils.removeStart(finderName, "find");
+    } else if (StringUtils.startsWith(finderName, "query")) {
+      path = StringUtils.removeStart(finderName, "query");
+    } else if (StringUtils.startsWith(finderName, "read")) {
+      path = StringUtils.removeStart(finderName, "read");
+    } else {
+      path = finderName;
+    }
+    path = StringUtils.uncapitalize(path);
+    ctx.addExtraParameter("finderPath", path);
 
     // Process elements to generate
     DOC newDoc = process("finderList", ctx);
@@ -380,6 +420,20 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
       JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
 
+      // Get finders for each controller
+      AnnotationMetadata controllerSearchAnnotation =
+          controller.getAnnotation(RooJavaType.ROO_SEARCH);
+      List<String> finderNames = new ArrayList<String>();
+      if (controllerSearchAnnotation != null
+          && controllerSearchAnnotation.getAttribute("finders") != null) {
+        List<?> finders = (List<?>) controllerSearchAnnotation.getAttribute("finders").getValue();
+        Iterator<?> iterator = finders.iterator();
+        while (iterator.hasNext()) {
+          StringAttributeValue attributeValue = (StringAttributeValue) iterator.next();
+          finderNames.add(attributeValue.getValue());
+        }
+      }
+
       // Getting pathPrefix
       AnnotationAttributeValue<Object> pathPrefixAttr =
           controllerAnnotation.getAttribute("pathPrefix");
@@ -403,6 +457,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       menuEntry.setPath(path);
       menuEntry.setEntityLabel(FieldItem.buildLabel(entity.getSimpleTypeName(), ""));
       menuEntry.setEntityPluralLabel(FieldItem.buildLabel(entity.getSimpleTypeName(), "plural"));
+      menuEntry.setFinders(finderNames);
 
       // Add new menu entry to menuEntries list
       menuEntries.add(menuEntry);
@@ -543,17 +598,15 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
    * If provided entity has more than 5 fields, only the first 5 ones will be
    * included on generated view.
    *
-   * @param entityDetails
+   * @param fields
    * @param entityName
    * @param checkMaxFields
    * @param ctx
    *
    * @return List that contains FieldMetadata that will be added to the view.
    */
-  protected List<FieldItem> getFieldViewItems(MemberDetails entityDetails, String entityName,
+  protected List<FieldItem> getFieldViewItems(List<FieldMetadata> entityFields, String entityName,
       boolean checkMaxFields, ViewContext ctx) {
-    // Getting entity fields
-    List<FieldMetadata> entityFields = entityDetails.getFields();
     int addedFields = 0;
 
     // Getting all controllers
@@ -691,12 +744,13 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
                 FieldItem.buildLabel(entityName, entityField.getFieldName().getSymbolName()));
 
             // Getting all referenced fields
+            List<FieldMetadata> referencedFields =
+                getMemberDetailsScanner().getMemberDetails(getClass().toString(),
+                    referencedFieldDetails).getFields();
             fieldItem.addConfigurationElement(
                 "referenceFieldFields",
-                getFieldViewItems(
-                    getMemberDetailsScanner().getMemberDetails(getClass().toString(),
-                        referencedFieldDetails), entityName + "."
-                        + entityField.getFieldName().getSymbolName(), true, ctx));
+                getFieldViewItems(referencedFields, entityName + "."
+                    + entityField.getFieldName().getSymbolName(), true, ctx));
 
           } else {
             // Ignore set or list which base types are not entity field
