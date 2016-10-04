@@ -981,13 +981,18 @@ public class ControllerOperationsImpl implements ControllerOperations {
         AnnotationAttributeValue<String> pathPrefixAttr =
             existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("pathPrefix");
 
+        AnnotationMetadata responseTypeAnnotation =
+            existingController.getAnnotation(responseType.getAnnotation());
         if (entityAttr != null
             && entityAttr.getValue().equals(entity)
             && typeAttr != null
+            && responseTypeAnnotation != null
             && (existingControllerType.equals(ControllerType.ITEM) || existingControllerType
                 .equals(ControllerType.COLLECTION))) {
+
           if (pathPrefixAttr != null) {
             pathPrefixController = pathPrefixAttr.getValue();
+
           }
           existsBasicControllers = true;
           break;
@@ -1001,8 +1006,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
               Level.INFO,
               String
                   .format(
-                      "ERROR: Don't exists controllers in the package %s. Please, use 'web mvc controller' command to create them",
-                      controllerPackage));
+                      "ERROR: Doesn't exist parent controller in the package %s with the response type %s for the entity %s. Please, use 'web mvc controller' command to create them",
+                      controllerPackage, responseType.getName(), entity.getSimpleTypeName()));
       return;
     }
 
@@ -1023,7 +1028,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
       }
 
       relationFieldIsValid =
-          checkRelationField(entityDetails, relationFieldParse, relationFieldObject, 0);
+          checkRelationField(entityDetails, relationFieldParse, relationFieldObject, 0,
+              responseType, controllerPackage, pathPrefixController, entity);
 
       if (relationFieldIsValid) {
         relationFields.add(relationField);
@@ -1052,8 +1058,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
                 .getFullyQualifiedTypeName().equals(JavaType.SET.getFullyQualifiedTypeName()))) {
 
           relationFields.add(field.getFieldName().getSymbolName());
-          relationFieldObject.put(relationField, field.getFieldType().getParameters().get(0)
-              .getSimpleTypeName());
+          relationFieldObject.put(field.getFieldName().getSymbolName(), field.getFieldType()
+              .getParameters().get(0).getSimpleTypeName());
 
         }
       }
@@ -1093,6 +1099,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
               } else {
                 // Detail controller exists
                 relationFieldsToRemove.add(field);
+                LOGGER.log(Level.INFO, String.format(
+                    "ERROR: the entity '%s' has already a detail controller for field %s.",
+                    entity.getSimpleTypeName(), field));
               }
             }
           }
@@ -1184,17 +1193,33 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * Find recursively if relation field is valid
+   * Find recursively if relation field is valid.
+   * Check that the fields are Set or List and check that the parents controllers exists
    *
-   * @param entityDetails Entity to search the current field parameter
-   * @param relationField Array with the related parameter splited
-   * @param relationFieldObject Map to save the name of the entity of the related field
-   * @param level Current level to search
+   * @param entityDetails
+   *            Entity to search the current field parameter
+   * @param relationField
+   *            Array with the related parameter splited
+   * @param relationFieldObject
+   *            Map to save the name of the entity of the related field
+   * @param level
+   *            Current level to search
+   * @param responseType
+   *            Response type of the detail controller
+   * @param controllerPackage
+   *            Package where create the detail controller
+   * @param pathPrefix
+   *            Path prefix of the detail controller
+   * @param masterEntity
+   *            Entity of the detail controller
    *
+   * @throws Error if there aren't parent detail controllers
    * @return If finally the relation field is valid
    */
   private boolean checkRelationField(ClassOrInterfaceTypeDetails entityDetails,
-      String[] relationField, Map<String, String> relationFieldObject, int level) {
+      String[] relationField, Map<String, String> relationFieldObject, int level,
+      ControllerMVCResponseService responseType, JavaPackage controllerPackage, String pathPrefix,
+      JavaType masterEntity) {
     boolean relationFieldIsValid = false;
     MemberDetails memberDetails =
         memberDetailsScanner.getMemberDetails(entityDetails.getType().getSimpleTypeName(),
@@ -1211,11 +1236,26 @@ public class ControllerOperationsImpl implements ControllerOperations {
                 .getFullyQualifiedTypeName().equals(JavaType.SET.getFullyQualifiedTypeName()))) {
           level++;
           if (relationField.length > level) {
+
+            // check if exists a detail controller (avoid check the master)
+            String currentRelationField = relationField[0];
+            for (int i = 1; i < level; i++) {
+              currentRelationField = currentRelationField.concat(".").concat(relationField[i]);
+            }
+            boolean detailControllerExists =
+                checkDetailControllerExists(masterEntity, responseType, controllerPackage,
+                    pathPrefix, currentRelationField);
+
+            Validate.isTrue(detailControllerExists, String.format(
+                "ERROR: Doesn't exist detail controller with response type %s for field %s.",
+                responseType.getName(), entityField.getFieldName()));
+
             ClassOrInterfaceTypeDetails entityFieldDetails =
                 getTypeLocationService().getTypeDetails(
                     entityField.getFieldType().getParameters().get(0));
             relationFieldIsValid =
-                checkRelationField(entityFieldDetails, relationField, relationFieldObject, level);
+                checkRelationField(entityFieldDetails, relationField, relationFieldObject, level,
+                    responseType, controllerPackage, pathPrefix, masterEntity);
           } else {
             relationFieldIsValid = true;
             relationFieldObject.put(StringUtils.join(relationField, "."), entityField
@@ -1226,6 +1266,59 @@ public class ControllerOperationsImpl implements ControllerOperations {
       }
     }
     return relationFieldIsValid;
+  }
+
+  /**
+   * Check if detail controller exists for the values entity, responseType, controllerPackage, pathPrefix
+   * and relationField provided by parameters
+   *
+   * @param entity Detail controller entity
+   * @param responseType
+   * @param controllerPackage
+   * @param pathPrefix
+   * @param relationField
+   * @return
+   */
+  private boolean checkDetailControllerExists(JavaType entity,
+      ControllerMVCResponseService responseType, JavaPackage controllerPackage, String pathPrefix,
+      String relationField) {
+    boolean detailControllerExists = false;
+    Set<ClassOrInterfaceTypeDetails> detailControllers =
+        getTypeLocationService()
+            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DETAIL);
+    Iterator<ClassOrInterfaceTypeDetails> itDetailControllers = detailControllers.iterator();
+    while (itDetailControllers.hasNext()) {
+      ClassOrInterfaceTypeDetails existingController = itDetailControllers.next();
+
+      if (existingController.getType().getPackage().equals(controllerPackage)) {
+        AnnotationAttributeValue<Object> entityAttr =
+            existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("entity");
+        AnnotationAttributeValue<Object> typeAttr =
+            existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("type");
+        ControllerType existingControllerType =
+            ControllerType.getControllerType(((EnumDetails) typeAttr.getValue()).getField()
+                .getSymbolName());
+        AnnotationAttributeValue<String> pathPrefixAttr =
+            existingController.getAnnotation(RooJavaType.ROO_CONTROLLER).getAttribute("pathPrefix");
+        AnnotationAttributeValue<String> relationFieldAttr =
+            existingController.getAnnotation(RooJavaType.ROO_DETAIL).getAttribute("relationField");
+        AnnotationMetadata responseTypeAnnotation =
+            existingController.getAnnotation(responseType.getAnnotation());
+        String pathPrefixController = "";
+        if (pathPrefixAttr != null) {
+          pathPrefixController = pathPrefixAttr.getValue();
+        }
+        if (entityAttr != null && entityAttr.getValue().equals(entity) && typeAttr != null
+            && responseTypeAnnotation != null
+            && existingControllerType.equals(ControllerType.DETAIL)
+            && pathPrefix.equals(pathPrefixController) && relationFieldAttr != null
+            && relationField.equals(relationFieldAttr.getValue())) {
+          detailControllerExists = true;
+          break;
+        }
+      }
+    }
+    return detailControllerExists;
   }
 
   /**
