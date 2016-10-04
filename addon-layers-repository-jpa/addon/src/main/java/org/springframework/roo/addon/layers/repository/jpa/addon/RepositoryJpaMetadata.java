@@ -31,7 +31,7 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Metadata for {@link RooJpaRepository}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -71,7 +71,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
@@ -147,27 +147,26 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   }
 
   /**
-   * Method that generates method "countByField" method. 
-   * 
+   * Method that generates method "countByField" method.
+   *
    * @param field
    * @param identifierType
-   * 
+   *
    * @return field
    */
   public MethodMetadata getCountMethodByField(FieldMetadata field, FieldMetadata identifierType) {
     // Define method name
     JavaSymbolName methodName =
-        new JavaSymbolName(String.format("countBy%s%s", field.getFieldName()
-            .getSymbolNameCapitalisedFirstLetter(), identifierType.getFieldName()
+        new JavaSymbolName(String.format("countBy%s", field.getFieldName()
             .getSymbolNameCapitalisedFirstLetter()));
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(identifierType.getFieldType()));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(field.getFieldType()));
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames.add(field.getFieldName());
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -187,7 +186,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 
   /**
    * This method returns all generated countMethodByReferencedFields
-   * 
+   *
    * @return Map with key that identifies referenced field and method metadata
    */
   public Map<FieldMetadata, MethodMetadata> getCountMethodByReferencedFields() {
