@@ -2,8 +2,10 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
+import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -20,6 +22,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
@@ -75,6 +78,8 @@ public class ControllerCommands implements CommandMarker {
   private Converter<JavaType> javaTypeConverter;
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
+  @Reference
+  private LastUsed lastUsed;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -606,14 +611,61 @@ public class ControllerCommands implements CommandMarker {
     return false;
   }
 
+  /**
+   * Gets a list of fields from an entity.
+   *
+   * @param entity
+   *            the JavaType from which to obtain the field list.
+   * @return a List<FieldMetadata> with info of the entity fields.
+   */
+  private List<FieldMetadata> getEntityFieldList(JavaType entity) {
+    List<FieldMetadata> fieldList = new ArrayList<FieldMetadata>();
+    ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getTypeDetails(entity);
+    Validate.notNull(typeDetails, String.format(
+        "Cannot find details for class %s. Please be sure that the class exists.",
+        entity.getFullyQualifiedTypeName()));
+    MemberDetails entityMemberDetails =
+        memberDetailsScanner.getMemberDetails(this.getClass().getName(), typeDetails);
+    Validate.notNull(
+        entityMemberDetails.getAnnotation(JpaJavaType.ENTITY),
+        String.format("%s must be an entity to obtain it's fields info.",
+            entity.getFullyQualifiedTypeName()));
+
+    // Get fields and check for other fields from relations
+    List<FieldMetadata> entityFields = entityMemberDetails.getFields();
+    for (FieldMetadata field : entityFields) {
+      fieldList.add(field);
+    }
+
+    return fieldList;
+  }
+
   @CliOptionAutocompleteIndicator(
       command = "web mvc detail",
       param = "field",
-      help = "--field parameter must be an existing @OneToMany field of the specified entity in parameter --entity.")
+      help = "--field parameter must be an existing @OneToMany field of the specified entity in parameter --entity.",
+      includeSpaceOnFinish = false)
   public List<String> getDetailFieldsRelatedToEntity(ShellContext shellContext) {
 
     // Get current value of class
     String currentEntity = shellContext.getParameters().get("entity");
+
+    // Get current fields in --field value
+    String currentFieldValue = shellContext.getParameters().get("field");
+
+    String[] splittedCurrentField = null;
+    boolean includeChildren = false;
+    boolean removedData = false;
+    if (currentFieldValue.contains(".")) {
+      if (!currentFieldValue.endsWith(".")) {
+        currentFieldValue = currentFieldValue.substring(0, currentFieldValue.lastIndexOf("."));
+        removedData = true;
+      }
+      includeChildren = true;
+      splittedCurrentField = currentFieldValue.split("[.]");
+    } else {
+      currentFieldValue = "";
+    }
 
     // Create results to return
     List<String> results = new ArrayList<String>();
@@ -622,10 +674,17 @@ public class ControllerCommands implements CommandMarker {
     Set<ClassOrInterfaceTypeDetails> entities =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             RooJavaType.ROO_JPA_ENTITY);
+
     for (ClassOrInterfaceTypeDetails entity : entities) {
       if (replaceTopLevelPackageString(entity, entity.getType().getModule()).equals(currentEntity)) {
-        results.addAll(getDetailFieldsRelatedToEntity(entity, "", entity.getType()
-            .getSimpleTypeName()));
+        if (includeChildren) {
+          // Get the entity where search the fields
+          entity = getEntityByDetailField(entity, splittedCurrentField, 0);
+        }
+        if (removedData) {
+          currentFieldValue = currentFieldValue.concat(".");
+        }
+        results.addAll(getDetailFieldsRelatedToEntity(entity, currentFieldValue));
       }
     }
 
@@ -633,15 +692,47 @@ public class ControllerCommands implements CommandMarker {
   }
 
   /**
-   * Get a field list recursively that can be selected to do a detail controller.
+   * Get a entity by field recursively
    *
-   * @param entity Entity on which create the detail controller
-   * @param parentFieldName The parent's field name used to construct the field name related with the original entity
-   * @param entityDetailController The root entity name of the detail controllers
+   * @param paternEntity Root entity
+   * @param field Field to search the entity
+   * @param level Current recursion level
+   * @return
+   */
+  private ClassOrInterfaceTypeDetails getEntityByDetailField(
+      ClassOrInterfaceTypeDetails paternEntity, String field[], int level) {
+    ClassOrInterfaceTypeDetails entity = paternEntity;
+    MemberDetails entityDetails =
+        memberDetailsScanner.getMemberDetails(paternEntity.getType().getSimpleTypeName(),
+            paternEntity);
+    List<FieldMetadata> fields = entityDetails.getFields();
+    for (FieldMetadata entityField : fields) {
+      if (entityField.getFieldName().getSymbolName().equals(field[level])) {
+        entity =
+            getTypeLocationService().getTypeDetails(
+                entityField.getFieldType().getParameters().get(0));
+      }
+    }
+    level++;
+    if (level < field.length) {
+      entity = getEntityByDetailField(entity, field, level);
+    }
+
+    return entity;
+  }
+
+  /**
+   * Get a field list that can be selected to do a detail controller.
+   *
+   * @param entity
+   *            Entity on which create the detail controller
+   * @param parentFieldName
+   *            The parent's field name used to construct the field name
+   *            related with the original entity
    * @return the related field list
    */
   private List<String> getDetailFieldsRelatedToEntity(ClassOrInterfaceTypeDetails entity,
-      String parentFieldName, String entityDetailController) {
+      String parentFieldName) {
     List<String> results = new ArrayList<String>();
 
     MemberDetails entityDetails =
@@ -649,49 +740,13 @@ public class ControllerCommands implements CommandMarker {
     List<FieldMetadata> fields = entityDetails.getFields();
 
     for (FieldMetadata field : fields) {
-      boolean detailNotWasCreated = true;
       AnnotationMetadata oneToManyAnnotation = field.getAnnotation(JpaJavaType.ONE_TO_MANY);
       if (oneToManyAnnotation != null
           && (field.getFieldType().getFullyQualifiedTypeName()
               .equals(JavaType.LIST.getFullyQualifiedTypeName()) || field.getFieldType()
               .getFullyQualifiedTypeName().equals(JavaType.SET.getFullyQualifiedTypeName()))) {
-
-        // Get all controllers with ROO_DETAIL annotation
-        Set<ClassOrInterfaceTypeDetails> listRooDetailController =
-            getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-                RooJavaType.ROO_DETAIL);
-        for (ClassOrInterfaceTypeDetails detailController : listRooDetailController) {
-          // Get entity value
-          AnnotationMetadata annotationRooController =
-              detailController.getAnnotation(RooJavaType.ROO_CONTROLLER);
-          JavaType entityAnnotationController =
-              (JavaType) annotationRooController.getAttribute("entity").getValue();
-          // Get relation field value
-          String relationField =
-              (String) detailController.getAnnotation(RooJavaType.ROO_DETAIL)
-                  .getAttribute("relationField").getValue();
-          // if entity and relation field are the same, the detail controller of this field was created
-          if (entityDetailController.equals(entityAnnotationController.getSimpleTypeName())
-              && parentFieldName.concat(field.getFieldName().getSymbolName()).equals(relationField)) {
-            ClassOrInterfaceTypeDetails entityField =
-                getTypeLocationService()
-                    .getTypeDetails(field.getFieldType().getParameters().get(0));
-            // This detail has been created, check if it has more levels
-            // and offer them including.
-            results.addAll(getDetailFieldsRelatedToEntity(entityField,
-                parentFieldName.concat(field.getFieldName().getSymbolName()).concat("."),
-                entityDetailController));
-            detailNotWasCreated = false;
-            break;
-          }
-        }
-        // If the detail controller was not created, add field to the result list.
-        if (detailNotWasCreated) {
-          results.add(parentFieldName.concat(field.getFieldName().getSymbolName()));
-        }
-
+        results.add(parentFieldName.concat(field.getFieldName().getSymbolName()));
       }
-
     }
 
     return results;
