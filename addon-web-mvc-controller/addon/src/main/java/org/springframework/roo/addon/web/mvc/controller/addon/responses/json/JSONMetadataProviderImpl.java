@@ -736,7 +736,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     }
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    Validate.notNull(globalSearch, "Couldn't find GlobalSearch in project.");
+    Validate.notNull(this.globalSearch, "Couldn't find GlobalSearch in project.");
     parameterTypes.add(new AnnotatedJavaType(this.globalSearch));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
         .build()));
@@ -1577,7 +1577,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
     parameterTypes.add(new AnnotatedJavaType(this.controllerDetailInfo.getParentEntity(),
         modelAttributeAnnotation.build()));
-    Validate.notNull(globalSearch, "Couldn't find GlobalSearch in project.");
+    Validate.notNull(this.globalSearch, "Couldn't find GlobalSearch in project.");
     parameterTypes.add(new AnnotatedJavaType(this.globalSearch));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
         .build()));
