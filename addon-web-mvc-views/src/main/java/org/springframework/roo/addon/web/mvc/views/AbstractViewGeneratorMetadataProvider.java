@@ -265,21 +265,16 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         // For each finder, create form and list view exposing only finder params 
         // from form bean object
         JavaType formBean = finderMethod.getParameterTypes().get(0).getJavaType();
+        List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
 
-        // Check if finder is not a custom finder
-        if (getTypeLocationService().getTypeDetails(formBean) == null) {
-
-          // formBean will be the entity itself
+        // Check if finder form bean is a DTO or the entity
+        if (getTypeLocationService().getTypeDetails(formBean) != null
+            && getTypeLocationService().getTypeDetails(formBean).getAnnotation(RooJavaType.ROO_DTO) == null) {
           formBean = this.entity;
         }
 
         // Add formBean to viewContext
         ctx.addExtraParameter("formBean", "formBean");
-
-        // Get formBean details
-        MemberDetails formBeanDetails =
-            getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
-                getTypeLocationService().getTypeDetails(formBean));
 
         // Use method from FinderOperationsImpl to fill maps
         Map<JavaType, Map<String, String>> typesFieldMaps =
@@ -295,13 +290,13 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         List<FinderParameter> finderParameters =
             finderParametersMap.get(finderMethod.getMethodName());
         Map<String, FieldMetadata> formBeanFields = typeFieldMetadataMap.get(formBean);
-        List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
+
         for (FinderParameter finderParam : finderParameters) {
           fieldsToAdd.add(formBeanFields.get(finderParam.getName().getSymbolName()));
         }
 
         viewGenerationService.addFinderFormView(this.controller.getType().getModule(),
-            formBeanDetails, finderMethod.getMethodName().getSymbolName(), fieldsToAdd, ctx);
+            entityDetails, finderMethod.getMethodName().getSymbolName(), fieldsToAdd, ctx);
         viewGenerationService.addFinderListView(this.controller.getType().getModule(),
             entityDetails, finderMethod.getMethodName().getSymbolName(), ctx);
       }

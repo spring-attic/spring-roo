@@ -266,11 +266,6 @@ public class FinderOperationsImpl implements FinderOperations {
     PartTree partTree = new PartTree(finderName.getSymbolName(), entityMemberDetails);
     List<FinderParameter> finderParameters = partTree.getParameters();
 
-    // Get all DTO fields
-    List<FieldMetadata> allFormBeanFields =
-        getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
-            getTypeLocationService().getTypeDetails(formBeanType)).getFields();
-
     // Create list of parameters for this finder
     List<FinderParameter> finderParametersList = new ArrayList<FinderParameter>();
 
@@ -279,6 +274,16 @@ public class FinderOperationsImpl implements FinderOperations {
       JavaSymbolName fieldName = finderParameter.getName();
       JavaType fieldType = finderParameter.getType();
       boolean found = false;
+
+      // Get all DTO fields if form bean is a DTO or entity fields if not
+      List<FieldMetadata> allFormBeanFields = new ArrayList<FieldMetadata>();
+      if (getTypeLocationService().getTypeDetails(formBeanType) != null
+          && getTypeLocationService().getTypeDetails(formBeanType).getAnnotation(
+              RooJavaType.ROO_DTO) != null) {
+        allFormBeanFields =
+            getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+                getTypeLocationService().getTypeDetails(formBeanType)).getFields();
+      }
 
       // Iterate over all entity fields
       for (FieldMetadata field : allEntityFields) {
@@ -304,20 +309,24 @@ public class FinderOperationsImpl implements FinderOperations {
           }
 
           // Add FieldMetadata from DTO to fieldMetadataMap
-          boolean fieldFoundInDto = false;
-          for (FieldMetadata dtoField : allFormBeanFields) {
-            if (dtoField.getFieldName().equals(fieldName)
-                && dtoField.getFieldType().equals(fieldType)) {
+          if (!allFormBeanFields.isEmpty()) {
+            boolean fieldFoundInDto = false;
+            for (FieldMetadata dtoField : allFormBeanFields) {
+              if (dtoField.getFieldName().equals(fieldName)
+                  && dtoField.getFieldType().equals(fieldType)) {
 
-              if (typeFieldMetadataMap != null) {
-                fieldMetadataMap.put(fieldName.getSymbolName(), dtoField);
+                if (typeFieldMetadataMap != null) {
+                  fieldMetadataMap.put(fieldName.getSymbolName(), dtoField);
+                }
+                fieldFoundInDto = true;
               }
-              fieldFoundInDto = true;
             }
+            Validate.isTrue(fieldFoundInDto,
+                "Couldn't find a field with same name and type that %s on DTO %s",
+                fieldName.getSymbolName(), formBeanType.getSimpleTypeName());
+          } else {
+            fieldMetadataMap.put(fieldName.getSymbolName(), field);
           }
-          Validate.isTrue(fieldFoundInDto,
-              "Couldn't find a field with same name and type that %s on DTO %s",
-              fieldName.getSymbolName(), formBeanType.getSimpleTypeName());
 
           found = true;
           break;
