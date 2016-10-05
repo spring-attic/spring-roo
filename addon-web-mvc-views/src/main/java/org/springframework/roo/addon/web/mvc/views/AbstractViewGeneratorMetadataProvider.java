@@ -6,10 +6,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.jvnet.inflector.Noun;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.springframework.roo.addon.dto.addon.DtoOperations;
 import org.springframework.roo.addon.finder.addon.FinderOperations;
 import org.springframework.roo.addon.finder.addon.FinderOperationsImpl;
-import org.springframework.roo.addon.finder.addon.parser.FinderMethod;
 import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
@@ -305,7 +303,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         viewGenerationService.addFinderFormView(this.controller.getType().getModule(),
             formBeanDetails, finderMethod.getMethodName().getSymbolName(), fieldsToAdd, ctx);
         viewGenerationService.addFinderListView(this.controller.getType().getModule(),
-            formBeanDetails, finderMethod.getMethodName().getSymbolName(), fieldsToAdd, ctx);
+            entityDetails, finderMethod.getMethodName().getSymbolName(), ctx);
       }
     }
 

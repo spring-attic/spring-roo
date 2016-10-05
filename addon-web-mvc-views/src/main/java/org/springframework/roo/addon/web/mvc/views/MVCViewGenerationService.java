@@ -124,12 +124,10 @@ public interface MVCViewGenerationService {
    * @param moduleName the module where finder list view will be added
    * @param entity the details of an entity to be able to generate view
    * @param finderName the name of the finder for which this form will be created
-   * @param fieldsToAdd 
    * @param ctx the ViewContext that contains necessary information about
    *            the controller, the project, etc...
    */
-  void addFinderListView(String moduleName, MemberDetails entity, String finderName,
-      List<FieldMetadata> fieldsToAdd, ViewContext ctx);
+  void addFinderListView(String moduleName, MemberDetails entity, String finderName, ViewContext ctx);
 
   /**
    * This operation will add the application index view using 

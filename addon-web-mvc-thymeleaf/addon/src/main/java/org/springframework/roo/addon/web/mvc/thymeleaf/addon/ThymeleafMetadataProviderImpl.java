@@ -307,12 +307,14 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
       for (MethodMetadata serviceFinder : serviceMetadata.getFinders()) {
         if (finders.contains(serviceFinder.getMethodName().toString())) {
           MethodMetadata finderMethod = getFinderMethod(serviceFinder);
-          findersToAdd.add(finderMethod);
 
           // Add each finder support methods
           findersToAdd.add(getFinderFormMethod(finderMethod));
           findersToAdd.add(getFinderRedirectMethod(finderMethod));
           findersToAdd.add(getFinderListMethod(finderMethod));
+
+          // Add finder method
+          findersToAdd.add(finderMethod);
 
           // Add dependencies between modules
           List<JavaType> types = new ArrayList<JavaType>();

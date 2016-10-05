@@ -261,10 +261,11 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addFinderListView(String moduleName, MemberDetails entityDetails, String finderName,
-      List<FieldMetadata> fieldsToAdd, ViewContext ctx) {
+      ViewContext ctx) {
 
     // Getting entity fields that should be included on view
-    List<FieldItem> fields = getFieldViewItems(fieldsToAdd, ctx.getEntityName(), false, ctx);
+    List<FieldMetadata> entityFields = entityDetails.getFields();
+    List<FieldItem> fields = getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx);
 
     ctx.addExtraParameter("fields", fields);
 
