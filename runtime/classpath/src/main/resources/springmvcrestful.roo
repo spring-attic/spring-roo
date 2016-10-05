@@ -1,0 +1,43 @@
+// Create project
+project setup --topLevelPackage com.disid.restful --projectName springMVCRESTful
+
+// Setup JPA
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY 
+
+// Create entities without relations
+
+// Address
+entity jpa --class ~.model.Address
+field string --fieldName street
+field string --fieldName city
+field number --fieldName streetNumber --type Integer --min 1
+
+// Category
+entity jpa --class ~.model.Category
+field string --fieldName name --sizeMin 3 --sizeMax 30
+field string --fieldName description
+
+// Customer
+entity jpa --class ~.model.Customer
+field string --fieldName  firstName
+field string --fieldName lastName
+
+// Product
+entity jpa --class ~.model.Product
+field string --fieldName name
+field string --fieldName description
+
+// CustomerOrder
+entity jpa --class ~.model.CustomerOrder
+field date --fieldName orderDate --type java.util.Date --dateTimeFormatPattern "dd/MM/yyyy"
+field date --fieldName shippedDate --type java.util.Date --dateTimeFormatPattern "dd/MM/yyyy"
+field string --fieldName shipAddress
+
+// OrderDetailPK
+embeddable --class ~.model.OrderDetailPK --serializable 
+field number --fieldName id --type Integer
+field number --fieldName customerOrderId --type Long --column customerOrderId
+
+// OrderDetail
+entity jpa --class ~.model.OrderDetail --identifierType ~.model.OrderDetailPK 
+field number --fieldName quantity --type Integer

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <!-- Spring IO Platform is the parent of the generated application to be able to
+    use Spring Boot and all its default configuration -->
   <parent>
     <groupId>io.spring.platform</groupId>
     <artifactId>platform-bom</artifactId>
@@ -10,13 +12,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
   <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
-  <packaging>TO_BE_CHANGED_BY_LISTENER</packaging>
-  <version>0.1.0.BUILD-SNAPSHOT</version>
+  <version>1.0.0.BUILD-SNAPSHOT</version>
   <name>TO_BE_CHANGED_BY_LISTENER</name>
+
+  <packaging>TO_BE_CHANGED_BY_LISTENER</packaging>
+
   <properties>
+    <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
     <java.version>JAVA_VERSION</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
     <aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
   </properties>
 
