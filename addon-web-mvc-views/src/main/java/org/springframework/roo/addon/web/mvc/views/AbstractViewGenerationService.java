@@ -8,7 +8,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
@@ -16,8 +15,6 @@ import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.addon.web.mvc.views.components.FieldTypes;
 import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -40,9 +37,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -413,8 +412,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   @Override
   public void addMenu(String moduleName, ViewContext ctx) {
-    // First of all, generate a list of MenuEntries based on existing controllers
-    List<MenuEntry> menuEntries = new ArrayList<MenuEntry>();
+
+    Map<String, MenuEntry> mapMenuEntries = new HashMap<String, MenuEntry>();
 
     Set<ClassOrInterfaceTypeDetails> existingControllers =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
@@ -423,8 +422,6 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     Iterator<ClassOrInterfaceTypeDetails> it = existingControllers.iterator();
 
     while (it.hasNext()) {
-      // Create new menuEntry element for every controller
-      MenuEntry menuEntry = new MenuEntry();
       // Getting controller and its information
       ClassOrInterfaceTypeDetails controller = it.next();
       AnnotationMetadata controllerAnnotation =
@@ -457,29 +454,40 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           "/".concat(Noun.pluralOf(StringUtils.uncapitalize(entity.getSimpleTypeName()),
               Locale.ENGLISH));
       if (StringUtils.isNotEmpty(pathPrefix)) {
-        if (!pathPrefix.startsWith("/")) {
-          pathPrefix = "/".concat(pathPrefix);
+        if (pathPrefix.startsWith("/")) {
+          path = pathPrefix.concat(path);
+
+        } else {
+          path = "/".concat(pathPrefix).concat(path);
         }
-        path = pathPrefix.concat(path);
       }
 
-      // Include info inside menuEntry
-      menuEntry.setEntityName(entity.getSimpleTypeName());
-      menuEntry.setPath(path);
-      menuEntry.setEntityLabel(FieldItem.buildLabel(entity.getSimpleTypeName(), ""));
-      menuEntry.setEntityPluralLabel(FieldItem.buildLabel(entity.getSimpleTypeName(), "plural"));
-      menuEntry.setFinders(finderNames);
+      // Create new menuEntry element for controller
+      MenuEntry menuEntry =
+          new MenuEntry(entity.getSimpleTypeName(), path, pathPrefix, FieldItem.buildLabel(
+              entity.getSimpleTypeName(), ""), FieldItem.buildLabel(entity.getSimpleTypeName(),
+              "plural"), finderNames);
+      String keyThatRepresentsEntry = pathPrefix.concat(entity.getSimpleTypeName());
 
-      // Add new menu entry to menuEntries list
-      menuEntries.add(menuEntry);
+      // Add new menu entry to menuEntries list if doesn't exist
+      if (mapMenuEntries.containsKey(keyThatRepresentsEntry)) {
+        MenuEntry menuEntryInserted = mapMenuEntries.get(keyThatRepresentsEntry);
+        if (menuEntryInserted.getFinders().isEmpty() && !menuEntry.getFinders().isEmpty()) {
+          menuEntryInserted.setFinders(menuEntry.getFinders());
+        }
+      } else {
+        mapMenuEntries.put(keyThatRepresentsEntry, menuEntry);
+      }
     }
 
+    // First of all, generate a list of MenuEntries based on existing controllers
+    List<MenuEntry> menuEntries = new ArrayList<MenuEntry>(mapMenuEntries.values());
     ctx.addExtraParameter("menuEntries", menuEntries);
 
     // Generate ids to search when merge new and existing doc
     List<String> requiredIds = new ArrayList<String>();
     for (MenuEntry entry : menuEntries) {
-      requiredIds.add(entry.getEntityName() + "Entry");
+      requiredIds.add(entry.getPathPrefix().concat(entry.getEntityName()).concat("Entry"));
     }
 
     // Process elements to generate

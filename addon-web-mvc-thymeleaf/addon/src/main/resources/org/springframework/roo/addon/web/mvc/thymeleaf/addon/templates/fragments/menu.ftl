@@ -38,8 +38,8 @@
 
               <ul class="nav navbar-nav" id="entitiesMenuEntries">
                <#list menuEntries as entry>
-                <li class="dropdown" id="${entry.entityName}Entry">
-                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+                <li class="dropdown" id="${entry.pathPrefix}${entry.entityName}Entry" data-z="${entry.z}">
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
                    aria-haspopup="true" aria-expanded="false"
                    data-th-utext="${r"#{"}label_menu_entry(${r"#{"}${entry.entityLabel}${r"}"})${r"}"}">${entry.entityName}<span class="caret"></span></a>
                  <ul class="dropdown-menu">
@@ -49,10 +49,10 @@
                     <li><a href="${entry.path}/${finder}Form" data-th-href="@{${entry.path}/${finder}Form}" data-th-text="${finder}" id="${entry.entityName}${finder}" >Search ${finder}</a></li>
                   </#list>
                  </ul>
-                </li>        
+                </li>
                </#list>
               </ul>
-              
+
               <!-- Languages -->
               <div data-layout-include="fragments/languages :: languages">
               	<span>Languages</span>
@@ -62,10 +62,10 @@
               <div data-layout-include="fragments/session-links :: session">
                 <!-- Content replaced by languages and session template fragment session-links.html -->
                 <span>User session data</span>
-              </div> 
-           
+              </div>
+
            </div>
-    
+
 
           </div>
         </nav>

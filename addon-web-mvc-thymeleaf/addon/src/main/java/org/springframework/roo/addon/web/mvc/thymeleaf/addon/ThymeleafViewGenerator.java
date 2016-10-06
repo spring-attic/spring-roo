@@ -1,16 +1,10 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
@@ -18,6 +12,10 @@ import org.jsoup.select.Elements;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -231,7 +229,7 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
             }
           } else {
 
-        	// Create before form button group and his comment
+            // Create before form button group and his comment
             Element lastElement = elementsByClassFormGroup.last().previousElementSibling();
             for (Element elementToAdd : listElementsToAdd) {
               lastElement.before(elementToAdd.clone());
