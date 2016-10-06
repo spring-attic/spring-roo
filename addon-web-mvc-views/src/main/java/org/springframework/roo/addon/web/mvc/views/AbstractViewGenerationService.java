@@ -81,11 +81,17 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   protected abstract DOC parse(String content);
 
-  protected abstract DOC merge(DOC existingDoc, DOC newDoc, List<String> requiredIds);
+  protected abstract DOC merge(DOC existingDoc, DOC newDoc, String idContainerElements,
+      List<String> requiredIds);
 
   protected abstract String getTemplatesLocation();
 
   protected abstract void writeDoc(DOC document, String viewPath);
+
+  // Id of each container element by page type
+  private static final String CRUD_LIST_ID_CONTAINER_ELEMENT = "containerFields";
+  private static final String MENU_ID_CONTAINER_ELEMENT = "entitiesMenuEntries";
+  private static final String LANGUAGES_ID_CONTAINER_ELEMENT = "languageFlags";
 
   @Override
   public void addListView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
@@ -109,7 +115,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc =
-          merge(loadExistingDoc(viewName), newDoc, Arrays.asList(ctx.getEntityName() + "Table"));
+          merge(loadExistingDoc(viewName), newDoc, CRUD_LIST_ID_CONTAINER_ELEMENT,
+              Arrays.asList(ctx.getEntityName() + "Table"));
     }
 
     // Write newDoc on disk
@@ -143,7 +150,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       for (FieldItem field : fields) {
         requiredIds.add(field.getFieldName());
       }
-      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+      newDoc =
+          merge(loadExistingDoc(viewName), newDoc, CRUD_LIST_ID_CONTAINER_ELEMENT, requiredIds);
     }
 
     // Write newDoc on disk
@@ -174,7 +182,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       for (FieldItem field : fields) {
         requiredIds.add(field.getFieldName());
       }
-      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+      newDoc =
+          merge(loadExistingDoc(viewName), newDoc, CRUD_LIST_ID_CONTAINER_ELEMENT, requiredIds);
     }
 
     // Write newDoc on disk
@@ -205,7 +214,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       for (FieldItem field : fields) {
         requiredIds.add(field.getFieldName());
       }
-      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+      newDoc =
+          merge(loadExistingDoc(viewName), newDoc, CRUD_LIST_ID_CONTAINER_ELEMENT, requiredIds);
     }
 
     // Write newDoc on disk
@@ -252,7 +262,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       for (FieldItem field : fields) {
         requiredIds.add(field.getFieldName());
       }
-      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", requiredIds);
     }
 
     // Write newDoc on disk
@@ -299,7 +309,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       for (FieldItem field : fields) {
         requiredIds.add(field.getFieldName());
       }
-      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", requiredIds);
     }
 
     // Write newDoc on disk
@@ -318,7 +328,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
     }
 
     // Write newDoc on disk
@@ -337,7 +347,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
     }
 
     // Write newDoc on disk
@@ -357,7 +367,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
     }
 
     // Write newDoc on disk
@@ -375,7 +385,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
     }
 
     // Write newDoc on disk
@@ -393,7 +403,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
     }
 
     // Write newDoc on disk
@@ -480,7 +490,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, MENU_ID_CONTAINER_ELEMENT, requiredIds);
     }
 
     // Write newDoc on disk
@@ -498,7 +508,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
     }
 
     // Write newDoc on disk
@@ -516,7 +526,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
     }
 
     // Write newDoc on disk
@@ -535,7 +545,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, null);
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
     }
 
     // Write newDoc on disk
@@ -565,7 +575,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, requiredIds);
+      newDoc =
+          merge(loadExistingDoc(viewName), newDoc, LANGUAGES_ID_CONTAINER_ELEMENT, requiredIds);
     }
 
     // Write newDoc on disk

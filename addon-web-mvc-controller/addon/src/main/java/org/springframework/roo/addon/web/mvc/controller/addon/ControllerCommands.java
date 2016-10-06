@@ -653,6 +653,7 @@ public class ControllerCommands implements CommandMarker {
     // Get current fields in --field value
     String currentFieldValue = shellContext.getParameters().get("field");
 
+    // Check the field value (ex: 'entity.detailentity.')
     String[] splittedCurrentField = null;
     boolean includeChildren = false;
     boolean removedData = false;
