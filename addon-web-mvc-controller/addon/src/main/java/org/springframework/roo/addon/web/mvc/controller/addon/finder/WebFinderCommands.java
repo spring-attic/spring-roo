@@ -447,7 +447,7 @@ public class WebFinderCommands implements CommandMarker {
               Level.SEVERE,
               String
                   .format(
-                      "ERROR: Repository % does not have any finder generated. Use 'finder add' command to solve this.",
+                      "ERROR: Repository %s does not have any finder generated. Use 'finder add' command to solve this.",
                       associatedRepository.getSimpleTypeName()));
       return finders;
 
