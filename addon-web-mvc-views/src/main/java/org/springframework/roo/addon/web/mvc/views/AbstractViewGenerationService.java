@@ -83,6 +83,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   protected abstract DOC merge(DOC existingDoc, DOC newDoc, String idContainerElements,
       List<String> requiredIds);
 
+  protected abstract DOC mergeListView(DOC existingDoc, DOC newDoc, String idContainerElements,
+      List<String> requiredIds, List<String> namesDetails);
+
   protected abstract String getTemplatesLocation();
 
   protected abstract void writeDoc(DOC document, String viewPath);
@@ -113,9 +116,16 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
+
+      // Create list where are included the fields to compare to update the page
+      List<String> namesDetails = new ArrayList<String>();
+      for (FieldItem fieldItemDetail : details) {
+        namesDetails.add(fieldItemDetail.getFieldNameCapitalized().concat("Table"));
+      }
+
       newDoc =
-          merge(loadExistingDoc(viewName), newDoc, CRUD_LIST_ID_CONTAINER_ELEMENT,
-              Arrays.asList(ctx.getEntityName() + "Table"));
+          mergeListView(loadExistingDoc(viewName), newDoc, CRUD_LIST_ID_CONTAINER_ELEMENT,
+              Arrays.asList(ctx.getEntityName() + "Table"), namesDetails);
     }
 
     // Write newDoc on disk

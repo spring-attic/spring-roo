@@ -125,13 +125,15 @@
 
         <!-- CONTENT -->
         <h1 data-th-text="${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Show ${entityName}</h1>
-        
-        <dl class="dl-horizontal" id="containerFields">
+
+        <ul class="dl-horizontal" id="containerFields">
           <#list fields as field>
-        	<dt id="${field.fieldName}Label" data-th-text="${r"#{"}${field.label}${r"}"}" data-z="${field.z}">${field.fieldName}</dt>
-   			<dd id="${field.fieldName}" data-th-text="*{{${field.fieldName}}}" data-z="${field.z}">${field.fieldName}Value</dd>
+          <li id="${field.fieldName}" data-z="${field.z}">
+        	  <strong data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</strong>
+   			    <span data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</span>
+   			  </li>
           </#list>
-          
+
           <#if details?size != 0>
               <hr>
               <ul class="nav nav-tabs">
@@ -145,7 +147,7 @@
                 </#if>
               </#list>
               </ul>
-              
+
               <div class="tab-content">
                 <#assign firstDetail=true>
                 <#list details as field>
@@ -157,8 +159,8 @@
                     </#if>
                         <!--START TABLE-->
                         <div class="table-responsive">
-                          <table id="${field.fieldNameCapitalized}Table" 
-                                 class="table table-striped table-hover table-bordered" 
+                          <table id="${field.fieldNameCapitalized}Table"
+                                 class="table table-striped table-hover table-bordered"
                                  data-row-id="${field.configuration.identifierField}"
                                  data-select="single"
                                  data-z="${field.z}"
@@ -187,7 +189,7 @@
                   </#list>
               </div>
             </#if>
-        </dl>
+        </ul>
 
         <div class="clearfix">
           <div class="pull-left">
@@ -228,7 +230,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/js/ie10-viewport-bug-workaround.js"></script>
 
   <div data-layout-fragment="javascript">
-    
+
     <!-- Datatables -->
     <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.js"></script>
@@ -246,8 +248,8 @@
     <!-- Datatables application defaults -->
     <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults.js" data-th-src="@{/public/js/datatables-defaults.js}"></script>
     <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults-en.js" data-th-src="@{/public/js/datatables-defaults-en.js}"></script>
-    
-    
+
+
     <!-- Datatables page configs -->
     <script type="text/javascript" data-th-inline="javascript">
     $(document).ready( function () {
@@ -257,7 +259,7 @@
             <#if firstDetail == false>
             function initialize${field.fieldNameCapitalized}Table() {
             </#if>
-            
+
             jQuery('#${field.fieldNameCapitalized}Table').DataTable({
                 'ajax': {
                       'url': ${field.fieldNameCapitalized}BaseUrl
@@ -266,17 +268,17 @@
                     {
                         'extend' : 'colvis',
                         'className' : 'btn-accion'
-                    }, 
+                    },
                     {
                         'extend' : 'pageLength',
                         'className' : 'btn-accion'
-                    } 
+                    }
                 ],
                 'columns': [
                   <#list field.configuration.referenceFieldFields as referencedFieldField>
                   { 'data': '${referencedFieldField.fieldName}' },
                   </#list>
-                  { 
+                  {
                     'data': '${field.configuration.identifierField}',
                     'orderable': false,
                     'searchable': false,
@@ -284,7 +286,7 @@
                         return '<a role="button" class="btn-accion show" href="${field.configuration.controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>'
                     }
                   }
-                ]  
+                ]
             });
             <#if firstDetail == false>
             }
@@ -298,12 +300,12 @@
         </#list>
     });
     </script>
-   
+
   </div>
 
   <!-- Application -->
   <script type="text/javascript" src="../../static/public/js/main.js" data-th-remove="all"></script>
-  
+
 </body>
 
 </html>
