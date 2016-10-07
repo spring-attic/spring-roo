@@ -8,6 +8,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
