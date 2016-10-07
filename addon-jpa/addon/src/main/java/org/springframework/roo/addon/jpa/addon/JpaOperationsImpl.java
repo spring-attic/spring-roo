@@ -85,6 +85,9 @@ public class JpaOperationsImpl implements JpaOperations {
   private static final String DATABASE_URL = "url";
   private static final String DATABASE_USERNAME = "username";
   private static final String JNDI_NAME = "jndi-name";
+  private static final String HIBERNATE_NAMING_STRATEGY = "spring.jpa.hibernate.naming.strategy";
+  private static final String HIBERNATE_NAMING_STRATEGY_VALUE =
+      "org.hibernate.cfg.ImprovedNamingStrategy";
   static final String POM_XML = "pom.xml";
 
   private FileManager fileManager;
@@ -448,6 +451,12 @@ public class JpaOperationsImpl implements JpaOperations {
       applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_PASSWORD,
           profile);
 
+    }
+
+    // Add Hibernate naming strategy property
+    if (ormProvider.toString().equals(OrmProvider.HIBERNATE.toString())) {
+      applicationConfigService.addProperty(moduleName, HIBERNATE_NAMING_STRATEGY,
+          HIBERNATE_NAMING_STRATEGY_VALUE, profile, force);
     }
   }
 
