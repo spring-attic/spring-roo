@@ -480,10 +480,10 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
                 && field.getDeclaredByMetadataId().equals(
                     projectionOriginalValue.getValue().getDeclaredByMetadataId())) {
 
-              // The projection contains identifier fields, so modify them and add them to
-              // specific Map
+              // The projection contains identifier fields, so replace its value in the Map
               String fieldPathName = "getEntityId()";
-              typesFieldMaps.get(type).replace(projectionOriginalValue.getKey(), fieldPathName);
+              typesFieldMaps.get(type).remove(projectionOriginalValue.getKey());
+              typesFieldMaps.get(type).put(projectionOriginalValue.getKey(), fieldPathName);
             }
           }
         }
