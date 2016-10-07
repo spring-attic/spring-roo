@@ -233,6 +233,8 @@ Notice we used _"mvn install"_ rather than _"mvn package"_. This is simply for
 convenience, as it will allow you to _"cd"_ into any Roo module subdirectory and
 _"mvn install"_. This saves considerable build time if changes are only being made in a single module.
 
+Also take into account _"mvn install"_ will perform some release related tasks, like generating the javadoc, the documentation from asciidoc, and generating the javadoc and source jars for each module. Those steps take a big amount of time to be performed, so to skip them just add the parameter _"-DskipRelease"_.
+
 Roo ships with a command line tool called *roo-dev*. This is also a Windows
 equivalent. It copies all relevant JARs from the Roo directories into
 _$ROO_HOME/runtime/bootstrap/roo-dev/target/osgi_. This directory represents a configured Roo OSGi instance. 
