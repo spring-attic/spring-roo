@@ -297,8 +297,21 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
 
         viewGenerationService.addFinderFormView(this.controller.getType().getModule(),
             entityDetails, finderMethod.getMethodName().getSymbolName(), fieldsToAdd, ctx);
-        viewGenerationService.addFinderListView(this.controller.getType().getModule(),
-            entityDetails, finderMethod.getMethodName().getSymbolName(), ctx);
+
+        // If return type is a projection, use its details
+        ClassOrInterfaceTypeDetails returnTypeDetails =
+            getTypeLocationService().getTypeDetails(
+                finderMethod.getReturnType().getParameters().get(0));
+        if (returnTypeDetails != null
+            && returnTypeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) != null) {
+          viewGenerationService.addFinderListView(this.controller.getType().getModule(),
+              getMemberDetails(returnTypeDetails), finderMethod.getMethodName().getSymbolName(),
+              ctx);
+        } else {
+          viewGenerationService.addFinderListView(this.controller.getType().getModule(),
+              entityDetails, finderMethod.getMethodName().getSymbolName(), ctx);
+        }
+
       }
     }
 

@@ -8,10 +8,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
-import org.jsoup.select.Elements;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.settings.project.ProjectSettingsService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,8 +34,14 @@ import java.util.List;
 @Service
 public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationService<Document> {
 
+  private static final String SPRING_ROO_THYMELEAF_TEMPLATES_LOCATION =
+      "spring.roo.thymeleaf.templates-location";
+
   @Reference
   PathResolver pathResolver;
+
+  @Reference
+  ProjectSettingsService projectSettings;
 
   @Override
   public String getName() {
@@ -261,7 +270,12 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
 
   @Override
   public String getTemplatesLocation() {
-    return pathResolver.getIdentifier("", Path.ROOT_ROO_CONFIG, "templates/thymeleaf");
+    String thymeleafTemplatesLocation =
+        projectSettings.getProperty(SPRING_ROO_THYMELEAF_TEMPLATES_LOCATION);
+    if (thymeleafTemplatesLocation != null) {
+      return pathResolver.getIdentifier("", Path.ROOT_ROO_CONFIG, thymeleafTemplatesLocation);
+    }
+    return pathResolver.getIdentifier("", Path.ROOT_ROO_CONFIG, "templates/thymeleaf/default");
   }
 
   @Override
