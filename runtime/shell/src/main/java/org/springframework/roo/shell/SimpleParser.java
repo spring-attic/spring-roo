@@ -1007,7 +1007,7 @@ public class SimpleParser implements Parser {
       boolean someComponentChanges = false;
 
       if (commands.isEmpty() || hasToReloadComponents()) {
-        // Cleaning commands
+        // Cleaning commands and indicators
         commands.clear();
         availabilityIndicators.clear();
         // Get all Services implement CommandMarker interface
@@ -1030,7 +1030,6 @@ public class SimpleParser implements Parser {
       if (converters.isEmpty() || hasToReloadComponents()) {
         // Cleaning converters
         converters.clear();
-        availabilityIndicators.clear();
         // Get all Services implement Converter interface
         try {
           ServiceReference<?>[] references =
