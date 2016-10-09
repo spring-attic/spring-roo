@@ -37,7 +37,7 @@ import org.springframework.roo.model.JavaType;
 /**
  * Functional test of
  * {@link JavaParserTypeParsingService#getCompilationUnitContents(org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails)}
- * 
+ *
  * @author DiSiD Technologies
  * @since 1.2.4
  */
@@ -173,7 +173,8 @@ public class UpdateCompilationUnitTest {
     final SetField fieldDetails =
         new SetField(SIMPLE_CLASS3_DECLARED_BY_MID, new JavaType(SET.getFullyQualifiedTypeName(),
             0, DataType.TYPE, null, Arrays.asList(SIMPLE_CLASS3_TYPE)), new JavaSymbolName(
-            "children"), SIMPLE_CLASS3_TYPE, Cardinality.ONE_TO_MANY, Cascade.REMOVE, false);
+            "children"), SIMPLE_CLASS3_TYPE, Cardinality.ONE_TO_MANY,
+            new Cascade[] {Cascade.REMOVE}, false);
 
     final FieldMetadataBuilder fieldBuilder =
         new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE,
@@ -200,7 +201,7 @@ public class UpdateCompilationUnitTest {
 
     final ReferenceField fieldDetails2 =
         new ReferenceField(SIMPLE_CLASS3_DECLARED_BY_MID, SIMPLE_CLASS2_TYPE, new JavaSymbolName(
-            "referenceField"), Cardinality.MANY_TO_ONE, Cascade.REFRESH);
+            "referenceField"), Cardinality.MANY_TO_ONE, new Cascade[] {Cascade.REFRESH});
 
     final FieldMetadataBuilder fieldBuilder2 =
         new FieldMetadataBuilder(fieldDetails2.getPhysicalTypeIdentifier(), Modifier.PRIVATE,

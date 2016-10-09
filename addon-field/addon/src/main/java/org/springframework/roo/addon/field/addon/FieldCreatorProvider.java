@@ -21,44 +21,51 @@ import org.springframework.roo.shell.ShellContext;
  * Provides a field creation API which can be implemented by each add-on that
  * creates classes that potentially use field creation commands.
  * <p>
- * This interface permits field creation via Roo commands with different 
- * configurations of parameters visibility and mandatory indicators. e.g. 
+ * This interface permits field creation via Roo commands with different
+ * configurations of parameters visibility and mandatory indicators. e.g.
  * DTO classes don't need database related options in field creation commands,
- * so they use their own implementation for making those options not visible.  
- * 
+ * so they use their own implementation for making those options not visible.
+ *
  * @author Sergio Clares
  * @since 2.0
  */
 public interface FieldCreatorProvider {
 
   /**
-   * Whether an implementation of this interface is valid for the class type 
+   * Whether an implementation of this interface is valid for the class type
    * where the field is going to be created.
-   * 
+   *
    * @return true if the implementation is valid
    */
   boolean isValid(JavaType javaType);
 
   /**
    * Whether field management commands are available.
-   * 
+   *
    * @return true if field management commands are available
    */
   boolean isFieldManagementAvailable();
 
   /**
    * Whether field embedded command is available.
-   * 
+   *
    * @return true if field embedded command is available
    */
   boolean isFieldEmbeddedAvailable();
 
   /**
    * Whether field reference command is available.
-   * 
+   *
    * @return true if field reference command is available
    */
   boolean isFieldReferenceAvailable();
+
+  /**
+   * Whether field list/set commands are available.
+   *
+   * @return true if fields collection commands are available
+   */
+  boolean isFieldCollectionAvailable();
 
   boolean isColumnMandatoryForFieldBoolean(ShellContext shellContext);
 
@@ -96,11 +103,7 @@ public interface FieldCreatorProvider {
 
   boolean isReferencedColumnNameVisibleForFieldReference(ShellContext shellContext);
 
-  boolean isCardinalityVisibleForFieldReference(ShellContext shellContext);
-
   boolean isFetchVisibleForFieldReference(ShellContext shellContext);
-
-  boolean isTransientVisibleForFieldReference(ShellContext shellContext);
 
   boolean isCascadeTypeVisibleForFieldReference(ShellContext shellContext);
 
@@ -181,24 +184,24 @@ public interface FieldCreatorProvider {
       String comment, boolean unique, String value, boolean permitReservedWords,
       boolean transientModifier);
 
-  void createReferenceField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality,
-      JavaType typeName, JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType,
-      boolean notNull, boolean nullRequired, String joinColumnName, String referencedColumnName,
-      Fetch fetch, String comment, boolean permitReservedWords, boolean transientModifier);
+  void createReferenceField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      boolean aggregation, JavaSymbolName mappedBy, Cascade cascadeType[], boolean notNull,
+      String joinColumnName, String referencedColumnName, Fetch fetch, String comment,
+      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce);
 
-  void createSetField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality, JavaType typeName,
-      JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType, boolean notNull,
-      boolean nullRequired, Integer sizeMin, Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch,
-      String comment, String joinTable, String joinColumns, String referencedColumns,
-      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      boolean transientModifier);
+  void createSetField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      Cardinality cardinality, Cascade cascadeType[], boolean notNull, Integer sizeMin,
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
+      String joinColumns, String referencedColumns, String inverseJoinColumns,
+      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
+      Boolean orphanRemoval, boolean isForce);
 
-  void createListField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality, JavaType typeName,
-      JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType, boolean notNull,
-      boolean nullRequired, Integer sizeMin, Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch,
-      String comment, String joinTable, String joinColumns, String referencedColumns,
-      String inverseJoinColumns, String inverseReferencedColumns, boolean permitReservedWords,
-      boolean transientModifier);
+  void createListField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      Cardinality cardinality, Cascade cascadeType[], boolean notNull, Integer sizeMin,
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
+      String joinColumns, String referencedColumns, String inverseJoinColumns,
+      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
+      Boolean orphanRemoval, boolean isForce);
 
   void createStringField(ClassOrInterfaceTypeDetails cid, JavaSymbolName fieldName,
       boolean notNull, boolean nullRequired, String decimalMin, String decimalMax, Integer sizeMin,

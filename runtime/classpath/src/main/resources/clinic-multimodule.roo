@@ -31,19 +31,22 @@ field date --fieldName birthDay --type java.util.Date --notNull
 focus --class model:~.Visit
 field string --fieldName description --sizeMax 255
 field date --fieldName visitDate --type java.util.Date --notNull --past
-field reference --fieldName pet --type ~.Pet --notNull
-field reference --fieldName vet --type ~.Vet
+// This relation are children part, by ROO-3793 will be declared on parent entity
+// field reference --fieldName pet --type ~.domain.Pet --notNull
+// field reference --fieldName vet --type ~.domain.Vet
 
 focus --class model:~.Pet
 field boolean --fieldName sendReminders --notNull --primitive
 field string --fieldName name --notNull --sizeMin 1
 field number --fieldName weight --type java.lang.Float --notNull --min 0
-field reference --fieldName owner --type model:~.Owner
 field enum --fieldName type --type model:~.reference.PetType --notNull
+// This relation is child part, by ROO-3793 will be declared on parent entity
+// field reference --fieldName owner --type ~.domain.Owner
 
 focus --class model:~.Vet
 field date --fieldName employedSince --type java.util.Calendar --notNull --past
 field enum --fieldName specialty --type model:~.reference.Specialty --notNull false
+field set --fieldName visits --type ~.domain.Visit
 
 focus --class model:~.Owner
 field set --fieldName pets --type model:~.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY

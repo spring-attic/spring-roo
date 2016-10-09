@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.jpa.addon.entity;
 
-import static org.springframework.roo.model.JdkJavaType.LIST;
-import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
@@ -21,7 +19,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.comments.CommentFormatter;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -35,10 +32,7 @@ import org.springframework.roo.classpath.operations.jsr303.DateField;
 import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
 import org.springframework.roo.classpath.operations.jsr303.EmbeddedField;
 import org.springframework.roo.classpath.operations.jsr303.EnumField;
-import org.springframework.roo.classpath.operations.jsr303.ListField;
 import org.springframework.roo.classpath.operations.jsr303.NumericField;
-import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
-import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.operations.jsr303.StringField;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileField;
@@ -60,14 +54,13 @@ import org.springframework.roo.shell.ShellContext;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Provides field creation operations support for embeddable classes by implementing
  * FieldCreatorProvider.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -125,10 +118,15 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     return false;
   }
 
+  @Override
+  public boolean isFieldCollectionAvailable() {
+    return false;
+  }
+
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -163,7 +161,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -203,7 +201,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -243,7 +241,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -283,7 +281,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -316,17 +314,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isCardinalityVisibleForFieldReference(ShellContext shellContext) {
-    return true;
-  }
-
-  @Override
   public boolean isFetchVisibleForFieldReference(ShellContext shellContext) {
-    return true;
-  }
-
-  @Override
-  public boolean isTransientVisibleForFieldReference(ShellContext shellContext) {
     return true;
   }
 
@@ -338,7 +326,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -366,7 +354,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -454,7 +442,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -507,7 +495,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -552,7 +540,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -582,7 +570,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   /**
    * ROO-3710: Indicator that checks if exists some project setting that makes
    * table column parameter mandatory.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project
@@ -791,233 +779,37 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public void createReferenceField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality,
-      JavaType typeName, JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType,
-      boolean notNull, boolean nullRequired, String joinColumnName, String referencedColumnName,
-      Fetch fetch, String comment, boolean permitReservedWords, boolean transientModifier) {
-
-    // Check if the requested entity is a JPA @Entity
-    final MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
-    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
-    Validate
-        .isTrue(
-            entityAnnotation != null || persistentAnnotation != null,
-            "The field reference command is only applicable to JPA @Entity or Spring Data @Persistent target types.");
-
-    Validate.isTrue(
-        cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE,
-        "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final ReferenceField fieldDetails =
-        new ReferenceField(physicalTypeIdentifier, fieldType, fieldName, cardinality, cascadeType);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (joinColumnName != null) {
-      fieldDetails.setJoinColumnName(joinColumnName);
-    }
-    if (referencedColumnName != null) {
-      Validate.notNull(joinColumnName,
-          "@JoinColumn name is required if specifying a referencedColumnName");
-      fieldDetails.setReferencedColumnName(referencedColumnName);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+  public void createReferenceField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      boolean aggregation, JavaSymbolName mappedBy, Cascade cascadeType[], boolean notNull,
+      String joinColumnName, String referencedColumnName, Fetch fetch, String comment,
+      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce) {
+    // This method shouldn't be executed as
+    // EmbeddableFieldCreatorProvider.isFieldReferenceAvailable() *ALWAYS* returns false
+    throw new IllegalArgumentException("'reference field' is not supported for Embedables objects");
   }
 
   @Override
-  public void createSetField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality,
-      JavaType typeName, JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType,
-      boolean notNull, boolean nullRequired, Integer sizeMin, Integer sizeMax,
-      JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable, String joinColumns,
-      String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
-      boolean permitReservedWords, boolean transientModifier) {
-
-    // Check if the requested entity is a JPA @Entity
-    final MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
-    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
-
-    if (entityAnnotation != null) {
-      Validate.isTrue(cardinality == Cardinality.ONE_TO_MANY
-          || cardinality == Cardinality.MANY_TO_MANY,
-          "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
-    } else if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
-      cardinality = null;
-    } else if (persistentAnnotation != null) {
-      // Yes, we can deal with that
-    } else {
-      throw new IllegalStateException(
-          "The field set command is only applicable to enum, JPA @Entity or Spring Data @Persistence elements");
-    }
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final SetField fieldDetails =
-        new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0,
-            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
-            cascadeType, false);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (sizeMin != null) {
-      fieldDetails.setSizeMin(sizeMin);
-    }
-    if (sizeMax != null) {
-      fieldDetails.setSizeMax(sizeMax);
-    }
-    if (mappedBy != null) {
-      fieldDetails.setMappedBy(mappedBy);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (joinTable != null) {
-
-      // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = null;
-      String[] referencedColumnsArray = null;
-      String[] inverseJoinColumnsArray = null;
-      String[] inverseReferencedColumnsArray = null;
-      if (joinColumns != null) {
-        joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      }
-      if (referencedColumns != null) {
-        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      }
-      if (inverseJoinColumns != null) {
-        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      }
-      if (inverseReferencedColumns != null) {
-        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
-      }
-
-      // Validate same number of elements
-      if (joinColumnsArray != null && referencedColumnsArray != null) {
-        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-            "--joinColumns and --referencedColumns must have same number of column values");
-      }
-      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate
-            .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-                "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
-      }
-
-      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
-          inverseJoinColumnsArray, inverseReferencedColumnsArray);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+  public void createSetField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
+      String joinColumns, String referencedColumns, String inverseJoinColumns,
+      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
+      Boolean orphanRemoval, boolean isForce) {
+    // This method shouldn't be executed as
+    // EmbeddableFieldCreatorProvider.isFieldCollectionAvailable() *ALWAYS* returns false
+    throw new IllegalArgumentException("'reference set' is not supported for Embedables objects");
   }
 
   @Override
-  public void createListField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality,
-      JavaType typeName, JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType,
-      boolean notNull, boolean nullRequired, Integer sizeMin, Integer sizeMax,
-      JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable, String joinColumns,
-      String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
-      boolean permitReservedWords, boolean transientModifier) {
-
-    // Check if the requested entity is a JPA @Entity
-    final MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
-    final AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
-    final AnnotationMetadata persistentAnnotation = memberDetails.getAnnotation(PERSISTENT);
-
-    if (entityAnnotation != null) {
-      Validate.isTrue(cardinality == Cardinality.ONE_TO_MANY
-          || cardinality == Cardinality.MANY_TO_MANY,
-          "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field list command");
-    } else if (cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
-      cardinality = null;
-    } else if (persistentAnnotation != null) {
-      // Yes, we can deal with that
-    } else {
-      throw new IllegalStateException(
-          "The field list command is only applicable to enum, JPA @Entity or Spring "
-              + "Data @Persistence elements");
-    }
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s' doesn't exist", typeName);
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final ListField fieldDetails =
-        new ListField(physicalTypeIdentifier, new JavaType(LIST.getFullyQualifiedTypeName(), 0,
-            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
-            cascadeType, false);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (sizeMin != null) {
-      fieldDetails.setSizeMin(sizeMin);
-    }
-    if (sizeMax != null) {
-      fieldDetails.setSizeMax(sizeMax);
-    }
-    if (mappedBy != null) {
-      fieldDetails.setMappedBy(mappedBy);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (joinTable != null) {
-
-      // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = null;
-      String[] referencedColumnsArray = null;
-      String[] inverseJoinColumnsArray = null;
-      String[] inverseReferencedColumnsArray = null;
-      if (joinColumns != null) {
-        joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      }
-      if (referencedColumns != null) {
-        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      }
-      if (inverseJoinColumns != null) {
-        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      }
-      if (inverseReferencedColumns != null) {
-        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
-      }
-
-      // Validate same number of elements
-      if (joinColumnsArray != null && referencedColumnsArray != null) {
-        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-            "--joinColumns and --referencedColumns must have same number of column values");
-      }
-      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate.isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-            "--inverseJoinColumns and --inverseReferencedColumns must have same "
-                + "number of column values");
-      }
-
-      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
-          inverseJoinColumnsArray, inverseReferencedColumnsArray);
-    }
-
-    insertField(fieldDetails, permitReservedWords, transientModifier);
+  public void createListField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
+      String joinColumns, String referencedColumns, String inverseJoinColumns,
+      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
+      Boolean orphanRemoval, boolean isForce) {
+    // This method shouldn't be executed as
+    // EmbeddableFieldCreatorProvider.isFieldCollectionAvailable() *ALWAYS* returns false
+    throw new IllegalArgumentException("'reference list' is not supported for Embedables objects");
   }
 
   @Override
@@ -1242,7 +1034,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
 
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
-   * 
+   *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
@@ -1285,7 +1077,7 @@ public class EmbeddableFieldCreatorProvider implements FieldCreatorProvider {
     if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
         && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-      // Value is for autocomplete only or user wrote abbreviate value  
+      // Value is for autocomplete only or user wrote abbreviate value
       javaTypeString = auxString;
     } else {
 

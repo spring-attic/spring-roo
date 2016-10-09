@@ -19,7 +19,6 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.operations.Cardinality;
-import org.springframework.roo.classpath.operations.Cascade;
 import org.springframework.roo.classpath.operations.DateTime;
 import org.springframework.roo.classpath.operations.EnumType;
 import org.springframework.roo.classpath.operations.Fetch;
@@ -55,7 +54,7 @@ import java.util.logging.Logger;
 
 /**
  * Additional shell commands for the purpose of creating fields.
- * 
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.0
@@ -90,10 +89,9 @@ public class FieldCommands implements CommandMarker {
   // FieldCreatorProvider implementations
   private List<FieldCreatorProvider> fieldCreatorProviders = new ArrayList<FieldCreatorProvider>();
 
-  // Project Settings 
+  // Project Settings
   private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
       "spring.roo.jpa.require.schema-object-name";
-  public static final String ROO_DEFAULT_JOIN_TABLE_NAME = "_ROO_JOIN_TABLE_";
 
   private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
@@ -624,32 +622,12 @@ public class FieldCommands implements CommandMarker {
     return false;
   }
 
-  @CliOptionVisibilityIndicator(command = "field reference", params = {"cardinality"},
-      help = "Option 'cardinality' is not available for this type of class")
-  public boolean isCardinalityVisibleForFieldReference(ShellContext shellContext) {
-    JavaType type = getTypeFromCommand(shellContext);
-    if (type != null) {
-      return getFieldCreatorProvider(type).isCardinalityVisibleForFieldReference(shellContext);
-    }
-    return false;
-  }
-
   @CliOptionVisibilityIndicator(command = "field reference", params = {"fetch"},
       help = "Option 'fetch' is not available for this type of class")
   public boolean isFetchVisibleForFieldReference(ShellContext shellContext) {
     JavaType type = getTypeFromCommand(shellContext);
     if (type != null) {
       return getFieldCreatorProvider(type).isFetchVisibleForFieldReference(shellContext);
-    }
-    return false;
-  }
-
-  @CliOptionVisibilityIndicator(command = "field reference", params = {"transient"},
-      help = "Option 'transient' is not available for this type of class")
-  public boolean isTransientVisibleForFieldReference(ShellContext shellContext) {
-    JavaType type = getTypeFromCommand(shellContext);
-    if (type != null) {
-      return getFieldCreatorProvider(type).isTransientVisibleForFieldReference(shellContext);
     }
     return false;
   }
@@ -693,39 +671,34 @@ public class FieldCommands implements CommandMarker {
           optionContext = UPDATE_PROJECT, help = "The name of the class to receive this field") final JavaType typeName,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
-      @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
       @CliOption(key = "joinColumnName", mandatory = true, help = "The JPA @JoinColumn name") final String joinColumnName,
       @CliOption(key = "referencedColumnName", mandatory = false,
           help = "The JPA @JoinColumn referencedColumnName") final String referencedColumnName,
-      @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "MANY_TO_ONE",
-          specifiedDefaultValue = "MANY_TO_ONE",
-          help = "The relationship cardinality at a JPA level") final Cardinality cardinality,
       @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
-      @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+      @CliOption(key = "mappedBy", mandatory = false,
+          help = "The field name on the referenced type which owns the relationship") final JavaSymbolName mappedBy,
+      //      @CliOption(
+      //          key = "cascadeType",
+      //          mandatory = false,
+      //          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
       @CliOption(
-          key = "cascadeType",
+          key = "aggregation",
           mandatory = false,
-          specifiedDefaultValue = "ALL",
-          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "true",
+          help = "Aggregation. Identify relationship as 'aggregation' (if is 'true', default) or a 'composition' (if is 'false')") final boolean aggregation,
+      @CliOption(key = "orphanRemoval", mandatory = false, specifiedDefaultValue = "true",
+          help = "Indicates whether reserved words are ignored by Roo") Boolean orphanRemoval,
       ShellContext shellContext) {
 
-    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
-    Validate
-        .notNull(cid,
-            "The specified target '--type' does not exist or can not be found. Please create this type first.");
-
-    final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
-    checkFieldExists(fieldName, shellContext, selfCid);
-
-    getFieldCreatorProvider(typeName).createReferenceField(cid, cardinality, typeName, fieldType,
-        fieldName, cascadeType, notNull, nullRequired, joinColumnName, referencedColumnName, fetch,
-        comment, permitReservedWords, transientModifier);
+    // TODO support multiple cascade type
+    getFieldCreatorProvider(typeName).createReferenceField(typeName, fieldType, fieldName,
+        aggregation, mappedBy, null, notNull, joinColumnName, referencedColumnName, fetch, comment,
+        permitReservedWords, orphanRemoval, shellContext.isForce());
   }
 
   @CliOptionMandatoryIndicator(command = "field set", params = {"joinColumns", "referencedColumns",
@@ -858,7 +831,7 @@ public class FieldCommands implements CommandMarker {
           help = "The maximum number of elements in the collection") final Integer sizeMax,
       @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "ONE_TO_MANY",
           specifiedDefaultValue = "ONE_TO_MANY",
-          help = "The relationship cardinality at a JPA level") Cardinality cardinality,
+          help = "The relationship cardinality at a JPA level") CardinalitySupported cardinality,
       @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
       @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false",
@@ -867,9 +840,7 @@ public class FieldCommands implements CommandMarker {
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
       @CliOption(key = "joinTable", mandatory = true,
-          specifiedDefaultValue = ROO_DEFAULT_JOIN_TABLE_NAME,
-          help = "Join table name. Most usually used in @ManyToMany relations. If "
-              + "name not specified it will take default @JoinTable name value.") final String joinTable,
+          help = "Join table name. Most usually used in @ManyToMany relations.") final String joinTable,
       @CliOption(key = "joinColumns", mandatory = true,
           help = "Comma separated list of join table's foreign key columns which "
               + "references the table of the entity owning the relation") final String joinColumns,
@@ -882,29 +853,33 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "inverseReferencedColumns", mandatory = true,
           help = "Comma separated list of foreign key referenced columns in the table "
               + "of the entity that does not own the relation") final String inverseReferencedColumns,
+      //      @CliOption(
+      //          key = "cascadeType",
+      //          mandatory = false,
+      //          unspecifiedDefaultValue = "ALL",
+      //          specifiedDefaultValue = "ALL",
+      //          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
       @CliOption(
-          key = "cascadeType",
+          key = "aggregation",
           mandatory = false,
-          unspecifiedDefaultValue = "ALL",
-          specifiedDefaultValue = "ALL",
-          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH and REMOVE.") final Cascade cascadeType,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "true",
+          help = "Aggregation. Identify relationship as 'aggregation' (if is 'true', default) or a 'composition' (if is 'false')") final boolean aggregation,
+      @CliOption(key = "orphanRemoval", mandatory = false, specifiedDefaultValue = "true",
+          help = "Indicates whether reserved words are ignored by Roo") Boolean orphanRemoval,
+
       ShellContext shellContext) {
+
+    // TODO support multiple cascade type
 
     // Check if joinTable must have a specified value.
     checkJoinTableNameMandatory(joinTable);
 
-    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
-    Validate
-        .notNull(cid,
-            "The specified target '--type' does not exist or can not be found. Please create this type first.");
-
-    final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
-    checkFieldExists(fieldName, shellContext, selfCid);
-
-    getFieldCreatorProvider(typeName).createSetField(cid, cardinality, typeName, fieldType,
-        fieldName, cascadeType, notNull, nullRequired, sizeMin, sizeMax, mappedBy, fetch, comment,
+    getFieldCreatorProvider(typeName).createSetField(typeName, fieldType, fieldName,
+        cardinality.getCardinality(), null, notNull, sizeMin, sizeMax, mappedBy, fetch, comment,
         joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
-        permitReservedWords, transientModifier);
+        permitReservedWords, aggregation, orphanRemoval, shellContext.isForce());
+
   }
 
   @CliOptionVisibilityIndicator(command = "field list", params = {"joinColumns",
@@ -1029,26 +1004,20 @@ public class FieldCommands implements CommandMarker {
           help = "The field name on the referenced type which owns the relationship") final JavaSymbolName mappedBy,
       @CliOption(key = "notNull", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true", help = "Whether this value cannot be null") final boolean notNull,
-      @CliOption(key = "nullRequired", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true", help = "Whether this value must be null") final boolean nullRequired,
       @CliOption(key = "sizeMin", mandatory = false,
           help = "The minimum number of elements in the collection") final Integer sizeMin,
       @CliOption(key = "sizeMax", mandatory = false,
           help = "The maximum number of elements in the collection") final Integer sizeMax,
       @CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "ONE_TO_MANY",
           specifiedDefaultValue = "ONE_TO_MANY",
-          help = "The relationship cardinality at a JPA level") Cardinality cardinality,
+          help = "The relationship cardinality at a JPA level") CardinalitySupported cardinality,
       @CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") final Fetch fetch,
       @CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") final String comment,
-      @CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false",
-          specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") final boolean transientModifier,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
       @CliOption(key = "joinTable", mandatory = true,
-          specifiedDefaultValue = ROO_DEFAULT_JOIN_TABLE_NAME,
-          help = "Join table name. Most usually used in @ManyToMany relations. If name "
-              + "not specified it will take default @JoinTable name value.") final String joinTable,
+          help = "Join table name. Most usually used in @ManyToMany relations.") final String joinTable,
       @CliOption(key = "joinColumns", mandatory = true,
           help = "Comma separated list of join table's foreign key columns which "
               + "references the table of the entity owning the relation") final String joinColumns,
@@ -1061,26 +1030,29 @@ public class FieldCommands implements CommandMarker {
       @CliOption(key = "inverseReferencedColumns", mandatory = true,
           help = "Comma separated list of foreign key referenced columns in the table "
               + "of the entity that does not own the relation") final String inverseReferencedColumns,
-      @CliOption(key = "cascadeType", mandatory = false, unspecifiedDefaultValue = "ALL",
-          specifiedDefaultValue = "ALL",
-          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH "
-              + "and REMOVE.") final Cascade cascadeType, ShellContext shellContext) {
+      //      @CliOption(key = "cascadeType", mandatory = false, unspecifiedDefaultValue = "ALL",
+      //          specifiedDefaultValue = "ALL",
+      //          help = "CascadeType. Possible values are ALL, DETACH, MERGE, PERSIST, REFRESH "
+      //              + "and REMOVE.") final Cascade cascadeType,
+      @CliOption(
+          key = "aggregation",
+          mandatory = false,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "true",
+          help = "Aggregation. Identify relationship as 'aggregation' (if is 'true', default) or a 'composition' (if is 'false')") final boolean aggregation,
+      @CliOption(key = "orphanRemoval", mandatory = false, specifiedDefaultValue = "true",
+          help = "Indicates whether reserved words are ignored by Roo") Boolean orphanRemoval,
+      ShellContext shellContext) {
+
+    // TODO Support multiple cascade type
 
     // Check if joinTable must have a specified value.
     checkJoinTableNameMandatory(joinTable);
 
-    final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeDetails(fieldType);
-    Validate.notNull(cid,
-        "The specified target '--type' does not exist or can not be found. Please "
-            + "create this type first.");
-
-    final ClassOrInterfaceTypeDetails selfCid = typeLocationService.getTypeDetails(typeName);
-    checkFieldExists(fieldName, shellContext, selfCid);
-
-    getFieldCreatorProvider(typeName).createListField(cid, cardinality, typeName, fieldType,
-        fieldName, cascadeType, notNull, nullRequired, sizeMin, sizeMax, mappedBy, fetch, comment,
+    getFieldCreatorProvider(typeName).createListField(typeName, fieldType, fieldName,
+        cardinality.getCardinality(), null, notNull, sizeMin, sizeMax, mappedBy, fetch, comment,
         joinTable, joinColumns, referencedColumns, inverseJoinColumns, inverseReferencedColumns,
-        permitReservedWords, transientModifier);
+        permitReservedWords, aggregation, orphanRemoval, shellContext.isForce());
 
   }
 
@@ -1335,7 +1307,7 @@ public class FieldCommands implements CommandMarker {
   }
 
   @CliAvailabilityIndicator({"field other", "field number", "field string", "field date",
-      "field boolean", "field enum", "field file", "field set", "field list"})
+      "field boolean", "field enum", "field file"})
   public boolean isFieldManagementAvailable() {
     return getFieldCreatorAvailable();
   }
@@ -1358,13 +1330,25 @@ public class FieldCommands implements CommandMarker {
     return getFieldCreatorAvailable();
   }
 
+  @CliAvailabilityIndicator({"field set", "field list"})
+  public boolean isFieldCollectionAvailable() {
+    JavaType type = lastUsed.getJavaType();
+    if (type != null) {
+      return getFieldCreatorProvider(type).isFieldCollectionAvailable();
+    }
+    return getFieldCreatorAvailable();
+  }
+
+
   /**
-   * Checks if entity has already a field with the same name and throws an exception 
+   * Checks if entity has already a field with the same name and throws an exception
    * in that case.
-   * 
+   *
    * @param fieldName
    * @param shellContext
    * @param javaTypeDetails
+   *
+   * @deprecated this should be done by operation class (see JpaFieldCreatorProvider.checkFieldExists)
    */
   private void checkFieldExists(final JavaSymbolName fieldName, ShellContext shellContext,
       final ClassOrInterfaceTypeDetails javaTypeDetails) {
@@ -1384,16 +1368,16 @@ public class FieldCommands implements CommandMarker {
   }
 
   /**
-   * Checks if exists some project setting that makes @JoinTable name mandatory. Throws 
-   * an exception with a message if exists property {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} 
+   * Checks if exists some project setting that makes @JoinTable name mandatory. Throws
+   * an exception with a message if exists property {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME}
    * on project settings and its value is "true". Else, continue.
-   * 
+   *
    * @param joinTable
    */
   private void checkJoinTableNameMandatory(String joinTable) {
     if (joinTable == null) {
       return;
-    } else if (ROO_DEFAULT_JOIN_TABLE_NAME.equals(joinTable)) {
+    } else {
 
       // Check if property 'spring.roo.jpa.require.schema-object-name' is defined on project settings
       String requiredSchemaObjectName =
@@ -1408,11 +1392,11 @@ public class FieldCommands implements CommandMarker {
   }
 
   /**
-   * Tries to obtain JavaType indicated in command or which has the focus 
+   * Tries to obtain JavaType indicated in command or which has the focus
    * in the Shell
-   * 
+   *
    * @param shellContext the Roo Shell context
-   * @return JavaType or null if no class has the focus or no class is 
+   * @return JavaType or null if no class has the focus or no class is
    * specified in the command
    */
   private JavaType getTypeFromCommand(ShellContext shellContext) {
@@ -1429,7 +1413,7 @@ public class FieldCommands implements CommandMarker {
 
   /**
    * Gets the right implementation of FieldCreatorProvider for a JavaType
-   * 
+   *
    * @param type the JavaType to get the implementation
    * @return FieldCreatorProvider implementation
    */
@@ -1464,9 +1448,9 @@ public class FieldCommands implements CommandMarker {
   }
 
   /**
-   * Checks all FieldCreator implementations looking for any available 
-   * 
-   * @return <code>true</code> if any of the implementations is available or 
+   * Checks all FieldCreator implementations looking for any available
+   *
+   * @return <code>true</code> if any of the implementations is available or
    * <code>false</code> if none of the implementations are available.
    */
   private boolean getFieldCreatorAvailable() {
@@ -1527,7 +1511,7 @@ public class FieldCommands implements CommandMarker {
 
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
-   * 
+   *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
@@ -1570,7 +1554,7 @@ public class FieldCommands implements CommandMarker {
     if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
         && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-      // Value is for autocomplete only or user wrote abbreviate value  
+      // Value is for autocomplete only or user wrote abbreviate value
       javaTypeString = auxString;
     } else {
 

@@ -1,14 +1,5 @@
 package org.springframework.roo.addon.dto.addon;
 
-import static org.springframework.roo.model.JdkJavaType.LIST;
-import static org.springframework.roo.model.JdkJavaType.SET;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -33,9 +24,7 @@ import org.springframework.roo.classpath.operations.jsr303.CollectionField;
 import org.springframework.roo.classpath.operations.jsr303.DateField;
 import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
 import org.springframework.roo.classpath.operations.jsr303.EnumField;
-import org.springframework.roo.classpath.operations.jsr303.ListField;
 import org.springframework.roo.classpath.operations.jsr303.NumericField;
-import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.operations.jsr303.StringField;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileContentType;
 import org.springframework.roo.classpath.operations.jsr303.UploadedFileField;
@@ -45,17 +34,21 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.ShellContext;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Provides field creation operations support for DTO classes by implementing
  * FieldCreatorProvider.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -99,6 +92,11 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isFieldReferenceAvailable() {
+    return false;
+  }
+
+  @Override
+  public boolean isFieldCollectionAvailable() {
     return false;
   }
 
@@ -193,17 +191,7 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isCardinalityVisibleForFieldReference(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
   public boolean isFetchVisibleForFieldReference(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
-  public boolean isTransientVisibleForFieldReference(ShellContext shellContext) {
     return false;
   }
 
@@ -488,159 +476,32 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public void createReferenceField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality,
-      JavaType typeName, JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType,
-      boolean notNull, boolean nullRequired, String joinColumnName, String referencedColumnName,
-      Fetch fetch, String comment, boolean permitReservedWords, boolean transientModifier) {
-
+  public void createReferenceField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      boolean aggregation, JavaSymbolName mappedBy, Cascade[] cascadeType, boolean notNull,
+      String joinColumnName, String referencedColumnName, Fetch fetch, String comment,
+      boolean permitReservedWords, Boolean orphanRemoval, boolean isForce) {
     throw new IllegalArgumentException(
         "'field reference' command is not available for DTO classes.");
   }
 
   @Override
-  public void createSetField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality,
-      JavaType typeName, JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType,
-      boolean notNull, boolean nullRequired, Integer sizeMin, Integer sizeMax,
-      JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable, String joinColumns,
-      String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
-      boolean permitReservedWords, boolean transientModifier) {
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s', doesn't exist", typeName);
-
-    cardinality = null;
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final SetField fieldDetails =
-        new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0,
-            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
-            cascadeType, true);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (sizeMin != null) {
-      fieldDetails.setSizeMin(sizeMin);
-    }
-    if (sizeMax != null) {
-      fieldDetails.setSizeMax(sizeMax);
-    }
-    if (mappedBy != null) {
-      fieldDetails.setMappedBy(mappedBy);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (joinTable != null) {
-
-      // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = null;
-      String[] referencedColumnsArray = null;
-      String[] inverseJoinColumnsArray = null;
-      String[] inverseReferencedColumnsArray = null;
-      if (joinColumns != null) {
-        joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      }
-      if (referencedColumns != null) {
-        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      }
-      if (inverseJoinColumns != null) {
-        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      }
-      if (inverseReferencedColumns != null) {
-        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
-      }
-
-      // Validate same number of elements
-      if (joinColumnsArray != null && referencedColumnsArray != null) {
-        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-            "--joinColumns and --referencedColumns must have same number of column values");
-      }
-      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate
-            .isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-                "--inverseJoinColumns and --inverseReferencedColumns must have same number of column values");
-      }
-
-      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
-          inverseJoinColumnsArray, inverseReferencedColumnsArray);
-    }
-
-    insertField(fieldDetails, permitReservedWords, false);
+  public void createSetField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
+      String joinColumns, String referencedColumns, String inverseJoinColumns,
+      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
+      Boolean orphanRemoval, boolean isForce) {
+    throw new IllegalArgumentException("'field set' command is not available for DTO classes.");
   }
 
   @Override
-  public void createListField(ClassOrInterfaceTypeDetails cid, Cardinality cardinality,
-      JavaType typeName, JavaType fieldType, JavaSymbolName fieldName, Cascade cascadeType,
-      boolean notNull, boolean nullRequired, Integer sizeMin, Integer sizeMax,
-      JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable, String joinColumns,
-      String referencedColumns, String inverseJoinColumns, String inverseReferencedColumns,
-      boolean permitReservedWords, boolean transientModifier) {
-
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(typeName);
-    Validate.notNull(javaTypeDetails, "The type specified, '%s' doesn't exist", typeName);
-
-    final String physicalTypeIdentifier = javaTypeDetails.getDeclaredByMetadataId();
-    final ListField fieldDetails =
-        new ListField(physicalTypeIdentifier, new JavaType(LIST.getFullyQualifiedTypeName(), 0,
-            DataType.TYPE, null, Arrays.asList(fieldType)), fieldName, fieldType, cardinality,
-            cascadeType, true);
-    fieldDetails.setNotNull(notNull);
-    fieldDetails.setNullRequired(nullRequired);
-    if (sizeMin != null) {
-      fieldDetails.setSizeMin(sizeMin);
-    }
-    if (sizeMax != null) {
-      fieldDetails.setSizeMax(sizeMax);
-    }
-    if (mappedBy != null) {
-      fieldDetails.setMappedBy(mappedBy);
-    }
-    if (fetch != null) {
-      fieldDetails.setFetch(fetch);
-    }
-    if (comment != null) {
-      fieldDetails.setComment(comment);
-    }
-    if (joinTable != null) {
-
-      // Create strings arrays and set @JoinTable annotation
-      String[] joinColumnsArray = null;
-      String[] referencedColumnsArray = null;
-      String[] inverseJoinColumnsArray = null;
-      String[] inverseReferencedColumnsArray = null;
-      if (joinColumns != null) {
-        joinColumnsArray = joinColumns.replace(" ", "").split(",");
-      }
-      if (referencedColumns != null) {
-        referencedColumnsArray = referencedColumns.replace(" ", "").split(",");
-      }
-      if (inverseJoinColumns != null) {
-        inverseJoinColumnsArray = inverseJoinColumns.replace(" ", "").split(",");
-      }
-      if (inverseReferencedColumns != null) {
-        inverseReferencedColumnsArray = inverseReferencedColumns.replace(" ", "").split(",");
-      }
-
-      // Validate same number of elements
-      if (joinColumnsArray != null && referencedColumnsArray != null) {
-        Validate.isTrue(joinColumnsArray.length == referencedColumnsArray.length,
-            "--joinColumns and --referencedColumns must have same number of column values");
-      }
-      if (inverseJoinColumnsArray != null && inverseReferencedColumnsArray != null) {
-        Validate.isTrue(inverseJoinColumnsArray.length == inverseReferencedColumnsArray.length,
-            "--inverseJoinColumns and --inverseReferencedColumns must have same "
-                + "number of column values");
-      }
-
-      fieldDetails.setJoinTableAnnotation(joinTable, joinColumnsArray, referencedColumnsArray,
-          inverseJoinColumnsArray, inverseReferencedColumnsArray);
-    }
-
-    insertField(fieldDetails, permitReservedWords, false);
+  public void createListField(JavaType typeName, JavaType fieldType, JavaSymbolName fieldName,
+      Cardinality cardinality, Cascade[] cascadeType, boolean notNull, Integer sizeMin,
+      Integer sizeMax, JavaSymbolName mappedBy, Fetch fetch, String comment, String joinTable,
+      String joinColumns, String referencedColumns, String inverseJoinColumns,
+      String inverseReferencedColumns, boolean permitReservedWords, Boolean aggregation,
+      Boolean orphanRemoval, boolean isForce) {
+    throw new IllegalArgumentException("'field list' command is not available for DTO classes.");
   }
 
   @Override
@@ -862,7 +723,7 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
-   * 
+   *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
@@ -905,7 +766,7 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
     if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
         && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-      // Value is for autocomplete only or user wrote abbreviate value  
+      // Value is for autocomplete only or user wrote abbreviate value
       javaTypeString = auxString;
     } else {
 

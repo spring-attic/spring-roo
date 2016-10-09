@@ -14,6 +14,11 @@
     <description>Support for field creation in the classes of the targeted project</description>
 
     <dependencies>
+        <!-- Annotations dependency -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.field.annotations</artifactId>
+        </dependency>
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>

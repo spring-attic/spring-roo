@@ -2,7 +2,7 @@
 project setup --topLevelPackage com.disid.restful --projectName springMVCRESTful
 
 // Setup JPA
-jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY 
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
 // Create entities without relations
 
@@ -34,10 +34,29 @@ field date --fieldName shippedDate --type java.util.Date --dateTimeFormatPattern
 field string --fieldName shipAddress
 
 // OrderDetailPK
-embeddable --class ~.model.OrderDetailPK --serializable 
-field number --fieldName id --type Integer
-field number --fieldName customerOrderId --type Long --column customerOrderId
+//embeddable --class ~.model.OrderDetailPK --serializable
+//field number --fieldName id --type Integer
+//field number --fieldName customerOrderId --type Long --column customerOrderId
 
 // OrderDetail
-entity jpa --class ~.model.OrderDetail --identifierType ~.model.OrderDetailPK 
+//entity jpa --class ~.model.OrderDetail --identifierType ~.model.OrderDetailPK
+entity jpa --class ~.model.OrderDetail
 field number --fieldName quantity --type Integer
+
+// Customer relations
+focus --class ~.model.Customer
+field reference --fieldName address --type ~.model.Address --aggregation false --joinColumnName my_customer
+field set --fieldName orders --type ~.model.CustomerOrder --joinTable my_customer_orders --joinColumns my_order --referencedColumns id --inverseJoinColumns my_customer --inverseReferencedColumns id
+
+// Category relations
+focus --class ~.model.Category
+field set --fieldName products --type ~.model.Product --cardinality MANY_TO_MANY --aggregation --joinTable my_products_categories --joinColumns my_product --referencedColumns id --inverseJoinColumns my_category --inverseReferencedColumns id
+
+// CostumerOrder relations
+focus --class ~.model.CustomerOrder
+field set --fieldName details --type ~.model.OrderDetail --cardinality ONE_TO_MANY --aggregation false
+
+// Product realtions
+focus --class ~.model.Product
+field set --fieldName orderDetails --type ~.model.OrderDetail
+

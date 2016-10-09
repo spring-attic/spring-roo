@@ -16,7 +16,7 @@ public class ListField extends SetField {
 
   public ListField(final String physicalTypeIdentifier, final JavaType fieldType,
       final JavaSymbolName fieldName, final JavaType genericParameterTypeName,
-      final Cardinality cardinality, final Cascade cascadeType, final boolean isDto) {
+      final Cardinality cardinality, final Cascade[] cascadeType, final boolean isDto) {
     super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName, cardinality,
         cascadeType, isDto);
   }

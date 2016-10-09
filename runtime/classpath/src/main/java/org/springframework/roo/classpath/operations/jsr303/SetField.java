@@ -7,8 +7,13 @@ import static org.springframework.roo.model.JpaJavaType.FETCH_TYPE;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+
+import org.apache.commons.lang3.StringUtils;
+
 import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
+import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMNS;
+import static org.springframework.roo.model.JpaJavaType.JOIN_TABLE;
 
 import java.util.*;
 
@@ -30,7 +35,7 @@ import org.springframework.roo.model.*;
  * This field is intended for use with JSR 220 and will create a @OneToMany
  * annotation or in the case of enums, an @ElementCollection annotation will be
  * created.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -38,11 +43,11 @@ public class SetField extends CollectionField {
 
   private final Cardinality cardinality;
   private Fetch fetch;
-  private List<AnnotationAttributeValue<?>> joinTableAttributes;
-  private Cascade cascadeType;
-  private final String ROO_DEFAULT_JOIN_TABLE_NAME = "_ROO_JOIN_TABLE_";
+  private List<AnnotationMetadataBuilder> additionaAnnotations =
+      new ArrayList<AnnotationMetadataBuilder>();
+  private Cascade[] cascadeType;
   private final boolean isDto;
-
+  private Boolean orphanRemoval;
   /**
    * Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be
    * added
@@ -51,7 +56,7 @@ public class SetField extends CollectionField {
 
   /**
    * Constructor for SetField
-   * 
+   *
    * @param physicalTypeIdentifier
    * @param fieldType
    * @param fieldName
@@ -62,7 +67,7 @@ public class SetField extends CollectionField {
    */
   public SetField(final String physicalTypeIdentifier, final JavaType fieldType,
       final JavaSymbolName fieldName, final JavaType genericParameterTypeName,
-      final Cardinality cardinality, final Cascade cascadeType, final boolean isDto) {
+      final Cardinality cardinality, final Cascade[] cascadeType, final boolean isDto) {
     super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName);
     this.cardinality = cardinality;
     this.cascadeType = cascadeType;
@@ -81,8 +86,22 @@ public class SetField extends CollectionField {
         // Assume set field is an enum
         annotations.add(new AnnotationMetadataBuilder(ELEMENT_COLLECTION));
       } else {
-        attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(
-            CASCADE_TYPE, new JavaSymbolName(cascadeType.name()))));
+        // Add cascade if option exists
+        if (cascadeType != null) {
+          List<EnumAttributeValue> cascadeValues = new ArrayList<EnumAttributeValue>();
+          for (Cascade type : cascadeType) {
+            cascadeValues.add(new EnumAttributeValue(new JavaSymbolName("cascade"),
+                new EnumDetails(CASCADE_TYPE, new JavaSymbolName(type.name()))));
+          }
+
+          attributes.add(new ArrayAttributeValue<EnumAttributeValue>(new JavaSymbolName("cascade"),
+              cascadeValues));
+        }
+        // Add orphanRemoval if option exists
+        if (getOrphanRemoval() != null) {
+          attributes.add(new BooleanAttributeValue(new JavaSymbolName("orphanRemoval"),
+              getOrphanRemoval().booleanValue()));
+        }
         if (fetch != null) {
           JavaSymbolName value = new JavaSymbolName("EAGER");
           if (fetch == Fetch.LAZY) {
@@ -113,9 +132,9 @@ public class SetField extends CollectionField {
       }
     }
 
-    // Add @JoinTable if required
-    if (joinTableAttributes != null) {
-      annotations.add(new AnnotationMetadataBuilder(JpaJavaType.JOIN_TABLE, joinTableAttributes));
+    // Add additional annotations (if any)
+    if (additionaAnnotations != null) {
+      annotations.addAll(additionaAnnotations);
     }
   }
 
@@ -134,6 +153,10 @@ public class SetField extends CollectionField {
     return mappedBy;
   }
 
+  public Boolean getOrphanRemoval() {
+    return orphanRemoval;
+  }
+
   public void setFetch(final Fetch fetch) {
     this.fetch = fetch;
   }
@@ -142,22 +165,36 @@ public class SetField extends CollectionField {
     this.mappedBy = mappedBy;
   }
 
+  public void setOrphanRemoval(Boolean orphanRemoval) {
+    this.orphanRemoval = orphanRemoval;
+  }
+
   /**
-   * Fill {@link #joinTableAttributes} for building @JoinTable annotation. The annotation 
-   * would have some nested @JoinColumn annotations in each of its "joinColumns" and 
+   * Add @JoinColumn annotation to field
+   *
+   * @param joinColumn
+   * @param referencedColumn
+   */
+  public void setJoinColumn(String joinColumn, String referencedColumn) {
+    setJoinAnnotations(null, new String[] {joinColumn}, new String[] {referencedColumn}, null, null);
+  }
+
+  /**
+   * Fill {@link #joinTableAttributes} for building @JoinTable annotation. The annotation
+   * would have some nested @JoinColumn annotations in each of its "joinColumns" and
    * "inverseJoinColumns" attributes.
-   * 
+   *
    * @param joinTableName
    * @param joinColumns
    * @param referencedColumns
    * @param inverseJoinColumns
    * @param inverseReferencedColumns
    */
-  public void setJoinTableAnnotation(String joinTableName, String[] joinColumns,
+  public void setJoinAnnotations(String joinTableName, String[] joinColumns,
       String[] referencedColumns, String[] inverseJoinColumns, String[] inverseReferencedColumns) {
 
-    final List<AnnotationAttributeValue<?>> joinColumnsAnnotations =
-        new ArrayList<AnnotationAttributeValue<?>>();
+    final List<AnnotationMetadataBuilder> joinColumnsBuilders =
+        new ArrayList<AnnotationMetadataBuilder>();
     if (joinColumns != null) {
 
       // Build joinColumns attribute
@@ -168,13 +205,13 @@ public class SetField extends CollectionField {
             new AnnotationMetadataBuilder(JOIN_COLUMN);
         joinColumnAnnotation.addStringAttribute("name", joinColumns[i]);
         joinColumnAnnotation.addStringAttribute("referencedColumnName", referencedColumns[i]);
-        joinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
-            "joinColumns"), joinColumnAnnotation.build()));
+        joinColumnsBuilders.add(joinColumnAnnotation);
       }
     }
 
-    final List<AnnotationAttributeValue<?>> inverseJoinColumnsAnnotations =
-        new ArrayList<AnnotationAttributeValue<?>>();
+
+    final List<AnnotationMetadataBuilder> inverseJoinColumnsBuilders =
+        new ArrayList<AnnotationMetadataBuilder>();
     if (inverseJoinColumns != null) {
 
       // Build inverseJoinColumns attribute
@@ -186,33 +223,75 @@ public class SetField extends CollectionField {
         inverseJoinColumnsAnnotation.addStringAttribute("name", inverseJoinColumns[i]);
         inverseJoinColumnsAnnotation.addStringAttribute("referencedColumnName",
             inverseReferencedColumns[i]);
-        inverseJoinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
-            "inverseJoinColumns"), inverseJoinColumnsAnnotation.build()));
+        inverseJoinColumnsBuilders.add(inverseJoinColumnsAnnotation);
+
       }
     }
 
-    // Add attributes for @JoinTable annotation
-    final List<AnnotationAttributeValue<?>> joinTableAttributes =
-        new ArrayList<AnnotationAttributeValue<?>>();
+    if (StringUtils.isNotBlank(joinTableName) || !inverseJoinColumnsBuilders.isEmpty()) {
+      // add @JoinTable annotation
 
-    // If name not specified, use default name value
-    if (ROO_DEFAULT_JOIN_TABLE_NAME.equals(joinTableName)) {
+      // Add attributes for @JoinTable annotation
+      final List<AnnotationAttributeValue<?>> joinTableAttributes =
+          new ArrayList<AnnotationAttributeValue<?>>();
+
+      // If name not specified, use default name value
       joinTableAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), joinTableName));
-    }
 
-    // If joinColumns options were not specified, use default @JoinColumn values
-    if (joinColumns != null) {
-      joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
-          new JavaSymbolName("joinColumns"), joinColumnsAnnotations));
-    }
+      // If joinColumns options were not specified, use default @JoinColumn values
+      if (joinColumns != null) {
+        final List<AnnotationAttributeValue<?>> joinColumnsAnnotations =
+            new ArrayList<AnnotationAttributeValue<?>>();
+        for (AnnotationMetadataBuilder joinColumnAnnotation : joinColumnsBuilders) {
+          joinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
+              "joinColumns"), joinColumnAnnotation.build()));
+        }
+        joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+            new JavaSymbolName("joinColumns"), joinColumnsAnnotations));
+      }
 
-    // If inverseJoinColumns options were not specified, use default @JoinColumn values
-    if (inverseJoinColumns != null) {
-      joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
-          new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnsAnnotations));
-    }
+      // If inverseJoinColumns options were not specified, use default @JoinColumn values
+      if (inverseJoinColumns != null) {
+        final List<AnnotationAttributeValue<?>> inverseJoinColumnsAnnotations =
+            new ArrayList<AnnotationAttributeValue<?>>();
+        for (AnnotationMetadataBuilder inverseJoinColumnsAnnotation : inverseJoinColumnsBuilders) {
+          inverseJoinColumnsAnnotations.add(new NestedAnnotationAttributeValue(new JavaSymbolName(
+              "inverseJoinColumns"), inverseJoinColumnsAnnotation.build()));
+        }
 
-    // Fill attributes field
-    this.joinTableAttributes = joinTableAttributes;
+        joinTableAttributes.add(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+            new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnsAnnotations));
+      }
+
+      // Add @JoinTable to additonalAnnotations
+      additionaAnnotations.add(new AnnotationMetadataBuilder(JOIN_TABLE, joinTableAttributes));
+
+    } else if (!joinColumnsBuilders.isEmpty()) {
+
+      // Manage @JoinColumn
+
+      if (joinColumnsBuilders.size() == 1) {
+
+        // Just one @JoinColumn
+        additionaAnnotations.add(joinColumnsBuilders.iterator().next());
+      } else {
+
+        // Multiple @JoinColumn, wrap with @JoinColumns
+        final AnnotationMetadataBuilder joinColumnsAnnotation =
+            new AnnotationMetadataBuilder(JOIN_COLUMNS);
+
+        final List<AnnotationAttributeValue<?>> joinColumnsAnnotations =
+            new ArrayList<AnnotationAttributeValue<?>>();
+        for (AnnotationMetadataBuilder joinColumnAnnotation : joinColumnsBuilders) {
+          joinColumnsAnnotations.add(new NestedAnnotationAttributeValue(
+              new JavaSymbolName("value"), joinColumnAnnotation.build()));
+        }
+        joinColumnsAnnotation.addAttribute(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+            new JavaSymbolName("value"), joinColumnsAnnotations));
+
+        // Add @JoinColumns
+        additionaAnnotations.add(joinColumnsAnnotation);
+      }
+    }
   }
 }

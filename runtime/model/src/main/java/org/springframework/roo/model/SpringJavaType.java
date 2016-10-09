@@ -14,6 +14,7 @@ import org.apache.commons.lang3.Validate;
 public final class SpringJavaType {
 
   // org.springframework
+  public static final JavaType ASSERT = new JavaType("org.springframework.util.Assert");
   public static final JavaType ASYNC = new JavaType(
       "org.springframework.scheduling.annotation.Async");
   public static final JavaType AUDITING_ENTITY_LISTENER = new JavaType(

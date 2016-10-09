@@ -89,6 +89,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl");
   public static final JavaType ROO_DTO = new JavaType(
       "org.springframework.roo.addon.dto.annotations.RooDTO");
+  public static final JavaType ROO_RELATION_MANAGEMENT = new JavaType(
+      "org.springframework.roo.addon.field.annotations.RooRelationManagement");
   public static final JavaType ROO_SERVICE = new JavaType(
       "org.springframework.roo.addon.layers.service.annotations.RooService");
   public static final JavaType ROO_SERVICE_IMPL = new JavaType(

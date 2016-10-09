@@ -36,7 +36,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Provides a base {@link Shell} implementation.
- * 
+ *
  * @author Ben Alex
  */
 @Component
@@ -286,6 +286,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
       return true;
     } catch (final RuntimeException e) {
       setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
+      logger.info(e.toString());
       try {
         // ROO-3581: When command fails, execute command listener FAILS
         notifyExecutionFailed();
@@ -313,7 +314,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
   /**
    * Returns any classpath resources with the given path
-   * 
+   *
    * @param path the path for which to search (never null)
    * @return <code>null</code> if the search can't be performed
    * @since 1.2.0
@@ -357,7 +358,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
    * If the path indicated by {@link #getHomeAsString()} does not exist, it
    * will be created as a directory. If this fails, an exception will be
    * thrown.
-   * 
+   *
    * @return the home directory for the current shell instance (which is
    *         guaranteed to exist and be a directory)
    */
@@ -401,7 +402,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
    * {@link AbstractShell} subclasses are encouraged to simply override
    * {@link #logCommandToOutput(String)} instead, and only override this
    * method if you actually need to fine-tune the output logic.
-   * 
+   *
    * @param line the parsed line (any comments have been removed; never null)
    * @param successful if the command was successful or not
    */
@@ -421,7 +422,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
    * Implementations should invoke {@link #getExitShellRequest()} to monitor
    * any attempts to exit the shell and release resources such as output log
    * files.
-   * 
+   *
    * @param processedLine the line that should be appended to some type of
    *            output (excluding the \n character)
    */
@@ -429,7 +430,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
   /**
    * Opens the given script for reading
-   * 
+   *
    * @param script the script to read (required)
    * @return a non-<code>null</code> input stream
    */
@@ -517,7 +518,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
    * designed for simple shell implementations. Advanced implementations (eg
    * those that support ANSI codes etc) will likely want to override this
    * method and set the {@link #shellPrompt} variable directly.
-   * 
+   *
    * @param path to set (can be null or empty; must NOT be formatted in any
    *            special way eg ANSI codes)
    */
@@ -527,7 +528,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
   /**
    * This method changes setPromptPath with a new one
-   * 
+   *
    * @param path
    */
   public void setRooPrompt(final String prompt) {
@@ -537,7 +538,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
   /**
    * Default implementation of {@link Shell#setPromptPath(String, boolean))}
    * method to satisfy STS compatibility.
-   * 
+   *
    * @param path to set (can be null or empty)
    * @param overrideStyle
    */
