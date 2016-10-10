@@ -42,8 +42,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   /**
    * Array of supported JPA-relationship annotations
    */
-  private static final JavaType[] JPA_ANNOTATIONS_SUPPORTED =
-      {JpaJavaType.ONE_TO_ONE, JpaJavaType.ONE_TO_MANY, JpaJavaType.MANY_TO_MANY};
+  private static final JavaType[] JPA_ANNOTATIONS_SUPPORTED = {JpaJavaType.ONE_TO_ONE,
+      JpaJavaType.ONE_TO_MANY, JpaJavaType.MANY_TO_MANY};
 
   private static final JavaSymbolName MAPPEDBY_ATTRIBUTE = new JavaSymbolName("mappedBy");
 
@@ -121,8 +121,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.entityDetails = entityDetails;
 
     // Add @Entity or @MappedSuperclass annotation
-    builder.addAnnotation(annotationValues.isMappedSuperclass()
-        ? getTypeAnnotation(MAPPED_SUPERCLASS) : getEntityAnnotation());
+    builder
+        .addAnnotation(annotationValues.isMappedSuperclass() ? getTypeAnnotation(MAPPED_SUPERCLASS)
+            : getEntityAnnotation());
 
     // Add @Table annotation if required
     builder.addAnnotation(getTableAnnotation());
@@ -179,17 +180,18 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     Map<String, RelationInfo> fieldInfosMappedByTemporal = new HashMap<String, RelationInfo>();
     ImportRegistrationResolver importResolver = builder.getImportRegistrationResolver();
 
-    for (FieldMetadata field : entityDetails
-        .getFieldsWithAnnotation(RooJavaType.ROO_JPA_RELATION)) {
+    for (FieldMetadata field : entityDetails.getFieldsWithAnnotation(RooJavaType.ROO_JPA_RELATION)) {
 
       fieldName = field.getFieldName().getSymbolName();
       // Get cardinality
       jpaAnnotation = getJpaRelaationAnnotation(field);
       cardinality = getFieldCardinality(jpaAnnotation);
-      Validate.notNull(cardinality,
-          "Field '%s.%s' is annotated with @%s but this annotation only can be used in @OneToOne, @OneToMany or @ManyToMany field",
-          governorPhysicalTypeMetadata.getType(), fieldName,
-          RooJavaType.ROO_JPA_RELATION.getSimpleTypeName());
+      Validate
+          .notNull(
+              cardinality,
+              "Field '%s.%s' is annotated with @%s but this annotation only can be used in @OneToOne, @OneToMany or @ManyToMany field",
+              governorPhysicalTypeMetadata.getType(), fieldName,
+              RooJavaType.ROO_JPA_RELATION.getSimpleTypeName());
 
       // Get child type
       if (cardinality == Cardinality.ONE_TO_ONE) {
@@ -207,10 +209,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       // Prepare methods
       addMethodName = getAddMethodName(field);
       removeMethodName = getRemoveMethodName(field);
-      addMethod = getAddValueMethod(addMethodName, field, cardinality, childType, mappedBy,
-          removeMethodName, importResolver);
-      removeMethod = getRemoveMethod(removeMethodName, field, cardinality, childType, mappedBy,
-          importResolver);
+      addMethod =
+          getAddValueMethod(addMethodName, field, cardinality, childType, mappedBy,
+              removeMethodName, importResolver);
+      removeMethod =
+          getRemoveMethod(removeMethodName, field, cardinality, childType, mappedBy, importResolver);
 
       // Add to ITD builder
       builder.addMethod(addMethod);
@@ -221,13 +224,15 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       if (relationTypeAttribute == null) {
         relationType = JpaRelationType.AGGREGATION;
       } else {
-        relationType = JpaRelationType
-            .valueOf(((EnumDetails) relationTypeAttribute.getValue()).getField().getSymbolName());
+        relationType =
+            JpaRelationType.valueOf(((EnumDetails) relationTypeAttribute.getValue()).getField()
+                .getSymbolName());
       }
 
       // Store info in temporal maps
-      info = new RelationInfo(fieldName, addMethodName, removeMethodName, cardinality, childType,
-          field, mappedBy, relationType);
+      info =
+          new RelationInfo(fieldName, addMethodName, removeMethodName, cardinality, childType,
+              field, mappedBy, relationType);
       fieldInfosTemporal.put(fieldName, info);
       fieldInfosMappedByTemporal.put(mappedBy, info);
 
@@ -249,8 +254,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @return
    */
   private JavaSymbolName getAddMethodName(final FieldMetadata field) {
-    final JavaSymbolName methodName = new JavaSymbolName(
-        ADD_METHOD_PREFIX + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+    final JavaSymbolName methodName =
+        new JavaSymbolName(ADD_METHOD_PREFIX
+            + StringUtils.capitalize(field.getFieldName().getSymbolName()));
     return methodName;
   }
 
@@ -323,11 +329,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // We declared the field in this ITD, so produce a public accessor for
     // it
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder
-        .appendFormalLine("return this." + identifierField.getFieldName().getSymbolName() + ";");
+    bodyBuilder.appendFormalLine("return this." + identifierField.getFieldName().getSymbolName()
+        + ";");
 
-    MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-        requiredAccessorName, identifierField.getFieldType(), bodyBuilder);
+    MethodMetadataBuilder methodMetadata =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName,
+            identifierField.getFieldType(), bodyBuilder);
 
     // If method exists, return null to prevent method creation
     if (existsMethod(methodMetadata)) {
@@ -386,8 +393,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       if (idField != null) {
         if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), ID) != null) {
           return idField;
-        } else if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(),
-            EMBEDDED_ID) != null) {
+        } else if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), EMBEDDED_ID) != null) {
           return idField;
         }
       }
@@ -464,8 +470,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
         final AnnotationMetadataBuilder generatedValueBuilder =
             new AnnotationMetadataBuilder(GENERATED_VALUE);
-        generatedValueBuilder.addEnumAttribute("strategy",
-            new EnumDetails(GENERATION_TYPE, new JavaSymbolName(identifierStrategy)));
+        generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(GENERATION_TYPE,
+            new JavaSymbolName(identifierStrategy)));
 
         if (StringUtils.isNotBlank(annotationValues.getSequenceName())) {
           final String sequenceKey =
@@ -501,10 +507,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       }
 
       // Add precision and scale attributes for numeric field
-      if (identifier != null && identifier.getScale() > 0
+      if (identifier != null
+          && identifier.getScale() > 0
           && (identifierType.equals(JavaType.DOUBLE_OBJECT)
-              || identifierType.equals(JavaType.DOUBLE_PRIMITIVE)
-              || identifierType.equals(BIG_DECIMAL))) {
+              || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType
+                .equals(BIG_DECIMAL))) {
         columnBuilder.addIntegerAttribute("precision", identifier.getColumnSize());
         columnBuilder.addIntegerAttribute("scale", identifier.getScale());
       }
@@ -575,12 +582,13 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // We declared the field in this ITD, so produce a public mutator for it
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder
-        .appendFormalLine("this." + identifierField.getFieldName().getSymbolName() + " = id;");
+    bodyBuilder.appendFormalLine("this." + identifierField.getFieldName().getSymbolName()
+        + " = id;");
 
-    MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-        requiredMutatorName, JavaType.VOID_PRIMITIVE,
-        AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+    MethodMetadataBuilder methodMetadata =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName,
+            JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+            parameterNames, bodyBuilder);
 
     // If method exists, return null to prevent method creation
     if (existsMethod(methodMetadata)) {
@@ -750,8 +758,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     bodyBuilder
         .appendFormalLine("return this." + versionField.getFieldName().getSymbolName() + ";");
 
-    MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-        requiredAccessorName, versionField.getFieldType(), bodyBuilder);
+    MethodMetadataBuilder methodMetadata =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName,
+            versionField.getFieldType(), bodyBuilder);
 
     // If method exists, return null to prevent method creation
     if (existsMethod(methodMetadata)) {
@@ -866,13 +875,14 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // We declared the field in this ITD, so produce a public mutator for it
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder
-        .appendFormalLine("this." + versionField.getFieldName().getSymbolName() + " = version;");
+    bodyBuilder.appendFormalLine("this." + versionField.getFieldName().getSymbolName()
+        + " = version;");
 
 
-    MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
-        requiredMutatorName, JavaType.VOID_PRIMITIVE,
-        AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+    MethodMetadataBuilder methodMetadata =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName,
+            JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+            parameterNames, bodyBuilder);
 
     // If method exists, return null to prevent method creation
     if (existsMethod(methodMetadata)) {
@@ -950,10 +960,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     final List<JavaType> parameterTypes = new ArrayList<JavaType>(1);
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>(1);
     if (cardinality != Cardinality.ONE_TO_ONE) {
-      parameterTypes.add(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null,
-          Arrays.asList(childType)));
-      parameterNames
-          .add(new JavaSymbolName(field.getFieldName().getSymbolName() + REMOVE_PARAMETER_SUFFIX));
+      parameterTypes.add(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays
+          .asList(childType)));
+      parameterNames.add(new JavaSymbolName(field.getFieldName().getSymbolName()
+          + REMOVE_PARAMETER_SUFFIX));
     }
 
     // See if the type itself declared the method
@@ -1004,8 +1014,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // {prop}.set{mappedBy}(null);
     builder.indent();
-    builder.appendFormalLine(
-        String.format("%s.set%s(null);", fieldName, StringUtils.capitalize(mappedBy)));
+    builder.appendFormalLine(String.format("%s.set%s(null);", fieldName,
+        StringUtils.capitalize(mappedBy)));
 
     // }
     builder.indentRemove();
@@ -1046,8 +1056,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         "Assert.notEmpty(%s, \"At least one item to remove is required\");", parameterName));
 
     // for ({childType} item : {param}) {
-    builder.appendFormalLine(
-        String.format("for (%s item : %s) {", childType.getSimpleTypeName(), parameterName));
+    builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
+        parameterName));
 
     // this.{field}.remove(item);
     builder.indent();
@@ -1091,16 +1101,16 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         "Assert.notEmpty(%s, \"At least one item to remove is required\");", parameterName));
 
     // for ({childType} item : {param}) {
-    builder.appendFormalLine(
-        String.format("for (%s item : %s) {", childType.getSimpleTypeName(), parameterName));
+    builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
+        parameterName));
 
     // this.{field}.remove(item);
     builder.indent();
     builder.appendFormalLine(String.format("this.%s.remove(item);", fieldName));
 
     // item.get{mappedBy}().remove(this);
-    builder.appendFormalLine(
-        String.format("item.get%s().remove(this);", StringUtils.capitalize(mappedBy)));
+    builder.appendFormalLine(String.format("item.get%s().remove(this);",
+        StringUtils.capitalize(mappedBy)));
 
     // }
     builder.indentRemove();
@@ -1114,8 +1124,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @return
    */
   private JavaSymbolName getRemoveMethodName(final FieldMetadata field) {
-    final JavaSymbolName methodName = new JavaSymbolName(
-        REMOVE_METHOD_PREFIX + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+    final JavaSymbolName methodName =
+        new JavaSymbolName(REMOVE_METHOD_PREFIX
+            + StringUtils.capitalize(field.getFieldName().getSymbolName()));
     return methodName;
   }
 
@@ -1143,10 +1154,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       parameterTypes.add(childType);
       parameterNames.add(field.getFieldName());
     } else {
-      parameterTypes.add(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null,
-          Arrays.asList(childType)));
-      parameterNames
-          .add(new JavaSymbolName(field.getFieldName().getSymbolName() + ADD_PARAMETER_SUFFIX));
+      parameterTypes.add(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays
+          .asList(childType)));
+      parameterNames.add(new JavaSymbolName(field.getFieldName().getSymbolName()
+          + ADD_PARAMETER_SUFFIX));
     }
 
     // See if the type itself declared the method
@@ -1214,8 +1225,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     builder.appendFormalLine(String.format("this.%s = %s;", fieldName, parameter));
 
     // {param}.set{mappedBy}(this);
-    builder.appendFormalLine(
-        String.format("%s.set%s(this);", parameter, StringUtils.capitalize(mappedBy)));
+    builder.appendFormalLine(String.format("%s.set%s(this);", parameter,
+        StringUtils.capitalize(mappedBy)));
 
     // }
     builder.indentRemove();
@@ -1249,12 +1260,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     importResolver.addImport(SpringJavaType.ASSERT);
     // Assert.notEmpty({param}, "At least one item to add is required");
-    builder.appendFormalLine(String
-        .format("Assert.notEmpty(%s, \"At least one item to add is required\");", parameterName));
+    builder.appendFormalLine(String.format(
+        "Assert.notEmpty(%s, \"At least one item to add is required\");", parameterName));
 
     // for ({childType} item : {param}) {
-    builder.appendFormalLine(
-        String.format("for (%s item : %s) {", childType.getSimpleTypeName(), parameterName));
+    builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
+        parameterName));
 
     // this.{field}.remove(item);
     builder.indent();
@@ -1296,20 +1307,20 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     importResolver.addImport(SpringJavaType.ASSERT);
 
     // Assert.notEmpty({param}, "At least one item to add is required");
-    builder.appendFormalLine(String
-        .format("Assert.notEmpty(%s, \"At least one item to add is required\");", parameterName));
+    builder.appendFormalLine(String.format(
+        "Assert.notEmpty(%s, \"At least one item to add is required\");", parameterName));
 
     // for ({childType} item : {param}) {
-    builder.appendFormalLine(
-        String.format("for (%s item : %s) {", childType.getSimpleTypeName(), parameterName));
+    builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
+        parameterName));
 
     // this.{field}.remove(item);
     builder.indent();
     builder.appendFormalLine(String.format("this.%s.add(item);", fieldName));
 
     // item.get{mappedBy}().add(this);
-    builder.appendFormalLine(
-        String.format("item.get%s().add(this);", StringUtils.capitalize(mappedBy)));
+    builder.appendFormalLine(String.format("item.get%s().add(this);",
+        StringUtils.capitalize(mappedBy)));
 
     // }
     builder.indentRemove();
