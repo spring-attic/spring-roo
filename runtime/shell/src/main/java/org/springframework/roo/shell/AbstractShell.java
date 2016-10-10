@@ -286,7 +286,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
       return true;
     } catch (final RuntimeException e) {
       setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
-      logger.info(e.toString());
+      if (isDevelopmentMode()) {
+        logger.severe(e.getMessage());
+      }
       try {
         // ROO-3581: When command fails, execute command listener FAILS
         notifyExecutionFailed();
