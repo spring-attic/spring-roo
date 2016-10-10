@@ -49,8 +49,8 @@ public class DefaultSecurityProvider implements SecurityProvider {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
-  private static final Dependency SPRING_SECURITY_STARTER =
-      new Dependency("org.springframework.boot", "spring-boot-starter-security", null);
+  private static final Dependency SPRING_SECURITY_STARTER = new Dependency(
+      "org.springframework.boot", "spring-boot-starter-security", null);
 
   private ProjectOperations projectOperations;
   private TypeManagementService typeManagementService;
@@ -124,25 +124,27 @@ public class DefaultSecurityProvider implements SecurityProvider {
   public void createWebSecurityConfigClass(JavaPackage configPackage, String profile, Pom module) {
 
     // Create JavaType
-    JavaType fileName = new JavaType(configPackage.getFullyQualifiedPackageName().concat(".")
-        .concat(profile).concat(".WebSecurityConfig"), module.getModuleName());
+    JavaType fileName =
+        new JavaType(configPackage.getFullyQualifiedPackageName().concat(".").concat(profile)
+            .concat(".WebSecurityConfig"), module.getModuleName());
 
     // Create file identifier
-    final String fileIdentifier = PhysicalTypeIdentifier.createIdentifier(fileName,
-        LogicalPath.getInstance(Path.SRC_MAIN_JAVA, fileName.getModule()));
+    final String fileIdentifier =
+        PhysicalTypeIdentifier.createIdentifier(fileName,
+            LogicalPath.getInstance(Path.SRC_MAIN_JAVA, fileName.getModule()));
 
     // Check if exists 
     if (getFileManager().exists(fileIdentifier)) {
-      LOGGER.log(Level.INFO,
-          String.format(
-              "INFO: WebSecurityConfig.java already exists on '%s' package for '%s' profile",
-              configPackage.getFullyQualifiedPackageName(), profile));
+      LOGGER.log(Level.INFO, String.format(
+          "INFO: WebSecurityConfig.java already exists on '%s' package for '%s' profile",
+          configPackage.getFullyQualifiedPackageName(), profile));
       return;
     }
 
     // Create physical type
-    final ClassOrInterfaceTypeDetailsBuilder cidBuilder = new ClassOrInterfaceTypeDetailsBuilder(
-        fileIdentifier, Modifier.PUBLIC, fileName, PhysicalTypeCategory.CLASS);
+    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(fileIdentifier, Modifier.PUBLIC, fileName,
+            PhysicalTypeCategory.CLASS);
 
     // Add annotation @RooWebSecurityConfiguration
     AnnotationMetadataBuilder webSecurityAnnotation =
