@@ -2,17 +2,22 @@ package org.springframework.roo.addon.security.addon.audit;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.security.addon.security.SecurityOperationsImpl;
-import org.springframework.roo.classpath.*;
+import org.springframework.roo.classpath.ModuleFeatureName;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -20,7 +25,12 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.*;
+import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.FeatureNames;
+import org.springframework.roo.project.LogicalPath;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
@@ -37,7 +47,7 @@ import org.w3c.dom.Element;
 @Service
 public class AuditOperationsImpl implements AuditOperations {
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(SecurityOperationsImpl.class);
+  protected final static Logger LOGGER = HandlerUtils.getLogger(AuditOperationsImpl.class);
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
@@ -224,26 +234,26 @@ public class AuditOperationsImpl implements AuditOperations {
    * Finds all @RooSecurityConfiguration in the project and set its attribute "enableJpaAuditing" to true.
    */
   private void updateRooSecurityAnnotation() {
-    Set<ClassOrInterfaceTypeDetails> securityConfigClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_SECURITY_CONFIGURATION);
-    for (ClassOrInterfaceTypeDetails securityConfigClass : securityConfigClasses) {
+    /*    Set<ClassOrInterfaceTypeDetails> securityConfigClasses =
+            getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+                RooJavaType.ROO_SECURITY_CONFIGURATION);
+        for (ClassOrInterfaceTypeDetails securityConfigClass : securityConfigClasses) {
 
-      // Update annotation
-      AnnotationMetadataBuilder annotation =
-          new AnnotationMetadataBuilder(
-              securityConfigClass.getAnnotation(RooJavaType.ROO_SECURITY_CONFIGURATION));
-      annotation.addBooleanAttribute("enableJpaAuditing", true);
-      annotation.build();
+          // Update annotation
+          AnnotationMetadataBuilder annotation =
+              new AnnotationMetadataBuilder(
+                  securityConfigClass.getAnnotation(RooJavaType.ROO_SECURITY_CONFIGURATION));
+          annotation.addBooleanAttribute("enableJpaAuditing", true);
+          annotation.build();
 
-      // Update class with updated annotation
-      ClassOrInterfaceTypeDetailsBuilder securityConfigClassBuilder =
-          new ClassOrInterfaceTypeDetailsBuilder(securityConfigClass);
-      securityConfigClassBuilder.updateTypeAnnotation(annotation);
+          // Update class with updated annotation
+          ClassOrInterfaceTypeDetailsBuilder securityConfigClassBuilder =
+              new ClassOrInterfaceTypeDetailsBuilder(securityConfigClass);
+          securityConfigClassBuilder.updateTypeAnnotation(annotation);
 
-      // Save changes to disk
-      getTypeManagementService().createOrUpdateTypeOnDisk(securityConfigClassBuilder.build());
-    }
+          // Save changes to disk
+          getTypeManagementService().createOrUpdateTypeOnDisk(securityConfigClassBuilder.build());
+        }*/
   }
 
   public FileManager getFileManager() {

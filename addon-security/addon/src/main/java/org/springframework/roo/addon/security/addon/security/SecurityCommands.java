@@ -83,8 +83,9 @@ public class SecurityCommands implements CommandMarker {
 
   @CliCommand(value = "security setup", help = "Install Spring Security into your project")
   public void installSecurity(
-      @CliOption(key = "type", mandatory = true, help = "The Spring Security provider to install.",
-          unspecifiedDefaultValue = "DEFAULT", specifiedDefaultValue = "DEFAULT") String type,
+      @CliOption(key = "type", mandatory = false,
+          help = "The Spring Security provider to install.", unspecifiedDefaultValue = "DEFAULT",
+          specifiedDefaultValue = "DEFAULT") String type,
       @CliOption(key = "configPackage", mandatory = false,
           help = "The package where @Configuration classes for Spring Security will be included.") JavaPackage configPackage,
       @CliOption(key = "profile", mandatory = false,

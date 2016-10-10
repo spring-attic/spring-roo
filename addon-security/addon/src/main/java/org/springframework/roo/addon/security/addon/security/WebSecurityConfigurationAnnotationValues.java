@@ -5,13 +5,16 @@ import org.springframework.roo.classpath.details.annotations.populator.*;
 import org.springframework.roo.model.RooJavaType;
 
 /**
- * Annotation values for @RooSecurityConfiguration
+ * Annotation values for @RooWebSecurityConfiguration
  * 
  * @author Sergio Clares
+ * @author Juan Carlos García
  * @since 2.0
  */
-public class SecurityConfigurationAnnotationValues extends AbstractAnnotationValues {
+public class WebSecurityConfigurationAnnotationValues extends AbstractAnnotationValues {
 
+  @AutoPopulate
+  private String profile;
   @AutoPopulate
   private boolean enableGlobalMethodSecurity;
   @AutoPopulate
@@ -22,10 +25,19 @@ public class SecurityConfigurationAnnotationValues extends AbstractAnnotationVal
    * 
    * @param governorPhysicalTypeMetadata the metadata to parse (required)
    */
-  public SecurityConfigurationAnnotationValues(
+  public WebSecurityConfigurationAnnotationValues(
       final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-    super(governorPhysicalTypeMetadata, RooJavaType.ROO_SECURITY_CONFIGURATION);
+    super(governorPhysicalTypeMetadata, RooJavaType.ROO_WEB_SECURITY_CONFIGURATION);
     AutoPopulationUtils.populate(this, annotationMetadata);
+  }
+
+  /**
+   * Returns the value of profile property
+   * 
+   * @return String with the profile property
+   */
+  public String getProfile() {
+    return profile;
   }
 
   /**

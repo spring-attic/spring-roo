@@ -4,17 +4,26 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.addon.security.annotations.RooSecurityConfiguration;
+import org.springframework.roo.addon.security.annotations.RooAudit;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.*;
+import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.model.JpaJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**

@@ -1,29 +1,35 @@
 package org.springframework.roo.addon.security.addon.security;
 
-import static org.springframework.roo.model.RooJavaType.*;
+import static org.springframework.roo.model.RooJavaType.ROO_WEB_SECURITY_CONFIGURATION;
+
 import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.classpath.*;
-import org.springframework.roo.classpath.details.*;
-import org.springframework.roo.classpath.itd.*;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
-import org.springframework.roo.model.*;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Implementation of {@link SecurityMetadataProvider}.
+ * Implementation of {@link WebSecurityMetadataProvider}.
  * <p/>
  * 
  * @author Sergio Clares
+ * @author Juan Carlos García
  * @since 2.0
  */
 @Component
 @Service
-public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
-    implements SecurityMetadataProvider {
+public class WebSecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
+    implements WebSecurityMetadataProvider {
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
   private static final JavaType ROO_AUTHENTICATION_AUDITOR_AWARE = new JavaType(
@@ -47,7 +53,7 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_SECURITY_CONFIGURATION);
+    addMetadataTrigger(ROO_WEB_SECURITY_CONFIGURATION);
   }
 
   /**
@@ -63,18 +69,18 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_SECURITY_CONFIGURATION);
+    removeMetadataTrigger(ROO_WEB_SECURITY_CONFIGURATION);
   }
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return SecurityMetadata.createIdentifier(javaType, path);
+    return WebSecurityMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType = SecurityMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = SecurityMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = WebSecurityMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = WebSecurityMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
@@ -85,7 +91,7 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
 
   @Override
   public String getItdUniquenessFilenameSuffix() {
-    return "SecurityConfiguration";
+    return "WebSecurityConfiguration";
   }
 
   @Override
@@ -93,8 +99,8 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    final SecurityConfigurationAnnotationValues annotationValues =
-        new SecurityConfigurationAnnotationValues(governorPhysicalTypeMetadata);
+    final WebSecurityConfigurationAnnotationValues annotationValues =
+        new WebSecurityConfigurationAnnotationValues(governorPhysicalTypeMetadata);
 
     // Get AuthenticationAuditorAware JavaType if exists
     Set<JavaType> authenticationClasses =
@@ -116,12 +122,12 @@ public class SecurityMetadataProviderImpl extends AbstractMemberDiscoveringItdMe
       }
     }
 
-    return new SecurityMetadata(metadataIdentificationString, aspectName,
+    return new WebSecurityMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, authenticationType, annotationValues);
   }
 
   public String getProvidesType() {
-    return SecurityMetadata.getMetadataIdentiferType();
+    return WebSecurityMetadata.getMetadataIdentiferType();
   }
 
 }
