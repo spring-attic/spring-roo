@@ -11,6 +11,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -18,6 +19,7 @@ import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.*;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataItem;
@@ -26,14 +28,39 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * The metadata for a JPA entity's *_Roo_Jpa_Entity.aj ITD.
- * 
+ *
  * @author Andrew Swan
  * @author Juan Carlos García
+ * @author Jose Manuel Vivó
  * @since 1.2.0
  */
 public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class.getName();
+
+
+  /**
+   * Array of supported JPA-relationship annotations
+   */
+  private static final JavaType[] JPA_ANNOTATIONS_SUPPORTED =
+      {JpaJavaType.ONE_TO_ONE, JpaJavaType.ONE_TO_MANY, JpaJavaType.MANY_TO_MANY};
+
+  private static final JavaSymbolName MAPPEDBY_ATTRIBUTE = new JavaSymbolName("mappedBy");
+
+
+  /**
+   * prefix for add/remove method names
+   */
+  private static final String REMOVE_METHOD_PREFIX = "removeFrom";
+  private static final String ADD_METHOD_PREFIX = "addTo";
+
+  /**
+   * Suffix for add/remove method parameter names
+   */
+  private static final String REMOVE_PARAMETER_SUFFIX = "ToRemove";
+  private static final String ADD_PARAMETER_SUFFIX = "ToAdd";
+
+
 
   private final JpaEntityAnnotationValues annotationValues;
   private final MemberDetails entityMemberDetails;
@@ -42,6 +69,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private FieldMetadata identifierField;
   private FieldMetadata versionField;
   private ClassOrInterfaceTypeDetails entityDetails;
+
+  private final Map<String, RelationInfo> relationInfos;
+
+  private final Map<String, RelationInfo> relationInfosByMappedBy;
+
 
   public static JavaType getJavaType(final String metadataIdentificationString) {
     return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING,
@@ -54,7 +86,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
   /**
    * Constructor
-   * 
+   *
    * @param metadataIdentificationString the JPA_ID of this
    *            {@link MetadataItem}
    * @param itdName the ITD's {@link JavaType} (required)
@@ -89,9 +121,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.entityDetails = entityDetails;
 
     // Add @Entity or @MappedSuperclass annotation
-    builder
-        .addAnnotation(annotationValues.isMappedSuperclass() ? getTypeAnnotation(MAPPED_SUPERCLASS)
-            : getEntityAnnotation());
+    builder.addAnnotation(annotationValues.isMappedSuperclass()
+        ? getTypeAnnotation(MAPPED_SUPERCLASS) : getEntityAnnotation());
 
     // Add @Table annotation if required
     builder.addAnnotation(getTableAnnotation());
@@ -131,8 +162,96 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     if (versionMutator != null) {
       builder.addMethod(versionMutator);
     }
+
+    // Manage relations
+
+    MethodMetadataBuilder addMethod, removeMethod;
+    Cardinality cardinality;
+    RelationInfo info;
+    JavaType childType;
+    JavaSymbolName addMethodName, removeMethodName;
+    AnnotationMetadata jpaAnnotation;
+    String fieldName;
+    JpaRelationType relationType;
+    AnnotationAttributeValue<?> relationTypeAttribute;
+
+    Map<String, RelationInfo> fieldInfosTemporal = new HashMap<String, RelationInfo>();
+    Map<String, RelationInfo> fieldInfosMappedByTemporal = new HashMap<String, RelationInfo>();
+    ImportRegistrationResolver importResolver = builder.getImportRegistrationResolver();
+
+    for (FieldMetadata field : entityDetails
+        .getFieldsWithAnnotation(RooJavaType.ROO_JPA_RELATION)) {
+
+      fieldName = field.getFieldName().getSymbolName();
+      // Get cardinality
+      jpaAnnotation = getJpaRelaationAnnotation(field);
+      cardinality = getFieldCardinality(jpaAnnotation);
+      Validate.notNull(cardinality,
+          "Field '%s.%s' is annotated with @%s but this annotation only can be used in @OneToOne, @OneToMany or @ManyToMany field",
+          governorPhysicalTypeMetadata.getType(), fieldName,
+          RooJavaType.ROO_JPA_RELATION.getSimpleTypeName());
+
+      // Get child type
+      if (cardinality == Cardinality.ONE_TO_ONE) {
+        childType = field.getFieldType();
+      } else {
+        childType = field.getFieldType().getBaseType();
+      }
+
+      // Get mappedBy annotation attribute
+      String mappedBy = getMappedByValue(jpaAnnotation);
+      Validate.notNull(mappedBy, "Missing 'mappedBy' attribute on @%s annotation of %s.%s field",
+          jpaAnnotation.getAnnotationType(), governorPhysicalTypeMetadata.getType(),
+          field.getFieldName());
+
+      // Prepare methods
+      addMethodName = getAddMethodName(field);
+      removeMethodName = getRemoveMethodName(field);
+      addMethod = getAddValueMethod(addMethodName, field, cardinality, childType, mappedBy,
+          removeMethodName, importResolver);
+      removeMethod = getRemoveMethod(removeMethodName, field, cardinality, childType, mappedBy,
+          importResolver);
+
+      // Add to ITD builder
+      builder.addMethod(addMethod);
+      builder.addMethod(removeMethod);
+
+      relationTypeAttribute =
+          field.getAnnotation(RooJavaType.ROO_JPA_RELATION).getAttribute("type");
+      if (relationTypeAttribute == null) {
+        relationType = JpaRelationType.AGGREGATION;
+      } else {
+        relationType = JpaRelationType
+            .valueOf(((EnumDetails) relationTypeAttribute.getValue()).getField().getSymbolName());
+      }
+
+      // Store info in temporal maps
+      info = new RelationInfo(fieldName, addMethodName, removeMethodName, cardinality, childType,
+          field, mappedBy, relationType);
+      fieldInfosTemporal.put(fieldName, info);
+      fieldInfosMappedByTemporal.put(mappedBy, info);
+
+    }
+
+    // store final info unmodifiable map
+    relationInfos = Collections.unmodifiableMap(fieldInfosTemporal);
+    relationInfosByMappedBy = Collections.unmodifiableMap(fieldInfosMappedByTemporal);
+
+
     // Build the ITD based on what we added to the builder above
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * Generate method name to use for add method of selected field
+   *
+   * @param field
+   * @return
+   */
+  private JavaSymbolName getAddMethodName(final FieldMetadata field) {
+    final JavaSymbolName methodName = new JavaSymbolName(
+        ADD_METHOD_PREFIX + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+    return methodName;
   }
 
   private AnnotationMetadata getDiscriminatorColumnAnnotation() {
@@ -147,7 +266,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
   /**
    * Generates the JPA @Entity annotation to be applied to the entity
-   * 
+   *
    * @return
    */
   private AnnotationMetadata getEntityAnnotation() {
@@ -172,7 +291,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * If {@link #getIdentifierField()} returns a field created by this ITD or
    * if the field is declared within the entity itself, a public accessor will
    * automatically be produced in the declaring class.
-   * 
+   *
    * @return the accessor (never returns null)
    */
   private MethodMetadataBuilder getIdentifierAccessor() {
@@ -204,12 +323,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // We declared the field in this ITD, so produce a public accessor for
     // it
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("return this." + identifierField.getFieldName().getSymbolName()
-        + ";");
+    bodyBuilder
+        .appendFormalLine("return this." + identifierField.getFieldName().getSymbolName() + ";");
 
-    MethodMetadataBuilder methodMetadata =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName,
-            identifierField.getFieldType(), bodyBuilder);
+    MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+        requiredAccessorName, identifierField.getFieldType(), bodyBuilder);
 
     // If method exists, return null to prevent method creation
     if (existsMethod(methodMetadata)) {
@@ -221,7 +339,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
   /**
   * Method that checks if method exists on Java target
-  * 
+  *
   * @param methodMetadata
   * @return
   */
@@ -255,7 +373,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * as the identifier and returned. If no such field is located, a private
    * field will be created as per the details contained in the
    * {@link RooJpaEntity} annotation, as applicable.
-   * 
+   *
    * @param parent (can be <code>null</code>)
    * @param project the user's project (required)
    * @param annotationValues
@@ -268,7 +386,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       if (idField != null) {
         if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), ID) != null) {
           return idField;
-        } else if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), EMBEDDED_ID) != null) {
+        } else if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(),
+            EMBEDDED_ID) != null) {
           return idField;
         }
       }
@@ -345,8 +464,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
         final AnnotationMetadataBuilder generatedValueBuilder =
             new AnnotationMetadataBuilder(GENERATED_VALUE);
-        generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(GENERATION_TYPE,
-            new JavaSymbolName(identifierStrategy)));
+        generatedValueBuilder.addEnumAttribute("strategy",
+            new EnumDetails(GENERATION_TYPE, new JavaSymbolName(identifierStrategy)));
 
         if (StringUtils.isNotBlank(annotationValues.getSequenceName())) {
           final String sequenceKey =
@@ -382,11 +501,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       }
 
       // Add precision and scale attributes for numeric field
-      if (identifier != null
-          && identifier.getScale() > 0
+      if (identifier != null && identifier.getScale() > 0
           && (identifierType.equals(JavaType.DOUBLE_OBJECT)
-              || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType
-                .equals(BIG_DECIMAL))) {
+              || identifierType.equals(JavaType.DOUBLE_PRIMITIVE)
+              || identifierType.equals(BIG_DECIMAL))) {
         columnBuilder.addIntegerAttribute("precision", identifier.getColumnSize());
         columnBuilder.addIntegerAttribute("scale", identifier.getScale());
       }
@@ -422,7 +540,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * If {@link #getIdentifierField()} returns a field created by this ITD or
    * if the field is declared within the entity itself, a public mutator will
    * automatically be produced in the declaring class.
-   * 
+   *
    * @return the mutator (never returns null)
    */
   private MethodMetadataBuilder getIdentifierMutator() {
@@ -457,13 +575,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // We declared the field in this ITD, so produce a public mutator for it
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("this." + identifierField.getFieldName().getSymbolName()
-        + " = id;");
+    bodyBuilder
+        .appendFormalLine("this." + identifierField.getFieldName().getSymbolName() + " = id;");
 
-    MethodMetadataBuilder methodMetadata =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName,
-            JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-            parameterNames, bodyBuilder);
+    MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+        requiredMutatorName, JavaType.VOID_PRIMITIVE,
+        AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 
     // If method exists, return null to prevent method creation
     if (existsMethod(methodMetadata)) {
@@ -475,7 +592,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
   /**
    * Returns the {@link JavaType} of the identifier field
-   * 
+   *
    * @param annotationValues the values of the {@link RooJpaEntity} annotation
    *            (required)
    * @param identifier can be <code>null</code>
@@ -494,7 +611,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   /**
    * Returns the JPA @Inheritance annotation to be applied to the entity, if
    * applicable
-   * 
+   *
    * @param annotationValues the values of the {@link RooJpaEntity} annotation
    *            (required)
    * @return <code>null</code> if it's already present or not required
@@ -521,7 +638,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * <p>
    * Otherwise, and if there is at least one other constructor declared in the
    * source file, this method creates one with public access.
-   * 
+   *
    * @return <code>null</code> if no constructor is to be produced
    */
   private ConstructorMetadataBuilder getNoArgConstructor() {
@@ -551,7 +668,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
   /**
    * Generates the JPA @Table annotation to be applied to the entity
-   * 
+   *
    * @param annotationValues
    * @return
    */
@@ -586,7 +703,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * If {@link #getVersionField()} returns a field created by this ITD or if
    * the version field is declared within the entity itself, a public accessor
    * will automatically be produced in the declaring class.
-   * 
+   *
    * @param memberDetails
    * @return the version accessor (may return null if there is no version
    *         field declared in this class)
@@ -633,9 +750,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     bodyBuilder
         .appendFormalLine("return this." + versionField.getFieldName().getSymbolName() + ";");
 
-    MethodMetadataBuilder methodMetadata =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName,
-            versionField.getFieldType(), bodyBuilder);
+    MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+        requiredAccessorName, versionField.getFieldType(), bodyBuilder);
 
     // If method exists, return null to prevent method creation
     if (existsMethod(methodMetadata)) {
@@ -655,7 +771,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * taken as the version and returned. If no such field is located, a private
    * field may be created as per the details contained in
    * {@link RooJpaEntity} annotation, as applicable.
-   * 
+   *
    * @return the version field (may be null)
    */
   private FieldMetadata getVersionField() {
@@ -707,7 +823,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * If {@link #getVersionField()} returns a field created by this ITD or if
    * the version field is declared within the entity itself, a public mutator
    * will automatically be produced in the declaring class.
-   * 
+   *
    * @return the mutator (may return null if there is no version field
    *         declared in this class)
    */
@@ -750,14 +866,13 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // We declared the field in this ITD, so produce a public mutator for it
     final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-    bodyBuilder.appendFormalLine("this." + versionField.getFieldName().getSymbolName()
-        + " = version;");
+    bodyBuilder
+        .appendFormalLine("this." + versionField.getFieldName().getSymbolName() + " = version;");
 
 
-    MethodMetadataBuilder methodMetadata =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName,
-            JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-            parameterNames, bodyBuilder);
+    MethodMetadataBuilder methodMetadata = new MethodMetadataBuilder(getId(), Modifier.PUBLIC,
+        requiredMutatorName, JavaType.VOID_PRIMITIVE,
+        AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 
     // If method exists, return null to prevent method creation
     if (existsMethod(methodMetadata)) {
@@ -765,5 +880,553 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     }
 
     return methodMetadata;
+  }
+
+  /**
+   * Returns cardinality value based on JPA field annotations
+   *
+   * @param field
+   * @return ONE_TO_MANY, MANY_TO_MANY, ONE_TO_ONE or null
+   */
+  private Cardinality getFieldCardinality(final AnnotationMetadata fieldJpaAnnotation) {
+    Cardinality cardinality = null;
+    if (JpaJavaType.ONE_TO_MANY.equals(fieldJpaAnnotation.getAnnotationType())) {
+      cardinality = Cardinality.ONE_TO_MANY;
+    } else if (JpaJavaType.MANY_TO_MANY.equals(fieldJpaAnnotation.getAnnotationType())) {
+      cardinality = Cardinality.MANY_TO_MANY;
+    } else if (JpaJavaType.ONE_TO_ONE.equals(fieldJpaAnnotation.getAnnotationType())) {
+      cardinality = Cardinality.ONE_TO_ONE;
+    }
+    return cardinality;
+  }
+
+  /**
+   * Returns JPA field annotations
+   *
+   * @param field
+   * @return ONE_TO_MANY, MANY_TO_MANY, ONE_TO_ONE or null
+   */
+  private AnnotationMetadata getJpaRelaationAnnotation(final FieldMetadata field) {
+    AnnotationMetadata annotation = null;
+    for (JavaType type : JPA_ANNOTATIONS_SUPPORTED) {
+      annotation = field.getAnnotation(type);
+      if (annotation != null) {
+        break;
+      }
+    }
+    return annotation;
+  }
+
+  /**
+   * Gets `mappedBy` attribute value from JPA relationship annotation
+   *
+   * @param jpaAnnotation
+   * @return
+   */
+  private String getMappedByValue(AnnotationMetadata jpaAnnotation) {
+    AnnotationAttributeValue<?> mappedByValue = jpaAnnotation.getAttribute(MAPPEDBY_ATTRIBUTE);
+    if (mappedByValue == null) {
+      return null;
+    }
+    return ((StringAttributeValue) mappedByValue).getValue();
+  }
+
+  /**
+   * Create remove method to handle referenced relation
+   *
+   * @param removeMethodName
+   * @param field
+   * @param cardinality
+   * @param childType
+   * @param mappedBy
+   * @param importResolver
+   * @return method metadata or null if method already in class
+   */
+  private MethodMetadataBuilder getRemoveMethod(final JavaSymbolName removeMethodName,
+      final FieldMetadata field, final Cardinality cardinality, final JavaType childType,
+      final String mappedBy, ImportRegistrationResolver importResolver) {
+
+    // Identify parameters types and names (if any)
+    final List<JavaType> parameterTypes = new ArrayList<JavaType>(1);
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>(1);
+    if (cardinality != Cardinality.ONE_TO_ONE) {
+      parameterTypes.add(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null,
+          Arrays.asList(childType)));
+      parameterNames
+          .add(new JavaSymbolName(field.getFieldName().getSymbolName() + REMOVE_PARAMETER_SUFFIX));
+    }
+
+    // See if the type itself declared the method
+    if (governorHasMethod(removeMethodName, parameterTypes)) {
+      return null;
+    }
+
+
+    final InvocableMemberBodyBuilder builder = new InvocableMemberBodyBuilder();
+
+    if (cardinality == Cardinality.ONE_TO_ONE) {
+      buildRemoveOneToOneBody(field, mappedBy, builder);
+    } else if (cardinality == Cardinality.ONE_TO_MANY) {
+      buildRemoveOneToManyBody(field, mappedBy, parameterNames.get(0), childType, builder,
+          importResolver);
+    } else {
+      // ManyToMany
+      buildRemoveManyToManyBody(field, mappedBy, parameterNames.get(0), childType, builder,
+          importResolver);
+    }
+
+    return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, removeMethodName,
+        JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+        parameterNames, builder);
+  }
+
+  /**
+   * Build remove method body for OneToOne relation
+   *
+   * @param field
+   * @param mappedBy
+   * @param builder
+   */
+  private void buildRemoveOneToOneBody(final FieldMetadata field, final String mappedBy,
+      final InvocableMemberBodyBuilder builder) {
+    final String fieldName = field.getFieldName().getSymbolName();
+    // Build toString method body
+
+    /*
+     * if (this.{prop} != null) {
+     *   {prop}.set{mappedBy}(null);
+     * }
+     * this.{prop} = null;
+     */
+
+    // if (this.{prop} != null) {
+    builder.appendFormalLine(String.format("if (this.%s != null) {", fieldName));
+
+    // {prop}.set{mappedBy}(null);
+    builder.indent();
+    builder.appendFormalLine(
+        String.format("%s.set%s(null);", fieldName, StringUtils.capitalize(mappedBy)));
+
+    // }
+    builder.indentRemove();
+    builder.appendFormalLine("}");
+
+    // this.{prop} = null;
+    builder.appendFormalLine(String.format("this.%s = null;", fieldName));
+  }
+
+  /**
+   * Build remove method body for OneToMany relation
+   *
+   * @param field
+   * @param mappedBy
+   * @param parameterName
+   * @param childType
+   * @param builder
+   * @param importResolver
+   */
+  private void buildRemoveOneToManyBody(final FieldMetadata field, final String mappedBy,
+      JavaSymbolName parameterName, final JavaType childType,
+      final InvocableMemberBodyBuilder builder, ImportRegistrationResolver importResolver) {
+    final String fieldName = field.getFieldName().getSymbolName();
+    // Build method body
+
+    /*
+     * Assert.notEmpty({param}, "At least one item to remove is required");
+     * for ({childType} item : {param}) {
+     *   this.{field}.remove(item);
+     *   item.set{mappedBy}(null);
+     * }
+     */
+
+    importResolver.addImport(SpringJavaType.ASSERT);
+
+    // Assert.notEmpty({param}, "At least one item to remove is required");
+    builder.appendFormalLine(String.format(
+        "Assert.notEmpty(%s, \"At least one item to remove is required\");", parameterName));
+
+    // for ({childType} item : {param}) {
+    builder.appendFormalLine(
+        String.format("for (%s item : %s) {", childType.getSimpleTypeName(), parameterName));
+
+    // this.{field}.remove(item);
+    builder.indent();
+    builder.appendFormalLine(String.format("this.%s.remove(item);", fieldName));
+
+    // item.set{mappedBy}(null);
+    builder.appendFormalLine(String.format("item.set%s(null);", StringUtils.capitalize(mappedBy)));
+
+    // }
+    builder.indentRemove();
+    builder.appendFormalLine("}");
+  }
+
+  /**
+   * Build remove method body for ManyToMany relation
+   *
+   * @param field
+   * @param mappedBy
+   * @param parameterName
+   * @param childType
+   * @param builder
+   * @param importResolver
+   */
+  private void buildRemoveManyToManyBody(final FieldMetadata field, final String mappedBy,
+      JavaSymbolName parameterName, final JavaType childType,
+      final InvocableMemberBodyBuilder builder, ImportRegistrationResolver importResolver) {
+    final String fieldName = field.getFieldName().getSymbolName();
+    // Build method body
+
+    /*
+     * Assert.notEmpty({param}, "At least one item to remove is required");
+     * for ({childType} item : {param}) {
+     *   this.{field}.remove(item);
+     *   item.get{mappedBy}().remove(this);
+     * }
+     */
+
+    importResolver.addImport(SpringJavaType.ASSERT);
+    // Assert.notEmpty({param}, "At least one item to remove is required");
+    builder.appendFormalLine(String.format(
+        "Assert.notEmpty(%s, \"At least one item to remove is required\");", parameterName));
+
+    // for ({childType} item : {param}) {
+    builder.appendFormalLine(
+        String.format("for (%s item : %s) {", childType.getSimpleTypeName(), parameterName));
+
+    // this.{field}.remove(item);
+    builder.indent();
+    builder.appendFormalLine(String.format("this.%s.remove(item);", fieldName));
+
+    // item.get{mappedBy}().remove(this);
+    builder.appendFormalLine(
+        String.format("item.get%s().remove(this);", StringUtils.capitalize(mappedBy)));
+
+    // }
+    builder.indentRemove();
+    builder.appendFormalLine("}");
+  }
+
+  /**
+   * Generate method name to use for remove method of selected field
+   *
+   * @param field
+   * @return
+   */
+  private JavaSymbolName getRemoveMethodName(final FieldMetadata field) {
+    final JavaSymbolName methodName = new JavaSymbolName(
+        REMOVE_METHOD_PREFIX + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+    return methodName;
+  }
+
+  /**
+   * Create add method to handle referenced relation
+   *
+   * @param addMethodName
+   * @param field
+   * @param cardinality
+   * @param childType
+   * @param mappedBy
+   * @param removeMethodName
+   * @param importResolver
+   * @return method metadata or null if method already in class
+   */
+  private MethodMetadataBuilder getAddValueMethod(final JavaSymbolName addMethodName,
+      final FieldMetadata field, final Cardinality cardinality, final JavaType childType,
+      final String mappedBy, final JavaSymbolName removeMethodName,
+      ImportRegistrationResolver importResolver) {
+
+    // Identify parameters type and name
+    final List<JavaType> parameterTypes = new ArrayList<JavaType>(1);
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>(1);
+    if (cardinality == Cardinality.ONE_TO_ONE) {
+      parameterTypes.add(childType);
+      parameterNames.add(field.getFieldName());
+    } else {
+      parameterTypes.add(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null,
+          Arrays.asList(childType)));
+      parameterNames
+          .add(new JavaSymbolName(field.getFieldName().getSymbolName() + ADD_PARAMETER_SUFFIX));
+    }
+
+    // See if the type itself declared the method
+    if (governorHasMethod(addMethodName, parameterTypes)) {
+      return null;
+    }
+
+    final InvocableMemberBodyBuilder builder = new InvocableMemberBodyBuilder();
+
+    if (cardinality == Cardinality.ONE_TO_ONE) {
+      buildAddOneToOneBody(field, mappedBy, parameterNames.get(0), childType, removeMethodName,
+          builder);
+    } else if (cardinality == Cardinality.ONE_TO_MANY) {
+      buildAddOneToManyBody(field, mappedBy, parameterNames.get(0), childType, builder,
+          importResolver);
+    } else {
+      buildAddManyToManyBody(field, mappedBy, parameterNames.get(0), childType, builder,
+          importResolver);
+    }
+
+    return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, addMethodName,
+        JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
+        parameterNames, builder);
+  }
+
+  /**
+   * Build add method body for OneToOne relation
+   *
+   * @param field
+   * @param mappedBy
+   * @param parameter
+   * @param childType
+   * @param removeMethodName
+   * @param builder
+   */
+  private void buildAddOneToOneBody(final FieldMetadata field, final String mappedBy,
+      final JavaSymbolName parameter, final JavaType childType,
+      final JavaSymbolName removeMethodName, InvocableMemberBodyBuilder builder) {
+
+    final String fieldName = field.getFieldName().getSymbolName();
+    // Build method body
+
+    /*
+     * if ({param} == null) {
+     *   {removeMethod}();
+     * } else {
+     *   this.{field} = {param};
+     *   {param}.set{mappedBy}(this);
+     * }
+     */
+
+    // if ({param} == null) {
+    builder.appendFormalLine(String.format("if (%s == null) {", parameter));
+
+    // {removeMethod}();
+    builder.indent();
+    builder.appendFormalLine(String.format("%s();", removeMethodName));
+
+    // } else {
+    builder.indentRemove();
+    builder.appendFormalLine("} else {");
+
+    // this.{field} = {param};
+    builder.indent();
+    builder.appendFormalLine(String.format("this.%s = %s;", fieldName, parameter));
+
+    // {param}.set{mappedBy}(this);
+    builder.appendFormalLine(
+        String.format("%s.set%s(this);", parameter, StringUtils.capitalize(mappedBy)));
+
+    // }
+    builder.indentRemove();
+    builder.appendFormalLine("}");
+
+  }
+
+  /**
+   * Build add method body for OneToMany relation
+   *
+   * @param field
+   * @param mappedBy
+   * @param parameterName
+   * @param childType
+   * @param builder
+   * @param importResolver
+   */
+  private void buildAddOneToManyBody(final FieldMetadata field, final String mappedBy,
+      final JavaSymbolName parameterName, final JavaType childType,
+      final InvocableMemberBodyBuilder builder, ImportRegistrationResolver importResolver) {
+    final String fieldName = field.getFieldName().getSymbolName();
+    // Build method body
+
+    /*
+     * Assert.notEmpty({param}, "At least one item to add is required");
+     * for ({childType} item : {param}) {
+     *   this.{field}.add(item);
+     *   item.set{mappedBy}(this);
+     * }
+     */
+
+    importResolver.addImport(SpringJavaType.ASSERT);
+    // Assert.notEmpty({param}, "At least one item to add is required");
+    builder.appendFormalLine(String
+        .format("Assert.notEmpty(%s, \"At least one item to add is required\");", parameterName));
+
+    // for ({childType} item : {param}) {
+    builder.appendFormalLine(
+        String.format("for (%s item : %s) {", childType.getSimpleTypeName(), parameterName));
+
+    // this.{field}.remove(item);
+    builder.indent();
+    builder.appendFormalLine(String.format("this.%s.add(item);", fieldName));
+
+    // item.set{mappedBy}(null);
+    builder.appendFormalLine(String.format("item.set%s(this);", StringUtils.capitalize(mappedBy)));
+
+    // }
+    builder.indentRemove();
+    builder.appendFormalLine("}");
+
+  }
+
+  /**
+   * Build add method body for ManyToMany relation
+   *
+   * @param field
+   * @param mappedBy
+   * @param parameterName
+   * @param childType
+   * @param builder
+   * @param importResolver
+   */
+  private void buildAddManyToManyBody(final FieldMetadata field, final String mappedBy,
+      final JavaSymbolName parameterName, final JavaType childType,
+      final InvocableMemberBodyBuilder builder, ImportRegistrationResolver importResolver) {
+    final String fieldName = field.getFieldName().getSymbolName();
+    // Build method body
+
+    /*
+     * Assert.notEmpty({param}, "At least one item to add is required");
+     * for ({childType} item : {param}) {
+     *   this.{field}.add(item);
+     *   item.get{mappedBy}().add(this);
+     * }
+     */
+
+    importResolver.addImport(SpringJavaType.ASSERT);
+
+    // Assert.notEmpty({param}, "At least one item to add is required");
+    builder.appendFormalLine(String
+        .format("Assert.notEmpty(%s, \"At least one item to add is required\");", parameterName));
+
+    // for ({childType} item : {param}) {
+    builder.appendFormalLine(
+        String.format("for (%s item : %s) {", childType.getSimpleTypeName(), parameterName));
+
+    // this.{field}.remove(item);
+    builder.indent();
+    builder.appendFormalLine(String.format("this.%s.add(item);", fieldName));
+
+    // item.get{mappedBy}().add(this);
+    builder.appendFormalLine(
+        String.format("item.get%s().add(this);", StringUtils.capitalize(mappedBy)));
+
+    // }
+    builder.indentRemove();
+    builder.appendFormalLine("}");
+
+  }
+
+  /**
+   * @return information about relations which current entity is parent. Map key is current entity field name
+   */
+  public Map<String, RelationInfo> getRelationInfos() {
+    return relationInfos;
+  }
+
+  /**
+   * @return information about relations which current entity is parent. Map key is child entity related field name
+   */
+  public Map<String, RelationInfo> getRelationInfosByMappedBy() {
+    return relationInfosByMappedBy;
+  }
+
+  /**
+   * @return information about current identifier field
+   */
+  public Identifier getCurrentIdentifier() {
+    return identifier;
+  }
+
+  /**
+   * @return information about current identifier field
+   */
+  public FieldMetadata getCurrentIndentifierField() {
+    return identifierField;
+  }
+
+  /**
+   * @return information about current version field
+   */
+  public FieldMetadata getCurrentVersionField() {
+    return versionField;
+  }
+
+  /**
+   * = _RelationInfo_
+   *
+   * *Immutable* information about a managed relation
+   *
+   * @author Jose Manuel Vivó
+   * @since 2.0.0
+   */
+  public static class RelationInfo {
+
+    /**
+     * relation field name
+     */
+    public final String fieldName;
+
+
+    /**
+     * Method to use to add/set a item
+     */
+    public final JavaSymbolName addMethod;
+
+    /**
+     * Method to use to remove/clean a item
+     */
+    public final JavaSymbolName removeMethod;
+
+    /**
+     * Relationship carinality
+     */
+    public final Cardinality cardinality;
+
+    /**
+     * Child item type
+     */
+    public final JavaType childType;
+
+    /**
+     * parent field metadata
+     */
+    public final FieldMetadata fieldMetadata;
+
+    /**
+     * Child field name
+     */
+    public final String mappedBy;
+
+    /**
+     * Relation type (Aggregation/Composition)
+     */
+    public final JpaRelationType type;
+
+    /**
+     * Constructor
+     *
+     * @param fieldName
+     * @param addMethod
+     * @param removeMethod
+     * @param cardinality
+     * @param childType
+     * @param fieldMetadata
+     * @param mappedBy
+     * @param type
+     */
+    protected RelationInfo(final String fieldName, final JavaSymbolName addMethod,
+        final JavaSymbolName removeMethod, final Cardinality cardinality, final JavaType childType,
+        final FieldMetadata fieldMetadata, final String mappedBy, final JpaRelationType type) {
+      super();
+      this.fieldName = fieldName;
+      this.addMethod = addMethod;
+      this.removeMethod = removeMethod;
+      this.cardinality = cardinality;
+      this.childType = childType;
+      this.fieldMetadata = fieldMetadata;
+      this.mappedBy = mappedBy;
+      this.type = type;
+    }
   }
 }

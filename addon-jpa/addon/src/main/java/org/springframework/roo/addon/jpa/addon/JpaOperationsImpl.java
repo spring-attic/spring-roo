@@ -221,11 +221,6 @@ public class JpaOperationsImpl implements JpaOperations {
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
-    // Also, it is necessary to include a class annotated with @RooGlobalSearch.
-    // This Value Object is used to define global data searches in an entity or
-    // group of entities.
-    generateGlobalSearch(name.getPackage());
-
     // Add persistence dependencies to entity module if necessary
     // Don't need to add them if spring-boot-starter-data-jpa is present, often in single module project
     if (!getProjectOperations().getFocusedModule().hasDependencyExcludingVersion(
@@ -568,54 +563,6 @@ public class JpaOperationsImpl implements JpaOperations {
 
       }
     }
-  }
-
-  /**
-   * Method that generates GlobalSearch class on current model package. If
-   * GlobalSearch already exists in this or other package, will not be
-   * generated.
-   *
-   * @param modelPackage Package where GlobalSearch should be generated
-   * @return JavaType with existing or new GlobalSearch
-   */
-  private JavaType generateGlobalSearch(JavaPackage modelPackage) {
-
-    // First of all, check if already exists a @RooGlobalSearch
-    // class on current project
-    Set<JavaType> globalSearchClasses =
-        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
-
-    if (!globalSearchClasses.isEmpty()) {
-      Iterator<JavaType> it = globalSearchClasses.iterator();
-      while (it.hasNext()) {
-        return it.next();
-      }
-    }
-
-    final JavaType javaType =
-        new JavaType(String.format("%s.GlobalSearch", modelPackage), modelPackage.getModule());
-    final String physicalPath =
-        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
-
-    // Including GlobalSearch class
-    InputStream inputStream = null;
-    try {
-      // Use defined template
-      inputStream = FileUtils.getInputStream(getClass(), "GlobalSearch-template._java");
-      String input = IOUtils.toString(inputStream);
-      // Replacing package
-      input = input.replace("__PACKAGE__", modelPackage.getFullyQualifiedPackageName());
-
-      // Creating GlobalSearch class
-      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, false);
-    } catch (final IOException e) {
-      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
-    } finally {
-      IOUtils.closeQuietly(inputStream);
-    }
-
-    return javaType;
-
   }
 
   /**

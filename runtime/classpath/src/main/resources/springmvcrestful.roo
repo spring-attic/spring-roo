@@ -56,7 +56,7 @@ field set --fieldName products --type ~.model.Product --cardinality MANY_TO_MANY
 focus --class ~.model.CustomerOrder
 field set --fieldName details --type ~.model.OrderDetail --cardinality ONE_TO_MANY --aggregation false
 
-// Product realtions
+// Product relations
 focus --class ~.model.Product
 field set --fieldName orderDetails --type ~.model.OrderDetail
 

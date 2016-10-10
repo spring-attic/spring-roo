@@ -14,7 +14,6 @@
     <description>Support for field creation in the classes of the targeted project</description>
 
     <modules>
-        <module>annotations</module>
         <module>addon</module>
     </modules>
 

@@ -20,16 +20,12 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.comments.CommentFormatter;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.Cascade;
@@ -59,6 +55,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.ReservedWords;
+import org.springframework.roo.model.RooEnumDetails;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
@@ -69,10 +66,8 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -80,6 +75,7 @@ import java.util.logging.Logger;
  * FieldCreatorProvider.
  *
  * @author Sergio Clares
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 @Component
@@ -108,8 +104,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
       "spring.roo.jpa.require.schema-object-name";
-
-  public static final String ROO_DEFAULT_JOIN_TABLE_NAME = "_ROO_JOIN_TABLE_";
 
   @Override
   public boolean isValid(JavaType javaType) {
@@ -863,6 +857,15 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
             Cardinality.ONE_TO_ONE, cascadeType);
     parentFieldDetails.setFetch(fetch);
 
+    AnnotationMetadataBuilder rooJpaRelationAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_RELATION);
+    if (aggregation) {
+      rooJpaRelationAnnotation.addEnumAttribute("type", RooEnumDetails.RELATION_TYPE_AGGREGATION);
+    } else {
+      rooJpaRelationAnnotation.addEnumAttribute("type", RooEnumDetails.RELATION_TYPE_COMPOSITION);
+    }
+    parentFieldDetails.addAdditionaAnnotation(rooJpaRelationAnnotation);
+
     if (comment != null) {
       parentFieldDetails.setComment(comment);
     }
@@ -893,81 +896,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
     // insert child field
     insertField(childFieldDetails, permitReservedWords, false);
 
-    // insert parent field and update @RooRelationManagement annotation
-    addFieldAndRelationManagementAnnotation(parentCid, parentFieldDetails, permitReservedWords);
-  }
-
-  /**
-   * Add a field and add/update ReleationManagement annotation in a entity
-   *
-   * @param parentCid
-   * @param field
-   * @param permitReservedWords
-   */
-  private void addFieldAndRelationManagementAnnotation(ClassOrInterfaceTypeDetails parentCid,
-      FieldDetails field, boolean permitReservedWords) {
-
-    // Get current annotation value
-    AnnotationMetadata relationManagementAnnotation =
-        parentCid.getAnnotation(RooJavaType.ROO_RELATION_MANAGEMENT);
-
-    AnnotationAttributeValue<?> currentRelations = null;
-    AnnotationMetadataBuilder annotationBuilder = null;
-    if (relationManagementAnnotation == null) {
-      annotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_RELATION_MANAGEMENT);
-    } else {
-      annotationBuilder = new AnnotationMetadataBuilder(relationManagementAnnotation);
-      // Check if new finder name to be included already exists in @RooFinders annotation
-      currentRelations = relationManagementAnnotation.getAttribute("relationFields");
-    }
-
-    final String fieldName = field.getFieldName().getSymbolName();
-
-    // Create list that will include values to add
-    List<StringAttributeValue> fieldNames = new ArrayList<StringAttributeValue>();
-
-    if (currentRelations != null) {
-      List<?> values = (List<?>) currentRelations.getValue();
-      Iterator<?> it = values.iterator();
-
-      while (it.hasNext()) {
-        StringAttributeValue relation = (StringAttributeValue) it.next();
-        if (fieldName.equals(relation.getValue())) {
-          LOGGER.log(Level.WARNING, String.format(
-              "ERROR: relation field '%s' already exists on entity '%s'", fieldName, parentCid
-                  .getType().getSimpleTypeName()));
-          return;
-        }
-        fieldNames.add(relation);
-      }
-    }
-
-    // Include field name to annotation attribute
-    fieldNames.add(new StringAttributeValue(new JavaSymbolName("relationFields"), fieldName));
-
-
-    // Fill relationFields attribute in @RooRelationManagement
-    annotationBuilder.addAttribute(new ArrayAttributeValue<StringAttributeValue>(
-        new JavaSymbolName("relationFields"), fieldNames));
-
-    // Get class builder
-    final ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(parentCid);
-
-    // Include @RooRelationManagement on related entity
-    if (relationManagementAnnotation == null) {
-      // Add annotation
-      cidBuilder.addAnnotation(annotationBuilder);
-    } else {
-      // Update annotation
-      cidBuilder.updateTypeAnnotation(annotationBuilder);
-    }
-
-    // Add target field to entity
-    cidBuilder.addField(generateFieldBuilder(field, permitReservedWords, false).build());
-
-    // Save entity changes on disk
-    typeManagementService.createOrUpdateTypeOnDisk(cidBuilder.build());
+    // insert parent field
+    insertField(parentFieldDetails, permitReservedWords, false);
   }
 
   @Override
@@ -1292,8 +1222,17 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
       }
     }
 
-    // insert parent field and update @RooRelationManagement annotation
-    addFieldAndRelationManagementAnnotation(parentCid, parentFieldDetails, permitReservedWords);
+    AnnotationMetadataBuilder rooJpaRelationAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_JPA_RELATION);
+    if (aggregation) {
+      rooJpaRelationAnnotation.addEnumAttribute("type", RooEnumDetails.RELATION_TYPE_AGGREGATION);
+    } else {
+      rooJpaRelationAnnotation.addEnumAttribute("type", RooEnumDetails.RELATION_TYPE_COMPOSITION);
+    }
+    parentFieldDetails.addAdditionaAnnotation(rooJpaRelationAnnotation);
+
+    // insert parent field
+    insertField(parentFieldDetails, permitReservedWords, false);
   }
 
   /**

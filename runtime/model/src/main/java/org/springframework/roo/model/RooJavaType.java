@@ -77,6 +77,8 @@ public final class RooJavaType {
   // Spring Roo 2.x annotations
   public static final JavaType ROO_JPA_ENTITY = new JavaType(
       "org.springframework.roo.addon.jpa.annotations.entity.RooJpaEntity");
+  public static final JavaType ROO_JPA_RELATION = new JavaType(
+      "org.springframework.roo.addon.jpa.annotations.entity.RooJpaRelation");
   public static final JavaType ROO_ENTITY_PROJECTION = new JavaType(
       "org.springframework.roo.addon.dto.annotations.RooEntityProjection");
   public static final JavaType ROO_READ_ONLY_REPOSITORY = new JavaType(
@@ -89,8 +91,6 @@ public final class RooJavaType {
       "org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl");
   public static final JavaType ROO_DTO = new JavaType(
       "org.springframework.roo.addon.dto.annotations.RooDTO");
-  public static final JavaType ROO_RELATION_MANAGEMENT = new JavaType(
-      "org.springframework.roo.addon.field.annotations.RooRelationManagement");
   public static final JavaType ROO_SERVICE = new JavaType(
       "org.springframework.roo.addon.layers.service.annotations.RooService");
   public static final JavaType ROO_SERVICE_IMPL = new JavaType(
@@ -166,6 +166,9 @@ public final class RooJavaType {
 
   public static final JavaType ROO_ENUM_CONTROLLER_TYPE = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType");
+
+  public static final JavaType ROO_ENUM_RELATION_TYPE = new JavaType(
+      "org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType");
 
   /**
    * Constructor is private to prevent instantiation

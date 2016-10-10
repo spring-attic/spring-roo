@@ -168,6 +168,10 @@ public class ReferenceField extends FieldDetails {
   }
 
 
+  public void addAdditionaAnnotation(AnnotationMetadataBuilder annotationBuilder) {
+    additionaAnnotations.add(annotationBuilder);
+  }
+
   /**
    * Fill {@link #joinTableAttributes} for building @JoinTable annotation. The annotation
    * would have some nested @JoinColumn annotations in each of its "joinColumns" and

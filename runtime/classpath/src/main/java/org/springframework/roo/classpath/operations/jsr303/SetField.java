@@ -149,6 +149,11 @@ public class SetField extends CollectionField {
     return new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params);
   }
 
+  public void addAdditionaAnnotation(AnnotationMetadataBuilder annotationBuilder) {
+    additionaAnnotations.add(annotationBuilder);
+  }
+
+
   public JavaSymbolName getMappedBy() {
     return mappedBy;
   }

@@ -532,11 +532,6 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.field.annotations</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.jpa.addon</artifactId>
                 <version>${project.version}</version>
             </dependency>
