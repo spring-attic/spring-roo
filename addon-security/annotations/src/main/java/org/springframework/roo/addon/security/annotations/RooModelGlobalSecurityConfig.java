@@ -7,27 +7,20 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that the annotated class is a @Configuration class
- * that manages Spring Security configuration.
+ * that manages Spring Security Global configuration for MODEL
+ * security provider 
  * 
  * @author Juan Carlos García
  * @since 2.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooWebSecurityConfiguration {
+public @interface RooModelGlobalSecurityConfig {
 
   /**
    * Indicates the profile where this configuration is applied
+   * 
+   * @return the profile where this configuration is applied
    */
   String profile() default "";
-
-  /**
-   * Indicates if method-level security is enabled. Default is false.
-   */
-  boolean enableGlobalMethodSecurity() default false;
-
-  /**
-   * Indicates if audit support is enabled. Default is false.
-   */
-  boolean enableJpaAuditing() default false;
 }
