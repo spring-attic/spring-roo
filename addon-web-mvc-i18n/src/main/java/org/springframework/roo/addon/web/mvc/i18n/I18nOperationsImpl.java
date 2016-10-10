@@ -133,7 +133,8 @@ public class I18nOperationsImpl implements I18nOperations {
 
     // Install flag
     final String flagGraphic =
-        targetDirectory + "public/img/" + i18n.getLocale().getLanguage() /* + country */+ ".png";
+        targetDirectory + "static/public/img/" + i18n.getLocale().getLanguage() /* + country */
+            + ".png";
     if (!getFileManager().exists(flagGraphic)) {
       InputStream inputStream = null;
       OutputStream outputStream = null;
