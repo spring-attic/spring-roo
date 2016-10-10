@@ -4,15 +4,6 @@ import static org.springframework.roo.project.DependencyScope.COMPILE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -32,6 +23,15 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Provides common project operations. Should be subclassed by a
@@ -175,95 +175,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     Validate.notNull(pom, "The pom is not available, so dependencies cannot be added");
 
     final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
-    final Element dependenciesElement =
-        DomUtils.createChildIfNotExists("dependencies", document.getDocumentElement(), document);
-    final List<Element> existingDependencyElements =
-        XmlUtils.findElements("dependency", dependenciesElement);
-
-    final List<Dependency> finalDependencies = new ArrayList<Dependency>();
-    final List<String> addedDependencies = new ArrayList<String>();
-    final List<String> removedDependencies = new ArrayList<String>();
-    final List<String> skippedDependencies = new ArrayList<String>();
-    for (final Dependency newDependency : newDependencies) {
-      // ROO-3465: Prevent version changes adding checkVersion to false
-      // when check if is possible to add the new dependency
-      if (pom.canAddDependency(newDependency, false)) {
-        // Look for any existing instances of this dependency
-        boolean inserted = false;
-        for (final Element existingDependencyElement : existingDependencyElements) {
-          final Dependency existingDependency = new Dependency(existingDependencyElement);
-          if (existingDependency.hasSameCoordinates(newDependency)) {
-            // It's the same artifact, but might have a different
-            // version, exclusions, etc.
-            if (!inserted) {
-              // We haven't added the new one yet; do so now
-              // ROO-3685: Check if current dependency has version when is added again
-              Element newDependencyElement =
-                  removeVersionIfBlank(newDependency.getElement(document));
-              dependenciesElement.insertBefore(newDependencyElement, existingDependencyElement);
-              inserted = true;
-              Dependency newDependencyWithoutVersion = new Dependency(newDependencyElement);
-              if (!newDependencyWithoutVersion.getVersion().equals(existingDependency.getVersion())) {
-                // It's a genuine version change => mention the
-                // old and new versions in the message
-                finalDependencies.add(newDependency);
-                addedDependencies.add(newDependency.getSimpleDescription());
-                removedDependencies.add(existingDependency.getSimpleDescription());
-              }
-            }
-            // Either way, we remove the previous one in case it was
-            // different in any way
-            dependenciesElement.removeChild(existingDependencyElement);
-          }
-          // Keep looping in case it's present more than once
-        }
-        if (!inserted) {
-          // We didn't encounter any existing dependencies with the
-          // same coordinates; add it now
-
-          // ROO-3660: Check if current dependency has version. If
-          // not, remove version attribute
-          Element newDependencyElement = removeVersionIfBlank(newDependency.getElement(document));
-          dependenciesElement.appendChild(newDependencyElement);
-          finalDependencies.add(newDependency);
-          addedDependencies.add(newDependency.getSimpleDescription());
-        }
-      } else {
-        skippedDependencies.add(newDependency.getSimpleDescription());
-        finalDependencies.add(newDependency);
-      }
-    }
-    if (!newDependencies.isEmpty() || !skippedDependencies.isEmpty()) {
-      final String message =
-          getPomDependenciesUpdateMessage(addedDependencies, removedDependencies,
-              skippedDependencies);
-      fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document),
-          message, false);
-    }
-
-    return finalDependencies;
-  }
-
-  /**
-   * Method that removes version from element if blank or "-"
-   * 
-   * @param element
-   * @return Element without version if blank
-   */
-  private Element removeVersionIfBlank(Element element) {
-    NodeList elementAttributes = element.getChildNodes();
-    for (int i = 0; i < elementAttributes.getLength(); i++) {
-      Element elementAttribute = (Element) elementAttributes.item(i);
-      if (elementAttribute != null
-          && elementAttribute.getTagName().equals("version")
-          && (elementAttribute.getTextContent() == null
-              || "-".equals(elementAttribute.getTextContent()) || "".equals(elementAttribute
-              .getTextContent()))) {
-        element.removeChild(elementAttributes.item(i));
-        break;
-      }
-    }
-    return element;
+    return writeDependencyInPom(newDependencies, pom, document, document.getDocumentElement());
   }
 
   public Dependency addDependency(final String moduleName, final Dependency dependency) {
@@ -301,6 +213,56 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     final Dependency dependency =
         new Dependency(groupId, artifactId, version, DependencyType.JAR, scope, classifier);
     return addDependency(moduleName, dependency);
+  }
+
+  public final List<Dependency> addDependenciesToDependencyManagement(final String moduleName,
+      Collection<? extends Dependency> newDependencies) {
+    Validate.isTrue(isProjectAvailable(moduleName),
+        "Dependency modification prohibited; no such module '%s'", moduleName);
+    final Pom pom = getPomFromModuleName(moduleName);
+    Validate.notNull(pom, "The pom is not available, so dependencies cannot be added");
+
+    final Document document = XmlUtils.readXml(fileManager.getInputStream(pom.getPath()));
+    final Element dependencyManagementElement =
+        DomUtils.createChildIfNotExists("dependencyManagement", document.getDocumentElement(),
+            document);
+    return writeDependencyInPom(newDependencies, pom, document, dependencyManagementElement);
+  }
+
+  public final Dependency addDependencyToDependencyManagement(String moduleName,
+      Dependency dependency) {
+    if (moduleName == null) {
+      moduleName = "";
+    }
+    Validate.notNull(dependency, "Dependency required");
+    List<Dependency> result =
+        addDependenciesToDependencyManagement(moduleName, Collections.singletonList(dependency));
+
+    if (result.isEmpty()) {
+      return null;
+    }
+    return result.get(0);
+  }
+
+  public final Dependency addDependencyToDependencyManagement(String groupId, String artifactId,
+      String version) {
+    return addDependencyToDependencyManagement("", groupId, artifactId, version, null);
+  }
+
+  public final Dependency addDependencyToDependencyManagement(String moduleName, String groupId,
+      String artifactId, String version, DependencyScope scope) {
+    if (moduleName == null) {
+      moduleName = "";
+    }
+    Validate.notNull(groupId, "Group ID required");
+    Validate.notNull(artifactId, "Artifact ID required");
+    Validate.notBlank(version, "Version required");
+    if (scope == null) {
+      scope = COMPILE;
+    }
+    final Dependency dependency =
+        new Dependency(groupId, artifactId, version, DependencyType.JAR, scope, "");
+    return addDependencyToDependencyManagement(moduleName, dependency);
   }
 
   public void addFilter(final String moduleName, final Filter filter) {
@@ -917,6 +879,28 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     removeDependency(moduleName, dependency);
   }
 
+  /**
+   * Method that removes version from element if blank or "-"
+   * 
+   * @param element
+   * @return Element without version if blank
+   */
+  private Element removeVersionIfBlank(Element element) {
+    NodeList elementAttributes = element.getChildNodes();
+    for (int i = 0; i < elementAttributes.getLength(); i++) {
+      Element elementAttribute = (Element) elementAttributes.item(i);
+      if (elementAttribute != null
+          && elementAttribute.getTagName().equals("version")
+          && (elementAttribute.getTextContent() == null
+              || "-".equals(elementAttribute.getTextContent()) || "".equals(elementAttribute
+              .getTextContent()))) {
+        element.removeChild(elementAttributes.item(i));
+        break;
+      }
+    }
+    return element;
+  }
+
   public void removeFilter(final String moduleName, final Filter filter) {
     Validate.isTrue(isProjectAvailable(moduleName), "Filter modification prohibited at this time");
     Validate.notNull(filter, "Filter required");
@@ -1172,4 +1156,88 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
     fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document),
         descriptionOfChange, false);
   }
+
+  /**
+   * Write the dependencies provided in specified pom, as children of the provided 
+   * Element (usually 'dependencies' or 'dependencyManagement').
+   * 
+   * @param newDependencies the collection of Dependency to be added.
+   * @param pom the module which the dependencies should be added.
+   * @param document the Document to act upon.
+   * @param element the element where append the collection of dependencies as 
+   *            children.
+   * @return the list of added dependencies.
+   */
+  private List<Dependency> writeDependencyInPom(
+      final Collection<? extends Dependency> newDependencies, final Pom pom,
+      final Document document, final Element element) {
+    final Element dependenciesElement =
+        DomUtils.createChildIfNotExists("dependencies", element, document);
+    final List<Element> existingDependencyElements =
+        XmlUtils.findElements("dependency", dependenciesElement);
+
+    final List<Dependency> finalDependencies = new ArrayList<Dependency>();
+    final List<String> addedDependencies = new ArrayList<String>();
+    final List<String> removedDependencies = new ArrayList<String>();
+    final List<String> skippedDependencies = new ArrayList<String>();
+    for (final Dependency newDependency : newDependencies) {
+      // ROO-3465: Prevent version changes adding checkVersion to false
+      // when check if is possible to add the new dependency
+      if (pom.canAddDependency(newDependency, false)) {
+        // Look for any existing instances of this dependency
+        boolean inserted = false;
+        for (final Element existingDependencyElement : existingDependencyElements) {
+          final Dependency existingDependency = new Dependency(existingDependencyElement);
+          if (existingDependency.hasSameCoordinates(newDependency)) {
+            // It's the same artifact, but might have a different
+            // version, exclusions, etc.
+            if (!inserted) {
+              // We haven't added the new one yet; do so now
+              // ROO-3685: Check if current dependency has version when is added again
+              Element newDependencyElement =
+                  removeVersionIfBlank(newDependency.getElement(document));
+              dependenciesElement.insertBefore(newDependencyElement, existingDependencyElement);
+              inserted = true;
+              Dependency newDependencyWithoutVersion = new Dependency(newDependencyElement);
+              if (!newDependencyWithoutVersion.getVersion().equals(existingDependency.getVersion())) {
+                // It's a genuine version change => mention the
+                // old and new versions in the message
+                finalDependencies.add(newDependency);
+                addedDependencies.add(newDependency.getSimpleDescription());
+                removedDependencies.add(existingDependency.getSimpleDescription());
+              }
+            }
+            // Either way, we remove the previous one in case it was
+            // different in any way
+            dependenciesElement.removeChild(existingDependencyElement);
+          }
+          // Keep looping in case it's present more than once
+        }
+        if (!inserted) {
+          // We didn't encounter any existing dependencies with the
+          // same coordinates; add it now
+
+          // ROO-3660: Check if current dependency has version. If
+          // not, remove version attribute
+          Element newDependencyElement = removeVersionIfBlank(newDependency.getElement(document));
+          dependenciesElement.appendChild(newDependencyElement);
+          finalDependencies.add(newDependency);
+          addedDependencies.add(newDependency.getSimpleDescription());
+        }
+      } else {
+        skippedDependencies.add(newDependency.getSimpleDescription());
+        finalDependencies.add(newDependency);
+      }
+    }
+    if (!newDependencies.isEmpty() || !skippedDependencies.isEmpty()) {
+      final String message =
+          getPomDependenciesUpdateMessage(addedDependencies, removedDependencies,
+              skippedDependencies);
+      fileManager.createOrUpdateTextFileIfRequired(pom.getPath(), XmlUtils.nodeToString(document),
+          message, false);
+    }
+
+    return finalDependencies;
+  }
+
 }

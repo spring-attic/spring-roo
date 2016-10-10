@@ -129,6 +129,73 @@ public interface ProjectOperations {
       String version, DependencyScope scope, String classifier);
 
   /**
+   * Attempts to add the specified dependencies to the group of managed dependencies. 
+   * If all the dependencies already exist according to
+   * {@link ProjectMetadata#isAllDependencyRegistered(Dependency)}, the method
+   * silently returns. Otherwise each new dependency is added.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param dependencies the dependencies to add (required)
+   * @return List of dependencies added on current operation
+   */
+  List<Dependency> addDependenciesToDependencyManagement(final String moduleName,
+      Collection<? extends Dependency> dependencies);
+
+  /**
+   * Attempts to add the specified dependency to the group of managed dependencies. 
+   * If the dependency already exists according to to
+   * {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}
+   * , the method silently returns. Otherwise the dependency is added.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon. If null, dependency 
+   *            will be added to root pom.
+   * @param dependency the dependency to add (required)
+   * @return added dependency
+   */
+  Dependency addDependencyToDependencyManagement(String moduleName, Dependency dependency);
+
+  /**
+   * Allows addition of a JAR dependency to the dependencyManagement on parent POM.
+   * <p>
+   * Provides a convenient way for third parties to instruct end users how to
+   * use the CLI to add support for their projects without requiring the user
+   * to manually edit a pom.xml or write an add-on.
+   * 
+   * @param groupId the group id of the dependency (required)
+   * @param artifactId the artifact id of the dependency (required)
+   * @param version the version of the dependency (required)
+   * @return added dependency
+   */
+  Dependency addDependencyToDependencyManagement(String groupId, String artifactId, String version);
+
+  /**
+   * Allows addition of a JAR dependency to the dependencyManagement on specified 
+   * POM.
+   * <p>
+   * Provides a convenient way for third parties to instruct end users how to
+   * use the CLI to add support for their projects without requiring the user
+   * to manually edit a pom.xml or write an add-on.
+   * 
+   * @param moduleName the name of the module to act upon. If null, dependency 
+   *            will be added to root pom.
+   * @param groupId the group id of the dependency (required)
+   * @param artifactId the artifact id of the dependency (required)
+   * @param version the version of the dependency (required)
+   * @param scope the scope of the dependency
+   * @return added dependency
+   */
+  Dependency addDependencyToDependencyManagement(String moduleName, String groupId,
+      String artifactId, String version, DependencyScope scope);
+
+  /**
    * Attempts to add the specified filter. If the filter already exists
    * according to
    * {@link ProjectMetadata#isFilterRegistered(org.springframework.roo.project.Filter)}
