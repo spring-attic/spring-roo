@@ -140,6 +140,16 @@ public interface MVCViewGenerationService {
   void addIndexView(String moduleName, ViewContext ctx);
 
   /**
+   * This operation will add the login view using the provided
+   * context
+   * 
+   * @param moduleName module where index view will be added
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addLoginView(String moduleName, ViewContext ctx);
+
+  /**
    * This operation will add the application error view using 
    * the provided context
    * 

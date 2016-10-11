@@ -3,6 +3,15 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -18,7 +27,6 @@ import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
-import org.springframework.roo.addon.security.addon.audit.AuditMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
@@ -44,15 +52,6 @@ import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link RepositoryJpaCustomImplMetadataProvider}.
@@ -255,26 +254,11 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     final String jpaEntityMetadataKey =
         JpaEntityMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
 
-    // Get audit metadata
-    final String auditMetadataKey =
-        AuditMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
-    final AuditMetadata auditMetadata = (AuditMetadata) getMetadataService().get(auditMetadataKey);
-
-
     // Create dependency between repository and java bean annotation
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
     // Create dependency between repository and jpa entity annotation
     registerDependency(jpaEntityMetadataKey, metadataIdentificationString);
-
-    // Create dependency between repository and audit annotation
-    registerDependency(auditMetadataKey, metadataIdentificationString);
-
-    // Getting audit properties
-    List<FieldMetadata> auditFields = new ArrayList<FieldMetadata>();
-    if (auditMetadata != null) {
-      auditFields = auditMetadata.getAuditFields();
-    }
 
     // Getting persistent properties
     List<FieldMetadata> idFields = getPersistenceMemberLocator().getIdentifierFields(entity);
@@ -326,8 +310,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         continue;
       }
 
-      // Exclude audit fields
-      isAudit = false;
+      // TODO Exclude audit fields
+      /*isAudit = false;
       for (FieldMetadata auditField : auditFields) {
         if (auditField.getFieldName().equals(field.getFieldName())) {
           isAudit = true;
@@ -337,7 +321,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
       if (isAudit) {
         continue;
-      }
+      }*/
 
       validFields.add(field);
     }

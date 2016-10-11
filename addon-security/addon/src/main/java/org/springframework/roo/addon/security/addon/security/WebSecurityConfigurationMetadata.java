@@ -28,9 +28,10 @@ import org.springframework.roo.project.LogicalPath;
  * @author Juan Carlos García
  * @since 2.0
  */
-public class WebSecurityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+public class WebSecurityConfigurationMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-  private static final String PROVIDES_TYPE_STRING = WebSecurityMetadata.class.getName();
+  private static final String PROVIDES_TYPE_STRING = WebSecurityConfigurationMetadata.class
+      .getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
   private static final JavaType AUDITOR_AWARE = new JavaType(
@@ -81,7 +82,7 @@ public class WebSecurityMetadata extends AbstractItdTypeDetailsProvidingMetadata
    * @param governorPhysicalTypeMetadata
    * @param annotationValues 
    */
-  public WebSecurityMetadata(final String identifier, final JavaType aspectName,
+  public WebSecurityConfigurationMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final JavaType authenticationAuditorAware,
       WebSecurityConfigurationAnnotationValues annotationValues) {

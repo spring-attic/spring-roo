@@ -90,7 +90,8 @@ public class DefaultSecurityProvider implements SecurityProvider {
 
     // Including dependency with Spring Boot Starter Security
     if (getProjectOperations().isMultimoduleProject()) {
-      // TODO: Is necessary to define dependencies in dependencyManagement
+      getProjectOperations().addDependencyToDependencyManagement(module.getModuleName(),
+          SPRING_SECURITY_STARTER);
     }
 
     getProjectOperations().addDependency(module.getModuleName(), SPRING_SECURITY_STARTER);

@@ -96,10 +96,6 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.jpa.addon</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.security.addon</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

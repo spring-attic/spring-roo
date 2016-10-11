@@ -16,7 +16,7 @@
 		<module>addon</module>
 		<module>annotations</module>    
     </modules>
-   
+    
     <properties>
     	<target.jar.directory>${basedir}/../target/all</target.jar.directory>  
 	</properties>
