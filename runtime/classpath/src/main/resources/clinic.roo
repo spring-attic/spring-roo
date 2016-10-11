@@ -67,5 +67,6 @@ service --all --apiPackage ~.service.api --implPackage ~.service.impl
 web mvc setup
 web mvc view setup --type THYMELEAF
 web mvc controller --all --responseType THYMELEAF
+web mvc detail --all --responseType THYMELEAF
 
 web mvc language --code es

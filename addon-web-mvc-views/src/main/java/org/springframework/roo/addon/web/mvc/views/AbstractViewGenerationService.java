@@ -36,7 +36,6 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -106,6 +105,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   private static final String FIELD_SUFFIX = "field";
   private static final String TABLE_SUFFIX = "entity";
   private static final String DETAIL_SUFFIX = "detail";
+  private static final String FINDER_SUFFIX = "finder";
 
   @Override
   public void addListView(String moduleName, MemberDetails entityDetails, ViewContext ctx) {
@@ -289,8 +289,6 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     List<FieldItem> fields =
         getFieldViewItems(entityFields, ctx.getEntityName(), false, ctx, StringUtils.EMPTY);
 
-    ctx.addExtraParameter("fields", fields);
-
     // Build URL path to get data
     String path = "";
     if (StringUtils.startsWith(finderName, "count")) {
@@ -308,18 +306,25 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     ctx.addExtraParameter("finderPath", path);
 
     // Process elements to generate
-    DOC newDoc = process("finderList", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName =
         getViewsFolder(moduleName).concat(ctx.getControllerPath()).concat("/").concat(finderName)
             .concat("List").concat(getViewsExtension());
 
+    EntityItem entityItem =
+        new EntityItem(ctx.getEntityName(), ctx.getIdentifierField(), ctx.getControllerPath(),
+            FINDER_SUFFIX);
+
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
       newDoc =
-          merge(loadExistingDoc(viewName), newDoc, CRU_FINDER_LIST_ID_CONTAINER_ELEMENT,
-              Arrays.asList(ctx.getEntityName() + "Table"));
+          mergeListView("finderList", loadExistingDoc(viewName), ctx, entityItem, fields,
+              new ArrayList<DetailEntityItem>());
+    } else {
+      ctx.addExtraParameter("fields", fields);
+      newDoc = process("finderList", ctx);
     }
 
     // Write newDoc on disk
