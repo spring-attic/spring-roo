@@ -22,7 +22,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -30,7 +29,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
@@ -44,7 +42,6 @@ import org.w3c.dom.Element;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +51,7 @@ import java.util.logging.Logger;
 
 /**
  * The {@link RepositoryJpaOperations} implementation.
- * 
+ *
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @author Sergio Clares
@@ -201,9 +198,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // Generates repository interface
     addRepositoryInterface(interfaceType, domainType, entityDetails, interfaceIdentifier);
 
-    // Generate QueryDslRepositorySupportExt
-    generateQueryDslRepositorySupportExt(interfaceType.getPackage());
-
     // By default, generate RepositoryCustom interface and its
     // implementation that allow developers to include its dynamic queries
     // using QueryDSL
@@ -308,7 +302,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   /**
    * Method that generates the repository interface. This method takes in mind
    * if entity is defined as readOnly or not.
-   * 
+   *
    * @param interfaceType
    * @param domainType
    * @param entityDetails
@@ -342,7 +336,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
    * Method that generates ReadOnlyRepository interface on current package. If
    * ReadOnlyRepository already exists in this or other package, will not be
    * generated.
-   * 
+   *
    * @param repositoryPackage Package where ReadOnlyRepository should be
    *            generated
    * @return JavaType with existing or new ReadOnlyRepository
@@ -392,7 +386,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
    * Method that generates RepositoryCustom implementation on current package.
    * If this RepositoryCustom implementation already exists in this or other
    * package, will not be generated.
-   * 
+   *
    * @param interfaceType
    * @param repository
    * @param entity
@@ -477,12 +471,12 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   /**
    * Method that generates RepositoryCustom interface and its implementation
    * for an specific entity
-   * 
+   *
    * @param domainType
    * @param repositoryType
    * @param repositoryPackage
-   * @param defaultReturnType 
-   * 
+   * @param defaultReturnType
+   *
    * @return JavaType with new RepositoryCustom interface.
    */
   private JavaType addRepositoryCustom(JavaType domainType, JavaType repositoryType,
@@ -532,59 +526,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     generateRepositoryCustomImpl(interfaceType, repositoryType, domainType);
 
     return interfaceType;
-
-  }
-
-  /**
-   * Method that generates QueryDslRepositorySupportExt on current package. 
-   * If it already exists in this or other package, it will not be generated.
-   * 
-   * @param repositoryPackage Package where QueryDslRepositorySupportExt should 
-   *            be generated
-   * @return JavaType with existing or new QueryDslRepositorySupportExt
-   */
-  private JavaType generateQueryDslRepositorySupportExt(JavaPackage repositoryPackage) {
-
-    // Create JavaType in repositoryPackage
-    final JavaType javaType =
-        new JavaType(String.format("%s.QueryDslRepositorySupportExt", repositoryPackage),
-            repositoryPackage.getModule());
-    final String physicalPath =
-        getPathResolver().getCanonicalPath(javaType.getModule(), Path.SRC_MAIN_JAVA, javaType);
-
-    // Find GlobalSearch and get fully qualified name
-    Set<JavaType> globalSearchTypes =
-        getTypeLocationService().findTypesWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
-    JavaType globalSearch = null;
-    if (!globalSearchTypes.isEmpty()) {
-      for (JavaType type : globalSearchTypes) {
-        globalSearch = type;
-      }
-    }
-    Validate.notNull(globalSearch,
-        "The project must have a GlobalSearch class to work properly with repositories.");
-
-    // Including ReadOnlyRepository interface
-    InputStream inputStream = null;
-    try {
-      // Use defined template
-      inputStream =
-          FileUtils.getInputStream(getClass(), "QueryDslRepositorySupportExt-template._java");
-      String input = IOUtils.toString(inputStream);
-      // Replacing package
-      input = input.replace("__PACKAGE__", repositoryPackage.getFullyQualifiedPackageName());
-      // Replacing GlobalSerach import
-      input = input.replace("__GLOBAL_SEARCH_IMPORT__", globalSearch.getFullyQualifiedTypeName());
-
-      // Creating ReadOnlyRepository interface
-      getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);
-    } catch (final IOException e) {
-      throw new IllegalStateException(String.format("Unable to create '%s'", physicalPath), e);
-    } finally {
-      IOUtils.closeQuietly(inputStream);
-    }
-
-    return javaType;
 
   }
 
@@ -751,7 +692,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
   /**
    * Method to get JpaOperations Service implementation
-   * 
+   *
    * @return
    */
   public JpaOperationsImpl getJpaOperationsImpl() {

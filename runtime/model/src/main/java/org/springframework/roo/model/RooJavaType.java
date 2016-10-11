@@ -135,8 +135,6 @@ public final class RooJavaType {
           "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesSortHandler");
   public static final JavaType ROO_THYMELEAF_DATATABLES_SORT = new JavaType(
       "org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafDatatablesSort");
-  public static final JavaType ROO_GLOBAL_SEARCH = new JavaType(
-      "org.springframework.roo.addon.layers.repository.jpa.annotations.RooGlobalSearch");
   public static final JavaType ROO_GLOBAL_SEARCH_HANDLER = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.RooGlobalSearchHandler");
 

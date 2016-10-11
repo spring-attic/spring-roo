@@ -21,6 +21,7 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
@@ -103,7 +104,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    *            the fields of each domain type.
    * @param typesAreProjections the Map<JavaType, Boolean> which tells if each type is
    *            a projection and must use a ConstructorExpression in finders implementations.
-   * @param finderParametersMap the Map with all projection finder names and its list 
+   * @param finderParametersMap the Map with all projection finder names and its list
    *            of finder params.
    */
   public RepositoryJpaCustomImplMetadata(final String identifier, final JavaType aspectName,
@@ -244,13 +245,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // AttributeMappingBuilder mapping = buildMapper()
     StringBuffer mappingBuilderLine = new StringBuffer();
-    mappingBuilderLine.append(String.format(
-        "%s mapping = buildMapper()",
-        new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
-            .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
-            .concat("QueryDslRepositorySupportExt").concat(LogicalPath.PATH_SEPARATOR)
-            .concat("AttributeMappingBuilder")).getNameIncludingTypeParameters(false,
-            this.importResolver)));
+    mappingBuilderLine.append(String.format("%s mapping = buildMapper()",
+        SpringletsJavaType.SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER
+            .getNameIncludingTypeParameters(false, this.importResolver)));
 
     if (!this.typesAreProjections.get(this.defaultReturnType)) {
 
@@ -296,7 +293,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Builds the query return sentence
-   * 
+   *
    * @param bodyBuilder ITD boidy builder
    * @param pageable the Page implementation variable name
    * @param entityVariable the name of the variable owning the query
@@ -389,13 +386,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // AttributeMappingBuilder mapping = buildMapper()
     StringBuffer mappingBuilderLine = new StringBuffer();
-    mappingBuilderLine.append(String.format(
-        "%s mapping = buildMapper()",
-        new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
-            .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
-            .concat("QueryDslRepositorySupportExt").concat(LogicalPath.PATH_SEPARATOR)
-            .concat("AttributeMappingBuilder")).getNameIncludingTypeParameters(false,
-            this.importResolver)));
+    mappingBuilderLine.append(String.format("%s mapping = buildMapper()",
+        SpringletsJavaType.SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER
+            .getNameIncludingTypeParameters(false, this.importResolver)));
 
     // .map(entiyVarName, varName) ...
     if (!this.typesAreProjections.get(this.defaultReturnType)) {
@@ -497,13 +490,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // AttributeMappingBuilder mapping = buildMapper()
     StringBuffer mappingBuilderLine = new StringBuffer();
-    mappingBuilderLine.append(String.format(
-        "%s mapping = buildMapper()",
-        new JavaType(governorPhysicalTypeMetadata.getType().getPackage()
-            .getFullyQualifiedPackageName().concat(LogicalPath.PATH_SEPARATOR)
-            .concat("QueryDslRepositorySupportExt").concat(LogicalPath.PATH_SEPARATOR)
-            .concat("AttributeMappingBuilder")).getNameIncludingTypeParameters(false,
-            this.importResolver)));
+    mappingBuilderLine.append(String.format("%s mapping = buildMapper()",
+        SpringletsJavaType.SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER
+            .getNameIncludingTypeParameters(false, this.importResolver)));
 
     // .map(entiyVarName, varName) ...
     if (!this.typesAreProjections.get(returnType)) {
@@ -549,9 +538,9 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
   }
 
   /**
-   * Method that generates implementation methods for each count method, associated 
+   * Method that generates implementation methods for each count method, associated
    * to each custom finder.
-   *  
+   *
    * @param method
    * @param validFields
    * @return
@@ -667,7 +656,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
    * @param finderParam the JavaType which contains the fields to use for filtering.
    *            Can be null in findAll queries.
    * @param formBean the name of the search param.
-   * @param finderName the name of the finder. Only available when method is a 
+   * @param finderName the name of the finder. Only available when method is a
    *            projection/DTO finder.
    */
   private void buildQuery(InvocableMemberBodyBuilder bodyBuilder, String entityVariable,

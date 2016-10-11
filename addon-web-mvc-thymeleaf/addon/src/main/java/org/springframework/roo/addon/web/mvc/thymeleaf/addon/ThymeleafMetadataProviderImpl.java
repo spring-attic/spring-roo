@@ -50,6 +50,7 @@ import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -87,7 +88,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
 
-  private JavaType globalSearchType;
   private JavaType datatablesDataType;
   private JavaType datatablesPageable;
 
@@ -216,19 +216,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // Getting service details
     final ServiceMetadata serviceMetadata = getServiceMetadata();
-
-    // Getting Global search class
-    Set<ClassOrInterfaceTypeDetails> globalSearchClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_GLOBAL_SEARCH);
-    if (globalSearchClasses.isEmpty()) {
-      throw new RuntimeException("ERROR: GlobalSearch.java file doesn't exist or has been deleted.");
-    }
-    Iterator<ClassOrInterfaceTypeDetails> gobalSearchClassIterator = globalSearchClasses.iterator();
-    while (gobalSearchClassIterator.hasNext()) {
-      this.globalSearchType = gobalSearchClassIterator.next().getType();
-      break;
-    }
 
     // Getting DatatablesDataType
     Set<ClassOrInterfaceTypeDetails> datatablesDataClasses =
@@ -507,7 +494,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     }
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
+    parameterTypes.add(AnnotatedJavaType
+        .convertFromJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
         .build()));
 
@@ -586,7 +574,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     final JavaSymbolName methodName = new JavaSymbolName("list");
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
+    parameterTypes.add(AnnotatedJavaType
+        .convertFromJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.datatablesPageable));
     AnnotationMetadataBuilder requestParamAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.REQUEST_PARAM);
@@ -2167,8 +2156,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
     parameterTypes.add(new AnnotatedJavaType(this.controllerDetailInfo.getParentEntity(),
         modelAttributeAnnotation.build()));
-    Validate.notNull(this.globalSearchType, "Couldn't find GlobalSearch in project.");
-    parameterTypes.add(new AnnotatedJavaType(this.globalSearchType));
+    parameterTypes.add(new AnnotatedJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
         .build()));
 
@@ -2317,7 +2305,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
     parameterTypes.add(new AnnotatedJavaType(this.controllerDetailInfo.getParentEntity(),
         modelAttributeAnnotation.build()));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.globalSearchType));
+    parameterTypes.add(AnnotatedJavaType
+        .convertFromJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.datatablesPageable));
     AnnotationMetadataBuilder requestParamAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.REQUEST_PARAM);

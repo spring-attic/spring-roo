@@ -8,7 +8,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -27,7 +26,6 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -37,16 +35,14 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -508,6 +504,16 @@ public class JpaOperationsImpl implements JpaOperations {
       requiredDependencies.add(new Dependency(dependencyElement));
     }
 
+    final List<Element> commonDependencies =
+        XmlUtils.findElements("/configuration/common/dependencies/dependency", configuration);
+    for (final Element dependencyElement : commonDependencies) {
+      requiredDependencies.add(new Dependency(dependencyElement));
+    }
+    // Add properties
+    List<Element> properties = XmlUtils.findElements("/configuration/properties/*", configuration);
+    for (Element property : properties) {
+      getProjectOperations().addProperty("", new Property(property));
+    }
     // Add dependencies used by other profiles, excluding the current profile
     List<String> profiles = applicationConfigService.getApplicationProfiles(module.getModuleName());
     profiles.remove(profile);

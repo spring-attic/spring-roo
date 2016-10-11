@@ -40,7 +40,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Class that implements {@link ServiceOperations}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @since 1.2.0
@@ -211,7 +211,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
   /**
    * Method that creates the service interface
-   * 
+   *
    * @param domainType
    * @param interfaceType
    */
@@ -253,26 +253,14 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     // Add dependencies between modules
     projectOperations.addModuleDependency(interfaceType.getModule(), domainType.getModule());
-
-    // Getting the class annotated with @RooGlobalSearch
-    Set<ClassOrInterfaceTypeDetails> globalSearchDetails =
-        typeLocationService
-            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GLOBAL_SEARCH);
-
-    if (globalSearchDetails.size() == 0) {
-      throw new RuntimeException("ERROR: Not found a class annotated with @RooGlobalSearch");
-    }
-
-    JavaType globalSearch = globalSearchDetails.iterator().next().getType();
-    projectOperations.addModuleDependency(interfaceType.getModule(), globalSearch.getModule());
   }
 
   /**
    * Method that creates the service implementation
-   * 
+   *
    * @param interfaceType
    * @param implType
-   * @param domainType 
+   * @param domainType
    */
   private void createServiceImplementation(final JavaType interfaceType, JavaType implType,
       ClassOrInterfaceTypeDetails repository, JavaType domainType) {

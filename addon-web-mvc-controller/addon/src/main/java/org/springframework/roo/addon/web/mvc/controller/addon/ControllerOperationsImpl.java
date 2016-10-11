@@ -42,6 +42,7 @@ import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooEnumDetails;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
@@ -240,7 +241,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     // Getting generated global class
     Set<ClassOrInterfaceTypeDetails> gobalSearchClasses =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_GLOBAL_SEARCH);
+            SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH);
     if (gobalSearchClasses.isEmpty()) {
       throw new RuntimeException(
           "ERROR: GlobalSearch.java class doesn't exists or has been deleted.");

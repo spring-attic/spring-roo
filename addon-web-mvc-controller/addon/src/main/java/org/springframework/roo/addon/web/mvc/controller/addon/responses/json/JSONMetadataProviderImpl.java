@@ -48,6 +48,7 @@ import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringEnumDetails;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -251,7 +252,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     // Get GlobalSearch type
     Set<ClassOrInterfaceTypeDetails> globalSearchList =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_GLOBAL_SEARCH);
+            SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH);
     if (!globalSearchList.isEmpty()) {
       for (ClassOrInterfaceTypeDetails type : globalSearchList) {
         this.globalSearch = type.getType();

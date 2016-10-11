@@ -30,6 +30,7 @@ import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTrack
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -44,7 +45,7 @@ import java.util.logging.Logger;
 
 /**
  * Implementation of {@link RepositoryJpaCustomMetadataProvider}.
- * 
+ *
  * @author Paula Navarro
  * @author Juan Carlos García
  * @author Sergio Clares
@@ -71,7 +72,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA_CUSTOM} as additional 
+   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA_CUSTOM} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -95,9 +96,9 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -193,7 +194,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     // Getting the class annotated with @RooGlobalSearch
     Set<ClassOrInterfaceTypeDetails> globalSearchDetails =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_GLOBAL_SEARCH);
+            SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH);
 
     if (globalSearchDetails.size() == 0) {
       throw new RuntimeException("ERROR: Not found a class annotated with @RooGlobalSearch");
