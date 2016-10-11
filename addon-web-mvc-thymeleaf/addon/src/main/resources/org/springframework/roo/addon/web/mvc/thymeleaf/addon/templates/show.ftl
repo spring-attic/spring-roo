@@ -42,7 +42,10 @@
 
 </head>
 
-<body>
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
 
   <!--START CONTAINER-->
   <div class="container bg-container">
@@ -310,6 +313,6 @@
   <!-- Application -->
   <script type="text/javascript" src="../../static/public/js/main.js" data-th-remove="all"></script>
 
-</body>
-
+ </body>
+</#if>
 </html>

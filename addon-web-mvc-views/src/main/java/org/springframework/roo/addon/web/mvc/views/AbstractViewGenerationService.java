@@ -81,8 +81,8 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   protected abstract DOC parse(String content);
 
-  protected abstract DOC merge(DOC existingDoc, DOC newDoc, String idContainerElements,
-      List<String> requiredIds);
+  protected abstract DOC merge(String templateName, DOC loadExistingDoc, ViewContext ctx);
+
 
   protected abstract DOC merge(String templateName, DOC existingDoc, ViewContext ctx,
       List<FieldItem> fields);
@@ -264,7 +264,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     ctx.addExtraParameter("action", path);
 
     // Process elements to generate
-    DOC newDoc = process("finderForm", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName =
@@ -273,7 +273,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, CRU_FINDER_LIST_ID_CONTAINER_ELEMENT, null);
+      newDoc = merge("finderForm", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("finderForm", ctx);
     }
 
     // Write newDoc on disk
@@ -335,14 +337,17 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addIndexView(String moduleName, ViewContext ctx) {
 
     // Process elements to generate
-    DOC newDoc = process("index", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName = getViewsFolder(moduleName).concat("/index").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("index", loadExistingDoc(viewName), ctx);
+
+    } else {
+      newDoc = process("index", ctx);
     }
 
     // Write newDoc on disk
@@ -354,14 +359,16 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addLoginView(String moduleName, ViewContext ctx) {
 
     // Process elements to generate
-    DOC newDoc = process("login", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName = getViewsFolder(moduleName).concat("/login").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("login", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("login", ctx);
     }
 
     // Write newDoc on disk
@@ -373,15 +380,18 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addErrorView(String moduleName, ViewContext ctx) {
 
     // Process elements to generate
-    DOC newDoc = process("error", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName = getViewsFolder(moduleName).concat("/error").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("error", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("error", ctx);
     }
+
 
     // Write newDoc on disk
     writeDoc(newDoc, viewName);
@@ -392,7 +402,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addDefaultLayout(String moduleName, ViewContext ctx) {
 
     // Process elements to generate
-    DOC newDoc = process("layouts/default-layout", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName =
@@ -400,7 +410,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("layouts/default-layout", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("layouts/default-layout", ctx);
     }
 
     // Write newDoc on disk
@@ -412,7 +424,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   public void addDefaultLayoutNoMenu(String moduleName, ViewContext ctx) {
 
     // Process elements to generate
-    DOC newDoc = process("layouts/default-layout-no-menu", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName =
@@ -420,7 +432,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("layouts/default-layout-no-menu", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("layouts/default-layout-no-menu", ctx);
     }
 
     // Write newDoc on disk
@@ -431,14 +445,16 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   @Override
   public void addFooter(String moduleName, ViewContext ctx) {
     // Process elements to generate
-    DOC newDoc = process("fragments/footer", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName = getFragmentsFolder(moduleName).concat("/footer").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("fragments/footer", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/footer", ctx);
     }
 
     // Write newDoc on disk
@@ -449,14 +465,16 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   @Override
   public void addHeader(String moduleName, ViewContext ctx) {
     // Process elements to generate
-    DOC newDoc = process("fragments/header", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName = getFragmentsFolder(moduleName).concat("/header").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("fragments/header", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/header", ctx);
     }
 
     // Write newDoc on disk
@@ -566,14 +584,16 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   @Override
   public void addModal(String moduleName, ViewContext ctx) {
     // Process elements to generate
-    DOC newDoc = process("fragments/modal", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName = getFragmentsFolder(moduleName).concat("/modal").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("fragments/modal", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/modal", ctx);
     }
 
     // Write newDoc on disk
@@ -584,14 +604,16 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   @Override
   public void addSession(String moduleName, ViewContext ctx) {
     // Process elements to generate
-    DOC newDoc = process("fragments/session", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName = getFragmentsFolder(moduleName).concat("/session").concat(getViewsExtension());
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("fragments/session", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/session", ctx);
     }
 
     // Write newDoc on disk
@@ -602,7 +624,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   @Override
   public void addSessionLinks(String moduleName, ViewContext ctx) {
     // Process elements to generate
-    DOC newDoc = process("fragments/session-links", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName =
@@ -610,7 +632,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+      newDoc = merge("fragments/session-links", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/session-links", ctx);
     }
 
     // Write newDoc on disk
@@ -626,7 +650,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
     ctx.addExtraParameter("languages", installedLanguages);
 
     // Process elements to generate
-    DOC newDoc = process("fragments/languages", ctx);
+    DOC newDoc = null;
 
     // Getting new viewName
     String viewName =
@@ -640,8 +664,9 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
     // Check if new view to generate exists or not
     if (existsFile(viewName)) {
-      newDoc =
-          merge(loadExistingDoc(viewName), newDoc, LANGUAGES_ID_CONTAINER_ELEMENT, requiredIds);
+      newDoc = merge("fragments/languages", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/languages", ctx);
     }
 
     // Write newDoc on disk

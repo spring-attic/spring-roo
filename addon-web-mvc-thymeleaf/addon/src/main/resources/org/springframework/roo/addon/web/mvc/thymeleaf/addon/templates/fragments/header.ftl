@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <title>Header</title>
   </head>
-  <body>
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
     <!--
     Only the internal content of the following div is included within
     the template, in header fragment
@@ -22,4 +25,5 @@
 
     </div>
   </body>
+</#if>
 </html>

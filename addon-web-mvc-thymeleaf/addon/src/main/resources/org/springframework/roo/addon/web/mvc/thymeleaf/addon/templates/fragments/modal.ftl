@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <title>Modal</title>
   </head>
-  <body>
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
     <div data-layout-fragment="modal(id, title)">
           <div class="modal fade" data-th-id="${r"${id}"} + 'Modal'" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
             <div class="modal-dialog" role="document">
@@ -21,4 +24,5 @@
           </div>
     </div>
   </body>
+  </#if>
 </html>
