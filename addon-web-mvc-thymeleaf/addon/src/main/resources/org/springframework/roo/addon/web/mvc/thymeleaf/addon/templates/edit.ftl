@@ -34,7 +34,7 @@
       data-th-remove="all"></link>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" type="text/css" 
+    <link rel="stylesheet" type="text/css"
        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"/>
 
 
@@ -60,8 +60,8 @@
 <link rel="stylesheet" type="text/css"
   data-th-href="@{/public/css/select2-bootstrap.css}"
   href="../../static/public/css/select2-bootstrap.css" />
-  
-  
+
+
 <!-- DateTimePicker -->
 <link rel="stylesheet" type="text/css"
     data-th-href="@{/public/css/jquery.datetimepicker.css}"
@@ -156,16 +156,20 @@
           <input type="hidden" name="_method" value="PUT" />
           <fieldset id="containerFields">
             <#list fields as field>
-                <#if field.type == "TEXT">
-                    <@text.input label=field.label fieldName=field.fieldName z=field.z size=3 />
+                <#if field.userManaged>
+                  ${field.codeManaged}
+                <#elseif field.type == "TEXT">
+                    <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z size=3 />
                 <#elseif field.type == "DATE">
-                    <@date.input label=field.label 
+                    <@date.input label=field.label
                     fieldName=field.fieldName
+                    fieldId=field.fieldId
                     z=field.z
                     format=field.configuration.format />
                 <#elseif field.type == "REFERENCE">
-                    <@reference.input label=field.label 
-                        fieldName=field.fieldName 
+                    <@reference.input label=field.label
+                        fieldName=field.fieldName
+                        fieldId=field.fieldId
                         z=field.z
                         referencedEntity=field.configuration.referencedEntity
                         identifierField=field.configuration.identifierField
@@ -173,12 +177,13 @@
                         fieldOne=field.configuration.fieldOne
                         fieldTwo=field.configuration.fieldTwo />
                 <#elseif field.type == "ENUM">
-                    <@enum.input label=field.label 
+                    <@enum.input label=field.label
                     fieldName=field.fieldName
+                    fieldId=field.fieldId
                     z=field.z
-                    items=field.configuration.items />                
+                    items=field.configuration.items />
                 <#elseif field.type == "BOOLEAN">
-                    <@checkbox.input label=field.label fieldName=field.fieldName z=field.z />                
+                    <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
                 </#if>
             </#list>
 
@@ -189,7 +194,7 @@
                   <!-- TODO IE8 -->
                   <button type="reset" class="btn btn-default"
                     onclick="location.href='list.html'"
-                    data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''" 
+                    data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
                     data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
                 </div>
                 <div class="pull-right">
@@ -223,15 +228,15 @@
   <!-- Bootstrap -->
   <script type="text/javascript"
     src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script>
-    
+
   <!-- Application -->
   <script src="../../static/public/js/main.js"></script>
 
   <div data-layout-fragment="javascript">
       <!-- Moment.js -->
-      <script data-th-src="@{/public/js/moment.js}" 
+      <script data-th-src="@{/public/js/moment.js}"
         src="../../static/public/js/moment.js"></script>
-      <script data-th-src="@{/public/js/moment-} + ${r"${application_locale}"} + .js" 
+      <script data-th-src="@{/public/js/moment-} + ${r"${application_locale}"} + .js"
         src="../../static/public/js/moment-en.js"></script>
       <!-- Select2 -->
       <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
@@ -244,6 +249,6 @@
 
   <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
   <script src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
-  
+
 </body>
 </html>

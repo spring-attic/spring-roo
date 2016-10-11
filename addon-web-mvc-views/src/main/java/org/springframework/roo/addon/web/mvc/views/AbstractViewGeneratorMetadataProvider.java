@@ -262,7 +262,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     if (this.finders != null) {
       for (MethodMetadata finderMethod : this.finders) {
 
-        // For each finder, create form and list view exposing only finder params 
+        // For each finder, create form and list view exposing only finder params
         // from form bean object
         JavaType formBean = finderMethod.getParameterTypes().get(0).getJavaType();
         List<FieldMetadata> fieldsToAdd = new ArrayList<FieldMetadata>();
@@ -271,6 +271,16 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
         if (getTypeLocationService().getTypeDetails(formBean) != null
             && getTypeLocationService().getTypeDetails(formBean).getAnnotation(RooJavaType.ROO_DTO) == null) {
           formBean = this.entity;
+
+          // Register dependency between DTO JavaBeanMetadata and this one
+          final LogicalPath logicalPath =
+              PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(formBean)
+                  .getDeclaredByMetadataId());
+          final String javaBeanMetadataKey =
+              JavaBeanMetadata.createIdentifier(getTypeLocationService().getTypeDetails(formBean)
+                  .getType(), logicalPath);
+          registerDependency(javaBeanMetadataKey, metadataIdentificationString);
+
         }
 
         // Add formBean to viewContext
@@ -307,11 +317,21 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
           viewGenerationService.addFinderListView(this.controller.getType().getModule(),
               getMemberDetails(returnTypeDetails), finderMethod.getMethodName().getSymbolName(),
               ctx);
+
+          // Register dependency between projection JavaBeanMetadata and this one
+          final LogicalPath logicalPath =
+              PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(
+                  returnTypeDetails.getType()).getDeclaredByMetadataId());
+          final String javaBeanMetadataKey =
+              JavaBeanMetadata.createIdentifier(
+                  getTypeLocationService().getTypeDetails(returnTypeDetails.getType()).getType(),
+                  logicalPath);
+          registerDependency(javaBeanMetadataKey, metadataIdentificationString);
+
         } else {
           viewGenerationService.addFinderListView(this.controller.getType().getModule(),
               entityDetails, finderMethod.getMethodName().getSymbolName(), ctx);
         }
-
       }
     }
 

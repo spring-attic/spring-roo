@@ -163,35 +163,39 @@
 
         <!--START TABLE-->
         <div class="table-responsive" id="containerFields">
-          <table id="${entityName}Table"
-                 class="table table-striped table-hover table-bordered"
-                 data-row-id="${identifierField}"
-                 data-select="single"
-                 data-z="${z}"
-                 data-order="[[ 0, &quot;asc&quot; ]]"
-                 data-th-attr="data-create-url=@{${controllerPath}/create-form/}">
-            <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
-            <thead>
-              <tr>
-                <#list fields as field>
-                <#if field.type != "LIST">
-                <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
-                </#if>
-                </#list>
-                <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-              </tr>
-            </thead>
-            <tbody data-th-remove="all">
-              <tr>
-                <#list fields as field>
-                <#if field.type != "LIST">
-                <td>${field.fieldName}</td>
-                </#if>
-                </#list>
-                <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-              </tr>
-            </tbody>
-          </table>
+          <#if entity.userManaged>
+             ${entity.codeManaged}
+          <#else>
+            <table id="${entity.entityItemId}-table"
+                   class="table table-striped table-hover table-bordered"
+                   data-row-id="${entity.configuration.identifierField}"
+                   data-select="single"
+                   data-z="${entity.z}"
+                   data-order="[[ 0, &quot;asc&quot; ]]"
+                   data-th-attr="data-create-url=@{${entity.configuration.controllerPath}/create-form/}">
+              <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
+              <thead>
+                <tr>
+                  <#list fields as field>
+                  <#if field.type != "LIST">
+                  <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
+                  </#if>
+                  </#list>
+                  <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                </tr>
+              </thead>
+              <tbody data-th-remove="all">
+                <tr>
+                  <#list fields as field>
+                  <#if field.type != "LIST">
+                  <td>${field.fieldName}</td>
+                  </#if>
+                  </#list>
+                  <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                </tr>
+              </tbody>
+            </table>
+          </#if>
         </div>
         <!--END TABLE-->
 
@@ -199,55 +203,71 @@
           <hr>
           <ul class="nav nav-tabs" id="nav-tabs">
           <#assign firstDetail=true>
-          <#list details as field>
-            <#if firstDetail == true>
-              <li class="active"><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}" data-z="${field.z}">${field.fieldNameCapitalized}</a></li>
-              <#assign firstDetail=false>
-            <#else>
-                <li><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}" data-z="${field.z}">${field.fieldNameCapitalized}</a></li>
-            </#if>
+          <#list details as detail>
+              <#if firstDetail == true>
+                <li class="active">
+                <#if detail.tabLinkCode??>
+                  ${detail.tabLinkCode}
+                <#else>
+                  <a id="${detail.entityItemId}-table-tab" data-toggle="tab" href="#detail-${detail.entityItemId}" data-z="${detail.z}">${detail.fieldNameCapitalized}</a>
+                </#if>
+                </li>
+                <#assign firstDetail=false>
+              <#else>
+                  <li>
+                  <#if detail.tabLinkCode??>
+                    ${detail.tabLinkCode}
+                  <#else>
+                    <a id="${detail.entityItemId}-table-tab" data-toggle="tab" href="#detail-${detail.entityItemId}" data-z="${detail.z}">${detail.fieldNameCapitalized}</a>
+                  </#if>
+                  </li>
+              </#if>
           </#list>
           </ul>
 
           <div class="tab-content" id="tab-content">
                 <#assign firstDetail=true>
-                <#list details as field>
+                <#list details as detail>
                     <#if firstDetail == true>
-                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane active">
+                        <div id="detail-${detail.entityItemId}" class="tab-pane active">
                         <#assign firstDetail=false>
                     <#else>
-                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane">
+                        <div id="detail-${detail.entityItemId}" class="tab-pane">
                     </#if>
                         <!--START TABLE-->
                         <div class="table-responsive">
-                          <table id="${field.fieldNameCapitalized}Table"
-                            class="table table-striped table-hover table-bordered"
-                            data-z="${field.z}"
-                            data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
-                            data-order="[[ 0, &quot;asc&quot; ]]"
-                            data-create-url-function="create${field.configuration.referencedFieldType}Url">
-                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.fieldNameCapitalized}</caption>
-                            <thead>
-                              <tr>
-                                <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                <#if referencedFieldField != entityName>
-                                    <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
-                                </#if>
-                                </#list>
-                                <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                              </tr>
-                            </thead>
-                            <tbody data-th-remove="all">
-                              <tr>
-                                <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                <#if referencedFieldField != entityName>
-                                    <td>${referencedFieldField.fieldName}</td>
-                                </#if>
-                                </#list>
-                                <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                              </tr>
-                            </tbody>
-                          </table>
+                          <#if detail.userManaged>
+                            ${detail.codeManaged}
+                          <#else>
+                            <table id="${detail.entityItemId}-table"
+                              class="table table-striped table-hover table-bordered"
+                              data-z="${detail.z}"
+                              data-row-id="${detail.configuration.identifierField}" data-defer-loading="0"
+                              data-order="[[ 0, &quot;asc&quot; ]]"
+                              data-create-url-function="create${detail.configuration.referencedFieldType}Url">
+                              <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${detail.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${detail.fieldNameCapitalized}</caption>
+                              <thead>
+                                <tr>
+                                  <#list detail.configuration.referenceFieldFields as referencedFieldField>
+                                  <#if referencedFieldField != entityName>
+                                      <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
+                                  </#if>
+                                  </#list>
+                                  <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                                </tr>
+                              </thead>
+                              <tbody data-th-remove="all">
+                                <tr>
+                                  <#list detail.configuration.referenceFieldFields as referencedFieldField>
+                                  <#if referencedFieldField != entityName>
+                                      <td>${referencedFieldField.fieldName}</td>
+                                  </#if>
+                                  </#list>
+                                  <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </#if>
                         </div>
                         <!--END TABLE-->
                     </div>
@@ -333,161 +353,173 @@
 
 
     <!-- Datatables page configs -->
-    <script type="text/javascript" data-th-inline="javascript" id="${entityName}TableJavascript" data-z="${z}">
-     jQuery(document).ready( function () {
-        var ${entityName}Table = jQuery('#${entityName}Table').DataTable({
-            'ajax': {
-                  'url': [[@{${controllerPath}/}]]
-              },
-            'columns': [
-              <#list fields as field>
-              { 'data': '${field.fieldName}' },
-              </#list>
-              {
-                'data': '${identifierField}',
-                'orderable': false,
-                'searchable': false,
-                'render': function ( data, type, full, meta ) {
-                    var baseUrl = [[@{${controllerPath}/}]];
-                    return '<a role="button" class="btn-accion ver" href="' + baseUrl + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
-                    '<a role="button" class="btn-accion modificar" href="' + baseUrl + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
-                    '<a role="button" class="btn-accion eliminar" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
+    <#if entity.javascriptCode["${entity.entityItemId}-table-javascript"]??>
+        ${entity.javascriptCode["${entity.entityItemId}-table-javascript"]}
+    <#else>
+      <script type="text/javascript" data-th-inline="javascript" id="${entity.entityItemId}-table-javascript" data-z="${entity.z}">
+       jQuery(document).ready( function () {
+          var ${entityName}Table = jQuery('#${entity.entityItemId}-table').DataTable({
+              'ajax': {
+                    'url': [[@{${entity.configuration.controllerPath}/}]]
+                },
+              'columns': [
+                <#list fields as field>
+                { 'data': '${field.fieldName}' },
+                </#list>
+                {
+                  'data': '${entity.configuration.identifierField}',
+                  'orderable': false,
+                  'searchable': false,
+                  'render': function ( data, type, full, meta ) {
+                      var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
+                      return '<a role="button" class="btn-accion ver" href="' + baseUrl + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
+                      '<a role="button" class="btn-accion modificar" href="' + baseUrl + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
+                      '<a role="button" class="btn-accion eliminar" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
+                  }
                 }
-              }
-            ]
-        });
+              ]
+          });
 
-        jQuery.extend({
-           'delete${entityName}': function(${identifierField}) {
-               var baseUrl = [[@{${controllerPath}/}]];
-               jQuery.ajax({
-                   url: baseUrl + ${identifierField},
-                   type: 'DELETE',
-                   success: function(result) {
-                     jQuery('#delete${entityName}ModalBody').empty();
-                     jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');
-                     jQuery('#delete${entityName}Modal').modal();
-                     /** Refresh Datatables */
-                     ${entityName}Table.ajax.reload();
-                   },
-                   error: function(jqXHR) {
-                     /** Getting error code */
-                     var message = '';
-                     /** CONFLICT */
-                     if (jqXHR.status == 409) {
-                         message = '<p data-th-text="|${r"#{info_no_deleted_item}"}|">0 items has been deleted.</p>';
+          jQuery.extend({
+             'delete${entityName}': function(${entity.configuration.identifierField}) {
+                 var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
+                 jQuery.ajax({
+                     url: baseUrl + ${entity.configuration.identifierField},
+                     type: 'DELETE',
+                     success: function(result) {
+                       jQuery('#delete${entityName}ModalBody').empty();
+                       jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');
+                       jQuery('#delete${entityName}Modal').modal();
+                       /** Refresh Datatables */
+                       ${entityName}Table.ajax.reload();
+                     },
+                     error: function(jqXHR) {
+                       /** Getting error code */
+                       var message = '';
+                       /** CONFLICT */
+                       if (jqXHR.status == 409) {
+                           message = '<p data-th-text="|${r"#{info_no_deleted_item}"}|">0 items has been deleted.</p>';
+                       }
+                       /** NOT_FOUND */
+                       if (jqXHR.status == 404 ) {
+                           message = '<p data-th-text="|${r"#{info_deleted_item_problem} #{info_no_exist_item}"}|">Error deleting selected item.</p>';
+                       }
+                       jQuery('#delete${entityName}ModalBody').empty();
+                       jQuery('#delete${entityName}ModalBody').append(message);
+                       jQuery('#delete${entityName}Modal').modal();
                      }
-                     /** NOT_FOUND */
-                     if (jqXHR.status == 404 ) {
-                         message = '<p data-th-text="|${r"#{info_deleted_item_problem} #{info_no_exist_item}"}|">Error deleting selected item.</p>';
-                     }
-                     jQuery('#delete${entityName}ModalBody').empty();
-                     jQuery('#delete${entityName}ModalBody').append(message);
-                     jQuery('#delete${entityName}Modal').modal();
-                   }
-                });
-           }
-         });
-      });
-      </script>
+                  });
+             }
+           });
+        });
+        </script>
+      </#if>
 
      <#if details?size != 0>
      	<#assign firstDetail = true>
-         <#list details as field>
-         <script type="text/javascript" data-th-inline="javascript" id="${field.fieldNameCapitalized}TableJavascript" data-z="${field.z}">
-         jQuery(document).ready( function () {
-         	<#if firstDetail == false>
-         	function initialize${field.fieldNameCapitalized}Table() {
-         	</#if>
-           	jQuery('#${field.fieldNameCapitalized}Table').DataTable({
-               'buttons' : [
-                    {
-                        'extend' : 'colvis',
-                        'className' : 'btn-accion'
-                    },
-                    {
-                        'extend' : 'pageLength',
-                        'className' : 'btn-accion'
-                    }
-                ],
-                'columns': [
-                  <#list field.configuration.referenceFieldFields as referencedFieldField>
-                  <#if referencedFieldField != entityName>
-                    { 'data': '${referencedFieldField.fieldName}' },
-                  </#if>
-                  </#list>
-                  {
-                    'data': '${field.configuration.identifierField}',
-                    'orderable': false,
-                    'searchable': false,
-                    'render': function ( data, type, full, meta ) {
-                        return '';
-                    }
-                  }
-                ]
-            });
-              <#if firstDetail == false>
-         }
-              	jQuery('#${field.fieldNameCapitalized}Tab').on('shown.bs.tab', function (e) {
-				if (jQuery.fn.DataTable.isDataTable('#${field.fieldNameCapitalized}Table') === false) {
-					initialize${field.fieldNameCapitalized}Table();
-					var url${field.fieldNameCapitalized} = jQuery.${field.fieldNameCapitalized}BaseUrl();
-					if (url${field.fieldNameCapitalized}) {
-						jQuery('#${field.fieldNameCapitalized}Table').DataTable().ajax.url(urlPruebaPets).load();
-					}
-				}
-  			});
-              </#if>
-              jQuery.extend({
-                'current${entityName}Id': undefined,
-                '${field.fieldNameCapitalized}BaseUrl': function() {
-                  if(jQuery.current${entityName}Id) {
-                    return [[@{${controllerPath}/}]] + jQuery.current${entityName}Id + '${field.configuration.controllerPath}/';
-                  }
-                  return undefined;
-                },
-                'create${field.fieldNameCapitalized}Url': function() {
-                  if(jQuery.current${entityName}Id) {
-                    return jQuery.${field.fieldNameCapitalized}BaseUrl() + jQuery.createUri + '/';
-                  }
-                  return undefined;
-                },
-                'update${field.fieldNameCapitalized}Url': function(${field.fieldNameCapitalized}Id) {
-                  if(jQuery.current${entityName}Id) {
-                    return jQuery.${field.fieldNameCapitalized}BaseUrl() + ${field.fieldNameCapitalized}Id + '/'+ jQuery.editUri + '/';
-                  }
-                  return undefined;
-                },
-                'delete${field.fieldNameCapitalized}Url': function(${field.fieldNameCapitalized}Id) {
-                  if(jQuery.current${entityName}Id) {
-                    return jQuery.${field.fieldNameCapitalized}BaseUrl() + ${field.fieldNameCapitalized}Id + '/'+ jQuery.deleteUri + '/';
-                  }
-                  return undefined;
-                }
-              });
-         	<#assign firstDetail = false>
-         	});
-          </script>
-         </#list>
+         <#list details as detail>
 
-       <script type="text/javascript" data-th-inline="javascript" id="${entityName}TableFirstDetailJavascript" data-z="${z}">
-       jQuery(document).ready( function () {
-         ${entityName}Table.on( 'select', function ( e, dt, type, indexes ) {
-            if ( type === 'row' ) {
-              var new${entityName}Id = ${entityName}Table.rows( indexes ).ids()[0];
-              if (jQuery.current${entityName}Id != new${entityName}Id) {
-                jQuery.current${entityName}Id = new${entityName}Id;
-                <#list details as field>
-                var url${field.fieldNameCapitalized} = jQuery.${field.fieldNameCapitalized}BaseUrl();
-                if (jQuery.fn.DataTable.isDataTable('#${field.fieldNameCapitalized}Table') === true) {
-               	jQuery('#${field.fieldNameCapitalized}Table').DataTable().ajax.url( url${field.fieldNameCapitalized} ).load();
+         <#if detail.javascriptCode["${detail.entityItemId}-table-javascript"]??>
+          ${detail.javascriptCode["${detail.entityItemId}-table-javascript"]}
+         <#else>
+           <script type="text/javascript" data-th-inline="javascript" id="${detail.entityItemId}-table-javascript" data-z="${detail.z}">
+           jQuery(document).ready( function () {
+           	<#if firstDetail == false>
+           	function initialize${detail.fieldNameCapitalized}Table() {
+           	</#if>
+             	jQuery('#${detail.entityItemId}-table').DataTable({
+                 'buttons' : [
+                      {
+                          'extend' : 'colvis',
+                          'className' : 'btn-accion'
+                      },
+                      {
+                          'extend' : 'pageLength',
+                          'className' : 'btn-accion'
+                      }
+                  ],
+                  'columns': [
+                    <#list detail.configuration.referenceFieldFields as referencedFieldField>
+                    <#if referencedFieldField != entityName>
+                      { 'data': '${referencedFieldField.fieldName}' },
+                    </#if>
+                    </#list>
+                    {
+                      'data': '${detail.configuration.identifierField}',
+                      'orderable': false,
+                      'searchable': false,
+                      'render': function ( data, type, full, meta ) {
+                          return '';
+                      }
+                    }
+                  ]
+              });
+                <#if firstDetail == false>
+           }
+                	jQuery('#${detail.entityItemId}-tab').on('shown.bs.tab', function (e) {
+  				if (jQuery.fn.DataTable.isDataTable('#${detail.entityItemId}-table') === false) {
+  					initialize${detail.fieldNameCapitalized}Table();
+  					var url${detail.fieldNameCapitalized} = jQuery.${detail.fieldNameCapitalized}BaseUrl();
+  					if (url${detail.fieldNameCapitalized}) {
+  						jQuery('#${detail.entityItemId}-table').DataTable().ajax.url(urlPruebaPets).load();
+  					}
+  				}
+    			});
+                </#if>
+                jQuery.extend({
+                  'current${entityName}Id': undefined,
+                  '${detail.fieldNameCapitalized}BaseUrl': function() {
+                    if(jQuery.current${entityName}Id) {
+                      return [[@{${entity.configuration.controllerPath}/}]] + jQuery.current${entityName}Id + '${detail.configuration.controllerPath}/';
+                    }
+                    return undefined;
+                  },
+                  'create${detail.fieldNameCapitalized}Url': function() {
+                    if(jQuery.current${entityName}Id) {
+                      return jQuery.${detail.fieldNameCapitalized}BaseUrl() + jQuery.createUri + '/';
+                    }
+                    return undefined;
+                  },
+                  'update${detail.fieldNameCapitalized}Url': function(${detail.fieldNameCapitalized}Id) {
+                    if(jQuery.current${entityName}Id) {
+                      return jQuery.${detail.fieldNameCapitalized}BaseUrl() + ${detail.fieldNameCapitalized}Id + '/'+ jQuery.editUri + '/';
+                    }
+                    return undefined;
+                  },
+                  'delete${detail.fieldNameCapitalized}Url': function(${detail.fieldNameCapitalized}Id) {
+                    if(jQuery.current${entityName}Id) {
+                      return jQuery.${detail.fieldNameCapitalized}BaseUrl() + ${detail.fieldNameCapitalized}Id + '/'+ jQuery.deleteUri + '/';
+                    }
+                    return undefined;
+                  }
+                });
+           	<#assign firstDetail = false>
+           	});
+            </script>
+            </#if>
+           </#list>
+       <#if entity.javascriptCode["${entity.entityItemId}-table-javascript-firstdetail"]??>
+          ${entity.javascriptCode["${entity.entityItemId}-table-javascript-firstdetail"]}
+       <#else>
+         <script type="text/javascript" data-th-inline="javascript" id="${entity.entityItemId}-table-javascript-firstdetail" data-z="${entity.z}">
+         jQuery(document).ready( function () {
+           ${entityName}Table.on( 'select', function ( e, dt, type, indexes ) {
+              if ( type === 'row' ) {
+                var new${entityName}Id = ${entityName}Table.rows( indexes ).ids()[0];
+                if (jQuery.current${entityName}Id != new${entityName}Id) {
+                  jQuery.current${entityName}Id = new${entityName}Id;
+                  <#list details as detail>
+                  var url${detail.fieldNameCapitalized} = jQuery.${detail.fieldNameCapitalized}BaseUrl();
+                  if (jQuery.fn.DataTable.isDataTable('#${detail.entityItemId}-table') === true) {
+                 	jQuery('#${detail.entityItemId}-table').DataTable().ajax.url( url${detail.fieldNameCapitalized} ).load();
+                  }
+                  </#list>
                 }
-                </#list>
               }
-            }
-          });
-          });
-        </script>
+            });
+            });
+          </script>
+        </#if>
      </#if>
 
   </div>

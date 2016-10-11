@@ -38,7 +38,10 @@
 
               <ul class="nav navbar-nav" id="entitiesMenuEntries">
                <#list menuEntries as entry>
-                <li class="dropdown" id="${entry.pathPrefix}${entry.entityName}Entry" data-z="${entry.z}">
+               <#if entry.userManaged>
+                 ${entry.codeManaged}
+               <#else>
+                <li class="dropdown" id="${entry.id}-entry" data-z="${entry.z}">
                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
                    aria-haspopup="true" aria-expanded="false"
                    data-th-utext="${r"#{"}label_menu_entry(${r"#{"}${entry.entityLabel}${r"}"})${r"}"}">${entry.entityName}<span class="caret"></span></a>
@@ -50,6 +53,7 @@
                   </#list>
                  </ul>
                 </li>
+               </#if>
                </#list>
               </ul>
 
