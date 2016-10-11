@@ -404,6 +404,26 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
+  public void addDefaultLayoutNoMenu(String moduleName, ViewContext ctx) {
+
+    // Process elements to generate
+    DOC newDoc = process("layouts/default-layout-no-menu", ctx);
+
+    // Getting new viewName
+    String viewName =
+        getLayoutsFolder(moduleName).concat("/default-layout-no-menu").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge(loadExistingDoc(viewName), newDoc, "", null);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
   public void addFooter(String moduleName, ViewContext ctx) {
     // Process elements to generate
     DOC newDoc = process("fragments/footer", ctx);

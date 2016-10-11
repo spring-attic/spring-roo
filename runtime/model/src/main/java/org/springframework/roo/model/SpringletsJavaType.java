@@ -7,6 +7,7 @@ package org.springframework.roo.model;
  * creating new instances of these types.
  *
  * @author Jose Manuel Vivó
+ * @author Juan Carlos García
  * @since 2.0.0
  */
 public class SpringletsJavaType {
@@ -20,6 +21,8 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER =
       new JavaType(
           "io.springlets.data.jpa.repository.support.QueryDslRepositorySupportExt.AttributeMappingBuilder");
+  public static final JavaType SPRINGLETS_USER_DETAILS_SERVICE = new JavaType(
+      "io.springlets.security.web.SpringletsUserDetailsService");
 
   /**
    * Constructor is private to prevent instantiation
