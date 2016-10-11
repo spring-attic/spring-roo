@@ -14,7 +14,7 @@
     data-th-remove="all" />
  <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
     href="../../static/public/img/favicon.ico" />
-    
+
  <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
     data-th-remove="all" />
 
@@ -29,7 +29,7 @@
   data-th-remove="all"></link>
 
  <!-- Font Awesome -->
- <link rel="stylesheet" type="text/css" 
+ <link rel="stylesheet" type="text/css"
    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"/>
 
  <!-- Bootswatch CSS custom -->
@@ -46,7 +46,7 @@
 <script src="/public/js/html5shiv.min.js"></script>
 <script src="/public/js/respond.min.js"></script>
 <![endif]-->
-    
+
 <!-- Select2 -->
 <link rel="stylesheet" type="text/css"
   data-th-href="@{/public/css/select2.css}"
@@ -54,27 +54,27 @@
 <link rel="stylesheet" type="text/css"
   data-th-href="@{/public/css/select2-bootstrap.css}"
   href="../../static/public/css/select2-bootstrap.css" />
-  
-  
+
+
 <!-- DateTimePicker -->
 <link rel="stylesheet" type="text/css"
     data-th-href="@{/public/css/jquery.datetimepicker.css}"
     href="../../static/public/css/jquery.datetimepicker.css" />
 <script data-th-src="@{/public/js/jquery.min.js}"
     src="../../static/public/js/jquery.min.js"></script>
-    
-<!-- Datatables -->  
-       
-  <link rel="stylesheet" type="text/css" 
+
+<!-- Datatables -->
+
+  <link rel="stylesheet" type="text/css"
         href="//cdn.datatables.net/1.10.12/css/dataTables.bootstrap.css"></link>
-  
-  <link rel="stylesheet" type="text/css" 
+
+  <link rel="stylesheet" type="text/css"
         href="//cdn.datatables.net/responsive/2.1.0/css/responsive.bootstrap.css"></link>
-  
-  <link rel="stylesheet" type="text/css" 
+
+  <link rel="stylesheet" type="text/css"
         href="//cdn.datatables.net/buttons/1.2.0/css/buttons.bootstrap.css"></link>
-  
-  <link rel="stylesheet" type="text/css" 
+
+  <link rel="stylesheet" type="text/css"
         href="//cdn.datatables.net/select/1.2.0/css/select.bootstrap.css"></link>
 
 </head>
@@ -117,7 +117,7 @@
             <a class="navbar-brand" href="#">Main Menu</a>
           </div>
 
-          <div id="bs-example-navbar-collapse-1" 
+          <div id="bs-example-navbar-collapse-1"
             class="navbar-collapse collapse">
             <!-- Main menu -->
             <div class="row">
@@ -163,38 +163,42 @@
 
         <!--START TABLE-->
         <div class="table-responsive" id="containerFields">
-          <table id="${entityName}Table" 
-                 class="table table-striped table-hover table-bordered" 
-                 data-row-id="${identifierField}"
-                 data-select="single"
-                 data-z="${z}"
-                 data-order="[[ 0, &quot;asc&quot; ]]"
-                 data-th-attr="data-create-url=@{${controllerPath}/create-form/}">
-            <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
-            <thead>
-              <tr>
-                <#list fields as field>
-                <#if field.type != "LIST">
-                <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
-                </#if>
-                </#list>
-                <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-              </tr>
-            </thead>
-            <tbody data-th-remove="all">
-              <tr>
-                <#list fields as field>
-                <#if field.type != "LIST">
-                <td>${field.fieldName}</td>
-                </#if>
-                </#list>
-                <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-              </tr>
-            </tbody>
-          </table>
+          <#if entity.userManaged>
+             ${entity.codeManaged}
+          <#else>
+            <table id="${entity.entityItemId}-table"
+                   class="table table-striped table-hover table-bordered"
+                   data-row-id="${entity.configuration.identifierField}"
+                   data-select="single"
+                   data-z="${entity.z}"
+                   data-order="[[ 0, &quot;asc&quot; ]]"
+                   data-th-attr="data-create-url=@{${entity.configuration.controllerPath}/create-form/}">
+              <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">List ${entityName}</caption>
+              <thead>
+                <tr>
+                  <#list fields as field>
+                  <#if field.type != "LIST">
+                  <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
+                  </#if>
+                  </#list>
+                  <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                </tr>
+              </thead>
+              <tbody data-th-remove="all">
+                <tr>
+                  <#list fields as field>
+                  <#if field.type != "LIST">
+                  <td>${field.fieldName}</td>
+                  </#if>
+                  </#list>
+                  <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                </tr>
+              </tbody>
+            </table>
+          </#if>
         </div>
         <!--END TABLE-->
-        
+
         <#if details?size != 0>
           <hr>
           <ul class="nav nav-tabs">
@@ -208,7 +212,7 @@
             </#if>
           </#list>
           </ul>
-          
+
           <div class="tab-content">
                 <#assign firstDetail=true>
                 <#list details as field>
@@ -220,7 +224,7 @@
                     </#if>
                         <!--START TABLE-->
                         <div class="table-responsive">
-                          <table id="${field.fieldNameCapitalized}Table" 
+                          <table id="${field.fieldNameCapitalized}Table"
                             class="table table-striped table-hover table-bordered"
                             data-z="${field.z}"
                             data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
@@ -253,12 +257,12 @@
                     </div>
                   </#list>
               </div>
-          
+
         </#if>
-        
+
         <div class="clearfix">
           <div class="pull-left">
-            <a href="../index.html" class="btn btn-default" data-th-href="@{/}"> 
+            <a href="../index.html" class="btn btn-default" data-th-href="@{/}">
                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
                <span data-th-text="${r"#{label_back}"}">Back</span>
             </a>
@@ -267,7 +271,7 @@
 
       </div>
       <!--END CONTENT-->
-      
+
        <!-- MODAL -->
       <div
         data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
@@ -296,9 +300,9 @@
           </div>
         </div>
       </div>
-      
+
     </section>
-    
+
   </div>
   <!--END CONTAINER-->
 
@@ -312,7 +316,7 @@
   <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js" data-th-remove="all"></script>
 
   <div data-layout-fragment="javascript">
-    
+
     <!-- Datatables -->
     <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.12/js/dataTables.bootstrap.js"></script>
@@ -330,69 +334,76 @@
     <!-- Datatables application defaults -->
     <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults.js" data-th-src="@{/public/js/datatables-defaults.js}"></script>
     <script type="text/javascript" charset="utf8" src="../../static/public/js/datatables-defaults-en.js" data-th-src="@{/public/js/datatables-defaults-en.js}"></script>
-    
-    
+
+
     <!-- Datatables page configs -->
-    <script type="text/javascript" data-th-inline="javascript">
-     jQuery(document).ready( function () {
-        var ${entityName}Table = jQuery('#${entityName}Table').DataTable({
-            'ajax': {
-                  'url': [[@{${controllerPath}/search/${finderPath}}]],
-                  'data': [[${r"${formBean}"}]]
-              },
-            'columns': [
-              <#list fields as field>
-              { 'data': '${field.fieldName}' },
-              </#list>
-              { 
-                'data': '${identifierField}',
-                'orderable': false,
-                'searchable': false,
-                'render': function ( data, type, full, meta ) {
-                    var baseUrl = [[@{${controllerPath}/}]];
-                    return '<a role="button" class="btn-accion ver" href="' + baseUrl + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
-                    '<a role="button" class="btn-accion modificar" href="' + baseUrl + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
-                    '<a role="button" class="btn-accion eliminar" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
+    <#if entity.javascriptCode["${entity.entityItemId}-table-javascript"]??>
+        ${entity.javascriptCode["${entity.entityItemId}-table-javascript"]}
+    <#else>
+      <script type="text/javascript" data-th-inline="javascript" id="${entity.entityItemId}-table-javascript" data-z="${entity.z}">
+       jQuery(document).ready( function () {
+          var ${entityName}Table = jQuery('#${entity.entityItemId}-table').DataTable({
+              'ajax': {
+                    'url': [[@{${entity.configuration.controllerPath}/search/${finderPath}}]],
+                    'data': [[${r"${formBean}"}]]
+                },
+              'columns': [
+                <#list fields as field>
+                { 'data': '${field.fieldName}' },
+                </#list>
+                {
+                  'data': '${entity.configuration.identifierField}',
+                  'orderable': false,
+                  'searchable': false,
+                  'render': function ( data, type, full, meta ) {
+                      var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
+                      return '<a role="button" class="btn-accion ver" href="' + baseUrl + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
+                      '<a role="button" class="btn-accion modificar" href="' + baseUrl + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
+                      '<a role="button" class="btn-accion eliminar" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
+                  }
                 }
-              }
-            ]  
-        });
-        
-        jQuery.extend({
-           'delete${entityName}': function(${identifierField}) {
-               var baseUrl = [[@{${controllerPath}/}]];
-               jQuery.ajax({
-                   url: baseUrl + ${identifierField},
-                   type: 'DELETE',
-                   success: function(result) {
-                     jQuery('#delete${entityName}ModalBody').empty();
-                     jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');
-                     jQuery('#delete${entityName}Modal').modal();
-                     /** Refresh Datatables */
-                     ${entityName}Table.ajax.reload();
-                   },
-                   error: function(jqXHR) {
-                     /** Getting error code */
-                     var message = '';
-                     /** CONFLICT */
-                     if (jqXHR.status == 409) {
-                         message = '<p data-th-text="|${r"#{info_no_deleted_item}"}|">0 items has been deleted.</p>';
+              ]
+          });
+
+          jQuery.extend({
+             'delete${entityName}': function(${identifierField}) {
+                 var baseUrl = [[@{${controllerPath}/}]];
+                 jQuery.ajax({
+                     url: baseUrl + ${identifierField},
+                     type: 'DELETE',
+                     success: function(result) {
+                       jQuery('#delete${entityName}ModalBody').empty();
+                       jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');
+                       jQuery('#delete${entityName}Modal').modal();
+                       /** Refresh Datatables */
+                       ${entityName}Table.ajax.reload();
+                     },
+                     error: function(jqXHR) {
+                       /** Getting error code */
+                       var message = '';
+                       /** CONFLICT */
+                       if (jqXHR.status == 409) {
+                           message = '<p data-th-text="|${r"#{info_no_deleted_item}"}|">0 items has been deleted.</p>';
+                       }
+                       /** NOT_FOUND */
+                       if (jqXHR.status == 404 ) {
+                           message = '<p data-th-text="|${r"#{info_deleted_item_problem} #{info_no_exist_item}"}|">Error deleting selected item.</p>';
+                       }
+                       jQuery('#delete${entityName}ModalBody').empty();
+                       jQuery('#delete${entityName}ModalBody').append(message);
+                       jQuery('#delete${entityName}Modal').modal();
                      }
-                     /** NOT_FOUND */
-                     if (jqXHR.status == 404 ) {
-                         message = '<p data-th-text="|${r"#{info_deleted_item_problem} #{info_no_exist_item}"}|">Error deleting selected item.</p>';
-                     }
-                     jQuery('#delete${entityName}ModalBody').empty();
-                     jQuery('#delete${entityName}ModalBody').append(message);
-                     jQuery('#delete${entityName}Modal').modal();
-                   }
-                });
-           }
+                  });
+             }
+           });
          });
-         
+        </script>
+        </#if>
          <#if details?size != 0>
          	<#assign firstDetail = true>
              <#list details as field>
+              <script type="text/javascript" data-th-inline="javascript" id="${field.fieldNameCapitalized}-table-javascript" data-z="${field.z}">
+              jQuery(document).ready( function () {
              	<#if firstDetail == false>
              	function initialize${field.fieldNameCapitalized}Table() {
              	</#if>
@@ -401,11 +412,11 @@
                         {
                             'extend' : 'colvis',
                             'className' : 'btn-accion'
-                        }, 
+                        },
                         {
                             'extend' : 'pageLength',
                             'className' : 'btn-accion'
-                        } 
+                        }
                     ],
                     'columns': [
                       <#list field.configuration.referenceFieldFields as referencedFieldField>
@@ -413,7 +424,7 @@
                         { 'data': '${referencedFieldField.fieldName}' },
                       </#if>
                       </#list>
-                      { 
+                      {
                         'data': '${field.configuration.identifierField}',
                         'orderable': false,
                         'searchable': false,
@@ -421,7 +432,7 @@
                             return '';
                         }
                       }
-                    ]  
+                    ]
                 });
                   <#if firstDetail == false>
              }
@@ -463,8 +474,15 @@
                     }
                   });
              	<#assign firstDetail = false>
+             	});
+            </script>
              </#list>
-             
+
+       <#if entity.javascriptCode["${entity.entityItemId}-table-javascript-firstdetail"]??>
+          ${entity.javascriptCode["${entity.entityItemId}-table-javascript-firstdetail"]}
+       <#else>
+         <script type="text/javascript" data-th-inline="javascript" id="${entity.entityItemId}-table-javascript-firstdetail" data-z="${entity.z}">
+         jQuery(document).ready( function () {
            ${entityName}Table.on( 'select', function ( e, dt, type, indexes ) {
               if ( type === 'row' ) {
                 var new${entityName}Id = ${entityName}Table.rows( indexes ).ids()[0];
@@ -475,18 +493,15 @@
                   if (jQuery.fn.DataTable.isDataTable('#${field.fieldNameCapitalized}Table') === true) {
                  	jQuery('#${field.fieldNameCapitalized}Table').DataTable().ajax.url( url${field.fieldNameCapitalized} ).load();
                   }
-                  </#list>
+                   </#list>
                 }
               }
             });
-         </#if>
-         
-         
-         
-        
-    });
-    </script>
-   
+            });
+          </script>
+        </#if>
+     </#if>
+
   </div>
 
   <!-- Application -->
