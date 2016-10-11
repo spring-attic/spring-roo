@@ -1,6 +1,6 @@
 package __PACKAGE__;
 
-import __PACKAGE__.QueryDslRepositorySupportExt;
+import io.springlets.data.jpa.repository.support.QueryDslRepositorySupportExt;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import __ENTITY_IMPORT__;
 

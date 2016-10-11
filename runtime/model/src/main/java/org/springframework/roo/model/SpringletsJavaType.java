@@ -20,6 +20,7 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER =
       new JavaType(
           "io.springlets.data.jpa.repository.support.QueryDslRepositorySupportExt.AttributeMappingBuilder");
+
   /**
    * Constructor is private to prevent instantiation
    */

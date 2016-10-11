@@ -1119,8 +1119,8 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
             requestParamAnnotation.build()));
         parameterNames.add(originalParameterNames.get(i));
         finderParamsString.append(originalParameterNames.get(i).getSymbolName());
-      } else if (originalParameterTypes.get(i).getJavaType().getSimpleTypeName()
-          .equals("GlobalSearch")) {
+      } else if (originalParameterTypes.get(i).getJavaType()
+          .equals(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH)) {
         parameterTypes.add(originalParameterTypes.get(i));
         addTypeToImport(originalParameterTypes.get(i).getJavaType());
         parameterNames.add(originalParameterNames.get(i));

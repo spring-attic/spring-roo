@@ -17,6 +17,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
@@ -31,17 +32,23 @@ import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooJpaRepositoryCustom}.
- * 
+ *
  * @author Paula Navarro
  * @since 2.0
  */
 public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+  private static final JavaSymbolName PAGEABLE_PARAMETER_NAME = new JavaSymbolName("pageable");
+  private static final JavaSymbolName GOBAL_SEARCH_PARAMETER_NAME = new JavaSymbolName(
+      "globalSearch");
+  private static final AnnotatedJavaType PAGEABLE_PARAMETER = new AnnotatedJavaType(
+      SpringJavaType.PAGEABLE);
+  private static final AnnotatedJavaType GLOBAL_SEARCH_PARAMETER = AnnotatedJavaType
+      .convertFromJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH);
   private static final String PROVIDES_TYPE_STRING = RepositoryJpaCustomMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private JavaType globalSearch;
   private JavaType defaultReturnType;
   private Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods;
   private List<MethodMetadata> customFinderMethods;
@@ -72,7 +79,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
@@ -82,22 +89,19 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    *            (required)
    * @param domainType entity referenced on interface
    * @param searchResult the java type o the search result returned by findAll finder
-   * @param globalSearch the class annotated with @RooGlobalSearch 
    * @param referencedFields map that contains referenced field and its identifier field type
-   * @param findersToAdd 
+   * @param findersToAdd
    */
   public RepositoryJpaCustomMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
-      final JavaType defaultReturnType, JavaType globalSearch,
-      final Map<FieldMetadata, JavaType> referencedFields, List<CustomFinderMethod> findersToAdd) {
+      final JavaType defaultReturnType, final Map<FieldMetadata, JavaType> referencedFields,
+      List<CustomFinderMethod> findersToAdd) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
-    Validate.notNull(globalSearch, "Global search required");
     Validate.notNull(defaultReturnType, "Search result required");
     Validate.notNull(referencedFields, "Referenced fields could be empty but not null");
 
-    this.globalSearch = globalSearch;
     this.defaultReturnType = defaultReturnType;
     this.customFinderMethods = new ArrayList<MethodMetadata>();
     this.customCountMethods = new ArrayList<MethodMetadata>();
@@ -154,8 +158,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   }
 
   /**
-   * Method that generates the findAll method on current interface. 
-   * 
+   * Method that generates the findAll method on current interface.
+   *
    * @return
    */
   public MethodMetadata getFindAllGlobalSearchMethod() {
@@ -165,13 +169,12 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
     //Global search parameter
-    parameterTypes.add(new AnnotatedJavaType(globalSearch));
-    parameterNames.add(new JavaSymbolName("globalSearch"));
+    parameterTypes.add(GLOBAL_SEARCH_PARAMETER);
+    parameterNames.add(GOBAL_SEARCH_PARAMETER_NAME);
 
     // Pageable parameter
-    parameterTypes.add(new AnnotatedJavaType(new JavaType(
-        "org.springframework.data.domain.Pageable")));
-    parameterNames.add(new JavaSymbolName("pageable"));
+    parameterTypes.add(PAGEABLE_PARAMETER);
+    parameterNames.add(PAGEABLE_PARAMETER_NAME);
 
     // Method name
     JavaSymbolName methodName = new JavaSymbolName("findAll");
@@ -190,11 +193,11 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   }
 
   /**
-   * Method that generates the findAll method for provided referenced field on current interface. 
-   * 
+   * Method that generates the findAll method for provided referenced field on current interface.
+   *
    * @param referencedField
    * @param identifierType
-   * 
+   *
    * @return
    */
   public MethodMetadata getFindAllMethodByReferencedField(FieldMetadata referencedField,
@@ -208,13 +211,13 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     // Define method parameter types and parameter names
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(referencedField.getFieldType()));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(globalSearch));
-    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
+    parameterTypes.add(GLOBAL_SEARCH_PARAMETER);
+    parameterTypes.add(PAGEABLE_PARAMETER);
 
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(referencedField.getFieldName());
-    parameterNames.add(new JavaSymbolName("globalSearch"));
-    parameterNames.add(new JavaSymbolName("pageable"));
+    parameterNames.add(GOBAL_SEARCH_PARAMETER_NAME);
+    parameterNames.add(PAGEABLE_PARAMETER_NAME);
 
     // Return type
     JavaType returnType =
@@ -231,8 +234,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * Method that generates finder methods whose return types are projections.
-   * 
-   * @param finderReturnType 
+   *
+   * @param finderReturnType
    * @param finderName
    * @param parameterType
    *
@@ -244,13 +247,13 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     // Define method parameter types and parameter names
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     parameterTypes.add(AnnotatedJavaType.convertFromJavaType(parameterType));
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(globalSearch));
-    parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE));
+    parameterTypes.add(GLOBAL_SEARCH_PARAMETER);
+    parameterTypes.add(PAGEABLE_PARAMETER);
 
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("formBean"));
-    parameterNames.add(new JavaSymbolName("globalSearch"));
-    parameterNames.add(new JavaSymbolName("pageable"));
+    parameterNames.add(GOBAL_SEARCH_PARAMETER_NAME);
+    parameterNames.add(PAGEABLE_PARAMETER_NAME);
 
     // Return type
     JavaType returnType =
@@ -267,7 +270,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * Method that generates count methods for custom finders.
-   * 
+   *
    * @param formBean the object containing the properties to search to
    * @param javaSymbolName the finder name
    * @return
@@ -317,9 +320,9 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   }
 
   /**
-   * This method returns all findAll methods for 
+   * This method returns all findAll methods for
    * referenced fields
-   * 
+   *
    * @return
    */
   public Map<FieldMetadata, MethodMetadata> getReferencedFieldsFindAllMethods() {
@@ -327,8 +330,8 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   }
 
   /**
-   * This method returns all finder methods which return a projection 
-   * 
+   * This method returns all finder methods which return a projection
+   *
    * @return
    */
   public List<MethodMetadata> getCustomFinderMethods() {
@@ -337,7 +340,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
   /**
    * This method returns all count methods of all custom finder methods
-   * 
+   *
    * @return
    */
   public List<MethodMetadata> getCustomCountMethods() {

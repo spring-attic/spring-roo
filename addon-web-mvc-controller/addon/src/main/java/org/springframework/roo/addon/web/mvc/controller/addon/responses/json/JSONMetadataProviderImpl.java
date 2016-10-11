@@ -95,7 +95,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   private final JavaType URI = new JavaType("java.net.URI");
   private ControllerMVCService controllerMVCService;
   private List<JavaType> typesToImport = new ArrayList<JavaType>();
-  private JavaType globalSearch;
   private String entityPlural;
   private String path;
   private ControllerDetailInfo controllerDetailInfo;
@@ -248,16 +247,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         ServiceMetadata.createIdentifier(serviceDetails.getType(), serviceLogicalPath);
     final ServiceMetadata serviceMetadata =
         (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
-
-    // Get GlobalSearch type
-    Set<ClassOrInterfaceTypeDetails> globalSearchList =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH);
-    if (!globalSearchList.isEmpty()) {
-      for (ClassOrInterfaceTypeDetails type : globalSearchList) {
-        this.globalSearch = type.getType();
-      }
-    }
 
     // Getting methods from related service
     MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
@@ -737,8 +726,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     }
 
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    Validate.notNull(this.globalSearch, "Couldn't find GlobalSearch in project.");
-    parameterTypes.add(new AnnotatedJavaType(this.globalSearch));
+    parameterTypes.add(new AnnotatedJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
         .build()));
 
@@ -1578,8 +1566,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
     parameterTypes.add(new AnnotatedJavaType(this.controllerDetailInfo.getParentEntity(),
         modelAttributeAnnotation.build()));
-    Validate.notNull(this.globalSearch, "Couldn't find GlobalSearch in project.");
-    parameterTypes.add(new AnnotatedJavaType(this.globalSearch));
+    parameterTypes.add(new AnnotatedJavaType(SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH));
     parameterTypes.add(new AnnotatedJavaType(SpringJavaType.PAGEABLE, pageableDefaultAnnotation
         .build()));
 

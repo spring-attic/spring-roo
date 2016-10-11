@@ -238,21 +238,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
       return;
     }
 
-    // Getting generated global class
-    Set<ClassOrInterfaceTypeDetails> gobalSearchClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH);
-    if (gobalSearchClasses.isEmpty()) {
-      throw new RuntimeException(
-          "ERROR: GlobalSearch.java class doesn't exists or has been deleted.");
-    }
-    JavaType globalSearchClass = null;
-    Iterator<ClassOrInterfaceTypeDetails> it = gobalSearchClasses.iterator();
-    while (it.hasNext()) {
-      globalSearchClass = it.next().getType();
-      break;
-    }
-
     JavaPackage modulePackage = getProjectOperations().getTopLevelPackage(module.getModuleName());
 
     final JavaType javaType =
@@ -272,7 +257,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
       String input = IOUtils.toString(inputStream);
       // Replacing package
       input = input.replace("__PACKAGE__", javaType.getPackage().getFullyQualifiedPackageName());
-      input = input.replace("__GLOBAL_SEARCH__", globalSearchClass.getFullyQualifiedTypeName());
+      input =
+          input.replace("__GLOBAL_SEARCH__",
+              SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH.getFullyQualifiedTypeName());
 
       // Creating GlobalSearchHandlerMethodArgumentResolver class
       getFileManager().createOrUpdateTextFileIfRequired(physicalPath, input, true);

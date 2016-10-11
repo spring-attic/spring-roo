@@ -191,22 +191,10 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
             defaultReturnType,
             "ERROR: Repository custom interface should contain a defaultReturnType on @RooJpaRepositoryCustom annotation");
 
-    // Getting the class annotated with @RooGlobalSearch
-    Set<ClassOrInterfaceTypeDetails> globalSearchDetails =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            SpringletsJavaType.SPRINGLETS_GLOBAL_SEARCH);
-
-    if (globalSearchDetails.size() == 0) {
-      throw new RuntimeException("ERROR: Not found a class annotated with @RooGlobalSearch");
-    }
-
-    JavaType globalSearch = globalSearchDetails.iterator().next().getType();
-
     // Add dependency between modules
     ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     getTypeLocationService().addModuleDependency(cid.getName().getModule(), entity);
     getTypeLocationService().addModuleDependency(cid.getName().getModule(), defaultReturnType);
-    getTypeLocationService().addModuleDependency(cid.getName().getModule(), globalSearch);
 
     // Getting referenced fields
     Map<FieldMetadata, JavaType> referencedFields = new HashMap<FieldMetadata, JavaType>();
@@ -323,7 +311,7 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     }
 
     return new RepositoryJpaCustomMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, defaultReturnType, globalSearch,
+        governorPhysicalTypeMetadata, annotationValues, entity, defaultReturnType,
         referencedFields, findersToAdd);
   }
 
