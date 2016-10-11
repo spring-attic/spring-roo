@@ -1,10 +1,9 @@
 package org.springframework.roo.addon.security.addon.security;
 
-import static org.springframework.roo.model.RooJavaType.ROO_WEB_SECURITY_CONFIGURATION;
+import static org.springframework.roo.model.RooJavaType.ROO_MODEL_GLOBAL_SECURITY_CONFIG;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -28,22 +27,19 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 
 /**
- * Implementation of {@link WebSecurityConfigurationMetadataProvider}.
+ * Implementation of {@link ModelGlobalSecurityConfigMetadataProvider}.
  * <p/>
  * 
- * @author Sergio Clares
  * @author Juan Carlos García
  * @since 2.0
  */
 @Component
 @Service
-public class WebSecurityConfigurationMetadataProviderImpl extends
+public class ModelGlobalSecurityConfigMetadataProviderImpl extends
     AbstractMemberDiscoveringItdMetadataProvider implements
-    WebSecurityConfigurationMetadataProvider {
+    ModelGlobalSecurityConfigMetadataProvider {
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
-  private static final JavaType ROO_AUTHENTICATION_AUDITOR_AWARE = new JavaType(
-      "org.springframework.roo.addon.security.annotations.RooAuthenticationAuditorAware");
 
   private List<ControllerMVCResponseService> controllerMvcResponseServices =
       new ArrayList<ControllerMVCResponseService>();
@@ -54,7 +50,7 @@ public class WebSecurityConfigurationMetadataProviderImpl extends
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_SECURITY_CONFIGURATION} as additional 
+   * <li>Registers {@link RooJavaType#ROO_MODEL_GLOBAL_SECURITY_CONFIG} as additional 
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -68,7 +64,7 @@ public class WebSecurityConfigurationMetadataProviderImpl extends
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_WEB_SECURITY_CONFIGURATION);
+    addMetadataTrigger(ROO_MODEL_GLOBAL_SECURITY_CONFIG);
   }
 
   /**
@@ -84,19 +80,20 @@ public class WebSecurityConfigurationMetadataProviderImpl extends
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_WEB_SECURITY_CONFIGURATION);
+    removeMetadataTrigger(ROO_MODEL_GLOBAL_SECURITY_CONFIG);
   }
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return WebSecurityConfigurationMetadata.createIdentifier(javaType, path);
+    return ModelGlobalSecurityConfigMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
     final JavaType javaType =
-        WebSecurityConfigurationMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = WebSecurityConfigurationMetadata.getPath(metadataIdentificationString);
+        ModelGlobalSecurityConfigMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path =
+        ModelGlobalSecurityConfigMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
@@ -107,7 +104,7 @@ public class WebSecurityConfigurationMetadataProviderImpl extends
 
   @Override
   public String getItdUniquenessFilenameSuffix() {
-    return "WebSecurityConfiguration";
+    return "ModelGlobalSecurityConfig";
   }
 
   @Override
@@ -115,39 +112,14 @@ public class WebSecurityConfigurationMetadataProviderImpl extends
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    ClassOrInterfaceTypeDetails webSecurityConfiguration =
+    ClassOrInterfaceTypeDetails globalSecurityConfiguration =
         governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 
-    final WebSecurityConfigurationAnnotationValues annotationValues =
-        new WebSecurityConfigurationAnnotationValues(governorPhysicalTypeMetadata);
+    final ModelGlobalSecurityConfigAnnotationValues annotationValues =
+        new ModelGlobalSecurityConfigAnnotationValues(governorPhysicalTypeMetadata);
 
-    // Get AuthenticationAuditorAware JavaType if exists
-    Set<JavaType> authenticationClasses =
-        getTypeLocationService().findTypesWithAnnotation(ROO_AUTHENTICATION_AUDITOR_AWARE);
-
-    JavaType authenticationType = null;
-    if (authenticationClasses.size() > 0) {
-      for (JavaType authenticationClass : authenticationClasses) {
-        if (authenticationClass.getModule() != null
-            && authenticationClass.getModule().equals(
-                governorPhysicalTypeMetadata.getType().getModule())) {
-          authenticationType = authenticationClass;
-          break;
-        } else if (authenticationClasses.size() == 1) {
-
-          // Project is single module. Pick single authentication class
-          authenticationType = authenticationClass;
-        }
-      }
-    }
-
-    // Looking for an installed view provider and delegating on it to 
-    // generate login view
-    generateLoginPage(webSecurityConfiguration.getType().getModule());
-
-
-    return new WebSecurityConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, authenticationType, annotationValues);
+    return new ModelGlobalSecurityConfigMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, annotationValues);
   }
 
   /**
@@ -210,7 +182,7 @@ public class WebSecurityConfigurationMetadataProviderImpl extends
 
       } catch (InvalidSyntaxException e) {
         LOGGER
-            .warning("Cannot load controllerMvcResponseServices on WebSecurityConfigurationMetadataProvider.");
+            .warning("Cannot load controllerMvcResponseServices on ModelGlobalSecurityConfigMetadataProviderImpl.");
         return null;
       }
     } else {
@@ -235,7 +207,7 @@ public class WebSecurityConfigurationMetadataProviderImpl extends
 
       } catch (InvalidSyntaxException e) {
         LOGGER
-            .warning("Cannot load ProjectOperations on WebSecurityConfigurationMetadataProvider.");
+            .warning("Cannot load ProjectOperations on ModelGlobalSecurityConfigMetadataProviderImpl.");
         return null;
       }
     } else {
@@ -244,7 +216,7 @@ public class WebSecurityConfigurationMetadataProviderImpl extends
   }
 
   public String getProvidesType() {
-    return WebSecurityConfigurationMetadata.getMetadataIdentiferType();
+    return ModelGlobalSecurityConfigMetadata.getMetadataIdentiferType();
   }
 
 }

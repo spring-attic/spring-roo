@@ -170,6 +170,16 @@ public interface MVCViewGenerationService {
   void addDefaultLayout(String moduleName, ViewContext ctx);
 
   /**
+   * This operation will add the default-layout-no-menu view using 
+   * the provided context
+   * 
+   * @param moduleName module where default view will be added
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addDefaultLayoutNoMenu(String moduleName, ViewContext ctx);
+
+  /**
    * This operation will add the footer fragment using 
    * the provided context
    * 

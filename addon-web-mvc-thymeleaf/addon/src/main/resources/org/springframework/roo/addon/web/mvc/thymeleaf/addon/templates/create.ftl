@@ -165,7 +165,7 @@
 
             <#list fields as field>
                 <#if field.type == "TEXT">
-                    <@text.input label=field.label fieldName=field.fieldName z=field.z />
+                    <@text.input label=field.label fieldName=field.fieldName z=field.z size=3 />
                 <#elseif field.type == "DATE">
                     <@date.input label=field.label 
                     fieldName=field.fieldName

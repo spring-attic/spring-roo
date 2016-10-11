@@ -16,7 +16,7 @@
          <div class="container">
 
             <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mainnav" aria-expanded="false">
                 <span class="sr-only">Menu</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -34,7 +34,7 @@
 
             </div><!-- /navbar-header -->
 
-            <div id="bs-example-navbar-collapse-1" class="navbar-collapse collapse">
+            <div id="mainnav" class="navbar-collapse collapse">
 
               <ul class="nav navbar-nav" id="entitiesMenuEntries">
                <#list menuEntries as entry>
@@ -53,23 +53,65 @@
                </#list>
               </ul>
 
-              <!-- Languages -->
+              <!-- Language select -->
               <div data-layout-include="fragments/languages :: languages">
-              	<span>Languages</span>
+                <!-- Content replaced by the session template fragment language.html
+                -->
+                <span>Language data</span>
               </div>
 
-              <!-- Menu -->
+              <!-- User menu -->
               <div data-layout-include="fragments/session-links :: session">
-                <!-- Content replaced by languages and session template fragment session-links.html -->
+                <!-- Content replaced by the session template fragment session-links.html
+                  -- It's possible include fragments/session :: session
+                  -- if you want menu user application without links
+                -->
                 <span>User session data</span>
               </div>
 
            </div>
 
+          </div>
+        </nav>
+
+    </div>
+
+    <!--
+    Only the internal content of the following div is included within
+    the template, in menu-languages fragment
+    -->
+    <div data-layout-fragment="menu-languages">
+
+        <!-- Main navbar -->
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+         <div class="container">
+
+              <!-- Brand logo -->
+              <div class="organization-logo navbar-brand">
+                <a title="${projectName}" href="/" data-th-href="@{/}">
+                  <img alt="${projectName}" data-th-src="@{/public/img/logo.png}" src="../../static/public/img/logo.png" />
+                </a>
+              </div>
+              <!-- Name application -->
+              <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}">${projectName}</a></div>
+
+            </div><!-- /navbar-header -->
+
+            <div id="mainnav" class="navbar-collapse collapse">
+
+              <!-- Language select -->
+              <div data-layout-include="fragments/languages :: languages">
+                <!-- Content replaced by the session template fragment language.html
+                -->
+                <span>Language data</span>
+              </div>
+
+           </div>
 
           </div>
         </nav>
 
     </div>
+
   </body>
 </html>
