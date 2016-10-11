@@ -106,6 +106,8 @@ public final class RooJavaType {
 
   public static final JavaType ROO_WEB_SECURITY_CONFIGURATION = new JavaType(
       "org.springframework.roo.addon.security.annotations.RooWebSecurityConfiguration");
+  public static final JavaType ROO_MODEL_GLOBAL_SECURITY_CONFIG = new JavaType(
+      "org.springframework.roo.addon.security.annotations.RooModelGlobalSecurityConfig");
 
   public static final JavaType ROO_WEB_MVC_CONFIGURATION = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.config.RooWebMvcConfiguration");
