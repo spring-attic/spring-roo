@@ -8,18 +8,19 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
-import org.jsoup.select.Elements;
+import org.springframework.roo.addon.web.mvc.views.ViewContext;
+import org.springframework.roo.addon.web.mvc.views.components.DetailEntityItem;
+import org.springframework.roo.addon.web.mvc.views.components.EntityItem;
+import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
+import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.settings.project.ProjectSettingsService;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -80,337 +81,132 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
   }
 
   @Override
-  public Document merge(Document existingDoc, Document newDoc, String idContainerElements,
-      List<String> requiredIds) {
+  public Document merge(String templateName, Document loadExistingDoc, ViewContext ctx,
+      List<FieldItem> fields) {
+    for (FieldItem field : fields) {
 
-    // Document with the calculated values
-    Document mergedDoc = newDoc.clone();
-
-    // if <html data-z="user-managed"/> keep old code
-    Elements existingDocTagHtml = existingDoc.getElementsByTag("html");
-    if (!existingDocTagHtml.isEmpty() && existingDocTagHtml.get(0).hasAttr("data-z")
-        && existingDocTagHtml.get(0).attr("data-z").equals("user-managed")) {
-      mergedDoc = existingDoc.clone();
-    } else {
-
-      // if <head data-z="user-managed"> keep old code
-      Elements existingDocTagHead = existingDoc.getElementsByTag("head");
-      if (!existingDocTagHead.isEmpty() && existingDocTagHead.get(0).hasAttr("data-z")
-          && existingDocTagHead.get(0).attr("data-z").equals("user-managed")) {
-        // Get head element
-        Elements mergedDocTagHead = mergedDoc.getElementsByTag("head");
-
-        // Replace by new value
-        mergedDocTagHead.get(0).replaceWith(existingDocTagHead.get(0).clone());
-      }
-
-      // if <body data-z="user-managed"> keep old code
-      Elements existingDocTagBody = existingDoc.getElementsByTag("body");
-      if (!existingDocTagBody.isEmpty() && existingDocTagBody.get(0).hasAttr("data-z")
-          && existingDocTagBody.get(0).attr("data-z").equals("user-managed")) {
-        // Get body element
-        Elements mergedDocTagBody = mergedDoc.getElementsByTag("body");
-
-        // Replace by new value
-        mergedDocTagBody.get(0).replaceWith(existingDocTagBody.get(0).clone());
-      } else {
-        // if <footer data-z="user-managed"> keep old code
-        Elements existingDocTagFooter = existingDoc.getElementsByTag("footer");
-        if (!existingDocTagFooter.isEmpty() && existingDocTagFooter.get(0).hasAttr("data-z")
-            && existingDocTagFooter.get(0).attr("data-z").equals("user-managed")) {
-          // Get footer element
-          Elements mergedDocTagFooter = mergedDoc.getElementsByTag("footer");
-
-          // Replace by new value
-          mergedDocTagFooter.get(0).replaceWith(existingDocTagFooter.get(0).clone());
-        }
-
-        // if <section data-layout-fragment="content"
-        // data-z="user-managed"> keep old code
-        Elements lstExistingDocTagSection = existingDoc.getElementsByTag("section");
-        Element existingDocTagSection = null;
-        for (Element elementTagSection : lstExistingDocTagSection) {
-          if (elementTagSection.hasAttr("data-layout-fragment")
-              && elementTagSection.attr("data-layout-fragment").equals("content")) {
-            existingDocTagSection = elementTagSection.clone();
-            break;
-          }
-        }
-
-        if (existingDocTagSection != null && existingDocTagSection.hasAttr("data-z")
-            && existingDocTagSection.attr("data-z").equals("user-managed")) {
-          // Get section of merged doc
-          Elements lstMergedDocTagSection = mergedDoc.getElementsByTag("section");
-          Element mergedDocTagSection = null;
-          for (Element elementTagSection : lstMergedDocTagSection) {
-            if (elementTagSection.hasAttr("data-layout-fragment")
-                && elementTagSection.attr("data-layout-fragment").equals("content")) {
-              mergedDocTagSection = elementTagSection;
-              break;
-            }
-          }
-
-          // Replace
-          if (mergedDocTagSection != null) {
-            mergedDocTagSection.replaceWith(existingDocTagSection);
-          }
-        }
+      // Get field code if data-z attribute value is equals to
+      // user-managed
+      Element elementField = loadExistingDoc.getElementById(field.getFieldId());
+      if (elementField != null && elementField.hasAttr("data-z")
+          && elementField.attr("data-z").equals("user-managed")) {
+        field.setUserManaged(true);
+        field.setCodeManaged(elementField.outerHtml());
       }
     }
 
-    if (requiredIds != null) {
-      // Get the container of the elements to replace them
-      Element existsDocContainer = existingDoc.getElementById(idContainerElements);
-      Element newDocContainer = newDoc.getElementById(idContainerElements);
-
-      if (existsDocContainer != null && newDocContainer != null
-          && mergedDoc.getElementById(idContainerElements) != null) {
-
-        // Put back the element 'container'
-        mergedDoc.getElementById(idContainerElements).replaceWith(existsDocContainer.clone());
-
-        // Get the new elements to insert or replace those necessary
-        Element mergedDocContainer = mergedDoc.getElementById(idContainerElements);
-
-        // Elements to add before the last element 'form-group' of
-        // container
-        List<Element> listElementsToAdd = new ArrayList<Element>();
-
-        Iterator<String> iterRequiredFields = requiredIds.iterator();
-        while (iterRequiredFields.hasNext()) {
-          String idField = iterRequiredFields.next();
-          Element mergedField = mergedDocContainer.getElementById(idField);
-
-          // If doesn't exist, put in the list to add the element to
-          // merged page
-          if (mergedField == null) {
-            listElementsToAdd.add(newDocContainer.getElementById(idField));
-          } else {
-
-            // If exists, check data-z attribute
-            if (!mergedField.hasAttr("data-z")
-                || (mergedField.hasAttr("data-z") && !mergedField.attr("data-z").equals(
-                    "user-managed"))) {
-
-              // Replace the old value by the calculated
-              Element fieldToCopy = newDocContainer.getElementById(idField).clone();
-              mergedField.replaceWith(fieldToCopy);
-            }
-          }
-        }
-
-        // Add new elements
-        if (!listElementsToAdd.isEmpty()) {
-
-          // Try to insert the elements after the last 'form-group'
-          // element. Normally form buttons
-          Elements elementsByClassFormGroup =
-              mergedDoc.getElementById(idContainerElements).getElementsByClass("form-group");
-          if (elementsByClassFormGroup.isEmpty()) {
-            // If doesn't exist, append elements to the end
-            for (Element elementToAdd : listElementsToAdd) {
-              mergedDoc.getElementById(idContainerElements).appendChild(elementToAdd.clone());
-            }
-          } else {
-
-            // Create before form button group and his comment
-            Element lastElement = elementsByClassFormGroup.last().previousElementSibling();
-            for (Element elementToAdd : listElementsToAdd) {
-              lastElement.before(elementToAdd.clone());
-            }
-          }
-        }
-
-        // Delete old elements without user-managed value in data-z
-        // attribute
-        // and not in requiredIds list
-        Elements allElementsWithClassFormGroup =
-            mergedDoc.getElementById(idContainerElements).getAllElements();
-
-        for (Element elementClassFormGroup : allElementsWithClassFormGroup) {
-
-          // Check data-z attribute
-          if ((elementClassFormGroup.hasAttr("data-z") && !elementClassFormGroup.attr("data-z")
-              .equals("user-managed"))) {
-            String idElement = elementClassFormGroup.attr("id");
-            if (idElement != null && !requiredIds.contains(idElement)) {
-              elementClassFormGroup.remove();
-            }
-          }
-        }
-      }
-    }
-    return mergedDoc;
+    ctx.addExtraParameter("fields", fields);
+    Document newDoc = process(templateName, ctx);
+    return newDoc;
   }
 
   @Override
-  public Document mergeListView(Document existingDoc, Document newDoc, String idContainerElements,
-      List<String> requiredIds, List<String> namesDetails) {
+  public Document mergeListView(String templateName, Document loadExistingDoc, ViewContext ctx,
+      EntityItem entity, List<FieldItem> fields, List<DetailEntityItem> details) {
 
-    Document mergedDoc = merge(existingDoc, newDoc, idContainerElements, requiredIds);
-
-    // restore detail code from old doc
-    if (mergedDoc.getElementById("nav-tabs") != null
-        && existingDoc.getElementById("nav-tabs") != null) {
-      mergedDoc.getElementById("nav-tabs").replaceWith(
-          existingDoc.getElementById("nav-tabs").clone());
-    }
-    if (mergedDoc.getElementById("tab-content") != null
-        && existingDoc.getElementById("tab-content") != null) {
-      mergedDoc.getElementById("tab-content").replaceWith(
-          existingDoc.getElementById("tab-content").clone());
+    // Get field code if data-z attribute value is equals to user-managed
+    Element elementField =
+        loadExistingDoc.getElementById(entity.getEntityItemId().concat("-table"));
+    if (elementField != null && elementField.hasAttr("data-z")
+        && elementField.attr("data-z").equals("user-managed")) {
+      entity.setUserManaged(true);
+      entity.setCodeManaged(elementField.outerHtml());
     }
 
-    // Set Entity datatable javascript depends of 'data-z' attribute
-    String javascriptId = requiredIds.get(0).concat("Javascript");
-    Element elementRequiredJavascript = mergedDoc.getElementById(javascriptId);
-    if (elementRequiredJavascript == null && !namesDetails.isEmpty()) {
-      mergedDoc.getElementsByAttributeValue("data-layout-fragment", "javascript").get(0)
-          .appendChild(newDoc.getElementById(javascriptId).clone());
-    } else {
-      if (!elementRequiredJavascript.hasAttr("data-z")
-          || (elementRequiredJavascript.hasAttr("data-z") && !elementRequiredJavascript.attr(
-              "data-z").equals("user-managed"))) {
-        mergedDoc.getElementById(javascriptId).replaceWith(
-            newDoc.getElementById(javascriptId).clone());
-      }
+    // Get javascript associated to field if data-z attribute value is
+    // equals to user-managed
+    Map<String, String> javascriptCode = new HashMap<String, String>();
+    Element elementJavascriptField =
+        loadExistingDoc.getElementById(entity.getEntityItemId().concat("-table-javascript"));
+    if (elementJavascriptField != null && elementJavascriptField.hasAttr("data-z")
+        && elementJavascriptField.attr("data-z").equals("user-managed")) {
+      javascriptCode.put(entity.getEntityItemId().concat("-table-javascript"),
+          elementJavascriptField.outerHtml());
     }
 
-    if (!namesDetails.isEmpty()) {
-      if (mergedDoc.getElementById("nav-tabs") == null) {
-        mergedDoc.getElementById(idContainerElements).before(newDoc.getElementById("nav-tabs"));
-      }
-
-      // Set tabs details depends of 'data-z' attribute
-      for (String nameDetail : namesDetails) {
-        String nameTab = nameDetail.replace("Table", "Tab");
-        Element datatableDetailTab = mergedDoc.getElementById(nameTab);
-        if (datatableDetailTab == null) {
-          mergedDoc.getElementById("nav-tabs").appendChild(
-              newDoc.getElementById(nameTab).parentNode().clone());
-        } else {
-          if (!datatableDetailTab.hasAttr("data-z")
-              || (datatableDetailTab.hasAttr("data-z") && !datatableDetailTab.attr("data-z")
-                  .equals("user-managed"))) {
-            mergedDoc.getElementById(nameTab).replaceWith(newDoc.getElementById(nameTab).clone());
-          }
-        }
-      }
-
-      if (mergedDoc.getElementById("tab-content") == null) {
-        mergedDoc.getElementById("nav-tabs").before(newDoc.getElementById("tab-content"));
-      }
-
-      // Set datatables details depends of 'data-z' attribute
-      for (String nameDetail : namesDetails) {
-        String divDetailName = "detail-".concat(nameDetail.replace("Table", ""));
-        Element datatableDetail = mergedDoc.getElementById(divDetailName);
-        if (datatableDetail == null) {
-          mergedDoc.getElementById("tab-content").appendChild(
-              newDoc.getElementById(divDetailName).clone());
-        } else {
-          if (!datatableDetail.hasAttr("data-z")
-              || (datatableDetail.hasAttr("data-z") && !datatableDetail.attr("data-z").equals(
-                  "user-managed"))) {
-            mergedDoc.getElementById(divDetailName).replaceWith(
-                newDoc.getElementById(divDetailName).clone());
-          }
-        }
-      }
-
-      // Set datatables javascript details depends of 'data-z' attribute
-      for (String nameDetail : namesDetails) {
-        javascriptId = nameDetail.concat("Javascript");
-        elementRequiredJavascript = mergedDoc.getElementById(javascriptId);
-        if (elementRequiredJavascript == null) {
-          mergedDoc.getElementsByAttributeValue("data-layout-fragment", "javascript").get(0)
-              .appendChild(newDoc.getElementById(javascriptId).clone());
-        } else {
-          if (!elementRequiredJavascript.hasAttr("data-z")
-              || (elementRequiredJavascript.hasAttr("data-z") && !elementRequiredJavascript.attr(
-                  "data-z").equals("user-managed"))) {
-            mergedDoc.getElementById(javascriptId).replaceWith(
-                newDoc.getElementById(javascriptId).clone());
-          }
-        }
+    // Check if has details because in this case it has a special javascript
+    if (!details.isEmpty()) {
+      Element elementJavascriptDetailField =
+          loadExistingDoc.getElementById(entity.getEntityItemId().concat(
+              "-table-javascript-firstdetail"));
+      if (elementJavascriptDetailField != null && elementJavascriptDetailField.hasAttr("data-z")
+          && elementJavascriptDetailField.attr("data-z").equals("user-managed")) {
+        javascriptCode.put(entity.getEntityItemId().concat("-table-javascript-firstdetail"),
+            elementJavascriptDetailField.outerHtml());
       }
     }
 
-    // Set EntityTableFirstDetailJavascript depends of 'data-z' attribute
-    javascriptId = requiredIds.get(0).concat("FirstDetailJavascript");
-    Element elementRequiredDetailJavascript = mergedDoc.getElementById(javascriptId);
-    if (elementRequiredDetailJavascript == null) {
-      if (!namesDetails.isEmpty()) {
-        mergedDoc.getElementsByAttributeValue("data-layout-fragment", "javascript").get(0)
-            .appendChild(newDoc.getElementById(javascriptId).clone());
-      }
-    } else {
-      if (!elementRequiredDetailJavascript.hasAttr("data-z")
-          || (elementRequiredDetailJavascript.hasAttr("data-z") && !elementRequiredDetailJavascript
-              .attr("data-z").equals("user-managed"))) {
+    entity.setJavascriptCode(javascriptCode);
 
-        // if it's empty and not 'user-managed' is because the master doesn't have details. Must be removed.
-        if (namesDetails.isEmpty()) {
-          elementRequiredJavascript.remove();
-        } else {
-          mergedDoc.getElementById(javascriptId).replaceWith(
-              newDoc.getElementById(javascriptId).clone());
-        }
+    for (DetailEntityItem detail : details) {
+
+      // Get detail code if data-z attribute value is equals to
+      // user-managed
+      Element elementDetail =
+          loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table"));
+      if (elementDetail != null && elementDetail.hasAttr("data-z")
+          && elementDetail.attr("data-z").equals("user-managed")) {
+        detail.setUserManaged(true);
+        detail.setCodeManaged(elementDetail.outerHtml());
       }
+
+      // Get javascript associated to field if data-z attribute value is
+      // equals to user-managed
+      Map<String, String> javascriptDetailCode = new HashMap<String, String>();
+      Element elementJavascriptDetailField =
+          loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table-javascript"));
+      if (elementJavascriptDetailField != null && elementJavascriptDetailField.hasAttr("data-z")
+          && elementJavascriptDetailField.attr("data-z").equals("user-managed")) {
+        javascriptDetailCode.put(detail.getEntityItemId().concat("-table-javascript"),
+            elementJavascriptDetailField.outerHtml());
+      }
+
+      detail.setJavascriptCode(javascriptDetailCode);
+
+      Element elementTabCodeDetailField =
+          loadExistingDoc.getElementById(detail.getEntityItemId().concat("-table-tab"));
+      if (elementTabCodeDetailField != null && elementTabCodeDetailField.hasAttr("data-z")
+          && elementTabCodeDetailField.attr("data-z").equals("user-managed")) {
+        detail.setTabLinkCode(elementTabCodeDetailField.outerHtml());
+      }
+
     }
 
-    // Delete old elements without user-managed value in data-z attribute
-    // and not in requiredIds list
-
-    // content
-    if (mergedDoc.getElementById("tab-content") != null) {
-      Elements allDetails = mergedDoc.getElementById("tab-content").getElementsByTag("table");
-      for (Element detail : allDetails) {
-        // Check data-z attribute
-        if ((detail.hasAttr("data-z") && !detail.attr("data-z").equals("user-managed"))) {
-          String idElement = detail.attr("id");
-          if (idElement != null && !namesDetails.contains(idElement)) {
-            detail.parent().parent().remove();
-          }
-        }
-      }
-    }
-
-    // tabs
-    if (mergedDoc.getElementById("nav-tabs") != null) {
-      Elements allDetailTabs = mergedDoc.getElementById("nav-tabs").getElementsByTag("a");
-      for (Element detailTab : allDetailTabs) {
-        // Check data-z attribute
-        if ((detailTab.hasAttr("data-z") && !detailTab.attr("data-z").equals("user-managed"))) {
-          String idElement = detailTab.attr("id");
-          if (idElement != null) {
-            String nameToCompare = idElement.replace("Tab", "Table");
-            if (!namesDetails.contains(nameToCompare)) {
-              detailTab.parent().remove();
-            }
-          }
-        }
-      }
-    }
-
-    // javascript
-    Elements allDetailJavascript =
-        mergedDoc.getElementsByAttributeValueContaining("id", "TableJavascript");
-    for (Element detailJavascript : allDetailJavascript) {
-      if ((detailJavascript.hasAttr("data-z") && !detailJavascript.attr("data-z").equals(
-          "user-managed"))) {
-        String idElement = detailJavascript.attr("id");
-        if (idElement != null) {
-          String nameToCompare = idElement.replace("Javascript", "");
-          if (!namesDetails.contains(nameToCompare) && !requiredIds.contains(nameToCompare)) {
-            detailJavascript.remove();
-          }
-        }
-      }
-    }
-
-    return mergedDoc;
+    ctx.addExtraParameter("entity", entity);
+    ctx.addExtraParameter("fields", fields);
+    ctx.addExtraParameter("details", details);
+    Document newDoc = process(templateName, ctx);
+    return newDoc;
   }
+
+  @Override
+  public Document mergeMenu(String templateName, Document loadExistingDoc, ViewContext ctx,
+      List<MenuEntry> menuEntries) {
+
+    for (MenuEntry menuEntry : menuEntries) {
+
+      // Get field code if data-z attribute value is equals to
+      // user-managed
+      Element elementMenu = loadExistingDoc.getElementById(menuEntry.getId().concat("-entry"));
+      if (elementMenu != null && elementMenu.hasAttr("data-z")
+          && elementMenu.attr("data-z").equals("user-managed")) {
+        menuEntry.setUserManaged(true);
+        menuEntry.setCodeManaged(elementMenu.outerHtml());
+      }
+    }
+
+    ctx.addExtraParameter("menuEntries", menuEntries);
+    Document newDoc = process(templateName, ctx);
+    return newDoc;
+  }
+
+  @Override
+  public Document merge(Document existingDoc, Document newDoc, String idContainerElements,
+      List<String> requiredIds) {
+    // TODO: TO BE FIXED WITH NEW COMMAND 'web mvc view update'
+    return newDoc;
+  }
+
 
   @Override
   public String getTemplatesLocation() {

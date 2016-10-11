@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.views.components;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.roo.support.util.XmlUtils;
+
 import java.util.List;
 
 /**
@@ -16,6 +19,9 @@ public class MenuEntry {
   private String entityLabel;
   private String entityPluralLabel;
   private List<String> finders;
+  private boolean userManaged;
+  private String codeManaged;
+  private String id;
   private int z;
 
   public MenuEntry(String entityName, String path, String pathPrefix, String entityLabel,
@@ -25,7 +31,10 @@ public class MenuEntry {
     this.pathPrefix = pathPrefix;
     this.entityLabel = entityLabel;
     this.entityPluralLabel = entityPluralLabel;
+    this.userManaged = false;
+    this.codeManaged = "";
     this.finders = finders;
+    buildId();
 
     // Calculate the Z parameter as the hash code of the other parameters
     this.z = calculateZ();
@@ -87,11 +96,64 @@ public class MenuEntry {
     this.z = z;
   }
 
+
+  public boolean isUserManaged() {
+    return userManaged;
+  }
+
+  public void setUserManaged(boolean userManaged) {
+    this.userManaged = userManaged;
+  }
+
+  public String getCodeManaged() {
+    return codeManaged;
+  }
+
+  public void setCodeManaged(String codeManaged) {
+    this.codeManaged = codeManaged;
+  }
+
+
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
   /**
-   * Calculate the hash code of the entityName, path, pathPrefix, entityLabel and entityPluralLabel properties
    *
-   * @return hash code
+   * Builds the id of the specified entry
+   *
    */
+  public void buildId() {
+
+    String id = StringUtils.EMPTY;
+
+    if (!StringUtils.isEmpty(this.pathPrefix)) {
+      id = id.concat(XmlUtils.convertId(pathPrefix.toLowerCase()));
+    }
+
+    if (StringUtils.isNotEmpty(id)) {
+      id.concat("-");
+    }
+
+    // If field is not blank or null, concatenate it
+    if (StringUtils.isNotEmpty(this.entityName)) {
+      id = id.concat(XmlUtils.convertId(entityName.toLowerCase()));
+    }
+
+
+    this.id = id;
+  }
+
+  /**
+     * Calculate the hash code of the entityName, path, pathPrefix, entityLabel and entityPluralLabel properties
+     *
+     * @return hash code
+     */
   private int calculateZ() {
     final int prime = 31;
     int result = 1;

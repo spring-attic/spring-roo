@@ -1,7 +1,7 @@
-<#macro input label fieldName z format>
-<div class="form-group" id="${fieldName}" data-z="${z}"
+<#macro input label fieldName fieldId z format>
+<div class="form-group" id="${fieldId}" data-z="${z}"
   data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'has-error has-feedback'">
-  <label for="${fieldName}" class="col-md-3 control-label" 
+  <label for="${fieldName}" class="col-md-3 control-label"
     data-th-text="${r"#{"}${label}${r"}"}">${fieldName}</label>
   <div class="col-md-3">
     <input name="${fieldName}" data-th-value="*{{${fieldName}}}" type="text" class="form-control datetimepicker"

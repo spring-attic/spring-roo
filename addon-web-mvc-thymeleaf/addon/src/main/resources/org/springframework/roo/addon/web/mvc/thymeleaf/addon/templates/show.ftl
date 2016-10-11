@@ -128,10 +128,14 @@
 
         <ul class="dl-horizontal" id="containerFields">
           <#list fields as field>
-          <li id="${field.fieldName}" data-z="${field.z}">
-        	  <strong data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</strong>
-   			    <span data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</span>
-   			  </li>
+            <#if field.userManaged>
+              ${field.codeManaged}
+            <#else>
+              <li id="${field.fieldId}" data-z="${field.z}">
+        	      <strong data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</strong>
+   			        <span data-th-text="*{{${field.fieldName}}}">${field.fieldName}Value</span>
+   			      </li>
+   			    </#if>
           </#list>
 
           <#if details?size != 0>
