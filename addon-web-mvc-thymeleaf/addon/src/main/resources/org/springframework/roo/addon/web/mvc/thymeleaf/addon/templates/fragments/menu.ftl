@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <title>Page menu</title>
   </head>
-  <body>
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
     <!--
     Only the internal content of the following div is included within
     the template, in menu fragment
@@ -118,4 +121,5 @@
     </div>
 
   </body>
+  </#if>
 </html>

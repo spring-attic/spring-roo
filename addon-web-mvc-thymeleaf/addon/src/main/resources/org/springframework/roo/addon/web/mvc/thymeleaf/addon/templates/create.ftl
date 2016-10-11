@@ -70,195 +70,200 @@
     src="../../static/public/js/jquery.min.js"></script>
 
 </head>
-<body>
+
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
 
 
-  <!--START CONTAINER-->
-  <div class="container bg-container">
+    <!--START CONTAINER-->
+    <div class="container bg-container">
 
-    <!-- HEADER -->
-    <header role="banner">
+      <!-- HEADER -->
+      <header role="banner">
 
-      <div class="bg-header">
-        <div class="organization-logo">
-          <a
-            title="${projectName}"
-            href="/"><img
-            alt="${projectName}"
-            src="../../static/public/img/logo_spring_roo.png" /></a>
-        </div>
-        <div class="application-name">
-            <a href="/" data-th-href="@{/}">${projectName}</a>
-        </div>
-      </div>
-
-      <!-- MAIN MENU -->
-      <nav class="navbar navbar-default">
-        <div class="container-fluid">
-
-	  <!-- collapsed menu button -->
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed"
-              data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
-              aria-expanded="false">
-              <span class="sr-only">Dropdown</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">Main Menu</a>
-	  </div>
-
-          <div id="bs-example-navbar-collapse-1" class="navbar-collapse collapse">
-            <!-- Main menu -->
-            <div class="row">
-              <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Active Menu 1</a></li>
-                <li><a href="#">Menu 2</a></li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle"
-                  data-toggle="dropdown" role="button" aria-haspopup="true"
-                  aria-expanded="false">Dropdown Menu 3<span class="caret"></span></a>
-                  <ul class="dropdown-menu">
-                    <li><a href="#">Submenu 1</a></li>
-                    <li><a href="#">Submenu 2</a></li>
-                    <li><a href="#">Submenu 3</a></li>
-                  </ul>
-                </li>
-              </ul>
+        <div class="bg-header">
+          <div class="organization-logo">
+            <a
+              title="${projectName}"
+              href="/"><img
+              alt="${projectName}"
+              src="../../static/public/img/logo_spring_roo.png" /></a>
           </div>
+          <div class="application-name">
+              <a href="/" data-th-href="@{/}">${projectName}</a>
+          </div>
+        </div>
 
-          <!-- User Menu -->
-          <div class="container upper-nav">
-                <ul class="nav navbar-nav navbar-right session">
-                  <li><span class="glyphicon glyphicon-user" aria-hidden="true"></span>
-                      <span data-th-text="${r"#{"}label_user${r"}"}">User</span></li>
-                  <li data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}">
-                       <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000</li>
-                  <li><button type="submit" class="exit"><span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-                       <span data-th-text="${r"#{"}label_exit${r"}"}">Exit</span></button></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right links">
-                  <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                      <span data-th-text="${r"#{"}label_contact${r"}"}">Contact</span></a></li>
-                  <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-                      <span data-th-text="${r"#{"}label_help${r"}"}">Help</span></a></li>
+        <!-- MAIN MENU -->
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+
+  	  <!-- collapsed menu button -->
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed"
+                data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
+                aria-expanded="false">
+                <span class="sr-only">Dropdown</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">Main Menu</a>
+  	  </div>
+
+            <div id="bs-example-navbar-collapse-1" class="navbar-collapse collapse">
+              <!-- Main menu -->
+              <div class="row">
+                <ul class="nav navbar-nav">
+                  <li class="active"><a href="#">Active Menu 1</a></li>
+                  <li><a href="#">Menu 2</a></li>
+                  <li class="dropdown"><a href="#" class="dropdown-toggle"
+                    data-toggle="dropdown" role="button" aria-haspopup="true"
+                    aria-expanded="false">Dropdown Menu 3<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      <li><a href="#">Submenu 1</a></li>
+                      <li><a href="#">Submenu 2</a></li>
+                      <li><a href="#">Submenu 3</a></li>
+                    </ul>
+                  </li>
                 </ul>
             </div>
-          </div>
-        </div>
-      </nav>
-    </header>
-    <!-- END HEADER -->
 
-    <!--START CONTENT-->
-    <section data-layout-fragment="content">
-      <div class="container-fluid content">
-
-        <h1 data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Create ${entityName}</h1>
-
-        <!--START FORM-->
-        <form class="form-horizontal" method="POST" data-th-object="${modelAttribute}"
-          data-th-action="@{${controllerPath}}">
-
-          <fieldset id="containerFields">
-            <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
-
-            <#list fields as field>
-                <#if field.userManaged>
-                  ${field.codeManaged}
-                <#elseif field.type == "TEXT">
-                    <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z size=3/>
-                <#elseif field.type == "DATE">
-                    <@date.input label=field.label
-                    fieldName=field.fieldName
-                    fieldId=field.fieldId
-                    z=field.z
-                    format=field.configuration.format />
-                <#elseif field.type == "REFERENCE">
-                    <@reference.input label=field.label
-                        fieldName=field.fieldName
-                        fieldId=field.fieldId
-                        z=field.z
-                        referencedEntity=field.configuration.referencedEntity
-                        identifierField=field.configuration.identifierField
-                        referencedPath=field.configuration.referencedPath
-                        fieldOne=field.configuration.fieldOne
-                        fieldTwo=field.configuration.fieldTwo />
-                <#elseif field.type == "ENUM">
-                    <@enum.input label=field.label
-                    fieldName=field.fieldName
-                    fieldId=field.fieldId
-                    z=field.z
-                    items=field.configuration.items />
-                <#elseif field.type == "BOOLEAN">
-                    <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
-                </#if>
-            </#list>
-
-            <!-- FORM BUTTONS -->
-            <div class="form-group">
-              <div class="col-md-12">
-                <div class="pull-left">
-                  <!-- TODO IE8 -->
-                  <button type="reset" class="btn btn-default"
-                    onclick="location.href='list.html'"
-                    data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
-                    data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
-                </div>
-                <div class="pull-right">
-                  <input type="submit" value="Accept" data-th-value="${r"#{"}label_submit${r"}"}" class="btn btn-primary" />
-                </div>
+            <!-- User Menu -->
+            <div class="container upper-nav">
+                  <ul class="nav navbar-nav navbar-right session">
+                    <li><span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                        <span data-th-text="${r"#{"}label_user${r"}"}">User</span></li>
+                    <li data-th-text="${r"#{"}label_last_access(00-00-0000)${r"}"}">
+                         <span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>Last Access: 00-00-0000</li>
+                    <li><button type="submit" class="exit"><span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                         <span data-th-text="${r"#{"}label_exit${r"}"}">Exit</span></button></li>
+                  </ul>
+                  <ul class="nav navbar-nav navbar-right links">
+                    <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                        <span data-th-text="${r"#{"}label_contact${r"}"}">Contact</span></a></li>
+                    <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+                        <span data-th-text="${r"#{"}label_help${r"}"}">Help</span></a></li>
+                  </ul>
               </div>
             </div>
+          </div>
+        </nav>
+      </header>
+      <!-- END HEADER -->
 
-          </fieldset>
-        </form>
-        <!--END FORM-->
+      <!--START CONTENT-->
+      <section data-layout-fragment="content">
+        <div class="container-fluid content">
 
-      </div>
-      <!--END CONTENT-->
+          <h1 data-th-text="${r"#{"}label_create_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Create ${entityName}</h1>
 
-    </section>
+          <!--START FORM-->
+          <form class="form-horizontal" method="POST" data-th-object="${modelAttribute}"
+            data-th-action="@{${controllerPath}}">
 
-  </div>
-  <!--END CONTAINER-->
+            <fieldset id="containerFields">
+              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
 
-  <footer class="container">
-    <p class="text-right">© Powered By Spring Roo</p>
-  </footer>
+              <#list fields as field>
+                  <#if field.userManaged>
+                    ${field.codeManaged}
+                  <#elseif field.type == "TEXT">
+                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z size=3/>
+                  <#elseif field.type == "DATE">
+                      <@date.input label=field.label
+                      fieldName=field.fieldName
+                      fieldId=field.fieldId
+                      z=field.z
+                      format=field.configuration.format />
+                  <#elseif field.type == "REFERENCE">
+                      <@reference.input label=field.label
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                          referencedEntity=field.configuration.referencedEntity
+                          identifierField=field.configuration.identifierField
+                          referencedPath=field.configuration.referencedPath
+                          fieldOne=field.configuration.fieldOne
+                          fieldTwo=field.configuration.fieldTwo />
+                  <#elseif field.type == "ENUM">
+                      <@enum.input label=field.label
+                      fieldName=field.fieldName
+                      fieldId=field.fieldId
+                      z=field.z
+                      items=field.configuration.items />
+                  <#elseif field.type == "BOOLEAN">
+                      <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
+                  </#if>
+              </#list>
 
-  <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- JQuery -->
-    <script type="text/javascript" charset="utf8"
-      src="https://code.jquery.com/jquery-1.12.3.js"></script>
+              <!-- FORM BUTTONS -->
+              <div class="form-group">
+                <div class="col-md-12">
+                  <div class="pull-left">
+                    <!-- TODO IE8 -->
+                    <button type="reset" class="btn btn-default"
+                      onclick="location.href='list.html'"
+                      data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
+                      data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
+                  </div>
+                  <div class="pull-right">
+                    <input type="submit" value="Accept" data-th-value="${r"#{"}label_submit${r"}"}" class="btn btn-primary" />
+                  </div>
+                </div>
+              </div>
 
-    <!-- Bootstrap -->
-    <script type="text/javascript"
-      src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script>
+            </fieldset>
+          </form>
+          <!--END FORM-->
 
-  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-  <script data-th-remove="all" data-th-src="@{/public/js/bootstrap.min.js}"
-    src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
+        </div>
+        <!--END CONTENT-->
 
-    <!-- Application -->
-    <script data-th-remove="all" data-th-src="@{/public/js/main.js}"
-        src="../../static/public/js/main.js"></script>
+      </section>
 
-  <div data-layout-fragment="javascript">
-      <!-- Moment.js -->
-      <script data-th-src="@{/public/js/moment.js}"
-        src="../../static/public/js/moment.js"></script>
-      <script data-th-src="@{/public/js/moment-} + ${r"${application_locale}"} + .js"
-        src="../../static/public/js/moment-en.js"></script>
-      <!-- Select2 -->
-      <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
-      <script src="../../static/public/js/select2.full-es.js" data-th-src="@{/public/js/select2.full-es.js}"></script>
-      <script src="../../static/public/js/select2-defaults.js" data-th-src="@{/public/js/select2-defaults.js}"></script>
-      <!-- DateTime Picker -->
-      <script src="../../static/public/js/jquery.datetimepicker.full.min.js" data-th-src="@{/public/js/jquery.datetimepicker.full.min.js}"></script>
-      <script src="../../static/public/js/datetimepicker-defaults.js" data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
-  </div>
+    </div>
+    <!--END CONTAINER-->
 
-</body>
+    <footer class="container">
+      <p class="text-right">© Powered By Spring Roo</p>
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+      ================================================== -->
+      <!-- JQuery -->
+      <script type="text/javascript" charset="utf8"
+        src="https://code.jquery.com/jquery-1.12.3.js"></script>
+
+      <!-- Bootstrap -->
+      <script type="text/javascript"
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script data-th-remove="all" data-th-src="@{/public/js/bootstrap.min.js}"
+      src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
+
+      <!-- Application -->
+      <script data-th-remove="all" data-th-src="@{/public/js/main.js}"
+          src="../../static/public/js/main.js"></script>
+
+    <div data-layout-fragment="javascript">
+        <!-- Moment.js -->
+        <script data-th-src="@{/public/js/moment.js}"
+          src="../../static/public/js/moment.js"></script>
+        <script data-th-src="@{/public/js/moment-} + ${r"${application_locale}"} + .js"
+          src="../../static/public/js/moment-en.js"></script>
+        <!-- Select2 -->
+        <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
+        <script src="../../static/public/js/select2.full-es.js" data-th-src="@{/public/js/select2.full-es.js}"></script>
+        <script src="../../static/public/js/select2-defaults.js" data-th-src="@{/public/js/select2-defaults.js}"></script>
+        <!-- DateTime Picker -->
+        <script src="../../static/public/js/jquery.datetimepicker.full.min.js" data-th-src="@{/public/js/jquery.datetimepicker.full.min.js}"></script>
+        <script src="../../static/public/js/datetimepicker-defaults.js" data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
+    </div>
+
+  </body>
+</#if>
 </html>

@@ -39,7 +39,10 @@
     <![endif]-->
 
 </head>
-<body>
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
   <header>
     <h1 data-th-text="${r"#{"}label_errorpage${r"}"}">Error Page</h1>
   </header>
@@ -58,4 +61,5 @@
   </section>
   <footer> &copy; Powered By Spring Roo </footer>
 </body>
+</#if>
 </html>

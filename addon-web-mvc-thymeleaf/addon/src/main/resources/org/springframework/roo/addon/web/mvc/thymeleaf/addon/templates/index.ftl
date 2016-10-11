@@ -8,11 +8,11 @@
     <meta name="description"
       content="${projectName}"
       data-th-remove="all" />
-      
+
     <meta name="author"
       content="Spring Roo"
       data-th-remove="all" />
-      
+
     <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
       href="../../static/public/img/favicon.ico" />
 
@@ -30,7 +30,7 @@
       data-th-remove="all"></link>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" type="text/css" 
+    <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"/>
 
     <!-- Bootswatch CSS custom -->
@@ -50,7 +50,10 @@
     <![endif]-->
 
   </head>
-  <body class="home">
+  <#if userManagedComponents?has_content && userManagedComponents["body"]??>
+    ${userManagedComponents["body"]}
+  <#else>
+  <body class="home" id="body">
 
     <!--Main container-->
     <div class="bg-container">
@@ -271,5 +274,6 @@
     <!-- Application -->
     <script src="../static/public/js/main.js"></script>
 
-  </body>
+ </body>
+</#if>
 </html>

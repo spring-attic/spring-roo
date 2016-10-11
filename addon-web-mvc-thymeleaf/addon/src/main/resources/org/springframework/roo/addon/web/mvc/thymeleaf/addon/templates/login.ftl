@@ -51,7 +51,10 @@
     <![endif]-->
 
   </head>
-  <body>
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
 
   <!--Main container-->
   <div class="container bg-container">
@@ -229,5 +232,6 @@
     <!-- Application -->
     <script src="../static/public/js/main.js"></script>
 
-  </body>
+ </body>
+</#if>
 </html>

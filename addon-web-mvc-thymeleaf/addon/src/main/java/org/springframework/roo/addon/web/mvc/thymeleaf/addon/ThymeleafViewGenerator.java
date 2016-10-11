@@ -8,6 +8,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.addon.web.mvc.views.components.DetailEntityItem;
 import org.springframework.roo.addon.web.mvc.views.components.EntityItem;
@@ -80,11 +81,30 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
     return Jsoup.parse(content, "", Parser.xmlParser());
   }
 
+  /**
+   * Get ids and codes of old document that have 'user-managed' value in data-z attribute.
+   *
+   * @param loadExistingDoc
+   * @return
+   */
+  private Map<String, String> mergeStructure(Document loadExistingDoc) {
+    Map<String, String> structureUserManaged = new HashMap<String, String>();
+    Elements elementsUserManaged =
+        loadExistingDoc.getElementsByAttributeValue("data-z", "user-managed");
+    for (Element elementUserManaged : elementsUserManaged) {
+      String id = elementUserManaged.attr("id");
+      if (id != null) {
+        String code = elementsUserManaged.outerHtml();
+        structureUserManaged.put(id, code);
+      }
+    }
+    return structureUserManaged;
+  }
+
   @Override
   public Document merge(String templateName, Document loadExistingDoc, ViewContext ctx,
       List<FieldItem> fields) {
     for (FieldItem field : fields) {
-
       // Get field code if data-z attribute value is equals to
       // user-managed
       Element elementField = loadExistingDoc.getElementById(field.getFieldId());
@@ -94,7 +114,7 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
         field.setCodeManaged(elementField.outerHtml());
       }
     }
-
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
     ctx.addExtraParameter("fields", fields);
     Document newDoc = process(templateName, ctx);
     return newDoc;
@@ -171,7 +191,7 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
       }
 
     }
-
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
     ctx.addExtraParameter("entity", entity);
     ctx.addExtraParameter("fields", fields);
     ctx.addExtraParameter("details", details);
@@ -194,18 +214,20 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
         menuEntry.setCodeManaged(elementMenu.outerHtml());
       }
     }
-
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
     ctx.addExtraParameter("menuEntries", menuEntries);
     Document newDoc = process(templateName, ctx);
     return newDoc;
   }
 
   @Override
-  public Document merge(Document existingDoc, Document newDoc, String idContainerElements,
-      List<String> requiredIds) {
+  public Document merge(String templateName, Document loadExistingDoc, ViewContext ctx) {
     // TODO: TO BE FIXED WITH NEW COMMAND 'web mvc view update'
+    ctx.addExtraParameter("userManagedComponents", mergeStructure(loadExistingDoc));
+    Document newDoc = process(templateName, ctx);
     return newDoc;
   }
+
 
 
   @Override

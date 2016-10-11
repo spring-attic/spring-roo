@@ -70,7 +70,10 @@
     src="../../static/public/js/jquery.min.js"></script>
 
 </head>
-<body>
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
 
   <!--START CONTAINER-->
   <div class="container bg-container">
@@ -251,4 +254,5 @@
   <script src="../../static/public/js/ie10-viewport-bug-workaround.js"></script>
 
 </body>
+</#if>
 </html>
