@@ -70,8 +70,8 @@
               <!-- User menu -->
               <div data-layout-include="fragments/session-links :: session">
                 <!-- Content replaced by the session template fragment session-links.html
-                  -- It's possible include fragments/session :: session
-                  -- if you want menu user application without links
+                   It's possible include fragments/session :: session
+                   if you want menu user application without links
                 -->
                 <span>User session data</span>
               </div>
