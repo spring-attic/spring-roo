@@ -213,6 +213,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
           "${project.version}");
       getProjectOperations().addDependency("service-impl", pom.getGroupId(), "integration",
           "${project.version}");
+
     }
 
     // In all cases, multimodule architectures have an application module where Spring Boot artifacts are created 
