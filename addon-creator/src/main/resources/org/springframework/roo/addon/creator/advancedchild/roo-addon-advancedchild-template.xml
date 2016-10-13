@@ -22,20 +22,6 @@
     <properties>
         <target.osgi-repository.directory>${basedir}/../target/osgi-repository-bin</target.osgi-repository.directory>
     </properties>
-    <repositories>
-        <repository>
-            <id>spring-roo-repository</id>
-            <name>Spring Roo Repository</name>
-            <url>http://spring-roo-repository.springsource.org/release</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>spring-roo-repository</id>
-            <name>Spring Roo Repository</name>
-            <url>http://spring-roo-repository.springsource.org/release</url>
-        </pluginRepository>
-    </pluginRepositories>
     <dependencies>
         <!-- OSGi -->
         <dependency>

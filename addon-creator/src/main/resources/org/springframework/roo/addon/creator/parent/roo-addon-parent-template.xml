@@ -38,40 +38,11 @@
     <module>repository</module>
   </modules>
   
-  <repositories>
-    <repository>
-      <id>spring-roo-repository-release</id>
-      <name>Spring Roo Repository</name>
-      <url>http://spring-roo-repository.springsource.org/release</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>spring-roo-repository-snapshot</id>
-      <name>Spring Roo Repository</name>
-      <url>http://spring-roo-repository.springsource.org/snapshot</url>
-      <snapshots>
-        <updatePolicy>never</updatePolicy>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-   
-  
   <pluginRepositories>
     <pluginRepository>
       <id>spring-maven-release</id>
       <name>Spring Maven Release Repository</name>
       <url>http://maven.springframework.org/release</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>spring-roo-repository-bundles</id>
-      <name>Spring Roo Repository</name>
-      <url>http://spring-roo-repository.springsource.org/bundles</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
     </pluginRepository>
     <pluginRepository>
       <id>atlassian-maven-release</id>
