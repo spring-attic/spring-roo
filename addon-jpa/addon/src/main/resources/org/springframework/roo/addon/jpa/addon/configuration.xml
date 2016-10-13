@@ -181,6 +181,6 @@
     </dependencies>
   </common>
   <properties>
-    <springlets-version>1.0.0.BUILD-SNAPSHOT</springlets-version>
+    <springlets.version>1.0.0.BUILD-SNAPSHOT</springlets.version>
   </properties>
 </configuration>
