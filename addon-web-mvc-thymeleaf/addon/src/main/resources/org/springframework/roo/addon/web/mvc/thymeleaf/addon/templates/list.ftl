@@ -370,7 +370,7 @@
         <small class="clearfix">
             Made with <a href="http://projects.spring.io/spring-roo/" target="_blank">
             Spring Roo &copy; 2016</a> •
-            We <span class="glyphicon glyphicon-heart"></span> 
+            We <span class="glyphicon glyphicon-heart"></span>
             <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
             <a data-th-href="@{/accessibility}" href="../accessibility.html"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
         </small>
@@ -485,8 +485,9 @@
       ${entity.javascriptCode["${entity.entityItemId}-table-javascript"]}
     <#else>
       <script type="text/javascript" data-th-inline="javascript" id="${entity.entityItemId}-table-javascript" data-z="${entity.z}">
+       var ${entityName}Table;
        jQuery(document).ready( function () {
-          var ${entityName}Table = jQuery('#${entity.entityItemId}-table').DataTable({
+          ${entityName}Table = jQuery('#${entity.entityItemId}-table').DataTable({
               'ajax': {
                     'url': [[@{${entity.configuration.controllerPath}/}]]
                 },
