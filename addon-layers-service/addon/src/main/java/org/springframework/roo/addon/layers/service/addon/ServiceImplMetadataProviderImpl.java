@@ -42,7 +42,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link ServiceImplMetadataProvider}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -65,7 +65,7 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_SERVICE_IMPL} as additional 
+   * <li>Registers {@link RooJavaType#ROO_SERVICE_IMPL} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -89,9 +89,9 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -167,9 +167,10 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     JavaType entity = (JavaType) serviceAnnotation.getAttribute("entity").getValue();
 
-    // Getting all methods defined on service interface that should be implemented in this 
+    // Getting all methods defined on service interface that should be implemented in this
     // service implementation
-    List<MethodMetadata> methodsToBeImplemented = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> methodsNotTransactionalsToBeImplemented = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> methodsTransactionalsToBeImplemented = new ArrayList<MethodMetadata>();
     Map<FieldMetadata, MethodMetadata> countReferencedFieldsMethodsToBeImplemented =
         new HashMap<FieldMetadata, MethodMetadata>();
     Map<FieldMetadata, MethodMetadata> findAllReferencedFieldsMethodsToBeImplemented =
@@ -185,7 +186,11 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
         (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
 
     if (serviceMetadata != null) {
-      methodsToBeImplemented = serviceMetadata.getAllDefinedMethods();
+      methodsNotTransactionalsToBeImplemented = serviceMetadata.getNotTransactionalDefinedMethods();
+      methodsTransactionalsToBeImplemented = serviceMetadata.getTransactionalDefinedMethods();
+      List<MethodMetadata> methodsToBeImplemented = new ArrayList<MethodMetadata>();
+      methodsToBeImplemented.addAll(methodsTransactionalsToBeImplemented);
+      methodsToBeImplemented.addAll(methodsNotTransactionalsToBeImplemented);
       countReferencedFieldsMethodsToBeImplemented =
           serviceMetadata.getCountByReferenceFieldDefinedMethod();
       findAllReferencedFieldsMethodsToBeImplemented =
@@ -222,13 +227,14 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
       }
     }
 
-    // Getting findAll Iterable method. This method will be used to findAll results 
+    // Getting findAll Iterable method. This method will be used to findAll results
     // before to invoke batch operations
     MethodMetadata findAllIterableMethod = serviceMetadata.getFindAllIterableMethod();
 
     return new ServiceImplMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, serviceInterface, repositoryDetails.getType(), entity,
-        findAllIterableMethod, methodsToBeImplemented, countReferencedFieldsMethodsToBeImplemented,
+        findAllIterableMethod, methodsNotTransactionalsToBeImplemented,
+        methodsTransactionalsToBeImplemented, countReferencedFieldsMethodsToBeImplemented,
         findAllReferencedFieldsMethodsToBeImplemented);
   }
 

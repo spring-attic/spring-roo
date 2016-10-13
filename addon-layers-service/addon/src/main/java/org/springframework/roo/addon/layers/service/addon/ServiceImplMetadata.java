@@ -33,7 +33,7 @@ import org.springframework.roo.project.LogicalPath;
 
 /**
  * Metadata for {@link RooServiceImpl}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -47,7 +47,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   private JavaType repository;
   private JavaType entity;
-  private List<MethodMetadata> allImplementedMethods;
   private Map<FieldMetadata, MethodMetadata> allCountByReferencedFieldMethods;
   private Map<FieldMetadata, MethodMetadata> allFindAllByReferencedFieldMethods;
   private MethodMetadata findAllIterableMethod;
@@ -77,19 +76,22 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
    * @param serviceInterface JavaType with interface that this service will implement
-   * @param methodsToBeImplemented list of MethodMetadata that represents all necessary methods
-   *            that should be implemented on current service implementation
+   * @param methodsNotTransactionalsToBeImplemented list of MethodMetadata that represents all necessary methods
+   *            that should be implemented on current service implementation and they aren't transactionals
+   * @param methodsTransactionalsToBeImplemented list of MethodMetadata that represents all necessary methods
+   *            that should be implemented on current service implementation and they aren transactionals
    */
   public ServiceImplMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType serviceInterface,
       final JavaType repository, final JavaType entity, final MethodMetadata findAllIterableMethod,
-      final List<MethodMetadata> methodsToBeImplemented,
+      final List<MethodMetadata> methodsNotTransactionalsToBeImplemented,
+      final List<MethodMetadata> methodsTransactionalsToBeImplemented,
       final Map<FieldMetadata, MethodMetadata> countReferencedFieldsMethods,
       final Map<FieldMetadata, MethodMetadata> findAllReferencedFieldsMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -98,7 +100,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     this.entity = entity;
     this.repository = repository;
     this.findAllIterableMethod = findAllIterableMethod;
-    this.allImplementedMethods = methodsToBeImplemented;
     this.allCountByReferencedFieldMethods = countReferencedFieldsMethods;
     this.allFindAllByReferencedFieldMethods = findAllReferencedFieldsMethods;
 
@@ -128,8 +129,13 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     // Add constructor
     ensureGovernorHasConstructor(getConstructor());
 
-    // Generating all methods that should be implemented
-    for (MethodMetadata method : methodsToBeImplemented) {
+    // Generating transactional methods that should be implemented
+    for (MethodMetadata method : methodsTransactionalsToBeImplemented) {
+      ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method, true)));
+    }
+
+    // Generating not transactional methods that should be implemented
+    for (MethodMetadata method : methodsNotTransactionalsToBeImplemented) {
       ensureGovernorHasMethod(new MethodMetadataBuilder(getMethod(method)));
     }
 
@@ -175,7 +181,7 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
   /**
    * Method that generates Service implementation constructor. If exists a
    * repository, it will be included as constructor parameter
-   * 
+   *
    * @return
    */
   public ConstructorMetadataBuilder getConstructor() {
@@ -202,10 +208,20 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
   /**
    * Method that generates implementation of provided method
-   * 
-   * @return MethodMetadataBuilder 
+   *
+   * @return MethodMetadataBuilder
    */
   private MethodMetadata getMethod(final MethodMetadata methodToBeImplemented) {
+    return getMethod(methodToBeImplemented, false);
+  }
+
+  /**
+   * Method that generates implementation of provided method
+   *
+   * @return MethodMetadataBuilder
+   */
+  private MethodMetadata getMethod(final MethodMetadata methodToBeImplemented,
+      boolean isTransactional) {
     // Define methodName
     JavaSymbolName methodName = methodToBeImplemented.getMethodName();
 
@@ -273,13 +289,20 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
       methodBuilder.addAnnotation(annotation);
     }
 
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
+    // Adding transactional annotation
+    if (isTransactional) {
+      AnnotationMetadataBuilder transactionalAnnotation =
+          new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
+      methodBuilder.addAnnotation(transactionalAnnotation);
+    }
+
+    // Build and return a MethodMetadata instance
+    return methodBuilder.build();
   }
 
   /**
    * This method returns repository field included on controller
-   * 
+   *
    * @param service
    * @return
    */
@@ -293,10 +316,6 @@ public class ServiceImplMetadata extends AbstractItdTypeDetailsProvidingMetadata
     return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
         new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.repository)
         .build();
-  }
-
-  public List<MethodMetadata> getAllImplementedMethods() {
-    return allImplementedMethods;
   }
 
   public Map<FieldMetadata, MethodMetadata> getAllCountByReferencedFieldMethods() {

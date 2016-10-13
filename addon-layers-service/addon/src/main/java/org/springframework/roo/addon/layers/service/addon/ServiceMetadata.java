@@ -32,7 +32,7 @@ import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooService}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -46,7 +46,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private JavaType identifierType;
   private List<MethodMetadata> finders;
   private MethodMetadata findAllGlobalSearchMethod;
-  private List<MethodMetadata> allDefinedMethod;
+  private List<MethodMetadata> transactionalDefinedMethod;
+  private List<MethodMetadata> notTransactionalDefinedMethod;
   private Map<FieldMetadata, MethodMetadata> countByReferenceFieldDefinedMethod;
   private Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods;
   private List<MethodMetadata> customCountMethods;
@@ -76,7 +77,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
@@ -89,8 +90,8 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @param findAllGlobalSearchMethod MethodMetadata with findAllGlobalSearch method
    * @param referencedFieldsFindAllMethods
    * @param countByReferencedFieldsMethods
-   * @param customCountMethods 
-   * 
+   * @param customCountMethods
+   *
    */
   public ServiceMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
@@ -110,63 +111,64 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     this.finders = finders;
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
     this.referencedFieldsFindAllDefinedMethods = new HashMap<FieldMetadata, MethodMetadata>();
-    this.allDefinedMethod = new ArrayList<MethodMetadata>();
+    this.transactionalDefinedMethod = new ArrayList<MethodMetadata>();
+    this.notTransactionalDefinedMethod = new ArrayList<MethodMetadata>();
     this.countByReferenceFieldDefinedMethod = new HashMap<FieldMetadata, MethodMetadata>();
     this.customCountMethods = customCountMethods;
 
     // Generating persistent methods for not readOnly entities
     if (!readOnly) {
       MethodMetadata saveMethod = getSaveMethod();
-      this.allDefinedMethod.add(saveMethod);
+      this.transactionalDefinedMethod.add(saveMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(saveMethod));
 
       MethodMetadata deleteMethod = getDeleteMethod();
-      this.allDefinedMethod.add(deleteMethod);
+      this.transactionalDefinedMethod.add(deleteMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
 
       MethodMetadata saveBatchMethod = getSaveBatchMethod();
-      this.allDefinedMethod.add(saveBatchMethod);
+      this.transactionalDefinedMethod.add(saveBatchMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(saveBatchMethod));
 
       MethodMetadata deleteBatchMethod = getDeleteBatchMethod();
-      this.allDefinedMethod.add(deleteBatchMethod);
+      this.transactionalDefinedMethod.add(deleteBatchMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteBatchMethod));
     }
 
     // Generating readOnly methods for every services
     MethodMetadata findAllMethod = getFindAllMethod();
-    this.allDefinedMethod.add(findAllMethod);
+    this.notTransactionalDefinedMethod.add(findAllMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(findAllMethod));
 
     MethodMetadata findAllIterableMethod = getFindAllIterableMethod();
-    this.allDefinedMethod.add(findAllIterableMethod);
+    this.notTransactionalDefinedMethod.add(findAllIterableMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(findAllIterableMethod));
 
     MethodMetadata findOneMethod = getFindOneMethod();
-    this.allDefinedMethod.add(findOneMethod);
+    this.notTransactionalDefinedMethod.add(findOneMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(findOneMethod));
 
     MethodMetadata countMethod = getCountMethod();
-    this.allDefinedMethod.add(countMethod);
+    this.notTransactionalDefinedMethod.add(countMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
 
     // Generating finders
     for (MethodMetadata finder : finders) {
       MethodMetadata finderMethod = getFinderMethod(finder);
-      this.allDefinedMethod.add(finderMethod);
+      this.notTransactionalDefinedMethod.add(finderMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
     }
 
     // Generating count finder methods
     for (MethodMetadata customCountMethod : customCountMethods) {
       MethodMetadata customCountServiceMethod = getCustomCountMethod(customCountMethod);
-      this.allDefinedMethod.add(customCountServiceMethod);
+      this.notTransactionalDefinedMethod.add(customCountServiceMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(customCountServiceMethod));
     }
 
     // Generating findAll method that includes GlobalSearch parameter
     MethodMetadata findAllWithGlobalSearchMethod = getFindAllGlobalSearchMethod();
-    this.allDefinedMethod.add(findAllWithGlobalSearchMethod);
+    this.notTransactionalDefinedMethod.add(findAllWithGlobalSearchMethod);
     ensureGovernorHasMethod(new MethodMetadataBuilder(findAllWithGlobalSearchMethod));
 
     // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
@@ -218,7 +220,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   /**
    * Method that generates method "findAll" method. This method includes
    * GlobalSearch parameters to be able to filter results.
-   * 
+   *
    * @return MethodMetadata
    */
   public MethodMetadata getFindAllGlobalSearchMethod() {
@@ -249,7 +251,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that generates method "findAll" method.
-   * 
+   *
    * @return MethodMetadataBuilder with public List <Entity> findAll();
    *         structure
    */
@@ -284,7 +286,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that generates method "findAll" with iterable parameter.
-   * 
+   *
    * @return MethodMetadataBuilder with public List <Entity> findAll(Iterable
    *         <Long> ids) structure
    */
@@ -324,7 +326,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that generates method "findOne".
-   * 
+   *
    * @return MethodMetadataBuilder with public Entity findOne(Long id);
    *         structure
    */
@@ -358,7 +360,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that generates method "count".
-   * 
+   *
    * @return MethodMetadataBuilder with public long count();
    *         structure
    */
@@ -390,7 +392,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that generates "save" method.
-   * 
+   *
    * @return MethodMetadataBuilder with public Entity save(Entity entity);
    *         structure
    */
@@ -418,19 +420,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             this.entity, parameterTypes, parameterNames, null);
 
-    // save method should be defined with @Transactional(readOnly = false)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", false);
-    methodBuilder.addAnnotation(transactionalAnnotation);
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
+    // Build a MethodMetadata instance
+    return methodBuilder.build();
   }
 
   /**
    * Method that generates "delete" method.
-   * 
+   *
    * @return MethodMetadataBuilder with public void delete(Entity entity); structure
    */
   public MethodMetadata getDeleteMethod() {
@@ -458,19 +454,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
 
-    // save method should be defined with @Transactional(readOnly = false)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", false);
-    methodBuilder.addAnnotation(transactionalAnnotation);
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
+    // Build a MethodMetadata instance
+    return methodBuilder.build();
   }
 
   /**
    * Method that generates "save" batch method.
-   * 
+   *
    * @return MethodMetadataBuilder with public List<Entity> save(Iterable
    *         <Entity> entities); structure
    */
@@ -502,19 +492,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             listEntityJavaType, parameterTypes, parameterNames, null);
 
-    // save method should be defined with @Transactional(readOnly = false)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", false);
-    methodBuilder.addAnnotation(transactionalAnnotation);
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
+    // Build a MethodMetadata instance
+    return methodBuilder.build();
   }
 
   /**
    * Method that generates "delete" batch method
-   * 
+   *
    * @return MethodMetadataBuilder with public void delete(Iterable
    *         <Long> ids); structure
    */
@@ -543,19 +527,18 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
             JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
 
-    // save method should be defined with @Transactional(readOnly = false)
-    AnnotationMetadataBuilder transactionalAnnotation =
-        new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
-    transactionalAnnotation.addBooleanAttribute("readOnly", false);
-    methodBuilder.addAnnotation(transactionalAnnotation);
+    // Build a MethodMetadata instance
+    MethodMetadata methodMetadata = methodBuilder.build();
 
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
+    // delete method must be defined with @Transactional
+    //methodMetadata.setTransactional(true);
+
+    return methodMetadata;
   }
 
   /**
    * Method that generates countByReferencedField method on current interface
-   * 
+   *
    * @param countMethod
    * @return
    */
@@ -584,7 +567,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that generates findAll method for provided referenced fields on current interface
-   * 
+   *
    * @param countMethod
    * @return
    */
@@ -612,7 +595,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that generates finder method on current interface
-   * 
+   *
    * @param finderMethod
    * @return
    */
@@ -630,7 +613,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that generates custom count method.
-   * 
+   *
    * @return MethodMetadata
    */
   private MethodMetadata getCustomCountMethod(MethodMetadata customCountMethod) {
@@ -647,17 +630,28 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * This method returns all defined methods in service interface
-   * 
+   * that aren transactional
+   *
    * @return
    */
-  public List<MethodMetadata> getAllDefinedMethods() {
-    return this.allDefinedMethod;
+  public List<MethodMetadata> getTransactionalDefinedMethods() {
+    return this.transactionalDefinedMethod;
   }
 
   /**
-   * This method returns all defined count methods in 
+   * This method returns all defined methods in service interface
+   * that aren't transactional
+   *
+   * @return
+   */
+  public List<MethodMetadata> getNotTransactionalDefinedMethods() {
+    return this.notTransactionalDefinedMethod;
+  }
+
+  /**
+   * This method returns all defined count methods in
    * service interface
-   * 
+   *
    * @return
    */
   public Map<FieldMetadata, MethodMetadata> getCountByReferenceFieldDefinedMethod() {
@@ -665,9 +659,9 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   }
 
   /**
-   * This method returns all defined findAll methods for referenced fields in 
+   * This method returns all defined findAll methods for referenced fields in
    * service interface
-   * 
+   *
    * @return
    */
   public Map<FieldMetadata, MethodMetadata> getReferencedFieldsFindAllDefinedMethods() {
@@ -676,7 +670,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that returns the finder methos.
-   * 
+   *
    * @return a list of finder methods
    */
   public List<MethodMetadata> getFinders() {
@@ -685,7 +679,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   /**
    * Method that returns the count methods.
-   * 
+   *
    * @return a list of count methods
    */
   public List<MethodMetadata> getCountMethods() {
