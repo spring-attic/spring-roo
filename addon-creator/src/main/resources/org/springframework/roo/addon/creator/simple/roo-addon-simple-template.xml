@@ -24,20 +24,6 @@
         <osgi.version>5.0.0</osgi.version>
         <scr.plugin.version>1.20.0</scr.plugin.version>
     </properties>
-    <repositories>
-        <repository>
-            <id>spring-roo-repository</id>
-            <name>Spring Roo Repository</name>
-            <url>http://spring-roo-repository.springsource.org/release</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>spring-roo-repository</id>
-            <name>Spring Roo Repository</name>
-            <url>http://spring-roo-repository.springsource.org/release</url>
-        </pluginRepository>
-    </pluginRepositories>
     <dependencies>
         <!-- OSGi -->
         <dependency>
