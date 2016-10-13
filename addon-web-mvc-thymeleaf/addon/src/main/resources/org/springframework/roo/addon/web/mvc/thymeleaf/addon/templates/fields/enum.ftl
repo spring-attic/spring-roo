@@ -1,17 +1,23 @@
 <#macro input label fieldName fieldId z items>
-<div class="form-group" data-z="${z}" id="${fieldId}" data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'has-error has-feedback'">
+<div class="form-group has-error has-feedback" data-z="${z}" id="${fieldId}"
+data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'has-error has-feedback'" data-th-class="form-group">
     <label for="${fieldName}" class="col-md-3 control-label" data-th-text="${r"#{"}${label}${r"}"}">${fieldName}</label>
     <div class="col-md-6">
       <!-- Select2 -->
-      <select data-th-field="*{${fieldName}}" class="dropdown-select-simple" style="width: 50%"
-        data-placeholder="Select an option" data-allow-clear="true">
+      <select data-th-field="*{${fieldName}}" class="form-control dropdown-select-simple"
+         data-allow-clear="true" data-th-attr="data-placeholder=${r"#{"}info_select_an_option${r"}"}">
          <option data-th-each="item : ${r"${"}${items}${r"}"}"
               data-th-value="${r"${item}"}"
               data-th-text="${r"${item}"}">Value</option>
       </select>
-      <span id="name-help" class="help-block alert"
+      <span
+      data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'glyphicon glyphicon-remove form-control-feedback'"
+      class="glyphicon glyphicon-remove form-control-feedback"
+      data-th-if="${r"${#fields.hasErrors"}('${fieldName}')}" aria-hidden="true"></span>
+      <span
+      id="${fieldName}-error" class="help-block"
       data-th-if="${r"${#fields.hasErrors"}('${fieldName}')}"
-      data-th-errors="*{${fieldName}}">Help message.</span>
+      data-th-errors="*{${fieldName}}">Error message.</span>
     </div>
 </div>
 </#macro>
