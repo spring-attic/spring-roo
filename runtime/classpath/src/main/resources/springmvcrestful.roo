@@ -60,3 +60,5 @@ field set --fieldName details --type ~.model.OrderDetail --cardinality ONE_TO_MA
 focus --class ~.model.Product
 field set --fieldName orderDetails --type ~.model.OrderDetail
 
+// Generate repositories
+repository jpa --all --package ~.repository

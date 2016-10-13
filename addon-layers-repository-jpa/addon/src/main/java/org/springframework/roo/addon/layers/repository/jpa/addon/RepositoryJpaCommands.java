@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 /**
  * Commands for the JPA repository add-on.
- * 
+ *
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @since 1.2.0
@@ -123,9 +123,9 @@ public class RepositoryJpaCommands implements CommandMarker {
   /**
    * This indicator return all Projection classes associated to an entity specified
    * in the 'entity' parameter.
-   * 
+   *
    * @param shellContext the Roo ShellContext.
-   * @return List<String> with fullyQualifiedNames of each associated Projection. 
+   * @return List<String> with fullyQualifiedNames of each associated Projection.
    */
   @CliOptionAutocompleteIndicator(
       command = "repository jpa",
@@ -160,7 +160,7 @@ public class RepositoryJpaCommands implements CommandMarker {
 
   /**
    * This indicator says if --defaultReturnType parameter should be visible or not.
-   * 
+   *
    * @param context ShellContext
    * @return false if domain entity specified in --entity parameter has no associated Projections.
    */
@@ -197,7 +197,7 @@ public class RepositoryJpaCommands implements CommandMarker {
    * This indicator says if --package parameter should be mandatory or not
    *
    * If --all parameter has been specified, --package parameter will be mandatory.
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -214,7 +214,7 @@ public class RepositoryJpaCommands implements CommandMarker {
    *
    * If --entity parameter has been specified and we are working under multimodule
    * project, --interface parameter will be mandatory.
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -231,7 +231,7 @@ public class RepositoryJpaCommands implements CommandMarker {
    *
    * If --all parameter has not been specified, --package parameter will not be visible
    * to prevent conflicts.
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -249,7 +249,7 @@ public class RepositoryJpaCommands implements CommandMarker {
    *
    * If --entity parameter has been specified, --all parameter will not be visible
    * to prevent conflicts.
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -264,9 +264,9 @@ public class RepositoryJpaCommands implements CommandMarker {
 
   /**
    * This indicator says if --interface and --defaultSearchResult parameter are visible.
-   * 
+   *
    * If --entity is specified, --interface and --defaultSearchResult will be visible
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -283,9 +283,9 @@ public class RepositoryJpaCommands implements CommandMarker {
 
   /**
    * This indicator says if --entity parameter is visible.
-   * 
+   *
    * If --all is specified, --entity won't be visible
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -320,13 +320,13 @@ public class RepositoryJpaCommands implements CommandMarker {
     if (all) {
       repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
     } else {
-      repositoryJpaOperations.addRepository(interfaceType, domainType, defaultReturnType);
+      repositoryJpaOperations.addRepository(interfaceType, domainType, defaultReturnType, true);
     }
   }
 
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
-   * 
+   *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
@@ -369,7 +369,7 @@ public class RepositoryJpaCommands implements CommandMarker {
     if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
         && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-      // Value is for autocomplete only or user wrote abbreviate value  
+      // Value is for autocomplete only or user wrote abbreviate value
       javaTypeString = auxString;
     } else {
 
@@ -381,11 +381,11 @@ public class RepositoryJpaCommands implements CommandMarker {
   }
 
   /**
-   * Tries to obtain JavaType indicated in command or which has the focus 
+   * Tries to obtain JavaType indicated in command or which has the focus
    * in the Shell
-   * 
+   *
    * @param shellContext the Roo Shell context
-   * @return JavaType or null if no class has the focus or no class is 
+   * @return JavaType or null if no class has the focus or no class is
    * specified in the command
    */
   private JavaType getTypeFromEntityParam(ShellContext shellContext) {

@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -10,12 +11,16 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.JpaOperations;
 import org.springframework.roo.addon.jpa.addon.JpaOperationsImpl;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -25,6 +30,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
@@ -42,9 +48,12 @@ import org.w3c.dom.Element;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,6 +64,7 @@ import java.util.logging.Logger;
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @author Sergio Clares
+ * @author Jose Manuel Vivó
  * @since 1.2.0
  */
 @Component
@@ -95,23 +105,25 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       ClassOrInterfaceTypeDetails entity = it.next();
 
       // Ignore abstract classes
-      if (!entity.isAbstract()) {
-        // Generating new interface type using entity
-        JavaType interfaceType =
-            new JavaType(repositoriesPackage.getFullyQualifiedPackageName().concat(".")
-                .concat(entity.getType().getSimpleTypeName()).concat("Repository"),
-                repositoriesPackage.getModule());
-
-        // Delegate on simple add repository method
-        addRepository(interfaceType, entity.getType(), null);
+      if (entity.isAbstract()) {
+        continue;
       }
+
+      // Generating new interface type using entity
+      JavaType interfaceType =
+          new JavaType(repositoriesPackage.getFullyQualifiedPackageName().concat(".")
+              .concat(entity.getType().getSimpleTypeName()).concat("Repository"),
+              repositoriesPackage.getModule());
+
+      // Delegate on simple add repository method
+      addRepository(interfaceType, entity.getType(), null, false);
     }
 
   }
 
   @Override
   public void addRepository(JavaType interfaceType, final JavaType domainType,
-      JavaType defaultReturnType) {
+      JavaType defaultReturnType, boolean failOnComposition) {
     Validate.notNull(domainType, "ERROR: You must specify a valid Entity. ");
 
     if (getProjectOperations().isMultimoduleProject()) {
@@ -133,6 +145,16 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     // @RooJpaEntity
     Validate.notNull(entityAnnotation,
         "ERROR: Provided entity should be annotated with @RooJpaEntity");
+
+    if (!shouldGenerateRepository(entityDetails)) {
+      if (failOnComposition) {
+        throw new IllegalArgumentException(
+            "%s is child part of a composition relation. Can't create repository (entity should be handle in parent part)");
+      } else {
+        // Nothing to do: silently exit
+        return;
+      }
+    }
 
     if (defaultReturnType != null) {
 
@@ -190,8 +212,8 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
     boolean readOnly = readOnlyAttr != null && readOnlyAttr.getValue() ? true : false;
 
-    // If is readOnly entity, generates common ReadOnlyRepository interface
     if (readOnly) {
+      // If is readOnly entity, generates common ReadOnlyRepository interface
       generateReadOnlyRepository(interfaceType.getPackage());
     }
 
@@ -717,6 +739,78 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       return jpaOperations;
     }
   }
+
+  @Override
+  public boolean shouldGenerateRepository(JavaType domainType) {
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(domainType);
+    return shouldGenerateRepository(entityDetails);
+  }
+
+  private boolean shouldGenerateRepository(ClassOrInterfaceTypeDetails entity) {
+    JavaType domainType = entity.getType();
+    JpaEntityMetadata entityMetadata = getJpaEntityMetadata(entity);
+    Validate.notNull(entityMetadata, "%s should be a Jpa Entity", domainType);
+    Map<String, FieldMetadata> relations = entityMetadata.getRelationsAsChild();
+    if (relations.isEmpty()) {
+      return true;
+    }
+    JpaEntityMetadata parent;
+    JavaType parentType;
+    RelationInfo info;
+    List<FieldMetadata> compositionRelation = new ArrayList<FieldMetadata>();
+    for (Entry<String, FieldMetadata> fieldEntry : relations.entrySet()) {
+      parentType = fieldEntry.getValue().getFieldType().getBaseType();
+      parent = getJpaEntityMetadata(parentType);
+      Validate.notNull(parent,
+          "Can't get information about Entity %s which is declared as parent in %s.%s field",
+          parentType, domainType, fieldEntry.getKey());
+      info = parent.getRelationInfosByMappedBy(domainType, fieldEntry.getKey());
+      Validate
+          .notNull(
+              info,
+              "Can't get information about relation on Entity %s which is declared as parent in %s.%s field",
+              parentType, domainType, fieldEntry.getKey());
+      if (info.type == JpaRelationType.COMPOSITION) {
+        compositionRelation.add(fieldEntry.getValue());
+      }
+    }
+    if (compositionRelation.isEmpty()) {
+      return true;
+    } else if (compositionRelation.size() > 1) {
+      throw new IllegalStateException(
+          "Entity %s has more than one relations of composition as child part: "
+              + StringUtils.join(compositionRelation, ","));
+    }
+    if (compositionRelation.get(0).getAnnotation(JpaJavaType.ONE_TO_ONE) != null) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Gets JpaEntityMetadata by a javaType
+   * @param domainType
+   * @return
+   */
+  private JpaEntityMetadata getJpaEntityMetadata(JavaType domainType) {
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(domainType);
+    return getJpaEntityMetadata(entityDetails);
+  }
+
+  /**
+   * Gets JpaEntityMetadata by a javaType
+   * @param domainType
+   * @return
+   */
+  private JpaEntityMetadata getJpaEntityMetadata(ClassOrInterfaceTypeDetails domainTypeDetails) {
+    final String entityMetadataId =
+        JpaEntityMetadata.createIdentifier(domainTypeDetails.getType(),
+            PhysicalTypeIdentifier.getPath(domainTypeDetails.getDeclaredByMetadataId()));
+    JpaEntityMetadata entityMetadata =
+        (JpaEntityMetadata) getMetadataService().get(entityMetadataId);
+    return entityMetadata;
+  }
+
 
   // Feature methods
 

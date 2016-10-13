@@ -74,6 +74,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
   private final Map<String, RelationInfo> relationInfosByMappedBy;
 
+  private Map<String, FieldMetadata> relationsAsChild;
 
   public static JavaType getJavaType(final String metadataIdentificationString) {
     return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING,
@@ -178,9 +179,23 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     Map<String, RelationInfo> fieldInfosTemporal = new HashMap<String, RelationInfo>();
     Map<String, RelationInfo> fieldInfosMappedByTemporal = new HashMap<String, RelationInfo>();
+    Map<String, FieldMetadata> relationsAsChildTemporal = new HashMap<String, FieldMetadata>();
     ImportRegistrationResolver importResolver = builder.getImportRegistrationResolver();
 
-    for (FieldMetadata field : entityDetails.getFieldsWithAnnotation(RooJavaType.ROO_JPA_RELATION)) {
+    // Locate relation fields to process
+    List<FieldMetadata> fieldsParent = new ArrayList<FieldMetadata>();
+    for (FieldMetadata field : entityDetails.getDeclaredFields()) {
+      if (field.getAnnotation(RooJavaType.ROO_JPA_RELATION) != null) {
+        fieldsParent.add(field);
+      } else if (field.getAnnotation(JpaJavaType.ONE_TO_ONE) != null
+          || field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
+          || field.getAnnotation(JpaJavaType.MANY_TO_MANY) != null) {
+        relationsAsChildTemporal.put(field.getFieldName().getSymbolName(), field);
+      }
+    }
+
+    // process fields which this entity is parent part
+    for (FieldMetadata field : fieldsParent) {
 
       fieldName = field.getFieldName().getSymbolName();
       // Get cardinality
@@ -234,17 +249,35 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
           new RelationInfo(fieldName, addMethodName, removeMethodName, cardinality, childType,
               field, mappedBy, relationType);
       fieldInfosTemporal.put(fieldName, info);
-      fieldInfosMappedByTemporal.put(mappedBy, info);
+      // Use ChildType+childField as keys to avoid overried values
+      // (the same mappedBy on many relations. Ej. Order.customer and Invoice.customer)
+      fieldInfosMappedByTemporal.put(
+          getMappedByInfoKey(field.getFieldType().getBaseType(), mappedBy), info);
 
     }
 
     // store final info unmodifiable map
+    relationsAsChild = Collections.unmodifiableMap(relationsAsChildTemporal);
     relationInfos = Collections.unmodifiableMap(fieldInfosTemporal);
     relationInfosByMappedBy = Collections.unmodifiableMap(fieldInfosMappedByTemporal);
 
 
     // Build the ITD based on what we added to the builder above
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * Get key to use to locate a value on {@link #relationInfosByMappedBy}.
+   *
+   * This is due to _mappedBy_ value usually is the same between relations with
+   * other entities (ej.: Order.customer, Invoice.customer, ContactNote.customer...)
+   *
+   * @param childEntity
+   * @param mappedBy field value
+   * @return
+   */
+  private String getMappedByInfoKey(JavaType childEntity, String mappedBy) {
+    return childEntity.getFullyQualifiedTypeName() + "." + mappedBy;
   }
 
   /**
@@ -1336,10 +1369,25 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
-   * @return information about relations which current entity is parent. Map key is child entity related field name
+   * @return information about relations which current entity is parent. Map key is child entity plus related field name
+   * @see #getRelationInfosByMappedBy(JavaType, String)
    */
   public Map<String, RelationInfo> getRelationInfosByMappedBy() {
     return relationInfosByMappedBy;
+  }
+
+  /**
+   * @return information about relations which current entity is parent.
+   */
+  public RelationInfo getRelationInfosByMappedBy(JavaType childType, String childFieldName) {
+    return relationInfosByMappedBy.get(getMappedByInfoKey(childType, childFieldName));
+  }
+
+  /**
+   * @return fields declared on entity which entity is child part.
+   */
+  public Map<String, FieldMetadata> getRelationsAsChild() {
+    return relationsAsChild;
   }
 
   /**
