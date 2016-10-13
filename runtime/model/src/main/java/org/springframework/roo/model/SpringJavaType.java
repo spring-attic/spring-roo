@@ -106,6 +106,10 @@ public final class SpringJavaType {
   public static final JavaType PAGEABLE = new JavaType("org.springframework.data.domain.Pageable");
   public static final JavaType PAGEABLE_DEFAULT = new JavaType(
       "org.springframework.data.web.PageableDefault");
+  public static final JavaType SPRING_JPA_REPOSITORY = new JavaType(
+      "org.springframework.data.jpa.repository.JpaRepository");
+  public static final JavaType SPRING_DATA_REPOSITORY = new JavaType(
+      "org.springframework.data.repository.Repository");
   public static final JavaType PATH_VARIABLE = new JavaType(
       "org.springframework.web.bind.annotation.PathVariable");
   public static final JavaType PERMISSION_EVALUATOR = new JavaType(

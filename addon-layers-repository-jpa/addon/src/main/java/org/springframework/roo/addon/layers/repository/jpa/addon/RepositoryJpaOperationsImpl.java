@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -25,6 +26,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -41,6 +43,7 @@ import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
@@ -76,17 +79,11 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
-  private FileManager fileManager;
-  private PathResolver pathResolver;
-  private ProjectOperations projectOperations;
-  private TypeManagementService typeManagementService;
-  private TypeLocationService typeLocationService;
-  private MemberDetailsScanner memberDetailsScanner;
-  private MetadataService metadataService;
-  private JpaOperationsImpl jpaOperations;
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    serviceInstaceManager.activate(this.context);
   }
 
   @Override
@@ -249,8 +246,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       plugins = XmlUtils.findElements("/configuration/multimodule/plugins/plugin", configuration);
 
       // Add database test dependency
-      getJpaOperationsImpl().addDatabaseDependencyWithTestScope(interfaceType.getModule(), null,
-          null);
+      getJpaOperations().addDatabaseDependencyWithTestScope(interfaceType.getModule(), null, null);
 
     } else {
       dependencies =
@@ -479,7 +475,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       input = input.replace("__ENTITY_NAME__", entity.getSimpleTypeName());
 
       // Creating RepositoryCustomImpl class
-      fileManager.createOrUpdateTextFileIfRequired(implIdentifier, input, false);
+      getFileManager().createOrUpdateTextFileIfRequired(implIdentifier, input, false);
     } catch (final IOException e) {
       throw new IllegalStateException(String.format("Unable to create '%s'", implIdentifier), e);
     } finally {
@@ -551,165 +547,32 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 
   }
 
-  public FileManager getFileManager() {
-    if (fileManager == null) {
-      // Get all Services implement FileManager interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(FileManager.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          fileManager = (FileManager) this.context.getService(ref);
-          return fileManager;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load FileManager on RepositoryJpaOperationsImpl.");
-        return null;
-      }
-    } else {
-      return fileManager;
-    }
+  private FileManager getFileManager() {
+    return serviceInstaceManager.getServiceInstance(this, FileManager.class);
   }
 
-  public PathResolver getPathResolver() {
-    if (pathResolver == null) {
-      // Get all Services implement PathResolver interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PathResolver.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          pathResolver = (PathResolver) this.context.getService(ref);
-          return pathResolver;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PathResolver on RepositoryJpaOperationsImpl.");
-        return null;
-      }
-    } else {
-      return pathResolver;
-    }
+  private PathResolver getPathResolver() {
+    return serviceInstaceManager.getServiceInstance(this, PathResolver.class);
   }
 
-  public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on RepositoryJpaOperationsImpl.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+  private ProjectOperations getProjectOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
   public TypeManagementService getTypeManagementService() {
-    if (typeManagementService == null) {
-      // Get all Services implement TypeManagementService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeManagementService = (TypeManagementService) this.context.getService(ref);
-          return typeManagementService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeManagementService on RepositoryJpaOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeManagementService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
   }
 
   public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) this.context.getService(ref);
-          return typeLocationService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on RepositoryJpaOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
   public MemberDetailsScanner getMemberDetailsScanner() {
-    if (memberDetailsScanner == null) {
-      // Get all Services implement MemberDetailsScanner interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          memberDetailsScanner = (MemberDetailsScanner) this.context.getService(ref);
-          return memberDetailsScanner;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MemberDetailsScanner on RepositoryJpaOperationsImpl.");
-        return null;
-      }
-    } else {
-      return memberDetailsScanner;
-    }
+    return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
   }
 
   public MetadataService getMetadataService() {
-    if (metadataService == null) {
-      // Get all Services implement MetadataService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(MetadataService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          metadataService = (MetadataService) this.context.getService(ref);
-          return metadataService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MetadataService on RepositoryJpaOperationsImpl.");
-        return null;
-      }
-    } else {
-      return metadataService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, MetadataService.class);
   }
 
   /**
@@ -717,27 +580,8 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
    *
    * @return
    */
-  public JpaOperationsImpl getJpaOperationsImpl() {
-    if (jpaOperations == null) {
-      // Get all Services implement JpaOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(JpaOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          jpaOperations = (JpaOperationsImpl) this.context.getService(ref);
-          return jpaOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load JpaOperations on ProjectConfigurationController.");
-        return null;
-      }
-    } else {
-      return jpaOperations;
-    }
+  public JpaOperations getJpaOperations() {
+    return serviceInstaceManager.getServiceInstance(this, JpaOperations.class);
   }
 
   @Override
@@ -747,78 +591,11 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
   }
 
   private boolean shouldGenerateRepository(ClassOrInterfaceTypeDetails entity) {
-    JavaType domainType = entity.getType();
-    JpaEntityMetadata entityMetadata = getJpaEntityMetadata(entity);
-    Validate.notNull(entityMetadata, "%s should be a Jpa Entity", domainType);
-    Map<String, FieldMetadata> relations = entityMetadata.getRelationsAsChild();
-    if (relations.isEmpty()) {
+    Pair<FieldMetadata, RelationInfo> compositionRelation =
+        getJpaOperations().getFieldChildPartOfCompositionRelation(entity);
+    if (compositionRelation == null) {
       return true;
     }
-    JpaEntityMetadata parent;
-    JavaType parentType;
-    RelationInfo info;
-    List<FieldMetadata> compositionRelation = new ArrayList<FieldMetadata>();
-    for (Entry<String, FieldMetadata> fieldEntry : relations.entrySet()) {
-      parentType = fieldEntry.getValue().getFieldType().getBaseType();
-      parent = getJpaEntityMetadata(parentType);
-      Validate.notNull(parent,
-          "Can't get information about Entity %s which is declared as parent in %s.%s field",
-          parentType, domainType, fieldEntry.getKey());
-      info = parent.getRelationInfosByMappedBy(domainType, fieldEntry.getKey());
-      Validate
-          .notNull(
-              info,
-              "Can't get information about relation on Entity %s which is declared as parent in %s.%s field",
-              parentType, domainType, fieldEntry.getKey());
-      if (info.type == JpaRelationType.COMPOSITION) {
-        compositionRelation.add(fieldEntry.getValue());
-      }
-    }
-    if (compositionRelation.isEmpty()) {
-      return true;
-    } else if (compositionRelation.size() > 1) {
-      throw new IllegalStateException(
-          "Entity %s has more than one relations of composition as child part: "
-              + StringUtils.join(compositionRelation, ","));
-    }
-    if (compositionRelation.get(0).getAnnotation(JpaJavaType.ONE_TO_ONE) != null) {
-      return false;
-    }
-    return true;
-  }
-
-  /**
-   * Gets JpaEntityMetadata by a javaType
-   * @param domainType
-   * @return
-   */
-  private JpaEntityMetadata getJpaEntityMetadata(JavaType domainType) {
-    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(domainType);
-    return getJpaEntityMetadata(entityDetails);
-  }
-
-  /**
-   * Gets JpaEntityMetadata by a javaType
-   * @param domainType
-   * @return
-   */
-  private JpaEntityMetadata getJpaEntityMetadata(ClassOrInterfaceTypeDetails domainTypeDetails) {
-    final String entityMetadataId =
-        JpaEntityMetadata.createIdentifier(domainTypeDetails.getType(),
-            PhysicalTypeIdentifier.getPath(domainTypeDetails.getDeclaredByMetadataId()));
-    JpaEntityMetadata entityMetadata =
-        (JpaEntityMetadata) getMetadataService().get(entityMetadataId);
-    return entityMetadata;
-  }
-
-
-  // Feature methods
-
-  public String getName() {
-    return FeatureNames.JPA;
-  }
-
-  public boolean isInstalledInModule(final String moduleName) {
-    return getProjectOperations().isFeatureInstalled(FeatureNames.JPA);
+    return compositionRelation.getRight().cardinality != Cardinality.ONE_TO_ONE;
   }
 }

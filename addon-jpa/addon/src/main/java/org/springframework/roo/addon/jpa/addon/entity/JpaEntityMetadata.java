@@ -1411,6 +1411,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     return versionField;
   }
 
+  public boolean isReadOnly() {
+    return annotationValues.isReadOnly();
+  }
+
   /**
    * = _RelationInfo_
    *

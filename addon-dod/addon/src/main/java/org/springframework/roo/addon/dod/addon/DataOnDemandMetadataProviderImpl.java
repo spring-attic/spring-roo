@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -62,7 +63,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link DataOnDemandMetadataProvider}.
- * 
+ *
  * @author Ben Alex
  * @author Greg Turnquist
  * @author Andrew Swan
@@ -91,34 +92,35 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
-   * <li>Create and open the {@link ItdTriggerBasedMetadataProviderTracker} 
+   * <li>Create and open the {@link ItdTriggerBasedMetadataProviderTracker}
    * to track for {@link ConfigurableMetadataProvider} service.</li>
-   * <li>Registers {@link RooJavaType#ROO_DATA_ON_DEMAND} as additional 
+   * <li>Registers {@link RooJavaType#ROO_DATA_ON_DEMAND} as additional
    * JavaType that will trigger metadata registration.</li>
    * </ul>
    */
   @Override
   protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
+    super.activate(cContext);
+    BundleContext localContext = cContext.getBundleContext();
     this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
+        new MetadataDependencyRegistryTracker(localContext, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
     // DOD classes are @Configurable because they may need DI of other DOD
     // classes that provide M:1 relationships
     this.configurableMetadataProviderTracker =
-        new ItdTriggerBasedMetadataProviderTracker(context, ConfigurableMetadataProvider.class,
-            ROO_DATA_ON_DEMAND);
+        new ItdTriggerBasedMetadataProviderTracker(localContext,
+            ConfigurableMetadataProvider.class, ROO_DATA_ON_DEMAND);
     this.configurableMetadataProviderTracker.open();
 
     addMetadataTrigger(ROO_DATA_ON_DEMAND);
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -264,7 +266,7 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
     final Map<FieldMetadata, DataOnDemandMetadata> locatedFields =
         new LinkedHashMap<FieldMetadata, DataOnDemandMetadata>();
     final Iterable<ClassOrInterfaceTypeDetails> dataOnDemandTypes =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND);
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND);
 
     final List<MethodMetadata> mutatorMethods = memberDetails.getMethods();
     // To avoid unnecessary rewriting of the DoD ITD we sort the mutators by
@@ -423,7 +425,7 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
   /**
    * Returns the {@link DataOnDemandMetadata} for the entity that's the target
    * of the given reference field.
-   * 
+   *
    * @param dodMetadataId
    * @param field
    * @param dataOnDemandTypes
@@ -453,25 +455,11 @@ public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringI
   }
 
   private void registerDependencyUponType(final String dodMetadataId, final JavaType type) {
-    final String fieldPhysicalTypeId = typeLocationService.getPhysicalTypeIdentifier(type);
+    final String fieldPhysicalTypeId = getTypeLocationService().getPhysicalTypeIdentifier(type);
     getMetadataDependencyRegistry().registerDependency(fieldPhysicalTypeId, dodMetadataId);
   }
 
   protected LayerService getLayerService() {
-    // Get all Services implement LayerService interface
-    try {
-      ServiceReference<?>[] references =
-          context.getAllServiceReferences(LayerService.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (LayerService) context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load LayerService on DataOnDemandMetadataProviderImpl.");
-      return null;
-    }
+    return getServiceManager().getServiceInstance(this, LayerService.class);
   }
 }

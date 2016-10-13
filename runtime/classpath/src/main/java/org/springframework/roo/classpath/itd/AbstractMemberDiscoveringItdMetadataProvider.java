@@ -36,7 +36,7 @@ import org.springframework.roo.metadata.MetadataItem;
  * exact metadata identification string to request, allowing flexibility in
  * implementation (eg a subclass could monitor for new ITD metadata related to
  * types other than simply their normal governor types).
- * 
+ *
  * @author Ben Alex
  * @since 1.1.1
  */
@@ -55,7 +55,7 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
    * cache and formally requested. This process allows subclasses to
    * effectively discover new ITD members that appear over time without
    * needing to process every request themselves.
-   * 
+   *
    * @param itdTypeDetails a valid {@link ItdTypeDetails} from which member
    *            information is available (never null)
    * @return null if the subclass is not interested in the type, or a MID if
@@ -68,7 +68,7 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends
    * MetadataDependencyRegistry.addNotificationListener(this). You must still
    * register in the activate method to receive these events, as described in
    * the JavaDocs for the superclass method of the same name.
-   * 
+   *
    * @see AbstractItdMetadataProvider#notifyForGenericListener(String)
    */
   @Override

@@ -1,5 +1,5 @@
 // Create project
-project setup --topLevelPackage com.disid.restful --projectName springMVCRESTful
+project setup --topLevelPackage com.disid.restful --projectName restfulshop
 
 // Setup JPA
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY

@@ -10,7 +10,7 @@ import org.springframework.roo.project.Feature;
  * @author Jose Manuel Vivó
  * @since 1.2.0
  */
-public interface RepositoryJpaOperations extends Feature {
+public interface RepositoryJpaOperations {
 
   /**
    * Checks if it's possible to generate new repositories on current project.

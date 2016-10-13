@@ -1,17 +1,11 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Map.Entry;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -22,12 +16,20 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Metadata for {@link RooJpaRepository}.
@@ -41,10 +43,11 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   private static final String PROVIDES_TYPE_STRING = RepositoryJpaMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
-  private static final String SPRING_JPA_REPOSITORY =
-      "org.springframework.data.jpa.repository.JpaRepository";
 
   private Map<FieldMetadata, MethodMetadata> countMethodByReferencedFields;
+  private FieldMetadata compositionField;
+  private RelationInfo compositionInfo;
+  private MethodMetadata compositionCountMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -79,7 +82,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    * @param annotationValues (required)
    * @param identifierType the type of the entity's identifier field
    *            (required)
-   * @param readOnly boolean
+   * @param entityMetadata boolean
    * @param readOnlyRepository JavaType
    * @param customRepositories List<JavaType>
    * @param referenceFields Map<JavaType, JavaType> that contains referenceField type
@@ -88,24 +91,29 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   public RepositoryJpaMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaAnnotationValues annotationValues, final JavaType identifierType,
-      final boolean readOnly, final JavaType readOnlyRepository,
-      final List<JavaType> customRepositories,
-      final Map<FieldMetadata, FieldMetadata> referenceFields) {
+      final JpaEntityMetadata entityMetadata, final JavaType readOnlyRepository,
+      final List<JavaType> customRepositories, boolean composition,
+      final Pair<FieldMetadata, RelationInfo> compositionInfo) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(identifierType, "Id type required");
 
     countMethodByReferencedFields = new HashMap<FieldMetadata, MethodMetadata>();
 
-    if (readOnly) {
+    // Add Repository interface
+    JavaType interfaceType = null;
+    if (composition) {
+      // If composition extends Repository
+      interfaceType = SpringJavaType.SPRING_DATA_REPOSITORY;
+    } else if (entityMetadata.isReadOnly()) {
       // If readOnly, extends ReadOnlyRepository
-      ensureGovernorExtends(new JavaType(readOnlyRepository.getFullyQualifiedTypeName(), 0,
-          DataType.TYPE, null, Arrays.asList(annotationValues.getEntity(), identifierType)));
+      interfaceType = readOnlyRepository;
     } else {
       // Extends JpaRepository
-      ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null,
-          Arrays.asList(annotationValues.getEntity(), identifierType)));
+      interfaceType = SpringJavaType.SPRING_JPA_REPOSITORY;
     }
+    ensureGovernorExtends(new JavaType(interfaceType.getFullyQualifiedTypeName(), 0, DataType.TYPE,
+        null, Arrays.asList(annotationValues.getEntity(), identifierType)));
 
     // If has some RepositoryCustom associated, add extends
     if (!customRepositories.isEmpty()) {
@@ -115,31 +123,20 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       }
     }
 
-    // Always add @Repository annotation
-    ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(SpringJavaType.REPOSITORY));
-
     // All repositories are generated with @Transactional(readOnly = true)
     AnnotationMetadataBuilder transactionalAnnotation =
         new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
     transactionalAnnotation.addBooleanAttribute("readOnly", true);
     ensureGovernorIsAnnotated(transactionalAnnotation);
 
-    // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
-    // method is not in the same order and ITD will be regenerated.
-    Map<FieldMetadata, FieldMetadata> referencedFieldsOrderedByFieldName =
-        new TreeMap<FieldMetadata, FieldMetadata>(new Comparator<FieldMetadata>() {
-          @Override
-          public int compare(FieldMetadata field1, FieldMetadata field2) {
-            return field1.getFieldName().compareTo(field2.getFieldName());
-          }
-        });
-    referencedFieldsOrderedByFieldName.putAll(referenceFields);
-
-    // Adding count methods for every referenced field
-    for (Entry<FieldMetadata, FieldMetadata> field : referencedFieldsOrderedByFieldName.entrySet()) {
-      MethodMetadata countMethod = getCountMethodByField(field.getKey(), field.getValue());
+    if (composition) {
+      MethodMetadata countMethod =
+          getCountMethodByField(compositionInfo.getLeft(), compositionInfo.getRight());
       ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
-      countMethodByReferencedFields.put(field.getKey(), countMethod);
+      this.compositionField = compositionInfo.getLeft();
+      this.compositionInfo = compositionInfo.getRight();
+      this.compositionCountMethod = countMethod;
+      countMethodByReferencedFields.put(compositionInfo.getLeft(), countMethod);
     }
 
     // Build the ITD
@@ -149,24 +146,29 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   /**
    * Method that generates method "countByField" method.
    *
-   * @param field
+   * @param relationInfo
    * @param identifierType
    *
    * @return field
    */
-  public MethodMetadata getCountMethodByField(FieldMetadata field, FieldMetadata identifierType) {
+  public MethodMetadata getCountMethodByField(FieldMetadata field, RelationInfo relationInfo) {
+
     // Define method name
-    JavaSymbolName methodName =
-        new JavaSymbolName(String.format("countBy%s", field.getFieldName()
+    String countPattern = "countBy%s";
+    if (relationInfo.cardinality == Cardinality.MANY_TO_MANY) {
+      countPattern = "countBy%sContains";
+    }
+
+    final JavaSymbolName methodName =
+        new JavaSymbolName(String.format(countPattern, field.getFieldName()
             .getSymbolNameCapitalisedFirstLetter()));
 
-    // Define method parameter types
+    // Define method parameter type and name
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(field.getFieldType()));
-
-    // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(field.getFieldName());
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(field.getFieldType()));
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(field.getFieldType()
+        .getSimpleTypeName())));
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -178,7 +180,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
-            identifierType.getFieldType(), parameterTypes, parameterNames, null);
+            JavaType.LONG_PRIMITIVE, parameterTypes, parameterNames, null);
 
     return methodBuilder.build(); // Build and return a MethodMetadata
     // instance
@@ -188,9 +190,22 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    * This method returns all generated countMethodByReferencedFields
    *
    * @return Map with key that identifies referenced field and method metadata
+   * @deprecated use {@link #getCompositionCountMethod()} and {@link #getCompositionField()}
    */
   public Map<FieldMetadata, MethodMetadata> getCountMethodByReferencedFields() {
     return countMethodByReferencedFields;
+  }
+
+  public MethodMetadata getCompositionCountMethod() {
+    return compositionCountMethod;
+  }
+
+  public FieldMetadata getCompositionField() {
+    return compositionField;
+  }
+
+  public RelationInfo getCompositionInfo() {
+    return compositionInfo;
   }
 
   @Override
