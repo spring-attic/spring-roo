@@ -24,7 +24,7 @@
       			<#list languages as language>
         			<li id="${language.localePrefix}Flag">
 					<a href="?lang=${language.localePrefix}">
-						<img class="flag" src="/img/${language.localePrefix}.png" alt="${language.language}" />&nbsp;
+						<img class="flag" src="/public/img/${language.localePrefix}.png" alt="${language.language}" />&nbsp;
 						<span data-th-text="${r"#{language_label_"}${language.localePrefix}${r"}"}">${language.language}</span>
 					</a>
 				</li>

@@ -141,10 +141,10 @@
                   </a>
                   <ul class="dropdown-menu" id="languageFlags">
                    <li id="enFlag"><a href="?lang=en"><img class="flag"
-                   data-th-src="@{/public/img/en.png}" src="../../public/img/en.png"
+                   data-th-src="@{/static/public/img/en.png}" src="../../static/public/img/en.png"
                    alt="English">&nbsp;<span>English</span></a> </li>
                    <li id="esFlag"><a href="?lang=es"><img class="flag"
-                   data-th-src="@{/public/img/es.png}" src="../../public/img/es.png"
+                   data-th-src="@{/static/public/img/es.png}" src="../../static/public/img/es.png"
                    alt="Spanish">&nbsp;<span>Spanish</span></a> </li>
                  </ul>
                </li>

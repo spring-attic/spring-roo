@@ -102,10 +102,10 @@
                   </a>
                   <ul class="dropdown-menu" id="languageFlags">
                    <li id="enFlag"><a href="?lang=en"><img class="flag"
-                   data-th-src="@{/public/img/en.png}" src="../public/img/en.png"
+                   data-th-src="@{/static/public/img/en.png}" src="../static/public/img/en.png"
                    alt="English">&nbsp;<span>English</span></a> </li>
                    <li id="esFlag"><a href="?lang=es"><img class="flag"
-                   data-th-src="@{/public/img/es.png}" src="../public/img/es.png"
+                   data-th-src="@{/static/public/img/es.png}" src="../static/public/img/es.png"
                    alt="Spanish">&nbsp;<span>Spanish</span></a> </li>
                  </ul>
                </li>
@@ -157,9 +157,9 @@
                       data-th-text="${r"#{"}error_expired_session${r"}"}" >Your session has expired</span>
                   </div>
 
-                  <@text.input label="label_login_username" fieldName="username" z="z" size=6/>
+                  <@text.input label="label_login_username" fieldId="username" fieldName="username" z="z" size=6/>
 
-                  <@password.input label="label_login_password" fieldName="password" z="z" size=6/>
+                  <@password.input label="label_login_password" fieldId="password" fieldName="password" z="z" size=6/>
 
                   <div class="form-group">
                     <div class="col-md-9 col-md-offset-3">

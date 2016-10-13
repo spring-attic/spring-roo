@@ -1,24 +1,14 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
-import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.views.MVCViewGenerationService;
 import org.springframework.roo.addon.web.mvc.views.ViewContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -44,6 +34,15 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implementation of ControllerMVCResponseService that provides
@@ -194,7 +193,6 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     ctx.setVersion(getProjectOperations().getPomFromModuleName("").getVersion());
 
     getViewGenerationService().addIndexView(module.getModuleName(), ctx);
-    getViewGenerationService().addAccessibilityView(module.getModuleName(), ctx);
     getViewGenerationService().addErrorView(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayout(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayoutNoMenu(module.getModuleName(), ctx);
@@ -205,9 +203,10 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addSession(module.getModuleName(), ctx);
     getViewGenerationService().addSessionLinks(module.getModuleName(), ctx);
     getViewGenerationService().addLanguages(module.getModuleName(), ctx);
-    getViewGenerationService().addLoginView(module.getModuleName(), ctx);
     getViewGenerationService().addAccessibilityView(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayoutNoMenu(module.getModuleName(), ctx);
+
+    getViewGenerationService().addLoginView(module.getModuleName(), ctx);
 
     // Add i18n support for english language
     getI18nOperations().installI18n(new EnglishLanguage(), module);
@@ -361,6 +360,10 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // copy all necessary scripts inside SRC_MAIN_RESOURCES/static/public/js
     copyDirectoryContents("static/js/*.js",
         getPathResolver().getIdentifier(resourcesPath, "/static/public/js"), true);
+
+    // copy all necessary scripts inside SRC_MAIN_RESOURCES/templates/fragments/js
+    copyDirectoryContents("templates/fragments/js/*.html",
+        pathResolver.getIdentifier(resourcesPath, "/templates/fragments/js"), true);
   }
 
   /**
