@@ -171,12 +171,12 @@
       <dependency>
         <groupId>io.springlets</groupId>
         <artifactId>springlets-data-commons</artifactId>
-        <version>${springlets-version}</version>
+        <version>${springlets.version}</version>
       </dependency>
       <dependency>
         <groupId>io.springlets</groupId>
         <artifactId>springlets-data-jpa</artifactId>
-        <version>${springlets-version}</version>
+        <version>${springlets.version}</version>
       </dependency>
     </dependencies>
   </common>
