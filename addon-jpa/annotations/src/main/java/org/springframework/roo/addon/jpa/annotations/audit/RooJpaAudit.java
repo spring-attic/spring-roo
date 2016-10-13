@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.security.annotations;
+package org.springframework.roo.addon.jpa.annotations.audit;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooAudit {
+public @interface RooJpaAudit {
 
   /**
    * Indicates the name of the Data Base column to store createdDate field data.

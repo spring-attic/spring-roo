@@ -11,7 +11,7 @@ entity jpa --class aaaa.bbb.cc.model.Entity2
 #-------------------------------------------------------------------------------------------------------
 # Goal:   Test 'audit setup' command without package
 #
-audit setup
+jpa audit setup
 #      
 # Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/AuthenticationAuditorAware.java
 #         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
@@ -29,12 +29,12 @@ audit setup
 #-------------------------------------------------------------------------------------------------------
 # Goal:   Test 'audit add' without its column parameters
 #
-audit add --entity ~.model.Entity1
+jpa audit add --entity ~.model.Entity1
 #      
 # Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity1.java
-#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity1_Roo_Audit.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity1_Roo_Jpa_Audit.aj
 #
-# Result: Adds @RooAudit annotation to Entity1 and creates Entity1_Roo_Audit.aj with audit fields, 
+# Result: Adds @RooAudit annotation to Entity1 and creates Entity1_Roo_Jpa_Audit.aj with audit fields, 
 #         getters and annotations (without including @Column annotations). 
 #=======================================================================================================
 
@@ -43,12 +43,12 @@ audit add --entity ~.model.Entity1
 #-------------------------------------------------------------------------------------------------------
 # Goal:   Test 'audit add' with its column parameters
 #
-audit add --entity ~.model.Entity2 --createdByColumn AAAAA --createdDateColumn BBBB --modifiedDateColumn CCCC --modifiedByColumn DDDD
+jpa audit add --entity ~.model.Entity2 --createdByColumn AAAAA --createdDateColumn BBBB --modifiedDateColumn CCCC --modifiedByColumn DDDD
 #      
 # Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity2.java
-#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity2_Roo_Audit.aj
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity2_Roo_Jpa_Audit.aj
 #
-# Result: Adds @RooAudit annotation to Entity1 and creates Entity1_Roo_Audit.aj with audit fields, 
+# Result: Adds @RooAudit annotation to Entity1 and creates Entity1_Roo_Jpa_Audit.aj with audit fields, 
 #         getters and annotations (including @Column annotations).
 #=======================================================================================================
 
@@ -68,7 +68,7 @@ audit add --entity ~.model.Entity2 --createdByColumn AAAAA --createdDateColumn B
 #-------------------------------------------------------------------------------------------------------
 # Goal:   Test if 'audit setup' is not available when already installed in the project.
 #
-#audit setup
+#jpa audit setup
 #      
 # Output: Command 'audit setup' was found but is not currently available (type 'help' then ENTER to 
 #         learn about this command)

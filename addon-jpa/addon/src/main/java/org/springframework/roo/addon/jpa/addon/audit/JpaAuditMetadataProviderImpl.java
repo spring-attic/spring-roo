@@ -1,20 +1,23 @@
-package org.springframework.roo.addon.security.addon.audit;
+package org.springframework.roo.addon.jpa.addon.audit;
 
-import static org.springframework.roo.model.RooJavaType.*;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_AUDIT;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.classpath.*;
-import org.springframework.roo.classpath.details.*;
-import org.springframework.roo.classpath.itd.*;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
-import org.springframework.roo.model.*;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Implementation of {@link AuditMetadataProvider}.
+ * Implementation of {@link JpaAuditMetadataProvider}.
  * <p/>
  * 
  * @author Sergio Clares
@@ -22,8 +25,8 @@ import org.springframework.roo.project.LogicalPath;
  */
 @Component
 @Service
-public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
-    implements AuditMetadataProvider {
+public class JpaAuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider
+    implements JpaAuditMetadataProvider {
 
   protected MetadataDependencyRegistryTracker registryTracker = null;
 
@@ -31,7 +34,7 @@ public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetad
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_AUDIT} as additional 
+   * <li>Registers {@link RooJavaType#ROO_JPA_AUDIT} as additional 
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -45,7 +48,7 @@ public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetad
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
-    addMetadataTrigger(ROO_AUDIT);
+    addMetadataTrigger(ROO_JPA_AUDIT);
   }
 
   /**
@@ -61,18 +64,18 @@ public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetad
         getProvidesType());
     this.registryTracker.close();
 
-    removeMetadataTrigger(ROO_AUDIT);
+    removeMetadataTrigger(ROO_JPA_AUDIT);
   }
 
   @Override
   protected String createLocalIdentifier(final JavaType javaType, final LogicalPath path) {
-    return AuditMetadata.createIdentifier(javaType, path);
+    return JpaAuditMetadata.createIdentifier(javaType, path);
   }
 
   @Override
   protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-    final JavaType javaType = AuditMetadata.getJavaType(metadataIdentificationString);
-    final LogicalPath path = AuditMetadata.getPath(metadataIdentificationString);
+    final JavaType javaType = JpaAuditMetadata.getJavaType(metadataIdentificationString);
+    final LogicalPath path = JpaAuditMetadata.getPath(metadataIdentificationString);
     return PhysicalTypeIdentifier.createIdentifier(javaType, path);
   }
 
@@ -83,7 +86,7 @@ public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetad
 
   @Override
   public String getItdUniquenessFilenameSuffix() {
-    return "Audit";
+    return "Jpa_Audit";
   }
 
   @Override
@@ -91,14 +94,14 @@ public class AuditMetadataProviderImpl extends AbstractMemberDiscoveringItdMetad
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    final AuditAnnotationValues annotationValues =
-        new AuditAnnotationValues(governorPhysicalTypeMetadata);
+    final JpaAuditAnnotationValues annotationValues =
+        new JpaAuditAnnotationValues(governorPhysicalTypeMetadata);
 
-    return new AuditMetadata(metadataIdentificationString, aspectName,
+    return new JpaAuditMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues);
   }
 
   public String getProvidesType() {
-    return AuditMetadata.getMetadataIdentiferType();
+    return JpaAuditMetadata.getMetadataIdentiferType();
   }
 }

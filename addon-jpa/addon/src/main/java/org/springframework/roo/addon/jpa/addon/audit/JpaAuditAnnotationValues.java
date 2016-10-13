@@ -1,16 +1,18 @@
-package org.springframework.roo.addon.security.addon.audit;
+package org.springframework.roo.addon.jpa.addon.audit;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.annotations.populator.*;
+import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
+import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
+import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.RooJavaType;
 
 /**
- * Annotation values for @RooAudit
+ * Annotation values for @RooJpaAudit
  * 
  * @author Sergio Clares
  * @since 2.0
  */
-public class AuditAnnotationValues extends AbstractAnnotationValues {
+public class JpaAuditAnnotationValues extends AbstractAnnotationValues {
 
   @AutoPopulate
   private String createdDateColumn = "";
@@ -26,8 +28,8 @@ public class AuditAnnotationValues extends AbstractAnnotationValues {
    * 
    * @param governorPhysicalTypeMetadata the metadata to parse (required)
    */
-  public AuditAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-    super(governorPhysicalTypeMetadata, RooJavaType.ROO_AUDIT);
+  public JpaAuditAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+    super(governorPhysicalTypeMetadata, RooJavaType.ROO_JPA_AUDIT);
     AutoPopulationUtils.populate(this, annotationMetadata);
   }
 

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.security.addon.audit;
+package org.springframework.roo.addon.jpa.addon.audit;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.roo.addon.security.annotations.RooAudit;
+import org.springframework.roo.addon.jpa.annotations.audit.RooJpaAudit;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -27,19 +27,19 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Metadata for {@link RooAudit}.
+ * Metadata for {@link RooJpaAudit}.
  * <p>
  * 
  * @author Sergio Clares
  * @since 2.0
  */
-public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+public class JpaAuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-  private static final String PROVIDES_TYPE_STRING = AuditMetadata.class.getName();
+  private static final String PROVIDES_TYPE_STRING = JpaAuditMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private final AuditAnnotationValues annotationValues;
+  private final JpaAuditAnnotationValues annotationValues;
   private ArrayList<FieldMetadata> auditFields = new ArrayList<FieldMetadata>();
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -72,9 +72,9 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
    * @param aspectName
    * @param governorPhysicalTypeMetadata
    */
-  public AuditMetadata(final String identifier, final JavaType aspectName,
+  public JpaAuditMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final AuditAnnotationValues annotationValues) {
+      final JpaAuditAnnotationValues annotationValues) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate
         .isTrue(
@@ -142,7 +142,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Create field annotations
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    // Only add @Column if required by annotation @RooAudit
+    // Only add @Column if required by annotation @RooJpaAudit
     if (StringUtils.isNotBlank(this.annotationValues.getCreatedDateColumn())) {
       AnnotationMetadataBuilder columnAnnotation =
           new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
@@ -177,7 +177,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Create field annotations
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    // Only add @Column if required by annotation @RooAudit
+    // Only add @Column if required by annotation @RooJpaAudit
     if (StringUtils.isNotBlank(this.annotationValues.getModifiedDateColumn())) {
       AnnotationMetadataBuilder columnAnnotation =
           new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
@@ -212,7 +212,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Create field annotations
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    // Only add @Column if required by annotation @RooAudit
+    // Only add @Column if required by annotation @RooJpaAudit
     if (StringUtils.isNotBlank(this.annotationValues.getCreatedByColumn())) {
       AnnotationMetadataBuilder columnAnnotation =
           new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
@@ -242,7 +242,7 @@ public class AuditMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
     // Create field annotations
     List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-    // Only add @Column if required by annotation @RooAudit
+    // Only add @Column if required by annotation @RooJpaAudit
     if (StringUtils.isNotBlank(this.annotationValues.getModifiedByColumn())) {
       AnnotationMetadataBuilder columnAnnotation =
           new AnnotationMetadataBuilder(JpaJavaType.COLUMN);
