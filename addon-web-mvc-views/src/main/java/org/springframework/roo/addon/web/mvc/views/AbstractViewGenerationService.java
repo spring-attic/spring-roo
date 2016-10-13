@@ -696,6 +696,32 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   }
 
   @Override
+  public void addAccessibilityView(String moduleName, ViewContext ctx) {
+
+    // Check if template exists
+    if (getFileManager().exists(
+        getTemplatesLocation().concat("/").concat("accessibility").concat(".ftl"))) {
+
+      // Process elements to generate
+      DOC newDoc = process("accessibility", ctx);
+
+      // Getting new viewName
+      String viewName =
+          getViewsFolder(moduleName).concat("/accessibility").concat(getViewsExtension());
+
+      // Check if new view to generate exists or not
+      if (existsFile(viewName)) {
+        newDoc = merge("accessibility", loadExistingDoc(viewName), ctx);
+      } else {
+        newDoc = process("accessibility", ctx);
+      }
+
+      // Write newDoc on disk
+      writeDoc(newDoc, viewName);
+    }
+  }
+
+  @Override
   public void updateMenuView(String moduleName, ViewContext ctx) {
     // TODO: This method should update menu view with the new
     // controller to include, instead of regenerate menu view page.

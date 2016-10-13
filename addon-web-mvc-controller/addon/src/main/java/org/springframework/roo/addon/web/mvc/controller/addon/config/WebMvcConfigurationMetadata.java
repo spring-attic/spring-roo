@@ -106,6 +106,9 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     // Add addArgumentResolvers() @Override method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getAddArgumentResolvers()));
 
+    // Add addViewControllers() @Override method
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getAddViewControllers()));
+
     // Add globalSearchResolver()
     ensureGovernorHasMethod(new MethodMetadataBuilder(getGlobalSearchResolver()));
 
@@ -374,6 +377,49 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     bodyBuilder.appendFormalLine("registry.addInterceptor(localeChangeInterceptor());");
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE,
+            parameterTypes, parameterNames, bodyBuilder);
+
+    // Add Bean annotation
+    methodBuilder.addAnnotation(new AnnotationMetadataBuilder(JavaType.OVERRIDE));
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
+   * Method that generates "addViewControllers" method.
+   *
+   * @return MethodMetadata
+   */
+  public MethodMetadata getAddViewControllers() {
+
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("addViewControllers");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType(
+        "org.springframework.web.servlet.config.annotation.ViewControllerRegistry")));
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("registry"));
+
+    if (governorHasMethod(methodName,
+        AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
+      return getGovernorMethod(methodName,
+          AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    }
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    bodyBuilder
+        .appendFormalLine("registry.addViewController(\"/accessibility\").setViewName(\"accessibility\");");
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =

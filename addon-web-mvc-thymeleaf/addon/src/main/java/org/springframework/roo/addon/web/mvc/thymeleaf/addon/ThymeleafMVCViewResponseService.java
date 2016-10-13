@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -39,6 +40,7 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
@@ -183,6 +185,9 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // Is necessary to copy static resources
     copyStaticResources(module);
 
+    // Add all available WebJar containing required static resources
+    addWebJars(module);
+
     // Delegate on view generation to create view elements
     ViewContext ctx = new ViewContext();
     ctx.setProjectName(getProjectOperations().getProjectName(""));
@@ -200,6 +205,9 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addSession(module.getModuleName(), ctx);
     getViewGenerationService().addSessionLinks(module.getModuleName(), ctx);
     getViewGenerationService().addLanguages(module.getModuleName(), ctx);
+    getViewGenerationService().addLoginView(module.getModuleName(), ctx);
+    getViewGenerationService().addAccessibilityView(module.getModuleName(), ctx);
+    getViewGenerationService().addDefaultLayoutNoMenu(module.getModuleName(), ctx);
 
     // Add i18n support for english language
     getI18nOperations().installI18n(new EnglishLanguage(), module);
@@ -665,6 +673,146 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     cidBuilder.setAnnotations(annotations);
 
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+  }
+
+  /**
+   * Configure WebJar dependencies in required pom's.
+   * 
+   * @param module the module where Thymeleaf is going to be installed
+   */
+  public void addWebJars(Pom module) {
+    String rootModuleName = "";
+
+    // Create lists of dependencies with and without version
+    List<Dependency> dependenciesWithVersion = new ArrayList<Dependency>();
+    List<Dependency> dependenciesUnversioned = new ArrayList<Dependency>();
+
+    //Add Bootstrap WebJar
+    getProjectOperations().addProperty(rootModuleName, new Property("bootstrap.version", "3.3.6"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "bootstrap",
+        "${bootstrap.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "bootstrap", null));
+
+    // Add Datatables and Datatables related WebJars
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables.version", "1.10.11"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datatables",
+        "${datatables.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "datatables", null));
+
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-bs.version", "1.10.11"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datatables.net-bs",
+        "${datatables-bs.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "datatables.net-bs", null));
+
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-buttons.version", "1.1.2"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datatables.net-buttons",
+        "${datatables-buttons.version}"));
+    dependenciesUnversioned
+        .add(new Dependency("org.webjars.bower", "datatables.net-buttons", null));
+
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-buttons-bs.version", "1.1.2"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datatables.net-buttons-bs",
+        "${datatables-buttons-bs.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "datatables.net-buttons-bs",
+        null));
+
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-responsive.version", "2.0.2"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datatables.net-responsive",
+        "${datatables-responsive.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "datatables.net-responsive",
+        null));
+
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-responsive-bs.version", "2.0.2"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datatables.net-responsive-bs",
+        "${datatables-responsive-bs.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "datatables.net-responsive-bs",
+        null));
+
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-select.version", "1.1.2"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datatables.net-select",
+        "${datatables-select.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "datatables.net-select", null));
+
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datatables-select-bs.version", "1.1.2"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datatables.net-select-bs",
+        "${datatables-select-bs.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "datatables.net-select-bs",
+        null));
+
+    // Add DatetimePicker WebJar
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("datetimepicker.version", "2.5.4"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "datetimepicker",
+        "${datetimepicker.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "datetimepicker", null));
+
+    // Add FontAwesome WebJar
+    getProjectOperations()
+        .addProperty(rootModuleName, new Property("fontawesome.version", "4.6.2"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "font-awesome",
+        "${fontawesome.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "font-awesome", null));
+
+    // Add jQuery WebJar
+    getProjectOperations().addProperty(rootModuleName, new Property("jquery.version", "1.12.3"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "jquery", "${jquery.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "jquery", null));
+
+    // Add jQuery InputMask WebJar
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("jquery-inputmask.version", "3.3.1"));
+    dependenciesWithVersion.add(new Dependency("org.webjars", "jquery.inputmask",
+        "${jquery-inputmask.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars", "jquery.inputmask", null));
+
+    // Add jQuery InputMask WebJar
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("jquery-validation.version", "1.15.0"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "jquery-validation",
+        "${jquery-validation.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "jquery-validation", null));
+
+    // Add MomentJS WebJar
+    getProjectOperations().addProperty(rootModuleName, new Property("momentjs.version", "2.13.0"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "momentjs",
+        "${momentjs.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "momentjs", null));
+
+    // Add Select2 WebJar
+    getProjectOperations().addProperty(rootModuleName, new Property("select2.version", "4.0.2"));
+    dependenciesWithVersion
+        .add(new Dependency("org.webjars.bower", "select2", "${select2.version}"));
+    dependenciesUnversioned.add(new Dependency("org.webjars.bower", "select2", null));
+
+    // Add Select2 Bootstrap Theme WebJar
+    getProjectOperations().addProperty(rootModuleName,
+        new Property("select2-bootstrap-theme.version", "0.1.0-beta.7"));
+    dependenciesWithVersion.add(new Dependency("org.webjars.bower", "select2-bootstrap-theme",
+        "${select2-bootstrap-theme.version}"));
+    dependenciesUnversioned
+        .add(new Dependency("org.webjars.bower", "select2-bootstrap-theme", null));
+
+    if (projectOperations.isMultimoduleProject()) {
+
+      // If multimodule project, add dependencies with version to dependencyManagement
+      getProjectOperations().addDependenciesToDependencyManagement(rootModuleName,
+          dependenciesWithVersion);
+
+      // Add dependencies without version to specified module
+      getProjectOperations().addDependencies(module.getModuleName(), dependenciesUnversioned);
+    } else {
+
+      // Add dependencies with version to the only module
+      getProjectOperations().addDependencies(module.getModuleName(), dependenciesWithVersion);
+    }
   }
 
   /**

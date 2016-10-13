@@ -260,6 +260,15 @@ public interface MVCViewGenerationService {
   void addLanguages(String moduleName, ViewContext ctx);
 
   /**
+   * This operation will add the application accesibility view using 
+   * the provided context
+   * 
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addAccessibilityView(String moduleName, ViewContext ctx);
+
+  /**
    * This operation will updates menu view.
    * 
    * TODO: Maybe, instead of modify all menu view, only new generated controller should
