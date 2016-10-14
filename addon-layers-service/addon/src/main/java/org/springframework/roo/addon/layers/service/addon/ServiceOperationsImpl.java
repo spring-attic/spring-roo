@@ -33,6 +33,9 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.DependencyScope;
+import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -317,5 +320,12 @@ public class ServiceOperationsImpl implements ServiceOperations {
     projectOperations.addModuleDependency(implType.getModule(), interfaceType.getModule());
     projectOperations.addModuleDependency(implType.getModule(), repository.getName().getModule());
     projectOperations.addModuleDependency(implType.getModule(), domainType.getModule());
+
+    // ROO-3799 Included dependency spring-tx if it's a multimodule project
+    if (projectOperations.isMultimoduleProject()) {
+      projectOperations.addDependency(implType.getModule(), new Dependency("org.springframework",
+          "spring-tx", "", DependencyType.JAR, DependencyScope.COMPILE));
+    }
+
   }
 }

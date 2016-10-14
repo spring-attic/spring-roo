@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
 /**
-/**
  * This class contains all necessary information about a entity to show it
  * in a page
  *

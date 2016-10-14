@@ -11,7 +11,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.security.addon.security.providers.SecurityProvider;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -44,7 +43,16 @@ public class SecurityCommands implements CommandMarker {
 
   @CliAvailabilityIndicator("security setup")
   public boolean isInstallSecurityAvailable() {
-    return securityOperations.isSecurityInstallationPossible();
+    // If some SecurityProvider is available to be installed, this command will be available
+    // showing only these ones.
+    List<SecurityProvider> securityProviders = securityOperations.getAllSecurityProviders();
+    for (SecurityProvider provider : securityProviders) {
+      if (provider.isInstallationAvailable()) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @CliOptionVisibilityIndicator(command = "security setup", params = {"module"},
@@ -74,7 +82,9 @@ public class SecurityCommands implements CommandMarker {
 
     List<SecurityProvider> securityProviders = securityOperations.getAllSecurityProviders();
     for (SecurityProvider provider : securityProviders) {
-      results.add(provider.getName());
+      if (provider.isInstallationAvailable()) {
+        results.add(provider.getName());
+      }
     }
 
     return results;
@@ -86,17 +96,11 @@ public class SecurityCommands implements CommandMarker {
       @CliOption(key = "type", mandatory = false,
           help = "The Spring Security provider to install.", unspecifiedDefaultValue = "DEFAULT",
           specifiedDefaultValue = "DEFAULT") String type,
-      @CliOption(key = "configPackage", mandatory = false,
-          help = "The package where @Configuration classes for Spring Security will be included.") JavaPackage configPackage,
-      @CliOption(key = "profile", mandatory = false,
-          help = "Profile where Spring Security Configuration will be applied.",
-          unspecifiedDefaultValue = "dev", specifiedDefaultValue = "dev") String profile,
       @CliOption(key = "module", mandatory = true,
           help = "The application module where to install the persistence",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
-    securityOperations.installSecurity(getSecurityProviderFromName(type), configPackage, profile,
-        module);
+    securityOperations.installSecurity(getSecurityProviderFromName(type), module);
 
   }
 

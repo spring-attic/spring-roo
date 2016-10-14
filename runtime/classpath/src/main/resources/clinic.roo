@@ -70,3 +70,10 @@ web mvc controller --all --responseType THYMELEAF
 web mvc detail --all --responseType THYMELEAF
 
 web mvc language --code es
+
+// FIXME!! Re-enable security when Springlets contains security starter
+// security setup
+
+// FIXME!! Re-enable audit when Springlets contains audit starter
+// jpa audit setup
+// jpa audit add --entity ~.domain.Owner

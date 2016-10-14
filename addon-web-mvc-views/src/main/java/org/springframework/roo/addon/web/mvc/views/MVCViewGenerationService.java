@@ -150,6 +150,16 @@ public interface MVCViewGenerationService {
   void addLoginView(String moduleName, ViewContext ctx);
 
   /**
+   * This operation will add the application accessibility view using 
+   * the provided context
+   * 
+   * @param moduleName module where index view will be added
+   * @param ctx ViewContext that contains necessary information about
+   *            the controller, the project, etc...
+   */
+  void addAccessibilityView(String moduleName, ViewContext ctx);
+
+  /**
    * This operation will add the application error view using 
    * the provided context
    * 

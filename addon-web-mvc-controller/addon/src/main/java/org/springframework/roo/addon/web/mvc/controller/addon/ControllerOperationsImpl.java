@@ -1054,7 +1054,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
       if (relationFields.isEmpty()) {
         LOGGER.log(Level.INFO, String.format(
-            "ERROR: the entity '%s' hasn't attributes to generate detail controllers.",
+            "INFO: the entity '%s' hasn't attributes to generate detail controllers.",
             entity.getSimpleTypeName()));
         return;
       }

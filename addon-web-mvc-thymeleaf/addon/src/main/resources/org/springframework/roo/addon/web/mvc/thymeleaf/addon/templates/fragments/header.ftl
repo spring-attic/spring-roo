@@ -14,6 +14,7 @@
     -->
     <div data-layout-fragment="header">
 
+      <!-- BANNER -->
       <div class="bg-header">
         <div class="jumbotron bg-banner">
             <div class="container">

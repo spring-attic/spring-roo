@@ -1,0 +1,89 @@
+# Create project, add security, persistence and entities to be able to test subsequent commands.
+project setup --topLevelPackage aaaa.bbb.cc 
+security setup
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY 
+entity jpa --class aaaa.bbb.cc.model.Entity1
+entity jpa --class aaaa.bbb.cc.model.Entity2
+
+
+#=======================================================================================================
+# TEST 1: Install audit to project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'audit setup' command without package
+#
+jpa audit setup
+#      
+# Output: Created SRC_MAIN_JAVA/aaaa/bbb/cc/AuthenticationAuditorAware.java
+#         Updated SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
+#         Updated ROOT/pom.xml [added dependencies org.springframework.data:spring-data-jpa:, 
+#           org.springframework.data:spring-data-commons:, org.springframework:spring-aspects:, 
+#           org.springframework.security:spring-security-core:]
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration_Roo_SecurityConfiguration.aj
+#
+# Result: Creates AuthenticationAuditorAware.java in base package, adds dependencies, updates 
+#         SecurityConfiguration.java and creates SecurityConfiguration_Roo_SecurityConfiguration.aj             
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 2: Add audit to Entity1 without column parameters
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'audit add' without its column parameters
+#
+jpa audit add --entity ~.model.Entity1
+#      
+# Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity1.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity1_Roo_Jpa_Audit.aj
+#
+# Result: Adds @RooAudit annotation to Entity1 and creates Entity1_Roo_Jpa_Audit.aj with audit fields, 
+#         getters and annotations (without including @Column annotations). 
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 3: Add audit to Entity2 with column parameters
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test 'audit add' with its column parameters
+#
+jpa audit add --entity ~.model.Entity2 --createdByColumn AAAAA --createdDateColumn BBBB --modifiedDateColumn CCCC --modifiedByColumn DDDD
+#      
+# Output: Updated SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity2.java
+#         Created SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity2_Roo_Jpa_Audit.aj
+#
+# Result: Adds @RooAudit annotation to Entity1 and creates Entity1_Roo_Jpa_Audit.aj with audit fields, 
+#         getters and annotations (including @Column annotations).
+#=======================================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they are      #
+# supposed to interrupt script execution.                                #
+#                                                                        #
+##########################################################################
+
+
+#=======================================================================================================
+# TEST 4: Try to install audit again
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if 'audit setup' is not available when already installed in the project.
+#
+#jpa audit setup
+#      
+# Output: Command 'audit setup' was found but is not currently available (type 'help' then ENTER to 
+#         learn about this command)
+#
+# Result: Stops command execution and shows a message which says command isn't available.                            
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 5: Try to compile generated project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if generated SecurityConfiguration has not compilation problems, like bad imports.
+#
+# $ mvn clean compile 
+#      
+# Output: [INFO] BUILD SUCCESS ...
+#
+# Result: Project successfully compiled.                             
+#=======================================================================================================

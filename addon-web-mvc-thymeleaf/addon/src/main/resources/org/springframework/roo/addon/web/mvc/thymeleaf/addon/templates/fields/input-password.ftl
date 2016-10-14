@@ -1,5 +1,5 @@
-<#macro input label fieldName z size>
-<div class="form-group has-error has-feedback" data-z="${z}" id="${fieldName}"
+<#macro input label fieldName fieldId z size>
+<div class="form-group has-error has-feedback" data-z="${z}" id="${fieldId}"
   data-th-classappend="${r"${#fields.hasErrors"}('${fieldName}')}? 'has-error has-feedback'" data-th-class="form-group">
   <label for="${fieldName}" class="col-md-3 control-label"
     data-th-text="${r"#{"}${label}${r"}"}">${fieldName}</label>

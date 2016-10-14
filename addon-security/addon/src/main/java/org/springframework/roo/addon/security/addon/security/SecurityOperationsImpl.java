@@ -13,7 +13,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.security.addon.security.providers.SecurityProvider;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -46,19 +45,12 @@ public class SecurityOperationsImpl implements SecurityOperations {
   }
 
   @Override
-  public boolean isSecurityInstallationPossible() {
-    return getProjectOperations().isFocusedProjectAvailable()
-        && getProjectOperations().isFeatureInstalled(FeatureNames.MVC);
-  }
-
-  @Override
-  public void installSecurity(SecurityProvider type, JavaPackage configPackage, String profile,
-      Pom module) {
+  public void installSecurity(SecurityProvider type, Pom module) {
 
     Validate.notNull(type, "ERROR: You must provide a valid SecurityProvider to install.");
 
     // Delegates on the provided SecurityProvider to install Spring Security on current project
-    type.install(configPackage, profile, module);
+    type.install(module);
   }
 
   @Override

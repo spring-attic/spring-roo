@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description"
-      content="A next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes." />
+      content="${r"#{info_description}"}" />
     <meta name="author"
-      content="Spring Roo team" />
-    <link data-th-href="@{/public/img/favicon.ico}" data-th-remove="all" rel="icon"
-       href="../../static/public/img/favicon.ico" />
+      content="${r"#{info_author}"}" />
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
       data-th-href="@{/public/img/favicon.ico}" />
@@ -17,34 +15,22 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-href="@{/public/img/apple-touch-icon.png}" />
 
-    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-title="${r"${projectName}"}">Spring Roo application</title>
+    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-text="${r"${projectName}"}">Spring Roo application</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"></link>
-        
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+        data-th-href="@{/webjars/bootstrap/3.3.6/dist/css/bootstrap.css}"></link>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link rel="stylesheet" type="text/css"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.css"></link>      
-        
-    <!-- Select2 -->
-    <link rel="stylesheet" type="text/css"
-      data-th-href="@{/public/css/select2.css}"
-      href="../../static/public/css/select2.css" />
-    <link rel="stylesheet" type="text/css"
-      data-th-href="@{/public/css/select2-bootstrap.css}"
-      href="../../static/public/css/select2-bootstrap.css" />
-      
-      
-    <!-- DateTimePicker -->
-    <link rel="stylesheet" type="text/css"
-        data-th-href="@{/public/css/jquery.datetimepicker.css}"
-        href="../../static/public/css/jquery.datetimepicker.css" />
-    <script data-th-src="@{/public/js/jquery.min.js}"
-        src="../../static/public/js/jquery.min.js"></script>
+      href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
+      data-th-href="@{/public/css/ie10-viewport-bug-workaround.css}"></link>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" type="text/css" 
-      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
+      data-th-href="@{/webjars/font-awesome/4.6.2/css/font-awesome.min.css}" />
 
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
@@ -56,14 +42,18 @@
       href="../../static/public/css/springroo.css"
       data-th-href="@{/public/css/springroo.css}" />
 
-    <!-- HTML5 shim y Respond.js para soporte de elementos HTML5 en IE8 y media queries -->
+   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-          <script src="/public/js/html5shiv.min.js"></script>
-          <script src="/public/js/respond.min.js"></script>
-        <![endif]-->
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
   </head>
-  <body>
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
 
      <header role="banner">
         <div data-layout-include="fragments/header :: header">
@@ -79,8 +69,6 @@
     </header>
 
     <div class="container bg-container">
-
-
       <section data-layout-fragment="content">
         <!-- Content replaced by the content fragment of the page displayed -->
         <h2>Sample static body for direct display of the template</h2>
@@ -97,34 +85,46 @@
       &copy; 2016 Spring Roo (footer for example for direct display of the template)
     </footer>
 
-      <!-- Bootstrap core JavaScript
-    ================================================== -->
-  <script data-th-src="@{/public/js/jquery.min.js}"
-    src="../../static/public/js/jquery.min.js"></script>
-  <script data-th-src="@{/public/js/bootstrap.min.js}"
-    src="../../static/public/js/bootstrap.min.js"></script>
+    <!-- JavaScript
+     ================================================== -->
+    <!-- Placed at the end of the document so that the pages load faster -->
+    <!-- JQuery -->
+    <script type="text/javascript" charset="utf8"
+      src="https://code.jquery.com/jquery-1.12.3.js"
+      data-th-src="@{/webjars/jquery/1.12.3/dist/jquery.js}"></script>
+
+    <!-- Bootstrap -->
+    <script type="text/javascript"
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.js"
+      data-th-src="@{/webjars/bootstrap/3.3.6/dist/js/bootstrap.js}"></script>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="../../static/public/js/ie10-viewport-bug-workaround.js"
       data-th-src="@{/public/js/ie10-viewport-bug-workaround.js}">
-    </script>
+      </script>
 
-      <div data-layout-fragment="javascript">
-          <!-- Moment.js --> 
-          <script data-th-src="@{/public/js/moment.js}" src="../../static/public/js/moment.js"></script> 
-          <script data-th-src="@{/public/js/moment-} + ${r"${application_locale}"} + .js" src="../../static/public/js/moment-en.js"></script> 
-          <!-- Select2 -->
-          <script src="../../static/public/js/select2.full.js" data-th-src="@{/public/js/select2.full.js}"></script>
-          <script src="../../static/public/js/select2.full-es.js" data-th-src="@{/public/js/select2.full-es.js}"></script>
-          <script src="../../static/public/js/select2-defaults.js" data-th-src="@{/public/js/select2-defaults.js}"></script>
-          <!-- DateTime Picker -->
-          <script src="../../static/public/js/jquery.datetimepicker.full.min.js" data-th-src="@{/public/js/jquery.datetimepicker.full.min.js}"></script>
-          <script src="../../static/public/js/datetimepicker-defaults.js" data-th-src="@{/public/js/datetimepicker-defaults.js}"></script>
-      </div>
+    <!-- MomentJS - date format -->
+    <script
+       src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js"
+       data-th-src="@{/webjars/momentjs/2.13.0/moment.js}">
+      </script>
+    <script
+       src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
+       data-th-src="@{/webjars/momentjs/2.13.0/locale/}+ ${r"${#"}locale.language${r"}"}+'.js'"
+       data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
+      </script>
+    <script src="../../static/public/js/moment-defaults.js"
+      data-th-src="@{/public/js/moment-defaults.js}">
+      </script>
+
+    <div data-layout-fragment="javascript">
+      <!-- This includes javascript own code of each page -->
+    </div>
 
     <!-- Application -->
     <script src="../../static/public/js/main.js"
       data-th-src="@{/public/js/main.js}">
       </script>
   </body>
+</#if>
 </html>

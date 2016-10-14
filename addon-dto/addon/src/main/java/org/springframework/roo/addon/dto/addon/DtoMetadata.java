@@ -15,7 +15,7 @@ import org.springframework.roo.model.*;
 import org.springframework.roo.project.LogicalPath;
 
 /**
- * Metadata for {@link RooAudit}.
+ * Metadata for {@link RooDTO}.
  * <p>
  * 
  * @author Sergio Clares

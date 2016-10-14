@@ -1,0 +1,151 @@
+# Create project, add security, persistence and entities to be able to test subsequent commands.
+project setup --topLevelPackage aaaa.bbb.cc --multimodule
+security setup
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY 
+entity jpa --class model:aaaa.bbb.cc.model.Entity1
+entity jpa --class aaaa.bbb.cc.model.Entity2
+
+
+#================================================================================================================
+# TEST 1: Install audit to multimodule project
+#----------------------------------------------------------------------------------------------------------------
+# Goal:   Test 'audit setup' command with --package parameter in multimodule project. Audit config files should 
+#         be placed in base package for each application modules because --package is not specified.
+#
+jpa audit setup
+#      
+# Output: Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/application
+#         Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/application/AuthenticationAuditorAware.java
+#         Updated application:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
+#         Updated application:ROOT/pom.xml [added dependencies org.springframework.data:spring-data-jpa:, 
+#           org.springframework.data:spring-data-commons:, org.springframework:spring-aspects:, 
+#           org.springframework.security:spring-security-core:]
+#         Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration_Roo_SecurityConfiguration.aj
+#
+# Result: Creates AuthenticationAuditorAware.java in base package of application module, adds dependencies,  
+#         updates SecurityConfiguration.java and creates SecurityConfiguration_Roo_SecurityConfiguration.aj           
+#================================================================================================================
+
+#================================================================================================================
+# TEST 2: Add audit to Entity1 without column parameters in multimodule project
+#----------------------------------------------------------------------------------------------------------------
+# Goal:   Test 'audit add' without its column parameters in multimodule project.
+#
+jpa audit add --entity model:~.Entity1
+#      
+# Output: Updated model:SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity1.java
+#         Created model:SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity1_Roo_Jpa_Audit.aj
+#
+# Result: Adds @RooJpaAudit annotation to Entity1 and creates Entity1_Roo_Jpa_Audit.aj with audit fields, 
+#         getters and annotations (without including @Column annotations). 
+#================================================================================================================
+
+#================================================================================================================
+# TEST 3: Add audit to Entity2 with column parameters in multimodule project
+#----------------------------------------------------------------------------------------------------------------
+# Goal:   Test 'audit add' with its column parameters in multimodule project.
+#
+jpa audit add --entity model:~.Entity2 --createdByColumn AAAAA --createdDateColumn BBBB --modifiedDateColumn CCCC --modifiedByColumn DDDD
+#      
+# Output: Updated model:SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity2.java
+#         Created model:SRC_MAIN_JAVA/aaaa/bbb/cc/model/Entity2_Roo_Jpa_Audit.aj
+#
+# Result: Adds @RooJpaAudit annotation to Entity1 and creates Entity1_Roo_Jpa_Audit.aj with audit fields, 
+#         getters and annotations (including @Column annotations).
+#================================================================================================================
+
+
+##########################################################################
+#######                      MANUAL TESTS                        #########
+##########################################################################
+#                                                                        #
+# The following commands must be executed manually because they are      #
+# supposed to interrupt script execution.                                #
+#                                                                        #
+##########################################################################
+
+
+#=======================================================================================================
+# TEST 4: Try to install audit again
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if 'audit setup' is not available when already installed in the project.
+#
+#jpa audit setup
+#      
+# Output: Command 'audit setup' was found but is not currently available (type 'help' then ENTER to 
+#         learn about this command)
+#
+# Result: Stops command execution and shows a message which says command isn't available.                            
+#=======================================================================================================
+
+#=======================================================================================================
+# TEST 5: Try to compile generated project
+#-------------------------------------------------------------------------------------------------------
+# Goal:   Test if generated SecurityConfiguration has not compilation problems, like bad imports.
+#
+# $ mvn clean compile 
+#      
+# Output: [INFO] BUILD SUCCESS ...
+#
+# Result: Project successfully compiled.                             
+#=======================================================================================================
+
+#====================================================================================================================
+# TEST 6: Try to install audit with multiple security configurations
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test generation of audit setup with multiple security configurations, one for each application module. That
+#         is, those modules which have a class annotated with @SpringBootApplication. Audit configuration files 
+#         should be placed in specified package for each application module.
+#
+# Preparation:
+#
+#     * Generate a new project:
+#
+#       project setup --topLevelPackage aaaa.bbb.cc --multimodule
+#
+#     * Clone aaaa.bbb.cc.CcApplication.java to "service-impl" module, package "aaaa.bbb.cc.service.impl"
+#       Change file package declaration.
+#
+#     * Install security:
+#
+#       security setup --module application
+#
+#     * Install persistence
+#
+#       jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY --module application    
+#
+#     * Install audit:
+#
+#       audit setup --package service-impl:aaaa.bbb.cc.audit
+#
+# Output: Created service-impl:SRC_MAIN_JAVA/aaaa/bbb/cc/audit
+#         Created service-impl:SRC_MAIN_JAVA/aaaa/bbb/cc/audit/AuthenticationAuditorAware.java
+#         Updated service-impl:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
+#         Updated application:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration.java
+#         Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/audit
+#         Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/audit/AuthenticationAuditorAware.java
+#         Updated service-impl:ROOT/pom.xml [added dependencies org.springframework.data:spring-data-jpa:, 
+#           org.springframework.data:spring-data-commons:, org.springframework:spring-aspects:, 
+#           org.springframework.security:spring-security-core:]
+#         Updated application:ROOT/pom.xml [added dependencies org.springframework.data:spring-data-jpa:, 
+#           org.springframework.data:spring-data-commons:, org.springframework:spring-aspects:, 
+#           org.springframework.security:spring-security-core:]
+#         Created application:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration_Roo_SecurityConfiguration.aj
+#         Created service-impl:SRC_MAIN_JAVA/aaaa/bbb/cc/config/SecurityConfiguration_Roo_SecurityConfiguration.aj
+#
+# Result: Generates two audit and security configuration classes, both for each application module, in specified 
+#         package. Updates dependencies for both application modules and creates two ITD's with the additional audit
+#         configuration.                            
+#====================================================================================================================
+
+#====================================================================================================================
+# TEST 7: Try to compile generated project with audit installed with multiple security configurations
+#--------------------------------------------------------------------------------------------------------------------
+# Goal:   Test if generated audit and security configurations have not compilation problems, like bad imports.
+#
+# $ mvn clean compile 
+#      
+# Output: [INFO] BUILD SUCCESS ...
+#
+# Result: Multimodule project successfully compiled with multiple security and audit configurations.                            
+#====================================================================================================================

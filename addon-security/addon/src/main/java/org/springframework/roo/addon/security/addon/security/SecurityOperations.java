@@ -3,7 +3,6 @@ package org.springframework.roo.addon.security.addon.security;
 import java.util.List;
 
 import org.springframework.roo.addon.security.addon.security.providers.SecurityProvider;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.maven.Pom;
@@ -21,23 +20,13 @@ public interface SecurityOperations extends Feature {
   String SECURITY_FEATURE_NAME = FeatureNames.SECURITY;
 
   /**
-   * Defines isSecurityInstallationPossible operation that will be used by implementations to know
-   * if the Spring Security installation is possible.
-   * 
-   * @return true if Spring Security setup is available.
-   */
-  boolean isSecurityInstallationPossible();
-
-  /**
    * Defines install operation that will be used by implementations to install the necessary
    * components of Spring Security.
    * 
    * @param type SecurityProvider type that will be install
-   * @param configPackage JavaPackage where the configuration class will be included
-   * @param profile String with the profile where Spring Security configuration will be applied
    * @param module Pom of the application module where Spring Security will be installed.
    */
-  void installSecurity(SecurityProvider type, JavaPackage configPackage, String profile, Pom module);
+  void installSecurity(SecurityProvider type, Pom module);
 
   /**
    * Defines getAllSecurityProviders operation that will be used by implementations to

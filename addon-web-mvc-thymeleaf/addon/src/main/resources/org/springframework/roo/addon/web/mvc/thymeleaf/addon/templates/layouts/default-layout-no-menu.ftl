@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
       data-th-href="@{/public/img/apple-touch-icon.png}" />
 
-    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-title="${r"${projectName}"}">Spring Roo application</title>
+    <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-text="${r"${projectName}"}">Spring Roo application</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
@@ -50,7 +50,11 @@
     <![endif]-->
 
   </head>
-  <body>
+
+<#if userManagedComponents?has_content && userManagedComponents["body"]??>
+  ${userManagedComponents["body"]}
+<#else>
+  <body id="body">
 
      <header role="banner">
         <div data-layout-include="fragments/header :: header">
@@ -123,4 +127,5 @@
       data-th-src="@{/public/js/main.js}">
       </script>
   </body>
+</#if>
 </html>

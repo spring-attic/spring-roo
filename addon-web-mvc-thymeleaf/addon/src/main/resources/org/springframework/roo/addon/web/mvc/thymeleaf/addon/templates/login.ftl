@@ -10,13 +10,13 @@
       With Roo you can easily build full Java applications in minutes." data-th-remove="all" />
     <meta name="author" content="Spring Roo development team" data-th-remove="all" />
 
-    <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+    <link rel="shortcut icon" href="../../public/img/favicon.ico"
        data-th-remove="all" />
 
-    <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+    <link rel="apple-touch-icon" href="../../public/img/apple-touch-icon.png"
        data-th-remove="all" />
 
-    <title data-th-text="${r"#{"}label_login${r"}"}- ${projectName}">Login- ${projectName}</title>
+    <title data-th-text="|${r"#{"}label_login${r"}"}- ${projectName}|">Login- ${projectName}</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
@@ -59,10 +59,10 @@
   <!--Main container-->
   <div class="container bg-container">
 
-      <!-- Header -->
+      <!-- HEADER -->
       <header role="banner">
 
-        <!--Banner -->
+        <!-- BANNER -->
         <div class="bg-header">
           <div class="jumbotron bg-banner">
               <div class="container">
@@ -76,6 +76,9 @@
         <nav class="navbar navbar-inverse navbar-fixed-top">
          <div class="container">
 
+            <!-- navbar-header -->
+            <div class="navbar-header">
+
               <!-- Brand logo -->
               <div class="organization-logo navbar-brand">
                 <a title="${projectName}" href="/">
@@ -86,7 +89,7 @@
               <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}">${projectName}</a></div>
 
             </div>
-            <!-- navbar header -->
+            <!-- /navbar header -->
 
             <!-- menu -->
             <div id="mainnav" class="navbar-collapse collapse">
@@ -99,14 +102,14 @@
                   </a>
                   <ul class="dropdown-menu" id="languageFlags">
                    <li id="enFlag"><a href="?lang=en"><img class="flag"
-                   data-th-src="@{/public/img/en.png}" src="../static/public/img/en.png"
+                   data-th-src="@{/static/public/img/en.png}" src="../static/public/img/en.png"
                    alt="English">&nbsp;<span>English</span></a> </li>
                    <li id="esFlag"><a href="?lang=es"><img class="flag"
-                   data-th-src="@{/public/img/es.png}" src="../static/public/img/es.png"
+                   data-th-src="@{/static/public/img/es.png}" src="../static/public/img/es.png"
                    alt="Spanish">&nbsp;<span>Spanish</span></a> </li>
                  </ul>
                </li>
-              </ul>
+              </ul>           
 
            </div>
 
@@ -114,6 +117,7 @@
         </nav>
 
       </header>
+      <!-- /HEADER -->
 
       <!--Content-->
       <section data-layout-fragment="content">
@@ -153,9 +157,9 @@
                       data-th-text="${r"#{"}error_expired_session${r"}"}" >Your session has expired</span>
                   </div>
 
-                  <@text.input label="label_login_username" fieldName="username" z="z" size=6/>
+                  <@text.input label="label_login_username" fieldId="username" fieldName="username" z="z" size=6/>
 
-                  <@password.input label="label_login_password" fieldName="password" z="z" size=6/>
+                  <@password.input label="label_login_password" fieldId="password" fieldName="password" z="z" size=6/>
 
                   <div class="form-group">
                     <div class="col-md-9 col-md-offset-3">
@@ -187,7 +191,9 @@
         <small class="clearfix">
             Made with <a href="http://projects.spring.io/spring-roo/" target="_blank">
             Spring Roo &copy; 2016</a> •
-            We <span class="glyphicon glyphicon-heart"></span> <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a>
+            We <span class="glyphicon glyphicon-heart"></span> 
+            <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
+            <a data-th-href="@{/accessibility}" href="accessibility.html"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
         </small>
         </div>
       </div>
@@ -232,6 +238,6 @@
     <!-- Application -->
     <script src="../static/public/js/main.js"></script>
 
- </body>
+  </body>
 </#if>
 </html>
