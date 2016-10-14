@@ -50,6 +50,7 @@ import java.util.logging.Logger;
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @author Paula Navarro
+ * @author Sergio Clares
  * @since 1.2.0
  */
 @Component
@@ -86,16 +87,13 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
             entity.getSimpleTypeName());
 
     // Check if module has an application class
-    Pom pom = projectOperations.getPomFromModuleName(controllerPackage.getModule());
-    Validate.isTrue(typeLocationService.hasModuleFeature(pom, ModuleFeatureName.APPLICATION),
-        "Specified module must have a class annotated with @SpringBootApplication module. Please, "
-            + "specify it with --package option, or focus it before running this command.");
+    controllerPackage = checkAndUseApplicationModule(controllerPackage);
 
     // Check if entity has any associated repository
+    boolean entityHasRepository = false;
     Set<ClassOrInterfaceTypeDetails> repositories =
         typeLocationService
             .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
-    boolean entityHasRepository = false;
     ClassOrInterfaceTypeDetails relatedRepository = null;
     for (ClassOrInterfaceTypeDetails repository : repositories) {
       if (repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity") != null
@@ -122,16 +120,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     // Get repository finder methods
     AnnotationMetadata findersAnnotation = relatedRepository.getAnnotation(RooJavaType.ROO_FINDERS);
     if (findersAnnotation != null && findersAnnotation.getAttribute("finders") != null) {
-      List<String> entityFinders = new ArrayList<String>();
-      List<?> values = (List<?>) findersAnnotation.getAttribute("finders").getValue();
-      Iterator<?> it = values.iterator();
 
-      while (it.hasNext()) {
-        NestedAnnotationAttributeValue finder = (NestedAnnotationAttributeValue) it.next();
-        if (finder.getValue() != null && finder.getValue().getAttribute("finder") != null) {
-          entityFinders.add((String) finder.getValue().getAttribute("finder").getValue());
-        }
-      }
+      // Get finders in @RooFinders
+      List<String> entityFinders = getFindersInRooFindersAnnotation(findersAnnotation);
 
       // Check if specified finder methods exists in associated repository
       for (String finder : queryMethods) {
@@ -146,10 +137,10 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     }
 
     // Check if entity has any associated service
-    Set<ClassOrInterfaceTypeDetails> services =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
     boolean entityHasService = false;
     JavaType relatedService = null;
+    Set<ClassOrInterfaceTypeDetails> services =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
     for (ClassOrInterfaceTypeDetails service : services) {
       if (service.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity") != null
           && service.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity").getValue()
@@ -167,28 +158,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     }
 
     // Seek for search type controllers related to entity
-    Set<ClassOrInterfaceTypeDetails> controllers =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_CONTROLLER);
     List<ClassOrInterfaceTypeDetails> entitySearchControllers =
-        new ArrayList<ClassOrInterfaceTypeDetails>();
-    for (ClassOrInterfaceTypeDetails controller : controllers) {
-      AnnotationMetadata controllerAnnotation =
-          controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
-
-      // Get annotation type enum value
-      ControllerType controllerType =
-          ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
-              .getValue()).getField().getSymbolName());
-      if (controllerAnnotation.getAttribute("type") != null
-          && controllerType.equals(ControllerType
-              .getControllerType(RooEnumDetails.CONTROLLER_TYPE_SEARCH.getField().getSymbolName()))
-          && controllerAnnotation.getAttribute("entity") != null
-          && controllerAnnotation.getAttribute("entity").getValue().equals(entity)) {
-
-        // The controller is a search controller of the current entity
-        entitySearchControllers.add(controller);
-      }
-    }
+        getEntityRelatedSearchControllers(entity);
 
     // Check if any of the search controllers have the same pathPrefix.
     // If so, and controllerPackage is as well the same, update the controller.
@@ -237,84 +208,19 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     if (controllerToUpdateOrCreate == null) {
 
       // Create controller builder for a new file
-      JavaType searchController =
-          new JavaType(String.format("%s.%sSearchController",
-              controllerPackage.getFullyQualifiedPackageName(),
-              Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)),
-              controllerPackage.getModule());
-      final String physicalPath =
-          PhysicalTypeIdentifier.createIdentifier(searchController,
-              LogicalPath.getInstance(Path.SRC_MAIN_JAVA, controllerPackage.getModule()));
       controllerBuilder =
-          new ClassOrInterfaceTypeDetailsBuilder(physicalPath, Modifier.PUBLIC, searchController,
-              PhysicalTypeCategory.CLASS);
-
-      // Create @RooController
-      AnnotationMetadataBuilder controllerAnnotation =
-          new AnnotationMetadataBuilder(RooJavaType.ROO_CONTROLLER);
-      controllerAnnotation.addClassAttribute("entity", entity);
-      controllerAnnotation.addStringAttribute("pathPrefix", pathPrefix);
-      controllerAnnotation.addEnumAttribute("type", new EnumDetails(
-          RooJavaType.ROO_ENUM_CONTROLLER_TYPE, new JavaSymbolName("SEARCH")));
-      controllerBuilder.addAnnotation(controllerAnnotation.build());
-
-      // Create @RooSearch
-      AnnotationMetadataBuilder searchAnnotation =
-          new AnnotationMetadataBuilder(RooJavaType.ROO_SEARCH);
-      List<AnnotationAttributeValue<?>> findersToAdd = new ArrayList<AnnotationAttributeValue<?>>();
-      for (String finder : queryMethods) {
-        findersToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), finder));
-      }
-      searchAnnotation.addAttribute(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
-          new JavaSymbolName("finders"), findersToAdd));
-      controllerBuilder.addAnnotation(searchAnnotation);
-
-      // Add response type annotation
-      AnnotationMetadataBuilder responseTypeAnnotation =
-          new AnnotationMetadataBuilder(responseType.getAnnotation());
-      controllerBuilder.addAnnotation(responseTypeAnnotation);
+          buildNewSearchController(entity, queryMethods, responseType, controllerPackage,
+              pathPrefix);
 
     } else {
 
       // Controller already exists, so create builder with it
       controllerBuilder = new ClassOrInterfaceTypeDetailsBuilder(controllerToUpdateOrCreate);
 
-      // Get @RooSearch and build necessary variables
-      AnnotationMetadata searchAnnotation =
-          controllerToUpdateOrCreate.getAnnotation(RooJavaType.ROO_SEARCH);
-      List<AnnotationAttributeValue<?>> findersToAdd = new ArrayList<AnnotationAttributeValue<?>>();
-      List<String> finderNames = new ArrayList<String>();
-      boolean findersAdded = false;
-
-      // Get existent finder values
-      if (searchAnnotation != null && searchAnnotation.getAttribute("finders") != null) {
-        List<?> existingFinders = (List<?>) searchAnnotation.getAttribute("finders").getValue();
-        Iterator<?> it = existingFinders.iterator();
-
-        // Add existent finders to new attributes array to merge with new ones
-        while (it.hasNext()) {
-          StringAttributeValue attributeValue = (StringAttributeValue) it.next();
-          findersToAdd.add(attributeValue);
-          finderNames.add(attributeValue.getValue());
-        }
-
-        // Add new finders to new attributes array
-        for (String finder : queryMethods) {
-          if (!finderNames.contains(finder)) {
-            findersToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), finder));
-            findersAdded = true;
-          }
-        }
-
-        // Add attributes array to @RooSearch
-        AnnotationMetadataBuilder searchAnnotationBuilder =
-            new AnnotationMetadataBuilder(searchAnnotation);
-        ArrayAttributeValue<AnnotationAttributeValue<?>> allFinders =
-            new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("finders"),
-                findersToAdd);
-        searchAnnotationBuilder.addAttribute(allFinders);
-        controllerBuilder.updateTypeAnnotation(searchAnnotationBuilder);
-      }
+      // Update existing controller
+      boolean findersAdded =
+          updateExistingSearchController(queryMethods, controllerToUpdateOrCreate,
+              controllerBuilder);
 
       // Check if response type is already added
       AnnotationMetadata responseTypeAnnotation =
@@ -351,10 +257,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     Validate.notNull(pathPrefix, "pathPrefix required");
 
     // Check if module has an application class
-    Pom pom = projectOperations.getPomFromModuleName(controllerPackage.getModule());
-    Validate.isTrue(typeLocationService.hasModuleFeature(pom, ModuleFeatureName.APPLICATION),
-        "Specified module must have a class annotated with @SpringBootApplication module. Please, "
-            + "specify it with --package option, or focus it before running this command.");
+    controllerPackage = checkAndUseApplicationModule(controllerPackage);
 
     // Search all entities with associated repository
     Set<ClassOrInterfaceTypeDetails> repositoryTypes =
@@ -439,5 +342,194 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
       projectOperations.addModuleDependency(controllerToUpdateOrCreate.getType().getModule(),
           entity.getModule());
     }
+  }
+
+  /**
+   * Build a new search controller for provided entity, with provided response type, 
+   * package, path prefix and query methods.
+   * 
+   * @param entity
+   * @param queryMethods
+   * @param responseType
+   * @param controllerPackage
+   * @param pathPrefix
+   * @return
+   */
+  private ClassOrInterfaceTypeDetailsBuilder buildNewSearchController(JavaType entity,
+      List<String> queryMethods, ControllerMVCResponseService responseType,
+      JavaPackage controllerPackage, String pathPrefix) {
+    ClassOrInterfaceTypeDetailsBuilder controllerBuilder;
+    JavaType searchController =
+        new JavaType(String.format("%s.%sSearchController",
+            controllerPackage.getFullyQualifiedPackageName(),
+            Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)),
+            controllerPackage.getModule());
+    final String physicalPath =
+        PhysicalTypeIdentifier.createIdentifier(searchController,
+            LogicalPath.getInstance(Path.SRC_MAIN_JAVA, controllerPackage.getModule()));
+    controllerBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(physicalPath, Modifier.PUBLIC, searchController,
+            PhysicalTypeCategory.CLASS);
+
+    // Create @RooController
+    AnnotationMetadataBuilder controllerAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_CONTROLLER);
+    controllerAnnotation.addClassAttribute("entity", entity);
+    controllerAnnotation.addStringAttribute("pathPrefix", pathPrefix);
+    controllerAnnotation.addEnumAttribute("type", new EnumDetails(
+        RooJavaType.ROO_ENUM_CONTROLLER_TYPE, new JavaSymbolName("SEARCH")));
+    controllerBuilder.addAnnotation(controllerAnnotation.build());
+
+    // Create @RooSearch
+    AnnotationMetadataBuilder searchAnnotation =
+        new AnnotationMetadataBuilder(RooJavaType.ROO_SEARCH);
+    List<AnnotationAttributeValue<?>> findersToAdd = new ArrayList<AnnotationAttributeValue<?>>();
+    for (String finder : queryMethods) {
+      findersToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), finder));
+    }
+    searchAnnotation.addAttribute(new ArrayAttributeValue<AnnotationAttributeValue<?>>(
+        new JavaSymbolName("finders"), findersToAdd));
+    controllerBuilder.addAnnotation(searchAnnotation);
+
+    // Add response type annotation
+    AnnotationMetadataBuilder responseTypeAnnotation =
+        new AnnotationMetadataBuilder(responseType.getAnnotation());
+    controllerBuilder.addAnnotation(responseTypeAnnotation);
+    return controllerBuilder;
+  }
+
+  /**
+   * Checks if module provided in package is an application module. If not, find an 
+   * application module and use it with default package. 
+   * 
+   * @param controllerPackage the provided JavaPackage to check
+   * @return
+   */
+  private JavaPackage checkAndUseApplicationModule(JavaPackage controllerPackage) {
+
+    if (!typeLocationService.hasModuleFeature(
+        projectOperations.getPomFromModuleName(controllerPackage.getModule()),
+        ModuleFeatureName.APPLICATION)) {
+
+      LOGGER
+          .log(
+              Level.WARNING,
+              "Focused or specified module isn't an application module (containing a class "
+                  + "annotated with @SpringBootApplication). Looking for an application module and default package...");
+
+      // Validate that project has at least one application module
+      Validate.notEmpty(typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION),
+          "The project must have at least one application module to publish web finders.");
+
+      // Get the first application module
+      String moduleName =
+          typeLocationService.getModuleNames(ModuleFeatureName.APPLICATION).iterator().next();
+      Pom module = projectOperations.getPomFromModuleName(moduleName);
+      controllerPackage =
+          new JavaPackage(typeLocationService.getTopLevelPackageForModule(module).concat(".web"),
+              moduleName);
+    }
+    return controllerPackage;
+  }
+
+  /**
+   * Update existing controller with new query methods
+   * @param queryMethods the finder names to add
+   * @param controllerToUpdateOrCreate the existing controller
+   * @param controllerBuilder the builder to apply the changes
+   * @return
+   */
+  private boolean updateExistingSearchController(List<String> queryMethods,
+      ClassOrInterfaceTypeDetails controllerToUpdateOrCreate,
+      ClassOrInterfaceTypeDetailsBuilder controllerBuilder) {
+    // Get @RooSearch and build necessary variables
+    AnnotationMetadata searchAnnotation =
+        controllerToUpdateOrCreate.getAnnotation(RooJavaType.ROO_SEARCH);
+    List<AnnotationAttributeValue<?>> findersToAdd = new ArrayList<AnnotationAttributeValue<?>>();
+    List<String> finderNames = new ArrayList<String>();
+    boolean findersAdded = false;
+
+    // Get existent finder values
+    if (searchAnnotation != null && searchAnnotation.getAttribute("finders") != null) {
+      List<?> existingFinders = (List<?>) searchAnnotation.getAttribute("finders").getValue();
+      Iterator<?> it = existingFinders.iterator();
+
+      // Add existent finders to new attributes array to merge with new ones
+      while (it.hasNext()) {
+        StringAttributeValue attributeValue = (StringAttributeValue) it.next();
+        findersToAdd.add(attributeValue);
+        finderNames.add(attributeValue.getValue());
+      }
+
+      // Add new finders to new attributes array
+      for (String finder : queryMethods) {
+        if (!finderNames.contains(finder)) {
+          findersToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), finder));
+          findersAdded = true;
+        }
+      }
+
+      // Add attributes array to @RooSearch
+      AnnotationMetadataBuilder searchAnnotationBuilder =
+          new AnnotationMetadataBuilder(searchAnnotation);
+      ArrayAttributeValue<AnnotationAttributeValue<?>> allFinders =
+          new ArrayAttributeValue<AnnotationAttributeValue<?>>(new JavaSymbolName("finders"),
+              findersToAdd);
+      searchAnnotationBuilder.addAttribute(allFinders);
+      controllerBuilder.updateTypeAnnotation(searchAnnotationBuilder);
+    }
+    return findersAdded;
+  }
+
+  /**
+   * Returns all ControllerType.SEARCH controllers related to provided entity.
+   * 
+   * @param entity the Javatype to which controllers should be related.
+   * @return a List<ClassOrInterfaceTypeDetails> with the related search controllers
+   */
+  private List<ClassOrInterfaceTypeDetails> getEntityRelatedSearchControllers(JavaType entity) {
+    Set<ClassOrInterfaceTypeDetails> controllers =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_CONTROLLER);
+    List<ClassOrInterfaceTypeDetails> entitySearchControllers =
+        new ArrayList<ClassOrInterfaceTypeDetails>();
+    for (ClassOrInterfaceTypeDetails controller : controllers) {
+      AnnotationMetadata controllerAnnotation =
+          controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
+
+      // Get annotation type enum value
+      ControllerType controllerType =
+          ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
+              .getValue()).getField().getSymbolName());
+      if (controllerAnnotation.getAttribute("type") != null
+          && controllerType.equals(ControllerType
+              .getControllerType(RooEnumDetails.CONTROLLER_TYPE_SEARCH.getField().getSymbolName()))
+          && controllerAnnotation.getAttribute("entity") != null
+          && controllerAnnotation.getAttribute("entity").getValue().equals(entity)) {
+
+        // The controller is a search controller of the current entity
+        entitySearchControllers.add(controller);
+      }
+    }
+    return entitySearchControllers;
+  }
+
+  /**
+   * Get all finder names in provided @RooFinder
+   * 
+   * @param findersAnnotation
+   * @return a List<String> with the finder names
+   */
+  private List<String> getFindersInRooFindersAnnotation(AnnotationMetadata findersAnnotation) {
+    List<String> entityFinders = new ArrayList<String>();
+    List<?> values = (List<?>) findersAnnotation.getAttribute("finders").getValue();
+    Iterator<?> it = values.iterator();
+
+    while (it.hasNext()) {
+      NestedAnnotationAttributeValue finder = (NestedAnnotationAttributeValue) it.next();
+      if (finder.getValue() != null && finder.getValue().getAttribute("finder") != null) {
+        entityFinders.add((String) finder.getValue().getAttribute("finder").getValue());
+      }
+    }
+    return entityFinders;
   }
 }
