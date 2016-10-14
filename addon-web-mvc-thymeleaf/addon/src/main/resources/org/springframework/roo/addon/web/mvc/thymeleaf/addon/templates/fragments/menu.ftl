@@ -51,9 +51,11 @@
                  <ul class="dropdown-menu">
                   <li><a href="${entry.path}/create-form" data-th-href="@{${entry.path}/create-form}" data-th-text="${r"#{"}label_create_entity(${r"#{"}${entry.entityLabel}${r"}"})${r"}"}">Create ${entry.entityName}</a></li>
                   <li><a href="${entry.path}" data-th-href="@{${entry.path}}" data-th-text="${r"#{"}label_list_entity(${r"#{"}${entry.entityPluralLabel}${r"}"})${r"}"}">List ${entry.entityName}</a></li>
-                  <#list entry.finders as finder>
-                    <li><a href="${entry.path}/${finder}Form" data-th-href="@{${entry.path}/${finder}Form}" data-th-text="${finder}" id="${entry.entityName}${finder}" >Search ${finder}</a></li>
-                  </#list>
+                  <#if entry.finderNamesAndPaths?has_content>
+                    <#list entry.finderNamesAndPaths?keys as finderKey>
+                      <li><a href="${entry.path}/${entry.finderNamesAndPaths[finderKey]}" data-th-href="@{${entry.path}/${entry.finderNamesAndPaths[finderKey]}}" data-th-text="${finderKey}" id="${entry.entityName}${finderKey}" >Search ${finderKey}</a></li>
+                    </#list>
+                  </#if>
                  </ul>
                 </li>
                </#if>
