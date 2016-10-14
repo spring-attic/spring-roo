@@ -23,6 +23,27 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
   </properties>
+  
+  <repositories>
+    <!-- Maven Snapshots Repository -->
+    <repository>
+      <id>maven-snapshot-repository</id>
+      <name>Maven Snapshot Repository</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        <releases>
+          <enabled>false</enabled>
+        </releases>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+    </repository>
+    <!-- Spring Roo repository -->
+    <repository>
+      <id>spring-roo-repository</id>
+      <name>Spring Roo Repository</name>
+      <url>http://repo.spring.io/spring-roo</url>
+    </repository>
+  </repositories>
 
   <dependencies>
     <!-- Spring Boot starters -->

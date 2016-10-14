@@ -74,7 +74,7 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
 
     // Include Springlets Starter project dependencies and properties
     getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
-    
+
     if (getProjectOperations().isMultimoduleProject()) {
 
       // If current project is a multimodule project, include dependencies first
