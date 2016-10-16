@@ -42,6 +42,7 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -699,9 +700,7 @@ public class JpaOperationsImpl implements JpaOperations {
   public Pair<FieldMetadata, RelationInfo> getFieldChildPartOfCompositionRelation(
       ClassOrInterfaceTypeDetails entityCdi) {
     JavaType domainType = entityCdi.getType();
-    JpaEntityMetadata entityMetadata = getJpaEntityMetadata(entityCdi);
-    Validate.notNull(entityMetadata, "%s should be a Jpa Entity", domainType);
-    Map<String, FieldMetadata> relations = entityMetadata.getRelationsAsChild();
+    List<Pair<FieldMetadata, RelationInfo>> relations = getFieldChildPartOfRelation(entityCdi);
     if (relations.isEmpty()) {
       return null;
     }
@@ -710,6 +709,48 @@ public class JpaOperationsImpl implements JpaOperations {
     RelationInfo info;
     List<Pair<FieldMetadata, RelationInfo>> compositionRelation =
         new ArrayList<Pair<FieldMetadata, RelationInfo>>();
+    for (Pair<FieldMetadata, RelationInfo> field : relations) {
+      if (field.getRight().type == JpaRelationType.COMPOSITION) {
+        compositionRelation.add(field);
+      }
+    }
+    Validate.isTrue(compositionRelation.size() <= 1,
+        "Entity %s has more than one relations of composition as child part: ", domainType,
+        StringUtils.join(getFieldNamesOfRelationList(compositionRelation), ","));
+    if (compositionRelation.isEmpty()) {
+      return null;
+    }
+    return compositionRelation.get(0);
+  }
+
+
+  private List<String> getFieldNamesOfRelationList(
+      List<Pair<FieldMetadata, RelationInfo>> compositionRelation) {
+    List<String> names = new ArrayList<String>(compositionRelation.size());
+    for (Pair<FieldMetadata, RelationInfo> pair : compositionRelation) {
+      names.add(pair.getLeft().getFieldName().getSymbolName());
+    }
+    return names;
+  }
+
+  @Override
+  public List<Pair<FieldMetadata, RelationInfo>> getFieldChildPartOfRelation(JavaType entity) {
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+    return getFieldChildPartOfRelation(entityDetails);
+  }
+
+  @Override
+  public List<Pair<FieldMetadata, RelationInfo>> getFieldChildPartOfRelation(
+      ClassOrInterfaceTypeDetails entityCdi) {
+    JavaType domainType = entityCdi.getType();
+    JpaEntityMetadata entityMetadata = getJpaEntityMetadata(entityCdi);
+    Validate.notNull(entityMetadata, "%s should be a Jpa Entity", domainType);
+    Map<String, FieldMetadata> relations = entityMetadata.getRelationsAsChild();
+    List<Pair<FieldMetadata, RelationInfo>> childRelations =
+        new ArrayList<Pair<FieldMetadata, RelationInfo>>();
+    JpaEntityMetadata parent;
+    JavaType parentType;
+    RelationInfo info;
     for (Entry<String, FieldMetadata> fieldEntry : relations.entrySet()) {
       parentType = fieldEntry.getValue().getFieldType().getBaseType();
       parent = getJpaEntityMetadata(parentType);
@@ -722,18 +763,9 @@ public class JpaOperationsImpl implements JpaOperations {
               info,
               "Can't get information about relation on Entity %s which is declared as parent in %s.%s field",
               parentType, domainType, fieldEntry.getKey());
-      if (info.type == JpaRelationType.COMPOSITION) {
-        compositionRelation.add(Pair.of(fieldEntry.getValue(), info));
-      }
+      childRelations.add(Pair.of(fieldEntry.getValue(), info));
     }
-    if (compositionRelation.isEmpty()) {
-      return null;
-    } else if (compositionRelation.size() > 1) {
-      throw new IllegalStateException(
-          "Entity %s has more than one relations of composition as child part: "
-              + StringUtils.join(compositionRelation, ","));
-    }
-    return compositionRelation.get(0);
+    return childRelations;
   }
 
   @Override

@@ -130,4 +130,21 @@ public interface JpaOperations extends Feature {
    */
   void addDatabaseDependencyWithTestScope(String repositoryModuleName, String profile,
       String databaseConfigPrefix);
+
+  /**
+   * Gets field of an entity which current entity is the child part of a relation.
+   *
+   * @param entity
+   * @return list returns current entity field metadata and relation info (from parent)
+   */
+  List<Pair<FieldMetadata, RelationInfo>> getFieldChildPartOfRelation(JavaType entity);
+
+  /**
+   * Gets field of an entity which current entity is the child part of a relation.
+   *
+   * @param entityCdi
+   * @return list returns current entity field metadata and relation info (from parent)
+   */
+  List<Pair<FieldMetadata, RelationInfo>> getFieldChildPartOfRelation(
+      ClassOrInterfaceTypeDetails entityCdi);
 }

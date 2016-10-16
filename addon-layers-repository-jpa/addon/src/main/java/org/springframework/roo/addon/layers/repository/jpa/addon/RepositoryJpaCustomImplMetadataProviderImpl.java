@@ -3,21 +3,11 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM_IMPL;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dto.addon.DtoOperations;
 import org.springframework.roo.addon.dto.addon.DtoOperationsImpl;
@@ -53,6 +43,15 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
  * Implementation of {@link RepositoryJpaCustomImplMetadataProvider}.
  *
@@ -74,9 +73,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
 
-  private FinderOperationsImpl finderOperationsImpl;
-  private DtoOperationsImpl dtoOperations;
-
   /**
    * This service is being activated so setup it:
    * <ul>
@@ -90,17 +86,18 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   @Override
   @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
+    super.activate(cContext);
+    BundleContext localContext = cContext.getBundleContext();
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
+        new MetadataDependencyRegistryTracker(localContext, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
     addMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM_IMPL);
 
     this.keyDecoratorTracker =
-        new CustomDataKeyDecoratorTracker(context, getClass(), new LayerTypeMatcher(
+        new CustomDataKeyDecoratorTracker(localContext, getClass(), new LayerTypeMatcher(
             ROO_REPOSITORY_JPA_CUSTOM_IMPL, new JavaSymbolName(
                 RooJpaRepositoryCustomImpl.REPOSITORY_ATTRIBUTE)));
     this.keyDecoratorTracker.open();
@@ -289,7 +286,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     // Getting valid fields to construct the findAll query
-    boolean isAudit;
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
 
     for (FieldMetadata field : entityMemberDetails.getFields()) {
@@ -539,49 +535,11 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
   }
 
   public DtoOperationsImpl getDtoOperations() {
-    if (dtoOperations == null) {
-
-      // Get all Services implement DtoOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(DtoOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (DtoOperationsImpl) context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER
-            .warning("Cannot load DtoOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
-        return null;
-      }
-    } else {
-      return dtoOperations;
-    }
+    return (DtoOperationsImpl) getServiceManager().getServiceInstance(this, DtoOperations.class);
   }
 
   public FinderOperationsImpl getFinderOperations() {
-    if (finderOperationsImpl == null) {
-      // Get all Services implement DtoOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(FinderOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (FinderOperationsImpl) context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER
-            .warning("Cannot load FinderOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
-        return null;
-      }
-    } else {
-      return this.finderOperationsImpl;
-    }
+    return (FinderOperationsImpl) getServiceManager().getServiceInstance(this,
+        FinderOperations.class);
   }
 }

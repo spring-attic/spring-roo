@@ -2,7 +2,6 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Feature;
 
 /**
  * @author Stefan Schmidt

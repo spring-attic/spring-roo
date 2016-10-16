@@ -65,8 +65,8 @@ public class ServiceInstaceManager {
           }
         }
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load " + serviceClass.getName() + " on " + requester.getClass().getName()
-            + ":".concat(e.toString()));
+        LOGGER.warning("Cannot load " + serviceClass.getName() + " on "
+            + requester.getClass().getName() + ":".concat(e.toString()));
         return null;
       }
       if (service != null) {
