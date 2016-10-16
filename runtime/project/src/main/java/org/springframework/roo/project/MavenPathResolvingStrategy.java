@@ -24,7 +24,7 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
   /**
    * Locates the first {@link PhysicalPath} which can be construed as a parent
    * of the presented identifier.
-   * 
+   *
    * @param identifier to locate the parent of (required)
    * @return the first matching parent, or null if not found
    */
@@ -39,8 +39,11 @@ public class MavenPathResolvingStrategy extends AbstractPathResolvingStrategy {
         longest = removeTrailingSeparator(pom.getRoot()).length();
         int nextLongest = 0;
         for (final PhysicalPath thisPhysicalPath : pom.getPhysicalPaths()) {
-          final String possibleParent =
+          String possibleParent =
               new FileDetails(thisPhysicalPath.getLocation(), null).getCanonicalPath();
+          if (!possibleParent.endsWith(File.separator)) {
+            possibleParent = possibleParent.concat(File.separator);
+          }
           if (removeTrailingSeparator(identifier).startsWith(possibleParent)
               && possibleParent.length() > nextLongest) {
             nextLongest = possibleParent.length();

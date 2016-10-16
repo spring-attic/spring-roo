@@ -525,14 +525,30 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       // Get finders for each controller
       AnnotationMetadata controllerSearchAnnotation =
           controller.getAnnotation(RooJavaType.ROO_SEARCH);
-      List<String> finderNames = new ArrayList<String>();
+      Map<String, String> finderNamesAndPaths = new HashMap<String, String>();
       if (controllerSearchAnnotation != null
           && controllerSearchAnnotation.getAttribute("finders") != null) {
         List<?> finders = (List<?>) controllerSearchAnnotation.getAttribute("finders").getValue();
         Iterator<?> iterator = finders.iterator();
         while (iterator.hasNext()) {
           StringAttributeValue attributeValue = (StringAttributeValue) iterator.next();
-          finderNames.add(attributeValue.getValue());
+          String finderName = attributeValue.getValue();
+
+          // Build URL path to get data
+          String finderPath = "";
+          if (StringUtils.startsWith(finderName, "count")) {
+            finderPath = StringUtils.removeStart(finderName, "count");
+          } else if (StringUtils.startsWith(finderName, "find")) {
+            finderPath = StringUtils.removeStart(finderName, "find");
+          } else if (StringUtils.startsWith(finderName, "query")) {
+            finderPath = StringUtils.removeStart(finderName, "query");
+          } else if (StringUtils.startsWith(finderName, "read")) {
+            finderPath = StringUtils.removeStart(finderName, "read");
+          } else {
+            finderPath = finderName;
+          }
+          finderPath = String.format("search/%s/search-form", StringUtils.uncapitalize(finderPath));
+          finderNamesAndPaths.put(finderName, finderPath);
         }
       }
 
@@ -560,14 +576,15 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       MenuEntry menuEntry =
           new MenuEntry(entity.getSimpleTypeName(), path, pathPrefix, FieldItem.buildLabel(
               entity.getSimpleTypeName(), ""), FieldItem.buildLabel(entity.getSimpleTypeName(),
-              "plural"), finderNames);
+              "plural"), finderNamesAndPaths);
       String keyThatRepresentsEntry = pathPrefix.concat(entity.getSimpleTypeName());
 
       // Add new menu entry to menuEntries list if doesn't exist
       if (mapMenuEntries.containsKey(keyThatRepresentsEntry)) {
         MenuEntry menuEntryInserted = mapMenuEntries.get(keyThatRepresentsEntry);
-        if (menuEntryInserted.getFinders().isEmpty() && !menuEntry.getFinders().isEmpty()) {
-          menuEntryInserted.setFinders(menuEntry.getFinders());
+        if (menuEntryInserted.getFinderNamesAndPaths().isEmpty()
+            && !menuEntry.getFinderNamesAndPaths().isEmpty()) {
+          menuEntryInserted.setFinderNamesAndPaths(menuEntry.getFinderNamesAndPaths());
         }
       } else {
         mapMenuEntries.put(keyThatRepresentsEntry, menuEntry);

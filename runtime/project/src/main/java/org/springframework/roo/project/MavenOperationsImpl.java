@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 
 /**
  * Implementation of {@link MavenOperations}.
- * 
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @author Juan Carlos García
@@ -67,7 +67,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
     /**
      * Constructor
-     * 
+     *
      * @param inputStream
      * @param processManager
      */
@@ -111,13 +111,13 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     }
   }
 
-  public void createModule(Pom parentPom, final String moduleName,
+  public void createModule(final String moduleName,
       final PackagingProvider selectedPackagingProvider, final String artifactId) {
-    createModule(parentPom, moduleName, selectedPackagingProvider, artifactId, null);
+    createModule(moduleName, selectedPackagingProvider, artifactId, null);
   }
 
 
-  private void createModule(Pom parentPom, final String moduleName,
+  private void createModule(final String moduleName,
       final PackagingProvider selectedPackagingProvider, final String artifactId,
       final String folder) {
 
@@ -127,13 +127,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
       throw new IllegalArgumentException(String.format("Module %s already exists", moduleName));
     }
 
-    if (parentPom == null) {
-      // Get current module as parent
-      parentPom = getProjectOperations().getFocusedModule();
-    } else {
-      // Set changes into the parent module
-      setModule(parentPom);
-    }
+    // Get parent pom
+    Pom parentPom = getProjectOperations().getPomFromModuleName("");
+    setModule(parentPom);
 
     // Validate parent has POM packaging
     if (!parentPom.getPackaging().equals("pom")) {
@@ -189,14 +185,14 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     // If developer selects STANDARD multimodule project, is necessary to create first
     // the standard modules (model, repository, integration, service-api and service-impl
     if (multimodule == Multimodule.STANDARD) {
-      createModule(pom, "model", jarPackagingProvider, "model");
-      createModule(pom, "repository", jarPackagingProvider, "repository");
+      createModule("model", jarPackagingProvider, "model");
+      createModule("repository", jarPackagingProvider, "repository");
 
       // ROO-3762: Generate integration module by default
-      createModule(pom, "integration", jarPackagingProvider, "integration");
+      createModule("integration", jarPackagingProvider, "integration");
 
-      createModule(pom, "service-api", jarPackagingProvider, "service.api");
-      createModule(pom, "service-impl", jarPackagingProvider, "service.impl");
+      createModule("service-api", jarPackagingProvider, "service.api");
+      createModule("service-impl", jarPackagingProvider, "service.impl");
 
       // Add dependencies between modules
       getProjectOperations().addDependency("repository", pom.getGroupId(), "model",
@@ -216,8 +212,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
     }
 
-    // In all cases, multimodule architectures have an application module where Spring Boot artifacts are created 
-    createModule(pom, "application", warPackagingProvider, "application", "");
+    // In all cases, multimodule architectures have an application module where Spring Boot artifacts are created
+    createModule("application", warPackagingProvider, "application", "");
 
     installApplicationConfiguration("application");
 
@@ -284,7 +280,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
   /**
    * This method creates a banner.txt file inside generated project that
    * will be displayed when the generated Spring Boot application starts.
-   * 
+   *
    * @param Pom module where banner.txt should be generated
    */
   private void addBannerFile(Pom module) {
@@ -318,7 +314,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
   /**
    * Creates topLevelPackage folder structure inside the focused module.
    * If folder is not null, adds this new folder inside topLevelPackage folders
-   * 
+   *
    * @param topLevelPackage folder structure represented as a package (required)
    * @param folder the folder to add inside topLevelPackage (can be null)
    */
@@ -447,7 +443,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
   /**
    * Returns the project's target Java version in POM format
-   * 
+   *
    * @param majorJavaVersion the major version provided by the user; can be
    *            <code>null</code> to auto-detect it
    * @return a non-blank string

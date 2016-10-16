@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -21,11 +22,13 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.converters.JavaPackageConverter;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -97,18 +100,18 @@ public class ServiceCommands implements CommandMarker {
     return false;
   }
 
-  @CliOptionMandatoryIndicator(command = "service", params = "interface")
-  public boolean isInterfaceParameterMandatory(ShellContext shellContext) {
-    if (shellContext.getParameters().containsKey("repository")
+  @CliOptionMandatoryIndicator(command = "service", params = "repository")
+  public boolean isRepositoryParameterMandatory(ShellContext shellContext) {
+    if (shellContext.getParameters().containsKey("entity")
         && projectOperations.isMultimoduleProject()) {
       return true;
     }
     return false;
   }
 
-  @CliOptionMandatoryIndicator(command = "service", params = "repository")
-  public boolean isRepositoryParameterMandatory(ShellContext shellContext) {
-    if (shellContext.getParameters().containsKey("entity")
+  @CliOptionMandatoryIndicator(command = "service", params = "interface")
+  public boolean isInterfaceParameterMandatory(ShellContext shellContext) {
+    if (shellContext.getParameters().containsKey("repository")
         && projectOperations.isMultimoduleProject()) {
       return true;
     }
@@ -201,7 +204,13 @@ public class ServiceCommands implements CommandMarker {
     for (String module : modules) {
       if (StringUtils.isNotBlank(module)
           && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
-        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR)
+            .concat(JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL).concat("."));
+      } else if (!projectOperations.isMultimoduleProject()) {
+
+        // Add only JavaPackage and JavaType completion
+        allPossibleValues.add(String.format("%s.service.api.",
+            JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL));
       }
     }
 
@@ -223,7 +232,13 @@ public class ServiceCommands implements CommandMarker {
     for (String module : modules) {
       if (StringUtils.isNotBlank(module)
           && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
-        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR)
+            .concat(JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL).concat("."));
+      } else if (!projectOperations.isMultimoduleProject()) {
+
+        // Add only JavaPackage and JavaType completion
+        allPossibleValues.add(String.format("%s.service.impl.",
+            JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL));
       }
     }
 
@@ -231,22 +246,6 @@ public class ServiceCommands implements CommandMarker {
     allPossibleValues.add("~.");
 
     return allPossibleValues;
-  }
-
-  /**
-   * This indicator says if --apiPackage and --implPackage parameters should be mandatory or not
-   *
-   * If --all parameter has been specified, --apiPackage and --implPackage parameters will be mandatory.
-   * 
-   * @param context ShellContext
-   * @return
-   */
-  @CliOptionMandatoryIndicator(params = {"apiPackage", "implPackage"}, command = "service")
-  public boolean arePackageParametersMandatory(ShellContext context) {
-    if (context.getParameters().containsKey("all")) {
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -318,11 +317,68 @@ public class ServiceCommands implements CommandMarker {
           help = "The service interface to be generated") final JavaType interfaceType,
       @CliOption(key = "class", mandatory = false,
           help = "The service implementation to be generated") final JavaType implType,
-      @CliOption(key = "apiPackage", mandatory = true, help = "The java interface package") final JavaPackage apiPackage,
-      @CliOption(key = "implPackage", mandatory = true,
+      @CliOption(key = "apiPackage", mandatory = false, help = "The java interface package") JavaPackage apiPackage,
+      @CliOption(key = "implPackage", mandatory = false,
           help = "The java package of the implementation classes for the interfaces") JavaPackage implPackage) {
 
     if (all) {
+
+      // If user didn't specified some API package, use default API package
+      if (apiPackage == null) {
+        if (projectOperations.isMultimoduleProject()) {
+
+          // Build default JavaPackage with module
+          for (String moduleName : projectOperations.getModuleNames()) {
+            if (moduleName.equals("service-api")) {
+              Pom module = projectOperations.getPomFromModuleName(moduleName);
+              apiPackage =
+                  new JavaPackage(typeLocationService.getTopLevelPackageForModule(module),
+                      moduleName);
+              break;
+            }
+          }
+
+          // Check if repository found
+          Validate.notNull(apiPackage, "Couldn't find in project a default service.api "
+              + "package. Please, use 'apiPackage' option to specify it.");
+        } else {
+
+          // Build default JavaPackage for single module
+          apiPackage =
+              new JavaPackage(projectOperations.getFocusedTopLevelPackage()
+                  .getFullyQualifiedPackageName().concat(".service.api"),
+                  projectOperations.getFocusedModuleName());
+        }
+      }
+
+      // If user didn't specified some impl package, use default impl package
+      if (implPackage == null) {
+        if (projectOperations.isMultimoduleProject()) {
+
+          // Build default JavaPackage with module
+          for (String moduleName : projectOperations.getModuleNames()) {
+            if (moduleName.equals("service-impl")) {
+              Pom module = projectOperations.getPomFromModuleName(moduleName);
+              implPackage =
+                  new JavaPackage(typeLocationService.getTopLevelPackageForModule(module),
+                      moduleName);
+              break;
+            }
+          }
+
+          // Check if repository found
+          Validate.notNull(implPackage, "Couldn't find in project a default service.impl "
+              + "package. Please, use 'implPackage' option to specify it.");
+        } else {
+
+          // Build default JavaPackage for single module
+          implPackage =
+              new JavaPackage(projectOperations.getFocusedTopLevelPackage()
+                  .getFullyQualifiedPackageName().concat(".service.impl"),
+                  projectOperations.getFocusedModuleName());
+        }
+      }
+
       serviceOperations.addAllServices(apiPackage, implPackage);
     } else {
       serviceOperations.addService(domainType, repositoryType, interfaceType, implType);

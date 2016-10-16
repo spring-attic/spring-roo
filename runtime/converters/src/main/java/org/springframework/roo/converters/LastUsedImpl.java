@@ -25,7 +25,7 @@ import org.springframework.roo.support.util.AnsiEscapeCode;
 
 /**
  * Records the last Java package and type used.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -193,6 +193,7 @@ public class LastUsedImpl implements LastUsed, CommandListener {
     }
     this.module = module;
     this.javaType = javaType;
+    this.isVerified = true;
     setPromptPath(javaType.getFullyQualifiedTypeName());
 
   }

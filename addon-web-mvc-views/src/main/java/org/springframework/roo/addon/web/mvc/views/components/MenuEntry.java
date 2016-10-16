@@ -3,7 +3,7 @@ package org.springframework.roo.addon.web.mvc.views.components;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * This class contains all necessary information about a menu entry.
@@ -18,14 +18,14 @@ public class MenuEntry {
   private String pathPrefix;
   private String entityLabel;
   private String entityPluralLabel;
-  private List<String> finders;
+  private Map<String, String> finderNamesAndPaths;
   private boolean userManaged;
   private String codeManaged;
   private String id;
   private int z;
 
   public MenuEntry(String entityName, String path, String pathPrefix, String entityLabel,
-      String entityPluralLabel, List<String> finders) {
+      String entityPluralLabel, Map<String, String> finderNamesAndPaths) {
     this.entityName = entityName;
     this.path = path;
     this.pathPrefix = pathPrefix;
@@ -33,7 +33,7 @@ public class MenuEntry {
     this.entityPluralLabel = entityPluralLabel;
     this.userManaged = false;
     this.codeManaged = "";
-    this.finders = finders;
+    this.finderNamesAndPaths = finderNamesAndPaths;
     buildId();
 
     // Calculate the Z parameter as the hash code of the other parameters
@@ -72,12 +72,12 @@ public class MenuEntry {
     return entityPluralLabel;
   }
 
-  public List<String> getFinders() {
-    return finders;
+  public Map<String, String> getFinderNamesAndPaths() {
+    return finderNamesAndPaths;
   }
 
-  public void setFinders(List<String> finders) {
-    this.finders = finders;
+  public void setFinderNamesAndPaths(Map<String, String> finderNamesAndPaths) {
+    this.finderNamesAndPaths = finderNamesAndPaths;
   }
 
   public String getPathPrefix() {

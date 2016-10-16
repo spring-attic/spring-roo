@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,12 +14,14 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.field.addon.FieldCommands;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.converters.JavaPackageConverter;
 import org.springframework.roo.converters.LastUsed;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -41,6 +44,7 @@ import java.util.logging.Logger;
  *
  * @author Stefan Schmidt
  * @author Juan Carlos García
+ * @author Sergio Clares
  * @since 1.2.0
  */
 @Component
@@ -110,12 +114,18 @@ public class RepositoryJpaCommands implements CommandMarker {
     for (String module : modules) {
       if (StringUtils.isNotBlank(module)
           && !module.equals(projectOperations.getFocusedModule().getModuleName())) {
-        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR).concat("~."));
+        allPossibleValues.add(module.concat(LogicalPath.MODULE_PATH_SEPARATOR)
+            .concat(JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL).concat("."));
+      } else if (!projectOperations.isMultimoduleProject()) {
+
+        // Add only JavaPackage and JavaType completion
+        allPossibleValues.add(String.format("%s.repository.",
+            JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL));
       }
     }
 
     // Always add base package
-    allPossibleValues.add("~.");
+    allPossibleValues.add(JavaPackageConverter.TOP_LEVEL_PACKAGE_SYMBOL.concat("."));
 
     return allPossibleValues;
   }
@@ -191,22 +201,6 @@ public class RepositoryJpaCommands implements CommandMarker {
     }
 
     return visible;
-  }
-
-  /**
-   * This indicator says if --package parameter should be mandatory or not
-   *
-   * If --all parameter has been specified, --package parameter will be mandatory.
-   *
-   * @param context ShellContext
-   * @return
-   */
-  @CliOptionMandatoryIndicator(params = "package", command = "repository jpa")
-  public boolean isPackageParameterMandatory(ShellContext context) {
-    if (context.getParameters().containsKey("all")) {
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -314,10 +308,38 @@ public class RepositoryJpaCommands implements CommandMarker {
       @CliOption(key = "defaultReturnType", mandatory = false,
           help = "The findAll finder return type. Should be a Projection class associated "
               + "to the entity specified in '--entity'.") JavaType defaultReturnType,
-      @CliOption(key = "package", mandatory = true,
-          help = "The package where repositories will be generated") final JavaPackage repositoriesPackage) {
+      @CliOption(key = "package", mandatory = false,
+          help = "The package where repositories will be generated.") JavaPackage repositoriesPackage) {
 
     if (all) {
+
+      // If user didn't specified some JavaPackage, use default repository package
+      if (repositoriesPackage == null) {
+        if (projectOperations.isMultimoduleProject()) {
+
+          // Build default JavaPackage with module
+          for (String moduleName : projectOperations.getModuleNames()) {
+            if (moduleName.equals("repository")) {
+              Pom module = projectOperations.getPomFromModuleName(moduleName);
+              repositoriesPackage =
+                  new JavaPackage(typeLocationService.getTopLevelPackageForModule(module),
+                      moduleName);
+              break;
+            }
+          }
+
+          // Check if repository found
+          Validate.notNull(repositoriesPackage, "Couldn't find in project a default 'repository' "
+              + "module. Please, use 'package' option to specify module and package.");
+        } else {
+
+          // Build default JavaPackage for single module
+          repositoriesPackage =
+              new JavaPackage(projectOperations.getFocusedTopLevelPackage()
+                  .getFullyQualifiedPackageName().concat(".repository"),
+                  projectOperations.getFocusedModuleName());
+        }
+      }
       repositoryJpaOperations.generateAllRepositories(repositoriesPackage);
     } else {
       repositoryJpaOperations.addRepository(interfaceType, domainType, defaultReturnType, true);

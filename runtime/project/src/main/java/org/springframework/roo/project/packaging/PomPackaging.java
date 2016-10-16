@@ -10,7 +10,7 @@ import org.springframework.roo.project.ProjectOperations;
 
 /**
  * The Maven "pom" {@link PackagingProvider}
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -22,7 +22,7 @@ public class PomPackaging extends AbstractCorePackagingProvider {
    * Constructor
    */
   public PomPackaging() {
-    super("pom", "parent-pom-template.xml", "child-pom-template.xml");
+    super("pom", "parent-pom-template.xml");
   }
 
   @Override

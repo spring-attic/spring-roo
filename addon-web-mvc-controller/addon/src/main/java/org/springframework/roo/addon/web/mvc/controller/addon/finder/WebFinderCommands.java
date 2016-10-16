@@ -1,15 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -19,6 +9,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
+import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -34,11 +25,22 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CliOptionAutocompleteIndicator;
+import org.springframework.roo.shell.CliOptionMandatoryIndicator;
 import org.springframework.roo.shell.CliOptionVisibilityIndicator;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Commands which provide finder functionality through Spring MVC controllers.
@@ -204,6 +206,22 @@ public class WebFinderCommands implements CommandMarker {
   }
 
   /**
+   * This indicator says if --package parameter should be visible or not. If project has more
+   * than one 'application' modules (which contain one @SpringBootApplication), package will 
+   * be mandatory.
+   * 
+   * @param shellContext
+   * @return
+   */
+  @CliOptionMandatoryIndicator(params = "package", command = "web mvc finder")
+  public boolean isPackageRequired(ShellContext shellContext) {
+    if (getTypeLocationService().getModuleNames(ModuleFeatureName.APPLICATION).size() <= 1) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * This indicator says if --responseType parameter should be visible or not
    *
    * If --all or --entity parameter have not been specified, --responseType parameter will not be visible
@@ -290,26 +308,23 @@ public class WebFinderCommands implements CommandMarker {
   public void addController(
       @CliOption(key = "entity", mandatory = false,
           help = "The entity owning the finders that should be published.") JavaType entity,
-      @CliOption(
-          key = "all",
-          mandatory = false,
-          specifiedDefaultValue = "true",
+      @CliOption(key = "all", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Indicates if developer wants to publish in web layer all finders from all entities in project.") boolean all,
+          help = "Indicates if developer wants to publish in web layer all finders from "
+              + "all entities in project.") boolean all,
       @CliOption(key = "queryMethod", mandatory = false,
           help = "Indicates the name of the finder to add to web layer.") String queryMethod,
-      @CliOption(
-          key = "responseType",
-          mandatory = false,
-          help = "Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary.") String responseType,
-      @CliOption(key = "package", mandatory = false, unspecifiedDefaultValue = "~.web",
-          help = "Indicates the package where generated controller will be located.") JavaPackage controllerPackage,
-      @CliOption(
-          key = "pathPrefix",
-          mandatory = false,
-          unspecifiedDefaultValue = "",
+      @CliOption(key = "responseType", mandatory = false,
+          help = "Indicates the responseType to be used by generated controller. Depending "
+              + "of the selected responseType, generated methods and views will vary.") String responseType,
+      @CliOption(key = "package", mandatory = true, unspecifiedDefaultValue = "~.web",
+          help = "Indicates the package where generated controller will be located. If "
+              + "multimodule project, package must be in an application module (those "
+              + "with @SpringBootApplication class).") JavaPackage controllerPackage, @CliOption(
+          key = "pathPrefix", mandatory = false, unspecifiedDefaultValue = "",
           specifiedDefaultValue = "",
-          help = "Indicates the default path value for accesing finder resources in controller, excluding first '/'.") String pathPrefix) {
+          help = "Indicates the default path value for accesing finder resources in "
+              + "controller, excluding first '/'.") String pathPrefix) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =
@@ -319,10 +334,9 @@ public class WebFinderCommands implements CommandMarker {
     ControllerMVCResponseService controllerResponseType = null;
     if (responseType != null) {
       if (!responseTypeServices.containsKey(responseType)) {
-        LOGGER
-            .log(
-                Level.SEVERE,
-                "ERROR: Provided responseType is not valid. Use autocomplete feature to obtain valid responseTypes.");
+        LOGGER.log(Level.SEVERE,
+            "ERROR: Provided responseType is not valid. Use autocomplete feature "
+                + "to obtain valid responseTypes.");
         return;
       } else {
         controllerResponseType = responseTypeServices.get(responseType);
@@ -412,7 +426,7 @@ public class WebFinderCommands implements CommandMarker {
    *            be returned.
    * @return a List<String> with the finder names.
    */
-  private List<String> getFinders(JavaType entity) {
+  public List<String> getFinders(JavaType entity) {
     List<String> finders = new ArrayList<String>();
     AnnotationMetadata findersAnnotation = null;
     JavaType associatedRepository = null;
@@ -535,6 +549,7 @@ public class WebFinderCommands implements CommandMarker {
    * 
    * @return
    */
+  @SuppressWarnings("unchecked")
   public Converter<JavaType> getJavaTypeConverter() {
     if (javaTypeConverter == null) {
       // Get all Services implement Converter<JavaType> interface
