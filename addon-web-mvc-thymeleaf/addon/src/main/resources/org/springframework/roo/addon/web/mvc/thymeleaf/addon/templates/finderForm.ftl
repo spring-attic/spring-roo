@@ -204,7 +204,7 @@
                 <#if field.type == "TEXT">
                     <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z size=3 />
                 <#elseif field.type == "DATE">
-                    <@date.input label=field.label
+                    <@date.input label=field.label 
                     fieldName=field.fieldName
                     fieldId=field.fieldId
                     z=field.z
@@ -220,11 +220,11 @@
                         fieldOne=field.configuration.fieldOne
                         fieldTwo=field.configuration.fieldTwo />
                 <#elseif field.type == "ENUM">
-                    <@enum.input label=field.label
+                    <@enum.input label=field.label 
                     fieldName=field.fieldName
                     fieldId=field.fieldId
                     z=field.z
-                    items=field.configuration.items />
+                    items=field.configuration.items />                
                 <#elseif field.type == "BOOLEAN">
                     <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />                
                 </#if>

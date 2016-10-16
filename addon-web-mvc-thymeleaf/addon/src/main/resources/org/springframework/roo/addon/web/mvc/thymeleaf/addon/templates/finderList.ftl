@@ -251,7 +251,7 @@
             </#if>
           </#list>
           </ul>
-
+          
           <div class="tab-content">
                 <#assign firstDetail=true>
                 <#list details as field>
@@ -263,7 +263,7 @@
                     </#if>
                         <!--START TABLE-->
                         <div class="table-responsive">
-                          <table id="${field.fieldNameCapitalized}Table"
+                          <table id="${field.fieldNameCapitalized}Table" 
                             class="table table-striped table-hover table-bordered"
                             data-z="${field.z}"
                             data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
@@ -296,9 +296,9 @@
                     </div>
                   </#list>
               </div>
-
+          
         </#if>
-
+        
         <div class="clearfix">
           <div class="pull-left">
             <a class="btn btn-default" data-th-href="@{${entity.configuration.controllerPath}/findAll/search-form/}"> 
@@ -339,9 +339,9 @@
           </div>
         </div>
       </div>
-
+      
     </section>
-
+    
   </div>
   <!-- /CONTAINER-->
 
@@ -536,11 +536,11 @@
                         {
                             'extend' : 'colvis',
                             'className' : 'btn-accion'
-                        },
+                        }, 
                         {
                             'extend' : 'pageLength',
                             'className' : 'btn-accion'
-                        }
+                        } 
                     ],
                     'columns': [
                       <#list field.configuration.referenceFieldFields as referencedFieldField>
@@ -548,7 +548,7 @@
                         { 'data': '${referencedFieldField.fieldName}' },
                       </#if>
                       </#list>
-                      {
+                      { 
                         'data': '${field.configuration.identifierField}',
                         'orderable': false,
                         'searchable': false,
@@ -556,7 +556,7 @@
                             return '';
                         }
                       }
-                    ]
+                    ]  
                 });
                   <#if firstDetail == false>
              }

@@ -579,25 +579,6 @@
                     'render': function ( data, type, full, meta ) {
                         return '';
                     }
-                    return undefined;
-                  },
-                  'create${detail.fieldNameCapitalized}Url': function() {
-                    if(jQuery.current${entityName}Id) {
-                      return jQuery.${detail.fieldNameCapitalized}BaseUrl() + jQuery.createUri + '/';
-                    }
-                    return undefined;
-                  },
-                  'update${detail.fieldNameCapitalized}Url': function(${detail.fieldNameCapitalized}Id) {
-                    if(jQuery.current${entityName}Id) {
-                      return jQuery.${detail.fieldNameCapitalized}BaseUrl() + ${detail.fieldNameCapitalized}Id + '/'+ jQuery.editUri + '/';
-                    }
-                    return undefined;
-                  },
-                  'delete${detail.fieldNameCapitalized}Url': function(${detail.fieldNameCapitalized}Id) {
-                    if(jQuery.current${entityName}Id) {
-                      return jQuery.${detail.fieldNameCapitalized}BaseUrl() + ${detail.fieldNameCapitalized}Id + '/'+ jQuery.deleteUri + '/';
-                    }
-                    return undefined;
                   }
                 ]
             });
@@ -660,11 +641,12 @@
                   if (jQuery.fn.DataTable.isDataTable('#${detail.entityItemId}-table') === true) {
                  	jQuery('#${detail.entityItemId}-table').DataTable().ajax.url( url${detail.fieldNameCapitalized} ).load();
                 }
+                </#list>
               }
-            });
-            });
-          </script>
-        </#if>
+            }
+          });
+          });
+        </script>
      </#if>
    </#if>
 
