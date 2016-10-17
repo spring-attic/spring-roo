@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ServiceMetadataProvider}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -67,7 +67,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_SERVICE} as additional 
+   * <li>Registers {@link RooJavaType#ROO_SERVICE} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -91,9 +91,9 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -296,7 +296,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 
     return new ServiceMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, entity, identifierType, readOnly, finders,
-        repositoryCustomMetadata.getFindAllGlobalSearchMethod(),
+        repositoryCustomMetadata.getCurrentFindAllGlobalSearchMethod(),
         repositoryCustomMetadata.getReferencedFieldsFindAllMethods(),
         countByReferencedFieldMethods, countMethods);
   }
