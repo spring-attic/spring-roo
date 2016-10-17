@@ -68,3 +68,67 @@ function isNotNull(obj) {
 function isNotEmpty(obj) {
   return !isEmpty(obj);
 }
+
+/**
+ * Generates and executes an ajax request whose goal is to load data from a 
+ * DataTable element.
+ *
+ * @param data DataTable object data
+ * @param callback Name of the function to call with the server data obtained 
+ * 			once the ajax request has been completed
+ * @param settings DataTable object options
+ * @param url Url to use for ajax request
+ * @param oDatatable DataTable on which the calling should act upon
+ *
+ */
+function loadData(data, callback, settings, url, oDatatable) {
+  if (url) {
+    jQuery.ajax({
+      url : url,
+      type : 'GET',
+      data : data,
+      dataType : 'json',
+      headers : {
+        Accept : "application/vnd.datatables+json",
+      },
+      success : jQuery.proxy(function(dataReceived) {
+        callback(dataReceived);
+        if(this.DataTable().state.loaded()){
+          var rowSelectedId = this.DataTable().state.loaded().rowSelectedId;
+          if(rowSelectedId){
+            var rowSelected = this.DataTable().row('#' + rowSelectedId);
+            if(rowSelected.length > 0){
+              rowSelected.select();
+            }
+          }
+        }
+      }, oDatatable),
+      error : function(dataReceived) {
+        jQuery('#datatablesErrorModal').modal('show');
+        callback(getEmptyDataDatatables(data.draw));
+      }
+    });
+  } else {
+    callback(getEmptyDataDatatables(data.draw));
+  }
+}
+
+/**
+ * Generates a JSON object with the necessary data for indicating a DataTable 
+ * object that any elements has been found.
+ *
+ * @param draw DataTable request counter
+ * @returns {json} JSON object which indicates a DataTable empty list
+ */
+function getEmptyDataDatatables(draw) {
+
+  var emptyData = {
+    'data' : new Array(),
+    'draw' : draw,
+    'error' : null,
+    'recordsFiltered' : '0',
+    'recordsTotal' : '0'
+  };
+
+  return emptyData;
+}

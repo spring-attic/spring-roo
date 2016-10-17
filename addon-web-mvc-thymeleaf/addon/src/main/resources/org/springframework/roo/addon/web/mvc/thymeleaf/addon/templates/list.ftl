@@ -488,8 +488,8 @@
        var ${entityName}Table;
        jQuery(document).ready( function () {
           ${entityName}Table = jQuery('#${entity.entityItemId}-table').DataTable({
-              'ajax': {
-                    'url': [[@{${entity.configuration.controllerPath}/}]]
+              'ajax': function (data, callback, settings) {
+                    loadData(data, callback, settings, [[@{${entity.configuration.controllerPath}/}]], this);
                 },
               'columns': [
                 <#list fields as field>

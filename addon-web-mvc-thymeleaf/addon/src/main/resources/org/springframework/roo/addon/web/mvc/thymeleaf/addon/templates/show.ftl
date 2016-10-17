@@ -442,13 +442,13 @@
         <#list details as field>
             var ${field.fieldNameCapitalized}BaseUrl = ${r"[["}@{${controllerPath}/${r"{"}${identifierField}${r"}"}${field.configuration.controllerPath}/(${identifierField}=${r"${"}${modelAttributeName}${r"."}${identifierField}${r"})}]]"} +  '';
             <#if firstDetail == false>
-            function initialize${field.fieldNameCapitalized}Table() {
+              function initialize${field.fieldNameCapitalized}Table() {
             </#if>
 
             jQuery('#${field.fieldNameCapitalized}Table').DataTable({
-                'ajax': {
-                      'url': ${field.fieldNameCapitalized}BaseUrl
-                 },
+                'ajax': function (data, callback, settings) {
+                    loadData(data, callback, settings, [[@{${entity.configuration.controllerPath}/}]], this);
+                },
                 'buttons' : [
                     {
                         'extend' : 'colvis',

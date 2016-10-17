@@ -467,9 +467,9 @@
       <script type="text/javascript" data-th-inline="javascript" id="${entity.entityItemId}-table-javascript" data-z="${entity.z}">
        jQuery(document).ready( function () {
           var ${entityName}Table = jQuery('#${entity.entityItemId}-table').DataTable({
-              'ajax': {
-                    'url': [[@{${entity.configuration.controllerPath}/search/${finderPath}}]],
-                    'data': [[${r"${formBean}"}]]
+              'ajax': function (data, callback, settings) {
+                    data.formBean = /*[[${r"${formBean}"}]]*/
+                    loadData(data, callback, settings, [[@{${entity.configuration.controllerPath}/}]], this);
                 },
               'columns': [
                 <#list fields as field>
@@ -629,7 +629,7 @@
   </div>
 
   <!-- Application -->
-  <script src="../../static/public/js/main.js"></script>
+  <script type="text/javascript" src="../../static/public/js/main.js" data-th-remove="all"></script>
 
 </body>
 </#if>
