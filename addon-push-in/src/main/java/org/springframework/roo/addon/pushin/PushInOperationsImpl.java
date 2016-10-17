@@ -491,8 +491,10 @@ public class PushInOperationsImpl implements PushInOperations {
       // Getting all imports registered on .aj file to move to .java file
       Set<ImportMetadata> allRegisteredImports = memberHoldingTypeDetails.getImports();
       detailsBuilder.addImports(allRegisteredImports);
-      // Save changes to be pushed
-      pushedElements.addAll(allRegisteredImports);
+      // Save imports to be pushed only if some method has been pushed
+      if (!pushedElements.isEmpty()) {
+        pushedElements.addAll(allRegisteredImports);
+      }
 
     }
 
@@ -551,15 +553,9 @@ public class PushInOperationsImpl implements PushInOperations {
     return fieldBuilder.build();
   }
 
-  /**
-   * This method checks if the provided methodName matches with the provided
-   * regular expression
-   * 
-   * @param methodName
-   * @param regEx
-   * @return
-   */
-  private boolean methodMatch(MethodMetadata method, String regEx) {
+
+  @Override
+  public boolean methodMatch(MethodMetadata method, String regEx) {
     // Create regular expression using provided text
     Pattern pattern = Pattern.compile(regEx);
     Matcher matcher = pattern.matcher(method.getMethodName().getSymbolName());
@@ -578,7 +574,7 @@ public class PushInOperationsImpl implements PushInOperations {
         boolean sameParameterTypes = false;
         if (methodParams.size() == parameterTypes.length) {
           sameParameterTypes = true;
-          for (int i = 0; methodParams.size() < i; i++) {
+          for (int i = 0; i < methodParams.size(); i++) {
             if (!methodParams.get(i).getJavaType().getSimpleTypeName().equals(parameterTypes[i])) {
               sameParameterTypes = false;
               break;

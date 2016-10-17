@@ -3,7 +3,6 @@ package org.springframework.roo.addon.security.addon.security;
 import java.util.List;
 
 import org.springframework.roo.addon.security.addon.security.providers.SecurityProvider;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;
@@ -52,4 +51,24 @@ public interface SecurityOperations extends Feature {
    * @param value
    */
   void addPreAuthorizeAnnotation(JavaType klass, String methodName, String value);
+
+  /**
+   * Defines addPreFilterAnnotation method that will be used by
+   * implementations to include @PreFilter annotation in service methods.
+   * 
+   * @param klass
+   * @param methodName
+   * @param value
+   */
+  void addPreFilterAnnotation(JavaType klass, String methodName, String value);
+
+  /**
+   * Defines addPostFilterAnnotation method that will be used by
+   * implementations to include @PostFilter annotation in service methods.
+   * 
+   * @param klass
+   * @param methodName
+   * @param value
+   */
+  void addPostFilterAnnotation(JavaType klass, String methodName, String value);
 }

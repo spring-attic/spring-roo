@@ -57,6 +57,9 @@ public class SecurityCommands implements CommandMarker {
 
   private static Logger LOGGER = HandlerUtils.getLogger(SecurityCommands.class);
 
+  private static final String PRE_FILTER = "PRE";
+  private static final String POST_FILTER = "POST";
+
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
@@ -148,7 +151,7 @@ public class SecurityCommands implements CommandMarker {
 
   @CliOptionAutocompleteIndicator(command = "security authorize", param = "class",
       help = "You must select a valid Service class", validate = true)
-  public List<String> getAllServiceClassesAndInterfaces(ShellContext context) {
+  public List<String> getAllServiceClassesAndInterfacesForAuthorize(ShellContext context) {
 
     List<String> results = new ArrayList<String>();
 
@@ -166,7 +169,7 @@ public class SecurityCommands implements CommandMarker {
       param = "method",
       help = "You must select a valid method from the provided class or a regular expression that match with existing methods",
       validate = false)
-  public List<String> getAllMethodsRelatedWithProvidedClass(ShellContext context) {
+  public List<String> getAllMethodsRelatedWithProvidedClassForAuthorize(ShellContext context) {
 
     List<String> results = new ArrayList<String>();
 
@@ -212,10 +215,8 @@ public class SecurityCommands implements CommandMarker {
   @CliCommand(value = "security authorize",
       help = "Include @PreAuthorize annotation to an specific method.")
   public void authorizeOperation(
-      @CliOption(
-          key = "class",
-          mandatory = true,
-          help = "The service class to annotate with @PreAuthorize or the service class that contains the method to annotate with @PreAuthorize.") JavaType klass,
+      @CliOption(key = "class", mandatory = true,
+          help = "The service class that contains the method to annotate with @PreAuthorize.") JavaType klass,
       @CliOption(
           key = "method",
           mandatory = true,
@@ -229,22 +230,137 @@ public class SecurityCommands implements CommandMarker {
     }
 
     // Calculate the @PreAuthorize annotation value by provided roles
-    String value = getPreAuthorizeAnnotationValue(roles);
+    String value = getSecurityAnnotationValue(roles);
 
     // Include the @PreAuthorize annotation with the calculated value
     securityOperations.addPreAuthorizeAnnotation(klass, methodName, value);
   }
 
+  @CliAvailabilityIndicator("security filtering")
+  public boolean isFilteringOperationAvailable() {
+    return projectOperations.isFeatureInstalled(FeatureNames.SECURITY);
+  }
+
+  @CliOptionAutocompleteIndicator(command = "security filtering", param = "class",
+      help = "You must select a valid Service class", validate = true)
+  public List<String> getAllServiceClassesAndInterfacesForFiltering(ShellContext context) {
+
+    List<String> results = new ArrayList<String>();
+
+    Set<ClassOrInterfaceTypeDetails> services =
+        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE,
+            RooJavaType.ROO_SERVICE_IMPL);
+    for (ClassOrInterfaceTypeDetails service : services) {
+      results.add(replaceTopLevelPackageString(service, context.getParameters().get("class")));
+    }
+    return results;
+  }
+
+  @CliOptionAutocompleteIndicator(
+      command = "security filtering",
+      param = "method",
+      help = "You must select a valid method from the provided class or a regular expression that match with existing methods",
+      validate = false)
+  public List<String> getAllMethodsRelatedWithProvidedClassForFiltering(ShellContext context) {
+
+    List<String> results = new ArrayList<String>();
+
+    String service = context.getParameters().get("class");
+    JavaType type = null;
+    if (service != null) {
+      type = getJavaTypeConverter().convertFromText(service, JavaType.class, PROJECT);
+    } else {
+      type = lastUsed.getJavaType();
+    }
+
+    MemberDetails serviceDetails =
+        memberDetailsScanner.getMemberDetails(getClass().getName(),
+            typeLocationService.getTypeDetails(type));
+
+    List<MethodMetadata> methods = serviceDetails.getMethods();
+
+    for (MethodMetadata method : methods) {
+
+      String methodName = method.getMethodName().getSymbolName();
+
+      List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+
+      methodName = methodName.concat("(");
+
+      for (int i = 0; i < parameterTypes.size(); i++) {
+        String paramType = parameterTypes.get(i).getJavaType().getSimpleTypeName();
+        methodName = methodName.concat(paramType).concat(",");
+      }
+
+      if (!parameterTypes.isEmpty()) {
+        methodName = methodName.substring(0, methodName.length() - 1).concat(")");
+      } else {
+        methodName = methodName.concat(")");
+      }
+
+      results.add(methodName);
+    }
+
+    return results;
+  }
+
+  @CliOptionAutocompleteIndicator(command = "security filtering", param = "when",
+      help = "You must select " + PRE_FILTER + " to include @PreFilter or " + POST_FILTER
+          + " to include @PostFilter", validate = true)
+  public List<String> getWhenOptions(ShellContext context) {
+    List<String> results = new ArrayList<String>();
+    results.add(PRE_FILTER);
+    results.add(POST_FILTER);
+    return results;
+  }
+
+  @CliCommand(value = "security filtering",
+      help = "Include @PreFilter/@PostFilter annotation to an specific method.")
+  public void filterOperation(
+      @CliOption(
+          key = "class",
+          mandatory = true,
+          help = "The service class that contains the method to annotate with @PreFilter/@PostFilter.") JavaType klass,
+      @CliOption(
+          key = "method",
+          mandatory = true,
+          help = "The service method name and its params that will be annotated with @PreFilter/@PostFilter. Is possible to specify a regular expression.") String methodName,
+      @CliOption(key = "roles", mandatory = false,
+          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction. ") String roles,
+      @CliOption(
+          key = "when",
+          mandatory = false,
+          unspecifiedDefaultValue = PRE_FILTER,
+          specifiedDefaultValue = PRE_FILTER,
+          help = "Indicates if filtering should be after or before to execute the operation. Depends of the specified value, @PreFilter annotation or @PostFilter annotation will be included.") String when) {
+
+    if (StringUtils.isEmpty(roles)) {
+      LOGGER.log(Level.INFO, "ERROR: You should provide almost one role on --roles parameter.");
+      return;
+    }
+
+    // Calculate the @PreFilter / @PostFilter annotation value by provided
+    // roles
+    String value = getSecurityAnnotationValue(roles);
+
+    if (when.equals(PRE_FILTER)) {
+      // Include the @PreFilter annotation with the calculated value
+      securityOperations.addPreFilterAnnotation(klass, methodName, value);
+    } else if (when.equals(POST_FILTER)) {
+      // Include the @PostFilter annotation with the calculated value
+      securityOperations.addPostFilterAnnotation(klass, methodName, value);
+    }
+  }
+
   /**
-   * This method calculate the @PreAuthorize annotation value by the provided
-   * roles
+   * This method calculate the annotation value by the provided roles
    * 
    * @param roles
    *            Comma separated list with all the roles
    * 
    * @return A String with the value to include in @PreAuthorize annotation
    */
-  private String getPreAuthorizeAnnotationValue(String roles) {
+  private String getSecurityAnnotationValue(String roles) {
 
     String value = "";
 

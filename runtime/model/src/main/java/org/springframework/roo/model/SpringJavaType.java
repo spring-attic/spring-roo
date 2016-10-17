@@ -114,8 +114,12 @@ public final class SpringJavaType {
       "org.springframework.data.annotation.Persistent");
   public static final JavaType PRE_AUTHORIZE = new JavaType(
       "org.springframework.security.access.prepost.PreAuthorize");
+  public static final JavaType PRE_FILTER = new JavaType(
+      "org.springframework.security.access.prepost.PreFilter");
   public static final JavaType POST_AUTHORIZE = new JavaType(
       "org.springframework.security.access.prepost.PostAuthorize");
+  public static final JavaType POST_FILTER = new JavaType(
+      "org.springframework.security.access.prepost.PostFilter");
   public static final JavaType PROPAGATION = new JavaType(
       "org.springframework.transaction.annotation.Propagation");
   public static final JavaType PRIMARY = new JavaType(
