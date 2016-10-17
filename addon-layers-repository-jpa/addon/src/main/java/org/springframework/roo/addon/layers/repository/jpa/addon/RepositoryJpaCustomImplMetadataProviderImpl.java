@@ -251,6 +251,9 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     final String jpaEntityMetadataKey =
         JpaEntityMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
 
+    JpaEntityMetadata entityMetadata =
+        (JpaEntityMetadata) getMetadataService().get(jpaEntityMetadataKey);
+
     // Create dependency between repository and java bean annotation
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
@@ -287,40 +290,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     // Getting valid fields to construct the findAll query
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
-
-    for (FieldMetadata field : entityMemberDetails.getFields()) {
-
-      // Exclude non-simple fields
-      if (field.getFieldType().isMultiValued()) {
-        continue;
-      }
-
-      // Exclude version field
-      if (field.getAnnotation(JpaJavaType.VERSION) != null) {
-        continue;
-      }
-
-      // Exclude id fields
-      if (field.getAnnotation(JpaJavaType.ID) != null
-          || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
-        continue;
-      }
-
-      // TODO Exclude audit fields
-      /*isAudit = false;
-      for (FieldMetadata auditField : auditFields) {
-        if (auditField.getFieldName().equals(field.getFieldName())) {
-          isAudit = true;
-          break;
-        }
-      }
-
-      if (isAudit) {
-        continue;
-      }*/
-
-      validFields.add(field);
-    }
+    loadValidFields(entityMemberDetails, entityMetadata, validFields);
 
     // Getting all necessary information about referencedFields
     Map<FieldMetadata, MethodMetadata> referencedFieldsMethods =
@@ -376,7 +346,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     for (MethodMetadata method : customFinderMethods) {
 
       // Get finder return type from first parameter of method return type (Page)
-      JavaType finderReturnType = method.getReturnType().getParameters().get(0);
+      JavaType finderReturnType = method.getReturnType().getBaseType();
       domainTypes.add(finderReturnType);
 
       // If type is a DTO, add finder fields to mappings
@@ -471,10 +441,60 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, validIdFields, validFields,
-        repositoryCustomMetadata.getFindAllGlobalSearchMethod(), referencedFieldsMethods,
+        governorPhysicalTypeMetadata, annotationValues, entity, entityMetadata, validIdFields,
+        validFields, repositoryCustomMetadata.getCurrentFindAllGlobalSearchMethod(),
+        repositoryCustomMetadata.getDefaultReturnType(), referencedFieldsMethods,
         referencedFieldsIdentifierNames, typesFieldMaps, customFinderMethods, customCountMethods,
         typesFieldsMetadataMap, typesAreProjections, finderParametersMap);
+  }
+
+  private void loadValidFields(MemberDetails entityMemberDetails, JpaEntityMetadata entityMetadata,
+      List<FieldMetadata> validFields) {
+
+
+    for (FieldMetadata field : entityMemberDetails.getFields()) {
+
+
+      // Exclude non-simple fields
+      if (field.getFieldType().isMultiValued()) {
+        continue;
+      }
+
+      // Exclude version field
+      if (field.getAnnotation(JpaJavaType.VERSION) != null) {
+        continue;
+      }
+
+      // Exclude id fields
+      if (field.getAnnotation(JpaJavaType.ID) != null
+          || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
+        continue;
+      }
+
+      String fieldName = field.getFieldName().getSymbolName();
+      // Exclude Reference field
+      if (entityMetadata.getRelationInfos().containsKey(fieldName)) {
+        continue;
+      }
+      if (entityMetadata.getRelationsAsChild().containsKey(fieldName)) {
+        continue;
+      }
+
+      // TODO Exclude audit fields
+      /*isAudit = false;
+      for (FieldMetadata auditField : auditFields) {
+        if (auditField.getFieldName().equals(field.getFieldName())) {
+          isAudit = true;
+          break;
+        }
+      }
+
+      if (isAudit) {
+        continue;
+      }*/
+
+      validFields.add(field);
+    }
   }
 
   /**
