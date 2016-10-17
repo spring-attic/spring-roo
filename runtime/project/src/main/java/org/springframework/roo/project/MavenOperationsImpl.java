@@ -5,11 +5,13 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.ActiveProcessManager;
@@ -53,6 +55,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
   private PackagingProviderRegistry packagingProviderRegistry;
   private ProcessManager processManager;
   private ProjectOperations projectOperations;
+
+  @Reference
+  private ApplicationConfigService applicationConfigService;
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
@@ -224,6 +229,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
     // ROO-3741: Including banner.txt on application module
     addBannerFile(getPomFromModuleName("application"));
 
+    // add application-dev.properties on application module
+    addApplicationDevPropertiesFile(getPomFromModuleName("application"));
+
     // Also, if STANDARD multimodule project has been selected, is necessary to include dependencies between
     // application module and the generated modules above
     if (multimodule == Multimodule.STANDARD) {
@@ -275,6 +283,25 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
     // ROO-3741: Including banner.txt
     addBannerFile(getPomFromModuleName(""));
+
+    // add application-dev.properties
+    addApplicationDevPropertiesFile(getPomFromModuleName(""));
+  }
+
+  /**
+   * Creates application-dev.properties with the following properties:
+   * - spring.messages.cache-seconds = 0
+   * - logging.level.TOP_LEVEL_PACKAGE = DEBUG
+   *
+   * @param Pom module where application-dev.properties should be generated
+   */
+  private void addApplicationDevPropertiesFile(Pom module) {
+
+    applicationConfigService.addProperty(module.getModuleName(), "spring.messages.cache-seconds",
+        "0", "dev", true);
+    applicationConfigService.addProperty(module.getModuleName(), "logging.level.TOP_LEVEL_PACKAGE",
+        "DEBUG", "dev", true);
+
   }
 
   /**
