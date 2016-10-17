@@ -73,7 +73,9 @@ public class PushInOperationsImpl implements PushInOperations {
   }
 
   @Override
-  public void pushInAll(boolean force) {
+  public List<Object> pushInAll(boolean writeOnDisk, boolean force) {
+
+    List<Object> pushedElements = new ArrayList<Object>();
 
     // Getting all JavaTypes on current project
     for (String moduleName : getProjectOperations().getModuleNames()) {
@@ -83,7 +85,7 @@ public class PushInOperationsImpl implements PushInOperations {
 
       for (JavaType declaredType : allDeclaredTypes) {
         // Push-in all content from .aj files to .java files
-        pushInClass(declaredType, force);
+        pushedElements.addAll(pushInClass(declaredType, writeOnDisk, force));
       }
     }
 
@@ -93,10 +95,15 @@ public class PushInOperationsImpl implements PushInOperations {
               Level.INFO,
               "All these changes will be applied. Execute your previous push-in command using --force parameter to apply them.");
     }
+
+    return pushedElements;
   }
 
   @Override
-  public void pushIn(JavaPackage specifiedPackage, JavaType klass, String method) {
+  public List<Object> pushIn(JavaPackage specifiedPackage, JavaType klass, String method,
+      boolean writeOnDisk) {
+
+    List<Object> pushedElements = new ArrayList<Object>();
 
     // Getting all JavaTypes on current project
     Collection<JavaType> allDeclaredTypes = new ArrayList<JavaType>();
@@ -118,15 +125,16 @@ public class PushInOperationsImpl implements PushInOperations {
       // If --class parameter is provided, --package will be ignored
       specifiedPackage = klass.getPackage();
 
-      // If --method is provided, method should exist on the provided class
+      // If --method is provided, method should exist on the provided
+      // class
       if (method != null) {
 
         boolean methodExists = false;
         MemberDetails classMemberDetails =
             getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
         for (MethodMetadata classMethod : classMemberDetails.getMethods()) {
-          if (methodMatch(classMethod.getMethodName().getSymbolName(), method)) {
-            pushInMethod(klass, classMethod);
+          if (methodMatch(classMethod, method)) {
+            pushedElements.addAll(pushInMethod(klass, classMethod, writeOnDisk));
             methodExists = true;
           }
         }
@@ -137,7 +145,7 @@ public class PushInOperationsImpl implements PushInOperations {
 
       } else {
         // If method is not specified, push-in entire class elements
-        pushInClass(klass, true);
+        pushedElements.addAll(pushInClass(klass, writeOnDisk, true));
       }
 
     } else if (specifiedPackage != null && method != null) {
@@ -152,8 +160,8 @@ public class PushInOperationsImpl implements PushInOperations {
           MemberDetails classMemberDetails =
               getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
           for (MethodMetadata classMethod : classMemberDetails.getMethods()) {
-            if (methodMatch(classMethod.getMethodName().getSymbolName(), method)) {
-              pushInMethod(declaredType, classMethod);
+            if (methodMatch(classMethod, method)) {
+              pushedElements.addAll(pushInMethod(declaredType, classMethod, writeOnDisk));
               methodExists = true;
             }
           }
@@ -174,8 +182,8 @@ public class PushInOperationsImpl implements PushInOperations {
         MemberDetails classMemberDetails =
             getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
         for (MethodMetadata classMethod : classMemberDetails.getMethods()) {
-          if (methodMatch(classMethod.getMethodName().getSymbolName(), method)) {
-            pushInMethod(declaredType, classMethod);
+          if (methodMatch(classMethod, method)) {
+            pushedElements.addAll(pushInMethod(declaredType, classMethod, writeOnDisk));
             methodExists = true;
           }
         }
@@ -187,22 +195,33 @@ public class PushInOperationsImpl implements PushInOperations {
     } else if (specifiedPackage != null) {
       for (JavaType declaredType : allDeclaredTypes) {
         if (declaredType.getPackage().equals(specifiedPackage)) {
-          pushInClass(declaredType, true);
+          pushedElements.addAll(pushInClass(declaredType, writeOnDisk, true));
         }
       }
     } else {
       LOGGER.log(Level.WARNING, "ERROR: You must specify at least one parameter. ");
-      return;
     }
+
+    return pushedElements;
   }
 
   /**
    * Makes push-in of all items defined on a provided class
    * 
    * @param klass
+   *            class to make the push-in operation
+   * @param weiteOnDisk
+   *            indicates if pushed elements should be writed on .java file
    * @param force
+   *            if some operation will produce several changes, this parameter
+   *            should be true.
+   * 
+   * @return list of objects with all the pushed elements.
    */
-  public void pushInClass(JavaType klass, boolean force) {
+  public List<Object> pushInClass(JavaType klass, boolean writeOnDisk, boolean force) {
+
+    List<Object> pushedElements = new ArrayList<Object>();
+
     // Check if current klass exists
     Validate
         .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
@@ -219,7 +238,8 @@ public class PushInOperationsImpl implements PushInOperations {
     MemberDetails memberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
-    // Check if the provided class is a test to be able to select valid class path
+    // Check if the provided class is a test to be able to select valid
+    // class path
     Path path =
         classDetails.getAnnotation(RooJavaType.ROO_UNIT_TEST) == null ? Path.SRC_MAIN_JAVA
             : Path.SRC_TEST_JAVA;
@@ -232,10 +252,11 @@ public class PushInOperationsImpl implements PushInOperations {
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(classDetails);
 
-    // Getting all details 
+    // Getting all details
     for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 
-      // Prevent that details from inheritance classes could be include on this .java file 
+      // Prevent that details from inheritance classes could be include on
+      // this .java file
       if (!memberHoldingTypeDetails.getType().equals(classDetails.getType())) {
         continue;
       }
@@ -252,7 +273,10 @@ public class PushInOperationsImpl implements PushInOperations {
                 .getFullyQualifiedTypeName())
             && !method.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
           // Add method to .java file
-          detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method));
+          MethodMetadata newMethod = getNewMethod(declaredByMetadataId, method);
+          detailsBuilder.addMethod(newMethod);
+          // Save changes on pushed elements list
+          pushedElements.add(newMethod);
           changesToApply.append(String.format("Method '%s' will be pushed on '%s.java' class. \n",
               method.getMethodName(), klass.getSimpleTypeName()));
         }
@@ -271,17 +295,22 @@ public class PushInOperationsImpl implements PushInOperations {
                 .getFullyQualifiedTypeName())
             && !field.getDeclaredByMetadataId().equals(declaredByMetadataId)) {
           // Add field to .java file
-          detailsBuilder.addField(getNewField(declaredByMetadataId, field));
+          FieldMetadata newField = getNewField(declaredByMetadataId, field);
+          detailsBuilder.addField(newField);
+          // Save changes on pushed elements list
+          pushedElements.add(newField);
           changesToApply.append(String.format("Field '%s' will be pushed on '%s.java' class. \n",
               field.getFieldName(), klass.getSimpleTypeName()));
         }
       }
 
-      // Getting all declared constructors (including declared on ITDs and .java files)
+      // Getting all declared constructors (including declared on ITDs and
+      // .java files)
       List<? extends ConstructorMetadata> allDeclaredConstructors =
           memberHoldingTypeDetails.getDeclaredConstructors();
 
-      // Checking if is necessary to make push-in for all declared constructors
+      // Checking if is necessary to make push-in for all declared
+      // constructors
       for (ConstructorMetadata constructor : allDeclaredConstructors) {
         // Check if current constructor exists on .java file
         classDetails = getTypeLocationService().getTypeDetails(detailsBuilder.build().getType());
@@ -298,6 +327,8 @@ public class PushInOperationsImpl implements PushInOperations {
         if (javaDeclaredConstructor == null) {
           // Add constructor to .java file
           detailsBuilder.addConstructor(constructor);
+          // Save changes on pushed elements list
+          pushedElements.add(constructor);
           String constructorParametersNames = "";
           for (JavaSymbolName paramName : constructor.getParameterNames()) {
             constructorParametersNames =
@@ -330,6 +361,8 @@ public class PushInOperationsImpl implements PushInOperations {
         if (!annotationExists) {
           // Add annotation to .java file
           detailsBuilder.addAnnotation(annotation);
+          // Save changes on pushed elements list
+          pushedElements.add(annotation);
           changesToApply.append(String.format(
               "Annotation '%s' will be pushed on '%s.java' class. \n", annotation
                   .getAnnotationType().getSimpleTypeName(), klass.getSimpleTypeName()));
@@ -342,17 +375,22 @@ public class PushInOperationsImpl implements PushInOperations {
         // If extends exists on .aj file, add it!
         if (!detailsBuilder.getExtendsTypes().contains(extendsType)) {
           detailsBuilder.addExtendsTypes(extendsType);
+          // Save changes on pushed elements list
+          pushedElements.add(extendsType);
           changesToApply.append(String.format(
               "Extends type '%s' will be pushed on '%s.java' class. \n",
               extendsType.getSimpleTypeName(), klass.getSimpleTypeName()));
         }
       }
 
-      // Getting all implements registered on .aj file to move to .java file
+      // Getting all implements registered on .aj file to move to .java
+      // file
       List<JavaType> allImplementsTypes = memberHoldingTypeDetails.getImplementsTypes();
       for (JavaType implementsType : allImplementsTypes) {
         if (!detailsBuilder.getImplementsTypes().contains(implementsType)) {
           detailsBuilder.addImplementsType(implementsType);
+          // Save changes on pushed elements list
+          pushedElements.add(implementsType);
           changesToApply.append(String.format(
               "Implements type '%s' will be pushed on '%s.java' class. \n",
               implementsType.getSimpleTypeName(), klass.getSimpleTypeName()));
@@ -362,6 +400,8 @@ public class PushInOperationsImpl implements PushInOperations {
       // Getting all imports registered on .aj file to move to .java file
       Set<ImportMetadata> allRegisteredImports = memberHoldingTypeDetails.getImports();
       detailsBuilder.addImports(allRegisteredImports);
+      // Save changes on pushed elements list
+      pushedElements.add(allRegisteredImports);
 
     }
 
@@ -371,18 +411,27 @@ public class PushInOperationsImpl implements PushInOperations {
       if (changesToApply.length() > 0) {
         LOGGER.log(Level.INFO, changesToApply.toString());
       }
-    } else {
+    } else if (writeOnDisk) {
       getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
     }
+
+    return pushedElements;
   }
 
   /**
    * Makes push-in of a method defined on a provided class
    * 
    * @param klass
-   * @param method
+   *            class to make the push-in operation
+   * @param weiteOnDisk
+   *            indicates if pushed elements should be writed on .java file
+   * 
+   * @return list of objects with all the pushed elements.
    */
-  public void pushInMethod(JavaType klass, MethodMetadata method) {
+  public List<Object> pushInMethod(JavaType klass, MethodMetadata method, boolean writeOnDisk) {
+
+    List<Object> pushedElements = new ArrayList<Object>();
+
     // Check if current klass exists
     Validate
         .notNull(klass, "ERROR: You must specify a valid class to continue with push-in action");
@@ -398,7 +447,8 @@ public class PushInOperationsImpl implements PushInOperations {
     MemberDetails memberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), classDetails);
 
-    // Check if the provided class is a test to be able to select valid class path
+    // Check if the provided class is a test to be able to select valid
+    // class path
     Path path =
         classDetails.getAnnotation(RooJavaType.ROO_UNIT_TEST) == null ? Path.SRC_MAIN_JAVA
             : Path.SRC_TEST_JAVA;
@@ -412,10 +462,11 @@ public class PushInOperationsImpl implements PushInOperations {
     ClassOrInterfaceTypeDetailsBuilder detailsBuilder =
         new ClassOrInterfaceTypeDetailsBuilder(classDetails);
 
-    // Getting all details 
+    // Getting all details
     for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 
-      // Prevent that details from inheritance classes could be include on this .java file 
+      // Prevent that details from inheritance classes could be include on
+      // this .java file
       if (!memberHoldingTypeDetails.getType().equals(classDetails.getType())) {
         continue;
       }
@@ -430,18 +481,27 @@ public class PushInOperationsImpl implements PushInOperations {
         if (!method.getDeclaredByMetadataId().equals(declaredByMetadataId)
             && declaredMethod.equals(method)) {
           // Add method to .java file
-          detailsBuilder.addMethod(getNewMethod(declaredByMetadataId, method));
+          MethodMetadata newMethod = getNewMethod(declaredByMetadataId, method);
+          detailsBuilder.addMethod(newMethod);
+          // Save changes to be pushed
+          pushedElements.add(newMethod);
         }
       }
 
       // Getting all imports registered on .aj file to move to .java file
       Set<ImportMetadata> allRegisteredImports = memberHoldingTypeDetails.getImports();
       detailsBuilder.addImports(allRegisteredImports);
+      // Save changes to be pushed
+      pushedElements.addAll(allRegisteredImports);
 
     }
 
-    // Updating .java file
-    getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
+    // Updating .java file if write on disdk
+    if (writeOnDisk) {
+      getTypeManagementService().createOrUpdateTypeOnDisk(detailsBuilder.build());
+    }
+
+    return pushedElements;
 
   }
 
@@ -492,18 +552,48 @@ public class PushInOperationsImpl implements PushInOperations {
   }
 
   /**
-   * This method checks if the provided methodName matches with 
-   * the provided regular expression
-   *  
+   * This method checks if the provided methodName matches with the provided
+   * regular expression
+   * 
    * @param methodName
    * @param regEx
    * @return
    */
-  private boolean methodMatch(String methodName, String regEx) {
+  private boolean methodMatch(MethodMetadata method, String regEx) {
     // Create regular expression using provided text
     Pattern pattern = Pattern.compile(regEx);
-    Matcher matcher = pattern.matcher(methodName);
-    return matcher.matches();
+    Matcher matcher = pattern.matcher(method.getMethodName().getSymbolName());
+    boolean matches = matcher.matches();
+
+    // If not matches, maybe is not a regEx, so is necessary to check it
+    // manually
+    if (!matches && regEx.split("\\(").length > 1) {
+
+      // Getting method name and parameter types
+      String name = regEx.split("\\(")[0];
+      String[] parameterTypes = regEx.split("\\(")[1].replaceAll("\\)", "").split(",");
+
+      if (method.getMethodName().equals(new JavaSymbolName(name))) {
+        List<AnnotatedJavaType> methodParams = method.getParameterTypes();
+        boolean sameParameterTypes = false;
+        if (methodParams.size() == parameterTypes.length) {
+          sameParameterTypes = true;
+          for (int i = 0; methodParams.size() < i; i++) {
+            if (!methodParams.get(i).getJavaType().getSimpleTypeName().equals(parameterTypes[i])) {
+              sameParameterTypes = false;
+              break;
+            }
+          }
+        }
+
+        // If the same method as provided, return true
+        if (sameParameterTypes) {
+          return true;
+        }
+      }
+    }
+
+    return matches;
   }
 
   /**
