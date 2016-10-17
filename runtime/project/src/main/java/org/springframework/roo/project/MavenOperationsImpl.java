@@ -11,7 +11,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.ActiveProcessManager;
@@ -55,9 +54,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
   private PackagingProviderRegistry packagingProviderRegistry;
   private ProcessManager processManager;
   private ProjectOperations projectOperations;
-
-  @Reference
-  private ApplicationConfigService applicationConfigService;
 
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
@@ -296,12 +292,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
    * @param Pom module where application-dev.properties should be generated
    */
   private void addApplicationDevPropertiesFile(Pom module) {
-
-    applicationConfigService.addProperty(module.getModuleName(), "spring.messages.cache-seconds",
-        "0", "dev", true);
-    applicationConfigService.addProperty(module.getModuleName(), "logging.level.TOP_LEVEL_PACKAGE",
-        "DEBUG", "dev", true);
-
+    // TODO: Copy application-dev.properties template 
   }
 
   /**
