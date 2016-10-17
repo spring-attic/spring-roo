@@ -92,6 +92,17 @@ public class JpaOperationsImpl implements JpaOperations {
   private TypeLocationService typeLocationService;
   private TypeManagementService typeManagementService;
 
+  private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
+      "1.0.0.BUILD-SNAPSHOT");
+  private static final Dependency SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION = new Dependency(
+      "io.springlets", "springlets-data-jpa", "${springlets.version}");
+  private static final Dependency SPRINGLETS_DATA_JPA_STARTER_WITHOUT_VERSION = new Dependency(
+      "io.springlets", "springlets-data-jpa", null);
+  private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION = new Dependency(
+      "io.springlets", "springlets-data-commons", "${springlets.version}");
+  private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER_WITHOUT_VERSION = new Dependency(
+      "io.springlets", "springlets-data-commons", null);
+
   @Reference
   private ApplicationConfigService applicationConfigService;
 
@@ -117,7 +128,8 @@ public class JpaOperationsImpl implements JpaOperations {
     final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
     final String stratersXPath = getStarterXPath(getUnwantedOrmProviders(ormProvider));
 
-    // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
+    // Updating pom.xml including necessary properties, dependencies and
+    // Spring Boot starters
     updateDependencies(module, configuration, ormProvider, jdbcDatabase, stratersXPath,
         providersXPath, databaseXPath, profile);
 
@@ -192,7 +204,7 @@ public class JpaOperationsImpl implements JpaOperations {
         cidBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(
             superclassClassOrInterfaceTypeDetails));
 
-        //Add dependency with superclass module
+        // Add dependency with superclass module
         getProjectOperations().addModuleDependency(superclass.getModule());
       }
     }
@@ -209,7 +221,7 @@ public class JpaOperationsImpl implements JpaOperations {
       implementsTypes.add(implementsType);
       cidBuilder.setImplementsTypes(implementsTypes);
 
-      //Add dependency with implementsType modules
+      // Add dependency with implementsType modules
       getProjectOperations().addModuleDependency(implementsType.getModule());
     }
 
@@ -218,7 +230,8 @@ public class JpaOperationsImpl implements JpaOperations {
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
     // Add persistence dependencies to entity module if necessary
-    // Don't need to add them if spring-boot-starter-data-jpa is present, often in single module project
+    // Don't need to add them if spring-boot-starter-data-jpa is present,
+    // often in single module project
     if (!getProjectOperations().getFocusedModule().hasDependencyExcludingVersion(
         new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", null))) {
       List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -269,7 +282,6 @@ public class JpaOperationsImpl implements JpaOperations {
   public boolean isJpaInstalled() {
     return projectOperations.isFeatureInstalled(FeatureNames.JPA);
   }
-
 
   private String getConnectionString(final JdbcDatabase jdbcDatabase, String hostName,
       final String databaseName) {
@@ -514,7 +526,8 @@ public class JpaOperationsImpl implements JpaOperations {
     for (Element property : properties) {
       getProjectOperations().addProperty("", new Property(property));
     }
-    // Add dependencies used by other profiles, excluding the current profile
+    // Add dependencies used by other profiles, excluding the current
+    // profile
     List<String> profiles = applicationConfigService.getApplicationProfiles(module.getModuleName());
     profiles.remove(profile);
 
@@ -549,7 +562,8 @@ public class JpaOperationsImpl implements JpaOperations {
     getProjectOperations().removeDependencies(module.getModuleName(), redundantDependencies);
     getProjectOperations().addDependencies(module.getModuleName(), requiredDependencies);
 
-    // Add database test dependency to repository module if it is multimodule project
+    // Add database test dependency to repository module if it is
+    // multimodule project
     // and some repository has been already added
     if (getProjectOperations().isMultimoduleProject()) {
       Set<JavaType> repositoryTypes =
@@ -560,7 +574,8 @@ public class JpaOperationsImpl implements JpaOperations {
           JavaType repositoryType = repositoryIterator.next();
           String moduleName = repositoryType.getModule();
 
-          // Remove redundant dependencies from modules with repository classes
+          // Remove redundant dependencies from modules with
+          // repository classes
           getProjectOperations().removeDependencies(moduleName, redundantDependencies);
 
           // Add new database dependencies
@@ -569,18 +584,46 @@ public class JpaOperationsImpl implements JpaOperations {
 
       }
     }
+
+    // Include Springlets Starter project dependencies and properties
+    getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
+
+    if (getProjectOperations().isMultimoduleProject()) {
+
+      // If current project is a multimodule project, include dependencies
+      // first
+      // on dependencyManagement and then on current module
+      getProjectOperations().addDependencyToDependencyManagement("",
+          SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
+      getProjectOperations().addDependency(module.getModuleName(),
+          SPRINGLETS_DATA_JPA_STARTER_WITHOUT_VERSION);
+      getProjectOperations().addDependencyToDependencyManagement("",
+          SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION);
+      getProjectOperations().addDependency(module.getModuleName(),
+          SPRINGLETS_DATA_COMMONS_STARTER_WITHOUT_VERSION);
+
+    } else {
+
+      // If not multimodule, include dependencies on root
+      getProjectOperations().addDependency("", SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
+      getProjectOperations().addDependency("", SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION);
+    }
   }
 
   /**
-   * Add datasource dependency for testing purposes in a module with repository classes.
-   * This method can be called when installing/changing persistence database or when
-   * adding repositories to the project.
+   * Add datasource dependency for testing purposes in a module with
+   * repository classes. This method can be called when installing/changing
+   * persistence database or when adding repositories to the project.
    *
-   * @param repositoryModuleName the module name where the dependency should be added.
-   * @param profile the profile used to obtain the datasource property from
-   *    spring config file.
-   * @param databaseConfigPrefix the database prefix used to find the right dependency
-   *    in the configuration file. It could be null if called from repository commands.
+   * @param repositoryModuleName
+   *            the module name where the dependency should be added.
+   * @param profile
+   *            the profile used to obtain the datasource property from spring
+   *            config file.
+   * @param databaseConfigPrefix
+   *            the database prefix used to find the right dependency in the
+   *            configuration file. It could be null if called from repository
+   *            commands.
    */
   public void addDatabaseDependencyWithTestScope(String repositoryModuleName, String profile,
       String databaseConfigPrefix) {
@@ -607,7 +650,8 @@ public class JpaOperationsImpl implements JpaOperations {
 
         for (String applicationProfile : profiles) {
 
-          // // Find the driver name to obtain the right dependency to add
+          // // Find the driver name to obtain the right dependency to
+          // add
           final String driver =
               applicationConfigService.getProperty(modules.get(0).getModuleName(),
                   DATASOURCE_PREFIX, DATABASE_DRIVER, applicationProfile);
@@ -645,9 +689,12 @@ public class JpaOperationsImpl implements JpaOperations {
   /**
    * Gets database dependency from config file and adds it with test scope
    *
-   * @param moduleName the module which dependency should be added
-   * @param databaseConfigPrefix the prefix name for choosing the dependency to add
-   * @param configuration the configuration file with the dependencies to copy from
+   * @param moduleName
+   *            the module which dependency should be added
+   * @param databaseConfigPrefix
+   *            the prefix name for choosing the dependency to add
+   * @param configuration
+   *            the configuration file with the dependencies to copy from
    */
   private void addTestScopedDependency(String moduleName, String databaseConfigPrefix,
       final Element configuration) {
