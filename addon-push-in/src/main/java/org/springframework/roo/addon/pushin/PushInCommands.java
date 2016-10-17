@@ -18,6 +18,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaPackage;
@@ -166,7 +167,25 @@ public class PushInCommands implements CommandMarker {
               && !declaredByMetadataID.split("\\#")[0]
                   .equals("MID:org.springframework.roo.classpath.PhysicalTypeIdentifier")
               && declaredByMetadataID.split("\\?")[1].equals(klass.getFullyQualifiedTypeName())) {
-            allPossibleMethods.add(method.getMethodName().getSymbolName());
+
+            String methodName = method.getMethodName().getSymbolName();
+
+            List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+
+            methodName = methodName.concat("(");
+
+            for (int i = 0; i < parameterTypes.size(); i++) {
+              String paramType = parameterTypes.get(i).getJavaType().getSimpleTypeName();
+              methodName = methodName.concat(paramType).concat(",");
+            }
+
+            if (!parameterTypes.isEmpty()) {
+              methodName = methodName.substring(0, methodName.length() - 1).concat(")");
+            } else {
+              methodName = methodName.concat(")");
+            }
+
+            allPossibleMethods.add(methodName);
           }
         }
       }
@@ -239,9 +258,9 @@ public class PushInCommands implements CommandMarker {
 
     // Check if developer wants to apply push-in on every component of generated project
     if (all != null) {
-      pushInOperations.pushInAll(shellContext.isForce());
+      pushInOperations.pushInAll(true, shellContext.isForce());
     } else {
-      pushInOperations.pushIn(specifiedPackage, klass, method);
+      pushInOperations.pushIn(specifiedPackage, klass, method, true);
     }
 
   }

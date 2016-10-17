@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.pushin;
 
+import java.util.List;
+
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
@@ -24,10 +26,14 @@ public interface PushInOperations {
    * Method that push-in all methods, fields, annotations, imports, extends, etc.. declared 
    * on project ITDs to its .java files.
    * 
+   * @param writeOnDisk boolean used to indicates if the elements to be pushed should be 
+   * 					written on disk or not.
    * @param force 
    *            boolean used to know if --force parameter has been used by developer
+   *            
+   * @return list of all the elements to be pushed. Doesn't matter if writeOnDisk is true or false.
    */
-  void pushInAll(boolean force);
+  List<Object> pushInAll(boolean writeOnDisk, boolean force);
 
   /**
    * Method that push-in all methods, fields, annotations, imports, extends, etc.. declared on 
@@ -43,6 +49,11 @@ public interface PushInOperations {
    * @param method
    *            String with the specified name of the method that
    *            developer wants to push-in
+   * @param writeOnDisk boolean used to indicates if the elements to be pushed should be 
+   * 					written on disk or not.
+   * 
+   * @return list of all the elements to be pushed. Doesn't matter if writeOnDisk is true or false.
    */
-  void pushIn(JavaPackage specifiedPackage, JavaType klass, String method);
+  List<Object> pushIn(JavaPackage specifiedPackage, JavaType klass, String method,
+      boolean writeOnDisk);
 }
