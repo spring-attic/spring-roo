@@ -467,47 +467,4 @@ public class ServiceCommands implements CommandMarker {
       return javaTypeConverter;
     }
   }
-
-  // ROO-3717: Service secure methods will be updated on future commits
-  /*@CliCommand(value = "service secure type", help = "Adds @RooService annotation to target type with options for authentication, authorization, and a permission evaluator")
-  public void secureService(
-          @CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
-          @CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
-          @CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = PROJECT, mandatory = false, help = "The domain entity this service should expose") final JavaType domainType,
-          @CliOption(key = "requireAuthentication", unspecifiedDefaultValue = "false", specifiedDefaultValue = "ture", mandatory = false, help = "Whether or not users must be authenticated to use the service") final boolean requireAuthentication,
-          @CliOption(key = "authorizedRoles", mandatory = false, help = "The role authorized the use the methods in the service") final String role,
-          @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator,
-          @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
-  
-      if (classType == null) {
-          classType = new JavaType(interfaceType.getFullyQualifiedTypeName()
-                  + "Impl");
-      }
-      if (useXmlConfiguration == null) {
-          useXmlConfiguration = Boolean.FALSE;
-      }
-      serviceOperations.setupService(interfaceType, classType, domainType,
-              requireAuthentication, role, usePermissionEvaluator,
-              useXmlConfiguration);
-  }
-  
-  @CliCommand(value = "service secure all", help = "Adds @RooService annotation to all entities with options for authentication, authorization, and a permission evaluator")
-  public void secureServiceAll(
-          @CliOption(key = "interfacePackage", mandatory = true, help = "The java interface package") final JavaPackage interfacePackage,
-          @CliOption(key = "classPackage", mandatory = false, help = "The java package of the implementation classes for the interfaces") JavaPackage classPackage,
-          @CliOption(key = "requireAuthentication", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not users must be authenticated to use the service") final boolean requireAuthentication,
-          @CliOption(key = "authorizedRole", mandatory = false, help = "The role authorized the use the methods in the service (additional roles can be added after creation)") final String role,
-          @CliOption(key = "usePermissionEvaluator", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Whether or not to use a PermissionEvaluator") final boolean usePermissionEvaluator,
-          @CliOption(key = "useXmlConfiguration", mandatory = false, help = "When true, Spring Roo will configure services using XML.") Boolean useXmlConfiguration) {
-  
-      if (classPackage == null) {
-          classPackage = interfacePackage;
-      }
-      if (useXmlConfiguration == null) {
-          useXmlConfiguration = Boolean.FALSE;
-      }
-      serviceOperations.setupAllServices(interfacePackage, classPackage,
-              requireAuthentication, role, usePermissionEvaluator,
-              useXmlConfiguration);
-  }*/
 }
