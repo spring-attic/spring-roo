@@ -3,6 +3,10 @@ package org.springframework.roo.addon.layers.service.addon;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -11,18 +15,16 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -42,15 +44,39 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private JavaType entity;
-  private JavaType identifierType;
-  private List<MethodMetadata> finders;
-  private MethodMetadata findAllGlobalSearchMethod;
-  private List<MethodMetadata> transactionalDefinedMethod;
-  private List<MethodMetadata> notTransactionalDefinedMethod;
-  private Map<FieldMetadata, MethodMetadata> countByReferenceFieldDefinedMethod;
-  private Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods;
-  private List<MethodMetadata> customCountMethods;
+  private static final Comparator<FieldMetadata> FIELD_METADATA_COMPARATOR =
+      new Comparator<FieldMetadata>() {
+        @Override
+        public int compare(FieldMetadata field1, FieldMetadata field2) {
+          return field1.getFieldName().compareTo(field2.getFieldName());
+        }
+      };
+
+
+
+  private final JavaType entity;
+  private final JavaType identifierType;
+  private final List<MethodMetadata> finders;
+  private final MethodMetadata findAllGlobalSearchMethod;
+  private final List<MethodMetadata> transactionalDefinedMethod;
+  private final List<MethodMetadata> notTransactionalDefinedMethod;
+  private final Map<FieldMetadata, MethodMetadata> countByReferenceFieldDefinedMethod;
+  private final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods;
+  private final List<MethodMetadata> customCountMethods;
+  private final JpaEntityMetadata entityMetadata;
+  private final RepositoryJpaMetadata repositoryMetadata;
+  private final MethodMetadata saveMethod;
+  private final MethodMetadata deleteMethod;
+  private final MethodMetadata saveBatchMethod;
+  private final MethodMetadata deleteBatchMethod;
+  private final MethodMetadata findOneMethod;
+  private final MethodMetadata findAllMethod;
+  private final MethodMetadata findAllIterableMethod;
+  private final MethodMetadata countMethod;
+  private final MethodMetadata findAllWithGlobalSearchMethod;
+  private final Map<JavaType, JpaEntityMetadata> relatedEntitiesMetadata;
+  private final MethodMetadata deleteIdMethod;
+
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -85,21 +111,25 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @param entity entity referenced on interface
    * @param identifierType the type of the entity's identifier field
    *            (required)
-   * @param readOnly specifies if current entity is defined as readOnly or not
+   * @param entityMetadata
+   * @param repositoryMetadata
    * @param finders list of finders added to current entity
    * @param findAllGlobalSearchMethod MethodMetadata with findAllGlobalSearch method
    * @param referencedFieldsFindAllMethods
    * @param countByReferencedFieldsMethods
    * @param customCountMethods
+   * @param relatedEntities
    *
    */
   public ServiceMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
-      final JavaType identifierType, final boolean readOnly, final List<MethodMetadata> finders,
+      final JavaType identifierType, final JpaEntityMetadata entityMetadata,
+      RepositoryJpaMetadata repositoryMetadata, final List<MethodMetadata> finders,
       final MethodMetadata findAllGlobalSearchMethod,
       final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods,
       final Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethods,
-      final List<MethodMetadata> customCountMethods) {
+      final List<MethodMetadata> customCountMethods,
+      Map<JavaType, JpaEntityMetadata> relatedEntities) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     Validate.notNull(entity, "ERROR: Entity required to generate service interface");
@@ -108,78 +138,122 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     this.entity = entity;
     this.identifierType = identifierType;
+    this.entityMetadata = entityMetadata;
+    this.relatedEntitiesMetadata = relatedEntities;
+    this.repositoryMetadata = repositoryMetadata;
     this.finders = finders;
     this.findAllGlobalSearchMethod = findAllGlobalSearchMethod;
-    this.referencedFieldsFindAllDefinedMethods = new HashMap<FieldMetadata, MethodMetadata>();
-    this.transactionalDefinedMethod = new ArrayList<MethodMetadata>();
-    this.notTransactionalDefinedMethod = new ArrayList<MethodMetadata>();
-    this.countByReferenceFieldDefinedMethod = new HashMap<FieldMetadata, MethodMetadata>();
-    this.customCountMethods = customCountMethods;
+    Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllDefinedMethods =
+        new HashMap<FieldMetadata, MethodMetadata>();
+    List<MethodMetadata> transactionalDefinedMethod = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> notTransactionalDefinedMethod = new ArrayList<MethodMetadata>();
+    Map<FieldMetadata, MethodMetadata> countByReferenceFieldDefinedMethod =
+        new HashMap<FieldMetadata, MethodMetadata>();
+    this.customCountMethods = Collections.unmodifiableList(customCountMethods);
 
-    // Generating persistent methods for not readOnly entities
-    if (!readOnly) {
-      MethodMetadata saveMethod = getSaveMethod();
-      this.transactionalDefinedMethod.add(saveMethod);
+    this.findOneMethod = getFindOneMethod();
+    notTransactionalDefinedMethod.add(findOneMethod);
+    ensureGovernorHasMethod(new MethodMetadataBuilder(findOneMethod));
+
+    // Generating persistent methods for modifiable entities
+    // (not reandOnly an no composition child)
+    if (entityMetadata.isReadOnly() || entityMetadata.isCompositionChild()) {
+      this.saveMethod = null;
+      this.deleteMethod = null;
+      this.saveBatchMethod = null;
+      this.deleteBatchMethod = null;
+      this.deleteIdMethod = null;
+    } else {
+      // Add modification methods
+      this.saveMethod = getSaveMethod();
+      transactionalDefinedMethod.add(saveMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(saveMethod));
 
-      MethodMetadata deleteMethod = getDeleteMethod();
-      this.transactionalDefinedMethod.add(deleteMethod);
+      this.deleteMethod = getDeleteMethod();
+      transactionalDefinedMethod.add(deleteMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
 
-      MethodMetadata saveBatchMethod = getSaveBatchMethod();
-      this.transactionalDefinedMethod.add(saveBatchMethod);
+      this.deleteIdMethod = getDeleteIdMethod();
+      transactionalDefinedMethod.add(deleteIdMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(deleteIdMethod));
+
+
+      this.saveBatchMethod = getSaveBatchMethod();
+      transactionalDefinedMethod.add(saveBatchMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(saveBatchMethod));
 
-      MethodMetadata deleteBatchMethod = getDeleteBatchMethod();
-      this.transactionalDefinedMethod.add(deleteBatchMethod);
+      this.deleteBatchMethod = getDeleteBatchMethod();
+      transactionalDefinedMethod.add(deleteBatchMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(deleteBatchMethod));
     }
 
-    // Generating readOnly methods for every services
-    MethodMetadata findAllMethod = getFindAllMethod();
-    this.notTransactionalDefinedMethod.add(findAllMethod);
-    ensureGovernorHasMethod(new MethodMetadataBuilder(findAllMethod));
+    // Add standard finders methods (if not composition child)
+    if (entityMetadata.isCompositionChild()) {
+      // No standard finder methods
+      this.findAllMethod = null;
+      this.findAllIterableMethod = null;
+      this.countMethod = null;
+      this.findAllWithGlobalSearchMethod = null;
 
-    MethodMetadata findAllIterableMethod = getFindAllIterableMethod();
-    this.notTransactionalDefinedMethod.add(findAllIterableMethod);
-    ensureGovernorHasMethod(new MethodMetadataBuilder(findAllIterableMethod));
+    } else {
+      // Add standard finders methods
+      this.findAllMethod = getFindAllMethod();
+      notTransactionalDefinedMethod.add(findAllMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(findAllMethod));
 
-    MethodMetadata findOneMethod = getFindOneMethod();
-    this.notTransactionalDefinedMethod.add(findOneMethod);
-    ensureGovernorHasMethod(new MethodMetadataBuilder(findOneMethod));
+      this.findAllIterableMethod = getFindAllIterableMethod();
+      notTransactionalDefinedMethod.add(findAllIterableMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(findAllIterableMethod));
 
-    MethodMetadata countMethod = getCountMethod();
-    this.notTransactionalDefinedMethod.add(countMethod);
-    ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
+      this.countMethod = getCountMethod();
+      notTransactionalDefinedMethod.add(countMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
+
+      // Generating findAll method that includes GlobalSearch parameter
+      this.findAllWithGlobalSearchMethod = getFindAllGlobalSearchMethod();
+      notTransactionalDefinedMethod.add(findAllWithGlobalSearchMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(findAllWithGlobalSearchMethod));
+    }
+
+    // Add relation management methods
+    Map<RelationInfo, MethodMetadata> addToRelationMethods =
+        new TreeMap<RelationInfo, MethodMetadata>();
+    Map<RelationInfo, MethodMetadata> removeFromRelationMethods =
+        new TreeMap<RelationInfo, MethodMetadata>();
+    MethodMetadata tmpMethod;
+    for (RelationInfo relationInfo : entityMetadata.getRelationInfos().values()) {
+
+      if (!(relationInfo.type == JpaRelationType.COMPOSITION && relationInfo.cardinality == Cardinality.ONE_TO_ONE)) {
+        // addToRELATION
+        tmpMethod = getAddToRelationMethod(relationInfo);
+        addToRelationMethods.put(relationInfo, tmpMethod);
+        ensureGovernorHasMethod(new MethodMetadataBuilder(tmpMethod));
+
+        // removeFromRELATION
+        tmpMethod = getRemoveFromRelationMethod(relationInfo);
+        removeFromRelationMethods.put(relationInfo, tmpMethod);
+        ensureGovernorHasMethod(new MethodMetadataBuilder(tmpMethod));
+      }
+    }
 
     // Generating finders
     for (MethodMetadata finder : finders) {
       MethodMetadata finderMethod = getFinderMethod(finder);
-      this.notTransactionalDefinedMethod.add(finderMethod);
+      notTransactionalDefinedMethod.add(finderMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
     }
 
     // Generating count finder methods
     for (MethodMetadata customCountMethod : customCountMethods) {
       MethodMetadata customCountServiceMethod = getCustomCountMethod(customCountMethod);
-      this.notTransactionalDefinedMethod.add(customCountServiceMethod);
+      notTransactionalDefinedMethod.add(customCountServiceMethod);
       ensureGovernorHasMethod(new MethodMetadataBuilder(customCountServiceMethod));
     }
-
-    // Generating findAll method that includes GlobalSearch parameter
-    MethodMetadata findAllWithGlobalSearchMethod = getFindAllGlobalSearchMethod();
-    this.notTransactionalDefinedMethod.add(findAllWithGlobalSearchMethod);
-    ensureGovernorHasMethod(new MethodMetadataBuilder(findAllWithGlobalSearchMethod));
 
     // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
     // method is not in the same order and ITD will be regenerated.
     Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethodsOrderedByFieldName =
-        new TreeMap<FieldMetadata, MethodMetadata>(new Comparator<FieldMetadata>() {
-          @Override
-          public int compare(FieldMetadata field1, FieldMetadata field2) {
-            return field1.getFieldName().compareTo(field2.getFieldName());
-          }
-        });
+        new TreeMap<FieldMetadata, MethodMetadata>(FIELD_METADATA_COMPARATOR);
     referencedFieldsFindAllMethodsOrderedByFieldName.putAll(referencedFieldsFindAllMethods);
 
     // Generating all findAll method for every referenced fields
@@ -187,19 +261,14 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
         .entrySet()) {
       MethodMetadata method =
           getFindAllReferencedFieldMethod(findAllReferencedFieldMethod.getValue());
-      this.referencedFieldsFindAllDefinedMethods.put(findAllReferencedFieldMethod.getKey(), method);
+      referencedFieldsFindAllDefinedMethods.put(findAllReferencedFieldMethod.getKey(), method);
       ensureGovernorHasMethod(new MethodMetadataBuilder(method));
     }
 
     // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
     // method is not in the same order and ITD will be regenerated.
     Map<FieldMetadata, MethodMetadata> countByReferencedFieldsMethodsOrderedByFieldName =
-        new TreeMap<FieldMetadata, MethodMetadata>(new Comparator<FieldMetadata>() {
-          @Override
-          public int compare(FieldMetadata field1, FieldMetadata field2) {
-            return field1.getFieldName().compareTo(field2.getFieldName());
-          }
-        });
+        new TreeMap<FieldMetadata, MethodMetadata>(FIELD_METADATA_COMPARATOR);
     countByReferencedFieldsMethodsOrderedByFieldName.putAll(countByReferencedFieldsMethods);
 
     // Generating all countByReferencedField methods
@@ -208,13 +277,108 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
           .entrySet()) {
         MethodMetadata method =
             getCountByReferencedFieldMethod(countByReferencedFieldMethod.getValue());
-        this.countByReferenceFieldDefinedMethod.put(countByReferencedFieldMethod.getKey(), method);
+        countByReferenceFieldDefinedMethod.put(countByReferencedFieldMethod.getKey(), method);
         ensureGovernorHasMethod(new MethodMetadataBuilder(method));
       }
     }
 
+    this.referencedFieldsFindAllDefinedMethods =
+        Collections.unmodifiableMap(referencedFieldsFindAllDefinedMethods);
+    this.transactionalDefinedMethod = Collections.unmodifiableList(transactionalDefinedMethod);
+    this.notTransactionalDefinedMethod =
+        Collections.unmodifiableList(notTransactionalDefinedMethod);
+    this.countByReferenceFieldDefinedMethod =
+        Collections.unmodifiableMap(countByReferencedFieldsMethods);
+
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  private MethodMetadata getRemoveFromRelationMethod(RelationInfo relationInfo) {
+    final MethodMetadata entityRemoveMethod = relationInfo.removeMethod;
+    // Define method name
+    JavaSymbolName methodName = entityRemoveMethod.getMethodName();
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // add parent entity parameter
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(entity));
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(entity.getSimpleTypeName())));
+
+    // Get related entity metadata
+    JpaEntityMetadata childEntityMetadata = relatedEntitiesMetadata.get(relationInfo.childType);
+    Validate.notNull(childEntityMetadata, "Can't get entity metadata for %s entity generating %s",
+        relationInfo.childType, aspectName);
+
+    if (relationInfo.cardinality != Cardinality.ONE_TO_ONE) {
+      // add child entity parameter
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
+          .iterableOf(childEntityMetadata.getCurrentIndentifierField().getFieldType())));
+      parameterNames.add(entityRemoveMethod.getParameterNames().get(0));
+    }
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName, entity,
+            parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
+  }
+
+  private MethodMetadata getAddToRelationMethod(RelationInfo relationInfo) {
+    final MethodMetadata entityAddMethod = relationInfo.addMethod;
+    // Define method name
+    JavaSymbolName methodName = entityAddMethod.getMethodName();
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    // add parent entity parameter
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(entity));
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(entity.getSimpleTypeName())));
+
+
+
+    // add child entity parameter
+    parameterNames.add(entityAddMethod.getParameterNames().get(0));
+    if (relationInfo.cardinality == Cardinality.ONE_TO_ONE) {
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(relationInfo.childType));
+    } else {
+      // Get related entity metadata
+      JpaEntityMetadata childEntityMetadata = relatedEntitiesMetadata.get(relationInfo.childType);
+      Validate.notNull(childEntityMetadata,
+          "Can't get entity metadata for %s entity generating %s", relationInfo.childType,
+          aspectName);
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
+          .iterableOf(childEntityMetadata.getCurrentIndentifierField().getFieldType())));
+    }
+
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName, entity,
+            parameterTypes, parameterNames, null);
+
+    return methodBuilder.build(); // Build and return a MethodMetadata
+    // instance
   }
 
   /**
@@ -223,7 +387,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    *
    * @return MethodMetadata
    */
-  public MethodMetadata getFindAllGlobalSearchMethod() {
+  private MethodMetadata getFindAllGlobalSearchMethod() {
     // Define method name
     JavaSymbolName methodName = this.findAllGlobalSearchMethod.getMethodName();
 
@@ -255,7 +419,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @return MethodMetadataBuilder with public List <Entity> findAll();
    *         structure
    */
-  public MethodMetadata getFindAllMethod() {
+  private MethodMetadata getFindAllMethod() {
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("findAll");
 
@@ -272,8 +436,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       return existingMethod;
     }
 
-    JavaType listEntityJavaType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
+    JavaType listEntityJavaType = JavaType.listOf(entity);
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
@@ -290,14 +453,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @return MethodMetadataBuilder with public List <Entity> findAll(Iterable
    *         <Long> ids) structure
    */
-  public MethodMetadata getFindAllIterableMethod() {
+  private MethodMetadata getFindAllIterableMethod() {
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("findAll");
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
-        DataType.TYPE, null, Arrays.asList(identifierType))));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType.iterableOf(identifierType)));
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -311,8 +473,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     }
 
 
-    JavaType listEntityJavaType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
+    JavaType listEntityJavaType = JavaType.listOf(entity);
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
@@ -330,7 +491,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @return MethodMetadataBuilder with public Entity findOne(Long id);
    *         structure
    */
-  public MethodMetadata getFindOneMethod() {
+  private MethodMetadata getFindOneMethod() {
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("findOne");
 
@@ -340,7 +501,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(new JavaSymbolName("id"));
+    parameterNames.add(entityMetadata.getCurrentIndentifierField().getFieldName());
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -364,7 +525,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @return MethodMetadataBuilder with public long count();
    *         structure
    */
-  public MethodMetadata getCountMethod() {
+  private MethodMetadata getCountMethod() {
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("count");
 
@@ -396,7 +557,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @return MethodMetadataBuilder with public Entity save(Entity entity);
    *         structure
    */
-  public MethodMetadata getSaveMethod() {
+  private MethodMetadata getSaveMethod() {
     // Define save method
     JavaSymbolName methodName = new JavaSymbolName("save");
 
@@ -429,7 +590,7 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    *
    * @return MethodMetadataBuilder with public void delete(Entity entity); structure
    */
-  public MethodMetadata getDeleteMethod() {
+  private MethodMetadata getDeleteMethod() {
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("delete");
 
@@ -459,26 +620,57 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
   }
 
   /**
+   * Method that generates "delete" (by id) method.
+   *
+   * @return MethodMetadataBuilder with public void delete(Entity entity); structure
+   */
+  private MethodMetadata getDeleteIdMethod() {
+    // Define method name
+    JavaSymbolName methodName = new JavaSymbolName("delete");
+
+    // Define method parameter types
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(this.identifierType));
+
+    // Define method parameter names
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(entityMetadata.getCurrentIndentifierField().getFieldName());
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, methodName,
+            JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, null);
+
+    // Build a MethodMetadata instance
+    return methodBuilder.build();
+  }
+
+  /**
    * Method that generates "save" batch method.
    *
    * @return MethodMetadataBuilder with public List<Entity> save(Iterable
    *         <Entity> entities); structure
    */
-  public MethodMetadata getSaveBatchMethod() {
+  private MethodMetadata getSaveBatchMethod() {
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("save");
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
-        DataType.TYPE, null, Arrays.asList(entity))));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType.iterableOf(entity)));
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
     parameterNames.add(new JavaSymbolName("entities"));
 
-    JavaType listEntityJavaType =
-        new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
+    JavaType listEntityJavaType = JavaType.listOf(entity);
 
     MethodMetadata existingMethod =
         getGovernorMethod(methodName,
@@ -502,14 +694,13 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
    * @return MethodMetadataBuilder with public void delete(Iterable
    *         <Long> ids); structure
    */
-  public MethodMetadata getDeleteBatchMethod() {
+  private MethodMetadata getDeleteBatchMethod() {
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("delete");
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(new JavaType("java.lang.Iterable", 0,
-        DataType.TYPE, null, Arrays.asList(identifierType))));
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType.iterableOf(identifierType)));
 
     // Define method parameter names
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -686,6 +877,42 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     return this.customCountMethods;
   }
 
+  public MethodMetadata getCurrentSaveMethod() {
+    return this.saveMethod;
+  }
+
+  public MethodMetadata getCurrentSaveBatchMethod() {
+    return this.saveBatchMethod;
+  }
+
+  public MethodMetadata getCurrentDeleteBatchMethod() {
+    return this.deleteBatchMethod;
+  }
+
+  public MethodMetadata getCurrentDeleteMethod() {
+    return this.deleteMethod;
+  }
+
+  public MethodMetadata getCurrentFindOneMethod() {
+    return this.findOneMethod;
+  }
+
+  public MethodMetadata getCurrentFindAllMethod() {
+    return this.findAllMethod;
+  }
+
+  public MethodMetadata getCurrentFindAllIterableMethod() {
+    return this.findAllIterableMethod;
+  }
+
+  public MethodMetadata getCurrentCountMethod() {
+    return this.countMethod;
+  }
+
+  public MethodMetadata getCurrentFindAllWithGlobalSearchMethod() {
+    return this.findAllWithGlobalSearchMethod;
+  }
+
   @Override
   public String toString() {
     final ToStringBuilder builder = new ToStringBuilder(this);
@@ -697,4 +924,5 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     builder.append("itdTypeDetails", itdTypeDetails);
     return builder.toString();
   }
+
 }

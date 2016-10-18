@@ -229,7 +229,7 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     // Getting findAll Iterable method. This method will be used to findAll results
     // before to invoke batch operations
-    MethodMetadata findAllIterableMethod = serviceMetadata.getFindAllIterableMethod();
+    MethodMetadata findAllIterableMethod = serviceMetadata.getCurrentFindAllIterableMethod();
 
     return new ServiceImplMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, serviceInterface, repositoryDetails.getType(), entity,

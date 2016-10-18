@@ -28,6 +28,7 @@ import org.springframework.roo.project.LogicalPath;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +47,11 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private Map<FieldMetadata, MethodMetadata> countMethodByReferencedFields;
-  private FieldMetadata compositionField;
-  private RelationInfo compositionInfo;
-  private MethodMetadata compositionCountMethod;
+  private final Map<FieldMetadata, MethodMetadata> countMethodByReferencedFields;
+  private final FieldMetadata compositionField;
+  private final RelationInfo compositionInfo;
+  private final MethodMetadata compositionCountMethod;
+  private final List<JavaType> customRepositories;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -106,11 +108,15 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     final JavaType identifierType = identifiers.get(0).getFieldType();
     final JavaType domainType = annotationValues.getEntity();
 
+    this.customRepositories = Collections.unmodifiableList(customRepositories);
+
     countMethodByReferencedFields = new HashMap<FieldMetadata, MethodMetadata>();
 
     // Iterate over fields which are child fields
     boolean composition = false;
     MethodMetadata countMethod;
+    MethodMetadata compositionCountMethod = null;
+    Pair<FieldMetadata, RelationInfo> compositionFieldInfo = null;
     for (Pair<FieldMetadata, RelationInfo> fieldInfo : relationsAsChild) {
       countMethod = getCountMethodByField(fieldInfo.getLeft(), fieldInfo.getRight());
       ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
@@ -123,12 +129,20 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
             "Entity %s has defined more than one relations as child part whit type composition.",
             aspectName);
         composition = true;
-        this.compositionField = fieldInfo.getLeft();
-        this.compositionInfo = fieldInfo.getRight();
-        this.compositionCountMethod = countMethod;
         ensureGovernorHasMethod(new MethodMetadataBuilder(getFindOneMethod(domainType,
             identifiers.get(0))));
+        compositionCountMethod = countMethod;
+        compositionFieldInfo = fieldInfo;
       }
+    }
+    if (composition) {
+      this.compositionField = compositionFieldInfo.getLeft();
+      this.compositionInfo = compositionFieldInfo.getRight();
+      this.compositionCountMethod = compositionCountMethod;
+    } else {
+      this.compositionField = null;
+      this.compositionInfo = null;
+      this.compositionCountMethod = null;
     }
 
     // Add Repository interface
@@ -229,22 +243,44 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    * This method returns all generated countMethodByReferencedFields
    *
    * @return Map with key that identifies referenced field and method metadata
-   * @deprecated use {@link #getCompositionCountMethod()} and {@link #getCompositionField()}
    */
   public Map<FieldMetadata, MethodMetadata> getCountMethodByReferencedFields() {
     return countMethodByReferencedFields;
   }
 
+  /**
+   * @return composition count method
+   */
   public MethodMetadata getCompositionCountMethod() {
     return compositionCountMethod;
   }
 
+  /**
+   * @return composition field
+   */
   public FieldMetadata getCompositionField() {
     return compositionField;
   }
 
+  /**
+   * @return composition relation info
+   */
   public RelationInfo getCompositionInfo() {
     return compositionInfo;
+  }
+
+  /**
+   * @return list of related custom repositories
+   */
+  public List<JavaType> getCustomRepositories() {
+    return customRepositories;
+  }
+
+  /**
+   * @return true if entity is composition
+   */
+  public boolean isComposition() {
+    return compositionField != null;
   }
 
   @Override

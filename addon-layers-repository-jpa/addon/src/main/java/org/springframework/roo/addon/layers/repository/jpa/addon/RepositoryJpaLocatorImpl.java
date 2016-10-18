@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -17,9 +18,10 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * The {@link RepositoryJpaLocator} implementation.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
+ * @author Jose Manuel Vivó
  * @since 1.2.0
  */
 @Component
@@ -54,5 +56,28 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
       }
     }
     return toReturn.values();
+  }
+
+  @Override
+  public ClassOrInterfaceTypeDetails getRepository(JavaType domainType) {
+    Validate.notNull(domainType, "domainType is required");
+    Collection<ClassOrInterfaceTypeDetails> repositories = getRepositories(domainType);
+    if (repositories.isEmpty()) {
+      return null;
+    } else if (repositories.size() > 1) {
+      throw new IllegalStateException("Found " + repositories.size() + " repositories for "
+          + domainType.getFullyQualifiedTypeName());
+    }
+    return repositories.iterator().next();
+  }
+
+  @Override
+  public ClassOrInterfaceTypeDetails getFirstRepository(JavaType domainType) {
+    Validate.notNull(domainType, "domainType is required");
+    Collection<ClassOrInterfaceTypeDetails> repositories = getRepositories(domainType);
+    if (repositories.isEmpty()) {
+      return null;
+    }
+    return repositories.iterator().next();
   }
 }
