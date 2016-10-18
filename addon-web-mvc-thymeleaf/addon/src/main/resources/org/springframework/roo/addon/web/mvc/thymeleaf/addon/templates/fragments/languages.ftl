@@ -18,7 +18,7 @@
       <ul class="nav navbar-nav navbar-right upper-nav languages">
           <li class="dropdown"> 
 		<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-			<span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp<span class="hidden-sm" data-th-text="${r"#{language_label}"}">Language</span><span class="caret"></span>
+			<span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp<span class="hidden-sm" data-th-text="${r"#{language_label}"}">Language</span><span class="caret"></span>
 		</a>
     	        <ul class="dropdown-menu" id="languageFlags">
       			<#list languages as language>

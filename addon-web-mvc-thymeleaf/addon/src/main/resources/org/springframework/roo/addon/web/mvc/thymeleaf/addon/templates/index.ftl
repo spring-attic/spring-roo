@@ -118,7 +118,7 @@
               <ul class="nav navbar-nav navbar-right upper-nav language">
                 <li class="dropdown">
                   <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;<span class="hidden-sm">Language</span><span class="caret"></span>
+                    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp;<span class="hidden-sm">Language</span><span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu" id="languageFlags">
                    <li id="enFlag"><a href="?lang=en"><img class="flag"
