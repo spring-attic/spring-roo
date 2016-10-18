@@ -222,15 +222,22 @@ public class SecurityCommands implements CommandMarker {
           mandatory = true,
           help = "The service method name and its params that will be annotated with @PreAuthorize. Is possible to specify a regular expression.") String methodName,
       @CliOption(key = "roles", mandatory = false,
-          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction. ") String roles) {
+          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction. ") String roles,
+      @CliOption(
+          key = "usernames",
+          mandatory = false,
+          help = "Comma separated list with all the usernames to add inside Spring Security annotation.") String usernames) {
 
-    if (StringUtils.isEmpty(roles)) {
-      LOGGER.log(Level.INFO, "ERROR: You should provide almost one role on --roles parameter.");
+    if (StringUtils.isEmpty(roles) && StringUtils.isEmpty(usernames)) {
+      LOGGER
+          .log(
+              Level.INFO,
+              "ERROR: You should provide almost one role on --roles parameter or almost one username on --usernames parameter..");
       return;
     }
 
     // Calculate the @PreAuthorize annotation value by provided roles
-    String value = getSecurityAnnotationValue(roles);
+    String value = securityOperations.getSpringSecurityAnnotationValue(roles, usernames);
 
     // Include the @PreAuthorize annotation with the calculated value
     securityOperations.addPreAuthorizeAnnotation(klass, methodName, value);
@@ -328,20 +335,27 @@ public class SecurityCommands implements CommandMarker {
       @CliOption(key = "roles", mandatory = false,
           help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction. ") String roles,
       @CliOption(
+          key = "usernames",
+          mandatory = false,
+          help = "Comma separated list with all the usernames to add inside Spring Security annotation.") String usernames,
+      @CliOption(
           key = "when",
           mandatory = false,
           unspecifiedDefaultValue = PRE_FILTER,
           specifiedDefaultValue = PRE_FILTER,
           help = "Indicates if filtering should be after or before to execute the operation. Depends of the specified value, @PreFilter annotation or @PostFilter annotation will be included.") String when) {
 
-    if (StringUtils.isEmpty(roles)) {
-      LOGGER.log(Level.INFO, "ERROR: You should provide almost one role on --roles parameter.");
+    if (StringUtils.isEmpty(roles) && StringUtils.isEmpty(usernames)) {
+      LOGGER
+          .log(
+              Level.INFO,
+              "ERROR: You should provide almost one role on --roles parameter or almost one username on --usernames parameter..");
       return;
     }
 
     // Calculate the @PreFilter / @PostFilter annotation value by provided
     // roles
-    String value = getSecurityAnnotationValue(roles);
+    String value = securityOperations.getSpringSecurityAnnotationValue(roles, usernames);
 
     if (when.equals(PRE_FILTER)) {
       // Include the @PreFilter annotation with the calculated value
@@ -350,42 +364,6 @@ public class SecurityCommands implements CommandMarker {
       // Include the @PostFilter annotation with the calculated value
       securityOperations.addPostFilterAnnotation(klass, methodName, value);
     }
-  }
-
-  /**
-   * This method calculate the annotation value by the provided roles
-   * 
-   * @param roles
-   *            Comma separated list with all the roles
-   * 
-   * @return A String with the value to include in @PreAuthorize annotation
-   */
-  private String getSecurityAnnotationValue(String roles) {
-
-    String value = "";
-
-    if (StringUtils.isNotEmpty(roles)) {
-
-      // First of all, obtain the comma separated list
-      // that contains all roles
-      String[] rolesList = roles.split(",");
-
-      // Now, check if there's more than one role
-      if (rolesList.length > 1) {
-        // create the hasAnyRole expression
-        value = "hasAnyRole(";
-      } else {
-        // create the hasRole expression
-        value = "hasRole(";
-      }
-
-      for (String role : rolesList) {
-        value = value.concat("'").concat(role).concat("'").concat(",");
-      }
-      value = value.substring(0, value.length() - 1).concat(")");
-    }
-
-    return value;
   }
 
   /**

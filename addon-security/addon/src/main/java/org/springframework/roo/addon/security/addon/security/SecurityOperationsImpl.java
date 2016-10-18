@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -70,6 +71,57 @@ public class SecurityOperationsImpl implements SecurityOperations {
     // Delegates on the provided SecurityProvider to install Spring Security
     // on current project
     type.install(module);
+  }
+
+  @Override
+  public String getSpringSecurityAnnotationValue(String roles, String usernames) {
+
+    String value = "";
+
+    // Including roles
+    if (StringUtils.isNotEmpty(roles)) {
+
+      // First of all, obtain the comma separated list
+      // that contains all roles
+      String[] rolesList = roles.split(",");
+
+      // Now, check if there's more than one role
+      if (rolesList.length > 1) {
+        // create the hasAnyRole expression
+        value = "hasAnyRole(";
+      } else {
+        // create the hasRole expression
+        value = "hasRole(";
+      }
+
+      for (String role : rolesList) {
+        value = value.concat("'").concat(role).concat("'").concat(",");
+      }
+      value = value.substring(0, value.length() - 1).concat(")");
+    }
+
+    // Including usernames
+    if (StringUtils.isNotEmpty(usernames)) {
+
+      // First of all, obtain the comma separated list
+      // that contains all usernames
+      String[] usernamesList = usernames.split(",");
+
+      // Check if also exist some role added previously
+      if (StringUtils.isNotEmpty(value) && usernamesList.length > 0) {
+        value = value.concat(" or");
+      }
+
+      // Create (#username == principal.username) expression
+      for (String username : usernamesList) {
+        value = value.concat(" (#").concat(username).concat(" == principal.username) or");
+      }
+
+      // Removing last extra or
+      value = value.substring(0, value.length() - 3);
+    }
+
+    return value.trim();
   }
 
   @Override

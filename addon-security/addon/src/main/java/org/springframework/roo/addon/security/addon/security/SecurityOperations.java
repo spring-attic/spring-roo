@@ -43,6 +43,18 @@ public interface SecurityOperations extends Feature {
   List<SecurityProvider> getAllSecurityProviders();
 
   /**
+   * Defines getSpringSecurityAnnotationValue method that will be used by
+   * implementations to calculate the value of the Spring Security Annotations
+   * 
+   * 
+   * @param roles separated comma list with the roles to include in Spring Security annotation.
+   * @param usernames separated comma list with the usernames to include in Spring Security annotation
+   * 
+   * @return String with the value of the Spring Security annotation
+   */
+  String getSpringSecurityAnnotationValue(String roles, String usernames);
+
+  /**
    * Defines addPreAuthorizeAnnotation method that will be used by
    * implementations to include @PreAuthorize annotation in service methods.
    * 
