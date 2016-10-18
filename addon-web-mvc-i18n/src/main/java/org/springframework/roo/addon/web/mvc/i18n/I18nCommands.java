@@ -98,9 +98,11 @@ public class I18nCommands implements CommandMarker {
       help = "Install new language in generated project. Also, could be used to specify the default language of the project.")
   public void language(
       @CliOption(key = "code", mandatory = true, help = "The language code for the desired bundle") final I18n i18n,
-      @CliOption(key = "useAsDefault", mandatory = false,
-          help = "Indicates if selected language should be used as default on this application.",
-          specifiedDefaultValue = "true", unspecifiedDefaultValue = "true") boolean useAsDefault,
+      @CliOption(
+          key = "useAsDefault",
+          mandatory = false,
+          help = "Indicates if selected language should be used as default on this application. By default false.",
+          specifiedDefaultValue = "false", unspecifiedDefaultValue = "false") boolean useAsDefault,
       @CliOption(key = "module", mandatory = true,
           help = "The application module where to install message bundles",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {

@@ -69,7 +69,7 @@ web mvc view setup --type THYMELEAF
 web mvc controller --all --responseType THYMELEAF
 web mvc detail --all --responseType THYMELEAF
 
-web mvc language --code es --useAsDefault false
+web mvc language --code es
 
 // FIXME!! Re-enable security when Springlets contains security starter
 // security setup

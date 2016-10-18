@@ -278,10 +278,11 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
         .getNameIncludingTypeParameters(false, importResolver)));
 
     // localeResolver.setDefaultLocale(new Locale(\"en\", \"EN\"));
-    if(StringUtils.isNotBlank(defaultLanguage)){
-    	bodyBuilder.appendFormalLine(String.format("localeResolver.setDefaultLocale(new %s(\"%s\"));",
-    			new JavaType("java.util.Locale").getNameIncludingTypeParameters(false, importResolver),
-    			defaultLanguage));
+    if (StringUtils.isNotBlank(defaultLanguage)) {
+      bodyBuilder.appendFormalLine(String.format(
+          "localeResolver.setDefaultLocale(new %s(\"%s\"));",
+          new JavaType("java.util.Locale").getNameIncludingTypeParameters(false, importResolver),
+          defaultLanguage));
     }
 
     // return
