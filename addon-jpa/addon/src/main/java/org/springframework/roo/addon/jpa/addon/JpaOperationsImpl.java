@@ -461,6 +461,19 @@ public class JpaOperationsImpl implements JpaOperations {
       applicationConfigService.addProperty(moduleName, HIBERNATE_NAMING_STRATEGY,
           HIBERNATE_NAMING_STRATEGY_VALUE, profile, force);
     }
+
+    // Add dev properties
+    applicationConfigService.addProperty(moduleName, "spring.jpa.show-sql", "true", "dev", true);
+    applicationConfigService.addProperty(moduleName, "spring.jpa.properties.hibernate.format_sql",
+        "true", "dev", true);
+    applicationConfigService.addProperty(moduleName,
+        "spring.jpa.properties.hibernate.generate_statistics", "true", "dev", true);
+    applicationConfigService.addProperty(moduleName, "logging.level.org.hibernate.stat", "DEBUG",
+        "dev", true);
+    applicationConfigService.addProperty(moduleName,
+        "logging.level.com.querydsl.jpa.impl.JPAQuery", "DEBUG", "dev", true);
+    applicationConfigService.addProperty(moduleName, "logging.pattern.level",
+        "%5p - QP:%X{querydsl.parameters} -", "dev", true);
   }
 
   /**

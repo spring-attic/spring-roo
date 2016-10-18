@@ -237,7 +237,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Adding spring.jackson.serialization.indent-output property
     getApplicationConfigService().addProperty(module.getModuleName(),
-        "spring.jackson.serialization.indent-output", "true", "", true);
+        "spring.jackson.serialization.indent-output", "true", "dev", true);
 
     // Add GlobalSearchHandlerMethodArgumentResolver.java
     addGlobalSearchHandlerMethodArgumentResolverClass(module);
