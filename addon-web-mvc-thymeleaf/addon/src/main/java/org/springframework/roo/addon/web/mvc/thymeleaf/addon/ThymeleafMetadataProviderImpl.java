@@ -736,6 +736,10 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    // populateFormats(model);
+    bodyBuilder.appendFormalLine("populateFormats(model);");
+    bodyBuilder.newLine();
+
     // model.addAttribute(new Entity());
     bodyBuilder.appendFormalLine(String.format("model.addAttribute(new %s());",
         this.entity.getSimpleTypeName()));
@@ -811,6 +815,10 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // if (result.hasErrors()) {
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
     bodyBuilder.indent();
+
+    // populateFormats(model);
+    bodyBuilder.appendFormalLine("populateFormats(model);");
+    bodyBuilder.newLine();
 
     // return "path/create";
     bodyBuilder.appendFormalLine(String.format("return \"%s/create\";", getViewsPath()));
@@ -891,6 +899,10 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
+    // populateFormats(model);
+    bodyBuilder.appendFormalLine("populateFormats(model);");
+    bodyBuilder.newLine();
+
     // return "path/create";
     bodyBuilder.appendFormalLine(String.format("return \"%s/edit\";", getViewsPath()));
 
@@ -962,6 +974,10 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     // if (result.hasErrors()) {
     bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
     bodyBuilder.indent();
+
+    // populateFormats(model);
+    bodyBuilder.appendFormalLine("populateFormats(model);");
+    bodyBuilder.newLine();
 
     // return "path/create";
     bodyBuilder.appendFormalLine(String.format("return \"%s/edit\";", getViewsPath()));
