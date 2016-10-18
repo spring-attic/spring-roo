@@ -32,8 +32,7 @@ public class Completion {
     this.order = order;
     this.value = value;
     if (StringUtils.isNotBlank(heading)) {
-      heading =
-          AnsiEscapeCode.decorate(heading, AnsiEscapeCode.UNDERSCORE, AnsiEscapeCode.FG_GREEN);
+      heading = AnsiEscapeCode.decorate(heading, AnsiEscapeCode.UNDERSCORE, AnsiEscapeCode.FG_CYAN);
     }
     this.heading = heading;
   }
