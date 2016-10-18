@@ -31,6 +31,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -38,6 +39,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.AnsiEscapeCode;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -718,7 +720,7 @@ public class SimpleParser implements Parser {
                 }
 
                 for (String value : values) {
-                  allValues.add(new Completion(value));
+                  allValues.add(getCompletion(value));
                 }
               } else {
 
@@ -854,6 +856,26 @@ public class SimpleParser implements Parser {
       }
 
       return 0;
+    }
+  }
+
+  /**
+   * This method obtains the Completion by the provided value. 
+   * 
+   * If the provided value contains ":" means that is necessary to include
+   * heading with the module.
+   * 
+   * @param value possible value to show on auto-completion
+   * 
+   * @return Completion with all necessary elements
+   */
+  private Completion getCompletion(String value) {
+    // Obtaining module that always be before :
+    if (value.split(":").length > 1 && AnsiEscapeCode.isAnsiEnabled()) {
+      String module = value.split(":")[0];
+      return new Completion(value, value.replace(module.concat(":"), ""), module, 0);
+    } else {
+      return new Completion(value);
     }
   }
 
