@@ -1070,7 +1070,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Build method body
 
     /*
-     *  Assert.notNull({param}, "The given Iterable of items to add can't be null!");
+     *  Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
      * for ({childType} item : {param}) {
      *   this.{field}.remove(item);
      *   item.set{mappedBy}(null);
@@ -1079,10 +1079,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     importResolver.addImport(SpringJavaType.ASSERT);
 
-    // Assert.notNull({param}, "The given Iterable of items to add can't be null!");
-    builder.appendFormalLine(String
-        .format("Assert.notNull(%s, \"The given Iterable of items to add can't be null!\");",
-            parameterName));
+    // Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
+    builder.appendFormalLine(String.format(
+        "Assert.notNull(%s, \"The given Iterable of items to remove can't be null!\");",
+        parameterName));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
@@ -1117,7 +1117,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Build method body
 
     /*
-     * Assert.notNull({param}, "The given Iterable of items to add can't be null!");
+     * Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
      * for ({childType} item : {param}) {
      *   this.{field}.remove(item);
      *   item.get{mappedBy}().remove(this);
@@ -1126,10 +1126,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     importResolver.addImport(SpringJavaType.ASSERT);
 
-    // Assert.notNull({param}, "The given Iterable of items to add can't be null!");
-    builder.appendFormalLine(String
-        .format("Assert.notNull(%s, \"The given Iterable of items to add can't be null!\");",
-            parameterName));
+    // Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
+    builder.appendFormalLine(String.format(
+        "Assert.notNull(%s, \"The given Iterable of items to remove can't be null!\");",
+        parameterName));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
