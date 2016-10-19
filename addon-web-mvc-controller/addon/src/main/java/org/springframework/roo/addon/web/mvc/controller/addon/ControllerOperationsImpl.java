@@ -13,6 +13,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
@@ -26,14 +27,18 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -104,6 +109,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   private Converter<Pom> pomConverter;
 
+  private MetadataService metadataService;
+
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
 
@@ -161,7 +168,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     if (getProjectOperations().isMultimoduleProject()) {
 
-      // If current project is a multimodule project, include dependencies first
+      // If current project is a multimodule project, include dependencies
+      // first
       // on dependencyManagement and then on current module
       getProjectOperations().addDependencyToDependencyManagement("",
           SPRINGLETS_WEB_STARTER_WITH_VERSION);
@@ -302,6 +310,29 @@ public class ControllerOperationsImpl implements ControllerOperations {
    */
   @Override
   public boolean isAddControllerAvailable() {
+    return getProjectOperations().isFeatureInstalled(FeatureNames.MVC);
+  }
+
+  /**
+   * This operation will check if add detail controllers operation is
+   * available
+   *
+   * @return true if add detail controller operation is available. false if
+   *         not.
+   */
+  @Override
+  public boolean isAddDetailControllerAvailable() {
+    return getProjectOperations().isFeatureInstalled(FeatureNames.MVC);
+  }
+
+  /**
+   * This operation will check if the operation publish services methods is
+   * available
+   *
+   * @return true if publish services methods is available. false if not.
+   */
+  @Override
+  public boolean isPublishOperationsAvailable() {
     return getProjectOperations().isFeatureInstalled(FeatureNames.MVC);
   }
 
@@ -1206,8 +1237,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * Find recursively if relation field is valid.
-   * Check that the fields are Set or List and check that the parents controllers exists
+   * Find recursively if relation field is valid. Check that the fields are
+   * Set or List and check that the parents controllers exists
    *
    * @param entityDetails
    *            Entity to search the current field parameter
@@ -1226,7 +1257,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
    * @param masterEntity
    *            Entity of the detail controller
    *
-   * @throws Error if there aren't parent detail controllers
+   * @throws Error
+   *             if there aren't parent detail controllers
    * @return If finally the relation field is valid
    */
   private boolean checkRelationField(ClassOrInterfaceTypeDetails entityDetails,
@@ -1250,7 +1282,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
           level++;
           if (relationField.length > level) {
 
-            // check if exists a detail controller (avoid check the master)
+            // check if exists a detail controller (avoid check the
+            // master)
             String currentRelationField = relationField[0];
             for (int i = 1; i < level; i++) {
               currentRelationField = currentRelationField.concat(".").concat(relationField[i]);
@@ -1282,10 +1315,11 @@ public class ControllerOperationsImpl implements ControllerOperations {
   }
 
   /**
-   * Check if detail controller exists for the values entity, responseType, controllerPackage, pathPrefix
-   * and relationField provided by parameters
+   * Check if detail controller exists for the values entity, responseType,
+   * controllerPackage, pathPrefix and relationField provided by parameters
    *
-   * @param entity Detail controller entity
+   * @param entity
+   *            Detail controller entity
    * @param responseType
    * @param controllerPackage
    * @param pathPrefix
@@ -1389,4 +1423,356 @@ public class ControllerOperationsImpl implements ControllerOperations {
     }
     return new JavaPackage(packageStr.concat(".web"), module);
   }
+
+  private MetadataService getMetadataService() {
+    if (metadataService == null) {
+      // Get all Services implement MetadataService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(MetadataService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          return (MetadataService) this.context.getService(ref);
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load MetadataService on FinderOperationsImpl.");
+        return null;
+      }
+    } else {
+      return metadataService;
+    }
+  }
+
+  /**
+   * Get all the methods that can be published from the service or the controller established by parameter
+   *
+   * @param currentService Service from which obtain methods
+   * @param currentController Controller from which obtain methods
+   * @return methods names list
+   */
+  public List<String> getAllMethodsToPublish(String currentService, String currentController) {
+
+    //Generating all possible values
+    List<String> serviceMethodsToPublish = new ArrayList<String>();
+
+    List<ClassOrInterfaceTypeDetails> servicesToPublish =
+        new ArrayList<ClassOrInterfaceTypeDetails>();
+
+    if (StringUtils.isEmpty(currentService)) {
+
+      // Get controllers
+      Set<ClassOrInterfaceTypeDetails> controllers =
+          getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+              RooJavaType.ROO_CONTROLLER);
+
+      for (ClassOrInterfaceTypeDetails controller : controllers) {
+        String name = replaceTopLevelPackageString(controller, currentController);
+        if (currentController.equals(name)) {
+
+          // Get the entity associated
+          AnnotationMetadata controllerAnnotation =
+              controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
+          JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
+
+          // Search the service related with the entity
+          Set<ClassOrInterfaceTypeDetails> services =
+              getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+                  RooJavaType.ROO_SERVICE);
+          Iterator<ClassOrInterfaceTypeDetails> itServices = services.iterator();
+          while (itServices.hasNext()) {
+            ClassOrInterfaceTypeDetails existingService = itServices.next();
+            AnnotationAttributeValue<Object> entityAttr =
+                existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
+            if (entityAttr != null && entityAttr.getValue().equals(entity)) {
+              servicesToPublish.add(existingService);
+            }
+          }
+
+          break;
+        }
+      }
+    } else {
+
+      // Get the services
+      Set<ClassOrInterfaceTypeDetails> services =
+          getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+              RooJavaType.ROO_SERVICE);
+
+      for (ClassOrInterfaceTypeDetails service : services) {
+        String name = replaceTopLevelPackageString(service, currentService);
+        if (currentService.equals(name)) {
+          servicesToPublish.add(service);
+          break;
+        }
+      }
+    }
+
+    for (ClassOrInterfaceTypeDetails serviceToPublish : servicesToPublish) {
+
+      // Getting service metadata
+      ClassOrInterfaceTypeDetails serviceDetails =
+          getTypeLocationService().getTypeDetails(serviceToPublish.getType());
+      final LogicalPath serviceLogicalPath =
+          PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
+      final String serviceMetadataKey =
+          ServiceMetadata.createIdentifier(serviceDetails.getType(), serviceLogicalPath);
+      final ServiceMetadata serviceMetadata =
+          (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+
+      // Get all methods generated by Roo
+      List<MethodMetadata> methodsImplementedByRoo = new ArrayList<MethodMetadata>();
+      methodsImplementedByRoo.addAll(serviceMetadata.getNotTransactionalDefinedMethods());
+      methodsImplementedByRoo.addAll(serviceMetadata.getTransactionalDefinedMethods());
+
+
+      // Get all methods and compare them with the generated by Roo
+      List<MethodMetadata> methods = serviceToPublish.getMethods();
+      boolean notGeneratedByRoo;
+      for (MethodMetadata method : methods) {
+        notGeneratedByRoo = true;
+        Iterator<MethodMetadata> iterMethodsImplRoo = methodsImplementedByRoo.iterator();
+        while (iterMethodsImplRoo.hasNext() && notGeneratedByRoo) {
+          MethodMetadata methodImplementedByRoo = iterMethodsImplRoo.next();
+
+          // If name is equals check the parameters
+          if (method.getMethodName().equals(methodImplementedByRoo.getMethodName())) {
+
+            //Check parameters type are equals and in the same order
+            if (method.getParameterTypes().size() == methodImplementedByRoo.getParameterTypes()
+                .size()) {
+              Iterator<AnnotatedJavaType> iterParameterTypesMethodRoo =
+                  methodImplementedByRoo.getParameterTypes().iterator();
+              boolean allParametersAreEquals = true;
+              for (AnnotatedJavaType parameterType : method.getParameterTypes()) {
+                AnnotatedJavaType parameterTypeMethodRoo = iterParameterTypesMethodRoo.next();
+                if (!parameterType.getJavaType().equals(parameterTypeMethodRoo.getJavaType())) {
+                  allParametersAreEquals = false;
+                  break;
+                }
+              }
+              if (allParametersAreEquals) {
+                notGeneratedByRoo = false;
+              }
+            }
+          }
+        }
+
+        // If is not generated by Roo add to list of the elements
+        if (notGeneratedByRoo) {
+          StringBuffer methodNameBuffer = new StringBuffer("");
+          if (StringUtils.isEmpty(currentService)) {
+            methodNameBuffer.append(replaceTopLevelPackage(serviceToPublish)).append(".");
+          }
+
+          methodNameBuffer.append(method.getMethodName().getSymbolName());
+          List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+
+          methodNameBuffer = methodNameBuffer.append("(");
+
+          for (int i = 0; i < parameterTypes.size(); i++) {
+            String paramType = parameterTypes.get(i).getJavaType().getSimpleTypeName();
+            methodNameBuffer = methodNameBuffer.append(paramType).append(",");
+          }
+
+          String methodName;
+          if (!parameterTypes.isEmpty()) {
+            methodName =
+                methodNameBuffer.toString().substring(0, methodNameBuffer.toString().length() - 1)
+                    .concat(")");
+          } else {
+            methodName = methodNameBuffer.append(")").toString();
+          }
+
+          serviceMethodsToPublish.add(methodName);
+        }
+      }
+    }
+    return serviceMethodsToPublish;
+  }
+
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText
+   *            String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  public String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())
+        && !cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else if (StringUtils.isNotBlank(cid.getType().getModule())
+        && cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())
+        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
+            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+
+      // Target module is focused but user wrote it
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    // Autocomplete with abbreviate or full qualified mode
+    String auxString =
+        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+            topLevelPackageString, "~"));
+    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
+        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
+
+      // Value is for autocomplete only or user wrote abbreviate value
+      javaTypeString = auxString;
+    } else {
+
+      // Value could be for autocomplete or for validation
+      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
+    }
+
+    return javaTypeString;
+  }
+
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   *
+   * @return the String representing a JavaType with its name shortened
+   */
+  public String replaceTopLevelPackage(ClassOrInterfaceTypeDetails cid) {
+    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+    String javaTypeString = "";
+    String topLevelPackageString = "";
+
+    // Add module value to topLevelPackage when necessary
+    if (StringUtils.isNotBlank(cid.getType().getModule())) {
+
+      // Target module is not focused
+      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      topLevelPackageString =
+          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+              .getFullyQualifiedPackageName();
+    } else {
+
+      // Not multimodule project
+      topLevelPackageString =
+          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
+    }
+
+    return javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
+        topLevelPackageString, "~"));
+  }
+
+
+  /**
+   * Generate the operations selected in the controller indicated
+   *
+   * @param controller Controller where the operations will be created
+   * @param operations Service operations names that will be created
+   */
+  public void exportOperation(JavaType controller, List<String> operations) {
+    ClassOrInterfaceTypeDetails controllerDetails =
+        getTypeLocationService().getTypeDetails(controller);
+
+    // Check if provided controller exists on current project
+    Validate.notNull(controllerDetails, "ERROR: You must provide an existing controller");
+
+    // Check if provided controller has been annotated with @RooController
+    Validate.notNull(controllerDetails.getAnnotation(RooJavaType.ROO_CONTROLLER),
+        "ERROR: You must provide a controller annotated with @RooController");
+
+    // Check parameter operations
+    Validate.notEmpty(operations, "INFO: Don't exist operations to publish");
+
+    ClassOrInterfaceTypeDetailsBuilder controllerBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(controllerDetails);
+
+    AnnotationMetadata operationsAnnotation =
+        controllerDetails.getAnnotation(RooJavaType.ROO_OPERATIONS);
+
+    // Create an array with new attributes array
+    List<StringAttributeValue> operationsToAdd = new ArrayList<StringAttributeValue>();
+
+    if (operationsAnnotation == null) {
+
+      // Add Operations annotation
+      AnnotationMetadataBuilder opAnnotation =
+          new AnnotationMetadataBuilder(RooJavaType.ROO_OPERATIONS);
+      controllerBuilder.addAnnotation(opAnnotation);
+
+      // set operations from command
+      for (String operation : operations) {
+        operationsToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), operation));
+      }
+
+      opAnnotation.addAttribute(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName(
+          "operations"), operationsToAdd));
+
+      // Write changes on provided controller
+      getTypeManagementService().createOrUpdateTypeOnDisk(controllerBuilder.build());
+
+    } else {
+      List<String> operationsNames = new ArrayList<String>();
+      boolean operationsAdded = false;
+      AnnotationAttributeValue<Object> attributeOperations =
+          operationsAnnotation.getAttribute("operations");
+      if (attributeOperations != null) {
+        List<StringAttributeValue> existingOperations =
+            (List<StringAttributeValue>) attributeOperations.getValue();
+        Iterator<StringAttributeValue> it = existingOperations.iterator();
+
+        // Add existent operations to new attributes array to merge with new ones
+        while (it.hasNext()) {
+          StringAttributeValue attributeValue = (StringAttributeValue) it.next();
+          operationsToAdd.add(attributeValue);
+          operationsNames.add(attributeValue.getValue());
+        }
+
+        // Add new finders to new attributes array
+        for (String operation : operations) {
+          if (!operationsNames.contains(operation)) {
+            operationsToAdd.add(new StringAttributeValue(new JavaSymbolName("value"), operation));
+            operationsAdded = true;
+          }
+        }
+
+        if (operationsAdded) {
+          AnnotationMetadataBuilder opAnnotation =
+              new AnnotationMetadataBuilder(operationsAnnotation);
+          opAnnotation.addAttribute(new ArrayAttributeValue<StringAttributeValue>(
+              new JavaSymbolName("operations"), operationsToAdd));
+
+          controllerBuilder.updateTypeAnnotation(opAnnotation);
+
+          // Write changes on provided controller
+          getTypeManagementService().createOrUpdateTypeOnDisk(controllerBuilder.build());
+        }
+      }
+    }
+  }
+
 }

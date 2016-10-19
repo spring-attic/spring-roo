@@ -2,10 +2,8 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
-import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -27,7 +25,6 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -248,7 +245,7 @@ public class ControllerCommands implements CommandMarker {
             RooJavaType.ROO_JPA_ENTITY);
     for (ClassOrInterfaceTypeDetails entity : entities) {
       if (!entity.isAbstract()) {
-        String name = replaceTopLevelPackageString(entity, currentText);
+        String name = getControllerOperations().replaceTopLevelPackageString(entity, currentText);
         if (!results.contains(name)) {
           results.add(name);
         }
@@ -370,64 +367,7 @@ public class ControllerCommands implements CommandMarker {
     }
   }
 
-  /**
-   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
-   * TopLevelPackage
-   *
-   * @param cid
-   *            ClassOrInterfaceTypeDetails of a JavaType
-   * @param currentText
-   *            String current text for option value
-   * @return the String representing a JavaType with its name shortened
-   */
-  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
-    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
-    String javaTypeString = "";
-    String topLevelPackageString = "";
 
-    // Add module value to topLevelPackage when necessary
-    if (StringUtils.isNotBlank(cid.getType().getModule())
-        && !cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())) {
-
-      // Target module is not focused
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
-      topLevelPackageString =
-          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
-              .getFullyQualifiedPackageName();
-    } else if (StringUtils.isNotBlank(cid.getType().getModule())
-        && cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())
-        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
-            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
-
-      // Target module is focused but user wrote it
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
-      topLevelPackageString =
-          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
-              .getFullyQualifiedPackageName();
-    } else {
-
-      // Not multimodule project
-      topLevelPackageString =
-          getProjectOperations().getFocusedTopLevelPackage().getFullyQualifiedPackageName();
-    }
-
-    // Autocomplete with abbreviate or full qualified mode
-    String auxString =
-        javaTypeString.concat(StringUtils.replace(javaTypeFullyQualilfiedName,
-            topLevelPackageString, "~"));
-    if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
-        && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
-
-      // Value is for autocomplete only or user wrote abbreviate value
-      javaTypeString = auxString;
-    } else {
-
-      // Value could be for autocomplete or for validation
-      javaTypeString = String.format("%s%s", javaTypeString, javaTypeFullyQualilfiedName);
-    }
-
-    return javaTypeString;
-  }
 
   /**
    * This method gets all implementations of ServerProvider interface to be
@@ -492,6 +432,161 @@ public class ControllerCommands implements CommandMarker {
   }
 
   // Detail commands
+
+  /**
+   * This indicator checks if is possible to add new detail controllers.
+   *
+   * If a valid project has been generated and Spring MVC has been installed,
+   * this command will be available.
+   *
+   * @return
+   */
+  @CliAvailabilityIndicator(value = "web mvc detail")
+  public boolean isAddDetailControllerAvailable() {
+    return getControllerOperations().isAddDetailControllerAvailable();
+  }
+
+  @CliOptionVisibilityIndicator(params = "all", command = "web mvc detail",
+      help = "--all parameter is not be visible if --entity parameter has been specified before.")
+  public boolean isAllParameterOfDetailCommandVisible(ShellContext context) {
+    if (context.getParameters().containsKey("entity")) {
+      return false;
+    }
+    return true;
+  }
+
+  @CliOptionVisibilityIndicator(params = "entity", command = "web mvc detail",
+      help = "--entity parameter is not be visible if --all parameter has been specified before.")
+  public boolean isEntityParameterOfDetailCommandVisible(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return false;
+    }
+    return true;
+  }
+
+  @CliOptionAutocompleteIndicator(
+      command = "web mvc detail",
+      param = "entity",
+      help = "--entity parameter must be an existing class annotated with @RooJpaEntity. Please, assign a valid one.")
+  public List<String> getAllEntitiesForDetailCommands(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentText = shellContext.getParameters().get("entity");
+
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    // Get entity full qualified names
+    Set<ClassOrInterfaceTypeDetails> entities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY);
+
+    for (ClassOrInterfaceTypeDetails entity : entities) {
+      String name = getControllerOperations().replaceTopLevelPackageString(entity, currentText);
+      if (!results.contains(name)) {
+        results.add(name);
+      }
+    }
+
+    return results;
+  }
+
+  @CliOptionVisibilityIndicator(params = {"field"}, command = "web mvc detail",
+      help = "--field parameter is visible if --entity parameter has been specified before.")
+  public boolean isFieldParameterVisible(ShellContext context) {
+    if (context.getParameters().containsKey("entity")) {
+      return true;
+    }
+    return false;
+  }
+
+  @CliOptionAutocompleteIndicator(
+      command = "web mvc detail",
+      param = "field",
+      help = "--field parameter must be an existing @OneToMany field of the specified entity in parameter --entity.",
+      includeSpaceOnFinish = false)
+  public List<String> getDetailFieldsRelatedToEntity(ShellContext shellContext) {
+
+    // Get current value of class
+    String currentEntity = shellContext.getParameters().get("entity");
+
+    // Get current fields in --field value
+    String currentFieldValue = shellContext.getParameters().get("field");
+
+    // Check the field value (ex: 'entity.detailentity.')
+    String[] splittedCurrentField = null;
+    boolean includeChildren = false;
+    boolean removedData = false;
+    if (currentFieldValue.contains(".")) {
+      if (!currentFieldValue.endsWith(".")) {
+        currentFieldValue = currentFieldValue.substring(0, currentFieldValue.lastIndexOf("."));
+        removedData = true;
+      }
+      includeChildren = true;
+      splittedCurrentField = currentFieldValue.split("[.]");
+    } else {
+      currentFieldValue = "";
+    }
+
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    // Get entity full qualified names
+    Set<ClassOrInterfaceTypeDetails> entities =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_JPA_ENTITY);
+
+    for (ClassOrInterfaceTypeDetails entity : entities) {
+      if (getControllerOperations().replaceTopLevelPackageString(entity,
+          entity.getType().getModule()).equals(currentEntity)) {
+        if (includeChildren) {
+          // Get the entity where search the fields
+          entity = getEntityByDetailField(entity, splittedCurrentField, 0);
+        }
+        if (removedData) {
+          currentFieldValue = currentFieldValue.concat(".");
+        }
+        results.addAll(getDetailFieldsRelatedToEntity(entity, currentFieldValue));
+      }
+    }
+
+    return results;
+  }
+
+  @CliOptionAutocompleteIndicator(param = "responseType", command = "web mvc detail",
+      help = "--responseType parameter should be completed with an installed response type.")
+  public List<String> getAllResponseTypeForDetailCommandValues(ShellContext context) {
+
+    // Getting all installed services that implements
+    // ControllerMVCResponseService
+    Map<String, ControllerMVCResponseService> installedResponseTypes =
+        getInstalledControllerMVCResponseTypes();
+
+    // Generating all possible values
+    List<String> responseTypes = new ArrayList<String>();
+
+    for (Entry<String, ControllerMVCResponseService> responseType : installedResponseTypes
+        .entrySet()) {
+      // If specified controller doesn't have this response type
+      // installed. Add to responseTypes
+      // possible values
+      responseTypes.add(responseType.getKey());
+    }
+
+    return responseTypes;
+  }
+
+  @CliOptionVisibilityIndicator(
+      params = {"package", "responseType"},
+      command = "web mvc detail",
+      help = "--package, --pathPrefix and --responseType parameters are not visible if --all parameter or --entity parameter has been specified before.")
+  public boolean areDetailParametersVisibles(ShellContext context) {
+    if (context.getParameters().containsKey("all") || context.getParameters().containsKey("entity")) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * This method provides the Command definition to be able to generate new
    * Controllers on current project.
@@ -502,7 +597,6 @@ public class ControllerCommands implements CommandMarker {
    * @param package
    * @param pathPrefix
    */
-
   @CliCommand(value = "web mvc detail",
       help = "Generates new @RooController inside current project")
   public void addDetailController(
@@ -557,147 +651,15 @@ public class ControllerCommands implements CommandMarker {
     }
   }
 
-  @CliOptionVisibilityIndicator(params = "all", command = "web mvc detail",
-      help = "--all parameter is not be visible if --entity parameter has been specified before.")
-  public boolean isAllParameterOfDetailCommandVisible(ShellContext context) {
-    if (context.getParameters().containsKey("entity")) {
-      return false;
-    }
-    return true;
-  }
-
-  @CliOptionVisibilityIndicator(params = "entity", command = "web mvc detail",
-      help = "--entity parameter is not be visible if --all parameter has been specified before.")
-  public boolean isEntityParameterOfDetailCommandVisible(ShellContext context) {
-    if (context.getParameters().containsKey("all")) {
-      return false;
-    }
-    return true;
-  }
-
-  @CliOptionAutocompleteIndicator(
-      command = "web mvc detail",
-      param = "entity",
-      help = "--entity parameter must be an existing class annotated with @RooJpaEntity. Please, assign a valid one.")
-  public List<String> getAllEntitiesForDetailCommands(ShellContext shellContext) {
-
-    // Get current value of class
-    String currentText = shellContext.getParameters().get("entity");
-
-    // Create results to return
-    List<String> results = new ArrayList<String>();
-
-    // Get entity full qualified names
-    Set<ClassOrInterfaceTypeDetails> entities =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_JPA_ENTITY);
-
-    for (ClassOrInterfaceTypeDetails entity : entities) {
-      String name = replaceTopLevelPackageString(entity, currentText);
-      if (!results.contains(name)) {
-        results.add(name);
-      }
-    }
-
-    return results;
-  }
-
-  @CliOptionVisibilityIndicator(params = {"field"}, command = "web mvc detail",
-      help = "--field parameter is visible if --entity parameter has been specified before.")
-  public boolean isFieldParameterVisible(ShellContext context) {
-    if (context.getParameters().containsKey("entity")) {
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Gets a list of fields from an entity.
-   *
-   * @param entity
-   *            the JavaType from which to obtain the field list.
-   * @return a List<FieldMetadata> with info of the entity fields.
-   */
-  private List<FieldMetadata> getEntityFieldList(JavaType entity) {
-    List<FieldMetadata> fieldList = new ArrayList<FieldMetadata>();
-    ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getTypeDetails(entity);
-    Validate.notNull(typeDetails, String.format(
-        "Cannot find details for class %s. Please be sure that the class exists.",
-        entity.getFullyQualifiedTypeName()));
-    MemberDetails entityMemberDetails =
-        memberDetailsScanner.getMemberDetails(this.getClass().getName(), typeDetails);
-    Validate.notNull(
-        entityMemberDetails.getAnnotation(JpaJavaType.ENTITY),
-        String.format("%s must be an entity to obtain it's fields info.",
-            entity.getFullyQualifiedTypeName()));
-
-    // Get fields and check for other fields from relations
-    List<FieldMetadata> entityFields = entityMemberDetails.getFields();
-    for (FieldMetadata field : entityFields) {
-      fieldList.add(field);
-    }
-
-    return fieldList;
-  }
-
-  @CliOptionAutocompleteIndicator(
-      command = "web mvc detail",
-      param = "field",
-      help = "--field parameter must be an existing @OneToMany field of the specified entity in parameter --entity.",
-      includeSpaceOnFinish = false)
-  public List<String> getDetailFieldsRelatedToEntity(ShellContext shellContext) {
-
-    // Get current value of class
-    String currentEntity = shellContext.getParameters().get("entity");
-
-    // Get current fields in --field value
-    String currentFieldValue = shellContext.getParameters().get("field");
-
-    // Check the field value (ex: 'entity.detailentity.')
-    String[] splittedCurrentField = null;
-    boolean includeChildren = false;
-    boolean removedData = false;
-    if (currentFieldValue.contains(".")) {
-      if (!currentFieldValue.endsWith(".")) {
-        currentFieldValue = currentFieldValue.substring(0, currentFieldValue.lastIndexOf("."));
-        removedData = true;
-      }
-      includeChildren = true;
-      splittedCurrentField = currentFieldValue.split("[.]");
-    } else {
-      currentFieldValue = "";
-    }
-
-    // Create results to return
-    List<String> results = new ArrayList<String>();
-
-    // Get entity full qualified names
-    Set<ClassOrInterfaceTypeDetails> entities =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_JPA_ENTITY);
-
-    for (ClassOrInterfaceTypeDetails entity : entities) {
-      if (replaceTopLevelPackageString(entity, entity.getType().getModule()).equals(currentEntity)) {
-        if (includeChildren) {
-          // Get the entity where search the fields
-          entity = getEntityByDetailField(entity, splittedCurrentField, 0);
-        }
-        if (removedData) {
-          currentFieldValue = currentFieldValue.concat(".");
-        }
-        results.addAll(getDetailFieldsRelatedToEntity(entity, currentFieldValue));
-      }
-    }
-
-    return results;
-  }
-
   /**
    * Get a entity by field recursively
    *
-   * @param paternEntity Root entity
-   * @param field Field to search the entity
-   * @param level Current recursion level
+   * @param paternEntity
+   *            Root entity
+   * @param field
+   *            Field to search the entity
+   * @param level
+   *            Current recursion level
    * @return
    */
   private ClassOrInterfaceTypeDetails getEntityByDetailField(
@@ -753,39 +715,201 @@ public class ControllerCommands implements CommandMarker {
     return results;
   }
 
-  @CliOptionAutocompleteIndicator(param = "responseType", command = "web mvc detail",
-      help = "--responseType parameter should be completed with an installed response type.")
-  public List<String> getAllResponseTypeForDetailCommandValues(ShellContext context) {
+  // operation command
+  @CliOptionAutocompleteIndicator(
+      param = "controller",
+      command = "web mvc operation",
+      help = "--controller parameter should be completed with an controller generated previously or with a name that will be used to create a new controller.")
+  public List<String> getAllControllerForOperationCommandValues(ShellContext context) {
 
-    // Getting all installed services that implements
-    // ControllerMVCResponseService
-    Map<String, ControllerMVCResponseService> installedResponseTypes =
-        getInstalledControllerMVCResponseTypes();
+    // Get the actual controller selected
+    String currentText = context.getParameters().get("controller");
 
-    // Generating all possible values
-    List<String> responseTypes = new ArrayList<String>();
+    // Create results to return
+    List<String> results = new ArrayList<String>();
 
-    for (Entry<String, ControllerMVCResponseService> responseType : installedResponseTypes
-        .entrySet()) {
-      // If specified controller doesn't have this response type
-      // installed. Add to responseTypes
-      // possible values
-      responseTypes.add(responseType.getKey());
+    // Get controllers full qualified names
+    Set<ClassOrInterfaceTypeDetails> controllers =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_CONTROLLER);
+
+    for (ClassOrInterfaceTypeDetails controller : controllers) {
+      String name = getControllerOperations().replaceTopLevelPackageString(controller, currentText);
+      if (!results.contains(name)) {
+        results.add(name);
+      }
     }
 
-    return responseTypes;
+    return results;
   }
 
-  @CliOptionVisibilityIndicator(
-      params = {"package", "responseType"},
-      command = "web mvc detail",
-      help = "--package, --pathPrefix and --responseType parameters are not visible if --all parameter or --entity parameter has been specified before.")
-  public boolean areDetailParametersVisibles(ShellContext context) {
-    if (context.getParameters().containsKey("all") || context.getParameters().containsKey("entity")) {
+  @CliOptionAutocompleteIndicator(param = "service", command = "web mvc operation",
+      help = "--service parameter should be completed with an service generated previously.")
+  public List<String> getAllServiceForOperationCommandValues(ShellContext context) {
+
+    // Get the actual service selected
+    String currentText = context.getParameters().get("service");
+
+    // Create results to return
+    List<String> results = new ArrayList<String>();
+
+    // Get controllers full qualified names
+    Set<ClassOrInterfaceTypeDetails> services =
+        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+            RooJavaType.ROO_SERVICE);
+
+    for (ClassOrInterfaceTypeDetails service : services) {
+      String name = getControllerOperations().replaceTopLevelPackageString(service, currentText);
+      if (!results.contains(name)) {
+        results.add(name);
+      }
+    }
+
+    return results;
+  }
+
+  @CliOptionAutocompleteIndicator(param = "operation", command = "web mvc operation",
+      help = "--operation parameter should be completed with the operations availables to publish.")
+  public List<String> getAllOperationsForOperationCommandValues(ShellContext context) {
+
+    // Getting the service
+    String currentService = context.getParameters().get("service");
+
+    // Get the controller and try to get the related service
+    String currentController = context.getParameters().get("controller");
+
+    return getControllerOperations().getAllMethodsToPublish(currentService, currentController);
+  }
+
+  @CliOptionVisibilityIndicator(params = {"all"}, command = "web mvc operation",
+      help = "--all parameter isn't visible if --operation parameter has been specified before.")
+  public boolean isAllParameterOperationVisible(ShellContext context) {
+    if (context.getParameters().containsKey("operation")) {
+      return false;
+    }
+    return true;
+  }
+
+  @CliOptionVisibilityIndicator(params = {"operation"}, command = "web mvc operation",
+      help = "--operation parameter isn't visible if --all parameter has been specified before.")
+  public boolean isOperationParameterOperationVisible(ShellContext context) {
+    if (context.getParameters().containsKey("all")) {
+      return false;
+    }
+    return true;
+  }
+
+  @CliOptionVisibilityIndicator(params = {"service"}, command = "web mvc operation",
+      help = "--service parameter isn't visible if --operation parameter has been specified.")
+  public boolean isServiceParameterOperationVisible(ShellContext context) {
+
+    // Check if parameter --service has been specified
+    if (context.getParameters().containsKey("service")) {
       return true;
     }
-    return false;
+
+    // Check if controller exists and if parameter --operation has been specified
+    if (context.getParameters().containsKey("operation")) {
+      return false;
+    }
+    return true;
   }
+
+  /**
+   * This indicator checks if is possible to publish own operations in
+   * controllers.
+   *
+   * If a valid project has been generated and Spring MVC has been installed,
+   * this command will be available.
+   *
+   * @return
+   */
+  @CliAvailabilityIndicator(value = "web mvc operation")
+  public boolean isPublishOperationsAvailable() {
+    return getControllerOperations().isPublishOperationsAvailable();
+  }
+
+  /**
+   * This method provides the Command definition to be able to publish service
+   * operations in controllers.
+   *
+   * @param controller
+   * @param service
+   * @param operation
+   * @param all
+   */
+  /* TODO: TO BE IMPLEMENTED
+     @CliCommand(value = "web mvc operation",
+      help = "Update or generates @RooController with service operations")
+  public void addOperationInController(
+
+      @CliOption(key = "controller", mandatory = true,
+          help = "Indicates the controller where should be published the service methods") JavaType controller,
+      @CliOption(
+          key = "service",
+          mandatory = false,
+          help = "This param will be visible if --controller parameter doesn't exists in the application. Indicates the service on which methods should be published in the controller") JavaType service,
+      @CliOption(
+          key = "operation",
+          mandatory = false,
+          help = "This param will be visible if --all parameter hasn't been specified. Indicates the operation of the service that should be published in the controller") String operation,
+      @CliOption(
+          key = "all",
+          mandatory = false,
+          specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "This param will be visible if --operation parameter hasn't been specified. Indicates if every method of the service should be published in the controller") boolean all) {
+
+    List<String> operations = new ArrayList<String>();
+
+    // Check --all parameter
+    if (all) {
+
+      // Getting the service
+      String currentService = null;
+      String serviceName = "";
+      if (service != null) {
+        currentService = service.getFullyQualifiedTypeName();
+
+        // Get service name to concatenate it on each method name
+        serviceName =
+            getControllerOperations().replaceTopLevelPackage(
+                getTypeLocationService().getTypeDetails(service));
+      }
+
+      // Getting the controller
+      String currentController = null;
+      if (controller != null) {
+        currentController = controller.getFullyQualifiedTypeName();
+      }
+
+      List<String> allMethodsToPublish =
+          getControllerOperations().getAllMethodsToPublish(currentService, currentController);
+
+
+      for (String methodToPublish : allMethodsToPublish) {
+        if (service != null) {
+          methodToPublish = serviceName.concat(".").concat(methodToPublish);
+        }
+        operations.add(methodToPublish);
+      }
+
+      // Get all the methods related with controller or service
+
+    } else {
+      if (service != null) {
+        // Add service name to operation
+        String serviceName =
+            getControllerOperations().replaceTopLevelPackage(
+                getTypeLocationService().getTypeDetails(service));
+        operation = serviceName.concat(".").concat(operation);
+      }
+
+      operations.add(operation);
+    }
+
+    getControllerOperations().exportOperation(controller, operations);
+  }*/
 
   // Gets OSGi Services
 

@@ -49,6 +49,8 @@ public final class RooJavaType {
       "org.springframework.roo.addon.layers.repository.mongo.RooMongoEntity");
   public static final JavaType ROO_NEO4J_ENTITY = new JavaType(
       "org.springframework.roo.addon.layers.repository.neo4j.RooNeo4jEntity");
+  public static final JavaType ROO_OPERATIONS = new JavaType(
+      "org.springframework.roo.addon.web.mvc.controller.annotations.RooOperations");
   public static final JavaType ROO_OP4J =
       new JavaType("org.springframework.roo.addon.op4j.RooOp4j");
   public static final JavaType ROO_PLURAL = new JavaType(
