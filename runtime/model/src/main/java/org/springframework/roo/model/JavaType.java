@@ -74,6 +74,8 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType OVERRIDE = new JavaType("java.lang.Override");
   public static final JavaType ITERABLE = new JavaType("java.lang.Iterable");
   public static final JavaType ITERATOR = new JavaType("java.lang.Iterator");
+  public static final JavaType ARRAYS = new JavaType("java.util.Arrays");
+  public static final JavaType COLLECTIONS = new JavaType("java.util.Collections");
 
   /**
    * @deprecated use {@link #STRING} instead
