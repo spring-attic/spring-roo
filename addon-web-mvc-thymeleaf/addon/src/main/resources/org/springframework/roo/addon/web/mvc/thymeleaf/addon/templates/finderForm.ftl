@@ -202,13 +202,15 @@
           <fieldset id="containerFields">
             <#list fields as field>
                 <#if field.type == "TEXT">
-                    <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z size=3 />
+                    <@text.input label=field.label fieldName=field.fieldName z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                <#elseif field.type == "NUMBER">
+                    <@number.input label=field.label fieldName=field.fieldName z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
                 <#elseif field.type == "DATE">
                     <@date.input label=field.label 
                     fieldName=field.fieldName
                     fieldId=field.fieldId
                     z=field.z
-                    format=field.configuration.format />
+                    format=field.configuration.format required=field.configuration.required />
                 <#elseif field.type == "REFERENCE">
                     <@reference.input label=field.label 
                         fieldName=field.fieldName 
@@ -218,13 +220,13 @@
                         identifierField=field.configuration.identifierField
                         referencedPath=field.configuration.referencedPath
                         fieldOne=field.configuration.fieldOne
-                        fieldTwo=field.configuration.fieldTwo />
+                        fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
                 <#elseif field.type == "ENUM">
                     <@enum.input label=field.label 
                     fieldName=field.fieldName
                     fieldId=field.fieldId
                     z=field.z
-                    items=field.configuration.items />                
+                    items=field.configuration.items required=field.configuration.required />
                 <#elseif field.type == "BOOLEAN">
                     <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />                
                 </#if>
