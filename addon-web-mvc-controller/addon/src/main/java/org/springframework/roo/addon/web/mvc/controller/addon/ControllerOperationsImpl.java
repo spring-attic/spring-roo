@@ -50,6 +50,7 @@ import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -106,6 +107,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
 
+  private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
+      "1.0.0.BUILD-SNAPSHOT");
+  private static final Dependency SPRINGLETS_WEB_STARTER_WITH_VERSION = new Dependency(
+      "io.springlets", "springlets-boot-starter-web", "${springlets.version}");
+  private static final Dependency SPRINGLETS_WEB_STARTER_WITHOUT_VERSION = new Dependency(
+      "io.springlets", "springlets-boot-starter-web", null);
+
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
   }
@@ -117,8 +125,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
    */
   @Override
   public boolean isSetupAvailable() {
-    return getProjectOperations().isFocusedProjectAvailable()
-        && !getProjectOperations().isFeatureInstalled(FeatureNames.MVC);
+    return getProjectOperations().isFocusedProjectAvailable();
   }
 
   /**
@@ -148,6 +155,24 @@ public class ControllerOperationsImpl implements ControllerOperations {
     // Add DateTime dependency
     getProjectOperations().addDependency(module.getModuleName(),
         new Dependency("joda-time", "joda-time", null));
+
+    // Include Springlets Starter project dependencies and properties
+    getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
+
+    if (getProjectOperations().isMultimoduleProject()) {
+
+      // If current project is a multimodule project, include dependencies first
+      // on dependencyManagement and then on current module
+      getProjectOperations().addDependencyToDependencyManagement("",
+          SPRINGLETS_WEB_STARTER_WITH_VERSION);
+      getProjectOperations().addDependency(module.getModuleName(),
+          SPRINGLETS_WEB_STARTER_WITHOUT_VERSION);
+
+    } else {
+
+      // If not multimodule, include dependencies on root
+      getProjectOperations().addDependency("", SPRINGLETS_WEB_STARTER_WITH_VERSION);
+    }
 
     // Create WebMvcConfiguration.java class
     JavaType webMvcConfiguration =
@@ -212,7 +237,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Adding spring.jackson.serialization.indent-output property
     getApplicationConfigService().addProperty(module.getModuleName(),
-        "spring.jackson.serialization.indent-output", "true", "", true);
+        "spring.jackson.serialization.indent-output", "true", "dev", true);
 
     // Add GlobalSearchHandlerMethodArgumentResolver.java
     addGlobalSearchHandlerMethodArgumentResolverClass(module);

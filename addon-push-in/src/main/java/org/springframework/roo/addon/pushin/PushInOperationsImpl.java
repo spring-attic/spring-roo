@@ -491,8 +491,10 @@ public class PushInOperationsImpl implements PushInOperations {
       // Getting all imports registered on .aj file to move to .java file
       Set<ImportMetadata> allRegisteredImports = memberHoldingTypeDetails.getImports();
       detailsBuilder.addImports(allRegisteredImports);
-      // Save changes to be pushed
-      pushedElements.addAll(allRegisteredImports);
+      // Save imports to be pushed only if some method has been pushed
+      if (!pushedElements.isEmpty()) {
+        pushedElements.addAll(allRegisteredImports);
+      }
 
     }
 

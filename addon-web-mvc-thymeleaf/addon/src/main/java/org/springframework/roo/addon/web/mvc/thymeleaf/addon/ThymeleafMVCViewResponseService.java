@@ -206,8 +206,8 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     getViewGenerationService().addAccessibilityView(module.getModuleName(), ctx);
     getViewGenerationService().addDefaultLayoutNoMenu(module.getModuleName(), ctx);
 
-    // Add i18n support for english language
-    getI18nOperations().installI18n(new EnglishLanguage(), module);
+    // Add i18n support for english language and use it as default
+    getI18nOperations().installLanguage(new EnglishLanguage(), true, module);
   }
 
   /**

@@ -2,6 +2,7 @@ package org.springframework.roo.addon.pushin;
 
 import java.util.List;
 
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 

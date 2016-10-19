@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
@@ -17,10 +16,11 @@ import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorat
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -134,6 +134,18 @@ public class WebMvcConfigurationMetadataProviderImpl extends
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
+    AnnotationMetadata annotation =
+        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getAnnotation(
+            RooJavaType.ROO_WEB_MVC_CONFIGURATION);
+
+    // Getting language attribute
+    AnnotationAttributeValue<String> defaultLanguageAttr =
+        annotation.getAttribute("defaultLanguage");
+    String defaultLanguage = "";
+    if (defaultLanguageAttr != null) {
+      defaultLanguage = defaultLanguageAttr.getValue();
+    }
+
     // Looking for a valid GlobalSearchHandlerMethodArgumentResolver
     JavaType globalSearchHandler = null;
     Set<ClassOrInterfaceTypeDetails> globalSearchHandlerClasses =
@@ -151,19 +163,7 @@ public class WebMvcConfigurationMetadataProviderImpl extends
     }
 
     return new WebMvcConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, globalSearchHandler);
-  }
-
-  private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
-
-    if (getMetadataDependencyRegistry() != null
-        && StringUtils.isNotBlank(upstreamDependency)
-        && StringUtils.isNotBlank(downStreamDependency)
-        && !upstreamDependency.equals(downStreamDependency)
-        && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(
-            MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
-      getMetadataDependencyRegistry().registerDependency(upstreamDependency, downStreamDependency);
-    }
+        governorPhysicalTypeMetadata, defaultLanguage, globalSearchHandler);
   }
 
   public String getProvidesType() {

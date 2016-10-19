@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -28,14 +27,16 @@ import org.springframework.roo.addon.web.mvc.i18n.languages.EnglishLanguage;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -56,6 +57,7 @@ import org.springframework.roo.support.util.XmlUtils;
  * Implementation of {@link I18nOperations}.
  * 
  * @author Sergio Clares
+ * @author Juan Carlos García
  * @since 2.0
  */
 @Component
@@ -68,6 +70,7 @@ public class I18nOperationsImpl implements I18nOperations {
   private BundleContext context;
 
   private TypeLocationService typeLocationService;
+  private TypeManagementService typeManagementService;
   private I18nSupport i18nSupport;
   private PathResolver pathResolver;
   private FileManager fileManager;
@@ -87,7 +90,8 @@ public class I18nOperationsImpl implements I18nOperations {
     return getProjectOperations().isFeatureInstalled(FeatureNames.MVC);
   }
 
-  public void installI18n(final I18n i18n, final Pom module) {
+  @Override
+  public void installLanguage(final I18n language, final boolean useAsDefault, final Pom module) {
 
     // Check if provided module match with application modules features
     Validate.isTrue(getTypeLocationService()
@@ -95,10 +99,10 @@ public class I18nOperationsImpl implements I18nOperations {
         "ERROR: Provided module doesn't match with application modules features. "
             + "Execute this operation again and provide a valid application module.");
 
-    Validate.notNull(i18n, "Language choice required");
+    Validate.notNull(language, "ERROR: You should provide a valid language code.");
 
-    if (i18n.getLocale() == null) {
-      LOGGER.warning("could not parse language choice");
+    if (language.getLocale() == null) {
+      LOGGER.warning("ERROR: Provided language is not valid.");
       return;
     }
 
@@ -107,19 +111,22 @@ public class I18nOperationsImpl implements I18nOperations {
 
     final String targetDirectory = getPathResolver().getIdentifier(resourcesPath, "");
 
-    // Install message bundle
-    String messageBundle = targetDirectory + "messages_" + i18n.getLocale().getLanguage() /* + country */
-        + ".properties";
+    // Getting message.properties file
+    String messageBundle = "";
 
-    // Special case for english locale (default)
-    if (i18n.getLocale().equals(Locale.ENGLISH)) {
+    if (language.getLocale().equals(Locale.ENGLISH)) {
       messageBundle = targetDirectory + "messages.properties";
+    } else {
+      messageBundle =
+          targetDirectory.concat("messages_").concat(
+              language.getLocale().getLanguage().concat(".properties"));
     }
+
     if (!getFileManager().exists(messageBundle)) {
       InputStream inputStream = null;
       OutputStream outputStream = null;
       try {
-        inputStream = i18n.getMessageBundle();
+        inputStream = language.getMessageBundle();
         outputStream = getFileManager().createFile(messageBundle).getOutputStream();
         IOUtils.copy(inputStream, outputStream);
       } catch (final Exception e) {
@@ -133,13 +140,13 @@ public class I18nOperationsImpl implements I18nOperations {
 
     // Install flag
     final String flagGraphic =
-        targetDirectory + "static/public/img/" + i18n.getLocale().getLanguage() /* + country */
-            + ".png";
+        targetDirectory.concat("static/public/img/").concat(language.getLocale().getLanguage())
+            .concat(".png");
     if (!getFileManager().exists(flagGraphic)) {
       InputStream inputStream = null;
       OutputStream outputStream = null;
       try {
-        inputStream = i18n.getFlagGraphic();
+        inputStream = language.getFlagGraphic();
         outputStream = getFileManager().createFile(flagGraphic).getOutputStream();
         IOUtils.copy(inputStream, outputStream);
       } catch (final Exception e) {
@@ -149,6 +156,38 @@ public class I18nOperationsImpl implements I18nOperations {
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(outputStream);
       }
+    }
+
+    // Update @WebMvcConfiguration annotation defining defaultLanguage
+    // attribute
+    if (useAsDefault) {
+
+      // Obtain all existing configuration classes annotated with
+      // @RooWebMvcConfiguration
+      Set<ClassOrInterfaceTypeDetails> configurationClasses =
+          getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
+              RooJavaType.ROO_WEB_MVC_CONFIGURATION);
+
+      for (ClassOrInterfaceTypeDetails configurationClass : configurationClasses) {
+        // If configuration class is located in the provided module
+        if (configurationClass.getType().getModule().equals(module.getModuleName())) {
+          ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+              new ClassOrInterfaceTypeDetailsBuilder(configurationClass);
+          AnnotationMetadataBuilder annotation =
+              cidBuilder.getDeclaredTypeAnnotation(RooJavaType.ROO_WEB_MVC_CONFIGURATION);
+          annotation.addStringAttribute("defaultLanguage", language.getLocale().getLanguage());
+
+          // Update configuration class
+          getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
+
+        }
+      }
+
+      LOGGER.log(
+          Level.INFO,
+          String.format("INFO: Default language of your project has been changed to %s.",
+              language.getLanguage()));
+
     }
 
     // Get response types for updating views with new language
@@ -198,10 +237,12 @@ public class I18nOperationsImpl implements I18nOperations {
   }
 
   /**
-   * Adds the entity properties as labels into i18n messages file 
+   * Adds the entity properties as labels into i18n messages file
    * 
-   * @param entityDetails MemberDetails where entity properties are defined
-   * @param entity JavaType representing the entity binded to controller
+   * @param entityDetails
+   *            MemberDetails where entity properties are defined
+   * @param entity
+   *            JavaType representing the entity binded to controller
    */
   public void updateI18n(MemberDetails entityDetails, JavaType entity, String moduleName) {
 
@@ -280,10 +321,13 @@ public class I18nOperationsImpl implements I18nOperations {
   }
 
   /**
-   * Builds the label of the specified field by joining its names and adding it to the entity label
+   * Builds the label of the specified field by joining its names and adding
+   * it to the entity label
    * 
-   * @param entity the entity name
-   * @param fieldNames list of fields
+   * @param entity
+   *            the entity name
+   * @param fieldNames
+   *            list of fields
    * @return label
    */
   private static String buildLabel(String entityName, String... fieldNames) {
@@ -298,7 +342,8 @@ public class I18nOperationsImpl implements I18nOperations {
   /**
    * Return a list of installed languages in the provided application module.
    * 
-   * @param moduleName the module name to search for installed languages.
+   * @param moduleName
+   *            the module name to search for installed languages.
    * @return a list with the available languages.
    */
   public List<I18n> getInstalledLanguages(String moduleName) {
@@ -330,13 +375,16 @@ public class I18nOperationsImpl implements I18nOperations {
   }
 
   /**
-   * This method gets all implementations of ControllerMVCResponseService interface to be able
-   * to locate all ControllerMVCResponseService. Uses param installed to obtain only the installed
-   * or not installed response types.
+   * This method gets all implementations of ControllerMVCResponseService
+   * interface to be able to locate all ControllerMVCResponseService. Uses
+   * param installed to obtain only the installed or not installed response
+   * types.
    * 
-   * @param installed indicates if returned responseType should be installed or not.
+   * @param installed
+   *            indicates if returned responseType should be installed or not.
    * 
-   * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
+   * @return Map with responseTypes identifier and the
+   *         ControllerMVCResponseService implementation
    */
   private List<ControllerMVCResponseService> getControllerMVCResponseTypes(boolean installed) {
     List<ControllerMVCResponseService> responseTypes =
@@ -518,7 +566,7 @@ public class I18nOperationsImpl implements I18nOperations {
         return null;
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PersistenceMemberLocator on AbstractIdMetadataProvider.");
+        LOGGER.warning("Cannot load PersistenceMemberLocator on I18nOperationsImpl.");
         return null;
       }
     } else {
@@ -539,7 +587,7 @@ public class I18nOperationsImpl implements I18nOperations {
         }
         return null;
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MemberDetailsScanner on PushInOperationsImpl.");
+        LOGGER.warning("Cannot load MemberDetailsScanner on I18nOperationsImpl.");
         return null;
       }
     } else {
@@ -562,7 +610,7 @@ public class I18nOperationsImpl implements I18nOperations {
         return null;
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ApplicationConfigService on ControllerOperationsImpl.");
+        LOGGER.warning("Cannot load ApplicationConfigService on I18nOperationsImpl.");
         return null;
       }
     } else {
@@ -584,11 +632,34 @@ public class I18nOperationsImpl implements I18nOperations {
         return null;
 
       } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MetadataService on SecurityOperationsImpl.");
+        LOGGER.warning("Cannot load MetadataService on I18nOperationsImpl.");
         return null;
       }
     } else {
       return metadataService;
+    }
+  }
+
+  public TypeManagementService getTypeManagementService() {
+    if (typeManagementService == null) {
+      // Get all Services implement TypeManagementService interface
+      try {
+        ServiceReference<?>[] references =
+            this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+
+        for (ServiceReference<?> ref : references) {
+          typeManagementService = (TypeManagementService) this.context.getService(ref);
+          return typeManagementService;
+        }
+
+        return null;
+
+      } catch (InvalidSyntaxException e) {
+        LOGGER.warning("Cannot load TypeManagementService on I18nOperationsImpl.");
+        return null;
+      }
+    } else {
+      return typeManagementService;
     }
   }
 

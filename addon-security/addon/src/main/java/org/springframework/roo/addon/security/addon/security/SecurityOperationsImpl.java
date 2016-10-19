@@ -2,8 +2,10 @@ package org.springframework.roo.addon.security.addon.security;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -72,6 +74,57 @@ public class SecurityOperationsImpl implements SecurityOperations {
   }
 
   @Override
+  public String getSpringSecurityAnnotationValue(String roles, String usernames) {
+
+    String value = "";
+
+    // Including roles
+    if (StringUtils.isNotEmpty(roles)) {
+
+      // First of all, obtain the comma separated list
+      // that contains all roles
+      String[] rolesList = roles.split(",");
+
+      // Now, check if there's more than one role
+      if (rolesList.length > 1) {
+        // create the hasAnyRole expression
+        value = "hasAnyRole(";
+      } else {
+        // create the hasRole expression
+        value = "hasRole(";
+      }
+
+      for (String role : rolesList) {
+        value = value.concat("'").concat(role).concat("'").concat(",");
+      }
+      value = value.substring(0, value.length() - 1).concat(")");
+    }
+
+    // Including usernames
+    if (StringUtils.isNotEmpty(usernames)) {
+
+      // First of all, obtain the comma separated list
+      // that contains all usernames
+      String[] usernamesList = usernames.split(",");
+
+      // Check if also exist some role added previously
+      if (StringUtils.isNotEmpty(value) && usernamesList.length > 0) {
+        value = value.concat(" or");
+      }
+
+      // Create (#username == principal.username) expression
+      for (String username : usernamesList) {
+        value = value.concat(" (#").concat(username).concat(" == principal.username) or");
+      }
+
+      // Removing last extra or
+      value = value.substring(0, value.length() - 3);
+    }
+
+    return value.trim();
+  }
+
+  @Override
   public void addPreAuthorizeAnnotation(JavaType klass, String methodName, String value) {
 
     Validate.notNull(klass,
@@ -81,14 +134,73 @@ public class SecurityOperationsImpl implements SecurityOperations {
     Validate.notNull(value,
         "ERROR: value parameter is mandatory on 'addPreAuthorizeAnnotation' method");
 
-    ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService().getTypeDetails(klass);
-    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
-        new ClassOrInterfaceTypeDetailsBuilder(serviceDetails);
-
     // Creating @PreAuthorize annotation
     AnnotationMetadataBuilder annotationPreAuthorize =
         new AnnotationMetadataBuilder(SpringJavaType.PRE_AUTHORIZE);
     annotationPreAuthorize.addStringAttribute("value", value);
+
+    addSpringSecurityAnnotation(klass, methodName, annotationPreAuthorize);
+
+  }
+
+  @Override
+  public void addPreFilterAnnotation(JavaType klass, String methodName, String value) {
+
+    Validate.notNull(klass,
+        "ERROR: klass parameter is mandatory on 'addPreFilterAnnotation' method");
+    Validate.notNull(methodName,
+        "ERROR: method parameter is mandatory on 'addPreFilterAnnotation' method");
+    Validate.notNull(value,
+        "ERROR: value parameter is mandatory on 'addPreFilterAnnotation' method");
+
+    // Creating @PreFilter annotation
+    AnnotationMetadataBuilder annotationPreAuthorize =
+        new AnnotationMetadataBuilder(SpringJavaType.PRE_FILTER);
+    annotationPreAuthorize.addStringAttribute("value", value);
+
+    addSpringSecurityAnnotation(klass, methodName, annotationPreAuthorize);
+
+  }
+
+  @Override
+  public void addPostFilterAnnotation(JavaType klass, String methodName, String value) {
+
+    Validate.notNull(klass,
+        "ERROR: klass parameter is mandatory on 'addPostFilterAnnotation' method");
+    Validate.notNull(methodName,
+        "ERROR: method parameter is mandatory on 'addPostFilterAnnotation' method");
+    Validate.notNull(value,
+        "ERROR: value parameter is mandatory on 'addPostFilterAnnotation' method");
+
+    // Creating @PostFilter annotation
+    AnnotationMetadataBuilder annotationPreAuthorize =
+        new AnnotationMetadataBuilder(SpringJavaType.POST_FILTER);
+    annotationPreAuthorize.addStringAttribute("value", value);
+
+    addSpringSecurityAnnotation(klass, methodName, annotationPreAuthorize);
+
+  }
+
+  /**
+   * This method will annotate the provided method with the provided security annotation.
+   * 
+   * @param klass Class that contains the method to annotate
+   * @param methodName the method to annotate
+   * @param annotation Spring Security annotation
+   */
+  private void addSpringSecurityAnnotation(JavaType klass, String methodName,
+      AnnotationMetadataBuilder annotation) {
+
+    Validate
+        .notNull(klass, "ERROR: klass parameter is mandatory on 'addSecurityAnnotation' method");
+    Validate.notNull(methodName,
+        "ERROR: method parameter is mandatory on 'addSecurityAnnotation' method");
+    Validate.notNull(annotation,
+        "ERROR: method parameter is mandatory on 'addSecurityAnnotation' method");
+
+    ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService().getTypeDetails(klass);
+    ClassOrInterfaceTypeDetailsBuilder cidBuilder =
+        new ClassOrInterfaceTypeDetailsBuilder(serviceDetails);
 
     // TODO: Analyze the possibility to decorate the generated code by other
     // Metadatas. By now, we need to make a push-in operation of the selected 
@@ -96,17 +208,27 @@ public class SecurityOperationsImpl implements SecurityOperations {
     List<Object> pushedElements =
         getPushInOperations().pushIn(klass.getPackage(), klass, methodName, false);
 
-    // Getting method to annotate
-    for (Object pushedElement : pushedElements) {
-      // Checking if the pushed element is a method
-      if (pushedElement.getClass().isAssignableFrom(DefaultMethodMetadata.class)) {
-        MethodMetadataBuilder method = new MethodMetadataBuilder((MethodMetadata) pushedElement);
-        method.addAnnotation(annotationPreAuthorize);
-        cidBuilder.addMethod(method);
-      } else if (pushedElement.getClass().isAssignableFrom(DefaultImportMetadata.class)) {
-        // Checking if the pushed element is an import
-        ImportMetadata importElement = (ImportMetadata) pushedElement;
-        cidBuilder.add(importElement);
+    if (pushedElements.isEmpty()) { // Means that method has been pushed before
+      // TODO: This is a problem related with the code maintaineance. It's not possible to 
+      // maintain methods in .java, so when the method is pushed, is not possible to add new annotations.
+      // Is really necessary to analyze some alternative to decorate existing code generated by other
+      // metadatas.
+      LOGGER.log(Level.INFO,
+          "ERROR: This method has been moved to the .java file so it's not possible "
+              + "to maintain it. Include the Spring Security annotation manually.");
+    } else {
+      // Getting method to annotate
+      for (Object pushedElement : pushedElements) {
+        // Checking if the pushed element is a method
+        if (pushedElement.getClass().isAssignableFrom(DefaultMethodMetadata.class)) {
+          MethodMetadataBuilder method = new MethodMetadataBuilder((MethodMetadata) pushedElement);
+          method.addAnnotation(annotation);
+          cidBuilder.addMethod(method);
+        } else if (pushedElement.getClass().isAssignableFrom(DefaultImportMetadata.class)) {
+          // Checking if the pushed element is an import
+          ImportMetadata importElement = (ImportMetadata) pushedElement;
+          cidBuilder.add(importElement);
+        }
       }
     }
 

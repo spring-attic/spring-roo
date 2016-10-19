@@ -16,4 +16,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface RooWebMvcConfiguration {
 
+  /**
+   * Specifies the defaultLanguage of the generated application
+   * 
+   * @return default Locale code of the generated application
+   */
+  String defaultLanguage() default "";
+
 }

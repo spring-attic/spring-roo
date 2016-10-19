@@ -94,6 +94,17 @@ public class JpaOperationsImpl implements JpaOperations {
 
   private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
+  private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
+      "1.0.0.BUILD-SNAPSHOT");
+  private static final Dependency SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION = new Dependency(
+      "io.springlets", "springlets-data-jpa", "${springlets.version}");
+  private static final Dependency SPRINGLETS_DATA_JPA_STARTER_WITHOUT_VERSION = new Dependency(
+      "io.springlets", "springlets-data-jpa", null);
+  private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION = new Dependency(
+      "io.springlets", "springlets-data-commons", "${springlets.version}");
+  private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER_WITHOUT_VERSION = new Dependency(
+      "io.springlets", "springlets-data-commons", null);
+
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
     this.serviceManager.activate(this.context);
@@ -453,6 +464,20 @@ public class JpaOperationsImpl implements JpaOperations {
       getApplicationConfigService().addProperty(moduleName, HIBERNATE_NAMING_STRATEGY,
           HIBERNATE_NAMING_STRATEGY_VALUE, profile, force);
     }
+
+    // Add dev properties
+    getApplicationConfigService().addProperty(moduleName, "spring.jpa.show-sql", "true", "dev",
+        true);
+    getApplicationConfigService().addProperty(moduleName,
+        "spring.jpa.properties.hibernate.format_sql", "true", "dev", true);
+    getApplicationConfigService().addProperty(moduleName,
+        "spring.jpa.properties.hibernate.generate_statistics", "true", "dev", true);
+    getApplicationConfigService().addProperty(moduleName, "logging.level.org.hibernate.stat",
+        "DEBUG", "dev", true);
+    getApplicationConfigService().addProperty(moduleName,
+        "logging.level.com.querydsl.jpa.impl.JPAQuery", "DEBUG", "dev", true);
+    getApplicationConfigService().addProperty(moduleName, "logging.pattern.level",
+        "%5p - QP:%X{querydsl.parameters} -", "dev", true);
   }
 
   /**
@@ -574,18 +599,46 @@ public class JpaOperationsImpl implements JpaOperations {
 
       }
     }
+
+    // Include Springlets Starter project dependencies and properties
+    getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
+
+    if (getProjectOperations().isMultimoduleProject()) {
+
+      // If current project is a multimodule project, include dependencies
+      // first
+      // on dependencyManagement and then on current module
+      getProjectOperations().addDependencyToDependencyManagement("",
+          SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
+      getProjectOperations().addDependency(module.getModuleName(),
+          SPRINGLETS_DATA_JPA_STARTER_WITHOUT_VERSION);
+      getProjectOperations().addDependencyToDependencyManagement("",
+          SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION);
+      getProjectOperations().addDependency(module.getModuleName(),
+          SPRINGLETS_DATA_COMMONS_STARTER_WITHOUT_VERSION);
+
+    } else {
+
+      // If not multimodule, include dependencies on root
+      getProjectOperations().addDependency("", SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
+      getProjectOperations().addDependency("", SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION);
+    }
   }
 
   /**
-   * Add datasource dependency for testing purposes in a module with repository classes.
-   * This method can be called when installing/changing persistence database or when
-   * adding repositories to the project.
+   * Add datasource dependency for testing purposes in a module with
+   * repository classes. This method can be called when installing/changing
+   * persistence database or when adding repositories to the project.
    *
-   * @param repositoryModuleName the module name where the dependency should be added.
-   * @param profile the profile used to obtain the datasource property from
-   *    spring config file.
-   * @param databaseConfigPrefix the database prefix used to find the right dependency
-   *    in the configuration file. It could be null if called from repository commands.
+   * @param repositoryModuleName
+   *            the module name where the dependency should be added.
+   * @param profile
+   *            the profile used to obtain the datasource property from spring
+   *            config file.
+   * @param databaseConfigPrefix
+   *            the database prefix used to find the right dependency in the
+   *            configuration file. It could be null if called from repository
+   *            commands.
    */
   public void addDatabaseDependencyWithTestScope(String repositoryModuleName, String profile,
       String databaseConfigPrefix) {
@@ -650,9 +703,12 @@ public class JpaOperationsImpl implements JpaOperations {
   /**
    * Gets database dependency from config file and adds it with test scope
    *
-   * @param moduleName the module which dependency should be added
-   * @param databaseConfigPrefix the prefix name for choosing the dependency to add
-   * @param configuration the configuration file with the dependencies to copy from
+   * @param moduleName
+   *            the module which dependency should be added
+   * @param databaseConfigPrefix
+   *            the prefix name for choosing the dependency to add
+   * @param configuration
+   *            the configuration file with the dependencies to copy from
    */
   private void addTestScopedDependency(String moduleName, String databaseConfigPrefix,
       final Element configuration) {

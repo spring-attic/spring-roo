@@ -1,11 +1,15 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -19,11 +23,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Metadata for {@link RooWebMVCConfiguration}.
@@ -78,7 +77,8 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
    *
    */
   public WebMvcConfigurationMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType globalSearchHandler) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String defaultLanguage,
+      final JavaType globalSearchHandler) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.importResolver = builder.getImportRegistrationResolver();
@@ -95,7 +95,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     ensureGovernorHasMethod(new MethodMetadataBuilder(getValidatorMethod()));
 
     // Add localResolver
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getLocaleResolver()));
+    ensureGovernorHasMethod(new MethodMetadataBuilder(getLocaleResolver(defaultLanguage)));
 
     // Add localeChangeInterceptor
     ensureGovernorHasMethod(new MethodMetadataBuilder(getLocaleChangeInterceptor()));
@@ -249,7 +249,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
    *
    * @return MethodMetadata
    */
-  public MethodMetadata getLocaleResolver() {
+  public MethodMetadata getLocaleResolver(String defaultLanguage) {
 
     // Define method name
     JavaSymbolName methodName = new JavaSymbolName("localeResolver");
@@ -278,8 +278,12 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
         .getNameIncludingTypeParameters(false, importResolver)));
 
     // localeResolver.setDefaultLocale(new Locale(\"en\", \"EN\"));
-    bodyBuilder.appendFormalLine(String.format("localeResolver.setDefaultLocale(%s.ENGLISH);",
-        new JavaType("java.util.Locale").getNameIncludingTypeParameters(false, importResolver)));
+    if (StringUtils.isNotBlank(defaultLanguage)) {
+      bodyBuilder.appendFormalLine(String.format(
+          "localeResolver.setDefaultLocale(new %s(\"%s\"));",
+          new JavaType("java.util.Locale").getNameIncludingTypeParameters(false, importResolver),
+          defaultLanguage));
+    }
 
     // return
     bodyBuilder.appendFormalLine("return localeResolver;");
