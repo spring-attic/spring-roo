@@ -452,11 +452,11 @@
                 'buttons' : [
                     {
                         'extend' : 'colvis',
-                        'className' : 'btn-accion'
+                        'className' : 'btn-action'
                     },
                     {
                         'extend' : 'pageLength',
-                        'className' : 'btn-accion'
+                        'className' : 'btn-action'
                     }
                 ],
                 'columns': [
@@ -468,7 +468,7 @@
                     'orderable': false,
                     'searchable': false,
                     'render': function ( data, type, full, meta ) {
-                        return '<a role="button" class="btn-accion show" href="${field.configuration.controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>'
+                        return '<a role="button" class="btn-action showInfo" href="${field.configuration.controllerPath}/' + data + '" data-th-text="${r"#{label_show}"}">Show</a>'
                     }
                   }
                 ]
