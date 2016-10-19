@@ -1,5 +1,18 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
@@ -28,23 +41,11 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
+import org.springframework.roo.model.Jsr303JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  *
@@ -771,6 +772,14 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         JavaType type = entityField.getFieldType();
         ClassOrInterfaceTypeDetails typeDetails = getTypeLocationService().getTypeDetails(type);
 
+        // ROO-3810: Getting @NotNull annotation to include required attr
+        AnnotationMetadata notNullAnnotation = entityField.getAnnotation(Jsr303JavaType.NOT_NULL);
+        if (notNullAnnotation != null) {
+          fieldItem.addConfigurationElement("required", true);
+        } else {
+          fieldItem.addConfigurationElement("required", false);
+        }
+
         // Check if is a referenced field
         if (typeDetails != null && typeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
           boolean shouldBeAdded = getReferenceField(fieldItem, typeDetails, allControllers);
@@ -814,7 +823,44 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           // Ignore details. To obtain details uses
           // getDetailsFieldViewItems method
           continue;
+        } else if (type.isNumber()) {
+          // ROO-3810: Getting @Min and @Max annotations to add validations if necessary
+          AnnotationMetadata minAnnotation = entityField.getAnnotation(Jsr303JavaType.MIN);
+          if (minAnnotation != null) {
+            AnnotationAttributeValue<Object> min = minAnnotation.getAttribute("value");
+            if (min != null) {
+              fieldItem.addConfigurationElement("min", min.getValue().toString());
+            } else {
+              fieldItem.addConfigurationElement("min", "NULL");
+            }
+          } else {
+            fieldItem.addConfigurationElement("min", "NULL");
+          }
+          AnnotationMetadata maxAnnotation = entityField.getAnnotation(Jsr303JavaType.MAX);
+          if (maxAnnotation != null) {
+            AnnotationAttributeValue<Object> max = maxAnnotation.getAttribute("value");
+            if (max != null) {
+              fieldItem.addConfigurationElement("max", max.getValue().toString());
+            } else {
+              fieldItem.addConfigurationElement("max", "NULL");
+            }
+          } else {
+            fieldItem.addConfigurationElement("max", "NULL");
+          }
+          fieldItem.setType(FieldTypes.NUMBER.toString());
         } else {
+          // ROO-3810:  Getting @Size annotation
+          AnnotationMetadata sizeAnnotation = entityField.getAnnotation(Jsr303JavaType.SIZE);
+          if (sizeAnnotation != null) {
+            AnnotationAttributeValue<Object> maxLength = sizeAnnotation.getAttribute("max");
+            if (maxLength != null) {
+              fieldItem.addConfigurationElement("maxLength", maxLength.getValue().toString());
+            } else {
+              fieldItem.addConfigurationElement("maxLength", "NULL");
+            }
+          } else {
+            fieldItem.addConfigurationElement("maxLength", "NULL");
+          }
           fieldItem.setType(FieldTypes.TEXT.toString());
         }
 
