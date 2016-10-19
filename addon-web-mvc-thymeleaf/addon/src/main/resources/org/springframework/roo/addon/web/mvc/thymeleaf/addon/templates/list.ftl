@@ -501,9 +501,9 @@
                   'searchable': false,
                   'render': function ( data, type, full, meta ) {
                       var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
-                      return '<a role="button" class="btn-accion ver" href="' + baseUrl + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
-                      '<a role="button" class="btn-accion modificar" href="' + baseUrl + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
-                      '<a role="button" class="btn-accion eliminar" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
+                      return '<a role="button" class="btn-action showInfo" href="' + baseUrl + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
+                      '<a role="button" class="btn-action edit" href="' + baseUrl + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
+                      '<a role="button" class="btn-action delete" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
                   }
                 }
               ]
@@ -559,11 +559,11 @@
                  'buttons' : [
                   {
                         'extend' : 'colvis',
-                        'className' : 'btn-accion'
+                        'className' : 'btn-action'
                   },
                   {
                         'extend' : 'pageLength',
-                        'className' : 'btn-accion'
+                        'className' : 'btn-action'
                   }
                 ],
                 'columns': [
