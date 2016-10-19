@@ -2,11 +2,14 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.maven.Pom;
+
+import java.util.List;
 
 /**
  * Provides an API with the available Operations to include Spring MVC on
@@ -44,6 +47,21 @@ public interface ControllerOperations extends Feature {
    * @return true if add controller operation is available. false if not.
    */
   boolean isAddControllerAvailable();
+
+  /**
+   * This operation will check if add detail controllers operation is available
+   *
+   * @return true if add detail controller operation is available. false if not.
+   */
+  boolean isAddDetailControllerAvailable();
+
+  /**
+   * This operation will check if the operation publish services methods is available
+   *
+   * @return true if publish services methods is available. false if not.
+   */
+  boolean isPublishOperationsAvailable();
+
 
   /**
    * This operation will generate or update a controller for every class
@@ -102,5 +120,45 @@ public interface ControllerOperations extends Feature {
    */
   void createOrUpdateDetailControllerForEntity(JavaType entity, String relationField,
       ControllerMVCResponseService responseType, JavaPackage controllerPackage);
+
+  /**
+   * Get all the methods that can be published from the service or the controller established by parameter
+   *
+   * @param currentService Service from which obtain methods
+   * @param currentController Controller from which obtain methods
+   * @return methods names list
+   */
+  public List<String> getAllMethodsToPublish(String currentService, String currentController);
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   * @param currentText
+   *            String current text for option value
+   * @return the String representing a JavaType with its name shortened
+   */
+  public String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText);
+
+  /**
+   * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
+   * TopLevelPackage
+   *
+   * @param cid
+   *            ClassOrInterfaceTypeDetails of a JavaType
+   *
+   * @return the String representing a JavaType with its name shortened
+   */
+  public String replaceTopLevelPackage(ClassOrInterfaceTypeDetails cid);
+
+  /**
+   * Generate the operations selected in the controller indicated
+   *
+   * @param controller Controller where the operations will be created
+   * @param operations Service operations names that will be created
+   */
+  public void exportOperation(JavaType controller, List<String> operations);
 
 }
