@@ -31,6 +31,7 @@ import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -48,15 +49,18 @@ import java.util.TreeMap;
  */
 public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+  private static final String PROVIDES_TYPE_STRING = RepositoryJpaCustomImplMetadata.class
+      .getName();
+  private static final String PROVIDES_TYPE = MetadataIdentificationUtils
+      .create(PROVIDES_TYPE_STRING);
+
+  private static final JavaType QUERYDSL_PATH = new JavaType("com.querydsl.core.types.Path");
   private static final JavaType QUERYDSL_BOOLEAN_BUILDER = new JavaType(
       "com.querydsl.core.BooleanBuilder");
   private static final JavaType QUERYDSL_PROJECTIONS = new JavaType(
       "com.querydsl.core.types.Projections");
   private static final JavaType QUERYDSL_JPQLQUERY = new JavaType("com.querydsl.jpa.JPQLQuery");
-  private static final String PROVIDES_TYPE_STRING = RepositoryJpaCustomImplMetadata.class
-      .getName();
-  private static final String PROVIDES_TYPE = MetadataIdentificationUtils
-      .create(PROVIDES_TYPE_STRING);
+
 
   final private ImportRegistrationResolver importResolver;
   final private JavaType entity;
@@ -485,7 +489,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // QEntity qEntity = QEntity.entity;
     bodyBuilder.appendFormalLine(String.format("%1$s %2$s = %1$s.%2$s;",
-        entityQtype.getNameIncludingTypeParameters(false, importResolver), entityVariable));
+        getNameOfJavaType(entityQtype), entityVariable));
     bodyBuilder.newLine();
 
     // Construct query
@@ -495,9 +499,11 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
     // AttributeMappingBuilder mapping = buildMapper()
     StringBuffer mappingBuilderLine = new StringBuffer();
-    mappingBuilderLine.append(String.format("%s mapping = buildMapper()",
-        SpringletsJavaType.SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER
-            .getNameIncludingTypeParameters(false, this.importResolver)));
+    mappingBuilderLine
+        .append(String
+            .format(
+                "%s mapping = buildMapper()",
+                getNameOfJavaType(SpringletsJavaType.SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER)));
 
     // .map(entiyVarName, varName) ...
     if (!this.typesAreProjections.get(returnType)) {
@@ -806,9 +812,12 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       }
     }
 
-    // applyGlobalSearch(search, query, ...
+    // Path<?>[] paths = new Path[] { .... };
     bodyBuilder.appendIndent();
-    bodyBuilder.append("applyGlobalSearch(globalSearch, query");
+    final String pathType = getNameOfJavaType(QUERYDSL_PATH);
+    bodyBuilder.append(String.format("%s<?>[] paths = new %s<?>[] {", pathType, pathType));
+    List<String> toAppend = new ArrayList<String>();
+
     // ... returnType.field1, returnType.field2);
     if (!this.typesAreProjections.get(returnType)) {
 
@@ -818,7 +827,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       while (iterator.hasNext()) {
         Entry<String, FieldMetadata> field = iterator.next();
         String fieldName = field.getValue().getFieldName().getSymbolName();
-        bodyBuilder.append(String.format(", %s.%s", entityVariable, fieldName));
+        toAppend.add(entityVariable + "." + fieldName);
       }
     } else {
 
@@ -829,11 +838,16 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
-        bodyBuilder.append(String.format(", %s", entry.getValue()));
+        toAppend.add(entry.getValue());
       }
     }
-    bodyBuilder.append(");");
+    bodyBuilder.append(StringUtils.join(toAppend, ','));
+    bodyBuilder.append("};");
     bodyBuilder.newLine();
+
+    // applyGlobalSearch(search, query, paths);
+    bodyBuilder.appendFormalLine("applyGlobalSearch(globalSearch, query, paths);");
+
   }
 
   @Override

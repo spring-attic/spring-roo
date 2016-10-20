@@ -396,17 +396,9 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
         // Get field values in "path" format from annotation
         AnnotationAttributeValue<?> projectionFields = projectionAnnotation.getAttribute("fields");
         @SuppressWarnings("unchecked")
-        List<StringAttributeValue> values =
-            (List<StringAttributeValue>) projectionFields.getValue();
-        String projectionFieldsString = "";
-        for (int i = 0; i < values.size(); i++) {
-          if (i == 0) {
-            projectionFieldsString = values.get(i).getValue();
-          } else {
-            projectionFieldsString =
-                projectionFieldsString.concat(",").concat(values.get(i).getValue());
-          }
-
+        List<String> projectionFieldList = new ArrayList<String>();
+        for (StringAttributeValue value : (List<StringAttributeValue>) projectionFields.getValue()) {
+          projectionFieldList.add(value.getValue());
         }
 
         // Add fields to typesFieldMaps
@@ -414,7 +406,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
         // Get the original FieldMetadata with its Java name in Projection
         Map<String, FieldMetadata> projectionOriginalFieldMetadataValues =
-            getDtoOperations().buildFieldsFromString(projectionFieldsString, associatedEntity);
+            getDtoOperations().buildFieldsFromString(StringUtils.join(projectionFieldList, ','),
+                associatedEntity);
         List<FieldMetadata> projectionIdentifierFields =
             getPersistenceMemberLocator().getIdentifierFields(associatedEntity);
         if (!getPersistenceMemberLocator().getEmbeddedIdentifierFields(associatedEntity).isEmpty()) {
