@@ -302,12 +302,6 @@ public class ServiceOperationsImpl implements ServiceOperations {
         PhysicalTypeIdentifier.createIdentifier(implTypeBuilder.build().getType(),
             pathResolver.getPath(implType.getModule(), Path.SRC_MAIN_JAVA));
 
-    // Add necessary imports
-    List<ImportMetadata> imports = new ArrayList<ImportMetadata>();
-    imports.add(new ImportMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, repository
-        .getType().getPackage(), repository.getType(), false, false).build());
-    implTypeBuilder.addImports(imports);
-
     // Write service implementation on disk
     typeManagementService.createOrUpdateTypeOnDisk(implTypeBuilder.build());
 
