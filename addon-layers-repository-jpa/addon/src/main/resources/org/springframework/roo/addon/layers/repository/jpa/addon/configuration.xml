@@ -6,6 +6,14 @@
         <groupId>com.querydsl</groupId>
         <artifactId>querydsl-jpa</artifactId>
       </dependency>
+      <dependency>
+        <groupId>io.springlets</groupId>
+        <artifactId>springlets-data-commons</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>io.springlets</groupId>
+        <artifactId>springlets-data-jpa</artifactId>
+      </dependency>
     </dependencies>
     <plugins>
       <plugin>
