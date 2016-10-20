@@ -9,7 +9,6 @@ jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 
 // Create domain entities
 module focus --moduleName model
-entity jpa --class ~.AttachedFile --table NORTHWIND_ATTACHED_FILES --sequenceName NORTHWIND_ATTACHED_FILES_ATTACHED_FILE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ATTACHED_FILE_ID --versionField version --versionType long --versionColumn VERSION
 entity jpa --class ~.Category --table NORTHWIND_CATEGORIES --sequenceName NORTHWIND_CATEGORIES_CATEGORY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CATEGORY_ID --versionField version --versionType long --versionColumn VERSION
 entity jpa --class ~.City --table NORTHWIND_CITIES --sequenceName NORTHWIND_CITIES_CITY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn CITY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
 entity jpa --class ~.Country --table NORTHWIND_COUNTRIES --sequenceName NORTHWIND_COUNTRIES_COUNTRY_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn COUNTRY_ID --versionField version --versionType long --versionColumn VERSION --readOnly
@@ -22,6 +21,7 @@ entity jpa --class ~.PurchaseOrder --table NORTHWIND_PURCHASE_ORDERS --sequenceN
 entity jpa --class ~.Region --table NORTHWIND_REGIONS --sequenceName NORTHWIND_REGIONS_REGION_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REGION_ID --versionField version --versionType long --versionColumn VERSION --readOnly
 entity jpa --class ~.Report --table NORTHWIND_REPORTS --sequenceName NORTHWIND_REPORTS_REPORT_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn REPORT_ID --versionField version --versionType long --versionColumn VERSION
 entity jpa --class ~.Shipper --table NORTHWIND_SHIPPERS --sequenceName NORTHWIND_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SHIPPER_ID --versionField version --versionType long --versionColumn VERSION
+entity jpa --class ~.SoldProduct --table NW_SOLD_PRODUCT_VIEW --sequenceName NORTHWIND_SHIPPERS_SHIPPER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn ID --versionField version --versionType long --versionColumn VERSION
 entity jpa --class ~.Store --table NORTHWIND_STORES --sequenceName NORTHWIND_STORES_STORE_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn STORE_ID --versionField version --versionType long --versionColumn VERSION
 entity jpa --class ~.Supplier --table NORTHWIND_SUPPLIERS --sequenceName NORTHWIND_SUPPLIERS_SUPPLIER_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn SUPPLIER_ID --versionField version --versionType long --versionColumn VERSION
 entity jpa --class ~.UserLogin --table NORTHWIND_USERS_LOGIN --sequenceName NORTHWIND_USERS_LOGIN_USER_LOGIN_ID_SEQ --identifierStrategy SEQUENCE --identifierColumn USER_LOGIN_ID --versionField version --versionType long --versionColumn VERSION
@@ -51,12 +51,6 @@ enum constant --name FOURTH_TRIM --class ~.Trimester
 
 
 // Create fields
-focus --class ~.AttachedFile
-field string --fieldName name --column NAME
-field string --fieldName src --column SRC
-field number --fieldName sizeFile --type long --column SIZE_FILE
-field string --fieldName mimetype --column MIMETYPE
-
 focus --class ~.Category
 field string --fieldName name --column NAME
 field string --fieldName description --column DESCRIPTION
@@ -64,10 +58,18 @@ field set --fieldName products --type ~.Product --cardinality ONE_TO_MANY --mapp
 
 focus --class ~.City
 field string --fieldName description --column DESCRIPTION
-field reference --fieldName region --type ~.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
+field set --fieldName parties --type ~.Party --cardinality ONE_TO_MANY --mappedBy city
+field set --fieldName customerOrders --type ~.CustomerOrder --cardinality ONE_TO_MANY --mappedBy city
+field set --fieldName stores --type ~.Store --cardinality ONE_TO_MANY --mappedBy city
+field set --fieldName suppliers --type ~.Supplier --cardinality ONE_TO_MANY --mappedBy city
 
 focus --class ~.Country
 field string --fieldName description --column DESCRIPTION
+field set --fieldName parties --type ~.Party --cardinality ONE_TO_MANY --mappedBy country
+field set --fieldName regions --type ~.Region --cardinality ONE_TO_MANY --mappedBy country
+field set --fieldName customerOrders --type ~.CustomerOrder --cardinality ONE_TO_MANY --mappedBy country
+field set --fieldName stores --type ~.Store --cardinality ONE_TO_MANY --mappedBy country
+field set --fieldName suppliers --type ~.Supplier --cardinality ONE_TO_MANY --mappedBy country
 
 focus --class ~.Customer
 field string --fieldName companyName --column COMPANY_NAME
@@ -75,6 +77,7 @@ field string --fieldName contactName --column CONTACT_NAME
 field string --fieldName contactTitle --column CONTACT_TITLE
 field string --fieldName fax --column FAX
 field string --fieldName email --column EMAIL
+field set --fieldName customerOrders --type ~.CustomerOrder --cardinality ONE_TO_MANY --mappedBy customer
 
 focus --class ~.CustomerOrder
 field date --fieldName orderDate --type java.util.Calendar --column ORDER_DATE --persistenceType JPA_TIMESTAMP
@@ -88,13 +91,6 @@ field enum --fieldName status --type ~.Status --column STATUS --enumType STRING
 field string --fieldName shipPhone --column SHIP_PHONE
 field date --fieldName invoiceDate --type java.util.Calendar --column INVOICE_DATE --persistenceType JPA_TIMESTAMP
 field date --fieldName closeDate --type java.util.Calendar --column CLOSE_DATE --persistenceType JPA_TIMESTAMP
-field reference --fieldName employee --type ~.Employee --joinColumnName EMPLOYEE --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName customer --type ~.Customer --joinColumnName CUSTOMER --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName shipVia --type ~.Shipper --joinColumnName SHIP_VIA --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName shipCity --type ~.City --joinColumnName SHIP_CITY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName shipRegion --type ~.Region --joinColumnName SHIP_REGION --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName shipCountry --type ~.Country --joinColumnName SHIP_COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName invoiceFile --type ~.AttachedFile --joinColumnName INVOICE_FILE --cardinality MANY_TO_ONE --fetch LAZY
 field set --fieldName orderDetails --type ~.OrderDetail --cardinality ONE_TO_MANY --mappedBy customerOrder
 
 focus --class ~.Employee
@@ -106,27 +102,25 @@ field date --fieldName hireDate --type java.util.Calendar --column HIRE_DATE --p
 field string --fieldName extension --column EXTENSION
 field string --fieldName photo --column PHOTO --lob
 field string --fieldName notes --column NOTES
-field reference --fieldName supervisor --type ~.Employee --joinColumnName SUPERVISOR --cardinality MANY_TO_ONE --fetch LAZY
+field set --fieldName employees --type ~.Employee --cardinality ONE_TO_MANY --mappedBy supervisor
+field set --fieldName purchaseOrders --type ~.PurchaseOrder --cardinality ONE_TO_MANY --mappedBy employee
+field set --fieldName customerOrders --type ~.CustomerOrder --cardinality ONE_TO_MANY --mappedBy employee
 
 focus --class ~.LoginRole
 field string --fieldName name --column NAME
 field string --fieldName description --column DESCRIPTION
+field set --fieldName userLoginRoles --type ~.UserLoginRole --cardinality ONE_TO_MANY --mappedBy loginRole
 
 focus --class ~.OrderDetail
 field number --fieldName unitPrice --type java.math.BigDecimal --column UNIT_PRICE
 field number --fieldName quantity --type java.lang.Integer --column QUANTITY
 field number --fieldName discount --type java.math.BigDecimal --column DISCOUNT
-field reference --fieldName customerOrder --type ~.CustomerOrder --joinColumnName CUSTOMER_ORDER --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName product --type ~.Product --joinColumnName PRODUCT --cardinality MANY_TO_ONE --fetch LAZY
 
 focus --class ~.Party
 field string --fieldName address --column ADDRESS
 field string --fieldName postalCode --column POSTAL_CODE
 field string --fieldName phone --column PHONE
-field reference --fieldName city --type ~.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName region --type ~.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName country --type ~.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
-field set --fieldName usersLogin --type ~.UserLogin --cardinality ONE_TO_MANY --mappedBy party
+field set --fieldName userLogins --type ~.UserLogin --cardinality ONE_TO_MANY --mappedBy party
 
 focus --class ~.Product
 field string --fieldName name --column NAME
@@ -137,8 +131,6 @@ field number --fieldName unitPrice --type java.math.BigDecimal --column UNIT_PRI
 field number --fieldName unitsInStock --type java.lang.Integer --column UNITS_IN_STOCK
 field number --fieldName reorderLevel --type java.lang.Integer --column REORDER_LEVEL
 field other --fieldName discontinued --type java.lang.Boolean --column DISCONTINUED
-field reference --fieldName supplier --type ~.Supplier --joinColumnName SUPPLIER --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName category --type ~.Category --joinColumnName CATEGORY --cardinality MANY_TO_ONE --fetch LAZY
 field set --fieldName purchaseOrders --type ~.PurchaseOrder --cardinality ONE_TO_MANY --mappedBy product
 field set --fieldName orderDetails --type ~.OrderDetail --cardinality ONE_TO_MANY --mappedBy product
 
@@ -146,12 +138,14 @@ focus --class ~.PurchaseOrder
 field number --fieldName unitCost --type java.math.BigDecimal --column UNIT_COST
 field number --fieldName quantity --type java.lang.Integer --column QUANTITY
 field date --fieldName orderDate --type java.util.Calendar --column ORDER_DATE --persistenceType JPA_TIMESTAMP
-field reference --fieldName employee --type ~.Employee --joinColumnName EMPLOYEE --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName product --type ~.Product --joinColumnName PRODUCT --cardinality MANY_TO_ONE --fetch LAZY
 
 focus --class ~.Region
 field string --fieldName description --column DESCRIPTION
-field reference --fieldName country --type ~.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
+field set --fieldName cities --type ~.City --cardinality ONE_TO_MANY --mappedBy region
+field set --fieldName parties --type ~.Party --cardinality ONE_TO_MANY --mappedBy region
+field set --fieldName customerOrders --type ~.CustomerOrder --cardinality ONE_TO_MANY --mappedBy region
+field set --fieldName stores --type ~.Store --cardinality ONE_TO_MANY --mappedBy region
+field set --fieldName suppliers --type ~.Supplier --cardinality ONE_TO_MANY --mappedBy region
 
 focus --class ~.Report
 field string --fieldName type --column TYPE
@@ -159,15 +153,13 @@ field string --fieldName type --column TYPE
 focus --class ~.Shipper
 field string --fieldName companyName --column COMPANY_NAME
 field string --fieldName phone --column PHONE
+field set --fieldName customerOrders --type ~.CustomerOrder --cardinality ONE_TO_MANY --mappedBy shipper
 
 focus --class ~.Store
 field string --fieldName name --column NAME
 field string --fieldName address --column ADDRESS
 field string --fieldName postalCode --column POSTAL_CODE
 field string --fieldName phone --column PHONE
-field reference --fieldName city --type ~.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName region --type ~.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName country --type ~.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
 
 focus --class ~.Supplier
 field string --fieldName companyName --column COMPANY_NAME
@@ -178,23 +170,18 @@ field string --fieldName postalCode --column POSTAL_CODE
 field string --fieldName phone --column PHONE
 field string --fieldName fax --column FAX
 field string --fieldName web --column WEB
-field reference --fieldName city --type ~.City --joinColumnName CITY --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName region --type ~.Region --joinColumnName REGION --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName country --type ~.Country --joinColumnName COUNTRY --cardinality MANY_TO_ONE --fetch LAZY
+field set --fieldName products --type ~.Product --cardinality ONE_TO_MANY --mappedBy supplier
+
 // Field with --joinTable and associated params
-field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NORTHWIND_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
+//field set --fieldName stores --type ~.Store --cardinality MANY_TO_MANY --joinTable NORTHWIND_SUPPLIER_STORES --joinColumns SUPPLIER --referencedColumns SUPPLIER_ID --inverseJoinColumns STORE --inverseReferencedColumns STORE_ID
 
 focus --class ~.UserLogin
 field string --fieldName username --column USERNAME --unique
 field string --fieldName password --column PASSWORD
 field date --fieldName fromDate --type java.util.Calendar --column FROM_DATE --persistenceType JPA_TIMESTAMP
 field date --fieldName thruDate --type java.util.Calendar --column THRU_DATE --persistenceType JPA_TIMESTAMP
-field reference --fieldName party --type ~.Party --joinColumnName PARTY --cardinality MANY_TO_ONE --fetch LAZY
 field set --fieldName userLoginRoles --type ~.UserLoginRole --cardinality ONE_TO_MANY --mappedBy userLogin
 
-focus --class ~.UserLoginRole
-field reference --fieldName userLogin --type ~.UserLogin --joinColumnName USER_LOGIN --cardinality MANY_TO_ONE --fetch LAZY
-field reference --fieldName loginRole --type ~.LoginRole --joinColumnName LOGIN_ROLE --cardinality MANY_TO_ONE --fetch LAZY
 
 // Generate DTO's
 dto --class ~.ActiveCustomerOrder --immutable
@@ -205,10 +192,21 @@ field other --fieldName status --type ~.Status
 field date --fieldName orderDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 
+dto --class ~.ActiveCustomerOrderBasic --immutable
+field number --fieldName orderId --type java.lang.Long
+field other --fieldName status --type ~.Status
+field date --fieldName orderDate --type java.util.Calendar
+field string --fieldName customerCompanyName
+
 dto --class ~.CategoryInfo --immutable
 field number --fieldName categoryId --type java.lang.Long
 field string --fieldName name
 field string --fieldName description
+
+dto --class ~.CertificateDni --immutable
+field number --fieldName status --type int
+field string --fieldName statusMsg
+field string --fieldName dni
 
 dto --class ~.CityInfo --immutable
 field number --fieldName cityId --type java.lang.Long
@@ -239,6 +237,11 @@ field string --fieldName email
 field string --fieldName phone
 field string --fieldName fax
 
+dto --class ~.CustomerNotification --immutable
+field number --fieldName customerId --type java.lang.Long
+field string --fieldName companyName
+field string --fieldName message
+
 dto --class ~.CustomerOrderInfo --immutable
 field number --fieldName orderId --type java.lang.Long
 field number --fieldName employeeId --type java.lang.Long
@@ -250,6 +253,25 @@ field other --fieldName status --type ~.Status
 field date --fieldName shippedDate --type java.util.Calendar
 field number --fieldName freight --type java.math.BigDecimal
 
+dto --class ~.CustomerOrderOfProduct --immutable
+field number --fieldName customerOrderId --type java.lang.Long
+field number --fieldName productId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field date --fieldName orderDate --type java.util.Calendar
+field other --fieldName status --type ~.Status
+field string --fieldName employeeName
+field string --fieldName customerCompanyName
+field date --fieldName shippedDate --type java.util.Calendar
+field number --fieldName freight --type java.math.BigDecimal
+
+dto --class ~.CustomerOrderSearch --immutable
+field number --fieldName customerId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+//field set --fieldName statuses --type ~.Status
+field date --fieldName orderDateStart --type java.util.Calendar
+field date --fieldName orderDateEnd --type java.util.Calendar
+
 dto --class ~.CustomerSalesReport --immutable
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName customerId --type java.lang.Long
@@ -258,7 +280,26 @@ field date --fieldName fromDate --type java.util.Calendar
 field date --fieldName thruDate --type java.util.Calendar
 field string --fieldName customerCompanyName
 field number --fieldName total --type java.math.BigDecimal
-field set --fieldName closedSalesReportByCustomer --type ~.ClosedSalesReportByCustomer
+//field set --fieldName closedSalesReportByCustomer --type ~.ClosedSalesReportByCustomer
+
+dto --class ~.CustomerUserLoginInfo --immutable
+field number --fieldName customerId --type java.lang.Long
+field string --fieldName companyName --notNull --sizeMax 50
+field string --fieldName contactName --notNull --sizeMax 100
+field string --fieldName contactTitle --sizeMax 80
+field string --fieldName email --notNull --sizeMax 80
+field string --fieldName address --notNull --sizeMax 200
+field other --fieldName city --type model:~.City --notNull
+field other --fieldName region --type model:~.Region --notNull
+field other --fieldName country --type model:~.Country --notNull
+field string --fieldName postalCode --notNull --sizeMax 6
+field string --fieldName phone --sizeMax 15
+field string --fieldName fax --sizeMax 15
+field string --fieldName username --notNull --sizeMax 30
+// Add @Pattern(regexp = "^[^<>\\\\'\"&;%]*$") to this field
+field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
+// Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
+field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
 
 dto --class ~.EmployeeInfo --immutable
 field number --fieldName employeeId --type java.lang.Long
@@ -269,6 +310,28 @@ field string --fieldName phone
 field string --fieldName extension
 field string --fieldName supervisorName
 
+dto --class ~.EmployeeUserLoginInfo --immutable
+field number --fieldName employeeId --type java.lang.Long
+field string --fieldName firstName --notNull --sizeMax 50
+field string --fieldName lastName --notNull --sizeMax 120
+field string --fieldName title --notNull --sizeMax 120
+field date --fieldName birthDate --notNull --type java.util.Calendar
+field date --fieldName hireDate --notNull --type java.util.Calendar
+field string --fieldName extension --notNull --sizeMax 50
+field string --fieldName notes --notNull --sizeMax 3500
+field other --fieldName supervisor --type model:~.Employee
+field string --fieldName address --notNull --sizeMax 200
+field other --fieldName city --type model:~.City --notNull
+field other --fieldName region --type model:~.Region --notNull
+field other --fieldName country --type model:~.Country --notNull
+field string --fieldName postalCode --notNull --sizeMax 6
+field string --fieldName phone --sizeMax 15
+field string --fieldName username --notNull --sizeMax 30
+// Add @Pattern(regexp = "^[^<>\\\\'\"&;%]*$") to this field
+field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
+// Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
+field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
+
 dto --class ~.Inventory --immutable
 field number --fieldName productId --type java.lang.Long
 field string --fieldName name
@@ -277,6 +340,38 @@ field number --fieldName assignedStock --type java.lang.Integer
 field number --fieldName availableStock --type java.lang.Integer
 field number --fieldName reorderLevel --type java.lang.Integer
 field number --fieldName replenishStock --type java.lang.Integer
+
+dto --class ~.Invoice --immutable
+field number --fieldName customerOrderId --type java.lang.Long
+field number --fieldName shipCountryId --type java.lang.Long
+field number --fieldName shipRegionId --type java.lang.Long
+field number --fieldName shipCityId --type java.lang.Long
+field number --fieldName customerId --type java.lang.Long
+field number --fieldName customerCountryId --type java.lang.Long
+field number --fieldName customerRegionId --type java.lang.Long
+field number --fieldName customerCityId --type java.lang.Long
+field number --fieldName employeeId --type java.lang.Long
+field number --fieldName shippedId --type java.lang.Long
+field date --fieldName invoiceDate --type java.util.Calendar
+field string --fieldName shipName
+field string --fieldName shipAddress
+field string --fieldName shipCountryDescription
+field string --fieldName shipRegionDescription
+field string --fieldName shipCityDescription
+field string --fieldName shipPostalCode
+field string --fieldName customerCompanyName
+field string --fieldName customerCountryDescription
+field string --fieldName customerRegionDescription
+field string --fieldName customerCityDescription
+field string --fieldName customerPostalCode
+field date --fieldName orderDate --type java.util.Calendar
+field date --fieldName shippedDate --type java.util.Calendar
+field string --fieldName employeeName
+field string --fieldName shipperCompanyName
+field number --fieldName freight --type java.math.BigDecimal
+field number --fieldName subtotal --type java.math.BigDecimal
+field number --fieldName total --type java.math.BigDecimal
+//field set --fieldName orderDetailsInfo --type ~.OrderDetailInfo
 
 dto --class ~.OrderDetailInfo --immutable
 field number --fieldName orderDetailId --type java.lang.Long
@@ -288,17 +383,20 @@ field number --fieldName unitPrice --type java.math.BigDecimal
 field number --fieldName discount --type java.math.BigDecimal
 field number --fieldName total --type java.math.BigDecimal
 
-dto --class ~.OrderDetailOfProduct --immutable
-field number --fieldName orderId --type java.lang.Long
-field number --fieldName productId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName customerId --type java.lang.Long
-field date --fieldName orderDate --type java.util.Calendar
+dto --class ~.OrderDetailOfCustomer --immutable
+field number --fieldName orderDetailId --type java.lang.Long
+field string --fieldName customerName
 field other --fieldName status --type ~.Status
-field string --fieldName employeeName
-field string --fieldName customerCompanyName
-field date --fieldName shippedDate --type java.util.Calendar
-field number --fieldName freight --type java.math.BigDecimal
+field number --fieldName quantity --type java.lang.Integer
+field string --fieldName productName
+
+dto --class ~.OrderDetailQuantity --immutable
+field number --fieldName orderDetailId --type java.lang.Long --notNull
+field number --fieldName customerOrderId --type java.lang.Long --notNull
+field number --fieldName quantityToAdd --type java.lang.Integer --notNull
+
+dto --class ~.OrderDetailSearch --immutable
+field number --fieldName customerId --type java.lang.Long
 
 dto --class ~.ProductInfo --immutable
 field number --fieldName productId --type java.lang.Long
@@ -312,6 +410,20 @@ field number --fieldName unitPrice --type java.math.BigDecimal
 field string --fieldName quantityPerUnit
 field boolean --fieldName discontinued
 
+dto --class ~.ProductOfCategory --immutable
+field number --fieldName productId --type java.lang.Long
+field number --fieldName categoryId --type java.lang.Long
+field number --fieldName supplierId --type java.lang.Long
+field string --fieldName code
+field string --fieldName name
+field string --fieldName supplierCompanyName
+field number --fieldName unitCost --type java.math.BigDecimal
+field number --fieldName unitPrice --type java.math.BigDecimal
+field string --fieldName quantityPerUnit
+field boolean --fieldName discontinued
+field number --fieldName purchaseOrdersCount --type java.lang.Long
+field number --fieldName orderDetailsCount --type java.lang.Long
+
 dto --class ~.ProductSalesReport --immutable
 field number --fieldName employeeId --type java.lang.Long
 field number --fieldName productId --type java.lang.Long
@@ -320,7 +432,7 @@ field date --fieldName fromDate --type java.util.Calendar
 field date --fieldName thruDate --type java.util.Calendar
 field string --fieldName productName
 field number --fieldName total --type java.math.BigDecimal
-field set --fieldName closedSalesReportByProduct --type ~.ClosedSalesReportByProduct
+//field set --fieldName closedSalesReportByProduct --type ~.ClosedSalesReportByProduct
 
 dto --class ~.PurchaseOrderInfo --immutable
 field number --fieldName purchaseOrderId --type java.lang.Long
@@ -331,10 +443,21 @@ field string --fieldName employeeName
 field number --fieldName quantity --type java.lang.Integer
 field number --fieldName totalCost --type java.math.BigDecimal
 
+dto --class ~.ReceivedEmail --immutable
+field string --fieldName subject
+field string --fieldName content
+field string --fieldName from --permitReservedWords
+
 dto --class ~.RegionInfo --immutable
 field number --fieldName regionId --type java.lang.Long
 field number --fieldName countryId --type java.lang.Long
 field string --fieldName description
+
+dto --class ~.ReplenishInventory --immutable
+field number --fieldName productId --type java.lang.Long
+field string --fieldName name
+field number --fieldName avalaibleStock --type java.lang.Integer
+field number --fieldName reorderLevel --type java.lang.Integer
 
 dto --class ~.ShipperInfo --immutable
 field number --fieldName shipperId --type java.lang.Long
@@ -374,51 +497,19 @@ field string --fieldName phone
 field string --fieldName fax
 field string --fieldName web
 
-dto --class ~.UserLoginDetails --immutable
-field number --fieldName id --type java.lang.Long
-field string --fieldName username
-field string --fieldName password
-field date --fieldName fromDate --type java.util.Calendar
-field date --fieldName thruDate --type java.util.Calendar
-field set --fieldName userLoginRoles --type ~.UserLoginRole
+dto --class ~.UserLoginPassword --immutable
+field string --fieldName password --notNull --sizeMin 8 --sizeMax 128
+// Add @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./])[A-Za-z\\d`~!@#$%^&*()_+\\-={}|\\[\\]\\\\:\";'<>?,./]*") to this field
+field string --fieldName repeatPassword --notNull --sizeMin 8 --sizeMax 128
 
-dto --class ~.Invoice --immutable
-field number --fieldName customerOrderId --type java.lang.Long
-field number --fieldName shipCountryId --type java.lang.Long
-field number --fieldName shipRegionId --type java.lang.Long
-field number --fieldName shipCityId --type java.lang.Long
-field number --fieldName customerId --type java.lang.Long
-field number --fieldName customerCountryId --type java.lang.Long
-field number --fieldName customerRegionId --type java.lang.Long
-field number --fieldName customerCityId --type java.lang.Long
-field number --fieldName employeeId --type java.lang.Long
-field number --fieldName shippedId --type java.lang.Long
-field date --fieldName invoiceDate --type java.util.Calendar
-field string --fieldName shipName
-field string --fieldName shipAddress
-field string --fieldName shipCountryDescription
-field string --fieldName shipRegionDescription
-field string --fieldName shipCityDescription
-field string --fieldName shipPostalCode
-field string --fieldName customerCompanyName
-field string --fieldName customerCountryDescription
-field string --fieldName customerRegionDescription
-field string --fieldName customerCityDescription
-field string --fieldName customerPostalCode
-field date --fieldName orderDate --type java.util.Calendar
-field date --fieldName shippedDate --type java.util.Calendar
-field string --fieldName employeeName
-field string --fieldName shipperCompanyName
-field number --fieldName freight --type java.math.BigDecimal
-field number --fieldName subtotal --type java.math.BigDecimal
-field number --fieldName total --type java.math.BigDecimal
-field set --fieldName orderDetailsInfo --type ~.OrderDetailInfo
 
 // Generate repositories
-repository jpa --all --package repository:~
+repository jpa --all
+
 
 // Generate services
-service --all --apiPackage service-api:~ --implPackage service-impl:~
+service --all
+
 
 // Create finders
 finder add --entity model:~.UserLogin --name findByUsername
@@ -427,11 +518,6 @@ finder add --entity model:~.Region --name findByCountryIdOrderByDescriptionAsc
 finder add --entity model:~.City --name findByRegionIdOrderByDescriptionAsc
 finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
 
-// Install security
-security setup
-
-// Add audit to Category entity
-audit add --entity ~.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
 
 // Add tests
 test unit --class model:~.CustomerOrder
@@ -440,21 +526,41 @@ test unit --class repository:~.CustomerOrderRepository
 test unit --class service-api:~.CustomerOrderService
 test unit --class service-impl:~.CustomerServiceImpl
 
+
 // Add Spring MVC
 web mvc setup
+
+
+// Install security
+security setup
+
+
+// Add audit to Category entity
+jpa audit setup
+jpa audit add --entity model:~.Category --createdDateColumn CREATED_DATE --modifiedDateColumn MODIFIED_DATE --createdByColumn CREATED_BY --modifiedByColumn MODIFIED_BY
+
 
 // Install THYMELEAF view
 web mvc view setup --type THYMELEAF
 
+
 // Add necessary controllers
 web mvc controller --entity model:~.Category --responseType THYMELEAF
+web mvc controller --entity model:~.Country --responseType THYMELEAF
 web mvc controller --entity model:~.CustomerOrder --responseType THYMELEAF
 web mvc controller --entity model:~.Customer --responseType THYMELEAF
 web mvc controller --entity model:~.Employee --responseType THYMELEAF
+web mvc controller --entity model:~.Product --responseType THYMELEAF
 web mvc controller --entity model:~.Shipper --responseType THYMELEAF
+web mvc controller --entity model:~.SoldProduct --responseType THYMELEAF
 web mvc controller --entity model:~.Store --responseType THYMELEAF
 web mvc controller --entity model:~.Supplier --responseType THYMELEAF
 
-// Update controller with JSON response type and add a finder to JSON response layer
-web mvc controller --entity model:~.Shipper --responseType JSON
-web mvc finder --controller application:~.web.ShippersController --all --responseType JSON
+// Required controller to generate its detail
+web mvc controller --entity model:~.Region --responseType THYMELEAF
+
+// Add details to controllers
+web mvc detail --entity model:~.Category --field products --responseType THYMELEAF
+web mvc detail --entity model:~.Product --field purchaseOrders --responseType THYMELEAF
+web mvc detail --entity model:~.Country --responseType THYMELEAF --field regions
+web mvc detail --entity model:~.Region --responseType THYMELEAF --field cities

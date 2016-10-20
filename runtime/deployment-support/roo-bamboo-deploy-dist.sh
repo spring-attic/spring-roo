@@ -623,76 +623,76 @@ if [[ "$COMMAND" = "assembly" ]]; then
         # GENERIC SHELL FEATURES
 
             # Project Settings tests
-            load_roo script project-settings-1.roo
-            load_roo script project-settings-2.roo
-            load_roo script project-settings-3.roo
+            #load_roo script project-settings-1.roo
+            #load_roo script project-settings-2.roo
+            #load_roo script project-settings-3.roo
 
             # Global parameter tests
-            load_roo script global-parameters.roo
+            #load_roo script global-parameters.roo
 
             # Application Configuration Service tests
-            load_roo script application-config-service.roo
+            #load_roo script application-config-service.roo
 
             # CliOptions dependency visibility
-            load_roo script cli-dependency-visibility.roo
+            #load_roo script cli-dependency-visibility.roo
 
             # CliOptions dynamic mandatory
-            load_roo script cli-dynamic-mandatory.roo
+            #load_roo script cli-dynamic-mandatory.roo
 
             # Push-In Operations
-            load_roo_build_and_test script push-in.roo
+            #load_roo_build_and_test script push-in.roo
 
         # PROJECT GENERATION FEATURES
 
             # Entity commands with project settings
-            load_roo script entities-with-project-settings.roo 
+            #load_roo script entities-with-project-settings.roo 
 
             # Entity and entity-field commands
-            load_roo script entities-and-entity-fields.roo 
+            #load_roo script entities-and-entity-fields.roo 
 
             # Repository test
-            load_roo_build_and_test script repository-generation-test.roo
+            #load_roo_build_and_test script repository-generation-test.roo
 
             # Finder tests
-            load_roo_build_and_test script finder-autocomplete-test.roo
-            load_roo_build_and_test script finder-generation-test.roo
+            #load_roo_build_and_test script finder-autocomplete-test.roo
+            #load_roo_build_and_test script finder-generation-test.roo
 
             # Service test
-            load_roo_build_and_test script service-generation-test.roo
+            #load_roo_build_and_test script service-generation-test.roo
 
             # Multimodule tests
-            load_roo_build_and_test script multimodule-standard-test.roo
-            load_roo_build_and_test script multimodule-basic-test.roo
+            #load_roo_build_and_test script multimodule-standard-test.roo
+            #load_roo_build_and_test script multimodule-basic-test.roo
             #load_roo_build_and_test script multimodule-jpa-layer-test.roo
-            load_roo_build_and_test script multimodule-service-layer-test.roo
+            #load_roo_build_and_test script multimodule-service-layer-test.roo
 
             # Security and audit tests
-            load_roo_build_and_test script security.roo
-            load_roo_build_and_test script security-multimodule.roo
-            load_roo_build_and_test script audit.roo            
-            load_roo_build_and_test script audit-multimodule.roo
+            #load_roo_build_and_test script security.roo
+            #load_roo_build_and_test script security-multimodule.roo
+            #load_roo_build_and_test script audit.roo            
+            #load_roo_build_and_test script audit-multimodule.roo
 
             # Addon-test tests
-            load_roo_build_and_test script tests.roo
-            load_roo_build_and_test script tests-multimodule.roo
+            #load_roo_build_and_test script tests.roo
+            #load_roo_build_and_test script tests-multimodule.roo
 
 	        # Web mvc tests
-            load_roo_build_and_test script web-mvc-test.roo
-            load_roo_build_and_test script multimodule-web-mvc-embedded-test.roo
-            load_roo_build_and_test script multimodule-web-mvc-weblogic-test.roo
+            #load_roo_build_and_test script web-mvc-test.roo
+            #load_roo_build_and_test script multimodule-web-mvc-embedded-test.roo
+            #load_roo_build_and_test script multimodule-web-mvc-weblogic-test.roo
 
 
-		    load_roo_build_and_test script web-finder-test.roo
+		    #load_roo_build_and_test script web-finder-test.roo
 		    #load_roo_build_and_test script multimodule-web-finder-test.roo
 
             # DTO's tests
-            load_roo_build_and_test script dto.roo
-            load_roo_build_and_test script dto-multimodule.roo
+            #load_roo_build_and_test script dto.roo
+            #load_roo_build_and_test script dto-multimodule.roo
 
         # COMPLETE APPLICATIONS TESTS
 
             # Northwind complete application
-            load_roo_build_and_test script northwind.roo
+            #load_roo_build_and_test script northwind.roo
 
             # Northwind complete multimodule application
 	        load_roo_build_and_test script northwind-multimodule.roo
@@ -701,7 +701,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
             load_roo_build_and_test script clinic.roo
 
             # Petclinic multimodule application
-            load_roo_build_and_test script clinic-multimodule.roo    
+            #load_roo_build_and_test script clinic-multimodule.roo    
 
         log "Removing Roo distribution from test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER
