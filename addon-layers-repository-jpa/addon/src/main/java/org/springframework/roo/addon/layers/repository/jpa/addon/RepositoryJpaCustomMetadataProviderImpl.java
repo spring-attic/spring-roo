@@ -4,11 +4,15 @@ import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTO
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.finder.addon.FinderMetadata;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.jpa.addon.JpaOperations;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -18,25 +22,18 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,17 +77,18 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
   @Override
   @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
+    super.activate(cContext);
+    BundleContext localContext = cContext.getBundleContext();
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
+        new MetadataDependencyRegistryTracker(localContext, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
     addMetadataTrigger(ROO_REPOSITORY_JPA_CUSTOM);
 
     this.keyDecoratorTracker =
-        new CustomDataKeyDecoratorTracker(context, getClass(), new LayerTypeMatcher(
+        new CustomDataKeyDecoratorTracker(localContext, getClass(), new LayerTypeMatcher(
             ROO_REPOSITORY_JPA_CUSTOM, new JavaSymbolName(RooJpaRepositoryCustom.ENTITY_ATTRIBUTE)));
     this.keyDecoratorTracker.open();
   }
@@ -196,30 +194,14 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     getTypeLocationService().addModuleDependency(cid.getName().getModule(), entity);
     getTypeLocationService().addModuleDependency(cid.getName().getModule(), defaultReturnType);
 
-    // Getting referenced fields
-    Map<FieldMetadata, JavaType> referencedFields = new HashMap<FieldMetadata, JavaType>();
-    MemberDetails entityDetails = getMemberDetails(entity);
-    List<FieldMetadata> entityFields = entityDetails.getFields();
+    // Get field which entity is field part
+    List<Pair<FieldMetadata, RelationInfo>> relationsAsChild =
+        getJpaOperations().getFieldChildPartOfRelation(entity);
 
-    for (FieldMetadata field : entityFields) {
-      ClassOrInterfaceTypeDetails fieldTypeDetails =
-          getTypeLocationService().getTypeDetails(field.getFieldType());
-      // Get only reference fields
-      if (fieldTypeDetails != null
-          && fieldTypeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-
-        List<FieldMetadata> identifierFields =
-            getPersistenceMemberLocator().getIdentifierFields(field.getFieldType());
-
-        if (identifierFields.isEmpty()) {
-          continue;
-        }
-        referencedFields.put(field, identifierFields.get(0).getFieldType());
-
-        // Add dependency between modules
-        getTypeLocationService().addModuleDependency(cid.getName().getModule(),
-            field.getFieldType());
-      }
+    for (Pair<FieldMetadata, RelationInfo> fieldInfo : relationsAsChild) {
+      // Add dependency between modules
+      getTypeLocationService().addModuleDependency(cid.getName().getModule(),
+          fieldInfo.getLeft().getFieldType());
     }
 
     // Register dependency between JavaBeanMetadata and this one
@@ -231,6 +213,20 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
             getTypeLocationService().getTypeDetails(entity).getType(), logicalPath);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
+    // FIXME
+    List<CustomFinderMethod> findersToAdd =
+        getFindersToAdd(annotationValues, entity, defaultReturnType);
+
+    return new RepositoryJpaCustomMetadata(metadataIdentificationString, aspectName,
+        governorPhysicalTypeMetadata, annotationValues, entity, defaultReturnType,
+        relationsAsChild, findersToAdd);
+  }
+
+  private List<CustomFinderMethod> getFindersToAdd(
+      final RepositoryJpaCustomAnnotationValues annotationValues, JavaType entity,
+      JavaType defaultReturnType) {
+    // TODO
+    /*
     // Get data for those finders whose return type is a projection
     Set<ClassOrInterfaceTypeDetails> repositoryJpaClasses =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
@@ -309,10 +305,13 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
         }
       }
     }
+    return findersToAdd;
+    */
+    return null;
+  }
 
-    return new RepositoryJpaCustomMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, defaultReturnType,
-        referencedFields, findersToAdd);
+  private JpaOperations getJpaOperations() {
+    return getServiceManager().getServiceInstance(this, JpaOperations.class);
   }
 
   protected void registerDependency(final String upstreamDependency,

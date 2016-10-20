@@ -553,9 +553,15 @@ public class PushInOperationsImpl implements PushInOperations {
     return fieldBuilder.build();
   }
 
-
-  @Override
-  public boolean methodMatch(MethodMetadata method, String regEx) {
+  /**
+   * This method checks if the provided methodName matches with the provided
+   * regular expression
+   * 
+   * @param methodName
+   * @param regEx
+   * @return
+   */
+  private boolean methodMatch(MethodMetadata method, String regEx) {
     // Create regular expression using provided text
     Pattern pattern = Pattern.compile(regEx);
     Matcher matcher = pattern.matcher(method.getMethodName().getSymbolName());
@@ -574,7 +580,7 @@ public class PushInOperationsImpl implements PushInOperations {
         boolean sameParameterTypes = false;
         if (methodParams.size() == parameterTypes.length) {
           sameParameterTypes = true;
-          for (int i = 0; i < methodParams.size(); i++) {
+          for (int i = 0; methodParams.size() < i; i++) {
             if (!methodParams.get(i).getJavaType().getSimpleTypeName().equals(parameterTypes[i])) {
               sameParameterTypes = false;
               break;

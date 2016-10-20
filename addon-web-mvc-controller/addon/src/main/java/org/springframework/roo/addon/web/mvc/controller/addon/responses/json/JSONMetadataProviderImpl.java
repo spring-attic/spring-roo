@@ -249,11 +249,11 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
         (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
 
     // Getting methods from related service
-    MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
-    MethodMetadata serviceDeleteMethod = serviceMetadata.getDeleteMethod();
-    MethodMetadata serviceFindOneMethod = serviceMetadata.getFindOneMethod();
+    MethodMetadata serviceSaveMethod = serviceMetadata.getCurrentSaveMethod();
+    MethodMetadata serviceDeleteMethod = serviceMetadata.getCurrentDeleteMethod();
+    MethodMetadata serviceFindOneMethod = serviceMetadata.getCurrentFindOneMethod();
     MethodMetadata serviceFindAllGlobalSearchMethod =
-        serviceMetadata.getFindAllGlobalSearchMethod();
+        serviceMetadata.getCurrentFindAllWithGlobalSearchMethod();
 
     List<MethodMetadata> findersToAdd = new ArrayList<MethodMetadata>();
 

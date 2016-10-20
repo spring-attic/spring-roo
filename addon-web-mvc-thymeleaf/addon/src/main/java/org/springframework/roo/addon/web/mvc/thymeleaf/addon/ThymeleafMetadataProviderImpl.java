@@ -272,11 +272,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     this.controllerDetailInfo = controllerMetadata.getControllerDetailInfo();
 
     // Getting methods from related service
-    MethodMetadata serviceSaveMethod = serviceMetadata.getSaveMethod();
-    MethodMetadata serviceDeleteMethod = serviceMetadata.getDeleteMethod();
+    MethodMetadata serviceSaveMethod = serviceMetadata.getCurrentSaveMethod();
+    MethodMetadata serviceDeleteMethod = serviceMetadata.getCurrentDeleteMethod();
     MethodMetadata serviceFindAllGlobalSearchMethod =
-        serviceMetadata.getFindAllGlobalSearchMethod();
-    MethodMetadata serviceCountMethod = serviceMetadata.getCountMethod();
+        serviceMetadata.getCurrentFindAllWithGlobalSearchMethod();
+    MethodMetadata serviceCountMethod = serviceMetadata.getCurrentCountMethod();
 
     // Add finder methods
     List<MethodMetadata> findersToAdd = new ArrayList<MethodMetadata>();

@@ -21,6 +21,8 @@ public class SpringletsJavaType {
   public static final JavaType SPRINGLETS_QUERYDSL_REPOSITORY_SUPPORT_ATTRIBUTE_BUILDER =
       new JavaType(
           "io.springlets.data.jpa.repository.support.QueryDslRepositorySupportExt.AttributeMappingBuilder");
+  public static final JavaType SPRINGLETS_USER_DETAILS_SERVICE = new JavaType(
+      "io.springlets.security.web.SpringletsUserDetailsService");
 
   /**
    * Constructor is private to prevent instantiation

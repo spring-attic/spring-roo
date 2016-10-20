@@ -3,6 +3,9 @@ package org.springframework.roo.addon.layers.repository.jpa.addon;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -12,6 +15,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
@@ -23,12 +27,10 @@ import org.springframework.roo.project.LogicalPath;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 /**
  * Metadata for {@link RooJpaRepositoryCustom}.
@@ -49,10 +51,12 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private JavaType defaultReturnType;
-  private Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods;
-  private List<MethodMetadata> customFinderMethods;
-  private List<MethodMetadata> customCountMethods;
+  private final JavaType defaultReturnType;
+  private final Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethods;
+  private final List<MethodMetadata> customFinderMethods;
+  private final List<MethodMetadata> customCountMethods;
+
+  private final MethodMetadata findAllGlobalSearchMethod;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -89,69 +93,78 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    *            (required)
    * @param domainType entity referenced on interface
    * @param searchResult the java type o the search result returned by findAll finder
-   * @param referencedFields map that contains referenced field and its identifier field type
+   * @param relationsAsChild list of information of fields which entity is child part
    * @param findersToAdd
    */
   public RepositoryJpaCustomMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
-      final JavaType defaultReturnType, final Map<FieldMetadata, JavaType> referencedFields,
+      final JavaType defaultReturnType,
+      final List<Pair<FieldMetadata, RelationInfo>> relationsAsChild,
       List<CustomFinderMethod> findersToAdd) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(defaultReturnType, "Search result required");
-    Validate.notNull(referencedFields, "Referenced fields could be empty but not null");
+    Validate.notNull(relationsAsChild, "Referenced fields could be empty but not null");
 
     this.defaultReturnType = defaultReturnType;
-    this.customFinderMethods = new ArrayList<MethodMetadata>();
-    this.customCountMethods = new ArrayList<MethodMetadata>();
+    ArrayList<MethodMetadata> tmpCustomFinderMethods = new ArrayList<MethodMetadata>();
+    ArrayList<MethodMetadata> tmpCustomCountMethods = new ArrayList<MethodMetadata>();
 
-    referencedFieldsFindAllMethods = new HashMap<FieldMetadata, MethodMetadata>();
+    Map<FieldMetadata, MethodMetadata> tempTeferencedFieldsFindAllMethods =
+        new HashMap<FieldMetadata, MethodMetadata>(relationsAsChild.size());
+
+    boolean composition = false;
+    // Generate findAllMethod for every referencedFields
+    for (Pair<FieldMetadata, RelationInfo> referencedField : relationsAsChild) {
+      if (referencedField.getRight().type == JpaRelationType.COMPOSITION) {
+        // check for more than one part of compositions as child part
+        Validate.isTrue(!composition,
+            "Entity %s has defined more than one relations as child part whit type composition.",
+            aspectName);
+        composition = true;
+      }
+      MethodMetadata method =
+          getFindAllMethodByReferencedField(referencedField.getLeft(), referencedField.getValue());
+      ensureGovernorHasMethod(new MethodMetadataBuilder(method));
+      tempTeferencedFieldsFindAllMethods.put(referencedField.getLeft(), method);
+    }
+    referencedFieldsFindAllMethods =
+        Collections.unmodifiableMap(tempTeferencedFieldsFindAllMethods);
 
     // Generate findAll method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllGlobalSearchMethod()));
-
-    // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
-    // method is not in the same order and ITD will be regenerated.
-    Map<FieldMetadata, JavaType> referencedFieldsOrderedByFieldName =
-        new TreeMap<FieldMetadata, JavaType>(new Comparator<FieldMetadata>() {
-          @Override
-          public int compare(FieldMetadata field1, FieldMetadata field2) {
-            return field1.getFieldName().compareTo(field2.getFieldName());
-          }
-        });
-    referencedFieldsOrderedByFieldName.putAll(referencedFields);
-
-    // Generate findAllMethod for every referencedFields
-    for (Entry<FieldMetadata, JavaType> referencedField : referencedFieldsOrderedByFieldName
-        .entrySet()) {
-      MethodMetadata method =
-          getFindAllMethodByReferencedField(referencedField.getKey(), referencedField.getValue());
-      ensureGovernorHasMethod(new MethodMetadataBuilder(method));
-      referencedFieldsFindAllMethods.put(referencedField.getKey(), method);
+    if (!composition) {
+      findAllGlobalSearchMethod = getFindAllGlobalSearchMethod();
+      ensureGovernorHasMethod(new MethodMetadataBuilder(findAllGlobalSearchMethod));
+    } else {
+      findAllGlobalSearchMethod = null;
     }
 
+    // TODO
     // Generate finder methods if any
-    for (CustomFinderMethod finderMethod : findersToAdd) {
-      MethodMetadata method =
-          getCustomFinder(finderMethod.getReturnType(), finderMethod.getMethodName(),
-              finderMethod.getFormBean());
-      ensureGovernorHasMethod(new MethodMetadataBuilder(method));
-      if (!customFinderMethods.contains(method)) {
-        customFinderMethods.add(method);
-      }
+    if (findersToAdd != null) {
+      for (CustomFinderMethod finderMethod : findersToAdd) {
+        MethodMetadata method =
+            getCustomFinder(finderMethod.getReturnType(), finderMethod.getMethodName(),
+                finderMethod.getFormBean());
+        ensureGovernorHasMethod(new MethodMetadataBuilder(method));
+        if (!tmpCustomFinderMethods.contains(method)) {
+          tmpCustomFinderMethods.add(method);
+        }
 
-      // Generate a count method for each custom finder if they aren't count methods
-      if (!StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
-        MethodMetadata countMethod =
-            getCustomCount(finderMethod.getFormBean(), finderMethod.getMethodName());
-        ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
-        if (!customCountMethods.contains(countMethod)) {
-          customCountMethods.add(countMethod);
+        // Generate a count method for each custom finder if they aren't count methods
+        if (!StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
+          MethodMetadata countMethod =
+              getCustomCount(finderMethod.getFormBean(), finderMethod.getMethodName());
+          ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
+          if (!tmpCustomCountMethods.contains(countMethod)) {
+            tmpCustomCountMethods.add(countMethod);
+          }
         }
       }
     }
-
+    customCountMethods = Collections.unmodifiableList(tmpCustomCountMethods);
+    customFinderMethods = Collections.unmodifiableList(tmpCustomFinderMethods);
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -162,7 +175,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    *
    * @return
    */
-  public MethodMetadata getFindAllGlobalSearchMethod() {
+  private MethodMetadata getFindAllGlobalSearchMethod() {
 
     // Define method parameter types and parameter names
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -200,22 +213,29 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    *
    * @return
    */
-  public MethodMetadata getFindAllMethodByReferencedField(FieldMetadata referencedField,
-      JavaType identifierType) {
+  private MethodMetadata getFindAllMethodByReferencedField(FieldMetadata referencedField,
+      RelationInfo relationInfo) {
+
+    // Define method name
+    String findPattern = "findBy%s";
+    if (relationInfo.cardinality == Cardinality.MANY_TO_MANY) {
+      findPattern = "findBy%sContains";
+    }
 
     // Method name
     JavaSymbolName methodName =
-        new JavaSymbolName(String.format("findAllBy%s",
-            StringUtils.capitalize(referencedField.getFieldName().getSymbolName())));
+        new JavaSymbolName(String.format(findPattern, referencedField.getFieldName()
+            .getSymbolNameCapitalisedFirstLetter()));
 
     // Define method parameter types and parameter names
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(referencedField.getFieldType()));
+    final JavaType paramType = referencedField.getFieldType().getBaseType();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(paramType));
     parameterTypes.add(GLOBAL_SEARCH_PARAMETER);
     parameterTypes.add(PAGEABLE_PARAMETER);
 
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterNames.add(referencedField.getFieldName());
+    parameterNames.add(new JavaSymbolName(StringUtils.uncapitalize(paramType.getSimpleTypeName())));
     parameterNames.add(GOBAL_SEARCH_PARAMETER_NAME);
     parameterNames.add(PAGEABLE_PARAMETER_NAME);
 
@@ -241,7 +261,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    *
    * @return
    */
-  public MethodMetadata getCustomFinder(JavaType finderReturnType, JavaSymbolName finderName,
+  private MethodMetadata getCustomFinder(JavaType finderReturnType, JavaSymbolName finderName,
       JavaType parameterType) {
 
     // Define method parameter types and parameter names
@@ -275,7 +295,7 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    * @param javaSymbolName the finder name
    * @return
    */
-  public MethodMetadata getCustomCount(JavaType formBean, JavaSymbolName finderName) {
+  private MethodMetadata getCustomCount(JavaType formBean, JavaSymbolName finderName) {
 
     // Define method parameter types and parameter names
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -339,11 +359,19 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
   }
 
   /**
-   * This method returns all count methods of all custom finder methods
+   * Returns all count methods of all custom finder methods
    *
    * @return
    */
   public List<MethodMetadata> getCustomCountMethods() {
     return customCountMethods;
+  }
+
+  /**
+   *
+   * @return method findAll declared for this repository
+   */
+  public MethodMetadata getCurrentFindAllGlobalSearchMethod() {
+    return findAllGlobalSearchMethod;
   }
 }

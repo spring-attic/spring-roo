@@ -32,10 +32,6 @@ import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 import static org.springframework.roo.model.JpaJavaType.VERSION;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -45,6 +41,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.AbstractIdentifierServiceAwareMetadataProvider;
 import org.springframework.roo.addon.jpa.addon.identifier.Identifier;
 import org.springframework.roo.addon.jpa.addon.identifier.IdentifierMetadata;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -56,25 +53,37 @@ import org.springframework.roo.classpath.customdata.taggers.Matcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MidTypeMatcher;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
 import org.springframework.roo.model.CustomDataAccessor;
+import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 /**
  * The {@link JpaEntityMetadataProvider} implementation.
- * 
+ *
  * @author Andrew Swan
  * @author Enrique Ruiz at DISID Corporation S.L.
  * @author Juan Carlos García
@@ -137,7 +146,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#TRIGGER_ANNOTATIONS} as additional 
+   * <li>Registers {@link RooJavaType#TRIGGER_ANNOTATIONS} as additional
    * JavaType that will trigger metadata registration.</li>
    * </ul>
    */
@@ -156,9 +165,9 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -189,7 +198,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
   /**
    * Returns the {@link Identifier} for the entity identified by the given
    * metadata ID.
-   * 
+   *
    * @param metadataIdentificationString
    * @return <code>null</code> if there isn't one
    */
@@ -216,7 +225,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 
   /**
    * Returns the {@link JpaEntityAnnotationValues} for the given domain type
-   * 
+   *
    * @param governorPhysicalType (required)
    * @return a non-<code>null</code> instance
    */
@@ -274,8 +283,108 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
     JavaType entity = JpaEntityMetadata.getJavaType(metadataIdentificationString);
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
 
+    // Locate relation fields to process
+    List<FieldMetadata> fieldsParent = new ArrayList<FieldMetadata>();
+    Map<String, FieldMetadata> relationsAsChild = new HashMap<String, FieldMetadata>();
+
+
+    for (FieldMetadata field : entityDetails.getDeclaredFields()) {
+      if (field.getAnnotation(RooJavaType.ROO_JPA_RELATION) != null) {
+        fieldsParent.add(field);
+      } else if (field.getAnnotation(JpaJavaType.ONE_TO_ONE) != null
+          || field.getAnnotation(JpaJavaType.MANY_TO_ONE) != null
+          || field.getAnnotation(JpaJavaType.MANY_TO_MANY) != null) {
+        relationsAsChild.put(field.getFieldName().getSymbolName(), field);
+      }
+    }
+
+    // Check if it's a child part of a composition
+    FieldMetadata compositionRelationField;
+    try {
+      compositionRelationField =
+          getCompositionRelationField(entity, entityDetails, relationsAsChild);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException(
+          "Problems found when trying to identify composition relationship", e);
+    }
+
     return new JpaEntityMetadata(metadataIdentificationString, aspectName, governorPhysicalType,
-        parent, governorMemberDetails, identifier, jpaEntityAnnotationValues, entityDetails);
+        parent, governorMemberDetails, identifier, jpaEntityAnnotationValues, entityDetails,
+        fieldsParent, relationsAsChild, compositionRelationField);
+  }
+
+  /**
+   * Gets {@link FieldMetadata} of entity field which declares a composition relationship
+   *
+   * @param entity
+   * @param entityDetails
+   * @param relationsAsChild
+   * @return
+   * @throws ClassNotFoundException
+   */
+  private FieldMetadata getCompositionRelationField(JavaType entity,
+      ClassOrInterfaceTypeDetails entityDetails, Map<String, FieldMetadata> relationsAsChild)
+      throws ClassNotFoundException {
+    // Try to identify if it's is a child part of a composition.
+    // It uses details and annotation values instead metadata to
+    // avoid problems of circular dependencies
+    ClassOrInterfaceTypeDetails parentDatils;
+    FieldMetadata compositionRelationField = null;
+    AnnotationMetadata parentFieldRelationAnnotation;
+    JpaRelationType type;
+    String parentMappedBy;
+    for (FieldMetadata field : relationsAsChild.values()) {
+      parentDatils = getTypeLocationService().getTypeDetails(field.getFieldType().getBaseType());
+      for (FieldMetadata parentField : parentDatils
+          .getFieldsWithAnnotation(RooJavaType.ROO_JPA_RELATION)) {
+        parentFieldRelationAnnotation = parentField.getAnnotation(RooJavaType.ROO_JPA_RELATION);
+        if (parentFieldRelationAnnotation != null
+            && entity.equals(parentField.getFieldType().getBaseType())) {
+          parentMappedBy = getFieldMappedByAnnotationValue(parentField);
+          if (field.getFieldName().getSymbolName().equals(parentMappedBy)) {
+            // Found parent relation field
+            // Check composition
+            EnumDetails value =
+                ((EnumAttributeValue) parentFieldRelationAnnotation
+                    .getAttribute(new JavaSymbolName("type"))).getValue();
+            if (JpaRelationType.COMPOSITION.name().equals(value.getField().getSymbolName())) {
+              // Found composition
+              if (compositionRelationField != null) {
+                throw new IllegalArgumentException(
+                    String
+                        .format(
+                            "Found to relations which '%s' is child part of composition relation field: '%s' and '%s'",
+                            entity.getFullyQualifiedTypeName(),
+                            compositionRelationField.getFieldName(), field.getFieldName()));
+              }
+              compositionRelationField = field;
+            }
+          }
+        }
+      }
+    }
+    return compositionRelationField;
+  }
+
+  /**
+   * Return _mappedBy_ annotation attribute value of Jpa-relation-definition annotation
+   *
+   * @param parentField
+   * @return
+   */
+  private String getFieldMappedByAnnotationValue(FieldMetadata parentField) {
+    AnnotationMetadata annotation = null;
+    for (JavaType jpaAnnotation : Arrays.asList(JpaJavaType.ONE_TO_MANY, JpaJavaType.ONE_TO_ONE,
+        JpaJavaType.MANY_TO_MANY)) {
+      annotation = parentField.getAnnotation(jpaAnnotation);
+      if (annotation != null) {
+        break;
+      }
+    }
+    if (annotation != null) {
+      return (String) annotation.getAttribute("mappedBy").getValue();
+    }
+    return null;
   }
 
   public String getProvidesType() {

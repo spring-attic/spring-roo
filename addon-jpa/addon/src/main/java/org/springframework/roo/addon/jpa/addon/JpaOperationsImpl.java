@@ -10,13 +10,14 @@ import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -25,7 +26,9 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.RooJavaType;
@@ -38,6 +41,8 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -52,6 +57,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.logging.Level;
@@ -86,11 +92,7 @@ public class JpaOperationsImpl implements JpaOperations {
       "org.hibernate.cfg.ImprovedNamingStrategy";
   static final String POM_XML = "pom.xml";
 
-  private FileManager fileManager;
-  private PathResolver pathResolver;
-  private ProjectOperations projectOperations;
-  private TypeLocationService typeLocationService;
-  private TypeManagementService typeManagementService;
+  private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.BUILD-SNAPSHOT");
@@ -103,11 +105,9 @@ public class JpaOperationsImpl implements JpaOperations {
   private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER_WITHOUT_VERSION = new Dependency(
       "io.springlets", "springlets-data-commons", null);
 
-  @Reference
-  private ApplicationConfigService applicationConfigService;
-
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    this.serviceManager.activate(this.context);
   }
 
   @Override
@@ -128,8 +128,7 @@ public class JpaOperationsImpl implements JpaOperations {
     final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
     final String stratersXPath = getStarterXPath(getUnwantedOrmProviders(ormProvider));
 
-    // Updating pom.xml including necessary properties, dependencies and
-    // Spring Boot starters
+    // Updating pom.xml including necessary properties, dependencies and Spring Boot starters
     updateDependencies(module, configuration, ormProvider, jdbcDatabase, stratersXPath,
         providersXPath, databaseXPath, profile);
 
@@ -204,7 +203,7 @@ public class JpaOperationsImpl implements JpaOperations {
         cidBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(
             superclassClassOrInterfaceTypeDetails));
 
-        // Add dependency with superclass module
+        //Add dependency with superclass module
         getProjectOperations().addModuleDependency(superclass.getModule());
       }
     }
@@ -221,7 +220,7 @@ public class JpaOperationsImpl implements JpaOperations {
       implementsTypes.add(implementsType);
       cidBuilder.setImplementsTypes(implementsTypes);
 
-      // Add dependency with implementsType modules
+      //Add dependency with implementsType modules
       getProjectOperations().addModuleDependency(implementsType.getModule());
     }
 
@@ -230,8 +229,7 @@ public class JpaOperationsImpl implements JpaOperations {
     getTypeManagementService().createOrUpdateTypeOnDisk(cidBuilder.build());
 
     // Add persistence dependencies to entity module if necessary
-    // Don't need to add them if spring-boot-starter-data-jpa is present,
-    // often in single module project
+    // Don't need to add them if spring-boot-starter-data-jpa is present, often in single module project
     if (!getProjectOperations().getFocusedModule().hasDependencyExcludingVersion(
         new Dependency("org.springframework.boot", "spring-boot-starter-data-jpa", null))) {
       List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -275,13 +273,14 @@ public class JpaOperationsImpl implements JpaOperations {
 
   @Override
   public SortedSet<String> getDatabaseProperties(String profile) {
-    return applicationConfigService.getPropertyKeys(DATASOURCE_PREFIX, true, profile);
+    return getApplicationConfigService().getPropertyKeys(DATASOURCE_PREFIX, true, profile);
   }
 
   @Override
   public boolean isJpaInstalled() {
-    return projectOperations.isFeatureInstalled(FeatureNames.JPA);
+    return getProjectOperations().isFeatureInstalled(FeatureNames.JPA);
   }
+
 
   private String getConnectionString(final JdbcDatabase jdbcDatabase, String hostName,
       final String databaseName) {
@@ -367,7 +366,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
   public boolean hasDatabaseProperties() {
     SortedSet<String> databaseProperties =
-        applicationConfigService.getPropertyKeys(DATASOURCE_PREFIX, false, null);
+        getApplicationConfigService().getPropertyKeys(DATASOURCE_PREFIX, false, null);
 
     return !databaseProperties.isEmpty();
   }
@@ -384,17 +383,17 @@ public class JpaOperationsImpl implements JpaOperations {
 
       // Getting current properties
       final String driver =
-          applicationConfigService.getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_DRIVER,
+          getApplicationConfigService().getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_DRIVER,
               profile);
       final String url =
-          applicationConfigService
-              .getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL, profile);
+          getApplicationConfigService().getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL,
+              profile);
       final String uname =
-          applicationConfigService.getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_USERNAME,
-              profile);
+          getApplicationConfigService().getProperty(moduleName, DATASOURCE_PREFIX,
+              DATABASE_USERNAME, profile);
       final String pwd =
-          applicationConfigService.getProperty(moduleName, DATASOURCE_PREFIX, DATABASE_PASSWORD,
-              profile);
+          getApplicationConfigService().getProperty(moduleName, DATASOURCE_PREFIX,
+              DATABASE_PASSWORD, profile);
 
       boolean hasChanged = !jdbcDatabase.getDriverClassName().equals(driver);
       hasChanged |= !connectionString.equals(url);
@@ -412,25 +411,27 @@ public class JpaOperationsImpl implements JpaOperations {
       if (userName != null) {
         props.put(DATABASE_USERNAME, StringUtils.stripToEmpty(userName));
       } else {
-        applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_USERNAME,
-            profile);
+        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
+            DATABASE_USERNAME, profile);
       }
       if (password != null) {
         props.put(DATABASE_PASSWORD, StringUtils.stripToEmpty(password));
       } else {
-        applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_PASSWORD,
-            profile);
+        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
+            DATABASE_PASSWORD, profile);
       }
 
-      applicationConfigService.addProperties(moduleName, DATASOURCE_PREFIX, props, profile, force);
+      getApplicationConfigService().addProperties(moduleName, DATASOURCE_PREFIX, props, profile,
+          force);
 
       // Remove jndi property
-      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, JNDI_NAME, profile);
+      getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX, JNDI_NAME,
+          profile);
 
     } else {
 
       final String jndiProperty =
-          applicationConfigService.getProperty(moduleName, DATASOURCE_PREFIX, JNDI_NAME);
+          getApplicationConfigService().getProperty(moduleName, DATASOURCE_PREFIX, JNDI_NAME);
 
       boolean hasChanged =
           jndiProperty == null || !jndiProperty.equals(StringUtils.stripToEmpty(jndi));
@@ -443,36 +444,39 @@ public class JpaOperationsImpl implements JpaOperations {
       Map<String, String> props = new HashMap<String, String>();
       props.put(JNDI_NAME, jndi);
 
-      applicationConfigService.addProperties(moduleName, DATASOURCE_PREFIX, props, profile, force);
+      getApplicationConfigService().addProperties(moduleName, DATASOURCE_PREFIX, props, profile,
+          force);
 
       // Remove old properties
-      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL, profile);
-      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_DRIVER,
+      getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL,
           profile);
-      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_USERNAME,
+      getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_DRIVER,
           profile);
-      applicationConfigService.removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_PASSWORD,
-          profile);
+      getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
+          DATABASE_USERNAME, profile);
+      getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
+          DATABASE_PASSWORD, profile);
 
     }
 
     // Add Hibernate naming strategy property
     if (ormProvider.toString().equals(OrmProvider.HIBERNATE.toString())) {
-      applicationConfigService.addProperty(moduleName, HIBERNATE_NAMING_STRATEGY,
+      getApplicationConfigService().addProperty(moduleName, HIBERNATE_NAMING_STRATEGY,
           HIBERNATE_NAMING_STRATEGY_VALUE, profile, force);
     }
 
     // Add dev properties
-    applicationConfigService.addProperty(moduleName, "spring.jpa.show-sql", "true", "dev", true);
-    applicationConfigService.addProperty(moduleName, "spring.jpa.properties.hibernate.format_sql",
-        "true", "dev", true);
-    applicationConfigService.addProperty(moduleName,
+    getApplicationConfigService().addProperty(moduleName, "spring.jpa.show-sql", "true", "dev",
+        true);
+    getApplicationConfigService().addProperty(moduleName,
+        "spring.jpa.properties.hibernate.format_sql", "true", "dev", true);
+    getApplicationConfigService().addProperty(moduleName,
         "spring.jpa.properties.hibernate.generate_statistics", "true", "dev", true);
-    applicationConfigService.addProperty(moduleName, "logging.level.org.hibernate.stat", "DEBUG",
-        "dev", true);
-    applicationConfigService.addProperty(moduleName,
+    getApplicationConfigService().addProperty(moduleName, "logging.level.org.hibernate.stat",
+        "DEBUG", "dev", true);
+    getApplicationConfigService().addProperty(moduleName,
         "logging.level.com.querydsl.jpa.impl.JPAQuery", "DEBUG", "dev", true);
-    applicationConfigService.addProperty(moduleName, "logging.pattern.level",
+    getApplicationConfigService().addProperty(moduleName, "logging.pattern.level",
         "%5p - QP:%X{querydsl.parameters} -", "dev", true);
   }
 
@@ -539,16 +543,16 @@ public class JpaOperationsImpl implements JpaOperations {
     for (Element property : properties) {
       getProjectOperations().addProperty("", new Property(property));
     }
-    // Add dependencies used by other profiles, excluding the current
-    // profile
-    List<String> profiles = applicationConfigService.getApplicationProfiles(module.getModuleName());
+    // Add dependencies used by other profiles, excluding the current profile
+    List<String> profiles =
+        getApplicationConfigService().getApplicationProfiles(module.getModuleName());
     profiles.remove(profile);
 
     for (String applicationProfile : profiles) {
 
       // Extract database
       final String driver =
-          applicationConfigService.getProperty(module.getModuleName(), DATASOURCE_PREFIX,
+          getApplicationConfigService().getProperty(module.getModuleName(), DATASOURCE_PREFIX,
               DATABASE_DRIVER, applicationProfile);
 
       for (JdbcDatabase database : JdbcDatabase.values()) {
@@ -575,8 +579,7 @@ public class JpaOperationsImpl implements JpaOperations {
     getProjectOperations().removeDependencies(module.getModuleName(), redundantDependencies);
     getProjectOperations().addDependencies(module.getModuleName(), requiredDependencies);
 
-    // Add database test dependency to repository module if it is
-    // multimodule project
+    // Add database test dependency to repository module if it is multimodule project
     // and some repository has been already added
     if (getProjectOperations().isMultimoduleProject()) {
       Set<JavaType> repositoryTypes =
@@ -587,8 +590,7 @@ public class JpaOperationsImpl implements JpaOperations {
           JavaType repositoryType = repositoryIterator.next();
           String moduleName = repositoryType.getModule();
 
-          // Remove redundant dependencies from modules with
-          // repository classes
+          // Remove redundant dependencies from modules with repository classes
           getProjectOperations().removeDependencies(moduleName, redundantDependencies);
 
           // Add new database dependencies
@@ -659,14 +661,13 @@ public class JpaOperationsImpl implements JpaOperations {
 
         // Add the database dependency of each profile
         List<String> profiles =
-            applicationConfigService.getApplicationProfiles(modules.get(0).getModuleName());
+            getApplicationConfigService().getApplicationProfiles(modules.get(0).getModuleName());
 
         for (String applicationProfile : profiles) {
 
-          // // Find the driver name to obtain the right dependency to
-          // add
+          // // Find the driver name to obtain the right dependency to add
           final String driver =
-              applicationConfigService.getProperty(modules.get(0).getModuleName(),
+              getApplicationConfigService().getProperty(modules.get(0).getModuleName(),
                   DATASOURCE_PREFIX, DATABASE_DRIVER, applicationProfile);
 
           for (JdbcDatabase database : JdbcDatabase.values()) {
@@ -680,8 +681,8 @@ public class JpaOperationsImpl implements JpaOperations {
 
         // Find the driver name to obtain the right dependency to add
         String driver =
-            applicationConfigService.getProperty(modules.get(0).getModuleName(), DATASOURCE_PREFIX,
-                DATABASE_DRIVER, profile);
+            getApplicationConfigService().getProperty(modules.get(0).getModuleName(),
+                DATASOURCE_PREFIX, DATABASE_DRIVER, profile);
 
         // Find the prefix value from JdbcDatabase enum
         JdbcDatabase[] jdbcDatabaseValues = JdbcDatabase.values();
@@ -751,113 +752,136 @@ public class JpaOperationsImpl implements JpaOperations {
     }
   }
 
-  public FileManager getFileManager() {
-    // Get all Services implement FileManager interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(FileManager.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        fileManager = (FileManager) this.context.getService(ref);
-        return fileManager;
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load FileManager on JpaOperationsImpl.");
+  @Override
+  public Pair<FieldMetadata, RelationInfo> getFieldChildPartOfCompositionRelation(
+      ClassOrInterfaceTypeDetails entityCdi) {
+    JavaType domainType = entityCdi.getType();
+    List<Pair<FieldMetadata, RelationInfo>> relations = getFieldChildPartOfRelation(entityCdi);
+    if (relations.isEmpty()) {
       return null;
     }
+    JpaEntityMetadata parent;
+    JavaType parentType;
+    RelationInfo info;
+    List<Pair<FieldMetadata, RelationInfo>> compositionRelation =
+        new ArrayList<Pair<FieldMetadata, RelationInfo>>();
+    for (Pair<FieldMetadata, RelationInfo> field : relations) {
+      if (field.getRight().type == JpaRelationType.COMPOSITION) {
+        compositionRelation.add(field);
+      }
+    }
+    Validate.isTrue(compositionRelation.size() <= 1,
+        "Entity %s has more than one relations of composition as child part: ", domainType,
+        StringUtils.join(getFieldNamesOfRelationList(compositionRelation), ","));
+    if (compositionRelation.isEmpty()) {
+      return null;
+    }
+    return compositionRelation.get(0);
   }
 
-  public PathResolver getPathResolver() {
 
-    if (pathResolver != null) {
-      return pathResolver;
+  private List<String> getFieldNamesOfRelationList(
+      List<Pair<FieldMetadata, RelationInfo>> compositionRelation) {
+    List<String> names = new ArrayList<String>(compositionRelation.size());
+    for (Pair<FieldMetadata, RelationInfo> pair : compositionRelation) {
+      names.add(pair.getLeft().getFieldName().getSymbolName());
     }
-    // Get all Services implement PathResolver interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(PathResolver.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        pathResolver = (PathResolver) this.context.getService(ref);
-        return pathResolver;
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load PathResolver on JpaOperationsImpl.");
-      return null;
-    }
+    return names;
   }
 
-  public ProjectOperations getProjectOperations() {
-    if (projectOperations != null) {
-      return projectOperations;
-    }
-    // Get all Services implement ProjectOperations interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        projectOperations = (ProjectOperations) this.context.getService(ref);
-        return projectOperations;
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load ProjectOperations on JpaOperationsImpl.");
-      return null;
-    }
+  @Override
+  public List<Pair<FieldMetadata, RelationInfo>> getFieldChildPartOfRelation(JavaType entity) {
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+    return getFieldChildPartOfRelation(entityDetails);
   }
 
-  public TypeLocationService getTypeLocationService() {
-
-    if (typeLocationService != null) {
-      return typeLocationService;
+  @Override
+  public List<Pair<FieldMetadata, RelationInfo>> getFieldChildPartOfRelation(
+      ClassOrInterfaceTypeDetails entityCdi) {
+    JavaType domainType = entityCdi.getType();
+    JpaEntityMetadata entityMetadata = getJpaEntityMetadata(entityCdi);
+    Validate.notNull(entityMetadata, "%s should be a Jpa Entity", domainType);
+    Map<String, FieldMetadata> relations = entityMetadata.getRelationsAsChild();
+    List<Pair<FieldMetadata, RelationInfo>> childRelations =
+        new ArrayList<Pair<FieldMetadata, RelationInfo>>();
+    JpaEntityMetadata parent;
+    JavaType parentType;
+    RelationInfo info;
+    for (Entry<String, FieldMetadata> fieldEntry : relations.entrySet()) {
+      parentType = fieldEntry.getValue().getFieldType().getBaseType();
+      parent = getJpaEntityMetadata(parentType);
+      Validate.notNull(parent,
+          "Can't get information about Entity %s which is declared as parent in %s.%s field",
+          parentType, domainType, fieldEntry.getKey());
+      info = parent.getRelationInfosByMappedBy(domainType, fieldEntry.getKey());
+      Validate
+          .notNull(
+              info,
+              "Can't get information about relation on Entity %s which is declared as parent in %s.%s field",
+              parentType, domainType, fieldEntry.getKey());
+      childRelations.add(Pair.of(fieldEntry.getValue(), info));
     }
-    // Get all Services implement TypeLocationService interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        typeLocationService = (TypeLocationService) this.context.getService(ref);
-        return typeLocationService;
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load TypeLocationService on JpaOperationsImpl.");
-      return null;
-    }
+    return childRelations;
   }
 
-  public TypeManagementService getTypeManagementService() {
-    if (typeManagementService != null) {
-      return typeManagementService;
-    }
-    // Get all Services implement TypeManagementService interface
-    try {
-      ServiceReference<?>[] references =
-          this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+  @Override
+  public Pair<FieldMetadata, RelationInfo> getFieldChildPartOfCompositionRelation(JavaType entity) {
+    return getFieldChildPartOfCompositionRelation(getTypeLocationService().getTypeDetails(entity));
+  }
 
-      for (ServiceReference<?> ref : references) {
-        typeManagementService = (TypeManagementService) this.context.getService(ref);
-        return typeManagementService;
-      }
 
-      return null;
+  /**
+   * Gets JpaEntityMetadata by a javaType
+   * @param domainType
+   * @return
+   */
+  private JpaEntityMetadata getJpaEntityMetadata(JavaType domainType) {
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(domainType);
+    return getJpaEntityMetadata(entityDetails);
+  }
 
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load TypeManagementService on JpaOperationsImpl.");
-      return null;
-    }
+  /**
+   * Gets JpaEntityMetadata by a javaType
+   * @param domainType
+   * @return
+   */
+  private JpaEntityMetadata getJpaEntityMetadata(ClassOrInterfaceTypeDetails domainTypeDetails) {
+    final String entityMetadataId =
+        JpaEntityMetadata.createIdentifier(domainTypeDetails.getType(),
+            PhysicalTypeIdentifier.getPath(domainTypeDetails.getDeclaredByMetadataId()));
+    JpaEntityMetadata entityMetadata =
+        (JpaEntityMetadata) getMetadataService().get(entityMetadataId);
+    return entityMetadata;
+  }
+
+
+  private MetadataService getMetadataService() {
+    return serviceManager.getServiceInstance(this, MetadataService.class);
+  }
+
+
+  private FileManager getFileManager() {
+    return serviceManager.getServiceInstance(this, FileManager.class);
+  }
+
+  private PathResolver getPathResolver() {
+    return serviceManager.getServiceInstance(this, PathResolver.class);
+  }
+
+  private ProjectOperations getProjectOperations() {
+    return serviceManager.getServiceInstance(this, ProjectOperations.class);
+  }
+
+  private TypeLocationService getTypeLocationService() {
+    return serviceManager.getServiceInstance(this, TypeLocationService.class);
+  }
+
+  private TypeManagementService getTypeManagementService() {
+    return serviceManager.getServiceInstance(this, TypeManagementService.class);
+  }
+
+  private ApplicationConfigService getApplicationConfigService() {
+    return serviceManager.getServiceInstance(this, ApplicationConfigService.class);
   }
 
   /**
@@ -878,7 +902,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
     boolean hasStarter = dependencies.contains(starter);
 
-    return applicationConfigService.existsSpringConfigFile(moduleName) && hasStarter;
+    return getApplicationConfigService().existsSpringConfigFile(moduleName) && hasStarter;
   }
 
   public String getName() {
