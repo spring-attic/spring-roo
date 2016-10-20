@@ -74,11 +74,6 @@ public class DefaultSecurityProvider implements SecurityProvider {
   public void install(Pom module) {
 
     // Including dependency with Spring Boot Starter Security
-    if (getProjectOperations().isMultimoduleProject()) {
-      getProjectOperations().addDependencyToDependencyManagement(module.getModuleName(),
-          SPRING_SECURITY_STARTER);
-    }
-
     getProjectOperations().addDependency(module.getModuleName(), SPRING_SECURITY_STARTER);
 
   }
