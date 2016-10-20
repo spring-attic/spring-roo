@@ -5,27 +5,17 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.ImportMetadata;
-import org.springframework.roo.classpath.details.ImportMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.model.JavaPackage;
@@ -40,6 +30,10 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class that implements {@link ServiceOperations}.
@@ -65,6 +59,9 @@ public class ServiceOperationsImpl implements ServiceOperations {
   @Reference
   private TypeLocationService typeLocationService;
 
+  @Reference
+  private RepositoryJpaLocator repositoryJpaLocator;
+
   @Override
   public boolean areServiceCommandsAvailable() {
     return projectOperations.isFocusedProjectAvailable();
@@ -80,47 +77,63 @@ public class ServiceOperationsImpl implements ServiceOperations {
         typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JPA_ENTITY);
     for (final ClassOrInterfaceTypeDetails domainType : entities) {
 
-      // Ignore abstract entities
+      // Ignore abstract entities or entities without repository
       if (!domainType.isAbstract()) {
-        // Creating service interfaces for every entity
-        JavaType interfaceType =
-            new JavaType(String.format("%s.%sService", apiPackage.getFullyQualifiedPackageName(),
-                domainType.getName().getSimpleTypeName()), apiPackage.getModule());
+        // Get repository
+        ClassOrInterfaceTypeDetails repository =
+            repositoryJpaLocator.getRepository(domainType.getName());
+        if (repository != null) {
+          // Creating service interfaces for every entity
+          JavaType interfaceType =
+              new JavaType(String.format("%s.%sService", apiPackage.getFullyQualifiedPackageName(),
+                  domainType.getName().getSimpleTypeName()), apiPackage.getModule());
 
-        // Creating service implementation for every entity
-        JavaType implType =
-            new JavaType(String.format("%s.%sServiceImpl", implPackage
-                .getFullyQualifiedPackageName(), domainType.getName().getSimpleTypeName()),
-                implPackage.getModule());
+          // Creating service implementation for every entity
+          JavaType implType =
+              new JavaType(String.format("%s.%sServiceImpl", implPackage
+                  .getFullyQualifiedPackageName(), domainType.getName().getSimpleTypeName()),
+                  implPackage.getModule());
 
-        // Delegates on individual service creator
-        addService(domainType.getType(), interfaceType, implType);
+          // Delegates on individual service creator
+          addService(domainType.getType(), repository.getName(), interfaceType, implType);
+        }
       }
     }
+  }
+
+  /**
+   * Informs if this component can generate service class for required entity
+   *
+   * @param domainType
+   * @return
+   */
+  public boolean canGenerateService(JavaType domainType) {
+    return canGenerateService(typeLocationService.getTypeDetails(domainType));
+  }
+
+  /**
+   * Informs if this component can generate service class for required entity
+   *
+   * @param domainType
+   * @return
+   */
+  public boolean canGenerateService(ClassOrInterfaceTypeDetails domainType) {
+    ClassOrInterfaceTypeDetails repository =
+        repositoryJpaLocator.getFirstRepository(domainType.getName());
+    if (repository == null) {
+      return false;
+    }
+    return true;
   }
 
   @Override
   public void addService(final JavaType domainType, final JavaType interfaceType,
       final JavaType implType) {
 
-    JavaType repositoryType = null;
-
-    // Getting all repositories
-    Set<ClassOrInterfaceTypeDetails> repositories =
-        typeLocationService
-            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
-
     // Find repository related to entity
-    for (ClassOrInterfaceTypeDetails repository : repositories) {
-      AnnotationAttributeValue<JavaType> entityAttr =
-          repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
+    ClassOrInterfaceTypeDetails repository = repositoryJpaLocator.getRepository(domainType);
 
-      if (entityAttr != null && entityAttr.getValue().equals(domainType)) {
-        repositoryType = repository.getType();
-      }
-    }
-
-    if (repositoryType == null) {
+    if (repository == null) {
       LOGGER
           .log(
               Level.INFO,
@@ -131,7 +144,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
       return;
     }
 
-    addService(domainType, repositoryType, interfaceType, implType);
+    addService(domainType, repository.getName(), interfaceType, implType);
   }
 
   @Override
@@ -144,23 +157,11 @@ public class ServiceOperationsImpl implements ServiceOperations {
               "ERROR: You must specify a repository type to be able to generate service on multimodule projects.");
     }
 
+    // Check if current entity is related with the repository
+    ClassOrInterfaceTypeDetails repository = null;
     if (repositoryType == null) {
-      Set<ClassOrInterfaceTypeDetails> repositories =
-          typeLocationService
-              .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
-
-      Iterator<ClassOrInterfaceTypeDetails> it = repositories.iterator();
-      while (it.hasNext()) {
-        ClassOrInterfaceTypeDetails repository = it.next();
-        AnnotationAttributeValue<JavaType> entityAttr =
-            repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
-
-        if (entityAttr != null && entityAttr.getValue().equals(domainType)) {
-          repositoryType = repository.getType();
-        }
-      }
-
-      if (repositoryType == null) {
+      repository = repositoryJpaLocator.getFirstRepository(domainType);
+      if (repository == null) {
         // Is necessary at least one repository to generate service
         LOGGER
             .log(
@@ -171,7 +172,9 @@ public class ServiceOperationsImpl implements ServiceOperations {
                         domainType.getFullyQualifiedTypeName()));
         return;
       }
-
+      repositoryType = repository.getName();
+    } else {
+      repository = typeLocationService.getTypeDetails(repositoryType);
     }
 
     if (interfaceType == null) {
@@ -186,23 +189,6 @@ public class ServiceOperationsImpl implements ServiceOperations {
       implType =
           new JavaType(String.format("%s.%sServiceImpl", interfaceType.getPackage(),
               domainType.getSimpleTypeName()), interfaceType.getModule());
-    }
-
-
-
-    // Check if current entity is related with the repository
-    ClassOrInterfaceTypeDetails repository = typeLocationService.getTypeDetails(repositoryType);
-
-
-    if (repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA) == null) {
-      LOGGER
-          .log(
-              Level.INFO,
-              String
-                  .format(
-                      "INFO: Repository '%s' is not annotated with @RooJpaRepository. Use 'repository' commands to generate a valid repository and then try again.",
-                      repositoryType.getSimpleTypeName()));
-      return;
     }
 
     // Generating service interface
@@ -310,12 +296,6 @@ public class ServiceOperationsImpl implements ServiceOperations {
     final String declaredByMetadataId =
         PhysicalTypeIdentifier.createIdentifier(implTypeBuilder.build().getType(),
             pathResolver.getPath(implType.getModule(), Path.SRC_MAIN_JAVA));
-
-    // Add necessary imports
-    List<ImportMetadata> imports = new ArrayList<ImportMetadata>();
-    imports.add(new ImportMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, repository
-        .getType().getPackage(), repository.getType(), false, false).build());
-    implTypeBuilder.addImports(imports);
 
     // Write service implementation on disk
     typeManagementService.createOrUpdateTypeOnDisk(implTypeBuilder.build());

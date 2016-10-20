@@ -57,15 +57,4 @@ public interface PushInOperations {
    */
   List<Object> pushIn(JavaPackage specifiedPackage, JavaType klass, String method,
       boolean writeOnDisk);
-
-  /**
-   * This method checks if the provided methodName matches with the provided
-   * regular expression or the complete methodName including parameters
-   * 
-   * @param methodName the method to check 
-   * @param regEx regular expression or complete method name including parameter types that should match
-   * 
-   * @return true if the provided regular expression matches with the provided method
-   */
-  public boolean methodMatch(MethodMetadata method, String regEx);
 }

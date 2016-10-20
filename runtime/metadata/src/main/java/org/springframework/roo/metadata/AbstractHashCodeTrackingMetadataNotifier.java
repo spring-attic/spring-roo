@@ -10,6 +10,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * Allows a {@link MetadataProvider} or other class to track hash codes of
@@ -21,7 +22,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * that you will be presenting are all of the same type AND they provide a
  * reliable {@link Object#hashCode()} method. Failure to observe this
  * requirement will result in erroneous notifications.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -32,23 +33,28 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
       .getLogger(AbstractHashCodeTrackingMetadataNotifier.class);
 
   // ------------ OSGi component attributes ----------------
+  /**
+   * @deprecated this property should be _private_ and set by {@link #activate(ComponentContext)}
+   *        method
+   */
   public BundleContext context;
+
+  protected ServiceInstaceManager serviceManager = null;
 
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
+    serviceManager = new ServiceInstaceManager();
+    this.serviceManager.activate(this.context);
   }
 
   private final Map<String, Integer> hashes = new HashMap<String, Integer>();
-
-  protected MetadataDependencyRegistry metadataDependencyRegistry;
-  protected MetadataService metadataService;
 
   /**
    * Notifies downstream dependencies of a change if and only if the passed
    * metadata item has a different hash code than the existing metadata item.
    * This is aimed at reducing needless notifications if nothing has actually
    * changed since the last notification.
-   * 
+   *
    * @param metadataItem the potentially-updated metadata item (required; must
    *            be a metadata item of the same class as all other items
    *            presented to this class)
@@ -71,57 +77,32 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
     getMetadataService().put(metadataItem);
 
     if (getMetadataDependencyRegistry() != null) {
-      metadataDependencyRegistry.notifyDownstream(metadataItem.getId());
+      getMetadataDependencyRegistry().notifyDownstream(metadataItem.getId());
     }
+  }
+
+  /**
+   *
+   * @deprecated this method should be removed as {@link #serviceManager}
+   *    should be created and activated thru {@link #activate(ComponentContext)}
+   *    method of this class. Child classes should call super.activate in its activate
+   *    method
+   */
+  public ServiceInstaceManager getServiceManager() {
+    // TODO this method should be removed this
+    if (serviceManager == null) {
+      serviceManager = new ServiceInstaceManager();
+      serviceManager.activate(context);
+    }
+    return serviceManager;
   }
 
   public MetadataDependencyRegistry getMetadataDependencyRegistry() {
-    if (metadataDependencyRegistry == null) {
-      // Get all Services implement MetadataDependencyRegistry interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(MetadataDependencyRegistry.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          metadataDependencyRegistry = (MetadataDependencyRegistry) context.getService(ref);
-          return metadataDependencyRegistry;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER
-            .warning("Cannot load MetadataDependencyRegistry on AbstractHashCodeTrackingNotifier.");
-        return null;
-      }
-    } else {
-      return metadataDependencyRegistry;
-    }
-
+    return getServiceManager().getServiceInstance(this, MetadataDependencyRegistry.class);
   }
 
   public MetadataService getMetadataService() {
-    if (metadataService == null) {
-      // Get all Services implement MetadataService interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(MetadataService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          metadataService = (MetadataService) context.getService(ref);
-          return metadataService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MetadataService on AbstractHashCodeTrackingNotifier.");
-        return null;
-      }
-    } else {
-      return metadataService;
-    }
-
+    return getServiceManager().getServiceInstance(this, MetadataService.class);
   }
 
 }

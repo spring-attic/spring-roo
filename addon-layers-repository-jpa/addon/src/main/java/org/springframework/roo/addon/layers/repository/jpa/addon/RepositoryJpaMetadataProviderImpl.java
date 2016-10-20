@@ -1,25 +1,19 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_READ_ONLY_REPOSITORY;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.bouncycastle.crypto.params.GOST3410ValidationParameters;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.jpa.addon.JpaOperations;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -33,7 +27,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
@@ -43,9 +36,17 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 /**
  * Implementation of {@link RepositoryJpaMetadataProvider}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @author Enrique Ruiz at DISID Corporation S.L.
@@ -72,7 +73,7 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}.</li>
    * <li>Create and open the {@link CustomDataKeyDecoratorTracker}.</li>
-   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA} as additional 
+   * <li>Registers {@link RooJavaType#ROO_REPOSITORY_JPA} as additional
    * JavaType that will trigger metadata registration.</li>
    * <li>Set ensure the governor type details represent a class.</li>
    * </ul>
@@ -80,25 +81,26 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
   @Override
   @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
+    super.activate(cContext);
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
+        new MetadataDependencyRegistryTracker(cContext.getBundleContext(), this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
 
     addMetadataTrigger(ROO_REPOSITORY_JPA);
 
     this.keyDecoratorTracker =
-        new CustomDataKeyDecoratorTracker(context, getClass(), new LayerTypeMatcher(
-            ROO_REPOSITORY_JPA, new JavaSymbolName(RooJpaRepository.ENTITY_ATTRIBUTE)));
+        new CustomDataKeyDecoratorTracker(cContext.getBundleContext(), getClass(),
+            new LayerTypeMatcher(ROO_REPOSITORY_JPA, new JavaSymbolName(
+                RooJpaRepository.ENTITY_ATTRIBUTE)));
     this.keyDecoratorTracker.open();
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -161,10 +163,6 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
     final RepositoryJpaAnnotationValues annotationValues =
         new RepositoryJpaAnnotationValues(governorPhysicalTypeMetadata);
     final JavaType domainType = annotationValues.getEntity();
-    final JavaType identifierType = getPersistenceMemberLocator().getIdentifierType(domainType);
-    if (identifierType == null) {
-      return null;
-    }
 
     // Remember that this entity JavaType matches up with this metadata
     // identification string
@@ -178,21 +176,33 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
 
     // Getting associated entity
     JavaType entity = annotationValues.getEntity();
-    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
-    AnnotationMetadata jpaEntityAnnotation = entityDetails.getAnnotation(ROO_JPA_ENTITY);
 
-    if (jpaEntityAnnotation == null) {
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+    final String entityMetadataId =
+        JpaEntityMetadata.createIdentifier(entityDetails.getType(),
+            PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId()));
+    final JpaEntityMetadata entityMetadata =
+        (JpaEntityMetadata) getMetadataService().get(entityMetadataId);
+
+    if (entityMetadata == null) {
       return null;
     }
 
-    // Check if related entity is setted as readOnly
-    boolean readOnly = false;
-    if (jpaEntityAnnotation.getAttribute("readOnly") != null) {
-      readOnly = (Boolean) jpaEntityAnnotation.getAttribute("readOnly").getValue();
-    }
+    // Getting java bean metadata
+    final LogicalPath entityLogicalPath =
+        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
+    final String javaBeanMetadataKey =
+        JavaBeanMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
 
+    // Create dependency between repository and java bean annotation
+    registerDependency(javaBeanMetadataKey, metadataIdentificationString);
+
+    // Register dependency between repositoryMetadata and jpaEntityMetadata
+    registerDependency(entityMetadataId, metadataIdentificationString);
+
+    // Check if related entity is setted as readOnly
     JavaType readOnlyRepository = null;
-    if (readOnly) {
+    if (entityMetadata.isReadOnly()) {
       // Getting ReadOnlyRepository interface annotated with
       // @RooReadOnlyRepository
       Set<ClassOrInterfaceTypeDetails> readOnlyRepositories =
@@ -228,33 +238,17 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
       }
     }
 
-    // Getting reference fields to be able to generate countsByReferences
-    Map<FieldMetadata, FieldMetadata> referenceFields = new HashMap<FieldMetadata, FieldMetadata>();
-
-    // Getting all entity fields
-    MemberDetails entityMemberDetails = getMemberDetails(entity);
-    List<FieldMetadata> allEntityFields = entityMemberDetails.getFields();
-    for (FieldMetadata field : allEntityFields) {
-      ClassOrInterfaceTypeDetails fieldTypeDetails =
-          getTypeLocationService().getTypeDetails(field.getFieldType());
-      // Get only reference fields
-      if (fieldTypeDetails != null
-          && fieldTypeDetails.getAnnotation(RooJavaType.ROO_JPA_ENTITY) != null) {
-
-        List<FieldMetadata> identifierFields =
-            getPersistenceMemberLocator().getIdentifierFields(field.getFieldType());
-
-        if (identifierFields.isEmpty()) {
-          continue;
-        }
-
-        referenceFields.put(field, identifierFields.get(0));
-      }
-    }
+    // Get field which entity is field part
+    List<Pair<FieldMetadata, RelationInfo>> relationsAsChild =
+        getJpaOperations().getFieldChildPartOfRelation(entityDetails);
 
     return new RepositoryJpaMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, identifierType, readOnly,
-        readOnlyRepository, repositoryCustomList, referenceFields);
+        governorPhysicalTypeMetadata, annotationValues, entityMetadata, readOnlyRepository,
+        repositoryCustomList, relationsAsChild);
+  }
+
+  private JpaOperations getJpaOperations() {
+    return getServiceManager().getServiceInstance(this, JpaOperations.class);
   }
 
   public String getProvidesType() {

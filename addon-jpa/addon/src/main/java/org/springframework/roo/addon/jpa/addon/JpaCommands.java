@@ -60,7 +60,7 @@ import java.util.logging.Logger;
 
 /**
  * Commands for the JPA add-on to be used by the ROO shell.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
@@ -73,7 +73,7 @@ public class JpaCommands implements CommandMarker {
 
   private static Logger LOGGER = HandlerUtils.getLogger(JpaCommands.class);
 
-  // Project Settings 
+  // Project Settings
   private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
       "spring.roo.jpa.require.schema-object-name";
 
@@ -248,7 +248,7 @@ public class JpaCommands implements CommandMarker {
 
   /**
    * Indicator that checks if versionField param has been specified and makes its associate params visible
-   * 
+   *
    * @param shellContext
    * @return true if versionField param has been specified.
    */
@@ -269,9 +269,9 @@ public class JpaCommands implements CommandMarker {
 
   /**
    * ROO-3709: Indicator that checks if exists some project setting that makes
-   * each of the following parameters mandatory: sequenceName, identifierColumn, 
+   * each of the following parameters mandatory: sequenceName, identifierColumn,
    * identifierStrategy, versionField, versionColumn, versionType and table.
-   * 
+   *
    * @param shellContext
    * @return true if exists property
    *         {@link #SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME} on project settings
@@ -295,10 +295,10 @@ public class JpaCommands implements CommandMarker {
 
   /**
    * Indicator that provides all possible values for --class parameter
-   * 
-   * The provided results will not be validate. It will not include space 
+   *
+   * The provided results will not be validate. It will not include space
    * on finish.
-   * 
+   *
    * @param shellContext
    * @return List with all possible values for --class parameter
    */
@@ -566,7 +566,7 @@ public class JpaCommands implements CommandMarker {
   /**
      * Returns a builder for the entity-related annotation to be added to a
      * newly created JPA entity
-     * 
+     *
      * @param table
      * @param schema
      * @param catalog
@@ -653,10 +653,10 @@ public class JpaCommands implements CommandMarker {
   }
 
   /**
-   * Check if superclass of the extended entity which it's going to be created 
-   * will override any specified param and shows a message if so. If user uses 
-   * the --force global param it will be possible to execute the command for creating the entity. 
-   * 
+   * Check if superclass of the extended entity which it's going to be created
+   * will override any specified param and shows a message if so. If user uses
+   * the --force global param it will be possible to execute the command for creating the entity.
+   *
    * @param identifierColumn
    * @param identifierField
    * @param identifierStrategy
@@ -682,7 +682,7 @@ public class JpaCommands implements CommandMarker {
 
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
-   * 
+   *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
@@ -725,7 +725,7 @@ public class JpaCommands implements CommandMarker {
     if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
         && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-      // Value is for autocomplete only or user wrote abbreviate value  
+      // Value is for autocomplete only or user wrote abbreviate value
       javaTypeString = auxString;
     } else {
 

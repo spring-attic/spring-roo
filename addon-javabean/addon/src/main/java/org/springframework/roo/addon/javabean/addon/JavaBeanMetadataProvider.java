@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -40,7 +41,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Provides {@link JavaBeanMetadata}.
- * 
+ *
  * @author Ben Alex
  * @author Juan Carlos García
  * @author Enrique Ruiz at DISID Corporation S.L.
@@ -64,24 +65,25 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
    * This service is being activated so setup it:
    * <ul>
    * <li>Create and open the {@link MetadataDependencyRegistryTracker}</li>
-   * <li>Registers {@link RooJavaType#ROO_JAVA_BEAN} as additional JavaType 
+   * <li>Registers {@link RooJavaType#ROO_JAVA_BEAN} as additional JavaType
    * that will trigger metadata registration.</li>
    * </ul>
    */
   @Override
   protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
+    super.activate(cContext);
+    BundleContext localContext = cContext.getBundleContext();
     this.registryTracker =
-        new MetadataDependencyRegistryTracker(context, this,
+        new MetadataDependencyRegistryTracker(localContext, this,
             PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
     this.registryTracker.open();
     addMetadataTrigger(ROO_JAVA_BEAN);
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -138,7 +140,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
     }
 
     final MethodMetadata identifierAccessor =
-        persistenceMemberLocator.getIdentifierAccessor(fieldType);
+        getPersistenceMemberLocator().getIdentifierAccessor(fieldType);
     if (identifierAccessor != null) {
       getMetadataDependencyRegistry().registerDependency(
           identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
@@ -227,55 +229,13 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
       if (hasGaeStateChanged) {
         wasGaeEnabled = isGaeEnabled;
         for (final String producedMid : producedMids) {
-          metadataService.evictAndGet(producedMid);
+          getMetadataService().evictAndGet(producedMid);
         }
       }
     }
   }
 
   public ProjectOperations getProjectOperations() {
-    // Get all Services implement ProjectOperations interface
-    try {
-      ServiceReference<?>[] references =
-          context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (ProjectOperations) context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load ProjectOperations on JavaBeanMetadataProvider.");
-      return null;
-    }
-  }
-
-  /**
-   * Method to get MemberDetailScanner interface implementations
-   * 
-   * @return MemberDetailsScanner implementation
-   */
-  public MemberDetailsScanner getMemberDetailsScanner() {
-    if (memberDetailsScanner == null) {
-      // Get all Services implement MemberDetailsScanner interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          memberDetailsScanner = (MemberDetailsScanner) context.getService(ref);
-          return memberDetailsScanner;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MemberDetailsScanner on JavaBeanMetadataProvider.");
-        return null;
-      }
-    } else {
-      return memberDetailsScanner;
-    }
+    return getServiceManager().getServiceInstance(this, ProjectOperations.class);
   }
 }

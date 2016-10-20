@@ -3,6 +3,7 @@ package org.springframework.roo.addon.security.addon.security;
 import java.util.List;
 
 import org.springframework.roo.addon.security.addon.security.providers.SecurityProvider;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Feature;
 import org.springframework.roo.project.FeatureNames;

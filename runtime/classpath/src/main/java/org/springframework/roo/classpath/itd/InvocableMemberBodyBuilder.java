@@ -3,12 +3,14 @@ package org.springframework.roo.classpath.itd;
 import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.InvocableMemberMetadata;
 
+import java.util.Arrays;
+
 /**
  * A simple way of producing method bodies for
  * {@link InvocableMemberMetadata#getBody()}.
  * <p>
  * Method bodies immediately assume they are indented two levels.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -48,6 +50,20 @@ public class InvocableMemberBodyBuilder {
     appendIndent();
     if (message != null && !"".equals(message)) {
       stringBuilder.append(message);
+    }
+    return newLine(false);
+  }
+
+  /**
+   * Prints the message formatted with values, after adding indents and returns to a new line. This
+   * is the most commonly used method.
+   *
+   * @see String#format(String, Object...)
+   */
+  public InvocableMemberBodyBuilder appendFormalLine(final String message, final Object... values) {
+    appendIndent();
+    if (message != null && !"".equals(message)) {
+      stringBuilder.append(String.format(message, values));
     }
     return newLine(false);
   }

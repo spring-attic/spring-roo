@@ -2,14 +2,6 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import static org.springframework.roo.shell.OptionContexts.PROJECT;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -19,9 +11,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.converters.JavaPackageConverter;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -40,12 +32,20 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * This class defines available commands to manage service layer. Allows to
  * create new service related with some specific entity or generate services for
  * every entity defined on generated project. Always generates interface and its
  * implementation
- * 
+ *
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @since 1.2.0
@@ -65,6 +65,8 @@ public class ServiceCommands implements CommandMarker {
   private ProjectOperations projectOperations;
   @Reference
   private TypeLocationService typeLocationService;
+  @Reference
+  private RepositoryJpaLocator repositoryJpaLocator;
 
   private Converter<JavaType> javaTypeConverter;
 
@@ -141,18 +143,12 @@ public class ServiceCommands implements CommandMarker {
           getJavaTypeConverter().convertFromText(entity, JavaType.class, PROJECT);
 
       // Check if current entity has valid repository
-      Set<ClassOrInterfaceTypeDetails> repositories =
-          typeLocationService
-              .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+      Collection<ClassOrInterfaceTypeDetails> repositories =
+          repositoryJpaLocator.getRepositories(domainEntity);
 
       for (ClassOrInterfaceTypeDetails repository : repositories) {
-        AnnotationAttributeValue<JavaType> entityAttr =
-            repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
-
-        if (entityAttr != null && entityAttr.getValue().equals(domainEntity)) {
-          String replacedValue = replaceTopLevelPackageString(repository, currentText);
-          allPossibleValues.add(replacedValue);
-        }
+        String replacedValue = replaceTopLevelPackageString(repository, currentText);
+        allPossibleValues.add(replacedValue);
       }
 
       if (allPossibleValues.isEmpty()) {
@@ -250,9 +246,9 @@ public class ServiceCommands implements CommandMarker {
 
   /**
    * This indicator says if --apiPackage and --implPackage parameters are visible.
-   * 
+   *
    * If --all is specified, --apiPackage and --implPackage will be visible
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -269,9 +265,9 @@ public class ServiceCommands implements CommandMarker {
 
   /**
    * This indicator says if --all parameter is visible.
-   * 
+   *
    * If --entity is specified, --all won't be visible
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -286,9 +282,9 @@ public class ServiceCommands implements CommandMarker {
 
   /**
    * This indicator says if --entity parameter is visible.
-   * 
+   *
    * If --all is specified, --entity won't be visible
-   * 
+   *
    * @param context ShellContext
    * @return
    */
@@ -387,7 +383,7 @@ public class ServiceCommands implements CommandMarker {
 
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
-   * 
+   *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
@@ -430,7 +426,7 @@ public class ServiceCommands implements CommandMarker {
     if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
         && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-      // Value is for autocomplete only or user wrote abbreviate value  
+      // Value is for autocomplete only or user wrote abbreviate value
       javaTypeString = auxString;
     } else {
 

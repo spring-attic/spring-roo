@@ -72,6 +72,10 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType STRING_ARRAY = new JavaType("java.lang.String", 1, DataType.TYPE,
       null, null);
   public static final JavaType OVERRIDE = new JavaType("java.lang.Override");
+  public static final JavaType ITERABLE = new JavaType("java.lang.Iterable");
+  public static final JavaType ITERATOR = new JavaType("java.lang.Iterator");
+  public static final JavaType ARRAYS = new JavaType("java.util.Arrays");
+  public static final JavaType COLLECTIONS = new JavaType("java.util.Collections");
 
   /**
    * @deprecated use {@link #STRING} instead
@@ -155,7 +159,7 @@ public class JavaType implements Comparable<JavaType> {
   }
 
   /**
-   * Returns a {@link JavaType} for a list of the given element type
+   * Returns a {@link JavaType} for a {@link List} of the given element type
    *
    * @param elementType the type of element in the list (required)
    * @return a non-<code>null</code> type
@@ -163,6 +167,54 @@ public class JavaType implements Comparable<JavaType> {
    */
   public static JavaType listOf(final JavaType elementType) {
     return new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(elementType));
+  }
+
+  /**
+   * Returns a {@link JavaType} for a {@link Map} of the given element type
+   *
+   * @param elementType the type of element in the list (required)
+   * @return a non-<code>null</code> type
+   * @since 2.0.0
+   */
+  public static JavaType mapOf(final JavaType keyType, final JavaType elementType) {
+    return new JavaType(Map.class.getName(), 0, DataType.TYPE, null, Arrays.asList(keyType,
+        elementType));
+  }
+
+  /**
+   * Returns a {@link JavaType} for a {@link Iterable} of the given element type
+   *
+   * @param elementType the type of element in the list (required)
+   * @return a non-<code>null</code> type
+   * @since 2.0.0
+   */
+  public static JavaType iterableOf(final JavaType elementType) {
+    return new JavaType(Iterable.class.getName(), 0, DataType.TYPE, null,
+        Arrays.asList(elementType));
+  }
+
+  /**
+   * Returns a {@link JavaType} for a _collectionType_ of the given element type
+   *
+   * @param elementType the type of element in the list (required)
+   * @return a non-<code>null</code> type
+   * @since 2.0.0
+   */
+  public static JavaType collectionOf(final JavaType collectionType, final JavaType elementType) {
+    return new JavaType(collectionType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+        Arrays.asList(elementType));
+  }
+
+  /**
+   * Returns a {@link JavaType} for a _collectionType_ of the given element type
+   *
+   * @param elementType the type of element in the list (required)
+   * @return a non-<code>null</code> type
+   * @since 2.0.0
+   */
+  public static JavaType wrapperOf(final JavaType wrapperType, final JavaType... elementTypes) {
+    return new JavaType(wrapperType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
+        Arrays.asList(elementTypes));
   }
 
   private final JavaSymbolName argName;

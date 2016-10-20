@@ -1,5 +1,5 @@
 // Create project
-project setup --topLevelPackage com.disid.restful --projectName springMVCRESTful
+project setup --topLevelPackage com.disid.restful --projectName restfulshop
 
 // Setup JPA
 jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
@@ -60,3 +60,8 @@ field set --fieldName details --type ~.model.OrderDetail --cardinality ONE_TO_MA
 focus --class ~.model.Product
 field set --fieldName orderDetails --type ~.model.OrderDetail
 
+// Generate repositories
+repository jpa --all --package ~.repository
+
+// Generate service layer
+service --all

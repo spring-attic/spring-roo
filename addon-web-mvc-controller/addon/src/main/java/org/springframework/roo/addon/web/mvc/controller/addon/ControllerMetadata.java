@@ -343,7 +343,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     String serviceFieldName = getServiceField().getFieldName().getSymbolName();
 
     // Getting findOneMethod
-    MethodMetadata serviceFindOneMethod = serviceMetadata.getFindOneMethod();
+    MethodMetadata serviceFindOneMethod = serviceMetadata.getCurrentFindOneMethod();
 
     bodyBuilder.appendFormalLine(String.format("return this.%s.%s(id);", serviceFieldName,
         serviceFindOneMethod.getMethodName()));
@@ -397,7 +397,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     String serviceFieldName = getServiceField(service).getFieldName().getSymbolName();
 
     // Getting findOneMethod
-    MethodMetadata serviceFindOneMethod = serviceMetadata.getFindOneMethod();
+    MethodMetadata serviceFindOneMethod = serviceMetadata.getCurrentFindOneMethod();
 
     bodyBuilder.appendFormalLine(String.format("return this.%s.%s(id);", serviceFieldName,
         serviceFindOneMethod.getMethodName()));

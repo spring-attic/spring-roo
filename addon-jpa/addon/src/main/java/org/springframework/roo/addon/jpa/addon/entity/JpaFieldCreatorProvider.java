@@ -11,6 +11,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.field.addon.FieldCreatorProvider;
 import org.springframework.roo.addon.plural.addon.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -1672,6 +1673,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
         return plural;
       }
     }
-    return javaType.getSimpleTypeName() + "s";
+    return Noun.pluralOf(javaType.getSimpleTypeName());
   }
 }

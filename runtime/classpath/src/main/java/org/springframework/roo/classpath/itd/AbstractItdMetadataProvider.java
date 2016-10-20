@@ -60,7 +60,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * had a trigger annotation been found, the metadata will be created. The
  * metadata creation method is expected to create, update or delete the ITD file
  * as appropriate.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -71,7 +71,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
   protected final static Logger LOGGER = HandlerUtils.getLogger(AbstractItdMetadataProvider.class);
 
   protected void activate(final ComponentContext cContext) {
-    context = cContext.getBundleContext();
+    super.activate(cContext);
   }
 
   /**
@@ -86,12 +86,9 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * available
    */
   private boolean dependsOnGovernorTypeDetailAvailability = true;
-  protected FileManager fileManager;
+
   /** We don't care about trigger annotations; we always produce metadata */
   private boolean ignoreTriggerAnnotations = false;
-  protected ItdDiscoveryService itdDiscoveryService;
-
-  protected MemberDetailsScanner memberDetailsScanner;
 
   /**
    * The annotations which, if present on a class or interface, will cause
@@ -99,14 +96,10 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    */
   private final List<JavaType> metadataTriggers = new ArrayList<JavaType>();
 
-  protected PersistenceMemberLocator persistenceMemberLocator;
-
-  protected TypeLocationService typeLocationService;
-
   /**
    * Registers an additional {@link JavaType} that will trigger metadata
    * registration.
-   * 
+   *
    * @param javaType the type-level annotation to detect that will cause
    *            metadata creation (required)
    */
@@ -118,7 +111,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
   /**
    * Registers the given {@link JavaType}s as triggering metadata
    * registration.
-   * 
+   *
    * @param triggerTypes the type-level annotations to detect that will cause
    *            metadata creation
    * @since 1.2.0
@@ -133,7 +126,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * Called whenever there is a requirement to produce a local identifier (ie
    * an instance identifier consistent with {@link #getProvidesType()}) for
    * the indicated {@link JavaType} and {@link Path}.
-   * 
+   *
    * @param javaType the type (required)
    * @param path the path (required)
    * @return an instance-specific identifier that is compatible with
@@ -143,7 +136,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
   /**
    * Deletes the given ITD, either now or later.
-   * 
+   *
    * @param metadataIdentificationString the ITD's metadata ID
    * @param itdFilename the ITD's filename
    * @param reason the reason for deletion; ignored if now is
@@ -312,7 +305,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * identification string (ie an instance identifier consistent with
    * {@link #getProvidesType()}) into the corresponding governor physical type
    * identifier.
-   * 
+   *
    * @param metadataIdentificationString the local identifier (required)
    * @return the physical type identifier of the governor (required)
    */
@@ -337,7 +330,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * {@link IdentifiableJavaStructure#getDeclaredByMetadataId()} and
    * converting it into a {@link JavaType} and {@link Path}, then calling
    * {@link #createLocalIdentifier(JavaType, Path)}.
-   * 
+   *
    * @param memberHoldingTypeDetails the member holder from which the
    *            declaring type information should be extracted (required)
    * @return a MID produced by {@link #createLocalIdentifier(JavaType, Path)}
@@ -360,16 +353,13 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
   /**
    * Returns details of the given class or interface type's members
-   * 
+   *
    * @param cid the physical type for which to get the members (can be
    *            <code>null</code>)
    * @return <code>null</code> if the member details are unavailable
    */
   protected MemberDetails getMemberDetails(final ClassOrInterfaceTypeDetails cid) {
-
-    if (memberDetailsScanner == null) {
-      memberDetailsScanner = getMemberDetailsScanner();
-    }
+    MemberDetailsScanner memberDetailsScanner = getMemberDetailsScanner();
     Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
 
     if (cid == null) {
@@ -380,15 +370,13 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
   /**
    * Returns details of the given Java type's members
-   * 
+   *
    * @param type the type for which to get the members (required)
    * @return <code>null</code> if the member details are unavailable
    */
   protected MemberDetails getMemberDetails(final JavaType type) {
 
-    if (typeLocationService == null) {
-      typeLocationService = getTypeLocationService();
-    }
+    TypeLocationService typeLocationService = getTypeLocationService();
     Validate.notNull(typeLocationService, "TypeLocationService is required");
 
     final String physicalTypeIdentifier = typeLocationService.getPhysicalTypeIdentifier(type);
@@ -403,16 +391,13 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
   /**
    * Returns details of the given physical type's members
-   * 
+   *
    * @param physicalTypeMetadata the physical type for which to get the
    *            members (can be <code>null</code>)
    * @return <code>null</code> if the member details are unavailable
    */
   protected MemberDetails getMemberDetails(final PhysicalTypeMetadata physicalTypeMetadata) {
-
-    if (memberDetailsScanner == null) {
-      memberDetailsScanner = getMemberDetailsScanner();
-    }
+    MemberDetailsScanner memberDetailsScanner = getMemberDetailsScanner();
     Validate.notNull(memberDetailsScanner, "MemberDetailsScanner is required");
 
     // We need to abort if we couldn't find dependent metadata
@@ -431,7 +416,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
   /**
    * Called when it is time to create the actual metadata instance.
-   * 
+   *
    * @param metadataIdentificationString the local identifier (non-null and
    *            consistent with {@link #getProvidesType()})
    * @param aspectName the Java type name for the ITD (non-null and obtained
@@ -457,7 +442,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * type, starting with the given type's parent and going upwards until the
    * first such instance is found (i.e. lower level metadata takes priority
    * over higher level metadata)
-   * 
+   *
    * @param <T> the type of metadata to look for
    * @param child the child type whose parents to search (required)
    * @return <code>null</code> if there is no such metadata
@@ -482,7 +467,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * an interface, based on the value of {@link #dependsOnGovernorBeingAClass}
    * . A more sophisticated implementation could check for the presence of
    * particular annotations or the implementation of particular interfaces.
-   * 
+   *
    * @param type can be <code>null</code>
    * @return <code>false</code> if the given type is <code>null</code>
    */
@@ -569,7 +554,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * <p>
    * This method allows subclasses to specially handle generic
    * {@link MetadataDependencyRegistry} events.
-   * 
+   *
    * @param upstreamDependency the upstream which was modified (guaranteed to
    *            be non-null, but could be class-level or instance-level)
    */
@@ -578,7 +563,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
   /**
    * Removes a {@link JavaType} metadata trigger registration. If the type was
    * never registered, the method returns without an error.
-   * 
+   *
    * @param javaType to remove (required)
    */
   public void removeMetadataTrigger(final JavaType javaType) {
@@ -588,7 +573,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
   /**
    * Removes the given {@link JavaType}s as triggering metadata registration.
-   * 
+   *
    * @param triggerTypes the type-level annotations to remove as triggers
    * @since 1.2.0
    */
@@ -620,7 +605,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * This method may also return null if it wishes to abort processing of the
    * notification. This may be appropriate if a determination cannot be made
    * at this time for whatever reason (eg too early in a lifecycle etc).
-   * 
+   *
    * @param upstreamDependency the upstream (never null)
    * @return an instance-specific MID of type {@link #getProvidesType()} (or
    *         null if the metadata notification should be aborted)
@@ -646,7 +631,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
    * represent a class. Note that
    * {@link #setDependsOnGovernorTypeDetailAvailability(boolean)} must also be
    * true to ensure this can be relied upon.
-   * 
+   *
    * @param dependsOnGovernorBeingAClass true means governor type detail must
    *            represent a class
    */
@@ -657,7 +642,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
   /**
    * If set to true (default is true), ensures subclass not called unless the
    * governor type details are available.
-   * 
+   *
    * @param dependsOnGovernorTypeDetailAvailability true means governor type
    *            details must be available
    */
@@ -670,106 +655,23 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
     this.ignoreTriggerAnnotations = ignoreTriggerAnnotations;
   }
 
-  public FileManager getFileManager() {
-    if (fileManager == null) {
-      // Get all Services implement FileManager interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(FileManager.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (FileManager) context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load FileManager on AbstractIdMetadataProvider.");
-        return null;
-      }
-    } else {
-      return fileManager;
-    }
+  protected FileManager getFileManager() {
+    return getServiceManager().getServiceInstance(this, FileManager.class);
   }
 
-  public ItdDiscoveryService getItdDiscoveryService() {
-    if (itdDiscoveryService == null) {
-      // Get all Services implement ItdDiscoveryService interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(ItdDiscoveryService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (ItdDiscoveryService) context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ItdDiscoveryService on AbstractIdMetadataProvider.");
-        return null;
-      }
-    } else {
-      return itdDiscoveryService;
-    }
-
+  protected ItdDiscoveryService getItdDiscoveryService() {
+    return getServiceManager().getServiceInstance(this, ItdDiscoveryService.class);
   }
 
-  public MemberDetailsScanner getMemberDetailsScanner() {
-    // Get all Services implement MemberDetailsScanner interface
-    try {
-      ServiceReference<?>[] references =
-          context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (MemberDetailsScanner) context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load MemberDetailsScanner on AbstractIdMetadataProvider.");
-      return null;
-    }
+  protected MemberDetailsScanner getMemberDetailsScanner() {
+    return getServiceManager().getServiceInstance(this, MemberDetailsScanner.class);
   }
 
-  public TypeLocationService getTypeLocationService() {
-    // Get all Services implement TypeLocationService interface
-    try {
-      ServiceReference<?>[] references =
-          context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-      for (ServiceReference<?> ref : references) {
-        return (TypeLocationService) context.getService(ref);
-      }
-
-      return null;
-
-    } catch (InvalidSyntaxException e) {
-      LOGGER.warning("Cannot load TypeLocationService on AbstractIdMetadataProvider.");
-      return null;
-    }
+  protected TypeLocationService getTypeLocationService() {
+    return getServiceManager().getServiceInstance(this, TypeLocationService.class);
   }
 
-  public PersistenceMemberLocator getPersistenceMemberLocator() {
-    if (persistenceMemberLocator == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (PersistenceMemberLocator) context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PersistenceMemberLocator on AbstractIdMetadataProvider.");
-        return null;
-      }
-    } else {
-      return persistenceMemberLocator;
-    }
+  protected PersistenceMemberLocator getPersistenceMemberLocator() {
+    return getServiceManager().getServiceInstance(this, PersistenceMemberLocator.class);
   }
 }

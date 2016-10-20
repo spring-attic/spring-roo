@@ -74,6 +74,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
   private final Map<String, RelationInfo> relationInfosByMappedBy;
 
+  private final Map<String, FieldMetadata> relationsAsChild;
+
+  private final FieldMetadata compositionRelationField;
 
   public static JavaType getJavaType(final String metadataIdentificationString) {
     return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING,
@@ -99,12 +102,17 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    *            can be <code>null</code>
    * @param annotationValues the effective annotation values taking into
    *            account the presence of a {@link RooJpaEntity} annotation (required)
+   * @param entityDetails
+   * @param fieldsRelationAsParent fields that declares a relation which current entity is the parent part
+   * @param fieldsRelationAsChild fields that declares a relation which current entity is the child part
+   * @param compositionRelationField field that declares a composition relation which current entity is the child part
    */
   public JpaEntityMetadata(final String metadataIdentificationString, final JavaType itdName,
       final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parent,
       final MemberDetails entityMemberDetails, final Identifier identifier,
       final JpaEntityAnnotationValues annotationValues,
-      final ClassOrInterfaceTypeDetails entityDetails) {
+      final ClassOrInterfaceTypeDetails entityDetails, List<FieldMetadata> fieldsRelationAsParent,
+      Map<String, FieldMetadata> fieldsRelationAsChild, FieldMetadata compositionRelationField) {
     super(metadataIdentificationString, itdName, entityPhysicalType);
     Validate.notNull(annotationValues, "Annotation values are required");
     Validate.notNull(entityMemberDetails, "Entity MemberDetails are required");
@@ -166,7 +174,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     // Manage relations
 
-    MethodMetadataBuilder addMethod, removeMethod;
+    MethodMetadata addMethod, removeMethod;
     Cardinality cardinality;
     RelationInfo info;
     JavaType childType;
@@ -176,11 +184,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     JpaRelationType relationType;
     AnnotationAttributeValue<?> relationTypeAttribute;
 
-    Map<String, RelationInfo> fieldInfosTemporal = new HashMap<String, RelationInfo>();
-    Map<String, RelationInfo> fieldInfosMappedByTemporal = new HashMap<String, RelationInfo>();
+    Map<String, RelationInfo> fieldInfosTemporal = new TreeMap<String, RelationInfo>();
+    Map<String, RelationInfo> fieldInfosMappedByTemporal = new TreeMap<String, RelationInfo>();
     ImportRegistrationResolver importResolver = builder.getImportRegistrationResolver();
 
-    for (FieldMetadata field : entityDetails.getFieldsWithAnnotation(RooJavaType.ROO_JPA_RELATION)) {
+    // process fields which this entity is parent part
+    for (FieldMetadata field : fieldsRelationAsParent) {
 
       fieldName = field.getFieldName().getSymbolName();
       // Get cardinality
@@ -216,8 +225,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
           getRemoveMethod(removeMethodName, field, cardinality, childType, mappedBy, importResolver);
 
       // Add to ITD builder
-      builder.addMethod(addMethod);
-      builder.addMethod(removeMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(addMethod));
+      ensureGovernorHasMethod(new MethodMetadataBuilder(removeMethod));
 
       relationTypeAttribute =
           field.getAnnotation(RooJavaType.ROO_JPA_RELATION).getAttribute("type");
@@ -231,20 +240,39 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
       // Store info in temporal maps
       info =
-          new RelationInfo(fieldName, addMethodName, removeMethodName, cardinality, childType,
-              field, mappedBy, relationType);
+          new RelationInfo(fieldName, addMethod, removeMethod, cardinality, childType, field,
+              mappedBy, relationType);
       fieldInfosTemporal.put(fieldName, info);
-      fieldInfosMappedByTemporal.put(mappedBy, info);
+      // Use ChildType+childField as keys to avoid overried values
+      // (the same mappedBy on many relations. Ej. Order.customer and Invoice.customer)
+      fieldInfosMappedByTemporal.put(
+          getMappedByInfoKey(field.getFieldType().getBaseType(), mappedBy), info);
 
     }
 
     // store final info unmodifiable map
+    this.relationsAsChild = Collections.unmodifiableMap(fieldsRelationAsChild);
     relationInfos = Collections.unmodifiableMap(fieldInfosTemporal);
     relationInfosByMappedBy = Collections.unmodifiableMap(fieldInfosMappedByTemporal);
+    this.compositionRelationField = compositionRelationField;
 
 
     // Build the ITD based on what we added to the builder above
     itdTypeDetails = builder.build();
+  }
+
+  /**
+   * Get key to use to locate a value on {@link #relationInfosByMappedBy}.
+   *
+   * This is due to _mappedBy_ value usually is the same between relations with
+   * other entities (ej.: Order.customer, Invoice.customer, ContactNote.customer...)
+   *
+   * @param childEntity
+   * @param mappedBy field value
+   * @return
+   */
+  private String getMappedByInfoKey(JavaType childEntity, String mappedBy) {
+    return childEntity.getFullyQualifiedTypeName() + "." + mappedBy;
   }
 
   /**
@@ -952,7 +980,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @param importResolver
    * @return method metadata or null if method already in class
    */
-  private MethodMetadataBuilder getRemoveMethod(final JavaSymbolName removeMethodName,
+  private MethodMetadata getRemoveMethod(final JavaSymbolName removeMethodName,
       final FieldMetadata field, final Cardinality cardinality, final JavaType childType,
       final String mappedBy, ImportRegistrationResolver importResolver) {
 
@@ -960,15 +988,15 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     final List<JavaType> parameterTypes = new ArrayList<JavaType>(1);
     final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>(1);
     if (cardinality != Cardinality.ONE_TO_ONE) {
-      parameterTypes.add(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays
-          .asList(childType)));
+      parameterTypes.add(JavaType.iterableOf(childType));
       parameterNames.add(new JavaSymbolName(field.getFieldName().getSymbolName()
           + REMOVE_PARAMETER_SUFFIX));
     }
 
     // See if the type itself declared the method
-    if (governorHasMethod(removeMethodName, parameterTypes)) {
-      return null;
+    MethodMetadata existingMethod = getGovernorMethod(removeMethodName, parameterTypes);
+    if (existingMethod != null) {
+      return existingMethod;
     }
 
 
@@ -987,7 +1015,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, removeMethodName,
         JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-        parameterNames, builder);
+        parameterNames, builder).build();
   }
 
   /**
@@ -1042,7 +1070,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Build method body
 
     /*
-     * Assert.notEmpty({param}, "At least one item to remove is required");
+     *  Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
      * for ({childType} item : {param}) {
      *   this.{field}.remove(item);
      *   item.set{mappedBy}(null);
@@ -1051,9 +1079,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     importResolver.addImport(SpringJavaType.ASSERT);
 
-    // Assert.notEmpty({param}, "At least one item to remove is required");
+    // Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
     builder.appendFormalLine(String.format(
-        "Assert.notEmpty(%s, \"At least one item to remove is required\");", parameterName));
+        "Assert.notNull(%s, \"The given Iterable of items to remove can't be null!\");",
+        parameterName));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
@@ -1088,7 +1117,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Build method body
 
     /*
-     * Assert.notEmpty({param}, "At least one item to remove is required");
+     * Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
      * for ({childType} item : {param}) {
      *   this.{field}.remove(item);
      *   item.get{mappedBy}().remove(this);
@@ -1096,9 +1125,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
      */
 
     importResolver.addImport(SpringJavaType.ASSERT);
-    // Assert.notEmpty({param}, "At least one item to remove is required");
+
+    // Assert.notNull({param}, "The given Iterable of items to remove can't be null!");
     builder.appendFormalLine(String.format(
-        "Assert.notEmpty(%s, \"At least one item to remove is required\");", parameterName));
+        "Assert.notNull(%s, \"The given Iterable of items to remove can't be null!\");",
+        parameterName));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
@@ -1142,7 +1173,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @param importResolver
    * @return method metadata or null if method already in class
    */
-  private MethodMetadataBuilder getAddValueMethod(final JavaSymbolName addMethodName,
+  private MethodMetadata getAddValueMethod(final JavaSymbolName addMethodName,
       final FieldMetadata field, final Cardinality cardinality, final JavaType childType,
       final String mappedBy, final JavaSymbolName removeMethodName,
       ImportRegistrationResolver importResolver) {
@@ -1154,16 +1185,17 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       parameterTypes.add(childType);
       parameterNames.add(field.getFieldName());
     } else {
-      parameterTypes.add(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays
-          .asList(childType)));
+      parameterTypes.add(JavaType.iterableOf(childType));
       parameterNames.add(new JavaSymbolName(field.getFieldName().getSymbolName()
           + ADD_PARAMETER_SUFFIX));
     }
 
     // See if the type itself declared the method
-    if (governorHasMethod(addMethodName, parameterTypes)) {
-      return null;
+    MethodMetadata existingMethod = getGovernorMethod(addMethodName, parameterTypes);
+    if (existingMethod != null) {
+      return existingMethod;
     }
+
 
     final InvocableMemberBodyBuilder builder = new InvocableMemberBodyBuilder();
 
@@ -1180,7 +1212,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, addMethodName,
         JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes),
-        parameterNames, builder);
+        parameterNames, builder).build();
   }
 
   /**
@@ -1251,7 +1283,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Build method body
 
     /*
-     * Assert.notEmpty({param}, "At least one item to add is required");
+     * Assert.notNull({param}, "The given Iterable of items to add can't be null!");
      * for ({childType} item : {param}) {
      *   this.{field}.add(item);
      *   item.set{mappedBy}(this);
@@ -1259,9 +1291,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
      */
 
     importResolver.addImport(SpringJavaType.ASSERT);
-    // Assert.notEmpty({param}, "At least one item to add is required");
-    builder.appendFormalLine(String.format(
-        "Assert.notEmpty(%s, \"At least one item to add is required\");", parameterName));
+
+    // Assert.notNull({param}, "The given Iterable of items to add can't be null!");
+    builder.appendFormalLine(String
+        .format("Assert.notNull(%s, \"The given Iterable of items to add can't be null!\");",
+            parameterName));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
@@ -1297,7 +1331,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     // Build method body
 
     /*
-     * Assert.notEmpty({param}, "At least one item to add is required");
+     * Assert.notNull({param}, "The given Iterable of items to add can't be null!");
      * for ({childType} item : {param}) {
      *   this.{field}.add(item);
      *   item.get{mappedBy}().add(this);
@@ -1306,9 +1340,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
     importResolver.addImport(SpringJavaType.ASSERT);
 
-    // Assert.notEmpty({param}, "At least one item to add is required");
-    builder.appendFormalLine(String.format(
-        "Assert.notEmpty(%s, \"At least one item to add is required\");", parameterName));
+    // Assert.notNull({param}, "The given Iterable of items to add can't be null!");
+    builder.appendFormalLine(String
+        .format("Assert.notNull(%s, \"The given Iterable of items to add can't be null!\");",
+            parameterName));
 
     // for ({childType} item : {param}) {
     builder.appendFormalLine(String.format("for (%s item : %s) {", childType.getSimpleTypeName(),
@@ -1336,17 +1371,25 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   }
 
   /**
-   * @return information about relations which current entity is parent. Map key is child entity related field name
+   * @return information about relations which current entity is parent. Map key is child entity plus related field name
+   * @see #getRelationInfosByMappedBy(JavaType, String)
    */
   public Map<String, RelationInfo> getRelationInfosByMappedBy() {
     return relationInfosByMappedBy;
   }
 
   /**
-   * @return information about current identifier field
+   * @return information about relations which current entity is parent.
    */
-  public Identifier getCurrentIdentifier() {
-    return identifier;
+  public RelationInfo getRelationInfosByMappedBy(JavaType childType, String childFieldName) {
+    return relationInfosByMappedBy.get(getMappedByInfoKey(childType, childFieldName));
+  }
+
+  /**
+   * @return fields declared on entity which entity is child part.
+   */
+  public Map<String, FieldMetadata> getRelationsAsChild() {
+    return relationsAsChild;
   }
 
   /**
@@ -1363,6 +1406,24 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     return versionField;
   }
 
+  public boolean isReadOnly() {
+    return annotationValues.isReadOnly();
+  }
+
+  /**
+   * @return true if this entity is the child part of a composition relation
+   */
+  public boolean isCompositionChild() {
+    return compositionRelationField != null;
+  }
+
+  /**
+   * @return field of current entity which defines the child part of a composition relation
+   */
+  public FieldMetadata getCompositionRelationField() {
+    return compositionRelationField;
+  }
+
   /**
    * = _RelationInfo_
    *
@@ -1371,7 +1432,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    * @author Jose Manuel Vivó
    * @since 2.0.0
    */
-  public static class RelationInfo {
+  public static class RelationInfo implements Comparable<RelationInfo> {
 
     /**
      * relation field name
@@ -1382,12 +1443,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     /**
      * Method to use to add/set a item
      */
-    public final JavaSymbolName addMethod;
+    public final MethodMetadata addMethod;
 
     /**
      * Method to use to remove/clean a item
      */
-    public final JavaSymbolName removeMethod;
+    public final MethodMetadata removeMethod;
 
     /**
      * Relationship carinality
@@ -1426,8 +1487,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
      * @param mappedBy
      * @param type
      */
-    protected RelationInfo(final String fieldName, final JavaSymbolName addMethod,
-        final JavaSymbolName removeMethod, final Cardinality cardinality, final JavaType childType,
+    protected RelationInfo(final String fieldName, final MethodMetadata addMethod,
+        final MethodMetadata removeMethod, final Cardinality cardinality, final JavaType childType,
         final FieldMetadata fieldMetadata, final String mappedBy, final JpaRelationType type) {
       super();
       this.fieldName = fieldName;
@@ -1438,6 +1499,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       this.fieldMetadata = fieldMetadata;
       this.mappedBy = mappedBy;
       this.type = type;
+    }
+
+    @Override
+    public int compareTo(RelationInfo o) {
+      return fieldName.compareTo(o.fieldName);
     }
   }
 }
