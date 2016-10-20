@@ -247,6 +247,10 @@ public class ServiceOperationsImpl implements ServiceOperations {
 
     // Add dependencies between modules
     projectOperations.addModuleDependency(interfaceType.getModule(), domainType.getModule());
+
+    // Add springlets-data-commons dependency
+    projectOperations.addDependency(interfaceType.getModule(), new Dependency("io.springlets",
+        "springlets-data-commons", null));
   }
 
   /**
