@@ -335,11 +335,11 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         getListJSONMethod(serviceFindAllGlobalSearchMethod),
         getListDatatablesJSONMethod(serviceCountMethod), getCreateFormMethod(),
         getCreateMethod(serviceSaveMethod), getEditFormMethod(),
-        getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod), getShowMethod(),
-        getPopulateFormMethod(), getPopulateFormatsMethod(),
-        getDeleteBatchMethod(serviceDeleteMethod), getCreateBatchMethod(serviceSaveMethod),
-        getUpdateBatchMethod(serviceSaveMethod), getDetailMethods(), isReadOnly(), typesToImport,
-        this.type, findersToAdd);
+        getUpdateMethod(serviceSaveMethod), getDeleteMethod(serviceDeleteMethod),
+        getDeleteJSONMethod(serviceDeleteMethod), getShowMethod(), getPopulateFormMethod(),
+        getPopulateFormatsMethod(), getDeleteBatchMethod(serviceDeleteMethod),
+        getCreateBatchMethod(serviceSaveMethod), getUpdateBatchMethod(serviceSaveMethod),
+        getDetailMethods(), isReadOnly(), typesToImport, this.type, findersToAdd);
   }
 
   private ServiceMetadata getServiceMetadata() {
@@ -1813,6 +1813,88 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
             SpringJavaType.RESPONSE_ENTITY, parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method provides the "delete" method using JSON response type
+   *
+   * @param serviceDeleteMethod
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getDeleteJSONMethod(MethodMetadata serviceDeleteMethod) {
+
+    // If provided entity is readOnly, create method is not
+    // available
+    if (this.readOnly || this.type != ControllerType.ITEM) {
+      return null;
+    }
+
+    // First of all, check if exists other method with the same
+    // @RequesMapping to generate
+    MethodMetadata existingMVCMethod =
+        getControllerMVCService().getMVCMethodByRequestMapping(controller.getType(),
+            SpringEnumDetails.REQUEST_METHOD_DELETE, null, null, null,
+            SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE.toString(), "");
+    if (existingMVCMethod != null
+        && !existingMVCMethod.getDeclaredByMetadataId().equals(this.metadataIdentificationString)) {
+      return existingMVCMethod;
+    }
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("delete");
+
+    // Define parameters
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    AnnotationMetadataBuilder modelAttributeAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.MODEL_ATTRIBUTE);
+    parameterTypes.add(new AnnotatedJavaType(addTypeToImport(this.entity), modelAttributeAnnotation
+        .build()));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames
+        .add(new JavaSymbolName(StringUtils.uncapitalize(this.entity.getSimpleTypeName())));
+
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @RequestMapping annotation
+    annotations.add(getControllerMVCService().getRequestMappingAnnotation(
+        SpringEnumDetails.REQUEST_METHOD_DELETE, null, null, null,
+        SpringEnumDetails.MEDIA_TYPE_APPLICATION_JSON_VALUE, ""));
+
+    // Adding @ResponseBody annotation
+    AnnotationMetadataBuilder responseBodyAnnotation =
+        new AnnotationMetadataBuilder(SpringJavaType.RESPONSE_BODY);
+    annotations.add(responseBodyAnnotation);
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // entityService.DELETE_METHOD(id);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("%s.%s(%s);", getServiceField().getFieldName(),
+        serviceDeleteMethod.getMethodName(),
+        StringUtils.uncapitalize(this.entity.getSimpleTypeName())));
+
+    // return new ResponseEntity(HttpStatus.OK);
+    bodyBuilder.newLine();
+    bodyBuilder.appendFormalLine(String.format("return new %s<%s>(%s.%s);",
+        addTypeToImport(SpringJavaType.RESPONSE_ENTITY).getSimpleTypeName(),
+        this.entity.getSimpleTypeName(),
+        addTypeToImport(SpringEnumDetails.HTTP_STATUS_OK.getType()).getSimpleTypeName(),
+        SpringEnumDetails.HTTP_STATUS_OK.getField().getSymbolName()));
+
+    JavaType responseEntityWithAttr =
+        new JavaType(SpringJavaType.RESPONSE_ENTITY.getFullyQualifiedTypeName(), 0, DataType.TYPE,
+            null, Arrays.asList(this.entity));
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
+            responseEntityWithAttr, parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
 
     return methodBuilder.build();

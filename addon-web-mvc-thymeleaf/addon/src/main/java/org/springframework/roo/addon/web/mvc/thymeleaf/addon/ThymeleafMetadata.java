@@ -38,6 +38,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
   private MethodMetadata createMethod;
   private MethodMetadata editFormMethod;
   private MethodMetadata updateMethod;
+  private MethodMetadata deleteJSONMethod;
   private MethodMetadata deleteMethod;
   private MethodMetadata showMethod;
   private MethodMetadata populateFormMethod;
@@ -97,6 +98,8 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    *            MethodMetadata
    * @param deleteMethod
    *            MethodMetadata
+   * @param deleteJSONMethod
+   *            MethodMetadata
    * @param showMethod
    *            MethodMetadata
    * @param populateFormMethod
@@ -124,11 +127,12 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
       final MethodMetadata listJSONMethod, final MethodMetadata listDatatablesJSONMethod,
       final MethodMetadata createFormMethod, final MethodMetadata createMethod,
       final MethodMetadata editFormMethod, final MethodMetadata updateMethod,
-      final MethodMetadata deleteMethod, final MethodMetadata showMethod,
-      final MethodMetadata populateFormMethod, final MethodMetadata populateFormatsMethod,
-      final MethodMetadata deleteBatchMethod, final MethodMetadata createBatchMethod,
-      final MethodMetadata updateBatchMethod, List<MethodMetadata> detailMethods,
-      final boolean readOnly, final List<JavaType> typesToImport, final ControllerType type,
+      final MethodMetadata deleteMethod, final MethodMetadata deleteJSONMethod,
+      final MethodMetadata showMethod, final MethodMetadata populateFormMethod,
+      final MethodMetadata populateFormatsMethod, final MethodMetadata deleteBatchMethod,
+      final MethodMetadata createBatchMethod, final MethodMetadata updateBatchMethod,
+      List<MethodMetadata> detailMethods, final boolean readOnly,
+      final List<JavaType> typesToImport, final ControllerType type,
       final List<MethodMetadata> finderMethods) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
@@ -143,6 +147,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
     this.editFormMethod = editFormMethod;
     this.updateMethod = updateMethod;
     this.deleteMethod = deleteMethod;
+    this.deleteJSONMethod = deleteJSONMethod;
     this.deleteBatchMethod = deleteBatchMethod;
     this.createBatchMethod = createBatchMethod;
     this.updateBatchMethod = updateBatchMethod;
@@ -173,6 +178,7 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
         ensureGovernorHasMethod(new MethodMetadataBuilder(editFormMethod));
         ensureGovernorHasMethod(new MethodMetadataBuilder(updateMethod));
         ensureGovernorHasMethod(new MethodMetadataBuilder(deleteMethod));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(deleteJSONMethod));
       }
     }
 
@@ -275,6 +281,15 @@ public class ThymeleafMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
    */
   public MethodMetadata getDeleteMethod() {
     return this.deleteMethod;
+  }
+
+  /**
+   * Method that returns delete JSON method
+   *
+   * @return
+   */
+  public MethodMetadata getDeleteJSONMethod() {
+    return this.deleteJSONMethod;
   }
 
   /**
