@@ -927,7 +927,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // If provided entity is readOnly or annotated controller is not a
     // Collection controller
-    // create method will not be available
+    // update method will not be available
     if (this.readOnly || this.type != ControllerType.ITEM) {
       return null;
     }
@@ -1018,7 +1018,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     // If provided entity is readOnly or annotated controller is not a
     // Collection controller
-    // create method will not be available
+    // delete method will not be available
     if (this.readOnly || this.type != ControllerType.ITEM) {
       return null;
     }
@@ -1239,7 +1239,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * @return
    */
   private MethodMetadata getFinderListMethod(MethodMetadata finderMethod) {
-    final List<AnnotatedJavaType> originalParameterTypes = finderMethod.getParameterTypes();
 
     // Get finder parameter names
     final List<JavaSymbolName> originalParameterNames = finderMethod.getParameterNames();
@@ -1322,7 +1321,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    * @return
    */
   private MethodMetadata getFinderRedirectMethod(MethodMetadata finderMethod) {
-    final List<AnnotatedJavaType> originalParameterTypes = finderMethod.getParameterTypes();
 
     // Get finder parameter names
     final List<JavaSymbolName> originalParameterNames = finderMethod.getParameterNames();
@@ -1827,10 +1825,9 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
    */
   private MethodMetadata getShowMethod() {
 
-    // If provided entity is readOnly or annotated controller is not a
-    // Collection controller
-    // create method will not be available
-    if (this.readOnly || this.type != ControllerType.ITEM) {
+    // If annotated controller is not a Item controller
+    // show method will not be available
+    if (this.type != ControllerType.ITEM) {
       return null;
     }
 
