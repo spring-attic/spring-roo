@@ -146,7 +146,7 @@ public class JpaOperationsImplTest {
     MockitoAnnotations.initMocks(this);
 
     // Mocks
-    when(mockProjectOperations.getPathResolver()).thenReturn(mockPathResolver);
+    /*when(mockProjectOperations.getPathResolver()).thenReturn(mockPathResolver);
     when(mockPathResolver.getFocusedIdentifier(Path.ROOT, JpaOperationsImpl.POM_XML)).thenReturn(
         POM_PATH);
 
@@ -166,7 +166,7 @@ public class JpaOperationsImplTest {
         mockProjectOperations);
 
     // Things that are too hard or ugly to mock
-    dialects = new Properties();
+    dialects = new Properties();*/
   }
 
   @Test
