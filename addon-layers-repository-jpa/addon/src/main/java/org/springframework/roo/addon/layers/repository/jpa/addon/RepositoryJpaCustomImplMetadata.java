@@ -169,12 +169,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
     // method is not in the same order and ITD will be regenerated.
     Map<FieldMetadata, MethodMetadata> allFindByReferencedFieldsMethodsOrderedByFieldName =
-        new TreeMap<FieldMetadata, MethodMetadata>(new Comparator<FieldMetadata>() {
-          @Override
-          public int compare(FieldMetadata field1, FieldMetadata field2) {
-            return field1.getFieldName().compareTo(field2.getFieldName());
-          }
-        });
+        new TreeMap<FieldMetadata, MethodMetadata>(FieldMetadata.COMPARATOR_BY_NAME);
     allFindByReferencedFieldsMethodsOrderedByFieldName.putAll(allFindReferencedFieldsMethods);
 
     // Generate findAll referenced fields implementation methods

@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 
 import java.util.Collection;
 
@@ -31,17 +32,15 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
   @Reference
   private MetadataDependencyRegistry dependencyRegistry;
 
-  private MetadataLocatorUtils<Object> util = null;
+  private MetadataLocatorUtils<JavaType> util;
 
   protected void activate(final ComponentContext cContext) {
-    if (util == null) {
-      util = new MetadataLocatorUtils<Object>(typeLocationService, new Evaluator());
-    }
+    util = new MetadataLocatorUtils<JavaType>(new Evaluator(typeLocationService));
     dependencyRegistry.addNotificationListener(util);
   }
 
   public Collection<ClassOrInterfaceTypeDetails> getRepositories(final JavaType domainType) {
-    return util.getValue(domainType, null);
+    return util.getValue(domainType, RooJavaType.ROO_REPOSITORY_JPA);
   }
 
   @Override
@@ -67,11 +66,15 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
     return repositories.iterator().next();
   }
 
-  private class Evaluator implements MetadataLocatorUtils.LocatorEvaluator<Object> {
+  private class Evaluator extends MetadataLocatorUtils.LocatorEvaluatorByAnnotation {
+
+    public Evaluator(TypeLocationService typeLocationService) {
+      super(typeLocationService);
+    }
 
     @Override
     public boolean evaluateForKey(JavaType key, ClassOrInterfaceTypeDetails valueToEvalueate,
-        Object context) {
+        JavaType context) {
       final RepositoryJpaAnnotationValues annotationValues =
           new RepositoryJpaAnnotationValues(new DefaultPhysicalTypeMetadata(
               valueToEvalueate.getDeclaredByMetadataId(),

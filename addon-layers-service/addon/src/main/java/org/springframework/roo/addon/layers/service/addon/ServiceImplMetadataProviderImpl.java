@@ -2,19 +2,18 @@ package org.springframework.roo.addon.layers.service.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE_IMPL;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.jpa.addon.JpaOperations;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.layers.service.annotations.RooServiceImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -26,7 +25,6 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -39,6 +37,13 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ServiceImplMetadataProvider}.
@@ -156,8 +161,11 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     // Getting service interface
     JavaType serviceInterface = annotationValues.getService();
+
     ClassOrInterfaceTypeDetails serviceInterfaceDetails =
         getTypeLocationService().getTypeDetails(serviceInterface);
+    final ServiceMetadata serviceMetadata =
+        getServiceMetadata(metadataIdentificationString, serviceInterfaceDetails);
 
     AnnotationMetadata serviceAnnotation =
         serviceInterfaceDetails.getAnnotation(RooJavaType.ROO_SERVICE);
@@ -167,37 +175,16 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
     JavaType entity = (JavaType) serviceAnnotation.getAttribute("entity").getValue();
 
-    // Getting all methods defined on service interface that should be implemented in this
-    // service implementation
-    List<MethodMetadata> methodsNotTransactionalsToBeImplemented = new ArrayList<MethodMetadata>();
-    List<MethodMetadata> methodsTransactionalsToBeImplemented = new ArrayList<MethodMetadata>();
-    Map<FieldMetadata, MethodMetadata> countReferencedFieldsMethodsToBeImplemented =
-        new HashMap<FieldMetadata, MethodMetadata>();
-    Map<FieldMetadata, MethodMetadata> findAllReferencedFieldsMethodsToBeImplemented =
-        new HashMap<FieldMetadata, MethodMetadata>();
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+    final String entityMetadataId =
+        JpaEntityMetadata.createIdentifier(entityDetails.getType(),
+            PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId()));
+    final JpaEntityMetadata entityMetadata =
+        (JpaEntityMetadata) getMetadataService().get(entityMetadataId);
 
-
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(serviceInterfaceDetails.getDeclaredByMetadataId());
-    final String serviceMetadataKey =
-        ServiceMetadata.createIdentifier(serviceInterfaceDetails.getType(), logicalPath);
-    registerDependency(serviceMetadataKey, metadataIdentificationString);
-    final ServiceMetadata serviceMetadata =
-        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
-
+    // Add dependencies between modules
     if (serviceMetadata != null) {
-      methodsNotTransactionalsToBeImplemented = serviceMetadata.getNotTransactionalDefinedMethods();
-      methodsTransactionalsToBeImplemented = serviceMetadata.getTransactionalDefinedMethods();
-      List<MethodMetadata> methodsToBeImplemented = new ArrayList<MethodMetadata>();
-      methodsToBeImplemented.addAll(methodsTransactionalsToBeImplemented);
-      methodsToBeImplemented.addAll(methodsNotTransactionalsToBeImplemented);
-      countReferencedFieldsMethodsToBeImplemented =
-          serviceMetadata.getCountByReferenceFieldDefinedMethod();
-      findAllReferencedFieldsMethodsToBeImplemented =
-          serviceMetadata.getReferencedFieldsFindAllDefinedMethods();
-
-      // Add dependencies between modules
-      for (MethodMetadata method : methodsToBeImplemented) {
+      for (MethodMetadata method : serviceMetadata.getAllMethods()) {
         List<JavaType> types = new ArrayList<JavaType>();
         types.add(method.getReturnType());
         types.addAll(method.getReturnType().getParameters());
@@ -215,27 +202,74 @@ public class ServiceImplMetadataProviderImpl extends AbstractMemberDiscoveringIt
     }
 
     // Getting associated repository
-    ClassOrInterfaceTypeDetails repositoryDetails = null;
-    Set<ClassOrInterfaceTypeDetails> repositories =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_REPOSITORY_JPA);
-    for (ClassOrInterfaceTypeDetails repo : repositories) {
-      AnnotationAttributeValue<JavaType> entityAttr =
-          repo.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
-      if (entityAttr != null && entityAttr.getValue().equals(entity)) {
-        repositoryDetails = repo;
+    ClassOrInterfaceTypeDetails repositoryDetails = getRepositoryJpaLocator().getRepository(entity);
+    final String repositoryMetadataId =
+        RepositoryJpaMetadata.createIdentifier(repositoryDetails.getType(),
+            PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId()));
+    final RepositoryJpaMetadata repositoryMetadata =
+        (RepositoryJpaMetadata) getMetadataService().get(repositoryMetadataId);
+
+    // Locate related services API types required by relations
+    Map<JavaType, ServiceMetadata> requiredServicesByEntity =
+        new HashMap<JavaType, ServiceMetadata>();
+    ClassOrInterfaceTypeDetails relatedService;
+    for (RelationInfo info : entityMetadata.getRelationInfos().values()) {
+      if (info.type == JpaRelationType.COMPOSITION) {
+        // We don't need composition services
+        continue;
+      }
+      if (!requiredServicesByEntity.containsKey(info.childType)) {
+        relatedService = getServiceLocator().getFirstService(info.childType);
+        if (relatedService == null) {
+          // Exit without metadata. This should be called in next metadata iteration
+          return null;
+        }
+        requiredServicesByEntity.put(info.childType,
+            getServiceMetadata(metadataIdentificationString, relatedService));
       }
     }
 
-    // Getting findAll Iterable method. This method will be used to findAll results
-    // before to invoke batch operations
-    MethodMetadata findAllIterableMethod = serviceMetadata.getCurrentFindAllIterableMethod();
+    // Get child relations info
+    List<Pair<FieldMetadata, RelationInfo>> childRelationsInfo =
+        getJpaOperations().getFieldChildPartOfRelation(entityDetails);
 
     return new ServiceImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, serviceInterface, repositoryDetails.getType(), entity,
-        findAllIterableMethod, methodsNotTransactionalsToBeImplemented,
-        methodsTransactionalsToBeImplemented, countReferencedFieldsMethodsToBeImplemented,
-        findAllReferencedFieldsMethodsToBeImplemented);
+        governorPhysicalTypeMetadata, serviceInterface, repositoryDetails.getType(),
+        repositoryMetadata, entity, entityMetadata, serviceMetadata, requiredServicesByEntity,
+        childRelationsInfo);
+  }
+
+  /**
+   * Returns {@link ServiceMetadata} of _serviceInterfaceDetails_
+   *
+   * Also register metadata dependencies
+   *
+   * @param metadataIdentificationString
+   * @param serviceInterfaceDetails
+   * @return
+   */
+  private ServiceMetadata getServiceMetadata(final String metadataIdentificationString,
+      ClassOrInterfaceTypeDetails serviceInterfaceDetails) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(serviceInterfaceDetails.getDeclaredByMetadataId());
+    final String serviceMetadataKey =
+        ServiceMetadata.createIdentifier(serviceInterfaceDetails.getType(), logicalPath);
+    registerDependency(serviceMetadataKey, metadataIdentificationString);
+    final ServiceMetadata serviceMetadata =
+        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
+    return serviceMetadata;
+  }
+
+  private RepositoryJpaLocator getRepositoryJpaLocator() {
+    return getServiceManager().getServiceInstance(this, RepositoryJpaLocator.class);
+  }
+
+  private ServiceLocator getServiceLocator() {
+    return getServiceManager().getServiceInstance(this, ServiceLocator.class);
+  }
+
+  private JpaOperations getJpaOperations() {
+    return getServiceManager().getServiceInstance(this, JpaOperations.class);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {

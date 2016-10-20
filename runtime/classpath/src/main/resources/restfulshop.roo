@@ -62,3 +62,6 @@ field set --fieldName orderDetails --type ~.model.OrderDetail
 
 // Generate repositories
 repository jpa --all --package ~.repository
+
+// Generate service layer
+service --all

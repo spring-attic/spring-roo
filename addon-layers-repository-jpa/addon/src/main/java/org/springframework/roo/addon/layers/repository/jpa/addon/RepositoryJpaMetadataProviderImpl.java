@@ -4,14 +4,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_READ_ONLY_REPOSITORY
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
 import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTOM;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -43,6 +35,14 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link RepositoryJpaMetadataProvider}.
@@ -163,8 +163,6 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
     final RepositoryJpaAnnotationValues annotationValues =
         new RepositoryJpaAnnotationValues(governorPhysicalTypeMetadata);
     final JavaType domainType = annotationValues.getEntity();
-    final List<FieldMetadata> identifiers =
-        getPersistenceMemberLocator().getIdentifierFields(domainType);
 
     // Remember that this entity JavaType matches up with this metadata
     // identification string
@@ -245,8 +243,8 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
         getJpaOperations().getFieldChildPartOfRelation(entityDetails);
 
     return new RepositoryJpaMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, identifiers, entityMetadata,
-        readOnlyRepository, repositoryCustomList, relationsAsChild);
+        governorPhysicalTypeMetadata, annotationValues, entityMetadata, readOnlyRepository,
+        repositoryCustomList, relationsAsChild);
   }
 
   private JpaOperations getJpaOperations() {

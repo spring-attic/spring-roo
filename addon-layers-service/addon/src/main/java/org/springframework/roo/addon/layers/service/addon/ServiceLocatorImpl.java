@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 
 import java.util.Collection;
 
@@ -24,28 +25,20 @@ import java.util.Collection;
 @Service
 public class ServiceLocatorImpl implements ServiceLocator {
 
-  public static enum LOCATOR_TYPE {
-    SERVICE, SERVICE_IMPL
-  };
-
   @Reference
   private TypeLocationService typeLocationService;
   @Reference
   private MetadataDependencyRegistry dependencyRegistry;
 
-  private MetadataLocatorUtils<LOCATOR_TYPE> util = null;
+  private MetadataLocatorUtils<JavaType> util;
 
   protected void activate(final ComponentContext cContext) {
-    if (util == null) {
-      util =
-          new MetadataLocatorUtils<ServiceLocatorImpl.LOCATOR_TYPE>(typeLocationService,
-              new Evaluator());
-    }
+    util = new MetadataLocatorUtils<JavaType>(new Evaluator(typeLocationService));
     dependencyRegistry.addNotificationListener(util);
   }
 
   public Collection<ClassOrInterfaceTypeDetails> getServices(final JavaType domainType) {
-    return util.getValue(domainType, LOCATOR_TYPE.SERVICE);
+    return util.getValue(domainType, RooJavaType.ROO_SERVICE);
   }
 
   @Override
@@ -72,7 +65,7 @@ public class ServiceLocatorImpl implements ServiceLocator {
   }
 
   public Collection<ClassOrInterfaceTypeDetails> getServiceImpls(final JavaType serviceType) {
-    return util.getValue(serviceType, LOCATOR_TYPE.SERVICE_IMPL);
+    return util.getValue(serviceType, RooJavaType.ROO_SERVICE_IMPL);
   }
 
   @Override
@@ -98,28 +91,30 @@ public class ServiceLocatorImpl implements ServiceLocator {
     return repositories.iterator().next();
   }
 
-  private class Evaluator implements MetadataLocatorUtils.LocatorEvaluator<LOCATOR_TYPE> {
+  private class Evaluator extends MetadataLocatorUtils.LocatorEvaluatorByAnnotation {
+
+    public Evaluator(TypeLocationService typeLocationService) {
+      super(typeLocationService);
+    }
 
     @Override
     public boolean evaluateForKey(JavaType key, ClassOrInterfaceTypeDetails valueToEvalueate,
-        LOCATOR_TYPE context) {
-      switch (context) {
-        case SERVICE: {
-          final ServiceAnnotationValues annotationValues =
-              new ServiceAnnotationValues(new DefaultPhysicalTypeMetadata(
-                  valueToEvalueate.getDeclaredByMetadataId(),
-                  typeLocationService.getPhysicalTypeCanonicalPath(valueToEvalueate
-                      .getDeclaredByMetadataId()), valueToEvalueate));
-          return annotationValues.getEntity() != null && annotationValues.getEntity().equals(key);
-        }
-        case SERVICE_IMPL: {
-          final ServiceImplAnnotationValues annotationValues =
-              new ServiceImplAnnotationValues(new DefaultPhysicalTypeMetadata(
-                  valueToEvalueate.getDeclaredByMetadataId(),
-                  typeLocationService.getPhysicalTypeCanonicalPath(valueToEvalueate
-                      .getDeclaredByMetadataId()), valueToEvalueate));
-          return annotationValues.getService() != null && annotationValues.getService().equals(key);
-        }
+        JavaType context) {
+      if (RooJavaType.ROO_SERVICE.equals(context)) {
+        final ServiceAnnotationValues annotationValues =
+            new ServiceAnnotationValues(new DefaultPhysicalTypeMetadata(
+                valueToEvalueate.getDeclaredByMetadataId(),
+                typeLocationService.getPhysicalTypeCanonicalPath(valueToEvalueate
+                    .getDeclaredByMetadataId()), valueToEvalueate));
+        return annotationValues.getEntity() != null && annotationValues.getEntity().equals(key);
+      }
+      if (RooJavaType.ROO_SERVICE_IMPL.equals(context)) {
+        final ServiceImplAnnotationValues annotationValues =
+            new ServiceImplAnnotationValues(new DefaultPhysicalTypeMetadata(
+                valueToEvalueate.getDeclaredByMetadataId(),
+                typeLocationService.getPhysicalTypeCanonicalPath(valueToEvalueate
+                    .getDeclaredByMetadataId()), valueToEvalueate));
+        return annotationValues.getService() != null && annotationValues.getService().equals(key);
       }
       return false;
     }

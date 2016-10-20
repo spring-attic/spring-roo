@@ -3,7 +3,6 @@ package org.springframework.roo.classpath;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,6 +47,14 @@ public class MetadataLocatorUtils<CONTEXT> implements MetadataNotificationListen
      * @return JavaType to evict or null if doesn't need to handle
      */
     JavaType evalueteForEvict(String streamDependency);
+
+    /**
+     * Returns all details which can match to context
+     *
+     * @param context
+     * @return
+     */
+    Set<ClassOrInterfaceTypeDetails> getAllPosibilities(CONTEXT context);
   }
 
   private final LocatorEvaluator<CONTEXT> evaluator;
@@ -61,12 +68,14 @@ public class MetadataLocatorUtils<CONTEXT> implements MetadataNotificationListen
    */
   private final Map<JavaType, JavaType> cacheMapInverse = new HashMap<JavaType, JavaType>();
 
-  final private TypeLocationService typeLocationService;
 
-  public MetadataLocatorUtils(TypeLocationService typeLocationService,
-      LocatorEvaluator<CONTEXT> locator) {
+  /**
+   * Default constructor
+   *
+   * @param locator
+   */
+  public MetadataLocatorUtils(LocatorEvaluator<CONTEXT> locator) {
     this.evaluator = locator;
-    this.typeLocationService = typeLocationService;
   }
 
   @Override
@@ -103,8 +112,7 @@ public class MetadataLocatorUtils<CONTEXT> implements MetadataNotificationListen
       cacheMap.put(type, new HashSet<ClassOrInterfaceTypeDetails>());
     }
     final Set<ClassOrInterfaceTypeDetails> existing = cacheMap.get(type);
-    final Set<ClassOrInterfaceTypeDetails> located =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
+    final Set<ClassOrInterfaceTypeDetails> located = evaluator.getAllPosibilities(context);
     if (existing.containsAll(located)) {
       return existing;
     }
@@ -120,4 +128,27 @@ public class MetadataLocatorUtils<CONTEXT> implements MetadataNotificationListen
     return toReturn.values();
   }
 
+
+  /**
+   * = _LocatorEvaluatorByAnnotation_
+   *
+   * Abstract class which implements location by annotation
+   *
+   * @author Jose Manuel Vivó
+   * @since 2.0.0
+   */
+  public static abstract class LocatorEvaluatorByAnnotation implements LocatorEvaluator<JavaType> {
+
+    private final TypeLocationService typeLocationService;
+
+    public LocatorEvaluatorByAnnotation(TypeLocationService typeLocationService) {
+      this.typeLocationService = typeLocationService;
+    }
+
+    @Override
+    public Set<ClassOrInterfaceTypeDetails> getAllPosibilities(JavaType context) {
+      return typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(context);
+    }
+
+  }
 }

@@ -19,7 +19,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.SpringJavaType;
@@ -27,7 +26,6 @@ import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +41,7 @@ import java.util.Map;
 public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
   private static final JavaSymbolName FIND_ONE_METHOD_NAME = new JavaSymbolName("findOne");
+  private static final JavaSymbolName FIND_ALL_ITERATOR_METHOD_NAME = new JavaSymbolName("findAll");
   private static final String PROVIDES_TYPE_STRING = RepositoryJpaMetadata.class.getName();
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
@@ -84,8 +83,6 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
    * @param annotationValues (required)
-   * @param identifiers the entity's identifiers fields
-   *            (required)
    * @param entityMetadata boolean
    * @param readOnlyRepository JavaType
    * @param customRepositories List<JavaType>
@@ -95,17 +92,14 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    */
   public RepositoryJpaMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
-      final RepositoryJpaAnnotationValues annotationValues, final List<FieldMetadata> identifiers,
-      final JpaEntityMetadata entityMetadata, final JavaType readOnlyRepository,
-      final List<JavaType> customRepositories,
+      final RepositoryJpaAnnotationValues annotationValues, final JpaEntityMetadata entityMetadata,
+      final JavaType readOnlyRepository, final List<JavaType> customRepositories,
       List<Pair<FieldMetadata, RelationInfo>> relationsAsChild) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
-    Validate.notNull(identifiers, "Id type required");
-    Validate.notEmpty(identifiers, "Id type required");
-    Validate.isTrue(identifiers.size() == 1, "Id type required (and only one)");
 
-    final JavaType identifierType = identifiers.get(0).getFieldType();
+    final FieldMetadata identifierField = entityMetadata.getCurrentIndentifierField();
+    final JavaType identifierType = identifierField.getFieldType();
     final JavaType domainType = annotationValues.getEntity();
 
     this.customRepositories = Collections.unmodifiableList(customRepositories);
@@ -130,7 +124,9 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
             aspectName);
         composition = true;
         ensureGovernorHasMethod(new MethodMetadataBuilder(getFindOneMethod(domainType,
-            identifiers.get(0))));
+            identifierField)));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllIteratorMethod(domainType,
+            identifierField)));
         compositionCountMethod = countMethod;
         compositionFieldInfo = fieldInfo;
       }
@@ -157,8 +153,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       // Extends JpaRepository
       interfaceType = SpringJavaType.SPRING_JPA_REPOSITORY;
     }
-    ensureGovernorExtends(new JavaType(interfaceType.getFullyQualifiedTypeName(), 0, DataType.TYPE,
-        null, Arrays.asList(annotationValues.getEntity(), identifierType)));
+    ensureGovernorExtends(JavaType.wrapperOf(interfaceType, annotationValues.getEntity(),
+        identifierType));
 
     // If has some RepositoryCustom associated, add extends
     if (!customRepositories.isEmpty()) {
@@ -178,12 +174,13 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     itdTypeDetails = builder.build();
   }
 
-  private MethodMetadata getFindOneMethod(JavaType repository, FieldMetadata fieldMetadata) {
+  private MethodMetadata getFindOneMethod(JavaType entity, FieldMetadata identifierFieldMetadata) {
     // Define method parameter type and name
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(fieldMetadata.getFieldType()));
-    parameterNames.add(fieldMetadata.getFieldName());
+    parameterTypes
+        .add(AnnotatedJavaType.convertFromJavaType(identifierFieldMetadata.getFieldType()));
+    parameterNames.add(identifierFieldMetadata.getFieldName());
 
     MethodMetadata existingMethod =
         getGovernorMethod(FIND_ONE_METHOD_NAME,
@@ -194,7 +191,29 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     return new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT,
-        FIND_ONE_METHOD_NAME, repository, parameterTypes, parameterNames, null).build();
+        FIND_ONE_METHOD_NAME, entity, parameterTypes, parameterNames, null).build();
+  }
+
+  private MethodMetadata getFindAllIteratorMethod(JavaType entity,
+      FieldMetadata identifierFieldMetadata) {
+    // Define method parameter type and name
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(JavaType
+        .iterableOf(identifierFieldMetadata.getFieldType())));
+    parameterNames.add(identifierFieldMetadata.getFieldName());
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(FIND_ALL_ITERATOR_METHOD_NAME,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    return new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT,
+        FIND_ALL_ITERATOR_METHOD_NAME, JavaType.listOf(entity), parameterTypes, parameterNames,
+        null).build();
   }
 
   /**
