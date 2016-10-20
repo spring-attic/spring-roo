@@ -32,6 +32,7 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
@@ -237,6 +238,13 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
     ctx.setModelAttribute(getEntityField().getFieldName().getSymbolName());
     ctx.setModelAttributeName(StringUtils.uncapitalize(entity.getSimpleTypeName()));
     ctx.setIdentifierField(identifierField.get(0).getFieldName().getSymbolName());
+
+    // Checking if Spring Security has been installed
+    if (getProjectOperations().isFeatureInstalled(FeatureNames.SECURITY)) {
+      ctx.setSecurityEnabled(true);
+    }
+
+    // Call Abstract Method fillContext to fill context with view provider custom implementation
     fillContext(ctx);
 
     // Use provided MVCViewGenerationService to generate views

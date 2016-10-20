@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.web.mvc.views.template.engines;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
@@ -12,14 +20,6 @@ import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.FileUtils;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -78,6 +78,9 @@ public abstract class AbstractFreeMarkerViewGenerationService<DOC> extends
       input.put("identifierField", ctx.getIdentifierField());
       input.put("modelAttribute", String.format("${%s}", ctx.getModelAttribute()));
       input.put("modelAttributeName", ctx.getModelAttributeName());
+
+      // Getting security information from ViewContext
+      input.put("isSecurityEnabled", ctx.isSecurityEnabled());
 
       // Add all extra elements from ViewContext. This is useful if some
       // implementation wants to include its own information
