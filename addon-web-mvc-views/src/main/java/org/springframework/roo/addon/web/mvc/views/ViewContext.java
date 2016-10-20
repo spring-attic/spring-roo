@@ -34,6 +34,9 @@ public class ViewContext {
   // Custom elements
   private Map<String, Object> extraInformation = new HashMap<String, Object>();
 
+  // Security information
+  private boolean securityEnabled;
+
   public String getControllerPath() {
     return controllerPath;
   }
@@ -112,6 +115,14 @@ public class ViewContext {
 
   public void setModelAttributeName(String modelAttributeName) {
     this.modelAttributeName = modelAttributeName;
+  }
+
+  public boolean isSecurityEnabled() {
+    return securityEnabled;
+  }
+
+  public void setSecurityEnabled(boolean securityEnabled) {
+    this.securityEnabled = securityEnabled;
   }
 
 }
