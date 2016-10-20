@@ -287,6 +287,7 @@
       <!-- /CONTENT-->
 
       <!-- MODAL -->
+      <#if details?size != 0>
       <div
         data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
 
@@ -314,8 +315,8 @@
           </div>
         </div>
       </div>
-
-    </section>  
+      </#if>
+    </section>
 
   </div>
   <!-- /CONTAINER-->
@@ -326,7 +327,7 @@
         <small class="clearfix">
             Made with <a href="http://projects.spring.io/spring-roo/" target="_blank">
             Spring Roo &copy; 2016</a> •
-            We <span class="glyphicon glyphicon-heart"></span> 
+            We <span class="glyphicon glyphicon-heart"></span>
             <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
             <a data-th-href="@{/accessibility}" href="../accessibility.html"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
         </small>

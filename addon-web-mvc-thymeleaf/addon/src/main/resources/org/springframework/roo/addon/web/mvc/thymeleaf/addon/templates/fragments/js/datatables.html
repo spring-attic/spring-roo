@@ -11,6 +11,11 @@
     -->
   <div data-layout-fragment="datatables">
 
+    <!-- Modal to show loading errors -->
+    <div data-layout-include="fragments/modal :: modal(id='datatablesError',
+          title=#{info_error}, message=#{error_datatables_loading})">
+    </div>
+
     <!-- Datatables -->
     <script type="text/javascript" charset="utf8"
       src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.js"
