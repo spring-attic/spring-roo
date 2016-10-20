@@ -332,7 +332,14 @@
 
       <!-- MODAL -->
       <div
-        data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
+        data-layout-include="fragments/modal-confirm :: modalConfirm(id='confirmDelete${entityName}',
+          title=${r"#{"}label_delete_entity(${r"#{"}${entityLabel}})}, message=${r"#{"}info_delete_item_confirm},
+          onclickCallback='javascript:loading();javascript:jQuery.delete${entityName}();')">
+          <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
+      </div>
+
+      <div
+        data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete_entity(${r"#{"}${entityLabel}})}, message=${r"#{"}info_deleted_items_number(1)})">
 
         <script type="text/javascript">
             function openDeleteModal(){
@@ -503,39 +510,44 @@
                       var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
                       return '<a role="button" class="btn-action showInfo" href="' + baseUrl + data + '" data-th-text="${r"#{label_show}"}">Show</a>' +
                       '<a role="button" class="btn-action edit" href="' + baseUrl + data + '/edit-form" data-th-text="${r"#{label_edit}"}">Edit</a>' +
-                      '<a role="button" class="btn-action delete" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
+                      '<a role="button" class="btn-action delete" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}Modal(' + data + ')"/>'
                   }
                 }
               ]
           });
 
           jQuery.extend({
-             'delete${entityName}': function(${entity.configuration.identifierField}) {
+             'current${entityName}Id': undefined,
+             'delete${entityName}Modal' : function(${entity.configuration.identifierField}) {
+                   jQuery.current${entityName}Id = ${entity.configuration.identifierField};
+                   if (jQuery.current${entityName}Id) {
+                     jQuery('#confirmDelete${entityName}Modal').modal('show');
+                   }
+             },
+             'delete${entityName}': function() {
                  var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
                  jQuery.ajax({
-                     url: baseUrl + ${entity.configuration.identifierField},
+                     url: baseUrl + jQuery.current${entityName}Id,
                      type: 'DELETE',
                      success: function(result) {
+                       jQuery('#confirmDelete${entityName}Modal').modal('hide');
+
+                       /** Refresh Datatables */
+                       jQuery('#${entity.entityItemId}-table').DataTable().ajax.reload();
                        jQuery('#delete${entityName}ModalBody').empty();
                        jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');
                        jQuery('#delete${entityName}Modal').modal();
-                       /** Refresh Datatables */
-                       ${entityName}Table.ajax.reload();
+
                      },
                      error: function(jqXHR) {
-                       /** Getting error code */
-                       var message = '';
-                       /** CONFLICT */
-                       if (jqXHR.status == 409) {
-                           message = '<p data-th-text="|${r"#{info_no_deleted_item}"}|">0 items has been deleted.</p>';
-                       }
-                       /** NOT_FOUND */
-                       if (jqXHR.status == 404 ) {
-                           message = '<p data-th-text="|${r"#{info_deleted_item_problem} #{info_no_exist_item}"}|">Error deleting selected item.</p>';
-                       }
+                       jQuery('#confirmDelete${entityName}Modal').modal('hide');
                        jQuery('#delete${entityName}ModalBody').empty();
-                       jQuery('#delete${entityName}ModalBody').append(message);
-                       jQuery('#delete${entityName}Modal').modal();
+                       if(jqXHR.status == 428){
+                         jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{error_deleting_item_with_relationships}"}|" >To delete the selected item, must delete its related elements before.</p>');
+                       } else {
+                         jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{error_deleting_item}"}|" >Error deleting selected item.</p>');
+                       }
+                       jQuery('#delete${entityName}Modal').modal('show');
                      }
                   });
              }

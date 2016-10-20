@@ -98,11 +98,6 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   protected abstract void writeDoc(DOC document, String viewPath);
 
-  // Id of each container element by page type
-  private static final String CRU_FINDER_LIST_ID_CONTAINER_ELEMENT = "containerFields";
-  private static final String MENU_ID_CONTAINER_ELEMENT = "entitiesMenuEntries";
-  private static final String LANGUAGES_ID_CONTAINER_ELEMENT = "languageFlags";
-
   private static final String FIELD_SUFFIX = "field";
   private static final String TABLE_SUFFIX = "entity";
   private static final String DETAIL_SUFFIX = "detail";
@@ -634,6 +629,27 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       newDoc = merge("fragments/modal", loadExistingDoc(viewName), ctx);
     } else {
       newDoc = process("fragments/modal", ctx);
+    }
+
+    // Write newDoc on disk
+    writeDoc(newDoc, viewName);
+
+  }
+
+  @Override
+  public void addModalConfirm(String moduleName, ViewContext ctx) {
+    // Process elements to generate
+    DOC newDoc = null;
+
+    // Getting new viewName
+    String viewName =
+        getFragmentsFolder(moduleName).concat("/modal-confirm").concat(getViewsExtension());
+
+    // Check if new view to generate exists or not
+    if (existsFile(viewName)) {
+      newDoc = merge("fragments/modal-confirm", loadExistingDoc(viewName), ctx);
+    } else {
+      newDoc = process("fragments/modal-confirm", ctx);
     }
 
     // Write newDoc on disk
