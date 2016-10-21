@@ -12,6 +12,10 @@
   <meta name="author"
     content="Spring Roo development team"
     data-th-remove="all" />
+  <#if isSecurityEnabled == true>
+  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf" data-th-content="${_csrf.token}" />
+  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf_header" data-th-content="${_csrf.headerName}" />
+  </#if>
 
  <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
     data-th-remove="all" />
@@ -492,9 +496,20 @@
           jQuery.extend({
              'delete${entityName}': function(${identifierField}) {
                  var baseUrl = [[@{${controllerPath}/}]];
+                 <#if isSecurityEnabled == true>
+                  var token = $("meta[name='_csrf']");
+                  var header = $("meta[name='_csrf_header']");
+                 </#if>
                  jQuery.ajax({
                      url: baseUrl + ${identifierField},
                      type: 'DELETE',
+                     <#if isSecurityEnabled == true>
+                     beforeSend : function(request) {
+                        if(token != null && token.length > 0 && header != null && header.length > 0) {
+                          request.setRequestHeader(header.attr("content"), token.attr("content"));
+                        }
+                     },
+                     </#if>
                      success: function(result) {
                        jQuery('#delete${entityName}ModalBody').empty();
                        jQuery('#delete${entityName}ModalBody').append('<p data-th-text="|${r"#{info_deleted_items_number(1)}"}|" >1 removed item</p>');

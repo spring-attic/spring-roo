@@ -12,6 +12,10 @@
   <meta name="author"
     content="Spring Roo development team"
     data-th-remove="all" />
+  <#if isSecurityEnabled == true>
+  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf" data-th-content="${r"${_csrf.token}"}" />
+  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf_header" data-th-content="${r"${_csrf.headerName}"}" />
+  </#if>
 
  <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
     data-th-remove="all" />
@@ -526,9 +530,20 @@
              },
              'delete${entityName}': function() {
                  var baseUrl = [[@{${entity.configuration.controllerPath}/}]];
+                 <#if isSecurityEnabled == true>
+                  var token = jQuery("meta[name='_csrf']");
+                  var header = jQuery("meta[name='_csrf_header']");
+                 </#if>
                  jQuery.ajax({
                      url: baseUrl + jQuery.current${entityName}Id,
                      type: 'DELETE',
+                     <#if isSecurityEnabled == true>
+                     beforeSend : function(request) {
+                        if(token != null && token.length > 0 && header != null && header.length > 0) {
+                          request.setRequestHeader(header.attr("content"), token.attr("content"));
+                        }
+                     },
+                     </#if>
                      success: function(result) {
                        jQuery('#confirmDelete${entityName}Modal').modal('hide');
 

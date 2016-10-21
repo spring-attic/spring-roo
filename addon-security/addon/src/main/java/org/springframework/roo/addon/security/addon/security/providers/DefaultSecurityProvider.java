@@ -6,14 +6,14 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * Implementation of SecurityProvider to work with the default 
@@ -38,10 +38,11 @@ public class DefaultSecurityProvider implements SecurityProvider {
   private static final Dependency SPRING_SECURITY_STARTER = new Dependency(
       "org.springframework.boot", "spring-boot-starter-security", null);
 
-  private ProjectOperations projectOperations;
+  private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    this.serviceManager.activate(this.context);
   }
 
   @Override
@@ -76,30 +77,21 @@ public class DefaultSecurityProvider implements SecurityProvider {
     // Including dependency with Spring Boot Starter Security
     getProjectOperations().addDependency(module.getModuleName(), SPRING_SECURITY_STARTER);
 
+    // Add property security.enable-csrf with true value to enable CSRF
+    getApplicationConfigService().addProperty(module.getModuleName(), "security.enable-csrf",
+        "true", "", true);
+    getApplicationConfigService().addProperty(module.getModuleName(), "security.enable-csrf",
+        "true", "dev", true);
+    
   }
 
   // Service references
 
-  public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
+  private ProjectOperations getProjectOperations() {
+    return serviceManager.getServiceInstance(this, ProjectOperations.class);
+  }
 
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on DefaultSecurityProvider.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+  private ApplicationConfigService getApplicationConfigService() {
+    return serviceManager.getServiceInstance(this, ApplicationConfigService.class);
   }
 }

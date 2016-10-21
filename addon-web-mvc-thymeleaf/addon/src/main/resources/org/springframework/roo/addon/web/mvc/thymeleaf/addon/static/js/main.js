@@ -83,6 +83,8 @@ function isNotEmpty(obj) {
  */
 function loadData(data, callback, settings, url, oDatatable) {
   if (url) {
+	var token = jQuery("meta[name='_csrf']");
+	var header = jQuery("meta[name='_csrf_header']");
     jQuery.ajax({
       url : url,
       type : 'GET',
@@ -90,6 +92,11 @@ function loadData(data, callback, settings, url, oDatatable) {
       dataType : 'json',
       headers : {
         Accept : "application/vnd.datatables+json",
+      },
+      beforeSend: function (request) {
+      	  if(token != null && token.length > 0 && header != null && header.length > 0) {
+	          request.setRequestHeader(header.attr("content"), token.attr("content"));
+      	  }
       },
       success : jQuery.proxy(function(dataReceived) {
         callback(dataReceived);

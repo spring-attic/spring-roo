@@ -52,7 +52,13 @@
       data-th-src="@{/webjars/datatables.net-select/1.1.2/js/dataTables.select.js}"></script>
 
     <script type="text/javascript" data-th-inline="javascript">
-    jQuery.extend($.fn.dataTable.ext.buttons, {
+    jQuery.extend( jQuery.fn.dataTable.ext.classes, {
+      "sFilter": "dataTables_filter col-sm-6",
+      "sInfo": "dataTables_info col-sm-6",
+      "sPaging": "dataTables_paginate col-sm-6 paging_", /* Note that the type is postfixed */
+      "sProcessing": "dataTables_processing progress-bar progress-bar-striped active"
+    });
+    jQuery.extend(jQuery.fn.dataTable.ext.buttons, {
         'add': function ( dt, conf ) {
           return {
             'action' : function(e, dt, node, config) {
@@ -74,6 +80,32 @@
             'Accept' : 'application/vnd.datatables+json'
           },
         },
+        'fnInitComplete': function(oSettings, json) {
+          this.DataTable().on( 'select', function ( e, dt, type, indexes ) {
+            if ( type === 'row' ) {
+              var rowSelectedId = jQuery(this).DataTable().rows( indexes ).ids()[0];
+              jQuery(this).DataTable().state.loaded().rowSelectedId = rowSelectedId;
+              jQuery(this).DataTable().state.save();
+            }
+          });
+          if(!jQuery(this).DataTable().state.loaded()){
+            oSettings.oLoadedState = jQuery(this).DataTable().state();
+          }
+        },
+        'stateSaveParams': function (settings, data) {
+          if(this.DataTable().state.loaded()){
+            var rowSelectedId = this.DataTable().state.loaded().rowSelectedId;
+            if(rowSelectedId){
+              data.rowSelectedId = rowSelectedId;
+            }
+          }
+        },
+        'buttons' : {
+          'dom': {
+             'container': {
+               'className': 'dt-buttons btn-group col-sm-6'
+             }
+           },
         'buttons' : [
             'add',
             {
@@ -83,8 +115,15 @@
             {
             'extend' : 'pageLength',
             'className' : 'btn-action',
+            },
+          ]
+        },
+        'columnDefs': [ {
+            'targets':  '_all',
+            'render': {
+                'display': jQuery.fn.dataTable.render.text()
             }
-        ],
+        } ],
         'deferRender' : true,
         'dom' : 'Bfrtip',
         'processing' : true,
