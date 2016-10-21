@@ -260,7 +260,12 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     // Add Thymeleaf layout dialect
     getProjectOperations().addDependency(module.getModuleName(), layoutThymeleafDependency);
 
-    // TODO: Add Thymeleaf tests dependencies
+    // ROO-3813: Use Thymeleaf 3.0 instead of the provided version by Spring IO
+    // More info about Thymelead 3.0 using Spring Boot here
+    // http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-use-thymeleaf-3
+    getProjectOperations().addProperty("", new Property("thymeleaf.version", "3.0.0.RELEASE"));
+    getProjectOperations().addProperty("",
+        new Property("thymeleaf-layout-dialect.version", "2.0.0"));
 
   }
 
