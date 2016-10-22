@@ -13,21 +13,15 @@ import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.javabean.annotations.RooJavaBean;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -46,9 +40,17 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.LogicalPath;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 /**
  * Metadata for {@link RooJavaBean}.
- * 
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.0
@@ -61,6 +63,13 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+  }
+
+
+  public static String createIdentifier(ClassOrInterfaceTypeDetails details) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(details.getDeclaredByMetadataId());
+    return createIdentifier(details.getType(), logicalPath);
   }
 
   public static JavaType getJavaType(final String metadataIdentificationString) {
@@ -96,7 +105,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier
    *            the ID of the metadata to create (must be a valid ID)
    * @param aspectName
@@ -177,8 +186,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
       for (MethodMetadata interfaceMethod : interfaceMethods) {
         MethodMetadataBuilder methodBuilder = getInterfaceMethod(interfaceMethod);
         // ROO-3584: JavaBean implementing Interface defining getters and setters
-        // ROO-3585: If interface method already exists on type is not necessary 
-        // to add on ITD. Method builder will be NULL. 
+        // ROO-3585: If interface method already exists on type is not necessary
+        // to add on ITD. Method builder will be NULL.
         if (methodBuilder != null && !checkIfInterfaceMethodWasImplemented(methodBuilder)) {
           builder.addMethod(methodBuilder);
         }
@@ -193,7 +202,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    * Obtains the specific accessor method that is either contained within the
    * normal Java compilation unit or will be introduced by this add-on via an
    * ITD.
-   * 
+   *
    * @param field
    *            that already exists on the type either directly or via
    *            introduction (required; must be declared by this type to be
@@ -229,7 +238,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    * Obtains the specific mutator method that is either contained within the
    * normal Java compilation unit or will be introduced by this add-on via an
    * ITD.
-   * 
+   *
    * @param field
    *            that already exists on the type either directly or via
    *            introduction (required; must be declared by this type to be
@@ -271,7 +280,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   /**
    * Obtains a valid MethodMetadataBuilder with necessary configuration
-   * 
+   *
    * @param method
    * @return MethodMetadataBuilder
    */
@@ -550,7 +559,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
    * To check if current method was implemented on all Java classes or ITds
    * associated to this entity class.
    * If method was implemented, is not necessary to add again.
-   * 
+   *
    * @param methodBuilder
    * @return
    */
@@ -582,7 +591,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   /**
    * Returns a list with the mutator methods of the class requesting the metadata
-   * 
+   *
    * @return List<MethodMetadata> with mutator methods of the class
    */
   public List<MethodMetadata> getMutatorMethods() {
@@ -591,7 +600,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
   /**
    * Returns a list with the accesor methods of the class requesting the metadata
-   * 
+   *
    * @return List<MethodMetadata> with accesor methods of the class
    */
   public List<MethodMetadata> getAccesorMethods() {

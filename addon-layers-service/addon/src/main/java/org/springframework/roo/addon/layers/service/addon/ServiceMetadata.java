@@ -24,9 +24,9 @@ import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -227,20 +227,6 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     addToRelationMethods = Collections.unmodifiableMap(addToRelationMethodsTemp);
     removeFromRelationMethods = Collections.unmodifiableMap(removeFromRelationMethodsTemp);
 
-    // Generating finders
-    for (MethodMetadata finder : finders) {
-      MethodMetadata finderMethod = getFinderMethod(finder);
-      notTransactionalDefinedMethod.add(finderMethod);
-      ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
-    }
-
-    // Generating count finder methods
-    for (MethodMetadata customCountMethod : customCountMethods) {
-      MethodMetadata customCountServiceMethod = getCustomCountMethod(customCountMethod);
-      notTransactionalDefinedMethod.add(customCountServiceMethod);
-      ensureGovernorHasMethod(new MethodMetadataBuilder(customCountServiceMethod));
-    }
-
     // ROO-3765: Prevent ITD regeneration applying the same sort to provided map. If this sort is not applied, maybe some
     // method is not in the same order and ITD will be regenerated.
     Map<FieldMetadata, MethodMetadata> referencedFieldsFindAllMethodsOrderedByFieldName =
@@ -275,6 +261,23 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
       }
     }
 
+
+    // Generating finders
+    for (MethodMetadata finder : finders) {
+      MethodMetadata finderMethod = getFinderMethod(finder);
+      notTransactionalDefinedMethod.add(finderMethod);
+      ensureGovernorHasMethod(new MethodMetadataBuilder(finderMethod));
+    }
+
+    // Generating count finder methods
+    for (MethodMetadata customCountMethod : customCountMethods) {
+      MethodMetadata customCountServiceMethod = getCustomCountMethod(customCountMethod);
+      if (!isAlreadyDefinedMethod(customCountMethod, countByReferencedFieldsMethods.values())) {
+        notTransactionalDefinedMethod.add(customCountServiceMethod);
+        ensureGovernorHasMethod(new MethodMetadataBuilder(customCountServiceMethod));
+      }
+    }
+
     this.referencedFieldsFindAllDefinedMethods =
         Collections.unmodifiableMap(referencedFieldsFindAllDefinedMethods);
     this.transactionalDefinedMethod = Collections.unmodifiableList(transactionalDefinedMethod);
@@ -289,6 +292,15 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  private boolean isAlreadyDefinedMethod(MethodMetadata method, Collection<MethodMetadata> values) {
+    for (MethodMetadata value : values) {
+      if (method.matchSignature(value)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private MethodMetadata getRemoveFromRelationMethod(RelationInfo relationInfo) {

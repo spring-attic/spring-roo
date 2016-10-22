@@ -10,6 +10,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 
@@ -31,6 +32,8 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
   private TypeLocationService typeLocationService;
   @Reference
   private MetadataDependencyRegistry dependencyRegistry;
+  @Reference
+  private MetadataService metadataService;
 
   private MetadataLocatorUtils<JavaType> util;
 
@@ -57,6 +60,12 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
   }
 
   @Override
+  public RepositoryJpaMetadata getRepositoryMetadata(JavaType domainType) {
+    ClassOrInterfaceTypeDetails repository = getRepository(domainType);
+    return metadataService.get(RepositoryJpaMetadata.createIdentifier(repository));
+  }
+
+  @Override
   public ClassOrInterfaceTypeDetails getFirstRepository(JavaType domainType) {
     Validate.notNull(domainType, "domainType is required");
     Collection<ClassOrInterfaceTypeDetails> repositories = getRepositories(domainType);
@@ -64,6 +73,12 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
       return null;
     }
     return repositories.iterator().next();
+  }
+
+  @Override
+  public RepositoryJpaMetadata getFirstRepositoryMetadata(JavaType domainType) {
+    ClassOrInterfaceTypeDetails repository = getFirstRepository(domainType);
+    return metadataService.get(RepositoryJpaMetadata.createIdentifier(repository));
   }
 
   private class Evaluator extends MetadataLocatorUtils.LocatorEvaluatorByAnnotation {

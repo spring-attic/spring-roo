@@ -8,6 +8,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.classpath.ModuleFeatureName;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -44,7 +46,7 @@ import java.util.logging.Logger;
 
 /**
  * Commands which provide finder functionality through Spring MVC controllers.
- * 
+ *
  * @author Stefan Schmidt
  * @author Paula Navarro
  * @author Sergio Clares
@@ -61,6 +63,9 @@ public class WebFinderCommands implements CommandMarker {
 
   @Reference
   private WebFinderOperations webFinderOperations;
+
+  @Reference
+  private RepositoryJpaLocator repositoryJpaLocator;
 
   private Map<String, ControllerMVCResponseService> responseTypes =
       new HashMap<String, ControllerMVCResponseService>();
@@ -82,7 +87,7 @@ public class WebFinderCommands implements CommandMarker {
    *
    * If --all parameter has been specified, --entity parameter will not be visible
    * to prevent conflicts.
-   * 
+   *
    * @return
    */
   @CliOptionVisibilityIndicator(params = "entity", command = "web mvc finder",
@@ -103,21 +108,22 @@ public class WebFinderCommands implements CommandMarker {
 
     // Create results to return
     List<String> results = new ArrayList<String>();
-    Set<ClassOrInterfaceTypeDetails> repositoryTypes =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_REPOSITORY_JPA, RooJavaType.ROO_FINDERS);
     for (JavaType entity : getTypeLocationService().findTypesWithAnnotation(
         RooJavaType.ROO_JPA_ENTITY)) {
-      for (ClassOrInterfaceTypeDetails repository : repositoryTypes) {
-        if (repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity")
-            .getValue().equals(entity)) {
-          ClassOrInterfaceTypeDetails entityDetails =
-              getTypeLocationService().getTypeDetails(entity);
-          String name = replaceTopLevelPackageString(entityDetails, currentText);
-          if (!results.contains(name)) {
-            results.add(name);
-          }
-        }
+
+      ClassOrInterfaceTypeDetails repository = repositoryJpaLocator.getFirstRepository(entity);
+      if (repository == null) {
+        continue;
+      }
+      AnnotationMetadata repositoryAnnotation =
+          repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+      if (repositoryAnnotation.getAttribute("finders") == null) {
+        continue;
+      }
+      String name = replaceTopLevelPackageString(entity, currentText);
+
+      if (!results.contains(name)) {
+        results.add(name);
       }
     }
 
@@ -133,7 +139,7 @@ public class WebFinderCommands implements CommandMarker {
    *
    * If --entity parameter has been specified, --all parameter will not be visible
    * to prevent conflicts.
-   * 
+   *
    * @return
    */
   @CliOptionVisibilityIndicator(params = "all", command = "web mvc finder",
@@ -150,7 +156,7 @@ public class WebFinderCommands implements CommandMarker {
    * This indicator says if --queryMethod parameter should be visible or not
    *
    * If --entity parameter has been specified, --queryMethod parameter will be visible.
-   * 
+   *
    * @return
    */
   @CliOptionVisibilityIndicator(
@@ -191,7 +197,7 @@ public class WebFinderCommands implements CommandMarker {
    *
    * If --all or --finder parameter have not been specified, --responseType parameter will not be visible
    * to preserve order.
-   * 
+   *
    * @return
    */
   @CliOptionVisibilityIndicator(
@@ -207,9 +213,9 @@ public class WebFinderCommands implements CommandMarker {
 
   /**
    * This indicator says if --package parameter should be visible or not. If project has more
-   * than one 'application' modules (which contain one @SpringBootApplication), package will 
+   * than one 'application' modules (which contain one @SpringBootApplication), package will
    * be mandatory.
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -226,7 +232,7 @@ public class WebFinderCommands implements CommandMarker {
    *
    * If --all or --entity parameter have not been specified, --responseType parameter will not be visible
    * to preserve order.
-   * 
+   *
    * @return
    */
   @CliOptionVisibilityIndicator(
@@ -242,11 +248,11 @@ public class WebFinderCommands implements CommandMarker {
 
   /**
    * This indicator returns all possible values for --responseType parameter.
-   * 
+   *
    * Depends of the specified --controller, responseTypes will be filtered to provide only that
    * responseTypes that exists on current controller. Also, only installed response types
    * will be provided.
-   * 
+   *
    * @param context
    * @return
    */
@@ -280,7 +286,7 @@ public class WebFinderCommands implements CommandMarker {
    *
    * If --all or --entity parameter have not been specified, --pathPrefix parameter will not be visible
    * to preserve order.
-   * 
+   *
    * @return
    */
   @CliOptionVisibilityIndicator(
@@ -297,7 +303,7 @@ public class WebFinderCommands implements CommandMarker {
   /**
    * This method provides the Command definition to be able to add
    * new finder on controllers.
-   * 
+   *
    * @param controller
    * @param all
    * @param finder
@@ -365,34 +371,34 @@ public class WebFinderCommands implements CommandMarker {
 
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
-   * 
+   *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
    */
-  private String replaceTopLevelPackageString(ClassOrInterfaceTypeDetails cid, String currentText) {
-    String javaTypeFullyQualilfiedName = cid.getType().getFullyQualifiedTypeName();
+  private String replaceTopLevelPackageString(JavaType type, String currentText) {
+    String javaTypeFullyQualilfiedName = type.getFullyQualifiedTypeName();
     String javaTypeString = "";
     String topLevelPackageString = "";
 
     // Add module value to topLevelPackage when necessary
-    if (StringUtils.isNotBlank(cid.getType().getModule())
-        && !cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())) {
+    if (StringUtils.isNotBlank(type.getModule())
+        && !type.getModule().equals(getProjectOperations().getFocusedModuleName())) {
 
       // Target module is not focused
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      javaTypeString = type.getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
       topLevelPackageString =
-          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+          getProjectOperations().getTopLevelPackage(type.getModule())
               .getFullyQualifiedPackageName();
-    } else if (StringUtils.isNotBlank(cid.getType().getModule())
-        && cid.getType().getModule().equals(getProjectOperations().getFocusedModuleName())
-        && (currentText.startsWith(cid.getType().getModule()) || cid.getType().getModule()
-            .startsWith(currentText)) && StringUtils.isNotBlank(currentText)) {
+    } else if (StringUtils.isNotBlank(type.getModule())
+        && type.getModule().equals(getProjectOperations().getFocusedModuleName())
+        && (currentText.startsWith(type.getModule()) || type.getModule().startsWith(currentText))
+        && StringUtils.isNotBlank(currentText)) {
 
       // Target module is focused but user wrote it
-      javaTypeString = cid.getType().getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
+      javaTypeString = type.getModule().concat(LogicalPath.MODULE_PATH_SEPARATOR);
       topLevelPackageString =
-          getProjectOperations().getTopLevelPackage(cid.getType().getModule())
+          getProjectOperations().getTopLevelPackage(type.getModule())
               .getFullyQualifiedPackageName();
     } else {
 
@@ -408,7 +414,7 @@ public class WebFinderCommands implements CommandMarker {
     if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
         && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-      // Value is for autocomplete only or user wrote abbreviate value  
+      // Value is for autocomplete only or user wrote abbreviate value
       javaTypeString = auxString;
     } else {
 
@@ -421,71 +427,21 @@ public class WebFinderCommands implements CommandMarker {
 
   /**
    * Get all finder names associated to an entity
-   * 
-   * @param entity the JavaType representing the entity whose finder names should 
+   *
+   * @param entity the JavaType representing the entity whose finder names should
    *            be returned.
    * @return a List<String> with the finder names.
    */
   public List<String> getFinders(JavaType entity) {
-    List<String> finders = new ArrayList<String>();
-    AnnotationMetadata findersAnnotation = null;
-    JavaType associatedRepository = null;
-
-    // Get repository related to controller entity
-    for (ClassOrInterfaceTypeDetails repository : getTypeLocationService()
-        .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA)) {
-
-      AnnotationAttributeValue<JavaType> entityAttribute =
-          repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity");
-      if (entityAttribute != null && entityAttribute.getValue().equals(entity)) {
-        associatedRepository = repository.getType();
-        findersAnnotation = repository.getAnnotation(RooJavaType.ROO_FINDERS);
-        break;
-      }
-    }
-
-    if (associatedRepository == null) {
-      LOGGER
-          .log(
-              Level.SEVERE,
-              String
-                  .format(
-                      "ERROR: Entity %s does not have a repository generated. Use 'repository jpa' command to solve this.",
-                      entity.getSimpleTypeName()));
-      return finders;
-
-    }
-    if (findersAnnotation == null) {
-      LOGGER
-          .log(
-              Level.SEVERE,
-              String
-                  .format(
-                      "ERROR: Repository %s does not have any finder generated. Use 'finder add' command to solve this.",
-                      associatedRepository.getSimpleTypeName()));
-      return finders;
-
-    }
-    AnnotationAttributeValue<JavaType> managedFinders = findersAnnotation.getAttribute("finders");
-
-    if (managedFinders != null) {
-      List<?> values = (List<?>) managedFinders.getValue();
-      Iterator<?> it = values.iterator();
-
-      while (it.hasNext()) {
-        NestedAnnotationAttributeValue finder = (NestedAnnotationAttributeValue) it.next();
-        if (finder.getValue() != null && finder.getValue().getAttribute("finder") != null) {
-          finders.add((String) finder.getValue().getAttribute("finder").getValue());
-        }
-      }
-    }
-    return finders;
+    RepositoryJpaMetadata repositoryJpaMetadata =
+        repositoryJpaLocator.getRepositoryMetadata(entity);
+    return repositoryJpaMetadata.getDeclaredFinderNames();
   }
 
   /**
    * This method gets all implementations of ControllerMVCResponseService interface to be able
    * to locate all installed ControllerMVCResponseService
-   * 
+   *
    * @return Map with responseTypes identifier and the ControllerMVCResponseService implementation
    */
   public Map<String, ControllerMVCResponseService> getInstalledControllerMVCResponseTypes() {
@@ -544,9 +500,9 @@ public class WebFinderCommands implements CommandMarker {
   }
 
   /**
-   * This method obtains JavaType converter to be able to obtain JavaType 
+   * This method obtains JavaType converter to be able to obtain JavaType
    * from strings
-   * 
+   *
    * @return
    */
   @SuppressWarnings("unchecked")

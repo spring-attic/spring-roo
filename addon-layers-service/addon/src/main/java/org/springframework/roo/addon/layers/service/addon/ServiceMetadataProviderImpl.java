@@ -7,7 +7,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.finder.addon.FinderMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomMetadata;
@@ -186,73 +185,37 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
                     entity.getSimpleTypeName()));
 
     // Get repository metadata
-    final LogicalPath repositoryLogicalPath =
-        PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
-    final String repositoryMetadataKey =
-        RepositoryJpaMetadata.createIdentifier(repositoryDetails.getType(), repositoryLogicalPath);
+    final String repositoryMetadataKey = RepositoryJpaMetadata.createIdentifier(repositoryDetails);
     registerDependency(repositoryMetadataKey, metadataIdentificationString);
     final RepositoryJpaMetadata repositoryMetadata =
-        (RepositoryJpaMetadata) getMetadataService().get(repositoryMetadataKey);
+        getMetadataService().get(repositoryMetadataKey);
 
 
-    // Getting finders to be included on current service
-    final String finderMetadataKey =
-        FinderMetadata.createIdentifier(repositoryDetails.getType(), repositoryLogicalPath);
-    registerDependency(finderMetadataKey, metadataIdentificationString);
-    final FinderMetadata finderMetadata =
-        (FinderMetadata) getMetadataService().get(finderMetadataKey);
     List<MethodMetadata> finders = new ArrayList<MethodMetadata>();
     List<MethodMetadata> countMethods = new ArrayList<MethodMetadata>();
-    if (finderMetadata != null) {
 
-      // Add dependencies between modules
-      for (MethodMetadata finder : finderMetadata.getFinders()) {
 
-        // Add to service finders list
-        finders.add(finder);
+    // Add dependencies between modules
+    for (MethodMetadata finder : repositoryMetadata.getFindersGenerated()) {
 
-        // Add dependencies between modules
-        List<JavaType> types = new ArrayList<JavaType>();
-        types.add(finder.getReturnType());
-        types.addAll(finder.getReturnType().getParameters());
+      // Add to service finders list
+      finders.add(finder);
 
-        for (AnnotatedJavaType parameter : finder.getParameterTypes()) {
-          types.add(parameter.getJavaType());
-          types.addAll(parameter.getJavaType().getParameters());
-        }
-
-        for (JavaType parameter : types) {
-          getTypeLocationService().addModuleDependency(
-              governorPhysicalTypeMetadata.getType().getModule(), parameter);
-        }
-      }
-
-      // Get count methods
-      countMethods.addAll(finderMetadata.getCountMethods());
+      registerDependencyModolesOfFinder(governorPhysicalTypeMetadata, finder);
     }
+
+    // Get count methods
+    countMethods.addAll(repositoryMetadata.getCountMethods());
 
     // Getting methods declared on related RepositoryJpaCustomMetadata
-    List<JavaType> customRepositories = repositoryMetadata.getCustomRepositories();
+    final JavaType customRepository = repositoryMetadata.getCustomRepository();
 
-    ClassOrInterfaceTypeDetails customRepositoryDetails;
-    LogicalPath customLogicalPath;
-    String customRepositoryMetadataKey;
-    RepositoryJpaCustomMetadata repositoryCustomMetadata = null;
-    for (JavaType customRepository : customRepositories) {
-      customRepositoryDetails = getTypeLocationService().getTypeDetails(customRepository);
-
-      if (customRepositoryDetails.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM) != null) {
-        // Getting finders to be included on current service
-        customLogicalPath =
-            PhysicalTypeIdentifier.getPath(customRepositoryDetails.getDeclaredByMetadataId());
-        customRepositoryMetadataKey =
-            RepositoryJpaCustomMetadata.createIdentifier(customRepositoryDetails.getType(),
-                customLogicalPath);
-        registerDependency(customRepositoryMetadataKey, metadataIdentificationString);
-        repositoryCustomMetadata =
-            (RepositoryJpaCustomMetadata) getMetadataService().get(customRepositoryMetadataKey);
-      }
-    }
+    final ClassOrInterfaceTypeDetails customRepositoryDetails =
+        getTypeLocationService().getTypeDetails(customRepository);
+    final String customRepositoryMetadataKey =
+        RepositoryJpaCustomMetadata.createIdentifier(customRepositoryDetails);
+    final RepositoryJpaCustomMetadata repositoryCustomMetadata =
+        getMetadataService().get(customRepositoryMetadataKey);
 
     // Check if we have a valid custom repository
     Validate
@@ -262,20 +225,28 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
                 .format(
                     "ERROR: Can't found a class @RooJpaRepositoryCustom for entity '%s' to be able to generate services",
                     entity.getSimpleTypeName()));
+    registerDependency(customRepositoryMetadataKey, metadataIdentificationString);
 
 
-    Map<FieldMetadata, MethodMetadata> countByReferencedFieldMethods =
+    final Map<FieldMetadata, MethodMetadata> countByReferencedFieldMethods =
         new HashMap<FieldMetadata, MethodMetadata>(
             repositoryMetadata.getCountMethodByReferencedFields());
 
-    // Add custom finders to finders list
-    finders.addAll(repositoryCustomMetadata.getCustomFinderMethods());
+    // Add custom finders to finders list and add dependencies between modules
+    for (MethodMetadata finder : repositoryCustomMetadata.getCustomFinderMethods()) {
+
+      // Add to service finders list
+      finders.add(finder);
+
+      registerDependencyModolesOfFinder(governorPhysicalTypeMetadata, finder);
+    }
 
     // Add custom count methods to count method list
     countMethods.addAll(repositoryCustomMetadata.getCustomCountMethods());
 
     // Get related entities metadata
-    Map<JavaType, JpaEntityMetadata> relatedEntities = new HashMap<JavaType, JpaEntityMetadata>();
+    final Map<JavaType, JpaEntityMetadata> relatedEntities =
+        new HashMap<JavaType, JpaEntityMetadata>();
 
     // As parent
     JavaType childEntity;
@@ -318,6 +289,24 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
         countByReferencedFieldMethods, countMethods, relatedEntities);
   }
 
+  private void registerDependencyModolesOfFinder(
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, MethodMetadata finder) {
+    // Add dependencies between modules
+    List<JavaType> types = new ArrayList<JavaType>();
+    types.add(finder.getReturnType());
+    types.addAll(finder.getReturnType().getParameters());
+
+    for (AnnotatedJavaType parameter : finder.getParameterTypes()) {
+      types.add(parameter.getJavaType());
+      types.addAll(parameter.getJavaType().getParameters());
+    }
+
+    for (JavaType parameter : types) {
+      getTypeLocationService().addModuleDependency(
+          governorPhysicalTypeMetadata.getType().getModule(), parameter);
+    }
+  }
+
   /**
    * Gets {@link JpaEntityMetadata} from a entity
    *
@@ -326,10 +315,7 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
    */
   private JpaEntityMetadata getEntityMetadata(JavaType entity) {
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
-    final String entityMetadataId =
-        JpaEntityMetadata.createIdentifier(entityDetails.getType(),
-            PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId()));
-    return (JpaEntityMetadata) getMetadataService().get(entityMetadataId);
+    return getMetadataService().get(JpaEntityMetadata.createIdentifier(entityDetails));
   }
 
   private RepositoryJpaLocator getRepositoryJpaLocator() {

@@ -54,15 +54,14 @@ field set --fieldName pets --type ~.domain.Pet --mappedBy owner --notNull false 
 repository jpa --all --package ~.repository
 service --all --apiPackage ~.service.api --implPackage ~.service.impl
 
-// FIXME!! Re-enable finder when feature will be re-implemented
-// finder add --entity ~.domain.Pet --name findByNameAndWeight
-// finder add --entity ~.domain.Pet --name findByOwner
-// finder add --entity ~.domain.Pet --name findBySendRemindersAndWeightLessThan
-// finder add --entity ~.domain.Pet --name findByTypeAndNameLike
+finder add --entity ~.domain.Pet --name findByNameAndWeight
+finder add --entity ~.domain.Pet --name findByOwner
+finder add --entity ~.domain.Pet --name findBySendRemindersAndWeightLessThan
+finder add --entity ~.domain.Pet --name findByTypeAndNameLike
 
-// finder add --entity ~.domain.Visit --name findByDescriptionAndVisitDate
-// finder add --entity ~.domain.Visit --name findByVisitDateBetween
-// finder add --entity ~.domain.Visit --name findByDescriptionLike
+finder add --entity ~.domain.Visit --name findByDescriptionAndVisitDate
+finder add --entity ~.domain.Visit --name findByVisitDateBetween
+finder add --entity ~.domain.Visit --name findByDescriptionLike
 
 web mvc setup
 web mvc view setup --type THYMELEAF

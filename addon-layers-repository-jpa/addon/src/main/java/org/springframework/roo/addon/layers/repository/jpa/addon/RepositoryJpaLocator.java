@@ -35,6 +35,17 @@ public interface RepositoryJpaLocator {
   ClassOrInterfaceTypeDetails getRepository(final JavaType domainType);
 
   /**
+   * Returns the repository metadata that support the given domain type
+   *
+   * @param domainType the domain type for which to find the repositories; not
+   *            <code>null</code>
+   * @return a repository or null if not found
+   * @throws NullPointerException if domainType is null
+   * @throws IllegalStateException if more than one repository found
+   */
+  RepositoryJpaMetadata getRepositoryMetadata(final JavaType domainType);
+
+  /**
    * Returns first repository that support the given domain type
    *
    * @param domainType the domain type for which to find the repositories; not
@@ -43,5 +54,16 @@ public interface RepositoryJpaLocator {
    * @throws NullPointerException if domainType is null
    */
   ClassOrInterfaceTypeDetails getFirstRepository(final JavaType domainType);
+
+  /**
+   * Returns first repository Metadata that support the given domain type
+   *
+   * @param domainType the domain type for which to find the repositories; not
+   *            <code>null</code>
+   * @return a repository (first found) or null if not found
+   * @throws NullPointerException if domainType is null
+   */
+  RepositoryJpaMetadata getFirstRepositoryMetadata(final JavaType domainType);
+
 
 }

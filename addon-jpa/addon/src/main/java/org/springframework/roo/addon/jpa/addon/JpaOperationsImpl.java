@@ -42,7 +42,6 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
-import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -70,6 +69,7 @@ import java.util.logging.Logger;
  * @author Alan Stewart
  * @author Juan Carlos García
  * @author Paula Navarro
+ * @author Jose Manuel Vivó
  * @since 1.0
  */
 @Component
@@ -846,11 +846,8 @@ public class JpaOperationsImpl implements JpaOperations {
    * @return
    */
   private JpaEntityMetadata getJpaEntityMetadata(ClassOrInterfaceTypeDetails domainTypeDetails) {
-    final String entityMetadataId =
-        JpaEntityMetadata.createIdentifier(domainTypeDetails.getType(),
-            PhysicalTypeIdentifier.getPath(domainTypeDetails.getDeclaredByMetadataId()));
-    JpaEntityMetadata entityMetadata =
-        (JpaEntityMetadata) getMetadataService().get(entityMetadataId);
+    final String entityMetadataId = JpaEntityMetadata.createIdentifier(domainTypeDetails);
+    JpaEntityMetadata entityMetadata = getMetadataService().get(entityMetadataId);
     return entityMetadata;
   }
 

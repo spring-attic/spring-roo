@@ -35,7 +35,6 @@
         <module>addon-jpa</module>
         <module>addon-dto</module>
         <module>addon-dod</module>
-        <module>addon-finder</module>
         <module>addon-backup</module>
         <module>addon-web-mvc-controller</module>
         <module>addon-web-mvc-views</module>

@@ -22,7 +22,6 @@ public interface MethodMetadata extends InvocableMemberMetadata {
         }
       };
 
-
   /**
    * @return the name of the method (never null)
    */
@@ -51,4 +50,14 @@ public interface MethodMetadata extends InvocableMemberMetadata {
    * @since 1.2.0
    */
   boolean isStatic();
+
+  /**
+   * Indicates if method signature matches (name, number of parameters,
+   * type of parameters) with otherMethod
+   *
+   * @param otherMethod
+   * @return
+   * @since 2.0.0
+   */
+  boolean matchSignature(final MethodMetadata otherMethod);
 }

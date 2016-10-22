@@ -2,8 +2,8 @@ package org.springframework.roo.addon.web.mvc.controller.addon.details;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_SORTED_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_SORTED_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
@@ -16,27 +16,14 @@ import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
-import java.beans.Introspector;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.finder.addon.FinderMetadata;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.addon.PluralMetadata;
 import org.springframework.roo.addon.web.mvc.controller.addon.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -46,10 +33,8 @@ import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustom
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
@@ -69,16 +54,24 @@ import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link WebMetadataService} to retrieve various metadata
  * information for use by Web scaffolding add-ons.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1.2
  */
@@ -324,18 +317,18 @@ public class WebMetadataServiceImpl implements WebMetadataService {
     Validate.notNull(formBackingType, "Java type required");
     Validate.notNull(formBackingTypeDetails, "Member details required");
 
-    final ClassOrInterfaceTypeDetails javaTypeDetails =
-        typeLocationService.getTypeDetails(formBackingType);
-    Validate.notNull(formBackingType,
-        "Class or interface type details isn't available for type '%s'", formBackingType);
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
-    final String finderMetadataKey = FinderMetadata.createIdentifier(formBackingType, logicalPath);
-    registerDependency(finderMetadataKey, metadataIdentificationString);
-    final FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
-    if (finderMetadata == null) {
-      return null;
-    }
+    //    final ClassOrInterfaceTypeDetails javaTypeDetails =
+    //        typeLocationService.getTypeDetails(formBackingType);
+    //    Validate.notNull(formBackingType,
+    //        "Class or interface type details isn't available for type '%s'", formBackingType);
+    //    final LogicalPath logicalPath =
+    //        PhysicalTypeIdentifier.getPath(javaTypeDetails.getDeclaredByMetadataId());
+    //    final String finderMetadataKey = FinderMetadata.createIdentifier(formBackingType, logicalPath);
+    //    registerDependency(finderMetadataKey, metadataIdentificationString);
+    //    final FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
+    //    if (finderMetadata == null) {
+    //      return null;
+    //    }
     final SortedSet<FinderMetadataDetails> finderMetadataDetails =
         new TreeSet<FinderMetadataDetails>();
     /*for (final MethodMetadata method : finderMetadata.getAllDynamicFinders()) {

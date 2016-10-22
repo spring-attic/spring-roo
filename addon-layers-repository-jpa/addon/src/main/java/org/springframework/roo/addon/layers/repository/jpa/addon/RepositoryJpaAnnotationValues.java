@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
+import org.springframework.roo.addon.layers.repository.jpa.annotations.RooFinder;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
@@ -10,7 +11,7 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * The values of a {@link RooJpaRepository} annotation.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @author Juan Carlos García
@@ -23,7 +24,7 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
   /**
    * Constructor
-   * 
+   *
    * @param governorPhysicalTypeMetadata the metadata to parse (required)
    */
   public RepositoryJpaAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
@@ -33,10 +34,23 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
   /**
    * Returns the entity type managed by the annotated repository
-   * 
+   *
    * @return a non-<code>null</code> type
    */
   public JavaType getEntity() {
     return entity;
   }
+
+  @AutoPopulate
+  private RooFinder[] finders;
+
+  /**
+   * Returns the finders to create for current repository
+   *
+   * @return RooFinder array
+   */
+  public RooFinder[] getFinders() {
+    return finders;
+  }
+
 }

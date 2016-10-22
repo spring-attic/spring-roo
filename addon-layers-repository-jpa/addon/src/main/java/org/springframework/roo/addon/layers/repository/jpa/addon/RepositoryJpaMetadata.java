@@ -7,7 +7,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -50,10 +53,23 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   private final FieldMetadata compositionField;
   private final RelationInfo compositionInfo;
   private final MethodMetadata compositionCountMethod;
-  private final List<JavaType> customRepositories;
+  private final JavaType customRepository;
+  private final JavaType entity;
+
+  private final List<FinderMethod> findersDeclared;
+  private final List<MethodMetadata> findersGenerated;
+  private final List<MethodMetadata> countMethods;
+  private final List<FinderMethod> findersToAddInCustom;
+  private final List<String> declaredFinderNames;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+  }
+
+  public static String createIdentifier(ClassOrInterfaceTypeDetails repositoryDetails) {
+    final LogicalPath repositoryLogicalPath =
+        PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
+    return createIdentifier(repositoryDetails.getType(), repositoryLogicalPath);
   }
 
   public static JavaType getJavaType(final String metadataIdentificationString) {
@@ -85,26 +101,31 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    * @param annotationValues (required)
    * @param entityMetadata boolean
    * @param readOnlyRepository JavaType
-   * @param customRepositories List<JavaType>
+   * @param customRepository
    * @param relationsAsChild
+   * @param findersToAdd
+   * @param findersToAddInCustom
+   * @param declaredFinderNames
    * @param referenceFields Map<JavaType, JavaType> that contains referenceField type
    * and its identifier type
    */
   public RepositoryJpaMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaAnnotationValues annotationValues, final JpaEntityMetadata entityMetadata,
-      final JavaType readOnlyRepository, final List<JavaType> customRepositories,
-      List<Pair<FieldMetadata, RelationInfo>> relationsAsChild) {
+      final JavaType readOnlyRepository, final JavaType customRepository,
+      List<Pair<FieldMetadata, RelationInfo>> relationsAsChild, List<FinderMethod> findersToAdd,
+      List<FinderMethod> findersToAddInCustom, List<String> declaredFinderNames) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
     final FieldMetadata identifierField = entityMetadata.getCurrentIndentifierField();
     final JavaType identifierType = identifierField.getFieldType();
-    final JavaType domainType = annotationValues.getEntity();
+    this.entity = annotationValues.getEntity();
 
-    this.customRepositories = Collections.unmodifiableList(customRepositories);
-
-    countMethodByReferencedFields = new HashMap<FieldMetadata, MethodMetadata>();
+    this.findersToAddInCustom = Collections.unmodifiableList(findersToAddInCustom);
+    this.customRepository = customRepository;
+    this.countMethodByReferencedFields = new HashMap<FieldMetadata, MethodMetadata>();
+    this.declaredFinderNames = Collections.unmodifiableList(declaredFinderNames);
 
     // Iterate over fields which are child fields
     boolean composition = false;
@@ -123,9 +144,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
             "Entity %s has defined more than one relations as child part whit type composition.",
             aspectName);
         composition = true;
-        ensureGovernorHasMethod(new MethodMetadataBuilder(getFindOneMethod(domainType,
-            identifierField)));
-        ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllIteratorMethod(domainType,
+        ensureGovernorHasMethod(new MethodMetadataBuilder(getFindOneMethod(entity, identifierField)));
+        ensureGovernorHasMethod(new MethodMetadataBuilder(getFindAllIteratorMethod(entity,
             identifierField)));
         compositionCountMethod = countMethod;
         compositionFieldInfo = fieldInfo;
@@ -157,12 +177,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
         identifierType));
 
     // If has some RepositoryCustom associated, add extends
-    if (!customRepositories.isEmpty()) {
-      // Extends RepositoryCustom
-      for (JavaType repositoryCustom : customRepositories) {
-        ensureGovernorExtends(repositoryCustom);
-      }
-    }
+    ensureGovernorExtends(customRepository);
 
     // All repositories are generated with @Transactional(readOnly = true)
     AnnotationMetadataBuilder transactionalAnnotation =
@@ -170,8 +185,51 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     transactionalAnnotation.addBooleanAttribute("readOnly", true);
     ensureGovernorIsAnnotated(transactionalAnnotation);
 
+
+    // Prepare list of ALL finders and count declared
+    List<MethodMetadata> findersTmp = new ArrayList<MethodMetadata>();
+    List<MethodMetadata> countMethodsTmp = new ArrayList<MethodMetadata>();
+    if (compositionCountMethod != null) {
+      countMethodsTmp.add(compositionCountMethod);
+    }
+    for (MethodMetadata declared : countMethodByReferencedFields.values()) {
+      countMethodsTmp.add(declared);
+    }
+
+    // Including finders and count methods
+    for (FinderMethod finderMethod : findersToAdd) {
+      MethodMetadata method = getFinderMethod(finderMethod).build();
+      if (!isAlreadyDeclaredMethod(method, findersTmp)) {
+        ensureGovernorHasMethod(new MethodMetadataBuilder(method));
+        findersTmp.add(method);
+      }
+
+      // Generate a count method for each finder if they aren't count methods
+      if (!StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
+        countMethod = getCountMethod(finderMethod).build();
+        if (!isAlreadyDeclaredMethod(countMethod, countMethodsTmp)) {
+          ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
+          countMethodsTmp.add(countMethod);
+        }
+      }
+    }
+
+    this.findersDeclared = Collections.unmodifiableList(new ArrayList<FinderMethod>(findersToAdd));
+    this.findersGenerated = Collections.unmodifiableList(findersTmp);
+    this.countMethods = Collections.unmodifiableList(countMethodsTmp);
+
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  private boolean isAlreadyDeclaredMethod(MethodMetadata method,
+      List<MethodMetadata> alreadyDeclaredMethods) {
+    for (MethodMetadata declared : alreadyDeclaredMethods) {
+      if (method.matchSignature(declared)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private MethodMetadata getFindOneMethod(JavaType entity, FieldMetadata identifierFieldMetadata) {
@@ -259,6 +317,77 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   }
 
   /**
+   * Method that generates finder method on current interface
+   *
+   * @param finderMethod
+   * @return
+   */
+  private MethodMetadataBuilder getFinderMethod(FinderMethod finderMethod) {
+
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    for (FinderParameter param : finderMethod.getParameters()) {
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(param.getType()));
+      parameterNames.add(param.getName());
+    }
+
+    // Add additional Pageable method
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.PAGEABLE));
+    parameterNames.add(new JavaSymbolName("pageable"));
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT,
+            finderMethod.getMethodName(), finderMethod.getReturnType(), parameterTypes,
+            parameterNames, null);
+
+    return methodBuilder; // Build and return a MethodMetadata
+    // instance
+  }
+
+
+
+  /**
+   * Method that generates finder method on current interface
+   *
+   * @param finderMethod
+   * @return
+   */
+  private MethodMetadataBuilder getCountMethod(FinderMethod finderMethod) {
+
+    // Define method parameter types and parameter names
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
+    for (FinderParameter param : finderMethod.getParameters()) {
+      parameterTypes.add(AnnotatedJavaType.convertFromJavaType(param.getType()));
+      parameterNames.add(param.getName());
+    }
+
+    // Create count method name
+    String countName = finderMethod.getMethodName().getSymbolName();
+    if (StringUtils.startsWith(countName, "find")) {
+      countName = StringUtils.removeStart(countName, "find");
+    } else if (StringUtils.startsWith(countName, "query")) {
+      countName = StringUtils.removeStart(countName, "query");
+    } else if (StringUtils.startsWith(countName, "read")) {
+      countName = StringUtils.removeStart(countName, "read");
+    }
+    countName = "count".concat(countName);
+    JavaSymbolName countMethodName = new JavaSymbolName(countName);
+
+    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC + Modifier.ABSTRACT, countMethodName,
+            JavaType.LONG_PRIMITIVE, parameterTypes, parameterNames, null);
+
+    return methodBuilder; // Build and return a MethodMetadata
+    // instance
+  }
+
+  /**
    * This method returns all generated countMethodByReferencedFields
    *
    * @return Map with key that identifies referenced field and method metadata
@@ -291,8 +420,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   /**
    * @return list of related custom repositories
    */
-  public List<JavaType> getCustomRepositories() {
-    return customRepositories;
+  public JavaType getCustomRepository() {
+    return customRepository;
   }
 
   /**
@@ -300,6 +429,48 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    */
   public boolean isComposition() {
     return compositionField != null;
+  }
+
+  /**
+   * @return entity handles by current repository
+   */
+  public JavaType getEntity() {
+    return entity;
+  }
+
+  /**
+   * @return finders definition which should be add in custom repository
+   */
+  public List<FinderMethod> getFindersToAddInCustom() {
+    return findersToAddInCustom;
+  }
+
+  /**
+   * @return all countMethods declared in repository
+   */
+  public List<MethodMetadata> getCountMethods() {
+    return countMethods;
+  }
+
+  /**
+   * @return finders definition declared to implement in repository
+   */
+  public List<FinderMethod> getFindersDeclared() {
+    return findersDeclared;
+  }
+
+  /**
+   * @return finders method generated in repository
+   */
+  public List<MethodMetadata> getFindersGenerated() {
+    return findersGenerated;
+  }
+
+  /**
+   * @return all declared finder names
+   */
+  public List<String> getDeclaredFinderNames() {
+    return declaredFinderNames;
   }
 
   @Override
@@ -311,6 +482,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
     builder.append("destinationType", destination);
     builder.append("governor", governorPhysicalTypeMetadata.getId());
     builder.append("itdTypeDetails", itdTypeDetails);
+    builder.append("entity", entity);
     return builder.toString();
   }
 }

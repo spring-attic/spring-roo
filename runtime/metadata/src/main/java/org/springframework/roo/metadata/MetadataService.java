@@ -32,7 +32,7 @@ package org.springframework.roo.metadata;
  * boolean parameter. It must also call
  * {@link MetadataDependencyRegistry#notifyDownstream(String)} in case any other
  * metadata was monitoring the metadata.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -42,7 +42,7 @@ public interface MetadataService extends MetadataNotificationListener, MetadataC
    * Returns the {@link MetadataItem} with the given ID, generating it from
    * scratch and caching the result. For performance reasons it's preferable
    * to call {@link #get(String)} if possible, to take advantage of the cache.
-   * 
+   *
    * @param metadataIdentificationString the ID of the {@link MetadataItem} to
    *            acquire; must identify a metadata instance, i.e. return
    *            <code>true</code> when passed to
@@ -51,12 +51,12 @@ public interface MetadataService extends MetadataNotificationListener, MetadataC
    *         metadata is not currently available
    * @throws an exception if the given type of metadata is not supported
    */
-  MetadataItem evictAndGet(String metadataIdentificationString);
+  <T extends MetadataItem> T evictAndGet(String metadataIdentificationString);
 
   /**
    * Returns the {@link MetadataItem} with the given ID, from the cache if
    * possible.
-   * 
+   *
    * @param metadataIdentificationString the ID of the {@link MetadataItem} to
    *            acquire; must identify a metadata instance, i.e. return
    *            <code>true</code> when passed to
@@ -65,7 +65,7 @@ public interface MetadataService extends MetadataNotificationListener, MetadataC
    *         metadata is not currently available
    * @throws an exception if the given type of metadata is not supported
    */
-  MetadataItem get(String metadataIdentificationString);
+  <T extends MetadataItem> T get(String metadataIdentificationString);
 
   /**
    * Creates the requested {@link MetadataItem} if possible, returning null if
@@ -82,7 +82,7 @@ public interface MetadataService extends MetadataNotificationListener, MetadataC
    * <p>
    * An exception will also be thrown if the identification string is related
    * to a provider that is not registered.
-   * 
+   *
    * @param metadataIdentificationString to acquire (required and must be
    *            supported by this provider)
    * @param evictCache forces eviction of the instance from any caches before

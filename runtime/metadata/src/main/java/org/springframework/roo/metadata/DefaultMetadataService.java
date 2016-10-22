@@ -26,7 +26,7 @@ import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTrack
  * This implementation is not thread safe. It should only be accessed by a
  * single thread at a time. This is enforced by the process manager semantics,
  * so we avoid the cost of re-synchronization here.
- * 
+ *
  * @author Ben Alex
  * @author Enrique Ruiz at DISID Corporation S.L.
  * @since 1.0
@@ -72,9 +72,9 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
   }
 
   /**
-   * This service is being deactivated so unregister upstream-downstream 
+   * This service is being deactivated so unregister upstream-downstream
    * dependencies, triggers, matchers and listeners.
-   * 
+   *
    * @param context
    */
   protected void deactivate(final ComponentContext context) {
@@ -133,12 +133,14 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
     }
   }
 
-  public MetadataItem evictAndGet(final String metadataIdentificationString) {
-    return getInternal(metadataIdentificationString, true, false);
+  @SuppressWarnings("unchecked")
+  public <T extends MetadataItem> T evictAndGet(final String metadataIdentificationString) {
+    return (T) getInternal(metadataIdentificationString, true, false);
   }
 
-  public MetadataItem get(final String metadataIdentificationString) {
-    return get(metadataIdentificationString, false);
+  @SuppressWarnings("unchecked")
+  public <T extends MetadataItem> T get(final String metadataIdentificationString) {
+    return (T) get(metadataIdentificationString, false);
   }
 
   public MetadataItem get(final String metadataIdentificationString, final boolean evictCache) {

@@ -5,6 +5,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.jvnet.inflector.Noun;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
+import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerOperations;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
@@ -19,7 +22,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
-import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
@@ -46,7 +48,7 @@ import java.util.logging.Logger;
 
 /**
  * Implementation of {@link WebFinderOperations}
- * 
+ *
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @author Paula Navarro
@@ -69,6 +71,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
   private TypeManagementService typeManagementService;
   @Reference
   private ProjectOperations projectOperations;
+  @Reference
+  private RepositoryJpaLocator repositoryJpaLocator;
 
   public boolean isWebFinderInstallationPossible() {
     return projectOperations.isFeatureInstalled(FeatureNames.MVC);
@@ -90,49 +94,29 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     controllerPackage = checkAndUseApplicationModule(controllerPackage);
 
     // Check if entity has any associated repository
-    boolean entityHasRepository = false;
-    Set<ClassOrInterfaceTypeDetails> repositories =
-        typeLocationService
-            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
-    ClassOrInterfaceTypeDetails relatedRepository = null;
-    for (ClassOrInterfaceTypeDetails repository : repositories) {
-      if (repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity") != null
-          && repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity")
-              .getValue().equals(entity)) {
-        entityHasRepository = true;
-        relatedRepository = repository;
-        break;
-      }
-    }
-    if (!entityHasRepository) {
-      LOGGER
-          .log(
-              Level.INFO,
-              String
-                  .format(
-                      "Entity %s doesn't have an associated repository. You "
-                          + "need at least an associated repository with finders to publish them to the web layer."
-                          + "Please, create one associated repository with 'repository jpa' command.",
-                      entity.getSimpleTypeName()));
-      return;
-    }
+    final ClassOrInterfaceTypeDetails relatedRepositoryDetails =
+        repositoryJpaLocator.getRepository(entity);
+    Validate
+        .notNull(
+            relatedRepositoryDetails,
+            "Entity %s doesn't have an associated repository. You "
+                + "need at least an associated repository with finders to publish them to the web layer."
+                + "Please, create one associated repository with 'repository jpa' command.", entity);
 
     // Get repository finder methods
-    AnnotationMetadata findersAnnotation = relatedRepository.getAnnotation(RooJavaType.ROO_FINDERS);
-    if (findersAnnotation != null && findersAnnotation.getAttribute("finders") != null) {
+    RepositoryJpaMetadata repositoryMetadata = repositoryJpaLocator.getRepositoryMetadata(entity);
 
-      // Get finders in @RooFinders
-      List<String> entityFinders = getFindersInRooFindersAnnotation(findersAnnotation);
+    // Get finders in @RooRepositoryJpa
+    List<String> entityFinders = repositoryMetadata.getDeclaredFinderNames();
 
-      // Check if specified finder methods exists in associated repository
-      for (String finder : queryMethods) {
-        if (!entityFinders.contains(finder)) {
-          LOGGER.log(Level.INFO, String.format(
-              "ERROR: Provided finder '%s' doesn't exists on the repository '%s' "
-                  + "related to entity '%s'", finder, relatedRepository.getType()
-                  .getSimpleTypeName(), entity.getSimpleTypeName()));
-          return;
-        }
+    // Check if specified finder methods exists in associated repository
+    for (String finder : queryMethods) {
+      if (!entityFinders.contains(finder)) {
+        LOGGER.log(Level.INFO, String.format(
+            "ERROR: Provided finder '%s' doesn't exists on the repository '%s' "
+                + "related to entity '%s'", finder, relatedRepositoryDetails.getType()
+                .getSimpleTypeName(), entity.getSimpleTypeName()));
+        return;
       }
     }
 
@@ -243,7 +227,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     }
 
     // Add dependencies between modules if required
-    addModuleDependencies(entity, relatedRepository, relatedService, controllerBuilder.build());
+    addModuleDependencies(entity, relatedRepositoryDetails, relatedService,
+        controllerBuilder.build());
 
     // Write changes to disk
     typeManagementService.createOrUpdateTypeOnDisk(controllerBuilder.build());
@@ -260,9 +245,6 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     controllerPackage = checkAndUseApplicationModule(controllerPackage);
 
     // Search all entities with associated repository
-    Set<ClassOrInterfaceTypeDetails> repositoryTypes =
-        typeLocationService
-            .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
     for (ClassOrInterfaceTypeDetails entityDetails : typeLocationService
         .findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY)) {
       JavaType entity = entityDetails.getType();
@@ -273,38 +255,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
       }
 
       // Seek the repositories of each entity
-      boolean hasRepository = false;
-      for (ClassOrInterfaceTypeDetails repository : repositoryTypes) {
-        if (repository.getAnnotation(RooJavaType.ROO_REPOSITORY_JPA).getAttribute("entity")
-            .getValue().equals(entity)) {
-          hasRepository = true;
-          AnnotationMetadata findersAnnotation = repository.getAnnotation(RooJavaType.ROO_FINDERS);
-          if (findersAnnotation != null && findersAnnotation.getAttribute("finders") != null) {
-            List<String> entityFinders = new ArrayList<String>();
-            List<?> values = (List<?>) findersAnnotation.getAttribute("finders").getValue();
-            Iterator<?> it = values.iterator();
-
-            while (it.hasNext()) {
-              NestedAnnotationAttributeValue finder = (NestedAnnotationAttributeValue) it.next();
-              if (finder.getValue() != null && finder.getValue().getAttribute("finder") != null) {
-                entityFinders.add((String) finder.getValue().getAttribute("finder").getValue());
-              }
-            }
-            this.createOrUpdateSearchControllerForEntity(entity, entityFinders, responseType,
-                controllerPackage, pathPrefix);
-          } else {
-            LOGGER
-                .log(
-                    Level.INFO,
-                    String
-                        .format(
-                            "Entity %s hasn't any finder associated and web "
-                                + "finder generation won't have effects. Use 'finder add' command to create finders.",
-                            entity.getSimpleTypeName()));
-          }
-        }
-      }
-      if (!hasRepository) {
+      RepositoryJpaMetadata repositoryMetadata = repositoryJpaLocator.getRepositoryMetadata(entity);
+      if (repositoryMetadata == null) {
         LOGGER
             .log(
                 Level.INFO,
@@ -314,12 +266,28 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
                             + "finder generation won't have effects. Use 'repository jpa' command to create repositories.",
                         entity.getSimpleTypeName()));
       }
+
+      List<String> entityFinders = repositoryMetadata.getDeclaredFinderNames();
+      if (entityFinders.isEmpty()) {
+        LOGGER
+            .log(
+                Level.INFO,
+                String
+                    .format(
+                        "Entity %s hasn't any finder associated and web "
+                            + "finder generation won't have effects. Use 'finder add' command to create finders.",
+                        entity.getSimpleTypeName()));
+      } else {
+        this.createOrUpdateSearchControllerForEntity(entity, entityFinders, responseType,
+            controllerPackage, pathPrefix);
+      }
+
     }
   }
 
   /**
    * Add dependencies between modules if needed
-   * 
+   *
    * @param entity
    * @param relatedRepository
    * @param relatedService
@@ -345,9 +313,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
   }
 
   /**
-   * Build a new search controller for provided entity, with provided response type, 
+   * Build a new search controller for provided entity, with provided response type,
    * package, path prefix and query methods.
-   * 
+   *
    * @param entity
    * @param queryMethods
    * @param responseType
@@ -399,9 +367,9 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
   }
 
   /**
-   * Checks if module provided in package is an application module. If not, find an 
-   * application module and use it with default package. 
-   * 
+   * Checks if module provided in package is an application module. If not, find an
+   * application module and use it with default package.
+   *
    * @param controllerPackage the provided JavaPackage to check
    * @return
    */
@@ -483,7 +451,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 
   /**
    * Returns all ControllerType.SEARCH controllers related to provided entity.
-   * 
+   *
    * @param entity the Javatype to which controllers should be related.
    * @return a List<ClassOrInterfaceTypeDetails> with the related search controllers
    */
@@ -511,25 +479,5 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
       }
     }
     return entitySearchControllers;
-  }
-
-  /**
-   * Get all finder names in provided @RooFinder
-   * 
-   * @param findersAnnotation
-   * @return a List<String> with the finder names
-   */
-  private List<String> getFindersInRooFindersAnnotation(AnnotationMetadata findersAnnotation) {
-    List<String> entityFinders = new ArrayList<String>();
-    List<?> values = (List<?>) findersAnnotation.getAttribute("finders").getValue();
-    Iterator<?> it = values.iterator();
-
-    while (it.hasNext()) {
-      NestedAnnotationAttributeValue finder = (NestedAnnotationAttributeValue) it.next();
-      if (finder.getValue() != null && finder.getValue().getAttribute("finder") != null) {
-        entityFinders.add((String) finder.getValue().getAttribute("finder").getValue());
-      }
-    }
-    return entityFinders;
   }
 }

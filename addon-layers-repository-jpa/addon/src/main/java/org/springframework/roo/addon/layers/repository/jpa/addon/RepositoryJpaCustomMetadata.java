@@ -6,7 +6,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustom;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -62,6 +64,12 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
   }
 
+  public static String createIdentifier(ClassOrInterfaceTypeDetails details) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(details.getDeclaredByMetadataId());
+    return createIdentifier(details.getType(), logicalPath);
+  }
+
   public static JavaType getJavaType(final String metadataIdentificationString) {
     return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING,
         metadataIdentificationString);
@@ -93,19 +101,18 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
    *            (required)
    * @param domainType entity referenced on interface
    * @param searchResult the java type o the search result returned by findAll finder
-   * @param relationsAsChild list of information of fields which entity is child part
-   * @param findersToAdd
+   * @param repositoryMetadata list of information of fields which entity is child part
+   * @param relationsAsChild
    */
   public RepositoryJpaCustomMetadata(final String identifier, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaCustomAnnotationValues annotationValues, final JavaType domainType,
-      final JavaType defaultReturnType,
-      final List<Pair<FieldMetadata, RelationInfo>> relationsAsChild,
-      List<CustomFinderMethod> findersToAdd) {
+      final JavaType defaultReturnType, final RepositoryJpaMetadata repositoryMetadata,
+      List<Pair<FieldMetadata, RelationInfo>> relationsAsChild) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
     Validate.notNull(defaultReturnType, "Search result required");
-    Validate.notNull(relationsAsChild, "Referenced fields could be empty but not null");
+    Validate.notNull(repositoryMetadata, "Referenced fields could be empty but not null");
 
     this.defaultReturnType = defaultReturnType;
     ArrayList<MethodMetadata> tmpCustomFinderMethods = new ArrayList<MethodMetadata>();
@@ -140,25 +147,33 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
       findAllGlobalSearchMethod = null;
     }
 
-    // TODO
+    // Prepare a list of all finder and count methods already declared on
+    // repository. While generate new methods, this list will be ground.
+    ArrayList<MethodMetadata> allCountMethods = new ArrayList<MethodMetadata>();
+    allCountMethods.addAll(repositoryMetadata.getCountMethods());
+    ArrayList<MethodMetadata> allFinderMethods = new ArrayList<MethodMetadata>();
+    allCountMethods.addAll(repositoryMetadata.getFindersGenerated());
+
     // Generate finder methods if any
-    if (findersToAdd != null) {
-      for (CustomFinderMethod finderMethod : findersToAdd) {
+    if (repositoryMetadata.getFindersToAddInCustom() != null
+        && !repositoryMetadata.getFindersToAddInCustom().isEmpty()) {
+      for (FinderMethod finderMethod : repositoryMetadata.getFindersToAddInCustom()) {
+        JavaType fromBean = finderMethod.getParameters().get(0).getType();
         MethodMetadata method =
-            getCustomFinder(finderMethod.getReturnType(), finderMethod.getMethodName(),
-                finderMethod.getFormBean());
-        ensureGovernorHasMethod(new MethodMetadataBuilder(method));
-        if (!tmpCustomFinderMethods.contains(method)) {
+            getCustomFinder(finderMethod.getReturnType(), finderMethod.getMethodName(), fromBean);
+        if (!isAlreadyDeclaredMethod(method, allFinderMethods)) {
+          ensureGovernorHasMethod(new MethodMetadataBuilder(method));
           tmpCustomFinderMethods.add(method);
+          allFinderMethods.add(method);
         }
 
         // Generate a count method for each custom finder if they aren't count methods
         if (!StringUtils.startsWith(finderMethod.getMethodName().getSymbolName(), "count")) {
-          MethodMetadata countMethod =
-              getCustomCount(finderMethod.getFormBean(), finderMethod.getMethodName());
-          ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
-          if (!tmpCustomCountMethods.contains(countMethod)) {
+          MethodMetadata countMethod = getCustomCount(fromBean, finderMethod.getMethodName());
+          if (!isAlreadyDeclaredMethod(countMethod, allCountMethods)) {
+            ensureGovernorHasMethod(new MethodMetadataBuilder(countMethod));
             tmpCustomCountMethods.add(countMethod);
+            allCountMethods.add(countMethod);
           }
         }
       }
@@ -168,6 +183,16 @@ public class RepositoryJpaCustomMetadata extends AbstractItdTypeDetailsProviding
 
     // Build the ITD
     itdTypeDetails = builder.build();
+  }
+
+  private boolean isAlreadyDeclaredMethod(MethodMetadata method,
+      List<MethodMetadata> alreadyDeclaredMethods) {
+    for (MethodMetadata declared : alreadyDeclaredMethods) {
+      if (method.matchSignature(declared)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

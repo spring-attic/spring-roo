@@ -11,11 +11,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dto.addon.DtoOperations;
 import org.springframework.roo.addon.dto.addon.DtoOperationsImpl;
-import org.springframework.roo.addon.finder.addon.FinderOperations;
-import org.springframework.roo.addon.finder.addon.FinderOperationsImpl;
-import org.springframework.roo.addon.finder.addon.parser.FinderParameter;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperations;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperationsImpl;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -234,25 +234,18 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     // Getting repository metadata
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(repositoryDetails.getDeclaredByMetadataId());
     final String repositoryMetadataKey =
-        RepositoryJpaCustomMetadata.createIdentifier(repositoryDetails.getType(), logicalPath);
+        RepositoryJpaCustomMetadata.createIdentifier(repositoryDetails);
     final RepositoryJpaCustomMetadata repositoryCustomMetadata =
-        (RepositoryJpaCustomMetadata) getMetadataService().get(repositoryMetadataKey);
+        getMetadataService().get(repositoryMetadataKey);
 
     // Getting java bean metadata
-    final LogicalPath entityLogicalPath =
-        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
-    final String javaBeanMetadataKey =
-        JavaBeanMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
+    final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
 
     // Getting jpa entity metadata
-    final String jpaEntityMetadataKey =
-        JpaEntityMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
+    final String jpaEntityMetadataKey = JpaEntityMetadata.createIdentifier(entityDetails);
 
-    JpaEntityMetadata entityMetadata =
-        (JpaEntityMetadata) getMetadataService().get(jpaEntityMetadataKey);
+    JpaEntityMetadata entityMetadata = getMetadataService().get(jpaEntityMetadataKey);
 
     // Create dependency between repository and java bean annotation
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
@@ -395,7 +388,6 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
         // Get field values in "path" format from annotation
         AnnotationAttributeValue<?> projectionFields = projectionAnnotation.getAttribute("fields");
-        @SuppressWarnings("unchecked")
         List<String> projectionFieldList = new ArrayList<String>();
         for (StringAttributeValue value : (List<StringAttributeValue>) projectionFields.getValue()) {
           projectionFieldList.add(value.getValue());
