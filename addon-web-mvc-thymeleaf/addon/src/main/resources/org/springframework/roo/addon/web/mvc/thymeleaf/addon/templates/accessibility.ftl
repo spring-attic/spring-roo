@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html lang="es" data-layout-decorator="layouts/default-layout">
 <head>
-<meta charset="UTF-8" data-th-remove="all" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
+<meta charset="UTF-8" data-th-remove="all">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all">
 <meta name="viewport" content="width=device-width, initial-scale=1"
-  data-th-remove="all" />
+  data-th-remove="all">
 <meta name="description"
   content="Spring Roo, a next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes." data-th-remove="all"
-  data-th-remove="all" />
+  data-th-remove="all">
 <meta name="author"
   content="Spring Roo development team"
-  data-th-remove="all" />
+  data-th-remove="all">
 
 <link rel="shortcut icon" href="../static/public/img/favicon.ico"
-  data-th-remove="all" />
+  data-th-remove="all">
 
 <link rel="apple-touch-icon" href="../static/public/img/apple-touch-icon.png"
-   data-th-remove="all" />
+   data-th-remove="all">
 
 <title data-th-text="|${r"#{"}label_accessibility${r"}"}- ${projectName}|">Accessibility - ${projectName}</title>
 

@@ -2,26 +2,26 @@
 <html lang="en" data-layout-decorator="layouts/default-layout">
 
 <head>
-  <meta charset="UTF-8" data-th-remove="all" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all" />
+  <meta charset="UTF-8" data-th-remove="all">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all">
   <meta name="viewport" content="width=device-width, initial-scale=1"
-    data-th-remove="all" />
+    data-th-remove="all">
   <meta name="description"
     content="Spring Roo, a next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes."
-    data-th-remove="all" />
+    data-th-remove="all">
   <meta name="author"
     content="Spring Roo development team"
-    data-th-remove="all" />
+    data-th-remove="all">
   <#if isSecurityEnabled == true>
   <meta data-th-if="${r"${_csrf != null}"}" name="_csrf" data-th-content="${_csrf.token}" />
   <meta data-th-if="${r"${_csrf != null}"}" name="_csrf_header" data-th-content="${_csrf.headerName}" />
   </#if>
 
  <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
-    data-th-remove="all" />
+    data-th-remove="all">
 
  <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
-    data-th-remove="all" />
+    data-th-remove="all">
 
  <title data-th-text="|${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}|">${entityName} List - ${projectName}</title>
 
@@ -38,7 +38,7 @@
  <!-- Font Awesome -->
  <link rel="stylesheet" type="text/css"
    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-   data-th-remove="all" />
+   data-th-remove="all">
 
  <!-- Datatables -->
  <link
@@ -69,12 +69,12 @@
  <!-- Bootswatch CSS custom -->
  <link rel="stylesheet" type="text/css"
    href="../../static/public/css/theme.css"
-   data-th-remove="all" />
+   data-th-remove="all">
 
  <!-- Roo CSS -->
  <link rel="stylesheet" type="text/css"
     href="../../static/public/css/springroo.css"
-    data-th-remove="all" />
+    data-th-remove="all">
 
  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
