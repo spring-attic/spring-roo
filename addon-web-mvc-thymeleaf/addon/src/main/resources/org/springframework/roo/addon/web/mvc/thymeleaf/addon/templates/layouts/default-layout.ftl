@@ -2,18 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description"
-      content="${r"#{info_description}"}" />
-    <meta name="author"
-      content="${r"#{info_author}"}" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="${r"#{info_description}"}">
+    <meta name="author" content="${r"#{info_author}"}">
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
-      data-th-href="@{/public/img/favicon.ico}" />
+      data-th-href="@{/public/img/favicon.ico}">
 
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
-      data-th-href="@{/public/img/apple-touch-icon.png}" />
+      data-th-href="@{/public/img/apple-touch-icon.png}">
 
     <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-text="${r"${projectName}"}">Spring Roo application</title>
 
