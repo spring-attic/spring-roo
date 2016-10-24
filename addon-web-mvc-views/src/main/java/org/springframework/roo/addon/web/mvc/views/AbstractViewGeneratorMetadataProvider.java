@@ -1,16 +1,25 @@
 package org.springframework.roo.addon.web.mvc.views;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.jvnet.inflector.Noun;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperations;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperationsImpl;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.addon.web.mvc.controller.addon.finder.SearchAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
@@ -36,16 +45,7 @@ import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * This abstract class will be extended by MetadataProviders focused on
@@ -60,6 +60,8 @@ import java.util.Set;
 @Component(componentAbstract = true)
 public abstract class AbstractViewGeneratorMetadataProvider extends
     AbstractMemberDiscoveringItdMetadataProvider {
+
+  protected ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   public String metadataIdentificationString;
   public JavaType aspectName;
@@ -76,10 +78,11 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
   public JavaType identifierType;
   public MethodMetadata identifierAccessor;
 
-  private ProjectOperations projectOperations;
-  private PropFilesManagerService propFilesManagerService;
-  private I18nOperationsImpl i18nOperationsImpl;
-  private FinderOperationsImpl finderOperationsImpl;
+  protected void activate(final ComponentContext context) {
+    this.context = context.getBundleContext();
+    serviceInstaceManager.activate(this.context);
+  }
+
 
   /**
    * This operation returns the MVCViewGenerationService that should be used
@@ -219,8 +222,7 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
       pathPrefix = StringUtils.lowerCase((String) pathPrefixAttr.getValue());
     }
     // Generate path
-    String path =
-        "/".concat(StringUtils.lowerCase(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)));
+    String path = "/".concat(StringUtils.lowerCase(getPluralService().getPlural(entity)));
     if (StringUtils.isNotEmpty(pathPrefix)) {
       if (!pathPrefix.startsWith("/")) {
         pathPrefix = "/".concat(pathPrefix);
@@ -426,96 +428,29 @@ public abstract class AbstractViewGeneratorMetadataProvider extends
   }
 
   public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on AbstractViewGeneratorMetadataProvider.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
   public PropFilesManagerService getPropFilesManager() {
-    if (propFilesManagerService == null) {
-      // Get all Services implement PropFileOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PropFilesManagerService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          propFilesManagerService = (PropFilesManagerService) this.context.getService(ref);
-          return propFilesManagerService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER
-            .warning("Cannot load PropFilesManagerService on AbstractViewGeneratorMetadataProvider.");
-        return null;
-      }
-    } else {
-      return propFilesManagerService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, PropFilesManagerService.class);
   }
 
   public I18nOperationsImpl getI18nOperationsImpl() {
-    if (i18nOperationsImpl == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(I18nOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          i18nOperationsImpl = (I18nOperationsImpl) this.context.getService(ref);
-          return i18nOperationsImpl;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on AbstractViewGeneratorMetadataProvider.");
-        return null;
-      }
-    } else {
-      return i18nOperationsImpl;
-    }
+    return (I18nOperationsImpl) serviceInstaceManager
+        .getServiceInstance(this, I18nOperations.class);
   }
 
   public FinderOperationsImpl getFinderOperations() {
-    if (finderOperationsImpl == null) {
-      // Get all Services implement DtoOperations interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(FinderOperations.class.getName(), null);
+    return (FinderOperationsImpl) serviceInstaceManager.getServiceInstance(this,
+        FinderOperations.class);
+  }
 
-        for (ServiceReference<?> ref : references) {
-          return (FinderOperationsImpl) context.getService(ref);
-        }
+  public PluralService getPluralService() {
+    return serviceInstaceManager.getServiceInstance(this, PluralService.class);
+  }
 
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER
-            .warning("Cannot load FinderOperationsImpl on RepositoryJpaCustomImplMetadataProviderImpl.");
-        return null;
-      }
-    } else {
-      return this.finderOperationsImpl;
-    }
+  public ControllerMVCService getControllerMVCService() {
+    return serviceInstaceManager.getServiceInstance(this, ControllerMVCService.class);
   }
 
 }

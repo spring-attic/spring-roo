@@ -2,18 +2,29 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static java.lang.reflect.Modifier.PUBLIC;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.jvnet.inflector.Noun;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.addon.servers.ServerProvider;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
@@ -38,6 +49,7 @@ import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.converters.PomConverter;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
@@ -59,20 +71,8 @@ import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.FileUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ControllerOperations}.
@@ -92,27 +92,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
+
   private Map<String, ControllerMVCResponseService> responseTypes =
       new HashMap<String, ControllerMVCResponseService>();
-
-  private ProjectOperations projectOperations;
-
-  private TypeLocationService typeLocationService;
-
-  private PathResolver pathResolver;
-
-  private FileManager fileManager;
-
-  private TypeManagementService typeManagementService;
-
-  private ApplicationConfigService applicationConfigService;
-
-  private Converter<Pom> pomConverter;
-
-  private MetadataService metadataService;
-
-  @Reference
-  private MemberDetailsScanner memberDetailsScanner;
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.BUILD-SNAPSHOT");
@@ -123,6 +106,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    serviceInstaceManager.activate(this.context);
   }
 
   /**
@@ -543,10 +527,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Generate Collection controller JavaType
     JavaType collectionController =
-        new JavaType(String.format("%s.%sCollectionController",
-            controllerPackage.getFullyQualifiedPackageName(),
-            Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)),
-            controllerPackage.getModule());
+        new JavaType(
+            String.format("%s.%sCollectionController",
+                controllerPackage.getFullyQualifiedPackageName(),
+                getPluralService().getPlural(entity)), controllerPackage.getModule());
 
     ClassOrInterfaceTypeDetails collectionControllerDetails =
         getTypeLocationService().getTypeDetails(collectionController);
@@ -582,10 +566,9 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Generate Item Controller JavaType
     JavaType itemController =
-        new JavaType(String.format("%s.%sItemController",
-            controllerPackage.getFullyQualifiedPackageName(),
-            Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)),
-            controllerPackage.getModule());
+        new JavaType(
+            String.format("%s.%sItemController", controllerPackage.getFullyQualifiedPackageName(),
+                getPluralService().getPlural(entity)), controllerPackage.getModule());
 
     ClassOrInterfaceTypeDetails itemControllerDetails =
         getTypeLocationService().getTypeDetails(itemController);
@@ -723,179 +706,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
       } finally {
         IOUtils.closeQuietly(inputStream);
       }
-    }
-  }
-
-  // Methods to obtain OSGi Services
-
-  public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) this.context.getService(ref);
-          return typeLocationService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on ControllerOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
-  }
-
-  public ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on ControllerOperationsImpl.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
-  }
-
-  public PathResolver getPathResolver() {
-    if (pathResolver == null) {
-      // Get all Services implement PathResolver interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PathResolver.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          pathResolver = (PathResolver) this.context.getService(ref);
-          return pathResolver;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PathResolver on ControllerOperationsImpl.");
-        return null;
-      }
-    } else {
-      return pathResolver;
-    }
-  }
-
-  public FileManager getFileManager() {
-    if (fileManager == null) {
-      // Get all Services implement FileManager interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(FileManager.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          fileManager = (FileManager) this.context.getService(ref);
-          return fileManager;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load FileManager on ControllerOperationsImpl.");
-        return null;
-      }
-    } else {
-      return fileManager;
-    }
-  }
-
-  public TypeManagementService getTypeManagementService() {
-    if (typeManagementService == null) {
-      // Get all Services implement TypeManagementService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeManagementService = (TypeManagementService) this.context.getService(ref);
-          return typeManagementService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeManagementService on ControllerOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeManagementService;
-    }
-  }
-
-  public ApplicationConfigService getApplicationConfigService() {
-    if (applicationConfigService == null) {
-      // Get all Services implement ApplicationConfigService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ApplicationConfigService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          applicationConfigService = (ApplicationConfigService) this.context.getService(ref);
-          return applicationConfigService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ApplicationConfigService on ControllerOperationsImpl.");
-        return null;
-      }
-    } else {
-      return applicationConfigService;
-    }
-  }
-
-  /**
-   * This method obtains Pom converter to be able to obtain Pom module from
-   * strings
-   *
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public Converter<Pom> getPomConverter() {
-    if (pomConverter == null) {
-      // Get all Services implement Converter<Pom> interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(Converter.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          Converter<?> converter = (Converter<?>) this.context.getService(ref);
-          if (converter.supports(Pom.class, "")) {
-            pomConverter = (Converter<Pom>) converter;
-            return pomConverter;
-          }
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load Converter<Pom> on ControllerOperationsImpl.");
-        return null;
-      }
-    } else {
-      return pomConverter;
     }
   }
 
@@ -1056,7 +866,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
     boolean relationFieldIsValid = false;
 
     MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(entity.getSimpleTypeName(), entityDetails);
+        getMemberDetailsScanner().getMemberDetails(entity.getSimpleTypeName(), entityDetails);
     List<FieldMetadata> fields = memberDetails.getFields();
     List<String> relationFields = new ArrayList<String>();
     Map<String, String> relationFieldObject = new HashMap<String, String>();
@@ -1154,8 +964,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     for (String field : relationFields) {
 
-      StringBuffer detailControllerName =
-          new StringBuffer(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH));
+      StringBuffer detailControllerName = new StringBuffer(getPluralService().getPlural(entity));
       detailControllerName.append("Item");
       if (field.contains(".")) {
         String[] splitField = field.split("[.]");
@@ -1265,7 +1074,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
       JavaType masterEntity) {
     boolean relationFieldIsValid = false;
     MemberDetails memberDetails =
-        memberDetailsScanner.getMemberDetails(entityDetails.getType().getSimpleTypeName(),
+        getMemberDetailsScanner().getMemberDetails(entityDetails.getType().getSimpleTypeName(),
             entityDetails);
     List<FieldMetadata> fields = memberDetails.getFields();
     for (FieldMetadata entityField : fields) {
@@ -1420,28 +1229,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
       packageStr = packageStr.concat(".").concat(module);
     }
     return new JavaPackage(packageStr.concat(".web"), module);
-  }
-
-  private MetadataService getMetadataService() {
-    if (metadataService == null) {
-      // Get all Services implement MetadataService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(MetadataService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (MetadataService) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MetadataService on FinderOperationsImpl.");
-        return null;
-      }
-    } else {
-      return metadataService;
-    }
   }
 
   /**
@@ -1771,6 +1558,48 @@ public class ControllerOperationsImpl implements ControllerOperations {
         }
       }
     }
+  }
+
+  //Methods to obtain OSGi Services
+
+  public TypeLocationService getTypeLocationService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
+  }
+
+  public ProjectOperations getProjectOperations() {
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
+  }
+
+  public PathResolver getPathResolver() {
+    return serviceInstaceManager.getServiceInstance(this, PathResolver.class);
+  }
+
+  public FileManager getFileManager() {
+    return serviceInstaceManager.getServiceInstance(this, FileManager.class);
+  }
+
+  public TypeManagementService getTypeManagementService() {
+    return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
+  }
+
+  public ApplicationConfigService getApplicationConfigService() {
+    return serviceInstaceManager.getServiceInstance(this, ApplicationConfigService.class);
+  }
+
+  public MemberDetailsScanner getMemberDetailsScanner() {
+    return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
+  }
+
+  private MetadataService getMetadataService() {
+    return serviceInstaceManager.getServiceInstance(this, MetadataService.class);
+  }
+
+  public Converter<Pom> getPomConverter() {
+    return serviceInstaceManager.getServiceInstance(this, PomConverter.class);
+  }
+
+  public PluralService getPluralService() {
+    return serviceInstaceManager.getServiceInstance(this, PluralService.class);
   }
 
 }

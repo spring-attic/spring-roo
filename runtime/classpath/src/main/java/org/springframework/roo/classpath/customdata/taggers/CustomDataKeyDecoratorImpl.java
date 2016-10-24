@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -25,6 +26,7 @@ import org.springframework.roo.model.CustomDataAccessor;
  * An implementation of {@link CustomDataKeyDecorator}.
  * 
  * @author James Tyrrell
+ * @author Juan Carlos García
  * @since 1.1.3
  */
 @Component
@@ -127,7 +129,16 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
    */
   public String getInflectorPlural(final String term, final Locale locale) {
     try {
-      return Noun.pluralOf(term, locale);
+      // ROO-3817: Uncapitalize term to obtain the plural correctly. 
+      String termUncapitalized = StringUtils.uncapitalize(term);
+      String thePluralUncapitalized = Noun.pluralOf(termUncapitalized, locale);
+      // ROO-3817: After that, returns the plural term taking in count if the received term is capitalized or not. 
+      if (StringUtils
+          .equalsIgnoreCase(term.substring(0, 1), thePluralUncapitalized.substring(0, 1))
+          && !StringUtils.equals(term.substring(0, 1), thePluralUncapitalized.substring(0, 1))) {
+        return StringUtils.capitalize(thePluralUncapitalized);
+      }
+      return thePluralUncapitalized;
     } catch (final RuntimeException re) {
       // Inflector failed (see for example ROO-305), so don't pluralize it
       return term;

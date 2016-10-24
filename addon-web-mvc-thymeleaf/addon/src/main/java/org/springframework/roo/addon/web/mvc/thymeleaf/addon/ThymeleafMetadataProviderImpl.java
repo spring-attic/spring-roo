@@ -2,6 +2,20 @@ package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_THYMELEAF;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
@@ -11,6 +25,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerDetailInfo;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
@@ -53,20 +68,7 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Logger;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * Implementation of {@link ThymeleafMetadataProvider}.
@@ -91,7 +93,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   private JavaType datatablesDataType;
   private JavaType datatablesPageable;
 
-  private ControllerMVCService controllerMVCService;
   private MVCViewGenerationService viewGenerationService;
 
   private List<JavaType> typesToImport;
@@ -113,6 +114,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
   @Override
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
+    serviceInstaceManager.activate(this.context);
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
@@ -253,8 +255,7 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
         ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
             .getValue()).getField().getSymbolName());
 
-    this.entityPlural =
-        StringUtils.uncapitalize(Noun.pluralOf(this.entity.getSimpleTypeName(), Locale.ENGLISH));
+    this.entityPlural = StringUtils.uncapitalize(getPluralService().getPlural(this.entity));
 
     if (controllerAnnotation.getAttribute("pathPrefix") != null) {
       this.pathPrefix = (String) controllerAnnotation.getAttribute("pathPrefix").getValue();
@@ -2157,29 +2158,6 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
     return ThymeleafMetadata.getMetadataIdentiferType();
   }
 
-  public ControllerMVCService getControllerMVCService() {
-    if (controllerMVCService == null) {
-      // Get all Services implement ControllerMVCService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ControllerMVCService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          controllerMVCService = (ControllerMVCService) this.context.getService(ref);
-          return controllerMVCService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ControllerMVCService on ThymeleafMetadataProviderImpl.");
-        return null;
-      }
-    } else {
-      return controllerMVCService;
-    }
-  }
-
   /**
    * This method provides all detail methods using Thymeleaf response type
    *
@@ -2523,4 +2501,5 @@ public class ThymeleafMetadataProviderImpl extends AbstractViewGeneratorMetadata
 
     return methodBuilder.build();
   }
+
 }

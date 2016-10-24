@@ -2,13 +2,23 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_CONTROLLER;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.jvnet.inflector.Noun;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -32,17 +42,7 @@ import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * Implementation of {@link ControllerMetadataProvider}.
@@ -64,6 +64,8 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
   protected MetadataDependencyRegistryTracker registryTracker = null;
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
 
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
+
   /**
    * This service is being activated so setup it:
    * <ul>
@@ -78,6 +80,7 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
   @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
+    serviceInstaceManager.activate(this.context);
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
@@ -178,8 +181,7 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     JavaType identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
 
     // Generate path
-    String path =
-        "/".concat(StringUtils.lowerCase(Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)));
+    String path = "/".concat(StringUtils.lowerCase(getPluralService().getPlural(entity)));
     if (StringUtils.isNotEmpty(pathPrefix)) {
       if (!pathPrefix.startsWith("/")) {
         pathPrefix = "/".concat(pathPrefix);
@@ -421,5 +423,11 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
   public String getProvidesType() {
     return ControllerMetadata.getMetadataIdentiferType();
+  }
+
+  // OSGI Services
+
+  private PluralService getPluralService() {
+    return serviceInstaceManager.getServiceInstance(this, PluralService.class);
   }
 }

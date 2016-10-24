@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -16,11 +15,9 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Component;
-import org.jvnet.inflector.Noun;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperations;
 import org.springframework.roo.addon.web.mvc.i18n.I18nOperationsImpl;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
@@ -46,6 +43,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  *
@@ -65,17 +63,14 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
 
   private static Logger LOGGER = HandlerUtils.getLogger(AbstractViewGenerationService.class);
 
-  private TypeLocationService typeLocationService;
-  private FileManager fileManager;
-  private PersistenceMemberLocator persistenceMemberLocator;
-  private MemberDetailsScanner memberDetailsScanner;
-  private I18nOperationsImpl i18nOperationsImpl;
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   // ------------ OSGi component attributes ----------------
   protected BundleContext context;
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    serviceInstaceManager.activate(this.context);
   }
 
   protected abstract DOC process(String templateName, ViewContext ctx);
@@ -556,9 +551,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         pathPrefix = (String) pathPrefixAttr.getValue();
       }
       // Generate path
-      String path =
-          "/".concat(Noun.pluralOf(StringUtils.uncapitalize(entity.getSimpleTypeName()),
-              Locale.ENGLISH));
+      String path = "/".concat(StringUtils.uncapitalize(getPluralService().getPlural(entity)));
       if (StringUtils.isNotEmpty(pathPrefix)) {
         if (pathPrefix.startsWith("/")) {
           path = pathPrefix.concat(path);
@@ -650,26 +643,6 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
       newDoc = merge("fragments/modal-confirm", loadExistingDoc(viewName), ctx);
     } else {
       newDoc = process("fragments/modal-confirm", ctx);
-    }
-
-    // Write newDoc on disk
-    writeDoc(newDoc, viewName);
-
-  }
-
-  @Override
-  public void addSession(String moduleName, ViewContext ctx) {
-    // Process elements to generate
-    DOC newDoc = null;
-
-    // Getting new viewName
-    String viewName = getFragmentsFolder(moduleName).concat("/session").concat(getViewsExtension());
-
-    // Check if new view to generate exists or not
-    if (existsFile(viewName)) {
-      newDoc = merge("fragments/session", loadExistingDoc(viewName), ctx);
-    } else {
-      newDoc = process("fragments/session", ctx);
     }
 
     // Write newDoc on disk
@@ -810,8 +783,10 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
           // Saving enum and items to display. Same name as
           // populateForm method
           fieldItem.setType(FieldTypes.ENUM.toString());
-          fieldItem.addConfigurationElement("items",
-              Noun.pluralOf(entityField.getFieldName().getSymbolName(), Locale.ENGLISH));
+          fieldItem.addConfigurationElement(
+              "items",
+              StringUtils.uncapitalize(getPluralService().getPlural(
+                  entityField.getFieldName().getSymbolName())));
 
         } else if (type.getFullyQualifiedTypeName().equals(Date.class.getName())
             || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
@@ -1027,7 +1002,7 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
         }
         // Generate path
         String path =
-            "/".concat(Noun.pluralOf(entityAttr.getValue().getSimpleTypeName(), Locale.ENGLISH));
+            "/".concat(StringUtils.uncapitalize(getPluralService().getPlural(entityAttr.getValue())));
         if (StringUtils.isNotEmpty(pathPrefix)) {
           if (!pathPrefix.startsWith("/")) {
             pathPrefix = "/".concat(pathPrefix);
@@ -1108,117 +1083,27 @@ public abstract class AbstractViewGenerationService<DOC> implements MVCViewGener
   // Getting OSGi Services
 
   public FileManager getFileManager() {
-    if (fileManager == null) {
-      // Get all Services implement FileManager interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(FileManager.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          fileManager = (FileManager) this.context.getService(ref);
-          return fileManager;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load FileManager on AbstractViewGenerationService.");
-        return null;
-      }
-    } else {
-      return fileManager;
-    }
+    return serviceInstaceManager.getServiceInstance(this, FileManager.class);
   }
 
   public TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) this.context.getService(ref);
-          return typeLocationService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on AbstractViewGenerationService.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
   public PersistenceMemberLocator getPersistenceMemberLocator() {
-    if (persistenceMemberLocator == null) {
-      // Get all Services implement PersistenceMemberLocator interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          persistenceMemberLocator = (PersistenceMemberLocator) this.context.getService(ref);
-          return persistenceMemberLocator;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PersistenceMemberLocator on AbstractViewGenerationService.");
-        return null;
-      }
-    } else {
-      return persistenceMemberLocator;
-    }
+    return serviceInstaceManager.getServiceInstance(this, PersistenceMemberLocator.class);
   }
 
   public MemberDetailsScanner getMemberDetailsScanner() {
-    if (memberDetailsScanner == null) {
-      // Get all Services implement MemberDetailsScanner interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          memberDetailsScanner = (MemberDetailsScanner) this.context.getService(ref);
-          return memberDetailsScanner;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MemberDetailsScanner on AbstractViewGenerationService.");
-        return null;
-      }
-    } else {
-      return memberDetailsScanner;
-    }
+    return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
   }
 
   public I18nOperationsImpl getI18nOperationsImpl() {
-    if (i18nOperationsImpl == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(I18nOperations.class.getName(), null);
+    return (I18nOperationsImpl) serviceInstaceManager
+        .getServiceInstance(this, I18nOperations.class);
+  }
 
-        for (ServiceReference<?> ref : references) {
-          i18nOperationsImpl = (I18nOperationsImpl) this.context.getService(ref);
-          return i18nOperationsImpl;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on AbstractViewGeneratorMetadataProvider.");
-        return null;
-      }
-    } else {
-      return i18nOperationsImpl;
-    }
+  public PluralService getPluralService() {
+    return serviceInstaceManager.getServiceInstance(this, PluralService.class);
   }
 }
