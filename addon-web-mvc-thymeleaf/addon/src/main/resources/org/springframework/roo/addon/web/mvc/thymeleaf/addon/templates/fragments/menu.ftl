@@ -72,8 +72,6 @@
               <!-- User menu -->
               <div data-layout-include="fragments/session-links :: session">
                 <!-- Content replaced by the session template fragment session-links.html
-                     It's possible include fragments/session :: session
-                     if you want menu user application without links
                 -->
                 <span>User session data</span>
               </div>
@@ -94,7 +92,7 @@
         <nav class="navbar navbar-inverse navbar-fixed-top">
          <div class="container">
 
-            <div class="navbar-header"> 
+            <div class="navbar-header">
 
               <!-- Brand logo -->
               <div class="organization-logo navbar-brand">
