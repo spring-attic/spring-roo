@@ -238,8 +238,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
         "DataBinderDeserializer", "http.converter.json");
     createClassFromTemplate(module, "FieldErrorSerializer-template._java", "FieldErrorSerializer",
         "http.converter.json");
-    createClassFromTemplate(module, "JsonpAdvice-template._java", "JsonpAdvice",
-        "http.converter.json");
     createClassFromTemplate(module, "ExceptionHandlerAdvice-template._java",
         "ExceptionHandlerAdvice", "http.converter.json");
 

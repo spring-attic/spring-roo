@@ -155,9 +155,6 @@ public final class RooJavaType {
   public static final JavaType ROO_JSON_FIELD_ERROR_SERIALIZER =
       new JavaType(
           "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONFieldErrorSerializer");
-  public static final JavaType ROO_JSON_JSONP_ADVICE =
-      new JavaType(
-          "org.springframework.roo.addon.web.mvc.controller.annotations.http.converters.json.RooJSONJsonpAdvice");
 
   public static final JavaType ROO_ENUM_CONTROLLER_TYPE = new JavaType(
       "org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType");
