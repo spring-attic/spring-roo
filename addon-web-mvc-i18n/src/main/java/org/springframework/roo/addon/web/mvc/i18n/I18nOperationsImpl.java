@@ -15,11 +15,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.jvnet.inflector.Noun;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18n;
 import org.springframework.roo.addon.web.mvc.i18n.components.I18nSupport;
@@ -51,6 +51,7 @@ import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.propfiles.manager.PropFilesManagerService;
 import org.springframework.roo.support.ant.AntPathMatcher;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 import org.springframework.roo.support.util.XmlUtils;
 
 /**
@@ -69,20 +70,11 @@ public class I18nOperationsImpl implements I18nOperations {
   // ------------ OSGi component attributes ----------------
   private BundleContext context;
 
-  private TypeLocationService typeLocationService;
-  private TypeManagementService typeManagementService;
-  private I18nSupport i18nSupport;
-  private PathResolver pathResolver;
-  private FileManager fileManager;
-  private ProjectOperations projectOperations;
-  private PropFilesManagerService propFilesManagerService;
-  private PersistenceMemberLocator persistenceMemberLocator;
-  private MemberDetailsScanner memberDetailsScanner;
-  private ApplicationConfigService applicationConfigService;
-  private MetadataService metadataService;
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    serviceInstaceManager.activate(this.context);
   }
 
   @Override
@@ -257,7 +249,7 @@ public class I18nOperationsImpl implements I18nOperations {
         .toLowerCase()).getReadableSymbolName());
 
     final String pluralResourceId = buildLabel(entity.getSimpleTypeName(), "plural");
-    final String plural = Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH);
+    final String plural = getPluralService().getPlural(entity);
     properties.put(pluralResourceId, new JavaSymbolName(plural).getReadableSymbolName());
 
     final List<FieldMetadata> javaTypePersistenceMetadataDetails =
@@ -419,248 +411,51 @@ public class I18nOperationsImpl implements I18nOperations {
   // Get OSGi services
 
   private TypeLocationService getTypeLocationService() {
-    if (typeLocationService == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeLocationService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          typeLocationService = (TypeLocationService) this.context.getService(ref);
-          return typeLocationService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeLocationService on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeLocationService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, TypeLocationService.class);
   }
 
   private I18nSupport getI18nSupport() {
-    if (i18nSupport == null) {
-      // Get all Services implement I18nSupport interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(I18nSupport.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          i18nSupport = (I18nSupport) context.getService(ref);
-          return i18nSupport;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load I18nSupport on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return i18nSupport;
-    }
+    return serviceInstaceManager.getServiceInstance(this, I18nSupport.class);
   }
 
   private PathResolver getPathResolver() {
-    if (pathResolver == null) {
-      // Get all Services implement PathResolver interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PathResolver.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (PathResolver) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PathResolver on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return pathResolver;
-    }
+    return serviceInstaceManager.getServiceInstance(this, PathResolver.class);
   }
 
   private FileManager getFileManager() {
-    if (fileManager == null) {
-      // Get all Services implement FileManager interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(FileManager.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (FileManager) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load FileManager on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return fileManager;
-    }
+    return serviceInstaceManager.getServiceInstance(this, FileManager.class);
   }
 
   private ProjectOperations getProjectOperations() {
-    if (projectOperations == null) {
-      // Get all Services implement ProjectOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ProjectOperations.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          projectOperations = (ProjectOperations) this.context.getService(ref);
-          return projectOperations;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ProjectOperations on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return projectOperations;
-    }
+    return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
   }
 
   private PropFilesManagerService getPropFilesManager() {
-    if (propFilesManagerService == null) {
-      // Get all Services implement PropFileOperations interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(PropFilesManagerService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          propFilesManagerService = (PropFilesManagerService) this.context.getService(ref);
-          return propFilesManagerService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PropFilesManagerService on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return propFilesManagerService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, PropFilesManagerService.class);
   }
 
   private PersistenceMemberLocator getPersistenceMemberLocator() {
-    if (persistenceMemberLocator == null) {
-      // Get all Services implement TypeLocationService interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(PersistenceMemberLocator.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (PersistenceMemberLocator) context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load PersistenceMemberLocator on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return persistenceMemberLocator;
-    }
+    return serviceInstaceManager.getServiceInstance(this, PersistenceMemberLocator.class);
   }
 
   private MemberDetailsScanner getMemberDetailsScanner() {
-    if (memberDetailsScanner == null) {
-      // Get all Services implement MemberDetailsScanner interface
-      try {
-        ServiceReference<?>[] references =
-            context.getAllServiceReferences(MemberDetailsScanner.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          memberDetailsScanner = (MemberDetailsScanner) context.getService(ref);
-          return memberDetailsScanner;
-        }
-        return null;
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MemberDetailsScanner on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return memberDetailsScanner;
-    }
+    return serviceInstaceManager.getServiceInstance(this, MemberDetailsScanner.class);
   }
 
   public ApplicationConfigService getApplicationConfigService() {
-    if (applicationConfigService == null) {
-      // Get all Services implement ApplicationConfigService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ApplicationConfigService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          applicationConfigService = (ApplicationConfigService) this.context.getService(ref);
-          return applicationConfigService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ApplicationConfigService on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return applicationConfigService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, ApplicationConfigService.class);
   }
 
   public MetadataService getMetadataService() {
-    if (metadataService == null) {
-      // Get all Services implement MetadataService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(MetadataService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          return (MetadataService) this.context.getService(ref);
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load MetadataService on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return metadataService;
-    }
+    return serviceInstaceManager.getServiceInstance(this, MetadataService.class);
   }
 
   public TypeManagementService getTypeManagementService() {
-    if (typeManagementService == null) {
-      // Get all Services implement TypeManagementService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(TypeManagementService.class.getName(), null);
+    return serviceInstaceManager.getServiceInstance(this, TypeManagementService.class);
+  }
 
-        for (ServiceReference<?> ref : references) {
-          typeManagementService = (TypeManagementService) this.context.getService(ref);
-          return typeManagementService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load TypeManagementService on I18nOperationsImpl.");
-        return null;
-      }
-    } else {
-      return typeManagementService;
-    }
+  public PluralService getPluralService() {
+    return serviceInstaceManager.getServiceInstance(this, PluralService.class);
   }
 
 }

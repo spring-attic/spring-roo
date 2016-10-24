@@ -1,15 +1,22 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.responses.json;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.jvnet.inflector.Noun;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
-import org.springframework.roo.addon.plural.addon.PluralMetadata;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerDetailInfo;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMVCService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerMetadata;
@@ -51,18 +58,7 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.model.SpringletsJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Logger;
+import org.springframework.roo.support.osgi.ServiceInstaceManager;
 
 /**
  * Implementation of {@link JSONMetadataProvider}.
@@ -78,6 +74,8 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     implements JSONMetadataProvider {
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(JSONMetadataProviderImpl.class);
+
+  private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
 
   private final Map<JavaType, String> domainTypeToServiceMidMap =
       new LinkedHashMap<JavaType, String>();
@@ -112,6 +110,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   @Override
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
+    serviceInstaceManager.activate(this.context);
     super.setDependsOnGovernorBeingAClass(false);
     this.registryTracker =
         new MetadataDependencyRegistryTracker(context, this,
@@ -226,14 +225,7 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     this.identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
 
     // Get entity plural
-    final ClassOrInterfaceTypeDetails details =
-        getTypeLocationService().getTypeDetails(this.entity);
-    final LogicalPath entityLogicalPath =
-        PhysicalTypeIdentifier.getPath(details.getDeclaredByMetadataId());
-    final String pluralIdentifier = PluralMetadata.createIdentifier(this.entity, entityLogicalPath);
-    final PluralMetadata pluralMetadata =
-        (PluralMetadata) getMetadataService().get(pluralIdentifier);
-    this.entityPlural = pluralMetadata.getPlural();
+    this.entityPlural = getPluralService().getPlural(entity);
 
     // Getting service and its metadata
     this.service = controllerMetadata.getService();
@@ -1453,53 +1445,6 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
   }
 
   /**
-   * Returns last JavaType found in project with provided annotation.
-   *
-   * @param annotationType
-   *            JAvaType with the annotation to search
-   * @return last JavaType found with the provided annotation or
-   *         {@link IllegalArgumentException} if a type with this annotation
-   *         doesn't exist.
-   */
-  private JavaType getTypeWithAnnotation(JavaType annotationType) {
-    Set<JavaType> types = getTypeLocationService().findTypesWithAnnotation(annotationType);
-
-    JavaType typeWithAnnotation = null;
-    for (JavaType type : types) {
-      typeWithAnnotation = type;
-    }
-
-    Validate.notNull(typeWithAnnotation,
-        "Couldn't find any type with needed %s annotation in JSONMetadataProviderImpl",
-        annotationType.getFullyQualifiedTypeName());
-
-    return typeWithAnnotation;
-  }
-
-  public ControllerMVCService getControllerMVCService() {
-    if (controllerMVCService == null) {
-      // Get all Services implement ControllerMVCService interface
-      try {
-        ServiceReference<?>[] references =
-            this.context.getAllServiceReferences(ControllerMVCService.class.getName(), null);
-
-        for (ServiceReference<?> ref : references) {
-          controllerMVCService = (ControllerMVCService) this.context.getService(ref);
-          return controllerMVCService;
-        }
-
-        return null;
-
-      } catch (InvalidSyntaxException e) {
-        LOGGER.warning("Cannot load ControllerMVCService on JSONMetadataProviderImpl.");
-        return null;
-      }
-    } else {
-      return controllerMVCService;
-    }
-  }
-
-  /**
    * This method provides all detail methods using JSON response type
    *
    * @return List of MethodMetadata
@@ -1669,22 +1614,33 @@ public class JSONMetadataProviderImpl extends AbstractMemberDiscoveringItdMetada
     bodyBuilder.newLine();
     bodyBuilder.appendFormalLine(String.format("%s<%s> %s = %s.%s(%s, search, pageable);",
         addTypeToImport(returnType).getSimpleTypeName(), returnTypeParamsString, StringUtils
-            .uncapitalize(StringUtils.lowerCase(Noun.pluralOf(this.controllerDetailInfo.getEntity()
-                .getSimpleTypeName(), Locale.ENGLISH))),
+            .uncapitalize(StringUtils.lowerCase(getPluralService().getPlural(
+                this.controllerDetailInfo.getEntity()))),
         getServiceField(this.controllerDetailInfo.getService()).getFieldName()
             .getSymbolNameUnCapitalisedFirstLetter(), findByMethod.getMethodName(), StringUtils
             .uncapitalize(this.controllerDetailInfo.getParentEntity().getSimpleTypeName())));
 
     // return entityrelplural;
-    bodyBuilder.appendFormalLine(String.format("return %s;", StringUtils.uncapitalize(StringUtils
-        .lowerCase(Noun.pluralOf(this.controllerDetailInfo.getEntity().getSimpleTypeName(),
-            Locale.ENGLISH)))));
+    bodyBuilder.appendFormalLine(String.format(
+        "return %s;",
+        StringUtils.uncapitalize(StringUtils.lowerCase(getPluralService().getPlural(
+            this.controllerDetailInfo.getEntity())))));
 
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(this.metadataIdentificationString, Modifier.PUBLIC, methodName,
             returnType, parameterTypes, parameterNames, bodyBuilder);
     methodBuilder.setAnnotations(annotations);
     return methodBuilder.build();
+  }
+
+  // OSGI Services
+
+  private ControllerMVCService getControllerMVCService() {
+    return serviceInstaceManager.getServiceInstance(this, ControllerMVCService.class);
+  }
+
+  private PluralService getPluralService() {
+    return serviceInstaceManager.getServiceInstance(this, PluralService.class);
   }
 
 }

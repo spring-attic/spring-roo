@@ -1,13 +1,20 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
-import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerOperations;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
@@ -37,15 +44,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Implementation of {@link WebFinderOperations}
  *
@@ -73,6 +71,8 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
   private ProjectOperations projectOperations;
   @Reference
   private RepositoryJpaLocator repositoryJpaLocator;
+  @Reference
+  private PluralService pluralService;
 
   public boolean isWebFinderInstallationPossible() {
     return projectOperations.isFeatureInstalled(FeatureNames.MVC);
@@ -329,8 +329,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     ClassOrInterfaceTypeDetailsBuilder controllerBuilder;
     JavaType searchController =
         new JavaType(String.format("%s.%sSearchController",
-            controllerPackage.getFullyQualifiedPackageName(),
-            Noun.pluralOf(entity.getSimpleTypeName(), Locale.ENGLISH)),
+            controllerPackage.getFullyQualifiedPackageName(), pluralService.getPlural(entity)),
             controllerPackage.getModule());
     final String physicalPath =
         PhysicalTypeIdentifier.createIdentifier(searchController,

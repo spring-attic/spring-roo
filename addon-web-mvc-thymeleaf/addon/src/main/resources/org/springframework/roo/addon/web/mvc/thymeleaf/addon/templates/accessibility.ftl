@@ -125,6 +125,7 @@
                     </span><span class="caret"></span>
                    </a>
                    <ul class="dropdown-menu" id="languageFlags">
+                   <#if languages??>
                     <#list languages as language>
                     <li id="${language.localePrefix}Flag">
                      <a href="?lang=${language.localePrefix}">
@@ -137,6 +138,7 @@
                      </a>
                     </li>
                     </#list>
+                   </#if>
                    </ul>
                 </li>
               </ul>
