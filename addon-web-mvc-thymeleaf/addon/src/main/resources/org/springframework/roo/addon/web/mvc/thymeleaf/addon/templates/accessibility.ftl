@@ -59,7 +59,7 @@
   <body id="body">
 
     <!--Main container-->
-    <div class="bg-container">
+    <div class="container bg-container">
 
       <!-- Header -->
       <header role="banner">
