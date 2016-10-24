@@ -28,12 +28,12 @@
  <!-- Bootstrap -->
  <link rel="stylesheet" type="text/css"
    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-   data-th-remove="all"></link>
+   data-th-remove="all">
 
  <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
  <link rel="stylesheet" type="text/css"
    href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-   data-th-remove="all"></link>
+   data-th-remove="all">
 
  <!-- Font Awesome -->
  <link rel="stylesheet" type="text/css"
@@ -44,27 +44,27 @@
  <link
    data-th-href="@{/webjars/datatables/1.10.11/media/css/jquery.dataTables.css}"
    rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
+   href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css">
 
  <link
    data-th-href="@{/webjars/datatables.net-bs/1.10.11/css/dataTables.bootstrap.css}"
    rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
+   href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css">
 
  <link
    data-th-href="@{/webjars/datatables.net-responsive-bs/2.0.2/css/responsive.bootstrap.css}"
    rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css"></link>
+   href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css">
 
  <link
    data-th-href="@{/webjars/datatables.net-buttons-bs/1.1.2/css/buttons.bootstrap.css}"
    rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"></link>
+   href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css">
 
  <link
    data-th-href="@{/webjars/datatables.net-select-bs/1.1.2/css/select.bootstrap.css}"
    rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
+   href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css">
 
  <!-- Bootswatch CSS custom -->
  <link rel="stylesheet" type="text/css"

@@ -23,12 +23,12 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-      data-th-remove="all"></link>
+      data-th-remove="all">
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-      data-th-remove="all"></link>
+      data-th-remove="all">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" type="text/css" 

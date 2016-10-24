@@ -23,27 +23,27 @@
 <!-- Bootstrap -->
 <link rel="stylesheet" type="text/css"
   href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-  data-th-remove="all"></link>
+  data-th-remove="all">
 
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <link rel="stylesheet" type="text/css"
   href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-  data-th-remove="all"></link>
+  data-th-remove="all">
 
 <!-- Font Awesome -->
 <link rel="stylesheet" type="text/css"
   href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-  data-th-remove="all" />
+  data-th-remove="all">
 
 <!-- Bootswatch CSS custom -->
 <link rel="stylesheet" type="text/css"
   href="../static/public/css/theme.css"
-  data-th-remove="all" />
+  data-th-remove="all">
 
 <!-- Roo CSS -->
 <link rel="stylesheet" type="text/css"
   href="../static/public/css/springroo.css"
-  data-th-remove="all" />
+  data-th-remove="all">
 
 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
