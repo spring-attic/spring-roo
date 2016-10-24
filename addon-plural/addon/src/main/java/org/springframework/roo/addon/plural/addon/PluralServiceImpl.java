@@ -46,47 +46,47 @@ public class PluralServiceImpl implements PluralService {
 
   @Override
   public String getPlural(JavaType type) {
-	  return getPlural(type, Locale.ENGLISH);
+    return getPlural(type, Locale.ENGLISH);
   }
-  
-  @Override 
-  public String getPlural(JavaType type, Locale locale){
-	    Validate.notNull(type, "ERROR: You must provide a valid JavaType");
-	    Validate.notNull(locale, "ERROR: You must provide a valid Locale");
-	    
-	    // Getting ClassOrInterfaceTypeDetails
-	    ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(type);
-	    Validate.notNull(cid, "ERROR: You must provide an existing JavaType");
-	    
-	    return getPlural(cid, locale);
+
+  @Override
+  public String getPlural(JavaType type, Locale locale) {
+    Validate.notNull(type, "ERROR: You must provide a valid JavaType");
+    Validate.notNull(locale, "ERROR: You must provide a valid Locale");
+
+    // Getting ClassOrInterfaceTypeDetails
+    ClassOrInterfaceTypeDetails cid = getTypeLocationService().getTypeDetails(type);
+    Validate.notNull(cid, "ERROR: You must provide an existing JavaType");
+
+    return getPlural(cid, locale);
   }
 
   @Override
   public String getPlural(ClassOrInterfaceTypeDetails cid) {
-	  return getPlural(cid, Locale.ENGLISH);
+    return getPlural(cid, Locale.ENGLISH);
   }
-  
+
   @Override
   public String getPlural(ClassOrInterfaceTypeDetails cid, Locale locale) {
-	    Validate.notNull(cid, "ERROR: You must provide a valid ClassOrInterfaceTypeDetails");
-	    Validate.notNull(locale, "ERROR: You must provide a valid Locale");
+    Validate.notNull(cid, "ERROR: You must provide a valid ClassOrInterfaceTypeDetails");
+    Validate.notNull(locale, "ERROR: You must provide a valid Locale");
 
-	    final JavaType javaType = cid.getType();
-	    final LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-	    final String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, logicalPath);
-	    final PluralMetadata pluralMetadata =
-	        (PluralMetadata) getMetadataService().get(pluralMetadataKey);
-	    if (pluralMetadata != null) {
-	      final String plural = pluralMetadata.getPlural();
-	      if (plural.equalsIgnoreCase(javaType.getSimpleTypeName())) {
-	        return plural + "Items";
-	      } else {
-	        return plural;
-	      }
-	    }
-	    return getPlural(javaType.getSimpleTypeName(), locale);
+    final JavaType javaType = cid.getType();
+    final LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+    final String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, logicalPath);
+    final PluralMetadata pluralMetadata =
+        (PluralMetadata) getMetadataService().get(pluralMetadataKey);
+    if (pluralMetadata != null) {
+      final String plural = pluralMetadata.getPlural();
+      if (plural.equalsIgnoreCase(javaType.getSimpleTypeName())) {
+        return plural + "Items";
+      } else {
+        return plural;
+      }
+    }
+    return getPlural(javaType.getSimpleTypeName(), locale);
   }
-  
+
   @Override
   public String getPlural(JavaSymbolName term) {
     return getPlural(term, Locale.ENGLISH);
@@ -94,7 +94,7 @@ public class PluralServiceImpl implements PluralService {
 
   @Override
   public String getPlural(JavaSymbolName term, Locale locale) {
-	  Validate.notNull(locale, "ERROR: You must provide a valid Locale");
+    Validate.notNull(locale, "ERROR: You must provide a valid Locale");
     return getPlural(term.getSymbolName(), locale);
   }
 
@@ -102,10 +102,10 @@ public class PluralServiceImpl implements PluralService {
   public String getPlural(String term) {
     return getPlural(term, Locale.ENGLISH);
   }
-  
+
   @Override
   public String getPlural(String term, Locale locale) {
-	  Validate.notNull(locale, "ERROR: You must provide a valid Locale");
+    Validate.notNull(locale, "ERROR: You must provide a valid Locale");
     return PluralMetadata.getInflectorPlural(term, locale);
   }
 

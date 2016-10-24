@@ -4,6 +4,7 @@ import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_PLURAL;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 import static org.springframework.roo.shell.OptionContexts.APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE;
@@ -11,6 +12,14 @@ import static org.springframework.roo.shell.OptionContexts.INTERFACE;
 import static org.springframework.roo.shell.OptionContexts.SUPERCLASS;
 import static org.springframework.roo.shell.OptionContexts.UPDATELAST_PROJECT;
 import static org.springframework.roo.shell.OptionContexts.UPDATE_PROJECT;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -49,14 +58,6 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Commands for the JPA add-on to be used by the ROO shell.
@@ -430,6 +431,10 @@ public class JpaCommands implements CommandMarker {
       @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Whether the generated entity should be used for read operations only.") final boolean readOnly,
+      @CliOption(
+          key = "plural",
+          mandatory = false,
+          help = "Specify the plural of this new entity. If not provided, a calculated plural will be used by default") String plural,
       ShellContext shellContext) {
 
     Validate.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
@@ -548,6 +553,12 @@ public class JpaCommands implements CommandMarker {
     }
     if (serializable) {
       annotationBuilder.add(ROO_SERIALIZABLE_BUILDER);
+    }
+    // ROO-3817: Including @RooPlural annotation if needed
+    if (StringUtils.isNotEmpty(plural)) {
+      AnnotationMetadataBuilder pluralAnnotation = new AnnotationMetadataBuilder(ROO_PLURAL);
+      pluralAnnotation.addStringAttribute("value", plural);
+      annotationBuilder.add(pluralAnnotation);
     }
 
     // Produce the entity itself

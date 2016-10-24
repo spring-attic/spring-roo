@@ -27,7 +27,7 @@ public interface PluralService {
    * @return String that contains the plural
    */
   String getPlural(JavaType type);
-  
+
   /**
    * This operation will return the plural of a provided JavaType.
    * 
@@ -53,7 +53,7 @@ public interface PluralService {
    * @return String that contains the plural
    */
   String getPlural(ClassOrInterfaceTypeDetails cid);
-  
+
   /**
    * This operation will return the plural of a provided ClassOrInterfaceTypeDetails.
    * 
@@ -77,7 +77,7 @@ public interface PluralService {
    * @return String pluralized
    */
   String getPlural(JavaSymbolName term);
-  
+
   /**
    * This operation will return the plural of the provided JavaSymbolName taking in
    * count the provided Locale.
@@ -95,7 +95,7 @@ public interface PluralService {
    * @return String pluralized
    */
   String getPlural(String term);
-  
+
   /**
    * This operation will return the plural of the provided String taking in count
    * the provided Locale.

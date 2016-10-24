@@ -5,18 +5,23 @@ import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
 import static org.springframework.roo.model.SpringJavaType.PERSISTENT;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.field.addon.FieldCreatorProvider;
-import org.springframework.roo.addon.plural.addon.PluralMetadata;
+import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
@@ -64,19 +69,13 @@ import org.springframework.roo.settings.project.ProjectSettingsService;
 import org.springframework.roo.shell.ShellContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
 /**
  * Provides field creation operations support for JPA entities by implementing
  * FieldCreatorProvider.
  *
  * @author Sergio Clares
  * @author Jose Manuel Vivó
+ * @author Juan Carlos García
  * @since 2.0
  */
 @Component
@@ -102,6 +101,9 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   @Reference
   private MemberDetailsScanner memberDetailsScanner;
+
+  @Reference
+  private PluralService pluralService;
 
   private static final String SPRING_ROO_JPA_REQUIRE_SCHEMA_OBJECT_NAME =
       "spring.roo.jpa.require.schema-object-name";
@@ -971,7 +973,8 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
         // generate mappedBy name from uncapitalized parentClass name
         if (cardinality == Cardinality.MANY_TO_MANY) {
           // Get plural
-          mappedBy = new JavaSymbolName(StringUtils.uncapitalize(getPlural(parentCid)));
+          mappedBy =
+              new JavaSymbolName(StringUtils.uncapitalize(pluralService.getPlural(parentCid)));
         } else {
           mappedBy =
               new JavaSymbolName(StringUtils.uncapitalize(parentCid.getType().getSimpleTypeName()));
@@ -1650,29 +1653,5 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
                     fieldName, parameterName));
       }
     }
-  }
-
-  /**
-   * Gets plural of a class based on its {@link PluralMetadata} (if any).
-   *
-   * If there isn't {@link PluralMetadata}, just add an _s_
-   *
-   * @param cid
-   * @return plural
-   */
-  private String getPlural(ClassOrInterfaceTypeDetails cid) {
-    final JavaType javaType = cid.getType();
-    final LogicalPath logicalPath = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-    final String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, logicalPath);
-    final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
-    if (pluralMetadata != null) {
-      final String plural = pluralMetadata.getPlural();
-      if (plural.equalsIgnoreCase(javaType.getSimpleTypeName())) {
-        return plural + "Items";
-      } else {
-        return plural;
-      }
-    }
-    return Noun.pluralOf(javaType.getSimpleTypeName());
   }
 }
