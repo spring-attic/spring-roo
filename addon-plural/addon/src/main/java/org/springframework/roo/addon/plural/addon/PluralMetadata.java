@@ -31,6 +31,7 @@ import org.springframework.roo.project.LogicalPath;
  * to the ITD builder, hence it never generates an ITD source file.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -109,9 +110,18 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
    * @param locale Locale
    * @return pluralized term
    */
-  public String getInflectorPlural(final String term, final Locale locale) {
+  public static String getInflectorPlural(final String term, final Locale locale) {
     try {
-      return Noun.pluralOf(term, locale);
+      // ROO-3817: Uncapitalize term to obtain the plural correctly. 
+      String termUncapitalized = StringUtils.uncapitalize(term);
+      String thePluralUncapitalized = Noun.pluralOf(termUncapitalized, locale);
+      // ROO-3817: After that, returns the plural term taking in count if the received term is capitalized or not. 
+      if (StringUtils
+          .equalsIgnoreCase(term.substring(0, 1), thePluralUncapitalized.substring(0, 1))
+          && !StringUtils.equals(term.substring(0, 1), thePluralUncapitalized.substring(0, 1))) {
+        return StringUtils.capitalize(thePluralUncapitalized);
+      }
+      return thePluralUncapitalized;
     } catch (final RuntimeException re) {
       // Inflector failed (see for example ROO-305), so don't pluralize it
       return term;
