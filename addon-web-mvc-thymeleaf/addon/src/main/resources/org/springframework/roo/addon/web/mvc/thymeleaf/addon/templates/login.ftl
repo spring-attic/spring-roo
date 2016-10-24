@@ -4,7 +4,7 @@
 <html lang="en" data-layout-decorator="layouts/default-layout-no-menu">
   <head>
     <meta charset="UTF-8" data-th-remove="all">
-    <meta charset="UTF-8" data-th-remove="all">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all">
     <meta name="viewport" content="width=device-width, initial-scale=1" data-th-remove="all">
     <meta name="description" content="Spring Roo, a next-generation rapid application development tool for Java developers.
       With Roo you can easily build full Java applications in minutes." data-th-remove="all">
