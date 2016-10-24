@@ -82,7 +82,7 @@ public class DefaultSecurityProvider implements SecurityProvider {
         "true", "", true);
     getApplicationConfigService().addProperty(module.getModuleName(), "security.enable-csrf",
         "true", "dev", true);
-    
+
   }
 
   // Service references
