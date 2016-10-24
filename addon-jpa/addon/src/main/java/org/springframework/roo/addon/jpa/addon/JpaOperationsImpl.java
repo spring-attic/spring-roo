@@ -90,6 +90,7 @@ public class JpaOperationsImpl implements JpaOperations {
   private static final String HIBERNATE_NAMING_STRATEGY = "spring.jpa.hibernate.naming.strategy";
   private static final String HIBERNATE_NAMING_STRATEGY_VALUE =
       "org.hibernate.cfg.ImprovedNamingStrategy";
+  private static final String DEFAULT_PROFILE_NAME = "default";
   static final String POM_XML = "pom.xml";
 
   private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
@@ -440,14 +441,13 @@ public class JpaOperationsImpl implements JpaOperations {
         return;
       }
 
-      // Write changes to Spring Config file
+      // Write changes to Spring Config file defined in profile
       Map<String, String> props = new HashMap<String, String>();
       props.put(JNDI_NAME, jndi);
-
       getApplicationConfigService().addProperties(moduleName, DATASOURCE_PREFIX, props, profile,
           force);
 
-      // Remove old properties
+      // Remove old properties if existing
       getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL,
           profile);
       getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_DRIVER,
@@ -457,6 +457,23 @@ public class JpaOperationsImpl implements JpaOperations {
       getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
           DATABASE_PASSWORD, profile);
 
+      // Create/update application-default.properties with JNDI name if database is Oracle
+      if (jdbcDatabase.getKey().equals(JdbcDatabase.ORACLE.getKey())) {
+        Map<String, String> defaultProps = new HashMap<String, String>();
+        defaultProps.put(JNDI_NAME, jndi);
+        getApplicationConfigService().addProperties(moduleName, DATASOURCE_PREFIX, defaultProps,
+            DEFAULT_PROFILE_NAME, force);
+
+        // Remove old properties if existing
+        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL,
+            DEFAULT_PROFILE_NAME);
+        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
+            DATABASE_DRIVER, DEFAULT_PROFILE_NAME);
+        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
+            DATABASE_USERNAME, DEFAULT_PROFILE_NAME);
+        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
+            DATABASE_PASSWORD, DEFAULT_PROFILE_NAME);
+      }
     }
 
     // Add Hibernate naming strategy property
