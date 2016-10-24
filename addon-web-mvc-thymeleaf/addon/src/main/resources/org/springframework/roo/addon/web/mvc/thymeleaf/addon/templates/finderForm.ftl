@@ -50,7 +50,7 @@
 
 <!-- DateTimePicker -->
 <link rel="stylesheet" type="text/css"
-  href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css" 
+  href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css"
   data-th-href="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.min.css}">
 
 <!-- Bootswatch CSS custom -->
@@ -153,22 +153,29 @@
               <!-- User menu -->
               <ul class="nav navbar-nav navbar-right upper-nav session">
                 <li class="dropdown">
-                  <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;<span class="hidden-sm">User</span><span class="caret"></span>
+                  <a class="dropdown-toggle" data-toggle="dropdown" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;
+                    <span class="hidden-sm" data-sec-authentication="principal.username"
+                      data-th-text="${r"#{"}label_user${r"}"}">User</span>
+                    <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">
-                   <li><a href="#"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>&nbsp;<span>Admin Profile</span></a></li>
-                   <li><a href="#"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span>&nbsp;<span>Change password</span></a></li>
-		   <li><form action="/logout" method="post">
-		     <button type="button" class="btn btn-link">
-		       <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
-		       <span>Log out</span>
-		     </button>
-		   </form></li>
+                   <li><a href="#"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                   &nbsp;<span data-th-text="${r"#{"}label_profile${r"}"}">Admin Profile</span></a></li>
+                   <li><a href="#"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                   &nbsp;<span data-th-text="${r"#{"}label_change_password${r"}"}">Change password</span></a></li>
+                   <li>
+                     <form data-th-action="@{/logout}" action="/logout" method="post">
+                       <button type="submit" class="btn btn-link">
+                        <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+                        <span data-th-text="${r"#{"}label_logout ${r"}"}">Log out</span>
+                       </button>
+                     </form>
+                   </li>
                  </ul>
                 </li>
               </ul>
-
               <!-- User menu links -->
               <ul class="nav navbar-nav navbar-right upper-nav links">
                 <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>&nbsp;<span class="hidden-sm">Contact</span></a></li>
@@ -206,14 +213,14 @@
                 <#elseif field.type == "NUMBER">
                     <@number.input label=field.label fieldName=field.fieldName z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
                 <#elseif field.type == "DATE">
-                    <@date.input label=field.label 
+                    <@date.input label=field.label
                     fieldName=field.fieldName
                     fieldId=field.fieldId
                     z=field.z
                     format=field.configuration.format required=field.configuration.required />
                 <#elseif field.type == "REFERENCE">
-                    <@reference.input label=field.label 
-                        fieldName=field.fieldName 
+                    <@reference.input label=field.label
+                        fieldName=field.fieldName
                         fieldId=field.fieldId
                         z=field.z
                         referencedEntity=field.configuration.referencedEntity
@@ -222,28 +229,28 @@
                         fieldOne=field.configuration.fieldOne
                         fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
                 <#elseif field.type == "ENUM">
-                    <@enum.input label=field.label 
+                    <@enum.input label=field.label
                     fieldName=field.fieldName
                     fieldId=field.fieldId
                     z=field.z
                     items=field.configuration.items required=field.configuration.required />
                 <#elseif field.type == "BOOLEAN">
-                    <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />                
+                    <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
                 </#if>
             </#list>
           </fieldset>
 
             <!-- form buttons -->
             <div class="form-group">
-              <div class="col-md-9 col-md-offset-3">      
+              <div class="col-md-9 col-md-offset-3">
                   <button type="reset" class="btn btn-default"
                     onclick="location.href='list.html'"
-                    data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''" 
-                    data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>            
+                    data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
+                    data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
                   <button type="submit" class="btn btn-primary">
 		    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>&nbsp;<span
                       data-th-text="${r"#{"}label_search${r"}"}">Search</span>
-                  </button> 
+                  </button>
               </div>
             </div>
 
@@ -271,7 +278,7 @@
         <small class="clearfix">
             Made with <a href="http://projects.spring.io/spring-roo/" target="_blank">
             Spring Roo &copy; 2016</a> •
-            We <span class="glyphicon glyphicon-heart"></span> 
+            We <span class="glyphicon glyphicon-heart"></span>
             <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
             <a data-th-href="@{/accessibility}" href="../accessibility.html"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
         </small>
@@ -344,14 +351,14 @@
     <script type="text/javascript" data-th-inline="javascript">
       (function(jQuery) {
         jQuery(document).ready(
-	  function() {	 
+	  function() {
 	    Inputmask.extendAliases({
-	      'numeric' : {	  
-	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator${r"}"}]]*/'.',	      
+	      'numeric' : {
+	         'groupSeparator' : /*[[${r"#{"}label_inputmask_groupSeparator${r"}"}]]*/'.',
 	         'radixPoint' : /*[[${r"#{"}label_inputmask_radixPoint${r"}"}]]*/','
 	       },
-	       'currency' : {	        
-	          'prefix' : /*[[${r"#{"}label_inputmask_prefix${r"}"}]]*/'',	
+	       'currency' : {
+	          'prefix' : /*[[${r"#{"}label_inputmask_prefix${r"}"}]]*/'',
 	          'suffix' : /*[[${r"#{"}label_inputmask_suffix${r"}"}]]*/' €'
 	        }
 	    });
@@ -404,47 +411,47 @@
          data-th-if="${r"${#"}locale.language${r"}"} != 'en'"></script>
 
        <script type="text/javascript" data-th-inline="javascript">
-         /*<![CDATA[*/   
+         /*<![CDATA[*/
 	 jQuery('.dropdown-select-simple').select2({
 	   debug : false,
            theme : 'bootstrap',
            allowClear : true,
-         });      
+         });
          jQuery('.dropdown-select-ajax').select2(
            {
              debug : false,
 	     theme : 'bootstrap',
 	     allowClear : true,
 	     ajax : {
-               data : function(params) {	
+               data : function(params) {
 		 var query = {
 		   'search[value]' : params.term,
 		   'page' : params.page - 1,
 		 }
 		 return query;
-	       },	   
+	       },
 	       processResults : function(data, page) {
 		 var idField = this.options.get('idField');
 		 var txtFields = this.options.get('textFields');
-		 var fields = txtFields.split(',');	
+		 var fields = txtFields.split(',');
 		 var results = [];
 		 jQuery.each(data.content, function(i, entity) {
 		   var id = entity[idField];
-		   var text = '';		
+		   var text = '';
 		   jQuery.each(fields, function(i, fieldName) {
 		     text = text.concat(' ', entity[fieldName]);
-		   });	
+		   });
 		   var obj = {
 		     'id' : id,
 		     'text' : jQuery.trim(text)
-		   };	
+		   };
 		   jQuery.each(entity, function(key, val) {
 		     var attribute = jQuery.trim(key);
 		     var value = jQuery.trim(val);
 		     obj[attribute] = value;
-		    });		
+		    });
 		    results.push(obj);
-		  });	
+		  });
 		  var morePages = !data.last;
 		  return {
 		    results : results,
@@ -465,7 +472,7 @@
     <!-- Application -->
     <script type="text/javascript" charset="utf8"
       src="../../static/public/js/main.js"></script>
-  
+
 </body>
 </#if>
 </html>

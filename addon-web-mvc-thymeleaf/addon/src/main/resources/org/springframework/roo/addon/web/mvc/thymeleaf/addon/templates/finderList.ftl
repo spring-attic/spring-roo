@@ -167,22 +167,29 @@
               <!-- User menu -->
               <ul class="nav navbar-nav navbar-right upper-nav session">
                 <li class="dropdown">
-                  <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;<span class="hidden-sm">User</span><span class="caret"></span>
+                  <a class="dropdown-toggle" data-toggle="dropdown" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;
+                    <span class="hidden-sm" data-sec-authentication="principal.username"
+                      data-th-text="${r"#{"}label_user${r"}"}">User</span>
+                    <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">
-                   <li><a href="#"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>&nbsp;<span>Admin Profile</span></a></li>
-                   <li><a href="#"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span>&nbsp;<span>Change password</span></a></li>
-		   <li><form action="/logout" method="post">
-		     <button type="button" class="btn btn-link">
-		       <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
-		       <span>Log out</span>
-		     </button>
-		   </form></li>
+                   <li><a href="#"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                   &nbsp;<span data-th-text="${r"#{"}label_profile${r"}"}">Admin Profile</span></a></li>
+                   <li><a href="#"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                   &nbsp;<span data-th-text="${r"#{"}label_change_password${r"}"}">Change password</span></a></li>
+                   <li>
+                     <form data-th-action="@{/logout}" action="/logout" method="post">
+                       <button type="submit" class="btn btn-link">
+                        <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+                        <span data-th-text="${r"#{"}label_logout ${r"}"}">Log out</span>
+                       </button>
+                     </form>
+                   </li>
                  </ul>
                 </li>
               </ul>
-
               <!-- User menu links -->
               <ul class="nav navbar-nav navbar-right upper-nav links">
                 <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>&nbsp;<span class="hidden-sm">Contact</span></a></li>
@@ -210,7 +217,7 @@
              ${entity.codeManaged}
           <#else>
             <table id="${entity.entityItemId}-table"
-                 class="table table-striped table-hover table-bordered" 
+                 class="table table-striped table-hover table-bordered"
                  data-row-id="${entity.configuration.identifierField}"
                  data-select="single"
                  data-z="${entity.z}"
@@ -238,10 +245,10 @@
                 </tr>
               </tbody>
             </table>
-          </#if>          
+          </#if>
         </div>
         <!-- /TABLE-->
-        
+
         <#if details?size != 0>
           <hr>
           <ul class="nav nav-tabs">
@@ -255,7 +262,7 @@
             </#if>
           </#list>
           </ul>
-          
+
           <div class="tab-content">
                 <#assign firstDetail=true>
                 <#list details as field>
@@ -267,7 +274,7 @@
                     </#if>
                         <!--START TABLE-->
                         <div class="table-responsive">
-                          <table id="${field.fieldNameCapitalized}Table" 
+                          <table id="${field.fieldNameCapitalized}Table"
                             class="table table-striped table-hover table-bordered"
                             data-z="${field.z}"
                             data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
@@ -300,12 +307,12 @@
                     </div>
                   </#list>
               </div>
-          
+
         </#if>
-        
+
         <div class="clearfix">
           <div class="pull-left">
-            <a class="btn btn-default" data-th-href="@{${entity.configuration.controllerPath}/findAll/search-form/}"> 
+            <a class="btn btn-default" data-th-href="@{${entity.configuration.controllerPath}/findAll/search-form/}">
                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
                <span data-th-text="${r"#{label_back}"}">Back</span>
             </a>
@@ -314,7 +321,7 @@
 
       </div>
       <!-- /CONTENT-->
-      
+
        <!-- MODAL -->
       <div
         data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
@@ -343,9 +350,9 @@
           </div>
         </div>
       </div>
-      
+
     </section>
-    
+
   </div>
   <!-- /CONTAINER-->
 
@@ -355,7 +362,7 @@
         <small class="clearfix">
             Made with <a href="http://projects.spring.io/spring-roo/" target="_blank">
             Spring Roo &copy; 2016</a> •
-            We <span class="glyphicon glyphicon-heart"></span> 
+            We <span class="glyphicon glyphicon-heart"></span>
             <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
             <a data-th-href="@{/accessibility}" href="../accessibility.html"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
         </small>
@@ -462,8 +469,8 @@
           src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.js"
           data-th-src="@{/webjars/datatables.net-select/1.1.2/js/dataTables.select.js}"></script>
 
-    </div>    
-    
+    </div>
+
     <!-- Datatables page configs -->
     <#if entity.javascriptCode["${entity.entityItemId}-table-javascript"]??>
         ${entity.javascriptCode["${entity.entityItemId}-table-javascript"]}
@@ -479,7 +486,7 @@
                 <#list fields as field>
                 { 'data': '${field.fieldName}' },
                 </#list>
-                { 
+                {
                   'data': '${entity.configuration.identifierField}',
                   'orderable': false,
                   'searchable': false,
@@ -490,9 +497,9 @@
                       '<a role="button" class="btn-action delete" data-th-text="${r"#{label_delete}"}" onclick="javascript:jQuery.delete${entityName}(' + data + ')"/>'
                   }
                 }
-              ]  
+              ]
           });
-        
+
           jQuery.extend({
              'delete${entityName}': function(${identifierField}) {
                  var baseUrl = [[@{${controllerPath}/}]];
@@ -537,9 +544,9 @@
            });
          });
         </script>
-        </#if>         
+        </#if>
          <#if details?size != 0>
-         	<#assign firstDetail = true>         	
+         	<#assign firstDetail = true>
              <#list details as field>
               <script type="text/javascript" data-th-inline="javascript" id="${field.fieldNameCapitalized}-table-javascript" data-z="${field.z}">
               jQuery(document).ready( function () {
@@ -551,11 +558,11 @@
                         {
                             'extend' : 'colvis',
                             'className' : 'btn-action'
-                        }, 
+                        },
                         {
                             'extend' : 'pageLength',
                             'className' : 'btn-action'
-                        } 
+                        }
                     ],
                     'columns': [
                       <#list field.configuration.referenceFieldFields as referencedFieldField>
@@ -563,7 +570,7 @@
                         { 'data': '${referencedFieldField.fieldName}' },
                       </#if>
                       </#list>
-                      { 
+                      {
                         'data': '${field.configuration.identifierField}',
                         'orderable': false,
                         'searchable': false,
@@ -571,7 +578,7 @@
                             return '';
                         }
                       }
-                    ]  
+                    ]
                 });
                   <#if firstDetail == false>
              }
@@ -616,7 +623,7 @@
              	});
             </script>
              </#list>
-             
+
        <#if entity.javascriptCode["${entity.entityItemId}-table-javascript-firstdetail"]??>
           ${entity.javascriptCode["${entity.entityItemId}-table-javascript-firstdetail"]}
        <#else>
@@ -640,7 +647,7 @@
           </script>
         </#if>
      </#if>
-   
+
   </div>
 
   <!-- Application -->
