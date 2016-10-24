@@ -20,27 +20,27 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
         href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-        data-th-href="@{/webjars/bootstrap/3.3.6/dist/css/bootstrap.css}"></link>
+        data-th-href="@{/webjars/bootstrap/3.3.6/dist/css/bootstrap.css}">
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-      data-th-href="@{/public/css/ie10-viewport-bug-workaround.css}"></link>
+      data-th-href="@{/public/css/ie10-viewport-bug-workaround.css}">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-      data-th-href="@{/webjars/font-awesome/4.6.2/css/font-awesome.min.css}" />
+      data-th-href="@{/webjars/font-awesome/4.6.2/css/font-awesome.min.css}">
 
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/theme.css"
-      data-th-href="@{/public/css/theme.css}" />
+      data-th-href="@{/public/css/theme.css}">
 
     <!-- Roo CSS -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/springroo.css"
-      data-th-href="@{/public/css/springroo.css}" />
+      data-th-href="@{/public/css/springroo.css}">
 
    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->

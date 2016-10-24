@@ -28,12 +28,12 @@
 <!-- Bootstrap -->
 <link rel="stylesheet" type="text/css"
   href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-  data-th-remove="all"></link>
+  data-th-remove="all">
 
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <link rel="stylesheet" type="text/css"
   href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-  data-th-remove="all"></link>
+  data-th-remove="all">
 
 <!-- Font Awesome -->
 <link rel="stylesheet" type="text/css"
@@ -43,15 +43,15 @@
 <!-- Select2 -->
 <link rel="stylesheet" type="text/css"
   href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.css"
-  data-th-href="@{/webjars/select2/4.0.2/dist/css/select2.css}" />
+  data-th-href="@{/webjars/select2/4.0.2/dist/css/select2.css}">
 <link rel="stylesheet" type="text/css"
   href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.7/select2-bootstrap.css"
-  data-th-href="@{/webjars/select2-bootstrap-theme/0.1.0-beta.7/dist/select2-bootstrap.css}" />
+  data-th-href="@{/webjars/select2-bootstrap-theme/0.1.0-beta.7/dist/select2-bootstrap.css}">
 
 <!-- DateTimePicker -->
 <link rel="stylesheet" type="text/css"
   href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.4/build/jquery.datetimepicker.min.css" 
-  data-th-href="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.min.css}" />
+  data-th-href="@{/webjars/datetimepicker/2.5.4/build/jquery.datetimepicker.min.css}">
 
 <!-- Bootswatch CSS custom -->
 <link rel="stylesheet" type="text/css"
