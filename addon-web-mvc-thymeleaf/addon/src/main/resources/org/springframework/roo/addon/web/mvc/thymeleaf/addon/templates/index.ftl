@@ -115,22 +115,30 @@
               </ul>
 
               <!-- Language -->
-              <ul class="nav navbar-nav navbar-right upper-nav language">
+              <ul class="nav navbar-nav navbar-right upper-nav languages">
                 <li class="dropdown">
-                  <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp;<span class="hidden-sm">Language</span><span class="caret"></span>
-                  </a>
-                  <ul class="dropdown-menu" id="languageFlags">
-                   <li id="enFlag"><a href="?lang=en"><img class="flag"
-                   data-th-src="@{/static/public/img/en.png}" src="../static/public/img/en.png"
-                   alt="English">&nbsp;<span>English</span></a> </li>
-                   <li id="esFlag"><a href="?lang=es"><img class="flag"
-                   data-th-src="@{/static/public/img/es.png}" src="../static/public/img/es.png"
-                   alt="Spanish">&nbsp;<span>Spanish</span></a> </li>
-                 </ul>
-               </li>
+                  <a class="dropdown-toggle" data-toggle="dropdown" role="button"
+                    aria-haspopup="true" aria-expanded="false">
+                    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp
+                    <span class="hidden-sm" data-th-text="${r"#{language_label}"}">Language
+                    </span><span class="caret"></span>
+                   </a>
+                   <ul class="dropdown-menu" id="languageFlags">
+                    <#list languages as language>
+                    <li id="${language.localePrefix}Flag">
+                     <a href="?lang=${language.localePrefix}">
+                       <img class="flag"
+                       data-th-src="@{/public/img/${language.localePrefix}.png}"
+                       src="/public/img/${language.localePrefix}.png"
+                       alt="${language.language}" />&nbsp;
+                       <span data-th-text="${r"#{language_label_"}${language.localePrefix}${r"}"}">
+                       ${language.language}</span>
+                     </a>
+                    </li>
+                    </#list>
+                   </ul>
+                </li>
               </ul>
-
               <!-- User menu -->
               <ul class="nav navbar-nav navbar-right upper-nav session">
                 <li class="dropdown">
