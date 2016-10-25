@@ -218,8 +218,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     // Get projection constructor fields from @RooEntityProjection and add it to a Map with
     // domain type's variable names
-    Map<JavaType, Map<String, String>> typesFieldMaps =
-        new LinkedHashMap<JavaType, Map<String, String>>();
+    Map<JavaType, List<Pair<String, String>>> typesFieldMaps =
+        new LinkedHashMap<JavaType, List<Pair<String, String>>>();
     Map<JavaType, Boolean> typesAreProjections = new HashMap<JavaType, Boolean>();
     if (returnTypeIsProjection) {
       buildFieldNamesMap(entity, returnType, entityProjectionAnnotation, typesFieldMaps);
@@ -283,18 +283,18 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadataMap =
         new HashMap<JavaType, Map<String, FieldMetadata>>();
     Map<String, FieldMetadata> entityFieldMetadata = new LinkedHashMap<String, FieldMetadata>();
-    Map<String, String> entityFieldMappings = new LinkedHashMap<String, String>();
+    List<Pair<String, String>> entityFieldMappings = new ArrayList<Pair<String, String>>();
     typesAreProjections.put(entity, false);
     for (FieldMetadata field : validFields) {
       entityFieldMetadata.put(field.getFieldName().getSymbolName(), field);
       if (field.getAnnotation(JpaJavaType.ID) != null
           || field.getAnnotation(JpaJavaType.EMBEDDED_ID) != null) {
-        entityFieldMappings.put(field.getFieldName().getSymbolName(), "getEntityId()");
+        entityFieldMappings.add(Pair.of(field.getFieldName().getSymbolName(), "getEntityId()"));
       } else {
-        entityFieldMappings.put(
+        entityFieldMappings.add(Pair.of(
             field.getFieldName().getSymbolName(),
             StringUtils.uncapitalize(entity.getSimpleTypeName()).concat(".")
-                .concat(field.getFieldName().getSymbolName()));
+                .concat(field.getFieldName().getSymbolName())));
       }
     }
     typesFieldsMetadataMap.put(entity, entityFieldMetadata);
@@ -377,8 +377,15 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
               // The projection contains identifier fields, so replace its value in the Map
               String fieldPathName = "getEntityId()";
-              typesFieldMaps.get(type).remove(projectionOriginalValue.getKey());
-              typesFieldMaps.get(type).put(projectionOriginalValue.getKey(), fieldPathName);
+              List<Pair<String, String>> fieldList = typesFieldMaps.get(type);
+              Pair<String, String> value;
+              for (int i = 0; i < fieldList.size(); i++) {
+                value = fieldList.get(i);
+                if (value.getKey().equals(projectionOriginalValue.getKey())) {
+                  fieldList.set(i, Pair.of(projectionOriginalValue.getKey(), fieldPathName));
+                  break;
+                }
+              }
             }
           }
         }
@@ -467,8 +474,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
    */
   private void buildFieldNamesMap(JavaType entity, JavaType projection,
       AnnotationMetadata entityProjectionAnnotation,
-      Map<JavaType, Map<String, String>> typesFieldMaps) {
-    Map<String, String> projectionFieldNames = new LinkedHashMap<String, String>();
+      Map<JavaType, List<Pair<String, String>>> typesFieldMaps) {
+    List<Pair<String, String>> projectionFieldNames = new ArrayList<Pair<String, String>>();
     if (!typesFieldMaps.containsKey(projection)) {
       AnnotationAttributeValue<?> projectionFields =
           entityProjectionAnnotation.getAttribute("fields");
@@ -490,7 +497,7 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
             }
           }
           String pathName = entityVariableName.concat(".").concat(field.getValue());
-          projectionFieldNames.put(propertyName.toString(), pathName);
+          projectionFieldNames.add(Pair.of(propertyName.toString(), pathName));
           typesFieldMaps.put(projection, projectionFieldNames);
         }
       }

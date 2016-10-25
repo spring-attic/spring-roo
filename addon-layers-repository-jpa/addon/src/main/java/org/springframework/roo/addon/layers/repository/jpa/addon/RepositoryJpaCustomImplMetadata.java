@@ -24,7 +24,6 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -35,7 +34,6 @@ import org.springframework.roo.project.LogicalPath;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +64,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   final private ImportRegistrationResolver importResolver;
   final private JavaType entity;
-  final private Map<JavaType, Map<String, String>> typesFieldMaps;
+  final private Map<JavaType, List<Pair<String, String>>> typesFieldMaps;
   final private JavaType defaultReturnType;
   final private Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadata;
   final private Map<JavaType, Boolean> typesAreProjections;
@@ -140,7 +138,7 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       final JavaType defaultReturnType,
       final Map<FieldMetadata, MethodMetadata> allFindReferencedFieldsMethods,
       final Map<FieldMetadata, String> referencedFieldsIdentifierNames,
-      final Map<JavaType, Map<String, String>> typesFieldMaps,
+      final Map<JavaType, List<Pair<String, String>>> typesFieldMaps,
       final List<Pair<MethodMetadata, PartTree>> customFinderMethods,
       final List<Pair<MethodMetadata, PartTree>> customCountMethods,
       final Map<JavaType, Map<String, FieldMetadata>> typesFieldsMetadata,
@@ -286,8 +284,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     } else {
 
       // Return type is a projection
-      Map<String, String> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
-      Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
+      List<Pair<String, String>> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
+      Iterator<Pair<String, String>> iterator = projectionFields.iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
@@ -332,16 +330,31 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       bodyBuilder.appendFormalLine(String.format("return loadPage(query, pageable, %s);",
           entityVariable));
     } else {
-      Map<String, String> projectionFields = this.typesFieldMaps.get(returnType);
+      List<Pair<String, String>> projectionFields = this.typesFieldMaps.get(returnType);
 
       // return loadPage(query, pageable, Projection.constructor(MyProjection.class,
       //                    getEntityId(), myEntity.field1, myEntity.field2);
       bodyBuilder.appendFormalLine(String.format(
           "return loadPage(query, %s, %s.constructor(%s.class, %s ));", pageable,
-          projection.getNameIncludingTypeParameters(false, this.importResolver),
-          returnType.getNameIncludingTypeParameters(false, this.importResolver),
-          StringUtils.join(projectionFields.values(), ", ")));
+          getNameOfJavaType(projection), getNameOfJavaType(returnType),
+          StringUtils.join(getListRightValueOfPair(projectionFields), ", ")));
     }
+  }
+
+  private List<String> getListRightValueOfPair(List<Pair<String, String>> projectionFields) {
+    List<String> result = new ArrayList<String>(projectionFields.size());
+    for (Pair<String, String> item : projectionFields) {
+      result.add(item.getRight());
+    }
+    return result;
+  }
+
+  private List<String> getListLeftValueOfPair(List<Pair<String, String>> projectionFields) {
+    List<String> result = new ArrayList<String>(projectionFields.size());
+    for (Pair<String, String> item : projectionFields) {
+      result.add(item.getLeft());
+    }
+    return result;
   }
 
   /**
@@ -425,10 +438,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     } else {
 
       // Return type is a projection
-      Map<String, String> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
-      Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
+      List<Pair<String, String>> projectionFields = this.typesFieldMaps.get(this.defaultReturnType);
+      Iterator<Pair<String, String>> iterator = projectionFields.iterator();
       while (iterator.hasNext()) {
-        Entry<String, String> entry = iterator.next();
+        Pair<String, String> entry = iterator.next();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
             entry.getValue()));
       }
@@ -529,8 +542,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     } else {
 
       // Return type is a projection
-      Map<String, String> projectionFields = this.typesFieldMaps.get(returnType);
-      Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
+      List<Pair<String, String>> projectionFields = this.typesFieldMaps.get(returnType);
+      Iterator<Pair<String, String>> iterator = projectionFields.iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
         mappingBuilderLine.append(String.format("\n\t\t\t.map(\"%s\", %s)", entry.getKey(),
@@ -734,7 +747,8 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
               formBeanParameterName, accessorMethodName));
 
           // Get path field name from field mappings
-          String pathFieldName = this.typesFieldMaps.get(formBeanType).get(field.getKey());
+          String pathFieldName =
+              getValueOfPairFor(this.typesFieldMaps.get(formBeanType), field.getKey());
           // query.where(myEntity.field.eq(formBean.getField()));
           bodyBuilder.appendIndent();
           bodyBuilder.appendIndent();
@@ -798,10 +812,10 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
     } else {
 
       // Return type is a projection
-      Map<String, String> projectionFields = this.typesFieldMaps.get(returnType);
+      List<Pair<String, String>> projectionFields = this.typesFieldMaps.get(returnType);
       Validate.notNull(projectionFields, "Couldn't get projection fields for %s",
           this.defaultReturnType);
-      Iterator<Entry<String, String>> iterator = projectionFields.entrySet().iterator();
+      Iterator<Pair<String, String>> iterator = projectionFields.iterator();
       while (iterator.hasNext()) {
         Entry<String, String> entry = iterator.next();
         toAppend.add(entry.getValue());
@@ -816,9 +830,23 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
 
   }
 
+  private String getValueOfPairFor(List<Pair<String, String>> list, String key) {
+    for (Pair<String, String> item : list) {
+      if (key.equals(item.getLeft())) {
+        return item.getValue();
+      }
+    }
+    return null;
+  }
+
   private void buildFormBeanFilterBody(InvocableMemberBodyBuilder bodyBuilder,
       JavaType formBeanType, String formBeanParameterName, String entityVariable, PartTree partTree) {
-    // TODO Auto-generated method stub
+
+    // BooleanBuilder searchCondition = new BooleanBuilder();
+    bodyBuilder.appendFormalLine("%1$s searchCondition = new %1$s();",
+        getNameOfJavaType(QUERYDSL_BOOLEAN_BUILDER));
+
+
     // formBean is a DTO, filter only by finder params
     List<FinderParameter> finderParamsList = partTree.getParameters();
     for (FinderParameter finderParameter : finderParamsList) {
@@ -839,17 +867,27 @@ public class RepositoryJpaCustomImplMetadata extends AbstractItdTypeDetailsProvi
       if (pathFieldName.equals("getEntityId()")) {
 
         // Field is an id field
-        bodyBuilder.appendFormalLine(String.format("query.where(getEntityId().eq(%s.%s()));",
-            formBeanParameterName, accessorMethodName));
+        bodyBuilder.appendFormalLine(String.format(
+            "searchCondition.and(getEntityId().eq(%s.%s()));", formBeanParameterName,
+            accessorMethodName));
       } else {
-        bodyBuilder.appendFormalLine(String.format("query.where(%s.eq(%s.%s()));", pathFieldName,
-            formBeanParameterName, accessorMethodName));
+        bodyBuilder.appendFormalLine(String.format("searchCondition.and(%s.eq(%s.%s()));",
+            pathFieldName, formBeanParameterName, accessorMethodName));
       }
 
       // }
       bodyBuilder.appendIndent();
       bodyBuilder.appendFormalLine("}");
     }
+
+    // if (searchCondition.hasValue()) {
+    bodyBuilder.appendFormalLine("if (searchCondition.hasValue()) {");
+    //     query.where(searchCondition);
+    bodyBuilder.indent();
+    bodyBuilder.appendFormalLine("query.where(searchCondition);");
+    // }
+    bodyBuilder.indentRemove();
+    bodyBuilder.appendFormalLine("}");
   }
 
   private String getFinderParamPath(FinderParameter finderParameter, String entityVariable) {

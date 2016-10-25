@@ -5,8 +5,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
@@ -39,7 +37,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -132,7 +129,7 @@ public class FinderOperationsImpl implements FinderOperations {
     // Add finder attribute
     singleFinderAnnotation.addStringAttribute("value", finderName.getSymbolName());
 
-    // Add defaultReturnType attribute
+    // Add returnType attribute
     if (returnType != null) {
       singleFinderAnnotation.addClassAttribute("returnType", returnType);
       getProjectOperations().addModuleDependency(repository.getName().getModule(),
