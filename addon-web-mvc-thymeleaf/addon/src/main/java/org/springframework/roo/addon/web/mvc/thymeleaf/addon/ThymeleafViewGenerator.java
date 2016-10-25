@@ -78,7 +78,9 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
 
   @Override
   public Document parse(String content) {
-    return Jsoup.parse(content, "", Parser.htmlParser());
+    Document doc = Jsoup.parse(content, "", Parser.xmlParser());
+    doc.outputSettings().prettyPrint(false);
+    return doc;
   }
 
   /**
