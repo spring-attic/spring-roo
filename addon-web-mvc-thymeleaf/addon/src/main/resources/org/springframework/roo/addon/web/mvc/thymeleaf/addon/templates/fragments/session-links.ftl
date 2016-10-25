@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Session info</title>
   </head>
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>

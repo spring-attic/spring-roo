@@ -1,50 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="${r"#{info_description}"}">
-    <meta name="author" content="${r"#{info_author}"}">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="${r"#{info_description}"}"/>
+    <meta name="author" content="${r"#{info_author}"}"/>
 
     <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
-      data-th-href="@{/public/img/favicon.ico}">
+      data-th-href="@{/public/img/favicon.ico}"/>
 
     <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
-      data-th-href="@{/public/img/apple-touch-icon.png}">
+      data-th-href="@{/public/img/apple-touch-icon.png}"/>
 
     <title data-layout-title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE" data-th-text="${r"${projectName}"}">Spring Roo application</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" type="text/css"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-        data-th-href="@{/webjars/bootstrap/3.3.6/dist/css/bootstrap.css}">
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+      data-th-href="@{/webjars/bootstrap/3.3.6/dist/css/bootstrap.css}"></link>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-      data-th-href="@{/public/css/ie10-viewport-bug-workaround.css}">
+      data-th-href="@{/public/css/ie10-viewport-bug-workaround.css}"></link>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" type="text/css"
       href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-      data-th-href="@{/webjars/font-awesome/4.6.2/css/font-awesome.min.css}">
+      data-th-href="@{/webjars/font-awesome/4.6.2/css/font-awesome.min.css}"/>
 
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/theme.css"
-      data-th-href="@{/public/css/theme.css}">
+      data-th-href="@{/public/css/theme.css}"/>
 
     <!-- Roo CSS -->
     <link rel="stylesheet" type="text/css"
       href="../../static/public/css/springroo.css"
-      data-th-href="@{/public/css/springroo.css}">
+      data-th-href="@{/public/css/springroo.css}"/>
 
    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
   </head>
