@@ -147,26 +147,18 @@
                 <li class="dropdown">
                   <a class="dropdown-toggle" data-toggle="dropdown" role="button"
                     aria-haspopup="true" aria-expanded="false">
-                    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp
-                    <span class="hidden-sm" data-th-text="${r"#{language_label}"}">Language
-                    </span><span class="caret"></span>
-                   </a>
-                   <ul class="dropdown-menu" id="languageFlags">
-                   <#if languages??>
-                    <#list languages as language>
-                    <li id="${language.localePrefix}Flag">
-                     <a href="?lang=${language.localePrefix}">
-                       <img class="flag"
-                       data-th-src="@{/public/img/${language.localePrefix}.png}"
-                       src="/public/img/${language.localePrefix}.png"
-                       alt="${language.language}" />&nbsp;
-                       <span data-th-text="${r"#{language_label_"}${language.localePrefix}${r"}"}">
-                       ${language.language}</span>
-                     </a>
-                    </li>
-                    </#list>
-                   </#if>
-                   </ul>
+                    <span class="glyphicon glyphicon-globe" aria-hidden="true">
+                    </span>&nbsp;<span class="hidden-sm"
+                    data-th-text="#{language_label}">Language</span><span class="caret"></span>
+                  </a>
+                  <ul class="dropdown-menu" id="languageFlags">
+                   <li id="enFlag"><a href="?lang=en"><img class="flag"
+                    data-th-src="@{/public/img/en.png}" src="../static/public/img/en.png"
+                    alt="English">&nbsp;<span data-th-text="#{language_label_en}">English</span></a> </li>
+                   <li id="esFlag"><a href="?lang=es"><img class="flag"
+                    data-th-src="@{/public/img/es.png}" src="../static/public/img/es.png"
+                    alt="Spanish">&nbsp;<span data-th-text="language_label_es">Spanish</span></a> </li>
+                  </ul>
                 </li>
               </ul>
               <!-- User menu -->
