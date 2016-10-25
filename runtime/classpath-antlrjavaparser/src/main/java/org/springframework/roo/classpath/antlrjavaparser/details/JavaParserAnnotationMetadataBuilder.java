@@ -228,7 +228,9 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
         annotationExpr =
             new MarkerAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation
                 .getAnnotationType().getSimpleTypeName()));
-      } else if (castValue.getValue().getAttributeNames().size() == 1) {
+      } else if (castValue.getValue().getAttributeNames().size() == 1
+          && (castValue.getValue().getAttributeNames().get(0) == null || "value".equals(castValue
+              .getValue().getAttributeNames().get(0).getSymbolName()))) {
         annotationExpr =
             new SingleMemberAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation
                 .getAnnotationType().getSimpleTypeName()), convert(
