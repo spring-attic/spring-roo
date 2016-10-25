@@ -527,10 +527,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Generate Collection controller JavaType
     JavaType collectionController =
-        new JavaType(
-            String.format("%s.%sCollectionController",
-                controllerPackage.getFullyQualifiedPackageName(),
-                getPluralService().getPlural(entity)), controllerPackage.getModule());
+        new JavaType(String.format("%s.%sCollectionController",
+            controllerPackage.getFullyQualifiedPackageName(),
+            StringUtils.capitalize(getPluralService().getPlural(entity))),
+            controllerPackage.getModule());
 
     ClassOrInterfaceTypeDetails collectionControllerDetails =
         getTypeLocationService().getTypeDetails(collectionController);
@@ -566,9 +566,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
     // Generate Item Controller JavaType
     JavaType itemController =
-        new JavaType(
-            String.format("%s.%sItemController", controllerPackage.getFullyQualifiedPackageName(),
-                getPluralService().getPlural(entity)), controllerPackage.getModule());
+        new JavaType(String.format("%s.%sItemController",
+            controllerPackage.getFullyQualifiedPackageName(),
+            StringUtils.capitalize(getPluralService().getPlural(entity))),
+            controllerPackage.getModule());
 
     ClassOrInterfaceTypeDetails itemControllerDetails =
         getTypeLocationService().getTypeDetails(itemController);
