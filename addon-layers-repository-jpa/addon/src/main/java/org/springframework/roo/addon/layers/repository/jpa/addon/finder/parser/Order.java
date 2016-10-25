@@ -4,10 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.classpath.details.FieldMetadata;
 
+import java.util.Stack;
+
 /**
- * Represents an order expression, which is a pair of property and 
- * {@link Direction}. 
- * 
+ * Represents an order expression, which is a pair of property and
+ * {@link Direction}.
+ *
  * @author Paula Navarro
  * @since 2.0
  */
@@ -16,17 +18,17 @@ public class Order {
   public static final Direction DEFAULT_DIRECTION = Direction.ASC;
 
   private final Direction direction;
-  private final Pair<FieldMetadata, String> property;
+  private final Pair<Stack<FieldMetadata>, String> property;
 
 
   /**
    * Creates a new {@link Order} instance, which represents an order expression.
    * An order expression needs an entity property and a {@link Direction}.
-   * 
+   *
    * @param direction the {@link Direction} can be Ascending or Descending
    * @param propertyInfo entity property
     */
-  public Order(Direction direction, Pair<FieldMetadata, String> propertyInfo) {
+  public Order(Direction direction, Pair<Stack<FieldMetadata>, String> propertyInfo) {
 
     // Validate order expression. If a direction is specified, property must exist
     if (direction != null && propertyInfo == null) {
@@ -39,7 +41,7 @@ public class Order {
 
   /**
    * Returns the order that the property shall be sorted for.
-   * 
+   *
    * @return
    */
   public Direction getDirection() {
@@ -48,10 +50,10 @@ public class Order {
 
   /**
    * Returns the property information to order for.
-   * 
+   *
    * @return Pair of property metadata and property name
    */
-  public Pair<FieldMetadata, String> getProperty() {
+  public Pair<Stack<FieldMetadata>, String> getProperty() {
     return property;
   }
 
@@ -65,7 +67,7 @@ public class Order {
 
   /**
    * Returns whether sorting for the property shall be ascending.
-   * 
+   *
    * @return
    */
   public boolean isAscending() {

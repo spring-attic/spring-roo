@@ -69,7 +69,7 @@ public class FinderOperationsImpl implements FinderOperations {
   }
 
   public void installFinder(final JavaType entity, final JavaSymbolName finderName,
-      JavaType formBean, JavaType defaultReturnType) {
+      JavaType formBean, JavaType returnType) {
     Validate.notNull(entity, "ERROR: Entity type required to generate finder.");
     Validate.notNull(finderName, "ERROR: Finder name required to generate finder.");
 
@@ -112,9 +112,8 @@ public class FinderOperationsImpl implements FinderOperations {
 
       while (it.hasNext()) {
         NestedAnnotationAttributeValue finder = (NestedAnnotationAttributeValue) it.next();
-        if (finder.getValue() != null && finder.getValue().getAttribute("finder") != null) {
-          if (finder.getValue().getAttribute("finder").getValue()
-              .equals(finderName.getSymbolName())) {
+        if (finder.getValue() != null && finder.getValue().getAttribute("value") != null) {
+          if (finder.getValue().getAttribute("value").getValue().equals(finderName.getSymbolName())) {
             LOGGER.log(
                 Level.WARNING,
                 String.format("ERROR: Finder '%s' already exists on entity '%s'",
@@ -131,17 +130,13 @@ public class FinderOperationsImpl implements FinderOperations {
         new AnnotationMetadataBuilder(RooJavaType.ROO_FINDER);
 
     // Add finder attribute
-    singleFinderAnnotation.addStringAttribute("finder", finderName.getSymbolName());
+    singleFinderAnnotation.addStringAttribute("value", finderName.getSymbolName());
 
     // Add defaultReturnType attribute
-    if (defaultReturnType == null) {
-      singleFinderAnnotation.addClassAttribute("defaultReturnType", entity);
+    if (returnType != null) {
+      singleFinderAnnotation.addClassAttribute("returnType", returnType);
       getProjectOperations().addModuleDependency(repository.getName().getModule(),
-          entity.getModule());
-    } else {
-      singleFinderAnnotation.addClassAttribute("defaultReturnType", defaultReturnType);
-      getProjectOperations().addModuleDependency(repository.getName().getModule(),
-          defaultReturnType.getModule());
+          returnType.getModule());
     }
 
     // Add formBean attribute
@@ -149,10 +144,6 @@ public class FinderOperationsImpl implements FinderOperations {
       singleFinderAnnotation.addClassAttribute("formBean", formBean);
       getProjectOperations().addModuleDependency(repository.getName().getModule(),
           formBean.getModule());
-    } else {
-      singleFinderAnnotation.addClassAttribute("formBean", entity);
-      getProjectOperations().addModuleDependency(repository.getName().getModule(),
-          entity.getModule());
     }
 
     NestedAnnotationAttributeValue newFinder =
@@ -241,21 +232,21 @@ public class FinderOperationsImpl implements FinderOperations {
     // Create list of parameters for this finder
     List<FinderParameter> finderParametersList = new ArrayList<FinderParameter>();
 
+    // Get all DTO fields if form bean is a DTO or entity fields if not
+    List<FieldMetadata> allFormBeanFields = new ArrayList<FieldMetadata>();
+    if (getTypeLocationService().getTypeDetails(formBeanType) != null
+        && getTypeLocationService().getTypeDetails(formBeanType).getAnnotation(RooJavaType.ROO_DTO) != null) {
+      allFormBeanFields =
+          getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
+              getTypeLocationService().getTypeDetails(formBeanType)).getFields();
+    }
+
     // Iterate over all specified fields
     for (FinderParameter finderParameter : finderParameters) {
       JavaSymbolName fieldName = finderParameter.getName();
       JavaType fieldType = finderParameter.getType();
       boolean found = false;
 
-      // Get all DTO fields if form bean is a DTO or entity fields if not
-      List<FieldMetadata> allFormBeanFields = new ArrayList<FieldMetadata>();
-      if (getTypeLocationService().getTypeDetails(formBeanType) != null
-          && getTypeLocationService().getTypeDetails(formBeanType).getAnnotation(
-              RooJavaType.ROO_DTO) != null) {
-        allFormBeanFields =
-            getMemberDetailsScanner().getMemberDetails(this.getClass().getName(),
-                getTypeLocationService().getTypeDetails(formBeanType)).getFields();
-      }
 
       // Iterate over all entity fields
       for (FieldMetadata field : allEntityFields) {

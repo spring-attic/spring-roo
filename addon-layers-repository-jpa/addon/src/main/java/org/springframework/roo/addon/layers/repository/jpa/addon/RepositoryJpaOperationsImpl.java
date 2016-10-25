@@ -1,20 +1,14 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jpa.addon.JpaOperations;
-import org.springframework.roo.addon.jpa.addon.JpaOperationsImpl;
-import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
-import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -32,7 +26,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
@@ -51,12 +44,9 @@ import org.w3c.dom.Element;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -164,8 +154,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
       // @RooEntityProjection
       Validate.notNull(defaultReturnTypeAnnotation,
           "ERROR: Provided defaultSearchResult should be annotated with @RooDTO");
-    } else {
-      defaultReturnType = domainType;
     }
 
     // Check if the new interface to be created already exists
@@ -215,12 +203,13 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
     }
 
     // Generates repository interface
-    addRepositoryInterface(interfaceType, domainType, entityDetails, interfaceIdentifier);
+    addRepositoryInterface(interfaceType, domainType, entityDetails, interfaceIdentifier,
+        defaultReturnType);
 
     // By default, generate RepositoryCustom interface and its
     // implementation that allow developers to include its dynamic queries
     // using QueryDSL
-    addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage(), defaultReturnType);
+    addRepositoryCustom(domainType, interfaceType, interfaceType.getPackage());
 
     // Add dependencies between modules
     getProjectOperations().addModuleDependency(interfaceType.getModule(), domainType.getModule());
@@ -327,13 +316,22 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
    * @param interfaceIdentifier
    */
   private void addRepositoryInterface(JavaType interfaceType, JavaType domainType,
-      ClassOrInterfaceTypeDetails entityDetails, String interfaceIdentifier) {
+      ClassOrInterfaceTypeDetails entityDetails, String interfaceIdentifier,
+      JavaType defaultReturnType) {
     // Generates @RooJpaRepository annotation with referenced entity value
     // and repository custom associated to this repository
     final AnnotationMetadataBuilder interfaceAnnotationMetadata =
         new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA);
     interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("entity"),
         domainType));
+    if (defaultReturnType != null) {
+      interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
+          "defaultReturnType"), defaultReturnType));
+
+      // Add dependencies between modules
+      getProjectOperations().addModuleDependency(interfaceType.getModule(),
+          defaultReturnType.getModule());
+    }
     // Generating interface
     final String interfaceMdId =
         PhysicalTypeIdentifier.createIdentifier(interfaceType,
@@ -498,7 +496,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
    * @return JavaType with new RepositoryCustom interface.
    */
   private JavaType addRepositoryCustom(JavaType domainType, JavaType repositoryType,
-      JavaPackage repositoryPackage, JavaType defaultReturnType) {
+      JavaPackage repositoryPackage) {
 
     // Getting RepositoryCustom interface JavaTYpe
     JavaType interfaceType =
@@ -528,13 +526,6 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
         new AnnotationMetadataBuilder(RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
     repositoryCustomAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
         "entity"), domainType));
-
-    repositoryCustomAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName(
-        "defaultReturnType"), defaultReturnType));
-
-    // Add dependencies between modules
-    getProjectOperations().addModuleDependency(interfaceType.getModule(),
-        defaultReturnType.getModule());
 
     interfaceBuilder.addAnnotation(repositoryCustomAnnotationMetadata);
 

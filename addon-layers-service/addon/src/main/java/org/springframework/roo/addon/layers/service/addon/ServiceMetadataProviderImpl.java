@@ -4,6 +4,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
@@ -12,6 +13,7 @@ import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.Relation
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaCustomMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -233,16 +235,20 @@ public class ServiceMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
             repositoryMetadata.getCountMethodByReferencedFields());
 
     // Add custom finders to finders list and add dependencies between modules
-    for (MethodMetadata finder : repositoryCustomMetadata.getCustomFinderMethods()) {
+    for (Pair<MethodMetadata, PartTree> finderInfo : repositoryCustomMetadata
+        .getCustomFinderMethods()) {
 
       // Add to service finders list
-      finders.add(finder);
+      finders.add(finderInfo.getKey());
 
-      registerDependencyModolesOfFinder(governorPhysicalTypeMetadata, finder);
+      registerDependencyModolesOfFinder(governorPhysicalTypeMetadata, finderInfo.getKey());
     }
 
     // Add custom count methods to count method list
-    countMethods.addAll(repositoryCustomMetadata.getCustomCountMethods());
+    for (Pair<MethodMetadata, PartTree> countInfo : repositoryCustomMetadata
+        .getCustomCountMethods()) {
+      countMethods.add(countInfo.getKey());
+    }
 
     // Get related entities metadata
     final Map<JavaType, JpaEntityMetadata> relatedEntities =

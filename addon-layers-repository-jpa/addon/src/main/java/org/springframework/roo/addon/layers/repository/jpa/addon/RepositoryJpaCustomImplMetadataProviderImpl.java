@@ -5,6 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA_CUSTO
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
@@ -16,6 +17,7 @@ import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperations;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.FinderOperationsImpl;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepositoryCustomImpl;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -40,6 +42,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
@@ -49,7 +52,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -195,28 +197,19 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
     JavaType entity = entityAttribute.getValue();
 
+    RepositoryJpaMetadata repositoryMetadata =
+        getRepositoryJpaLocator().getRepositoryMetadata(entity);
+
     // Register downstream dependency for RepositoryJpaCustomImplMetadata to update projection
     // finders implementations
-    Set<ClassOrInterfaceTypeDetails> repositoryCustomClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_REPOSITORY_JPA_CUSTOM);
-    for (ClassOrInterfaceTypeDetails repositoryJpaCustom : repositoryCustomClasses) {
-      if (repositoryCustom.equals(repositoryJpaCustom.getType())) {
-        LogicalPath repositoryLogicalPath =
-            PhysicalTypeIdentifier.getPath(repositoryJpaCustom.getDeclaredByMetadataId());
-        String repositoryCustomMetadataKey =
-            RepositoryJpaCustomMetadata.createIdentifier(repositoryJpaCustom.getType(),
-                repositoryLogicalPath);
-        registerDependency(repositoryCustomMetadataKey, metadataIdentificationString);
-        break;
-      }
-    }
+    String repositoryCustomMetadataKey =
+        RepositoryJpaCustomMetadata.createIdentifier(repositoryDetails);
+    registerDependency(repositoryCustomMetadataKey, metadataIdentificationString);
 
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
 
     // Check if default return type is a Projection
-    JavaType returnType =
-        (JavaType) repositoryCustomAnnotation.getAttribute("defaultReturnType").getValue();
+    JavaType returnType = repositoryMetadata.getDefaultReturnType();
     ClassOrInterfaceTypeDetails returnTypeDetails =
         getTypeLocationService().getTypeDetails(returnType);
     AnnotationMetadata entityProjectionAnnotation =
@@ -233,11 +226,8 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
       typesAreProjections.put(returnType, true);
     }
 
-    // Getting repository metadata
-    final String repositoryMetadataKey =
-        RepositoryJpaCustomMetadata.createIdentifier(repositoryDetails);
     final RepositoryJpaCustomMetadata repositoryCustomMetadata =
-        getMetadataService().get(repositoryMetadataKey);
+        getMetadataService().get(repositoryCustomMetadataKey);
 
     // Getting java bean metadata
     final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
@@ -253,33 +243,10 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     // Create dependency between repository and jpa entity annotation
     registerDependency(jpaEntityMetadataKey, metadataIdentificationString);
 
-    // Getting persistent properties
-    List<FieldMetadata> idFields = getPersistenceMemberLocator().getIdentifierFields(entity);
-    if (idFields.isEmpty()) {
-      throw new RuntimeException(String.format("Error: Entity %s does not have an identifier",
-          entityAttribute.getName()));
-    }
 
-    // Getting entity properties for findAll method
+    // Getting entity properties
     MemberDetails entityMemberDetails =
         getMemberDetailsScanner().getMemberDetails(getClass().getName(), entityDetails);
-
-    // Removing duplicates in persistent properties
-    boolean duplicated;
-    List<FieldMetadata> validIdFields = new ArrayList<FieldMetadata>();
-    for (FieldMetadata id : idFields) {
-      duplicated = false;
-
-      for (FieldMetadata validId : validIdFields) {
-        if (id.getFieldName().equals(validId.getFieldName())) {
-          duplicated = true;
-          break;
-        }
-      }
-      if (!duplicated) {
-        validIdFields.add(id);
-      }
-    }
 
     // Getting valid fields to construct the findAll query
     List<FieldMetadata> validFields = new ArrayList<FieldMetadata>();
@@ -292,11 +259,13 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     Map<FieldMetadata, String> referencedFieldsIdentifierNames =
         new HashMap<FieldMetadata, String>();
 
-    List<MethodMetadata> customFinderMethods = repositoryCustomMetadata.getCustomFinderMethods();
+    List<Pair<MethodMetadata, PartTree>> customFinderMethods =
+        repositoryCustomMetadata.getCustomFinderMethods();
 
-    List<MethodMetadata> customCountMethods = repositoryCustomMetadata.getCustomCountMethods();
+    List<Pair<MethodMetadata, PartTree>> customCountMethods =
+        repositoryCustomMetadata.getCustomCountMethods();
     if (customCountMethods == null) {
-      customCountMethods = new ArrayList<MethodMetadata>();
+      customCountMethods = new ArrayList<Pair<MethodMetadata, PartTree>>();
     }
 
     for (Entry<FieldMetadata, MethodMetadata> referencedFields : referencedFieldsMethods.entrySet()) {
@@ -334,28 +303,15 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     // Make a list with all domain types, excepting entities
     List<JavaType> domainTypes = new ArrayList<JavaType>();
     domainTypes.add(returnType);
-    Map<JavaSymbolName, List<FinderParameter>> finderParametersMap =
-        new HashMap<JavaSymbolName, List<FinderParameter>>();
-    for (MethodMetadata method : customFinderMethods) {
+    for (Pair<MethodMetadata, PartTree> methodInfo : customFinderMethods) {
 
       // Get finder return type from first parameter of method return type (Page)
-      JavaType finderReturnType = method.getReturnType().getBaseType();
+      JavaType finderReturnType = getDomainTypeOfFinderMethod(methodInfo.getKey());
       domainTypes.add(finderReturnType);
 
       // If type is a DTO, add finder fields to mappings
-      JavaType parameterType = method.getParameterTypes().get(0).getJavaType();
+      JavaType parameterType = methodInfo.getKey().getParameterTypes().get(0).getJavaType();
       typesAreProjections.put(parameterType, false);
-
-      // Build finder formBean field mappings
-      getFinderOperations().buildFormBeanFieldNamesMap(entity, parameterType, typesFieldMaps,
-          typesFieldsMetadataMap, method.getMethodName(), finderParametersMap);
-    }
-
-    // Add custom count methods to mappings
-    for (MethodMetadata countMethod : customCountMethods) {
-      getFinderOperations().buildFormBeanFieldNamesMap(entity,
-          countMethod.getParameterTypes().get(0).getJavaType(), typesFieldMaps,
-          typesFieldsMetadataMap, countMethod.getMethodName(), finderParametersMap);
     }
 
     // Add typesFieldMaps for each projection finder and check for id fields
@@ -368,6 +324,10 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
 
       // Build Map with FieldMetadata of each projection
       ClassOrInterfaceTypeDetails typeDetails = getTypeLocationService().getTypeDetails(type);
+      if (typeDetails == null) {
+        LOGGER.warning("Detail not found for type: " + type);
+        continue;
+      }
       List<FieldMetadata> typeFieldList =
           getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), typeDetails)
               .getFields();
@@ -426,11 +386,25 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     }
 
     return new RepositoryJpaCustomImplMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, entityMetadata, validIdFields,
-        validFields, repositoryCustomMetadata.getCurrentFindAllGlobalSearchMethod(),
+        governorPhysicalTypeMetadata, annotationValues, entity, entityMetadata,
+        entityMetadata.getCurrentIndentifierField(), validFields,
+        repositoryCustomMetadata.getCurrentFindAllGlobalSearchMethod(),
         repositoryCustomMetadata.getDefaultReturnType(), referencedFieldsMethods,
         referencedFieldsIdentifierNames, typesFieldMaps, customFinderMethods, customCountMethods,
-        typesFieldsMetadataMap, typesAreProjections, finderParametersMap);
+        typesFieldsMetadataMap, typesAreProjections);
+  }
+
+  private JavaType getDomainTypeOfFinderMethod(MethodMetadata method) {
+    JavaType returnType = method.getReturnType();
+    if (returnType.getFullyQualifiedTypeName().equals(
+        SpringJavaType.PAGE.getFullyQualifiedTypeName())) {
+      if (returnType.getParameters() != null && returnType.getParameters().size() == 1) {
+        return returnType.getParameters().get(0);
+      }
+    } else if (returnType.getEnclosingType() != null) {
+      return returnType.getBaseType();
+    }
+    return null;
   }
 
   private void loadValidFields(MemberDetails entityMemberDetails, JpaEntityMetadata entityMetadata,
@@ -539,12 +513,17 @@ public class RepositoryJpaCustomImplMetadataProviderImpl extends
     return RepositoryJpaCustomImplMetadata.getMetadataIdentiferType();
   }
 
-  public DtoOperationsImpl getDtoOperations() {
+  private DtoOperationsImpl getDtoOperations() {
     return (DtoOperationsImpl) getServiceManager().getServiceInstance(this, DtoOperations.class);
   }
 
-  public FinderOperationsImpl getFinderOperations() {
+  private FinderOperationsImpl getFinderOperations() {
     return (FinderOperationsImpl) getServiceManager().getServiceInstance(this,
         FinderOperations.class);
   }
+
+  private RepositoryJpaLocator getRepositoryJpaLocator() {
+    return getServiceManager().getServiceInstance(this, RepositoryJpaLocator.class);
+  }
+
 }

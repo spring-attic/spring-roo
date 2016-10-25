@@ -7,9 +7,10 @@ import java.lang.annotation.Target;
 
 /**
  * Represents a single finder in {@link RooFinders} with its name and return type.
- * 
+ *
  * @author Sergio Clares
- * @since 2.0
+ * @author Jose Manuel Vivó
+ * @since 2.0.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
@@ -17,19 +18,19 @@ public @interface RooFinder {
 
   /**
    * The name of the finder with Spring Data nomenclature
-   * 
+   *
    * @return
    */
-  String finder();
+  String value();
 
   /**
    * The class which the finder will return as result.
    */
-  Class<?> defaultReturnType();
+  Class<?> returnType() default Class.class;
 
   /**
    * The class which the finder will receive as argument.
    */
-  Class<?> formBean();
+  Class<?> formBean() default Class.class;
 
 }

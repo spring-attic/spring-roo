@@ -15,20 +15,20 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * This class is based on Predicate inner class located inside PartTree.java class from Spring Data commons project.
- * 
+ *
  * It has some little changes to be able to work properly on Spring Roo project
  * and make easy Spring Data query parser.
- * 
+ *
  * Get more information about original class on:
- * 
+ *
  * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/PartTree.java
- * 
+ *
  * Represents the predicate part of a query.
- * Predicate is used to define expressions or conditions on entity properties and concatenate them with And/Or. 
- * It is composed by {@link OrPart}s consisting of simple {@link Part} instances in turn. 
+ * Predicate is used to define expressions or conditions on entity properties and concatenate them with And/Or.
+ * It is composed by {@link OrPart}s consisting of simple {@link Part} instances in turn.
  * Optionally, a static ordering can be applied by appending an {@literal OrderBy} clause that references properties and by providing a sorting direction.
- * These conditions are properties combined with operators.  
- * 
+ * These conditions are properties combined with operators.
+ *
  * @author Paula Navarro
  * @author Juan Carlos García
  * @since 2.0
@@ -53,7 +53,7 @@ public class Predicate {
 
   /**
    * Builds a predicate from a source by creating search expressions and the order clause.
-   * 
+   *
    * @param partTree PartTree instance where current Predicate will be defined
    * @param source
    * @param fields
@@ -92,8 +92,8 @@ public class Predicate {
   /**
    * Returns the different queries that can be defined from the current order clause.
    * The options are concatenated to the current query.
-   * 
-   * @param query that represents the subject and conditions 
+   *
+   * @param query that represents the subject and conditions
    * @return
    */
   public List<String> getOrderOptions(String query) {
@@ -104,8 +104,8 @@ public class Predicate {
   /**
    * Returns the different queries that can be build based on the current predicate expressions.
    * The options are joined to the current query expression.
-   * 
-   * @param query that represents the subject information 
+   *
+   * @param query that represents the subject information
    * @return
    */
   public List<String> getOptions(String subject) {
@@ -146,7 +146,7 @@ public class Predicate {
       // Once a property is defined, OrderBy option can be added
       options.add(subject.concat(ORDER_BY));
 
-      // AlwaysIgnoreCase option ends search criteria definition. 
+      // AlwaysIgnoreCase option ends search criteria definition.
       if (!alwaysIgnoreCase) {
 
         options.add(subject.concat("AllIgnoreCase"));
@@ -176,7 +176,7 @@ public class Predicate {
 
         // IgnoreCase option is available only for string properties
         if (lastAnd.shouldIgnoreCase() != IgnoreCaseType.ALWAYS
-            && lastAnd.getProperty().getKey().getFieldType().equals(JavaType.STRING)) {
+            && lastAnd.getProperty().getKey().peek().getFieldType().equals(JavaType.STRING)) {
           options.add(subject.concat("IgnoreCase"));
           options.add(subject.concat("IgnoringCase"));
         }
@@ -184,7 +184,7 @@ public class Predicate {
         // If the property condition is a reference to other entity, the related entity fields are shown
         if (!lastAnd.hasOperator() && lastAnd.shouldIgnoreCase() != IgnoreCaseType.ALWAYS) {
           List<FieldMetadata> fields =
-              currentPartTreeInstance.getValidProperties(lastAnd.getProperty().getLeft()
+              currentPartTreeInstance.getValidProperties(lastAnd.getProperty().getLeft().peek()
                   .getFieldType());
 
           if (fields != null) {
@@ -200,8 +200,8 @@ public class Predicate {
 
   /**
    * Splits source by AllIgnoreCase option and returns information before this option.
-   * 
-   * @param source 
+   *
+   * @param source
    * @return source previous to AllIgnoreCase option.
    */
   private String detectAndSetAllIgnoreCase(String source) {
@@ -222,7 +222,7 @@ public class Predicate {
   /**
    * Splits source by Or{@literal Or} expressions and builds {@link OrPart}s which are simple conditions or expressions joined by And.
    * E.g. from the source "LastNameAndFirstNameOrAge" it will build the "LastNameAndFirstName" and "Age" OrderParts.
-   * 
+   *
    * @param source the source to split up into {@literal Or} parts in turn.
    */
   private void buildTree(String source) {
@@ -284,7 +284,7 @@ public class Predicate {
   /**
    * Checks if source is a predicate well-defined,  which means that its structure follows the SpringData rules. However, it does not validates if the properties exist in the entity domain
    * @param source predicate
-   * @return true if source matches the SpringData predicate definition. Otherwise returns false. 
+   * @return true if source matches the SpringData predicate definition. Otherwise returns false.
    */
   public static boolean IsValid(String source) {
     if (PartTree.matches(source, COMPLETE_QUERY_TEMPLATE)) {
@@ -311,7 +311,7 @@ public class Predicate {
           continue;
         }
 
-        Integer count = parametersCount.get(part.getProperty().getLeft());
+        Integer count = parametersCount.get(part.getProperty().getLeft().peek());
 
         for (FinderParameter parameter : part.getParameters()) {
 
@@ -331,7 +331,7 @@ public class Predicate {
           }
 
           // Update number of times a property has been used as parameter name
-          parametersCount.put(part.getProperty().getLeft(), count);
+          parametersCount.put(part.getProperty().getLeft().peek(), count);
           parameters.add(parameter);
         }
       }

@@ -13,18 +13,18 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.roo.classpath.details.FieldMetadata;
 
 /**
- * This class is based on OrderBySource.java class from Spring Data commons project. 
- * 
+ * This class is based on OrderBySource.java class from Spring Data commons project.
+ *
  * It has some little changes to be able to work properly on Spring Roo project
  * and make easy Spring Data query parser.
- * 
+ *
  * Get more information about original class on:
- * 
+ *
  * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/OrderBySource.java
- * 
- * Represents an order clause, which is set after {@literal OrderBy} token. 
- * It expects the last part of the query to be given and supports order by several properties ending with its sorting {@link Direction}. 
- * 
+ *
+ * Represents an order clause, which is set after {@literal OrderBy} token.
+ * It expects the last part of the query to be given and supports order by several properties ending with its sorting {@link Direction}.
+ *
  * @author Paula Navarro
  * @author Juan Carlos García
  * @since 2.0
@@ -46,7 +46,7 @@ public class OrderBySource {
   /**
    * Creates a new {@link OrderBySource} for the given clause, checking the property referenced exists on the given
    * entity properties.
-   * 
+   *
    * @param partTree PartTree instance where current OrderBySource will be defined
    * @param clause must not be {@literal null}.
    * @param fields entity properties must not be {@literal null}.
@@ -105,7 +105,7 @@ public class OrderBySource {
   /**
    * Returns the different order clauses that can be build based on the current order clause defined.
    * Query is added as options prefix.
-   * 
+   *
    * @param query prefix to be added to the options
    * @return
    */
@@ -135,7 +135,7 @@ public class OrderBySource {
 
       // If property is a reference to other entity, related entity properties can be added
       List<FieldMetadata> fields =
-          currentPartTreeInstance.getValidProperties(lastOrder.getProperty().getLeft()
+          currentPartTreeInstance.getValidProperties(lastOrder.getProperty().getLeft().peek()
               .getFieldType());
 
       if (fields != null) {

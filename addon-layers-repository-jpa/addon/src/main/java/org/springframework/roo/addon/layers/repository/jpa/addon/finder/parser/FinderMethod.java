@@ -1,13 +1,15 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser;
 
-import java.util.List;
-
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Class that contains finder method structure.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -21,31 +23,26 @@ public class FinderMethod {
       List<FinderParameter> parameters) {
     this.returnType = returnType;
     this.methodName = methodName;
-    this.parameters = parameters;
+    this.parameters = Collections.unmodifiableList(new ArrayList<FinderParameter>(parameters));
+  }
+
+  public FinderMethod(PartTree finder) {
+    this.returnType = finder.getReturnType();
+    this.methodName = new JavaSymbolName(finder.getOriginalQuery());
+    this.parameters =
+        Collections.unmodifiableList(new ArrayList<FinderParameter>(finder.getParameters()));
   }
 
   public JavaType getReturnType() {
     return returnType;
   }
 
-  public void setReturnType(JavaType returnType) {
-    this.returnType = returnType;
-  }
-
   public JavaSymbolName getMethodName() {
     return methodName;
   }
 
-  public void setMethodName(JavaSymbolName methodName) {
-    this.methodName = methodName;
-  }
-
   public List<FinderParameter> getParameters() {
     return parameters;
-  }
-
-  public void setParameters(List<FinderParameter> parameters) {
-    this.parameters = parameters;
   }
 
 

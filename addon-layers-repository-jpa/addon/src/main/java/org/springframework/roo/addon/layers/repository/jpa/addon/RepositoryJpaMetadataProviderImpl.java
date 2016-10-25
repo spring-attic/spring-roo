@@ -18,6 +18,7 @@ import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.F
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
+import org.springframework.roo.addon.layers.repository.jpa.annotations.RooFinder;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -196,21 +197,15 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
     ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
     MemberDetails entityMemberDetails =
         getMemberDetailsScanner().getMemberDetails(this.getClass().getName(), entityDetails);
-    final String entityMetadataId =
-        JpaEntityMetadata.createIdentifier(entityDetails.getType(),
-            PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId()));
-    final JpaEntityMetadata entityMetadata =
-        (JpaEntityMetadata) getMetadataService().get(entityMetadataId);
+    final String entityMetadataId = JpaEntityMetadata.createIdentifier(entityDetails);
+    final JpaEntityMetadata entityMetadata = getMetadataService().get(entityMetadataId);
 
     if (entityMetadata == null) {
       return null;
     }
 
     // Getting java bean metadata
-    final LogicalPath entityLogicalPath =
-        PhysicalTypeIdentifier.getPath(entityDetails.getDeclaredByMetadataId());
-    final String javaBeanMetadataKey =
-        JavaBeanMetadata.createIdentifier(entityDetails.getType(), entityLogicalPath);
+    final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
 
     // Create dependency between repository and java bean annotation
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
@@ -263,6 +258,34 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
         ROO_REPOSITORY_JPA_CUSTOM.getSimpleTypeName(), entity.getSimpleTypeName(),
         StringUtils.join(repositoryCustomList, ","));
 
+    JavaType defaultReturnType;
+    final JavaType annotationDefaultReturnType = annotationValues.getDefaultReturnType();
+    // Get and check defaultReturnType
+    if (annotationDefaultReturnType == null || annotationDefaultReturnType.equals(JavaType.CLASS)
+        || annotationDefaultReturnType.equals(entity)) {
+      defaultReturnType = entity;
+    } else {
+      // Validate that defaultReturnValue is projection of current entity
+      ClassOrInterfaceTypeDetails returnTypeCid =
+          getTypeLocationService().getTypeDetails(annotationDefaultReturnType);
+      AnnotationMetadata projectionAnnotation =
+          returnTypeCid.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION);
+      Validate.notNull(projectionAnnotation,
+          "ERROR: %s defined on %s.@%s.defaultReturnType must be annotated with @%s annotation",
+          annotationDefaultReturnType, governorPhysicalTypeMetadata.getType(),
+          RooJavaType.ROO_REPOSITORY_JPA, RooJavaType.ROO_ENTITY_PROJECTION);
+      Validate
+          .isTrue(
+              entity.equals(projectionAnnotation.getAttribute("entity").getValue()),
+              "ERROR: %s defined on %s.@%s.defaultReturnType must be annotated with @%s annotation and match the 'entity' attribute value",
+              annotationDefaultReturnType, governorPhysicalTypeMetadata.getType(),
+              RooJavaType.ROO_REPOSITORY_JPA, RooJavaType.ROO_ENTITY_PROJECTION);
+
+      defaultReturnType = annotationDefaultReturnType;
+    }
+
+
+
     // Get field which entity is field part
     List<Pair<FieldMetadata, RelationInfo>> relationsAsChild =
         getJpaOperations().getFieldChildPartOfRelation(entityDetails);
@@ -276,12 +299,16 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
     List<FinderMethod> findersToAdd = new ArrayList<FinderMethod>();
 
     // Create list of finder to add in RespositoryCustom
-    List<FinderMethod> findersToAddInCustom = new ArrayList<FinderMethod>();
+    List<Pair<FinderMethod, PartTree>> findersToAddInCustom =
+        new ArrayList<Pair<FinderMethod, PartTree>>();
 
     Map<JavaType, ClassOrInterfaceTypeDetails> detailsCache =
         new HashMap<JavaType, ClassOrInterfaceTypeDetails>();
 
     List<String> declaredFinderNames = new ArrayList<String>();
+
+
+    RooFinder[] findersAnnValue = annotationValues.getFinders();
 
     // Get finders attributes
     AnnotationAttributeValue<?> currentFinders = repositoryAnnotation.getAttribute("finders");
@@ -293,74 +320,105 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
         NestedAnnotationAttributeValue finderAnnotation =
             (NestedAnnotationAttributeValue) valuesIt.next();
         if (finderAnnotation.getValue() != null
-            && finderAnnotation.getValue().getAttribute("finder") != null) {
+            && finderAnnotation.getValue().getAttribute("value") != null) {
 
           // Get finder name
           String finderName = null;
-          if (finderAnnotation.getValue().getAttribute("finder").getValue() instanceof String) {
-            finderName = (String) finderAnnotation.getValue().getAttribute("finder").getValue();
+          if (finderAnnotation.getValue().getAttribute("value").getValue() instanceof String) {
+            finderName = (String) finderAnnotation.getValue().getAttribute("value").getValue();
           }
           Validate.notNull(finderName, "'finder' attribute in @RooFinder must be a String");
           declaredFinderNames.add(finderName);
 
           // Get finder return type
-          JavaType returnType =
-              (JavaType) finderAnnotation.getValue().getAttribute("defaultReturnType").getValue();
-          Validate.notNull(returnType, "@RooFinder must have a 'defaultReturnType' parameter.");
+          JavaType returnType = getNestedAttributeValue(finderAnnotation, "returnType");
+          JavaType finderReturnType;
+          if (returnType == null || JavaType.CLASS.equals(returnType)) {
+            finderReturnType = defaultReturnType;
+            returnType = null;
+          } else {
+            finderReturnType = returnType;
+          }
 
           // Get finder return type
-          JavaType formBean =
-              (JavaType) finderAnnotation.getValue().getAttribute("formBean").getValue();
-          Validate.notNull(formBean, "@RooFinder must have a 'formBean' parameter.");
+          JavaType formBean = getNestedAttributeValue(finderAnnotation, "formBean");
+          boolean isDeclaredFormBean = false;
+          if (JavaType.CLASS.equals(formBean)) {
+            formBean = null;
+          }
 
-          // If defaultReturnType is a Projection or formBean is a DTO, finder creation
-          // should be avoided here and let RepositoryJpaCustomMetadata create it on
-          // RepositoryCustom classes.
-          ClassOrInterfaceTypeDetails returnTypeDetails = getDetailsFor(returnType, detailsCache);
-          ClassOrInterfaceTypeDetails fromBeanDetails =
-              getTypeLocationService().getTypeDetails(formBean);
+          // Create FinderMethods
+          PartTree finder = new PartTree(finderName, entityMemberDetails, this, finderReturnType);
 
-          if ((returnTypeDetails != null && returnTypeDetails
-              .getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) == null)
-              && (fromBeanDetails != null && fromBeanDetails.getAnnotation(RooJavaType.ROO_DTO) == null)) {
-            // Create FinderMethods
-            PartTree finder = new PartTree(finderName, entityMemberDetails, this, returnType);
+          Validate
+              .notNull(
+                  finder,
+                  String
+                      .format(
+                          "ERROR: '%s' is not a valid finder. Use autocomplete feature (TAB or CTRL + Space) to include finder that follows Spring Data nomenclature.",
+                          finderName));
 
-            Validate
-                .notNull(
-                    finder,
-                    String
-                        .format(
-                            "ERROR: '%s' is not a valid finder. Use autocomplete feature (TAB or CTRL + Space) to include finder that follows Spring Data nomenclature.",
-                            finderName));
+          FinderMethod finderMethod = new FinderMethod(finder);
 
-            FinderMethod finderMethod =
-                new FinderMethod(finder.getReturnType(), new JavaSymbolName(finderName),
-                    finder.getParameters());
+          // Add dependencies between modules
+          List<JavaType> types = new ArrayList<JavaType>();
+          types.add(finder.getReturnType());
+          types.addAll(finder.getReturnType().getParameters());
 
-            // Add dependencies between modules
-            List<JavaType> types = new ArrayList<JavaType>();
-            types.add(finder.getReturnType());
-            types.addAll(finder.getReturnType().getParameters());
+          for (FinderParameter parameter : finder.getParameters()) {
+            types.add(parameter.getType());
+            types.addAll(parameter.getType().getParameters());
+          }
 
-            for (FinderParameter parameter : finder.getParameters()) {
-              types.add(parameter.getType());
-              types.addAll(parameter.getType().getParameters());
-            }
+          for (JavaType parameter : types) {
+            getTypeLocationService().addModuleDependency(
+                governorPhysicalTypeMetadata.getType().getModule(), parameter);
+          }
 
-            for (JavaType parameter : types) {
-              getTypeLocationService().addModuleDependency(
-                  governorPhysicalTypeMetadata.getType().getModule(), parameter);
-            }
+          if (formBean == null && returnType == null) {
 
             // Add to finder methods list
             findersToAdd.add(finderMethod);
+
           } else {
-            FinderMethod finderMethod =
+            // If defaultReturnType is a Projection or formBean is a DTO, finder creation
+            // should be avoided here and let RepositoryJpaCustomMetadata create it on
+            // RepositoryCustom classes.
+            if (returnType != null && !returnType.equals(entity)) {
+              ClassOrInterfaceTypeDetails returnTypeDetails =
+                  getDetailsFor(returnType, detailsCache);
+              Validate
+                  .isTrue(
+                      returnTypeDetails != null
+                          && returnTypeDetails.getAnnotation(RooJavaType.ROO_ENTITY_PROJECTION) != null,
+                      "ERROR: finder '%s' declared 'returnType' (%s) is not annotated with @%s annotation",
+                      finderName, returnType.getSimpleTypeName(),
+                      RooJavaType.ROO_ENTITY_PROJECTION.getSimpleTypeName());
+
+            }
+
+            Validate.notNull(formBean,
+                "ERROR: finder '%s' requires 'formBean' value if 'defaultReturnType' is defined",
+                finderName);
+
+            ClassOrInterfaceTypeDetails formBeanDetails =
+                getTypeLocationService().getTypeDetails(formBean);
+
+            Validate.isTrue(
+                formBeanDetails != null
+                    && formBeanDetails.getAnnotation(RooJavaType.ROO_DTO) != null,
+                "ERROR: finder '%s' declared 'formBean' (%s) is not annotated with @%s annotation",
+                finderName, returnType.getSimpleTypeName(),
+                RooJavaType.ROO_ENTITY_PROJECTION.getSimpleTypeName());
+
+            checkDtoFieldsForFinder(formBeanDetails, finder, governorPhysicalTypeMetadata.getType());
+
+            finderMethod =
                 new FinderMethod(returnType, new JavaSymbolName(finderName),
                     Arrays.asList(new FinderParameter(formBean, new JavaSymbolName(StringUtils
                         .uncapitalize(formBean.getSimpleTypeName())))));
-            findersToAddInCustom.add(finderMethod);
+            findersToAddInCustom.add(Pair.of(finderMethod, finder));
+
           }
         }
       }
@@ -368,8 +426,56 @@ public class RepositoryJpaMetadataProviderImpl extends AbstractMemberDiscovering
 
     return new RepositoryJpaMetadata(metadataIdentificationString, aspectName,
         governorPhysicalTypeMetadata, annotationValues, entityMetadata, readOnlyRepository,
-        repositoryCustomList.get(0), relationsAsChild, findersToAdd, findersToAddInCustom,
-        declaredFinderNames);
+        repositoryCustomList.get(0), defaultReturnType, relationsAsChild, findersToAdd,
+        findersToAddInCustom, declaredFinderNames);
+  }
+
+  /**
+   * Validates that all dto fields matches with parameters on finder of a repository
+   *
+   * @param formBeanDetails
+   * @param finder
+   * @param repository
+   */
+  private void checkDtoFieldsForFinder(ClassOrInterfaceTypeDetails formBeanDetails,
+      PartTree finder, JavaType repository) {
+    final JavaType dtoType = formBeanDetails.getName();
+    final String finderName = finder.getOriginalQuery();
+    FieldMetadata paramField, dtoField;
+    JavaType paramType, dtoFieldType;
+    for (FinderParameter param : finder.getParameters()) {
+      paramField = param.getPath().peek();
+      dtoField = formBeanDetails.getField(paramField.getFieldName());
+      Validate.notNull(dtoField, "Field '%s' not found on DTO %s for finder '%s' of %s",
+          paramField.getFieldName(), dtoType, finderName, repository);
+      paramType = paramField.getFieldType().getBaseType();
+      dtoFieldType = dtoField.getFieldType().getBaseType();
+      Validate.isTrue(paramType.equals(dtoFieldType),
+          "Type missmatch for field '%s' on DTO %s for finder '%s' of %s: excepted %s and got %s",
+          dtoField.getFieldName(), dtoType, finderName, repository, paramType, dtoFieldType);
+    }
+
+  }
+
+  /**
+   * Gets attributo of a nested annotation attribute value
+   *
+   * @param newstedAnnotationAttr
+   * @param attributeName
+   * @return
+   */
+  private <T> T getNestedAttributeValue(NestedAnnotationAttributeValue newstedAnnotationAttr,
+      String attributeName) {
+
+    AnnotationMetadata annotationValue = newstedAnnotationAttr.getValue();
+    if (annotationValue == null) {
+      return null;
+    }
+    AnnotationAttributeValue<?> attribute = annotationValue.getAttribute(attributeName);
+    if (attribute == null) {
+      return null;
+    }
+    return (T) attribute.getValue();
   }
 
   private ClassOrInterfaceTypeDetails getDetailsFor(JavaType type,

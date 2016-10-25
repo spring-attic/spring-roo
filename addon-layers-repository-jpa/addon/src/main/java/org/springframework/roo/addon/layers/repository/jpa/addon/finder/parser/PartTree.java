@@ -12,25 +12,26 @@ import org.springframework.roo.model.JavaType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * This class is based on PartTree.java class from Spring Data commons project.
- * 
+ *
  * It has some little changes to be able to work properly on Spring Roo project
  * and make easy Spring Data query parser.
- * 
+ *
  * Get more information about original class on:
- * 
+ *
  * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/PartTree.java
- * 
+ *
  * Class to parse a {@link String} into a {@link Subject} and a {@link Predicate}.
  * Takes a entity details to extract the
  * properties of the domain class. The {@link PartTree} can then be used to
  * build queries based on its API instead of parsing the method name for each
  * query execution.
- * 
+ *
  * @author Paula Navarro
  * @author Juan Carlos García
  * @since 2.0
@@ -60,7 +61,7 @@ public class PartTree {
   private final String originalQuery;
 
   /**
-   * Interface that provides operations to obtain useful information during finder autocomplete 
+   * Interface that provides operations to obtain useful information during finder autocomplete
    */
   private final FinderAutocomplete finderAutocomplete;
 
@@ -81,13 +82,13 @@ public class PartTree {
 
   /**
    * Creates a new {@link PartTree} by parsing the given {@link String}.
-   * 
+   *
    * @param source
    *            the {@link String} to parse
    * @param memberDetails
    *            the member details of the entity class to extract the fields
    *            to expose them as options.
-   * @param finderAutocomplete interface that provides operations to obtain useful information during autocomplete 
+   * @param finderAutocomplete interface that provides operations to obtain useful information during autocomplete
    */
   public PartTree(String source, MemberDetails memberDetails,
       FinderAutocomplete finderAutocomplete, JavaType providedReturnType) {
@@ -125,15 +126,15 @@ public class PartTree {
   }
 
   /**
-   * Extracts the java type of the results to be returned by the PartTree query 
-   * 
+   * Extracts the java type of the results to be returned by the PartTree query
+   *
    * @param entityDetails the entity details to extract the object to return by default
    * @return
    */
   private JavaType extractReturnType(MemberDetails entityDetails) {
 
     Integer maxResults = subject.getMaxResults();
-    Pair<FieldMetadata, String> property = subject.getProperty();
+    Pair<Stack<FieldMetadata>, String> property = subject.getProperty();
     JavaType type = null;
 
     // Count subject returns Long
@@ -143,7 +144,7 @@ public class PartTree {
 
     if (property != null && property.getLeft() != null) {
       // Returns the property type if it is specified
-      type = property.getLeft().getFieldType();
+      type = property.getLeft().peek().getFieldType();
 
     } else if (providedReturnType != null) {
       type = providedReturnType;
@@ -163,7 +164,7 @@ public class PartTree {
     }
 
 
-    // Check number of results to return. 
+    // Check number of results to return.
     if (maxResults != null && maxResults == 1) {
       // Unique result
       return type;
@@ -183,7 +184,7 @@ public class PartTree {
 
   /**
    * Creates a new {@link PartTree} by parsing the given {@link String}.
-   * 
+   *
    * @param source
    *            the {@link String} to parse
    * @param memberDetails
@@ -198,9 +199,9 @@ public class PartTree {
 
   /**
    * Filters the entity properties that can be used to build Spring Data
-   * expressions. Persistence version property is excluded as well as multivalued properties 
+   * expressions. Persistence version property is excluded as well as multivalued properties
    * since Spring Data does not support operations with them
-   * 
+   *
    * @param memberDetails
    * @return entity properties which type is supported  by SpringData
    */
@@ -228,7 +229,7 @@ public class PartTree {
    * Filters the entity properties of a javaType that can be used to build Spring Data
    * expressions. Persistence version field is excluded, and multivalued fields
    * are removed since Spring Data does not supports operations with them.
-   * 
+   *
    * @param javaType
    * @return entity properties which type is supported  by SpringData
    */
@@ -247,20 +248,38 @@ public class PartTree {
     return null;
   }
 
+  /**
+   * Extract entity property name from raw property and returns the property metadata and the property name.
+   * If raw property references a property of a related entity, returns a Pair with the related entity property metadata and
+   * a string composed by the reference property name and the related entity property name.
+   * E.g. if raw property contains "petName" and current entity has a relation with Pet, it will return Pair(NameMetadata, "petName"))
+   *
+   * @param rawProperty the string that contains property name
+   * @param fields entity properties
+   * @return Pair that contains the path of property metadata and the property name.
+   */
+  public Pair<Stack<FieldMetadata>, String> extractValidProperty(String rawProperty,
+      List<FieldMetadata> fields) {
+    return extractValidProperty(rawProperty, fields, null);
+  }
 
   /**
    * Extract entity property name from raw property and returns the property metadata and the property name.
-   * If raw property references a property of a related entity, returns a Pair with the related entity property metadata and 
-   * a string composed by the reference property name and the related entity property name. 
-   * E.g. if raw property contains "petName" and current entity has a relation with Pet, it will return Pair(NameMetadata, "petName"))
-   * 
+   * If raw property references a property of a related entity, returns a Pair with the related entity property metadata and
+   * a string composed by the reference property name and the related entity property name.
+   * E.g. if raw property contains "petName" and current entity has a relation with Pet, it will return Pair({pet, name}, "petName"))
+   *
    * @param rawProperty the string that contains property name
    * @param fields entity properties
-   * @return Pair that contains the property metadata and the property name.
+   * @param path of previous entities
+   * @return Pair that contains the path of property metadata and the property name.
    */
-  public Pair<FieldMetadata, String> extractValidProperty(String rawProperty,
-      List<FieldMetadata> fields) {
+  public Pair<Stack<FieldMetadata>, String> extractValidProperty(String rawProperty,
+      List<FieldMetadata> fields, Stack<FieldMetadata> path) {
 
+    if (path == null) {
+      path = new Stack<FieldMetadata>();
+    }
     if (StringUtils.isBlank(rawProperty) || fields == null) {
       return null;
     }
@@ -286,27 +305,30 @@ public class PartTree {
       return null;
     }
 
-    // If extracted property is a reference to other entity, the fields of this related entity are inspected to check if extractProperty contains information about them 
-    Pair<FieldMetadata, String> related = extractRelatedEntityValidProperty(rawProperty, tempField);
+    path.push(tempField);
+
+    // If extracted property is a reference to other entity, the fields of this related entity are inspected to check if extractProperty contains information about them
+    Pair<Stack<FieldMetadata>, String> related =
+        extractRelatedEntityValidProperty(rawProperty, tempField, path);
     if (related != null) {
       return Pair.of(
-          related.getLeft() == null ? tempField : related.getLeft(),
+          related.getLeft() == null ? path : related.getLeft(),
           StringUtils.capitalize(tempField.getFieldName().toString()).concat(
               StringUtils.capitalize(related.getRight())));
     }
 
-    return Pair.of(tempField, StringUtils.capitalize(tempField.getFieldName().toString()));
+    return Pair.of(path, StringUtils.capitalize(tempField.getFieldName().toString()));
   }
 
   /**
    * Gets the property of a related entity, using raw property information.
-   * 
+   *
    * @param rawProperty string that contains the definition of a property, which can be a property accessed by a relation.
    * @param referenceProperty property that represents a relation with other entity.
    * @return Pair that contains a property metadata and its name.
    */
-  private Pair<FieldMetadata, String> extractRelatedEntityValidProperty(String extractProperty,
-      FieldMetadata referenceProperty) {
+  private Pair<Stack<FieldMetadata>, String> extractRelatedEntityValidProperty(
+      String extractProperty, FieldMetadata referenceProperty, Stack<FieldMetadata> path) {
 
     if (StringUtils.isBlank(extractProperty) || referenceProperty == null) {
       return null;
@@ -319,7 +341,8 @@ public class PartTree {
       return null;
     }
 
-    return extractValidProperty(property, getValidProperties(referenceProperty.getFieldType()));
+    return extractValidProperty(property, getValidProperties(referenceProperty.getFieldType()),
+        path);
 
   }
 
@@ -328,7 +351,7 @@ public class PartTree {
    * Returns the different queries that can be build based on the current defined query.
    * First it lists the subject expressions that can be build. Once it is completed, it returns the queries available to
    * define the predicate.
-   * 
+   *
    * @return
    */
   public List<String> getOptions() {
@@ -343,7 +366,7 @@ public class PartTree {
 
   /**
    * Returns whether we indicate distinct lookup of entities.
-   * 
+   *
    * @return {@literal true} if distinct
    */
   public boolean isDistinct() {
@@ -352,7 +375,7 @@ public class PartTree {
 
   /**
    * Returns whether a count projection shall be applied.
-   * 
+   *
    * @return
    */
   public Boolean isCountProjection() {
@@ -370,7 +393,7 @@ public class PartTree {
   /**
    * Splits the given text at the given keyword. Expects camel-case style to
    * only match concrete keywords and not derivatives of it.
-   * 
+   *
    * @param text
    *            the text to split
    * @param keyword
@@ -394,7 +417,7 @@ public class PartTree {
   }
 
   /**
-   * Returns true if query is well-defined, which means that subject and predicate have a correct structure. 
+   * Returns true if query is well-defined, which means that subject and predicate have a correct structure.
    * However, it does not validate if entity properties exist.
    * @return
    */
@@ -414,7 +437,7 @@ public class PartTree {
   /**
    * Returns the number of maximal results to return or {@literal null} if
    * not restricted.
-   * 
+   *
    * @return
    */
   public Integer getMaxResults() {
@@ -424,7 +447,7 @@ public class PartTree {
   /**
    * Returns true if the query matches with the given {@link Pattern}. Otherwise, returns false.
    * If the query is null, returns false.
-   * 
+   *
    * @param query
    * @param pattern
    * @return
@@ -434,8 +457,8 @@ public class PartTree {
   }
 
   /**
-   * Method that obtains the return type of current finder 
-   * 
+   * Method that obtains the return type of current finder
+   *
    * @return JavaType with return type
    */
   public JavaType getReturnType() {
@@ -444,11 +467,15 @@ public class PartTree {
 
   /**
    * Method that obtains the necessary parameters of current finder
-   * 
+   *
    * @return List that contains all necessary parameters
    */
   public List<FinderParameter> getParameters() {
     return finderParameters;
+  }
+
+  public String getOriginalQuery() {
+    return originalQuery;
   }
 
 
