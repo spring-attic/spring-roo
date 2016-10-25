@@ -473,7 +473,7 @@ field number --fieldName reorderLevel --type java.lang.Integer
 
 entity projection --class ~.ShipperProjection --entity model:~.Shipper --fields id,companyName,phone
 
-dto --class ~.ShipperFindByPhone
+dto --class ~.ShipperFindByPhoneForm
 field string --fieldName phone
 
 dto --class ~.StoreInfo --immutable
