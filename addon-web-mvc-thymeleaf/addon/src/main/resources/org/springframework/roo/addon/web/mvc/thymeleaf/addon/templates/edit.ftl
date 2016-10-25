@@ -331,9 +331,7 @@
   <script
      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js">
   </script>
-  <script
-     src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
-     data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
+  <script src="../../static/public/js/moment-locale-es.js">
   </script>
   <script src="../../static/public/js/moment-defaults.js">
   </script>
@@ -392,8 +390,8 @@
       (function(jQuery) {
          jQuery(document).ready(function() {
 	   jQuery.extend( jQuery.validator.messages, {
-	     'dateformat' : /*[[${r"#{"}error_invalidDate${r"}"}]]*/ 'Please enter a correct date/time',
-	     'inputmask': /*[[${r"#{"}lerror_invalidMaskValue${r"}"}]]*/ 'Please enter a valid value',
+	     'dateformat' : /*[[${r"#{"}error_invalid_date${r"}"}]]*/ 'Please enter a correct date/time',
+	     'inputmask': /*[[${r"#{"}lerror_invalid_maskValue${r"}"}]]*/ 'Please enter a valid value',
 	   });
 	 });
       })(jQuery);

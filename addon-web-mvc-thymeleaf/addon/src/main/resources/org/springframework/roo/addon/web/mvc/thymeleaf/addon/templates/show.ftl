@@ -386,9 +386,7 @@
   <script
      src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.js">
   </script>
-  <script
-     src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/locale/es.js"
-     data-th-if="${r"${#"}locale.language${r"}"} != 'en'">
+  <script src="../../static/public/js/moment-locale-es.js">
   </script>
   <script src="../../static/public/js/moment-defaults.js">
   </script>
