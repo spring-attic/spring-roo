@@ -1,84 +1,84 @@
 <!DOCTYPE html>
 <html lang="en" data-layout-decorator="layouts/default-layout">
-<head>
-<meta charset="UTF-8" data-th-remove="all">
-<meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all">
-<meta name="viewport" content="width=device-width, initial-scale=1"
-  data-th-remove="all">
-<meta name="description"
-  content="Spring Roo, a next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes."
-  data-th-remove="all">
-<meta name="author"
-  content="Spring Roo development team"
-  data-th-remove="all">
+  <head>
+    <meta charset="UTF-8" data-th-remove="all"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"
+      data-th-remove="all"/>
+    <meta name="description"
+      content="Spring Roo, a next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes."
+      data-th-remove="all"/>
+    <meta name="author"
+      content="Spring Roo development team"
+      data-th-remove="all"/>
 
-<link rel="shortcut icon" href="../../static/public/img/favicon.ico"
-       data-th-remove="all">
+    <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+      data-th-remove="all"/>
 
-<link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
-       data-th-remove="all">
+    <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+      data-th-remove="all"/>
 
-<title data-th-text="|${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"} - ${projectName}|">Show ${entityName} - ${projectName}</title>
+    <title data-th-text="|${r"#{"}label_show_entity(${r"#{"}${entityLabel}${r"}"})${r"}"} - ${projectName}|">Show ${entityName} - ${projectName}</title>
 
-<!-- Bootstrap -->
-<link rel="stylesheet" type="text/css"
-  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-  data-th-remove="all">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+      data-th-remove="all"></link>
 
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<link rel="stylesheet" type="text/css"
-  href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-  data-th-remove="all">
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link rel="stylesheet" type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
+      data-th-remove="all"></link>
 
-<!-- Font Awesome -->
-<link rel="stylesheet" type="text/css"
-  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-  data-th-remove="all">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
+      data-th-remove="all"/>
 
-<!-- Datatables -->
-<link
-  data-th-href="@{/webjars/datatables/1.10.11/media/css/jquery.dataTables.css}"
-  rel="stylesheet" type="text/css"
-  href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css">
+    <!-- Datatables -->
+    <link
+      data-th-href="@{/webjars/datatables/1.10.11/media/css/jquery.dataTables.css}"
+      rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
 
-<link
-  data-th-href="@{/webjars/datatables.net-bs/1.10.11/css/dataTables.bootstrap.css}"
-  rel="stylesheet" type="text/css"
-  href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css">
+    <link
+      data-th-href="@{/webjars/datatables.net-bs/1.10.11/css/dataTables.bootstrap.css}"
+      rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
 
-<link
-  data-th-href="@{/webjars/datatables.net-responsive-bs/2.0.2/css/responsive.bootstrap.css}"
-  rel="stylesheet" type="text/css"
-  href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css">
+    <link
+      data-th-href="@{/webjars/datatables.net-responsive-bs/2.0.2/css/responsive.bootstrap.css}"
+      rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css"></link>
 
-<link
-  data-th-href="@{/webjars/datatables.net-buttons-bs/1.1.2/css/buttons.bootstrap.css}"
-  rel="stylesheet" type="text/css"
-  href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css">
+    <link
+      data-th-href="@{/webjars/datatables.net-buttons-bs/1.1.2/css/buttons.bootstrap.css}"
+      rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"></link>
 
-<link
-  data-th-href="@{/webjars/datatables.net-select-bs/1.1.2/css/select.bootstrap.css}"
-  rel="stylesheet" type="text/css"
-  href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css">
+    <link
+      data-th-href="@{/webjars/datatables.net-select-bs/1.1.2/css/select.bootstrap.css}"
+      rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
 
-<!-- Bootswatch CSS custom -->
-<link rel="stylesheet" type="text/css"
-  href="../../static/public/css/theme.css"
-  data-th-remove="all">
+    <!-- Bootswatch CSS custom -->
+    <link rel="stylesheet" type="text/css"
+      href="../../static/public/css/theme.css"
+      data-th-remove="all"/>
 
-<!-- Roo CSS -->
-<link rel="stylesheet" type="text/css"
-   href="../../static/public/css/springroo.css"
-   data-th-remove="all">
+    <!-- Roo CSS -->
+    <link rel="stylesheet" type="text/css"
+      href="../../static/public/css/springroo.css"
+      data-th-remove="all"/>
 
-<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-<!--[if lt IE 9]>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+    <![endif]-->
 
-</head>
+  </head>
 
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
@@ -149,15 +149,15 @@
                     aria-haspopup="true" aria-expanded="false">
                     <span class="glyphicon glyphicon-globe" aria-hidden="true">
                     </span>&nbsp;<span class="hidden-sm"
-                    data-th-text="#{language_label}">Language</span><span class="caret"></span>
+                    data-th-text="${r"#{"}language_label${r"}"}">Language</span><span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu" id="languageFlags">
                    <li id="enFlag"><a href="?lang=en"><img class="flag"
                     data-th-src="@{/public/img/en.png}" src="../static/public/img/en.png"
-                    alt="English">&nbsp;<span data-th-text="#{language_label_en}">English</span></a> </li>
+                    alt="English">&nbsp;<span data-th-text="${r"#{"}language_label_en${r"}"}">English</span></a> </li>
                    <li id="esFlag"><a href="?lang=es"><img class="flag"
                     data-th-src="@{/public/img/es.png}" src="../static/public/img/es.png"
-                    alt="Spanish">&nbsp;<span data-th-text="language_label_es">Spanish</span></a> </li>
+                    alt="Spanish">&nbsp;<span data-th-text="${r"#{"}language_label_es${r"}"}">Spanish</span></a> </li>
                   </ul>
                 </li>
               </ul>
