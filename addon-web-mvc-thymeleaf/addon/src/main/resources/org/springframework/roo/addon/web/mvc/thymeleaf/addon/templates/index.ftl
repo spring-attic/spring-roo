@@ -31,7 +31,8 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" type="text/css"
-      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" data-th-remove="all"/>
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
+      data-th-remove="all"/>
 
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
