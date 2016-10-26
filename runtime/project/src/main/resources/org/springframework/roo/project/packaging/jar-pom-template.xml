@@ -44,6 +44,21 @@
       <url>http://repo.spring.io/spring-roo</url>
     </repository>
   </repositories>
+  
+  <dependencyManagement>
+    <dependencies>
+
+      <!-- Spring Roo annotations -->
+      <dependency>
+        <groupId>org.springframework.roo</groupId>
+        <artifactId>org.springframework.roo.annotations</artifactId>
+        <version>${roo.version}</version>
+        <type>pom</type>
+        <scope>provided</scope>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- Spring Boot starters -->
@@ -65,11 +80,9 @@
 
     <!-- Spring Roo annotations -->
     <dependency>
-      <groupId>org.springframework.roo</groupId>
-      <artifactId>org.springframework.roo.annotations</artifactId>
-      <version>${roo.version}</version>
-      <type>pom</type>
-      <scope>provided</scope>
+        <groupId>org.springframework.roo</groupId>
+        <artifactId>org.springframework.roo.annotations</artifactId>
+        <type>pom</type>
     </dependency>
 
     <!-- AspectJ dependencies -->
@@ -95,71 +108,89 @@
   </dependencies>
 
   <build>
+  
+    <pluginManagement>
+      <plugins>
+	      <plugin>
+	        <groupId>org.springframework.boot</groupId>
+	        <artifactId>spring-boot-maven-plugin</artifactId>
+	        <configuration>
+	          <mainClass>${start-class}</mainClass>
+	          <classifier>exec</classifier>
+	          <excludeDevtools>true</excludeDevtools>
+	        </configuration>
+	      </plugin>
+	      <!-- Compiler plugin -->
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <configuration>
+	          <source>${java.version}</source>
+	          <target>${java.version}</target>
+	          <encoding>${project.build.sourceEncoding}</encoding>
+	          <useIncrementalCompilation>false</useIncrementalCompilation>
+	        </configuration>
+	      </plugin>
+	      <!-- AspectJ plugins -->
+	      <plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>aspectj-maven-plugin</artifactId>
+	        <version>${aspectj.plugin.version}</version>
+	        <configuration>
+	          <source>${java.version}</source>
+	          <target>${java.version}</target>
+	          <Xlint>ignore</Xlint>
+	          <complianceLevel>${java.version}</complianceLevel>
+	          <encoding>UTF-8</encoding>
+	        </configuration>
+	        <executions>
+	          <execution>
+	            <phase>process-sources</phase>
+	            <goals>
+	              <goal>compile</goal>
+	              <goal>test-compile</goal>
+	            </goals>
+	          </execution>
+	        </executions>
+	        <dependencies>
+	          <dependency>
+	            <groupId>org.aspectj</groupId>
+	            <artifactId>aspectjtools</artifactId>
+	            <version>${aspectj.version}</version>
+	          </dependency>
+	        </dependencies>
+	      </plugin>
+	      <!-- Surefire plugin configuration -->
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-surefire-plugin</artifactId>
+	        <configuration>
+	          <excludes>
+	            <exclude>**/*_Roo_*</exclude>
+	          </excludes>
+	        </configuration>
+	      </plugin>
+      
+      </plugins>
+    </pluginManagement>
+  
     <plugins>
-      <!-- Spring Boot plugins -->
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <mainClass>${start-class}</mainClass>
-          <classifier>exec</classifier>
-          <excludeDevtools>true</excludeDevtools>
-        </configuration>
-      </plugin>
-
-      <!-- Compiler plugin -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-          <useIncrementalCompilation>false</useIncrementalCompilation>
-        </configuration>
-      </plugin>
-
-      <!-- AspectJ plugins -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>${aspectj.plugin.version}</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <Xlint>ignore</Xlint>
-          <complianceLevel>${java.version}</complianceLevel>
-          <encoding>UTF-8</encoding>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>compile</goal>
-              <goal>test-compile</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>${aspectj.version}</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
-      <!-- Surefire plugin configuration -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/*_Roo_*</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-
+       <plugin>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-maven-plugin</artifactId>
+       </plugin>
+       <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-compiler-plugin</artifactId>
+       </plugin>
+       <plugin>
+         <groupId>org.codehaus.mojo</groupId>
+         <artifactId>aspectj-maven-plugin</artifactId>
+       </plugin>
+       <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+         <artifactId>maven-surefire-plugin</artifactId>
+       </plugin>
     </plugins>
   </build>
 

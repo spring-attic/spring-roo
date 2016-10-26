@@ -42,9 +42,9 @@ public class PomTest {
   private static final String WAR = "war";
 
   private Pom getMinimalPom(final String packaging, final Dependency... dependencies) {
-    return new Pom(GROUP_ID, ARTIFACT_ID, VERSION, packaging, Arrays.asList(dependencies), null,
-        null, null, null, null, null, null, null, null, null, null, PROJECT_ROOT + File.separator
-            + "pom.xml", ROOT_MODULE, null);
+    return new Pom(GROUP_ID, ARTIFACT_ID, VERSION, packaging, null, Arrays.asList(dependencies),
+        null, null, null, null, null, null, null, null, null, null, null, null, PROJECT_ROOT
+            + File.separator + "pom.xml", ROOT_MODULE, null);
   }
 
   private Dependency getMockDependency(final String groupId, final String artifactId,

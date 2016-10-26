@@ -42,10 +42,8 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.BUILD-SNAPSHOT");
-  private static final Dependency SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION = new Dependency(
-      "io.springlets", "springlets-boot-starter-data-jpa", "${springlets.version}");
-  private static final Dependency SPRINGLETS_DATA_JPA_STARTER_WITHOUT_VERSION = new Dependency(
-      "io.springlets", "springlets-boot-starter-data-jpa", null);
+  private static final Dependency SPRINGLETS_DATA_JPA_STARTER = new Dependency("io.springlets",
+      "springlets-boot-starter-data-jpa", "${springlets.version}");
 
 
   private ProjectOperations projectOperations;
@@ -75,21 +73,9 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
     // Include Springlets Starter project dependencies and properties
     getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
 
-    if (getProjectOperations().isMultimoduleProject()) {
-
-      // If current project is a multimodule project, include dependencies first
-      // on dependencyManagement and then on current module
-      getProjectOperations().addDependencyToDependencyManagement("",
-          SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
-      getProjectOperations().addDependency(module.getModuleName(),
-          SPRINGLETS_DATA_JPA_STARTER_WITHOUT_VERSION);
-
-    } else {
-
-      // If not multimodule, include dependencies on root
-      getProjectOperations().addDependency("", SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
-    }
-
+    // If current project is a multimodule project, include dependencies first
+    // on dependencyManagement and then on current module
+    getProjectOperations().addDependency(module.getModuleName(), SPRINGLETS_DATA_JPA_STARTER);
 
   }
 
@@ -201,8 +187,7 @@ public class JpaAuditOperationsImpl implements JpaAuditOperations {
   public boolean isInstalledInModule(String moduleName) {
     boolean isInstalledInModule = false;
     Pom module = getProjectOperations().getPomFromModuleName(moduleName);
-    Set<Dependency> starter =
-        module.getDependenciesExcludingVersion(SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
+    Set<Dependency> starter = module.getDependenciesExcludingVersion(SPRINGLETS_DATA_JPA_STARTER);
 
     if (!starter.isEmpty()) {
       isInstalledInModule = true;

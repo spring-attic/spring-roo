@@ -99,10 +99,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.BUILD-SNAPSHOT");
-  private static final Dependency SPRINGLETS_WEB_STARTER_WITH_VERSION = new Dependency(
-      "io.springlets", "springlets-boot-starter-web", "${springlets.version}");
-  private static final Dependency SPRINGLETS_WEB_STARTER_WITHOUT_VERSION = new Dependency(
-      "io.springlets", "springlets-boot-starter-web", null);
+  private static final Dependency SPRINGLETS_WEB_STARTER = new Dependency("io.springlets",
+      "springlets-boot-starter-web", "${springlets.version}");
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -150,21 +148,8 @@ public class ControllerOperationsImpl implements ControllerOperations {
     // Include Springlets Starter project dependencies and properties
     getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
 
-    if (getProjectOperations().isMultimoduleProject()) {
+    getProjectOperations().addDependency(module.getModuleName(), SPRINGLETS_WEB_STARTER);
 
-      // If current project is a multimodule project, include dependencies
-      // first
-      // on dependencyManagement and then on current module
-      getProjectOperations().addDependencyToDependencyManagement("",
-          SPRINGLETS_WEB_STARTER_WITH_VERSION);
-      getProjectOperations().addDependency(module.getModuleName(),
-          SPRINGLETS_WEB_STARTER_WITHOUT_VERSION);
-
-    } else {
-
-      // If not multimodule, include dependencies on root
-      getProjectOperations().addDependency("", SPRINGLETS_WEB_STARTER_WITH_VERSION);
-    }
 
     // Create WebMvcConfiguration.java class
     JavaType webMvcConfiguration =

@@ -32,12 +32,8 @@ public class ModelSecurityProvider implements SecurityProvider {
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.BUILD-SNAPSHOT");
-  private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER_WITH_VERSION =
-      new Dependency("io.springlets", "springlets-boot-starter-security-authentication",
-          "${springlets.version}");
-  private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER_WITHOUT_VERSION =
-      new Dependency("io.springlets", "springlets-boot-starter-security-authentication", null);
-
+  private static final Dependency SPRINGLETS_SECURITY_AUTHENTICATION_STARTER = new Dependency(
+      "io.springlets", "springlets-boot-starter-security-authentication", "${springlets.version}");
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(ModelSecurityProvider.class);
 
@@ -60,8 +56,7 @@ public class ModelSecurityProvider implements SecurityProvider {
     boolean isInstalledInModule = false;
     Pom module = getProjectOperations().getPomFromModuleName(moduleName);
     Set<Dependency> starter =
-        module
-            .getDependenciesExcludingVersion(SPRINGLETS_SECURITY_AUTHENTICATION_STARTER_WITH_VERSION);
+        module.getDependenciesExcludingVersion(SPRINGLETS_SECURITY_AUTHENTICATION_STARTER);
 
     if (!starter.isEmpty()) {
       isInstalledInModule = true;
@@ -83,22 +78,8 @@ public class ModelSecurityProvider implements SecurityProvider {
     // Include Springlets Starter project dependencies and properties
     getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
 
-    if (getProjectOperations().isMultimoduleProject()) {
-
-      // If current project is a multimodule project, include dependencies first
-      // on dependencyManagement and then on current module
-      getProjectOperations().addDependencyToDependencyManagement("",
-          SPRINGLETS_SECURITY_AUTHENTICATION_STARTER_WITH_VERSION);
-      getProjectOperations().addDependency(module.getModuleName(),
-          SPRINGLETS_SECURITY_AUTHENTICATION_STARTER_WITHOUT_VERSION);
-
-    } else {
-
-      // If not multimodule, include dependencies on root
-      getProjectOperations().addDependency("",
-          SPRINGLETS_SECURITY_AUTHENTICATION_STARTER_WITH_VERSION);
-    }
-
+    getProjectOperations().addDependency(module.getModuleName(),
+        SPRINGLETS_SECURITY_AUTHENTICATION_STARTER);
   }
 
   // Service references

@@ -33,6 +33,7 @@ import org.springframework.roo.support.util.FileUtils;
  * 
  * @author James Tyrrell
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 public class Pom {
@@ -40,7 +41,10 @@ public class Pom {
   static final String DEFAULT_PACKAGING = "jar"; // Maven behaviour
   public static final String ROOT_MODULE_SYMBOL = "~";
 
+  private final Set<Plugin> pluginsInPluginManagement = new LinkedHashSet<Plugin>();
   private final Set<Plugin> buildPlugins = new LinkedHashSet<Plugin>();
+  private final Set<Dependency> dependenciesInDependencyManagement =
+      new LinkedHashSet<Dependency>();
   private final Set<Dependency> dependencies = new LinkedHashSet<Dependency>();
   private final Set<Filter> filters = new LinkedHashSet<Filter>();
   private final GAV gav;
@@ -65,6 +69,7 @@ public class Pom {
    * @param artifactId the Maven artifactId (required)
    * @param version the version of the artifact being built (required)
    * @param packaging the Maven packaging (required)
+   * @param dependenciesInDependencyManagement (can be <code>null</code> for none)
    * @param dependencies (can be <code>null</code> for none)
    * @param parent the POM's parent declaration (can be <code>null</code> for
    *            none)
@@ -83,6 +88,7 @@ public class Pom {
    *            contains test code (can be blank for the Maven default)
    * @param filters any filters defined in the POM (can be <code>null</code>
    *            for none)
+   * @param pluginsInPluginManagement any plugin defined in pluginManagement section
    * @param buildPlugins any plugins defined in the POM (can be
    *            <code>null</code> for none)
    * @param resources any build resources defined in the POM (can be
@@ -94,12 +100,15 @@ public class Pom {
    *            the root (can be <code>null</code>)
    */
   public Pom(final String groupId, final String artifactId, final String version,
-      final String packaging, final Collection<? extends Dependency> dependencies,
-      final Parent parent, final Collection<? extends Module> modules,
+      final String packaging,
+      final Collection<? extends Dependency> dependenciesInDependencyManagement,
+      final Collection<? extends Dependency> dependencies, final Parent parent,
+      final Collection<? extends Module> modules,
       final Collection<? extends Property> pomProperties, final String name,
       final Collection<? extends Repository> repositories,
       final Collection<? extends Repository> pluginRepositories, final String sourceDirectory,
       final String testSourceDirectory, final Collection<? extends Filter> filters,
+      final Collection<? extends Plugin> pluginsInPluginManagement,
       final Collection<? extends Plugin> buildPlugins,
       final Collection<? extends Resource> resources, final String path, final String moduleName,
       final Collection<Path> paths) {
@@ -124,7 +133,10 @@ public class Pom {
     this.testSourceDirectory =
         StringUtils.defaultIfEmpty(testSourceDirectory, Path.SRC_TEST_JAVA.getDefaultLocation());
 
+    CollectionUtils.populate(this.pluginsInPluginManagement, pluginsInPluginManagement);
     CollectionUtils.populate(this.buildPlugins, buildPlugins);
+    CollectionUtils.populate(this.dependenciesInDependencyManagement,
+        dependenciesInDependencyManagement);
     CollectionUtils.populate(this.dependencies, dependencies);
     CollectionUtils.populate(this.filters, filters);
     CollectionUtils.populate(this.modules, modules);
@@ -167,6 +179,35 @@ public class Pom {
   public boolean canAddDependency(final Dependency newDependency, boolean checkVersion) {
     return newDependency != null && !isDependencyRegistered(newDependency, checkVersion)
         && !Dependency.isHigherLevel(newDependency.getType().toString(), packaging);
+  }
+
+  /**
+   * Indicates whether it's valid to add the given {@link Dependency} to the dependencyManagement
+   * of this pom
+   * 
+   * @param newDependency the {@link Dependency} to check (can be
+   *            <code>null</code>)
+   * @return see above
+   * @since 2.0
+   */
+  public boolean canAddDependencyToDependencyManagement(final Dependency newDependency,
+      boolean checkVersion) {
+    return newDependency != null
+        && !isDependencyRegisteredInDependencyManagement(newDependency, checkVersion)
+        && !Dependency.isHigherLevel(newDependency.getType().toString(), packaging);
+  }
+
+  /**
+   * Indicates whether it's valid to add the given {@link Plugin} to the pluginManagement
+   * of this pom
+   * 
+   * @param newPlugin the {@link Plugin} to check (can be
+   *            <code>null</code>)
+   * @return see above
+   * @since 2.0
+   */
+  public boolean canAddPluginToPluginManagement(final Plugin newPlugin, boolean checkVersion) {
+    return newPlugin != null && !isPluginRegisteredInPluginManagement(newPlugin, checkVersion);
   }
 
   /**
@@ -571,6 +612,59 @@ public class Pom {
       }
     }
     return dependency != null && registered;
+  }
+
+  /**
+  * Indicates whether the given dependency is registered in dependencyManagement without checking dependency version
+  * , by checking the result of {@link Dependency#equals(Object)}.
+  * 
+  * @param dependency
+  *            the dependency to check (can be <code>null</code>)
+  * @return <code>false</code> if a <code>null</code> dependency is given
+  */
+  public boolean isDependencyRegisteredInDependencyManagement(final Dependency dependency,
+      boolean checkVersion) {
+    if (checkVersion) {
+      return dependency != null && dependenciesInDependencyManagement.contains(dependency);
+    }
+
+    boolean registered = false;
+    Iterator<Dependency> it = dependenciesInDependencyManagement.iterator();
+    while (it.hasNext()) {
+      Dependency dp = it.next();
+      if (dependency.getGroupId().equals(dp.getGroupId())
+          && dependency.getArtifactId().equals(dp.getArtifactId())) {
+        registered = true;
+        break;
+      }
+    }
+    return dependency != null && registered;
+  }
+
+  /**
+  * Indicates whether the given plugin is registered in pluginManagement without checking plugin version
+  * , by checking the result of {@link Plugin#equals(Object)}.
+  * 
+  * @param plugin
+  *            the plugin to check (can be <code>null</code>)
+  * @return <code>false</code> if a <code>null</code> dependency is given
+  */
+  public boolean isPluginRegisteredInPluginManagement(final Plugin plugin, boolean checkVersion) {
+    if (checkVersion) {
+      return plugin != null && pluginsInPluginManagement.contains(plugin);
+    }
+
+    boolean registered = false;
+    Iterator<Plugin> it = pluginsInPluginManagement.iterator();
+    while (it.hasNext()) {
+      Plugin dp = it.next();
+      if (plugin.getGroupId().equals(dp.getGroupId())
+          && plugin.getArtifactId().equals(dp.getArtifactId())) {
+        registered = true;
+        break;
+      }
+    }
+    return plugin != null && registered;
   }
 
   /**

@@ -48,13 +48,6 @@
   <dependencyManagement>
     <dependencies>
 
-      <!-- Test utils dependencies -->
-      <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${assertj.version}</version>
-      </dependency>
-
       <!-- Spring Roo annotations -->
       <dependency>
         <groupId>org.springframework.roo</groupId>
