@@ -471,9 +471,9 @@ field string --fieldName name
 field number --fieldName avalaibleStock --type java.lang.Integer
 field number --fieldName reorderLevel --type java.lang.Integer
 
-dto --class ~.ShipperInfo --immutable
-field number --fieldName shipperId --type java.lang.Long
-field string --fieldName companyName
+entity projection --class ~.ShipperProjection --entity model:~.Shipper --fields id,companyName,phone
+
+dto --class ~.ShipperFindByPhoneForm
 field string --fieldName phone
 
 dto --class ~.StoreInfo --immutable
@@ -529,7 +529,7 @@ finder add --entity model:~.Shipper --name findByCompanyName
 finder add --entity model:~.Region --name findByCountryIdOrderByDescriptionAsc
 finder add --entity model:~.City --name findByRegionIdOrderByDescriptionAsc
 finder add --entity model:~.Product --name findByDiscontinuedOrderByNameAsc
-
+finder add --entity model:~.Shipper --name findByPhone --formBean model:~.ShipperFindByPhoneForm --returnType model:~.ShipperProjection
 
 // Add tests
 test unit --class model:~.CustomerOrder

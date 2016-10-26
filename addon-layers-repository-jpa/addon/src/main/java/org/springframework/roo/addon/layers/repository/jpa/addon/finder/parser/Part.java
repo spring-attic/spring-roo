@@ -1,13 +1,6 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,21 +9,28 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * This class is based on Part.java class from Spring Data commons project.
- * 
+ *
  * It has some little changes to be able to work properly on Spring Roo project
  * and make easy Spring Data query parser.
- * 
+ *
  * Get more information about original class on:
- * 
+ *
  * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/Part.java
- * 
+ *
  * Represents a single search expression (which are joined using And/Or operators).
- * This expression needs a property to define the condition. 
- * Optionally, an operator can be set after the property to perform an operation over it. 
+ * This expression needs a property to define the condition.
+ * Optionally, an operator can be set after the property to perform an operation over it.
  * Furthermore, {@literal IgnoreCase} option is available to be added to any property.
- * 
+ *
  * @author Paula Navarro
  * @author Juan Carlos García
  * @since 2.0
@@ -40,7 +40,7 @@ public class Part {
   private static final Pattern IGNORE_CASE = Pattern.compile("Ignor(ing|e)Case");
 
   // Contains property metadata and name
-  private final Pair<FieldMetadata, String> property;
+  private final Pair<Stack<FieldMetadata>, String> property;
 
   // Operator type
   private Type type = null;
@@ -56,7 +56,7 @@ public class Part {
 
   /**
    * Creates a new {@link Part} from a condition stored into source .
-   * 
+   *
    * @param partTree PartTree instance where current Part will be defined
    * @param source the search criteria
    * @param fields entity properties
@@ -80,14 +80,15 @@ public class Part {
       partToUse = partToUse.substring(property.getRight().length());
 
       // Extract operator information
-      Pair<Type, String> type = Type.extractOperator(partToUse, property.getLeft().getFieldType());
+      Pair<Type, String> type =
+          Type.extractOperator(partToUse, property.getLeft().peek().getFieldType());
       this.type = type.getLeft();
       this.operator = type.getRight();
       this.operatorGroup = Type.extractOperatorGroup(operator);
 
-      //Validates that ignore case option is only available for string property type 
+      //Validates that ignore case option is only available for string property type
       if (ignoreCase == IgnoreCaseType.ALWAYS
-          && !property.getKey().getFieldType().equals(JavaType.STRING)) {
+          && !property.getKey().peek().getFieldType().equals(JavaType.STRING)) {
         throw new IllegalArgumentException(
             "ERROR: IgnoseCase option is only available for String properties");
       }
@@ -98,7 +99,7 @@ public class Part {
 
   /**
    * Detects if expression contains IgnoreCase option and removes it.
-   * 
+   *
    * @param expression
    * @return expression without IgnoreCase option.
    */
@@ -121,7 +122,7 @@ public class Part {
 
   /**
    * Returns how many method parameters are bound by this part.
-   * 
+   *
    * @return
    */
   public int getNumberOfArguments() {
@@ -132,12 +133,12 @@ public class Part {
   }
 
   /**
-   * Returns the property metadata and name of this expression. 
+   * Returns the property metadata and name of this expression.
    * If any property is defined, returns {@literal null}.
-   * 
+   *
    * @return Pair of property metadata and property name
    */
-  public Pair<FieldMetadata, String> getProperty() {
+  public Pair<Stack<FieldMetadata>, String> getProperty() {
     return property;
   }
 
@@ -151,7 +152,7 @@ public class Part {
   /**
    * Returns whether the search criteria referenced should be matched
    * ignoring case.
-   * 
+   *
    * @return
    */
   public IgnoreCaseType shouldIgnoreCase() {
@@ -161,7 +162,7 @@ public class Part {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override
@@ -180,7 +181,7 @@ public class Part {
     }
 
     List<String> typeKeywords = new ArrayList<String>();
-    List<Type> types = Type.getOperators(property.getLeft().getFieldType());
+    List<Type> types = Type.getOperators(property.getLeft().peek().getFieldType());
 
     // Check if operator group is an operator
     boolean removePrefix = Type.ALL_KEYWORDS.contains(operatorGroup);
@@ -219,7 +220,7 @@ public class Part {
 
   /**
    * Returns operators which name starts with a given prefix and are supported by the search expression property
-   * 
+   *
    * @param prefix
    * @return
    */
@@ -229,7 +230,7 @@ public class Part {
     }
 
     List<String> typeKeywords = new ArrayList<String>();
-    List<Type> types = Type.getOperators(property.getLeft().getFieldType());
+    List<Type> types = Type.getOperators(property.getLeft().peek().getFieldType());
 
     // Check if operator group is an operator
     boolean removePrefix = Type.ALL_KEYWORDS.contains(prefix);
@@ -303,7 +304,7 @@ public class Part {
 
 
   /**
-   * Builds a list of parameters based on the number of arguments that operator type needs and the property java type 
+   * Builds a list of parameters based on the number of arguments that operator type needs and the property java type
    * @return
    */
   public List<FinderParameter> getParameters() {
@@ -325,8 +326,8 @@ public class Part {
       arguments = type.getNumberOfArguments();
     }
 
-    JavaType javaType = property.getLeft().getFieldType();
-    String name = property.getLeft().getFieldName().toString();
+    JavaType javaType = property.getLeft().peek().getFieldType();
+    String name = property.getLeft().peek().getFieldName().toString();
 
     // In operator is a special case, since its parameter is a list of property java type objects
     if (type != null && (type == Type.IN || type == Type.NOT_IN)) {
@@ -348,9 +349,8 @@ public class Part {
         if (type.getNumberOfArguments() > 1) {
           suffix = String.valueOf(i + 1);
         }
-        parameters.add(new FinderParameter(property.getLeft().getFieldType(), new JavaSymbolName(
-            name.concat(suffix))));
-
+        parameters.add(new FinderParameter(javaType, new JavaSymbolName(name.concat(suffix)),
+            property.getLeft()));
       }
     }
 

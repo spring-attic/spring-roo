@@ -175,18 +175,11 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     RepositoryJpaMetadata repositoryMetadata =
         getMetadataService().get(RepositoryJpaMetadata.createIdentifier(repositoryClass));
 
-    // Getting findAll results type
-    JavaType defaultReturnType = annotationValues.getDefaultReturnType();
-    Validate
-        .notNull(
-            defaultReturnType,
-            "ERROR: Repository custom interface should contain a defaultReturnType on @RooJpaRepositoryCustom annotation");
-
     // Add dependency between modules
     ClassOrInterfaceTypeDetails cid = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
     String module = cid.getName().getModule();
     getTypeLocationService().addModuleDependency(module, entity);
-    getTypeLocationService().addModuleDependency(module, defaultReturnType);
+    getTypeLocationService().addModuleDependency(module, repositoryMetadata.getDefaultReturnType());
 
     // Get field which entity is field part
     List<Pair<FieldMetadata, RelationInfo>> relationsAsChild =
@@ -198,18 +191,15 @@ public class RepositoryJpaCustomMetadataProviderImpl extends
     }
 
     // Register dependency between JavaBeanMetadata and this one
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(entity)
-            .getDeclaredByMetadataId());
-    final String javaBeanMetadataKey =
-        JavaBeanMetadata.createIdentifier(
-            getTypeLocationService().getTypeDetails(entity).getType(), logicalPath);
+    final ClassOrInterfaceTypeDetails entityDetails =
+        getTypeLocationService().getTypeDetails(entity);
+    final String javaBeanMetadataKey = JavaBeanMetadata.createIdentifier(entityDetails);
     registerDependency(javaBeanMetadataKey, metadataIdentificationString);
 
 
     return new RepositoryJpaCustomMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, annotationValues, entity, defaultReturnType,
-        repositoryMetadata, relationsAsChild);
+        governorPhysicalTypeMetadata, annotationValues, entity, repositoryMetadata,
+        relationsAsChild);
   }
 
   private JpaOperations getJpaOperations() {

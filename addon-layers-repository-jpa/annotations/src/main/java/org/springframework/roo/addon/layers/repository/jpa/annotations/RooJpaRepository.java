@@ -46,4 +46,18 @@ public @interface RooJpaRepository {
    */
   RooFinder[] finders() default {};
 
+
+  /**
+   * The type of the results returned by the findAll search of annotated repository
+   *
+   * @return a non-<code>null</code> type
+   */
+  Class<?> defaultReturnType() default Class.class;
+
+
+  /**
+   * The name of this annotation's attribute that specifies the findAll search results
+   * type.
+   */
+  String DEFAULT_RETURN_TYPE_ATTRIBUTE = "defaultReturnType";
 }

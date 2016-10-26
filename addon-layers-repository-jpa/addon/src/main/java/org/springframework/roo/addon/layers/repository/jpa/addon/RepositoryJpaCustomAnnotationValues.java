@@ -10,7 +10,7 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * The values of a {@link RooJpaRepositoryCustom} annotation.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -19,12 +19,9 @@ public class RepositoryJpaCustomAnnotationValues extends AbstractAnnotationValue
   @AutoPopulate
   private JavaType entity;
 
-  @AutoPopulate
-  private JavaType defaultReturnType;
-
   /**
    * Constructor
-   * 
+   *
    * @param governorPhysicalTypeMetadata the metadata to parse (required)
    */
   public RepositoryJpaCustomAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
@@ -33,17 +30,8 @@ public class RepositoryJpaCustomAnnotationValues extends AbstractAnnotationValue
   }
 
   /**
-   * Returns the search result type returned by the findAll method of the annotated repository
-   * 
-   * @return a non-<code>null</code> type
-   */
-  public JavaType getDefaultReturnType() {
-    return defaultReturnType;
-  }
-
-  /**
    * Returns the entity type managed by the annotated repository
-   * 
+   *
    * @return a non-<code>null</code> type
    */
   public JavaType getEntity() {

@@ -9,6 +9,7 @@ import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.Relation
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderMethod;
 import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.FinderParameter;
+import org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser.PartTree;
 import org.springframework.roo.addon.layers.repository.jpa.annotations.RooJpaRepository;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -55,11 +56,12 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   private final MethodMetadata compositionCountMethod;
   private final JavaType customRepository;
   private final JavaType entity;
+  private final JavaType defaultReturnType;
 
   private final List<FinderMethod> findersDeclared;
   private final List<MethodMetadata> findersGenerated;
   private final List<MethodMetadata> countMethods;
-  private final List<FinderMethod> findersToAddInCustom;
+  private final List<Pair<FinderMethod, PartTree>> findersToAddInCustom;
   private final List<String> declaredFinderNames;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
@@ -113,14 +115,16 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
       final PhysicalTypeMetadata governorPhysicalTypeMetadata,
       final RepositoryJpaAnnotationValues annotationValues, final JpaEntityMetadata entityMetadata,
       final JavaType readOnlyRepository, final JavaType customRepository,
-      List<Pair<FieldMetadata, RelationInfo>> relationsAsChild, List<FinderMethod> findersToAdd,
-      List<FinderMethod> findersToAddInCustom, List<String> declaredFinderNames) {
+      final JavaType defaultReturnType, List<Pair<FieldMetadata, RelationInfo>> relationsAsChild,
+      List<FinderMethod> findersToAdd, List<Pair<FinderMethod, PartTree>> findersToAddInCustom,
+      List<String> declaredFinderNames) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
     Validate.notNull(annotationValues, "Annotation values required");
 
     final FieldMetadata identifierField = entityMetadata.getCurrentIndentifierField();
     final JavaType identifierType = identifierField.getFieldType();
     this.entity = annotationValues.getEntity();
+    this.defaultReturnType = defaultReturnType;
 
     this.findersToAddInCustom = Collections.unmodifiableList(findersToAddInCustom);
     this.customRepository = customRepository;
@@ -184,7 +188,6 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
         new AnnotationMetadataBuilder(SpringJavaType.TRANSACTIONAL);
     transactionalAnnotation.addBooleanAttribute("readOnly", true);
     ensureGovernorIsAnnotated(transactionalAnnotation);
-
 
     // Prepare list of ALL finders and count declared
     List<MethodMetadata> findersTmp = new ArrayList<MethodMetadata>();
@@ -441,7 +444,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
   /**
    * @return finders definition which should be add in custom repository
    */
-  public List<FinderMethod> getFindersToAddInCustom() {
+  public List<Pair<FinderMethod, PartTree>> getFindersToAddInCustom() {
     return findersToAddInCustom;
   }
 
@@ -471,6 +474,15 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
    */
   public List<String> getDeclaredFinderNames() {
     return declaredFinderNames;
+  }
+
+  /**
+   * Return defaultReturnType specified value (if any)
+   *
+   * @return defaultReturnType or entity type if value is not set
+   */
+  public JavaType getDefaultReturnType() {
+    return defaultReturnType;
   }
 
   @Override

@@ -53,4 +53,15 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
     return finders;
   }
 
+  @AutoPopulate
+  private JavaType defaultReturnType;
+
+  /**
+   * Returns the default return type to use to finders in repository custom
+   *
+   * @return default return type
+   */
+  public JavaType getDefaultReturnType() {
+    return defaultReturnType;
+  }
 }

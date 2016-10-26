@@ -1,32 +1,33 @@
 package org.springframework.roo.addon.layers.repository.jpa.addon.finder.parser;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.roo.classpath.details.FieldMetadata;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * This class is based on Subject inner class located inside PartTree.java class from Spring Data commons project.
- * 
+ *
  * It has some little changes to be able to work properly on Spring Roo project
  * and make easy Spring Data query parser.
- * 
+ *
  * Get more information about original class on:
- * 
+ *
  * https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/repository/query/parser/PartTree.java
- * 
+ *
  * Represents the subject part of the query. A query subject is enclosed between a database operation (query, read or find) and "By" token.
  *  E.g. {@code findDistinctUserByNameOrderByAge} would have the subject {@code DistinctUser}.
  *  Subject can have optional expressions like Distinct, limiting expressions such as First and Top, and a property which will be the result to return
- * 
+ *
  * @author Paula Navarro
  * @author Juan Carlos García
  * @since 2.0
@@ -61,14 +62,14 @@ public class Subject {
   private String limit = "";
   private boolean isComplete = false;
   private boolean isCount = false;
-  private Pair<FieldMetadata, String> property = null;
+  private Pair<Stack<FieldMetadata>, String> property = null;
   private List<FieldMetadata> fields;
 
   private final PartTree currentPartTreeInstance;
 
   /**
    * Extracts the subject expressions from a source and builds a structure which represents it.
-   * 
+   *
    * @param partTree PartTree instance where current Subject will be defined
    * @param source subject query
    * @param fields entity properties
@@ -92,7 +93,7 @@ public class Subject {
 
   /**
    * Extract count parameters from subject
-   * 
+   *
    * @param subject
    */
   private void buildCountSubject(String subject) {
@@ -116,7 +117,7 @@ public class Subject {
 
   /**
    * Extract query parameters from subject
-   * 
+   *
    * @param subject
    */
   private void buildQuerySubject(String subject) {
@@ -181,7 +182,8 @@ public class Subject {
    * @param property
    * @return Pair of property metadata and property name
    */
-  public Pair<FieldMetadata, String> extractValidField(String source, List<FieldMetadata> fields) {
+  public Pair<Stack<FieldMetadata>, String> extractValidField(String source,
+      List<FieldMetadata> fields) {
     if (source == null) {
       return null;
     }
@@ -194,7 +196,7 @@ public class Subject {
 
   /**
    * Returns whether we indicate distinct lookup of entities.
-   * 
+   *
    * @return {@literal true} if distinct
    */
   public boolean isDistinct() {
@@ -203,7 +205,7 @@ public class Subject {
 
   /**
    * Returns whether a count projection shall be applied.
-   * 
+   *
    * @return
    */
   public Boolean isCountProjection() {
@@ -214,7 +216,7 @@ public class Subject {
    * Returns if subject is completed. Subject is complete if it has all
    * its expressions well-defined, starts with a query type (read, query
    * or find) and ends with "By" delimiter.
-   * 
+   *
    * @return
    */
   public boolean isComplete() {
@@ -224,7 +226,7 @@ public class Subject {
   /**
    * Return the number of maximal results to return or {@literal null} if
    * not restricted.
-   * 
+   *
    * @return
    */
   public Integer getMaxResults() {
@@ -247,19 +249,19 @@ public class Subject {
   }
 
   /**
-   * Returns the property metadata and name of this expression. 
+   * Returns the property metadata and name of this expression.
    * If any property is defined, returns {@literal null}.
-   * 
+   *
    * @return Pair of property metadata and property name
    */
-  public Pair<FieldMetadata, String> getProperty() {
+  public Pair<Stack<FieldMetadata>, String> getProperty() {
     return property;
   }
 
 
   /**
    * Returns true if subject expressions are well-defined (e.g. Distinct is defined before Top/First options) and the property belongs to the entity domain.
-   * @return 
+   * @return
    */
   public boolean isValid() {
     return isValid(toString());
@@ -268,7 +270,7 @@ public class Subject {
   /**
    * Returns true if source is a well-defined subject. However, it does not validate if the property exist in the entity domain
    * @param source
-   * @return  
+   * @return
    */
   public static boolean isValid(String source) {
     if (PartTree.matches(source, COUNT_BY_TEMPLATE)) {
@@ -281,7 +283,7 @@ public class Subject {
   /**
    * Returns the different queries that can be build based on the current subject expressions.
    * The options are joined to the current query expression.
-   * 
+   *
    * @return
    */
   public List<String> getOptions() {
@@ -344,7 +346,7 @@ public class Subject {
     } else {
       // If the property is a reference to other entity, related entity properties are shown
       List<FieldMetadata> fields =
-          currentPartTreeInstance.getValidProperties(property.getLeft().getFieldType());
+          currentPartTreeInstance.getValidProperties(property.getLeft().peek().getFieldType());
 
       if (fields != null) {
         for (FieldMetadata relatedEntityfield : fields) {
