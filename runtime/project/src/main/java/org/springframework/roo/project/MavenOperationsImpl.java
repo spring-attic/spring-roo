@@ -544,8 +544,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
           break;
       }
     }
-    // By default, Spring Roo projects will be generated on Java 1.8
-    return "1.8";
+    // Return null if given value is invalid.
+    return null;
   }
 
   /**
