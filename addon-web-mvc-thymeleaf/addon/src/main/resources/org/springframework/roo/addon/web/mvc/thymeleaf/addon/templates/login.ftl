@@ -27,8 +27,8 @@
       data-th-remove="all"></link>
     <!-- Font Awesome -->
     <link rel="stylesheet" type="text/css"
-    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-    data-th-remove="all"/>
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
+      data-th-remove="all"/>
     <!-- Bootswatch CSS custom -->
     <link rel="stylesheet" type="text/css"
       href="../static/public/css/theme.css"
@@ -69,10 +69,8 @@
         <!-- Main navbar -->
         <nav class="navbar navbar-inverse navbar-fixed-top">
          <div class="container">
-
             <!-- navbar-header -->
             <div class="navbar-header">
-
               <!-- Brand logo -->
               <div class="organization-logo navbar-brand">
                 <a title="${projectName}" href="/">
@@ -80,14 +78,15 @@
                 </a>
               </div>
               <!-- Name application -->
-              <div class="application-name navbar-brand hidden-xs"><a href="/" data-th-href="@{/}">${projectName}</a></div>
+              <div class="application-name navbar-brand hidden-xs">
+              	<a href="/" data-th-href="@{/}">${projectName}</a>
+              </div>
 
             </div>
-            <!-- /navbar header -->
+            <!-- /navbar-header -->
 
             <!-- menu -->
             <div id="mainnav" class="navbar-collapse collapse">
-
               <!-- Language -->
               <ul class="nav navbar-nav navbar-right upper-nav languages">
                 <li class="dropdown">
@@ -120,37 +119,32 @@
 
         <div class="container content">
 
-        <!-- CONTENIDO -->
-        <div class="box-center">
-
           <div class="panel panel-default">
             <div class="panel-heading">
               <h1 class="panel-title" data-th-text="${r"#{"}label_login${r"}"}">Login</h1>
             </div>
             <div class="panel-body">
               <form class="form-horizontal" data-th-action="@{/login}" method="post">
-
                 <fieldset>
                   <legend class="sr-only" data-th-text="${r"#{"}help_login${r"}"}" >Enter your login and password</legend>
 
+                  <!-- Alerts messages -->
                   <div data-th-if="${r"${"}param.error${r"}"}" class="alert alert-danger"
                     role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only" data-th-text="|${r"#{"}label_error${r"}"}:|">Error:</span> <span
-                      data-th-text="${r"#{"}error_login${r"}"}" >Invalid user and password</span>
+                      data-th-text="${r"#{"}error_login${r"}"}" >Username or password are invalid</span>
                   </div>
-
                   <div data-th-if="${r"${"}param.logout${r"}"}" class="alert alert-success"
                     role="alert">
                     <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> <span
                       data-th-text="${r"#{"}info_closed_session${r"}"}" >Log out correctly</span>
                   </div>
-
                   <div data-th-if="${r"${"}param.expired${r"}"}" class="alert alert-danger"
                     role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only" data-th-text="|${r"#{"}label_error${r"}"}:|">Error:</span> <span
-                      data-th-text="${r"#{"}error_expired_session${r"}"}" >Your session has expired</span>
+                      data-th-text="${r"#{"}error_expired_session${r"}"}" >Your session has been expired</span>
                   </div>
 
                   <@text.input label="label_login_username" fieldId="username" fieldName="username" z="z" size=6/>
@@ -172,7 +166,7 @@
 
           </div>
 
-        </div>
+
 
         </div>
         <!--/content-->
@@ -182,38 +176,42 @@
     <!--container-->
 
    <footer class="container">
-     <div class="row">
-      <div class="col-sm-6 col-sm-offset-3">
-        <small class="clearfix">
-            Made with <a href="http://projects.spring.io/spring-roo/" target="_blank">
+      <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+          <small class="clearfix">
+            Made with <a href="http://projects.spring.io/spring-roo/" target="_blank" data-th-text="| Spring Roo © ${r"${#calendars.format(#dates.createNow(),'yyyy')}"}|">
             Spring Roo &copy; 2016</a> •
             We <span class="glyphicon glyphicon-heart"></span>
             <a href="https://github.com/spring-projects/spring-roo/" target="_blank">Open source</a> •
-            <a data-th-href="@{/accessibility}" href="accessibility.html"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
-        </small>
+            <a data-th-href="@{/accessibility}" href="/accessibility"><span data-th-text="${r"#{"}label_accessibility${r"}"}">Accessibility</span></a>
+          </small>
         </div>
       </div>
       <!-- certified logos -->
       <div class="row">
         <div class="col-sm-6 col-sm-offset-6 text-right">
-
-         <a title="Explanation of WCAG 2.0 Level Double-A Conformance"
+          <a title="Explanation of WCAG 2.0 Level Double-A Conformance"
+            data-th-title="${r"#{label_accessibility_title}"}"
             target="_blank"
             href="http://www.w3.org/WAI/WCAG2AA-Conformance">
             <img height="32" width="88"
                  src="http://www.w3.org/WAI/wcag2AA"
+                 data-th-alt="${r"#{label_accessibility_alt}"}"
                  alt="Level Double-A conformance, W3C WAI Web Content
                  Accessibility Guidelines 2.0">
-         </a>
-         &nbsp;
-         <a title="Application developed and tested with OWASP -
+          </a>
+          &nbsp;
+          <a title="Application developed and tested with OWASP -
              Open Web Application Security Project"
+             data-th-title="${r"#{label_owasp_title}"}"
             target="_blank"
             href="https://www.owasp.org">
-          <img height="32" width="90"
+           <img height="32" width="90"
+               data-th-src="@{/public/img/owasp_logo.png}"
                src="../static/public/img/owasp_logo.png"
+               data-th-alt="${r"#{label_owasp_alt}"}"
                alt="Application developed and tested with OWASP">
-         </a>
+          </a>
         </div>
       </div>
     </footer>
