@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -85,9 +86,20 @@ public class ModelSecurityProvider implements SecurityProvider {
 
     // Include Springlets Starter project dependencies and properties
     getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
-
     getProjectOperations().addDependency(module.getModuleName(),
         SPRINGLETS_SECURITY_AUTHENTICATION_STARTER);
+
+    // Add property security.enable-csrf with true value to enable CSRF
+    getApplicationConfigService().addProperty(module.getModuleName(), "security.enable-csrf",
+        "true", "", true);
+    getApplicationConfigService().addProperty(module.getModuleName(), "security.enable-csrf",
+        "true", "dev", true);
+
+    // Add thymeleaf-extras-springsecurity4 dependency with Thymeleaf 3 support
+    getProjectOperations().addProperty(module.getModuleName(),
+        new Property("thymeleaf-extras-springsecurity4.version", "3.0.0.RELEASE"));
+    getProjectOperations().addDependency(module.getModuleName(),
+        new Dependency("org.thymeleaf.extras", "thymeleaf-extras-springsecurity4", null));
 
     // Add @EnableJpaRepositories and @EntityScan annotations to the @SpringBootApplication class
     Set<ClassOrInterfaceTypeDetails> springBootApplicationClasses =
@@ -105,17 +117,15 @@ public class ModelSecurityProvider implements SecurityProvider {
         break;
       }
     }
-
-    // Add thymeleaf-extras-springsecurity4 dependency with Thymeleaf 3 support
-    getProjectOperations().addProperty(module.getModuleName(),
-        new Property("thymeleaf-extras-springsecurity4.version", "3.0.0.RELEASE"));
-    getProjectOperations().addDependency(module.getModuleName(),
-        new Dependency("org.thymeleaf.extras", "thymeleaf-extras-springsecurity4", null));
   }
 
   // Service references
   public ProjectOperations getProjectOperations() {
     return serviceInstaceManager.getServiceInstance(this, ProjectOperations.class);
+  }
+
+  private ApplicationConfigService getApplicationConfigService() {
+    return serviceInstaceManager.getServiceInstance(this, ApplicationConfigService.class);
   }
 
   public TypeLocationService getTypeLocationService() {
