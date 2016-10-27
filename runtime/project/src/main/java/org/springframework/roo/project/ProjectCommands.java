@@ -28,7 +28,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Commands related to file system monitoring and process management.
- * 
+ *
  * @author Ben Alex
  * @author Juan Carlos García
  * @since 1.1
@@ -104,7 +104,8 @@ public class ProjectCommands implements CommandMarker {
       @CliOption(key = "multimodule", mandatory = false, specifiedDefaultValue = "STANDARD",
           help = "Option to use a multmodule architecture") final Multimodule multimodule,
       @CliOption(key = "java",
-          help = "Forces a particular major version of Java to be used (DEFAULT: 8)") final Integer majorJavaVersion,
+          help = "Forces a particular major version of Java to be used (DEFAULT: Java 6 inherited from Spring Boot)")
+          final Integer majorJavaVersion,
       @CliOption(key = "packaging", help = "The Maven packaging of this project",
           unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
