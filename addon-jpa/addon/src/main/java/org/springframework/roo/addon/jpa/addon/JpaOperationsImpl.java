@@ -90,7 +90,6 @@ public class JpaOperationsImpl implements JpaOperations {
   private static final String HIBERNATE_NAMING_STRATEGY = "spring.jpa.hibernate.naming.strategy";
   private static final String HIBERNATE_NAMING_STRATEGY_VALUE =
       "org.hibernate.cfg.ImprovedNamingStrategy";
-  private static final String DEFAULT_PROFILE_NAME = "default";
   static final String POM_XML = "pom.xml";
 
   private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
@@ -452,24 +451,6 @@ public class JpaOperationsImpl implements JpaOperations {
           DATABASE_USERNAME, profile);
       getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
           DATABASE_PASSWORD, profile);
-
-      // Create/update application-default.properties with JNDI name if database is Oracle
-      if (jdbcDatabase.getKey().equals(JdbcDatabase.ORACLE.getKey())) {
-        Map<String, String> defaultProps = new HashMap<String, String>();
-        defaultProps.put(JNDI_NAME, jndi);
-        getApplicationConfigService().addProperties(moduleName, DATASOURCE_PREFIX, defaultProps,
-            DEFAULT_PROFILE_NAME, force);
-
-        // Remove old properties if existing
-        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL,
-            DEFAULT_PROFILE_NAME);
-        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
-            DATABASE_DRIVER, DEFAULT_PROFILE_NAME);
-        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
-            DATABASE_USERNAME, DEFAULT_PROFILE_NAME);
-        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
-            DATABASE_PASSWORD, DEFAULT_PROFILE_NAME);
-      }
     }
 
     // Add Hibernate naming strategy property
@@ -522,6 +503,10 @@ public class JpaOperationsImpl implements JpaOperations {
             configuration);
     for (final Element dependencyElement : databaseDependencies) {
       requiredDependencies.add(new Dependency(dependencyElement));
+    }
+    if (jdbcDatabase.toString().equals(JdbcDatabase.ORACLE.toString())) {
+      LOGGER
+          .warning("Oracle drivers aren't in Maven public repositories!! You should include them manually in your local Maven repository.");
     }
 
     final List<Element> ormDependencies =
