@@ -162,6 +162,10 @@ public final class SpringJavaType {
   public static final JavaType VALUE = new JavaType(
       "org.springframework.beans.factory.annotation.Value");
   public static final JavaType WEB_UTILS = new JavaType("org.springframework.web.util.WebUtils");
+  public static final JavaType ENTITY_SCAN = new JavaType(
+      "org.springframework.boot.autoconfigure.domain.EntityScan");
+  public static final JavaType ENABLE_JPA_REPOSITORIES = new JavaType(
+      "org.springframework.data.jpa.repository.config.EnableJpaRepositories");
 
   /**
    * Returns the {@link JavaType} for a Spring converter
