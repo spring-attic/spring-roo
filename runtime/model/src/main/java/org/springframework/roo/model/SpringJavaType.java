@@ -14,6 +14,12 @@ import org.apache.commons.lang3.Validate;
 public final class SpringJavaType {
 
   // org.springframework
+  public static final JavaType ANNOTATION_CONFIGURATION = new JavaType(
+      "org.springframework.context.annotation.Configuration");
+  public static final JavaType ANNOTATION_IMPORT = new JavaType(
+      "org.springframework.context.annotation.Import");
+  public static final JavaType ANNOTATION_CONDITIONALONWEBAPPLICATION = new JavaType(
+      "org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication");
   public static final JavaType ASSERT = new JavaType("org.springframework.util.Assert");
   public static final JavaType ASYNC = new JavaType(
       "org.springframework.scheduling.annotation.Async");
@@ -170,8 +176,10 @@ public final class SpringJavaType {
   /**
    * Returns the {@link JavaType} for a Spring converter
    *
-   * @param fromType the type being converted from (required)
-   * @param toType the type being converted to (required)
+   * @param fromType
+   *            the type being converted from (required)
+   * @param toType
+   *            the type being converted to (required)
    * @return a non-<code>null</code> type
    */
   public static JavaType getConverterType(final JavaType fromType, final JavaType toType) {

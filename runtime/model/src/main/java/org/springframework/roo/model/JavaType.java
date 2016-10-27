@@ -55,6 +55,7 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float");
   public static final JavaType FLOAT_PRIMITIVE = new JavaType("java.lang.Float", 0,
       DataType.PRIMITIVE, null, null);
+  public static final JavaType HASH_MAP = new JavaType("java.util.HashMap");
   public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer");
   public static final JavaType INT_PRIMITIVE = new JavaType("java.lang.Integer", 0,
       DataType.PRIMITIVE, null, null);
