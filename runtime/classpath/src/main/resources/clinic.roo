@@ -70,8 +70,7 @@ web mvc detail --all --responseType THYMELEAF
 
 web mvc language --code es
 
-// FIXME!! Re-enable security when Springlets Security works correctly
-//security setup --provider MODEL
+security setup --provider DEFAULT
 
 // FIXME!! Re-enable audit when Springlets contains audit starter
 // jpa audit setup
