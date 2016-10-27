@@ -1,6 +1,8 @@
 package org.springframework.roo.support.osgi;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -82,7 +84,7 @@ public class ServiceInstaceManager {
   }
 
   @SuppressWarnings({"unchecked"})
-  public <SERVICE> SERVICE getServiceInstance(Object requester, Class<SERVICE> serviceClass,
+  public <SERVICE> List<SERVICE> getServiceInstance(Object requester, Class<SERVICE> serviceClass,
       Matcher<SERVICE> matcher) {
     SERVICE service = null;
     if (context == null) {
@@ -99,14 +101,21 @@ public class ServiceInstaceManager {
         return null;
       }
 
-      if (references.length >= 1) {
+      List<SERVICE> matches = new ArrayList<SERVICE>();
+
+      if (references.length > 0) {
         for (ServiceReference<?> reference : references) {
           service = (SERVICE) context.getService(reference);
           if (matcher.match(service)) {
-            return service;
+            matches.add(service);
           }
         }
       }
+
+      if (!matches.isEmpty()) {
+        return matches;
+      }
+
       return null;
     } catch (InvalidSyntaxException e) {
       LOGGER.warning("Cannot load " + serviceClass.getName() + " on "
