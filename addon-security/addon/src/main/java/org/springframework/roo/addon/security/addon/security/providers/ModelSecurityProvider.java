@@ -89,7 +89,7 @@ public class ModelSecurityProvider implements SecurityProvider {
     getProjectOperations().addDependency(module.getModuleName(),
         SPRINGLETS_SECURITY_AUTHENTICATION_STARTER);
 
-    // Add @@EnableJpaRepositories and @EntityScan annotations to the @SpringBootApplication class
+    // Add @EnableJpaRepositories and @EntityScan annotations to the @SpringBootApplication class
     Set<ClassOrInterfaceTypeDetails> springBootApplicationClasses =
         getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
             SpringJavaType.SPRING_BOOT_APPLICATION);

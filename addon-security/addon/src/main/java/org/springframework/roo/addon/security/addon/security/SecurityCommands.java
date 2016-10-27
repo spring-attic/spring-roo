@@ -114,7 +114,7 @@ public class SecurityCommands implements CommandMarker {
     return true;
   }
 
-  @CliOptionAutocompleteIndicator(command = "security setup", param = "type",
+  @CliOptionAutocompleteIndicator(command = "security setup", param = "provider",
       help = "You must select a valid security provider.", validate = true)
   public List<String> getAllSecurityProviders(ShellContext context) {
 
@@ -133,7 +133,7 @@ public class SecurityCommands implements CommandMarker {
 
   @CliCommand(value = "security setup", help = "Install Spring Security into your project")
   public void installSecurity(
-      @CliOption(key = "type", mandatory = false,
+      @CliOption(key = "provider", mandatory = false,
           help = "The Spring Security provider to install.", unspecifiedDefaultValue = "DEFAULT",
           specifiedDefaultValue = "DEFAULT") String type,
       @CliOption(key = "module", mandatory = true,
