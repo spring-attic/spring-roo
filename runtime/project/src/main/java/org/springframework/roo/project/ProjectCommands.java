@@ -103,9 +103,9 @@ public class ProjectCommands implements CommandMarker {
           help = "The name of the project (last segment of package name used as default)") final String projectName,
       @CliOption(key = "multimodule", mandatory = false, specifiedDefaultValue = "STANDARD",
           help = "Option to use a multmodule architecture") final Multimodule multimodule,
-      @CliOption(key = "java",
-          help = "Forces a particular major version of Java to be used (DEFAULT: Java 6 inherited from Spring Boot)")
-          final Integer majorJavaVersion,
+      @CliOption(
+          key = "java",
+          help = "Forces a particular major version of Java to be used (DEFAULT: Java 6 inherited from Spring Boot)") final Integer majorJavaVersion,
       @CliOption(key = "packaging", help = "The Maven packaging of this project",
           unspecifiedDefaultValue = JarPackaging.NAME) final PackagingProvider packaging) {
 
