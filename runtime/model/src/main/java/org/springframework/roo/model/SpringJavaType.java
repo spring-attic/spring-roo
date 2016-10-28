@@ -153,6 +153,8 @@ public final class SpringJavaType {
       "org.springframework.http.ResponseEntity");
   public static final JavaType SPRING_BOOT_APPLICATION = new JavaType(
       "org.springframework.boot.autoconfigure.SpringBootApplication");
+  public static final JavaType SPRING_BOOT_SERVLET_INITIALIZER = new JavaType(
+      "org.springframework.boot.web.support.SpringBootServletInitializer");
   public static final JavaType SERVICE = new JavaType("org.springframework.stereotype.Service");
   public static final JavaType SIMPLE_MAIL_MESSAGE = new JavaType(
       "org.springframework.mail.SimpleMailMessage");
@@ -172,6 +174,8 @@ public final class SpringJavaType {
       "org.springframework.boot.autoconfigure.domain.EntityScan");
   public static final JavaType ENABLE_JPA_REPOSITORIES = new JavaType(
       "org.springframework.data.jpa.repository.config.EnableJpaRepositories");
+  public static final JavaType WEB_APPLICATION_INITIALIZER = new JavaType(
+      "org.springframework.web.WebApplicationInitializer");
 
   /**
    * Returns the {@link JavaType} for a Spring converter

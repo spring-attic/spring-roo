@@ -883,7 +883,18 @@ public class JpaOperationsImpl implements JpaOperations {
 
     boolean hasStarter = dependencies.contains(starter);
 
-    return getApplicationConfigService().existsSpringConfigFile(moduleName) && hasStarter;
+    // Check existing application profiles
+    boolean existsSpringConfigProfileInModule = false;
+    List<String> applicationProfiles =
+        getApplicationConfigService().getApplicationProfiles(moduleName);
+    for (String profile : applicationProfiles) {
+      if (getApplicationConfigService().existsSpringConfigFile(moduleName, profile)) {
+        existsSpringConfigProfileInModule = true;
+        break;
+      }
+    }
+
+    return existsSpringConfigProfileInModule && hasStarter;
   }
 
   public String getName() {
