@@ -32,6 +32,7 @@ import org.springframework.roo.support.osgi.OSGiUtils;
  * Default implementation of {@link ProcessManager} interface.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.0
  */
 @Component
@@ -173,6 +174,8 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
+    // ROO-3824: Checking -DdevelopmentMode parameter
+    setDevelopmentMode(OSGiUtils.isDevelopmentMode(context));
     workingDir = OSGiUtils.getRooWorkingDirectory(context);
     this.context.addFrameworkListener(new FrameworkListener() {
       public void frameworkEvent(final FrameworkEvent event) {

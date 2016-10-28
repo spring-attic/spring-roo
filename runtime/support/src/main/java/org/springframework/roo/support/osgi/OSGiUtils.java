@@ -18,6 +18,7 @@ import org.springframework.roo.support.ant.PathMatcher;
  * Utility methods relating to OSGi
  * 
  * @author Andrew Swan
+ * @author Juan Carlos García
  * @since 1.2.0
  */
 public final class OSGiUtils {
@@ -33,6 +34,8 @@ public final class OSGiUtils {
    * The root path within an OSGi bundle
    */
   public static final String ROOT_PATH = "/";
+
+  public static final String ROO_DEVELOPMENT_MODE_PROPERTY = "developmentMode";
 
   /**
    * Executes the given callback on any bundles in the given context
@@ -152,6 +155,19 @@ public final class OSGiUtils {
    */
   public static String getRooWorkingDirectory(final ComponentContext componentContext) {
     return componentContext.getBundleContext().getProperty(ROO_WORKING_DIRECTORY_PROPERTY);
+  }
+
+  /**
+   * Returns the value of -DdevelopmentMode property for the given OSGi component context
+   * 
+   * @param componentContext the component context (required)
+   * @return true if developmentMode has been specified as true
+   * @since 2.0
+   */
+  public static boolean isDevelopmentMode(final ComponentContext componentContext) {
+    String developmentMode =
+        componentContext.getBundleContext().getProperty(ROO_DEVELOPMENT_MODE_PROPERTY);
+    return "true".equals(developmentMode);
   }
 
   /**
