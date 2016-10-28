@@ -23,7 +23,7 @@ import org.springframework.roo.shell.*;
 
 /**
  * Shell commands for creating classes, interfaces, and enums.
- * 
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.0
@@ -42,7 +42,7 @@ public class ClasspathCommands implements CommandMarker {
   @CliCommand(value = "class", help = "Creates a new Java class source file in any project path")
   public void createClass(
       @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true,
-          help = "The name of the class to create") final JavaType name,
+          help = "The name of the class to create (mandatory") final JavaType name,
       @CliOption(key = "rooAnnotations", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Whether the generated class should have common Roo annotations") final boolean rooAnnotations,
@@ -94,7 +94,7 @@ public class ClasspathCommands implements CommandMarker {
   @CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
   public void createEnum(
       @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true,
-          help = "The name of the enum to create") final JavaType name,
+          help = "The name of the enum to create (mandatory") final JavaType name,
       @CliOption(key = "path", mandatory = false,
           unspecifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
           specifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
@@ -121,7 +121,7 @@ public class ClasspathCommands implements CommandMarker {
       help = "Creates a new Java interface source file in any project path")
   public void createInterface(
       @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true,
-          help = "The name of the interface to create") final JavaType name,
+          help = "The name of the interface to create (mandatory)") final JavaType name,
       @CliOption(key = "path", mandatory = false,
           unspecifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
           specifiedDefaultValue = "FOCUSED:SRC_MAIN_JAVA",
@@ -148,7 +148,7 @@ public class ClasspathCommands implements CommandMarker {
   public void enumConstant(
       @CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT, help = "The name of the enum class to receive this field") final JavaType name,
-      @CliOption(key = "name", mandatory = true, help = "The name of the constant") final JavaSymbolName fieldName,
+      @CliOption(key = "name", mandatory = true, help = "The name of the constant (mandatory)") final JavaSymbolName fieldName,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
@@ -158,7 +158,7 @@ public class ClasspathCommands implements CommandMarker {
 
   @CliCommand(value = "focus", help = "Changes focus to a different type")
   public void focus(@CliOption(key = "class", mandatory = true, optionContext = UPDATE_PROJECT,
-      help = "The type to focus on") final JavaType type) {
+      help = "The type to focus on (mandatory)") final JavaType type) {
     classpathOperations.focus(type);
   }
 

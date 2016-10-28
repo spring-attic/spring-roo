@@ -29,9 +29,10 @@ public class SettingsCommands implements CommandMarker {
   }
 
   @CliCommand(value = "settings add", help = "Adds or updates a particular setting")
-  public void addSetting(
-      @CliOption(key = "name", mandatory = true, help = "The setting name that should be changed") final String name,
-      @CliOption(key = "value", mandatory = true, help = "The new vale for this settings name") final String value,
+  public void addSetting(@CliOption(key = "name", mandatory = true,
+      help = "The setting name that should be changed (mandatory)") final String name,
+      @CliOption(key = "value", mandatory = true,
+          help = "The new vale for this settings name (mandatory)") final String value,
       ShellContext shellContext) {
 
     settingsOperations.addSetting(name, value, shellContext.isForce());
@@ -39,7 +40,7 @@ public class SettingsCommands implements CommandMarker {
 
   @CliCommand(value = "settings remove", help = "Removes an specific setting from configuration")
   public void removeSetting(@CliOption(key = "name", mandatory = true,
-      help = "The settings name that should be removed") final String name) {
+      help = "The settings name that should be removed (mandatory)") final String name) {
 
     settingsOperations.removeSetting(name);
   }

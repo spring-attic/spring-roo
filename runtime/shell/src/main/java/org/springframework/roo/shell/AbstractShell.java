@@ -476,10 +476,11 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
   @CliCommand(value = {"script"},
       help = "Parses the specified resource file and executes its commands")
-  public void script(@CliOption(key = {"", "file"}, help = "The file to locate and execute",
-      mandatory = true) final File script, @CliOption(key = "lineNumbers", mandatory = false,
-      specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
-      help = "Display line numbers when executing the script") final boolean lineNumbers) {
+  public void script(@CliOption(key = {"", "file"},
+      help = "The file to locate and execute (mandatory)", mandatory = true) final File script,
+      @CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true",
+          unspecifiedDefaultValue = "false",
+          help = "Display line numbers when executing the script") final boolean lineNumbers) {
 
     Validate.notNull(script, "Script file to parse is required");
     final double startedNanoseconds = System.nanoTime();

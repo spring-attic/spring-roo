@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 
 /**
  * Commands for the DTO add-on to be used by the ROO shell.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -100,7 +100,7 @@ public class DtoCommands implements CommandMarker {
           key = "class",
           mandatory = true,
           optionContext = UPDATELAST_PROJECT,
-          help = "Name of the DTO class to create, including package and module (if multimodule project)") final JavaType name,
+          help = "Name of the DTO class to create, including package and module (if multimodule project) (mandatory)") final JavaType name,
       @CliOption(key = "immutable", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false", help = "Whether the DTO should be inmutable") final boolean immutable,
       @CliOption(key = "utilityMethods", mandatory = false, specifiedDefaultValue = "true",
@@ -130,7 +130,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Makes 'entity' option mandatory if 'class' has been defined.
-   * 
+   *
    * @param shellContext
    * @return true if 'class' has been defined, false otherwise.
    */
@@ -148,7 +148,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Makes 'fields' option mandatory if 'entity' has been defined.
-   * 
+   *
    * @param shellContext
    * @return true if 'entity' has been defined, false otherwise.
    */
@@ -166,7 +166,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Makes 'all' option visible only if 'class' option is not specified.
-   * 
+   *
    * @param shellContext
    * @return false if 'class' is specified, true otherwise.
    */
@@ -185,7 +185,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Makes 'class' option visible only if 'all' option is not specified.
-   * 
+   *
    * @param shellContext
    * @return false if 'all' is specified, true otherwise.
    */
@@ -204,7 +204,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Makes 'entity' option visible only if 'class' option is already specified.
-   * 
+   *
    * @param shellContext
    * @return true if 'class' is specified, false otherwise.
    */
@@ -223,7 +223,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Makes 'suffix' option visible only if 'all' option is specified.
-   * 
+   *
    * @param shellContext
    * @return true if 'all' is specified, false otherwise.
    */
@@ -242,7 +242,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Makes 'fields' option visible only if 'entity' option is specified.
-   * 
+   *
    * @param shellContext
    * @return true if 'entity' is specified, false otherwise.
    */
@@ -261,7 +261,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Find entities in project and returns a list with their fully qualified names.
-   * 
+   *
    * @param shellContext
    * @return List<String> with available entity full qualified names.
    */
@@ -293,7 +293,7 @@ public class DtoCommands implements CommandMarker {
       help = "Creates new projection classes from entities in SRC_MAIN_JAVA")
   public void newProjectionClass(
       @CliOption(key = "entity", mandatory = true,
-          help = "Name of the entity which can be used to create the Projection from") final JavaType entity,
+          help = "Name of the entity which can be used to create the Projection from (mandatory)") final JavaType entity,
       @CliOption(
           key = "class",
           mandatory = false,
@@ -302,8 +302,10 @@ public class DtoCommands implements CommandMarker {
       @CliOption(key = "all", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Whether should create one Projection per each entity in the project") final boolean all,
-      @CliOption(key = "fields", mandatory = true,
-          help = "Comma separated list of entity fields to be included into the Projection") final String fields,
+      @CliOption(
+          key = "fields",
+          mandatory = true,
+          help = "Comma separated list of entity fields to be included into the Projection (mandatory)") final String fields,
       @CliOption(
           key = "suffix",
           mandatory = false,
@@ -345,7 +347,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for TopLevelPackage
-   * 
+   *
    * @param cid ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText String current text for option value
    * @return the String representing a JavaType with its name shortened
@@ -388,7 +390,7 @@ public class DtoCommands implements CommandMarker {
     if ((StringUtils.isBlank(currentText) || auxString.startsWith(currentText))
         && StringUtils.contains(javaTypeFullyQualilfiedName, topLevelPackageString)) {
 
-      // Value is for autocomplete only or user wrote abbreviate value  
+      // Value is for autocomplete only or user wrote abbreviate value
       javaTypeString = auxString;
     } else {
 
@@ -401,7 +403,7 @@ public class DtoCommands implements CommandMarker {
 
   /**
    * Gets a list of fields from an entity.
-   * 
+   *
    * @param entity the JavaType from which to obtain the field list.
    * @return a List<FieldMetadata> with info of the entity fields.
    */
@@ -428,11 +430,11 @@ public class DtoCommands implements CommandMarker {
   }
 
   /**
-   * Tries to obtain JavaType indicated in command or which has the focus 
+   * Tries to obtain JavaType indicated in command or which has the focus
    * in the Shell
-   * 
+   *
    * @param shellContext the Roo Shell context
-   * @return JavaType or null if no class has the focus or no class is 
+   * @return JavaType or null if no class has the focus or no class is
    * specified in the command
    */
   private JavaType getTypeFromEntityParam(ShellContext shellContext) {

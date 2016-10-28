@@ -16,7 +16,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Shell commands for {@link UnitTestOperationsImpl}.
- * 
+ *
  * @author Sergio Clares
  * @since 2.0
  */
@@ -36,8 +36,11 @@ public class UnitTestCommands implements CommandMarker {
 
   @CliCommand(value = "test unit", help = "Creates a unit test class for the specified class")
   public void newMockTest(
-      @CliOption(key = "class", mandatory = true, optionContext = UPDATE_PROJECT,
-          help = "The name of the project class which this unit test class is targeting") final JavaType projectType,
+      @CliOption(
+          key = "class",
+          mandatory = true,
+          optionContext = UPDATE_PROJECT,
+          help = "The name of the project class which this unit test class is targeting (mandatory)") final JavaType projectType,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {

@@ -61,7 +61,7 @@ public class MetadataCommands implements CommandMarker {
   @CliCommand(value = METADATA_CACHE_COMMAND,
       help = "Shows detailed metadata for the indicated type")
   public String metadataCacheMaximum(@CliOption(key = {"maximumCapacity"}, mandatory = true,
-      help = "The maximum number of metadata items to cache") final int maxCapacity) {
+      help = "The maximum number of metadata items to cache (mandatory)") final int maxCapacity) {
     Validate.isTrue(maxCapacity >= 100, "Maximum capacity must be 100 or greater");
     metadataService.setMaxCapacity(maxCapacity);
     // Show them that the change has taken place
@@ -71,7 +71,7 @@ public class MetadataCommands implements CommandMarker {
   @CliCommand(value = METADATA_FOR_ID_COMMAND,
       help = "Shows detailed information about the metadata item")
   public String metadataForId(@CliOption(key = {"", "metadataId"}, mandatory = true,
-      help = "The metadata ID (should start with MID:)") final String metadataId) {
+      help = "The metadata ID (should start with MID:) (mandatory)") final String metadataId) {
     final StringBuilder sb = new StringBuilder();
     sb.append("Identifier : ").append(metadataId).append(IOUtils.LINE_SEPARATOR);
 
@@ -117,7 +117,7 @@ public class MetadataCommands implements CommandMarker {
       help = "Shows the ProjectMetadata for the indicated project module")
   public String metadataForModule(
       @CliOption(key = {"", "module"}, mandatory = false, optionContext = INCLUDE_CURRENT_MODULE,
-          help = "The module for which to retrieve the metadata (defaults to the focused module)") final Pom pom) {
+          help = "The module for which to retrieve the metadata; default: the focused module") final Pom pom) {
     final Pom targetPom = ObjectUtils.defaultIfNull(pom, projectOperations.getFocusedModule());
     if (targetPom == null) {
       return "This project has no modules";
@@ -129,7 +129,7 @@ public class MetadataCommands implements CommandMarker {
   @CliCommand(value = METADATA_FOR_TYPE_COMMAND,
       help = "Shows detailed metadata for the indicated type")
   public String metadataForType(@CliOption(key = {"", "type"}, mandatory = true,
-      help = "The Java type for which to display metadata") final JavaType javaType) {
+      help = "The Java type for which to display metadata (mandatory)") final JavaType javaType) {
     final String id = typeLocationService.getPhysicalTypeIdentifier(javaType);
     if (id == null) {
       return "Cannot locate source for " + javaType.getFullyQualifiedTypeName();
@@ -164,7 +164,7 @@ public class MetadataCommands implements CommandMarker {
 
   @CliCommand(value = METADATA_TRACE_COMMAND, help = "Traces metadata event delivery notifications")
   public void metadataTrace(@CliOption(key = {"", "level"}, mandatory = true,
-      help = "The verbosity of notifications (0=none, 1=some, 2=all)") final int level) {
+      help = "The verbosity of notifications (0=none, 1=some, 2=all) (mandatory)") final int level) {
     metadataLogger.setTraceLevel(level);
   }
 }

@@ -24,7 +24,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Allows monitoring of {@link ProcessManager} for development mode users.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Juan Carlos García
@@ -70,8 +70,9 @@ public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject im
     }
   }
 
-  @CliCommand(value = PROCESS_MANAGER_DEBUG_COMMAND,
-      help = "Indicates if process manager debugging is desired")
+  @CliCommand(
+      value = PROCESS_MANAGER_DEBUG_COMMAND,
+      help = "Indicates if process manager debugging is desired. It is only available if 'development mode' is true.")
   public void processManagerDebug(@CliOption(key = {"", "enabled"}, mandatory = false,
       specifiedDefaultValue = "true", unspecifiedDefaultValue = "true",
       help = "Activates debug mode") final boolean debug) {

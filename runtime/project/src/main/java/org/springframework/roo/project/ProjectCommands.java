@@ -98,9 +98,9 @@ public class ProjectCommands implements CommandMarker {
           key = {"topLevelPackage"},
           mandatory = true,
           optionContext = "update",
-          help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+          help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell) (mandatory)") final JavaPackage topLevelPackage,
       @CliOption(key = "projectName",
-          help = "The name of the project (last segment of package name used as default)") final String projectName,
+          help = "The name of the project; default: last segment of package name used") final String projectName,
       @CliOption(key = "multimodule", mandatory = false, specifiedDefaultValue = "STANDARD",
           help = "Option to use a multmodule architecture") final Multimodule multimodule,
       @CliOption(

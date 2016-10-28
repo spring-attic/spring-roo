@@ -28,7 +28,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 /**
  * This class provides necessary commands to be able to include new languages on
  * generated projects.
- * 
+ *
  * @author Sergio Clares
  * @author Juan Carlos García
  * @since 2.0
@@ -57,10 +57,10 @@ public class I18nCommands implements CommandMarker {
 
   /**
    * This indicator checks if --module parameter should be mandatory or not.
-   * 
+   *
    * If focused module doesn't match with the properties of ModuleFeature
    * APPLICATION, --module parameter should be mandatory.
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -76,11 +76,11 @@ public class I18nCommands implements CommandMarker {
 
   /**
    * This indicator checks if --module parameter should be visible or not.
-   * 
+   *
    * If exists more than one module that match with the properties of
    * ModuleFeature APPLICATION, --module parameter should be visible and
    * mandatory.
-   * 
+   *
    * @param shellContext
    * @return
    */
@@ -97,14 +97,18 @@ public class I18nCommands implements CommandMarker {
       value = "web mvc language",
       help = "Install new language in generated project. Also, could be used to specify the default language of the project.")
   public void language(
-      @CliOption(key = "code", mandatory = true, help = "The language code for the desired bundle") final I18n i18n,
+      @CliOption(key = "code", mandatory = true,
+          help = "The language code for the desired bundle (mandatory)") final I18n i18n,
       @CliOption(
           key = "useAsDefault",
           mandatory = false,
           help = "Indicates if selected language should be used as default on this application. By default false.",
           specifiedDefaultValue = "false", unspecifiedDefaultValue = "false") boolean useAsDefault,
-      @CliOption(key = "module", mandatory = true,
-          help = "The application module where to install message bundles",
+      @CliOption(
+          key = "module",
+          mandatory = true,
+          help = "The application module where to install message bundles. This option is not available if there is only one "
+              + "application module (mandatory if the focus is not set in application module)",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
     if (i18n == null) {

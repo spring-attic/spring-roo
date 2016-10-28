@@ -119,8 +119,6 @@ public interface FieldCreatorProvider {
 
   boolean isFetchVisibleForFieldSet(ShellContext shellContext);
 
-  boolean isTransientVisibleForFieldSet(ShellContext shellContext);
-
   boolean isJoinTableVisibleForFieldSet(ShellContext shellContext);
 
   boolean areJoinTableParamsVisibleForFieldList(ShellContext shellContext);
@@ -134,8 +132,6 @@ public interface FieldCreatorProvider {
   boolean isCardinalityVisibleForFieldList(ShellContext shellContext);
 
   boolean isFetchVisibleForFieldList(ShellContext shellContext);
-
-  boolean isTransientVisibleForFieldList(ShellContext shellContext);
 
   boolean isJoinTableVisibleForFieldList(ShellContext shellContext);
 
