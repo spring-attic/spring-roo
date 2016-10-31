@@ -9,9 +9,9 @@
     <meta name="author"
       content="Spring Roo development team" data-th-remove="all"/>
 
-    <link rel="shortcut icon" href="../../public/img/favicon.ico"
+    <link rel="shortcut icon" href="../public/img/favicon.ico"
        data-th-remove="all"/>
-    <link rel="apple-touch-icon" href="../../public/img/apple-touch-icon.png"
+    <link rel="apple-touch-icon" href="../public/img/apple-touch-icon.png"
        data-th-remove="all"/>
     <title data-th-text="|${r"#{"}label_login${r"}"}- ${projectName}|">Login- ${projectName}</title>
 
@@ -121,59 +121,59 @@
             <div class="panel-heading">
               <h1 class="panel-title" data-th-text="${r"#{"}label_login${r"}"}">Login</h1>
             </div>
-            <div class="panel-body"> 
-              <form class="form-horizontal" data-th-action="@{/login}" method="post"> 
-               <fieldset> 
-                <legend class="sr-only" data-th-text="${r"#{help_login}"}">Enter your login and password</legend> 
-                <div data-th-if="${r"${param.error}"}" class="alert alert-danger" role="alert"> 
-                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> 
-                 <span class="sr-only" data-th-text="|${r"#{label_error}"}:|">Error:</span> 
-                 <span data-th-text="${r"#{error_login}"}">Invalid user and password</span> 
-                </div> 
-                <div data-th-if="${r"${param.logout}"}" class="alert alert-success" role="alert"> 
-                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
-                 <span data-th-text="${r"#{info_closed_session}"}">Log out correctly</span> 
-                </div> 
-                <div data-th-if="${r"${param.expired}"}" class="alert alert-danger" role="alert"> 
-                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> 
-                 <span class="sr-only" data-th-text="|${r"#{label_error}"}:|">Error:</span> 
-                 <span data-th-text="${r"#{error_expired_session}"}">Your session has expired</span> 
-                </div> 
-                <div class="form-group has-error has-feedback" data-z="z" id="username" 
-                    data-th-classappend="${r"${param.error}"}? 'has-error has-feedback'" 
-                    data-th-class="form-group"> 
-                 <label for="username" class="col-md-3 control-label" data-th-text="${r"#{label_login_username}"}">username</label> 
-                 <div class="col-md-6"> 
-                  <input id="username" name="username" type="text" 
-                      class="form-control" placeholder="username" 
-                      data-th-placeholder="${r"#{label_login_username}"}" data-toggle="tooltip" 
-                      aria-describedby="usernameStatus" /> 
-                  <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'" 
-                      class="glyphicon glyphicon-remove form-control-feedback" 
-                      data-th-if="${r"${param.error}"}" aria-hidden="true"></span> 
+            <div class="panel-body">
+              <form class="form-horizontal" data-th-action="@{/login}" method="post">
+               <fieldset>
+                <legend class="sr-only" data-th-text="${r"#{help_login}"}">Enter your login and password</legend>
+                <div data-th-if="${r"${param.error}"}" class="alert alert-danger" role="alert">
+                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                 <span class="sr-only" data-th-text="|${r"#{label_error}"}:|">Error:</span>
+                 <span data-th-text="${r"#{error_login}"}">Invalid user and password</span>
+                </div>
+                <div data-th-if="${r"${param.logout}"}" class="alert alert-success" role="alert">
+                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                 <span data-th-text="${r"#{info_closed_session}"}">Log out correctly</span>
+                </div>
+                <div data-th-if="${r"${param.expired}"}" class="alert alert-danger" role="alert">
+                 <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                 <span class="sr-only" data-th-text="|${r"#{label_error}"}:|">Error:</span>
+                 <span data-th-text="${r"#{error_expired_session}"}">Your session has been expired</span>
+                </div>
+                <div class="form-group has-error has-feedback" data-z="z" id="username"
+                    data-th-classappend="${r"${param.error}"}? 'has-error has-feedback'"
+                    data-th-class="form-group">
+                 <label for="username" class="col-md-3 control-label" data-th-text="${r"#{label_login_username}"}">Username</label>
+                 <div class="col-md-6">
+                  <input id="username" name="username" type="text"
+                      class="form-control" placeholder="Username"
+                      data-th-placeholder="${r"#{label_login_username}"}" data-toggle="tooltip"
+                      aria-describedby="usernameStatus" />
+                  <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'"
+                      class="glyphicon glyphicon-remove form-control-feedback"
+                      data-th-if="${r"${param.error}"}" aria-hidden="true"></span>
                  </div>
-                </div> 
-                <div class="form-group has-error has-feedback" data-z="z" id="password" 
-                    data-th-classappend="${r"${param.error}"}? 'has-error has-feedback'" data-th-class="form-group"> 
-                 <label for="password" class="col-md-3 control-label" data-th-text="${r"#{label_login_password}"}">password</label> 
-                 <div class="col-md-6"> 
-                  <input id="password" name="password" type="password" 
-                      class="form-control" placeholder="password" data-th-placeholder="${r"#{label_login_password}"}" 
-                      data-toggle="tooltip" aria-describedby="passwordStatus" /> 
-                  <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'" 
-                      class="glyphicon glyphicon-remove form-control-feedback" data-th-if="${r"${param.error}"}" 
-                      aria-hidden="true"></span> 
-                 </div> 
-                </div> 
-                <div class="form-group"> 
-                 <div class="col-md-9 col-md-offset-3"> 
-                  <button type="reset" class="btn btn-default" data-th-text="${r"#{label_reset}"}">Cancel</button> 
-                  <button type="submit" class="btn btn-primary" data-th-text="${r"#{label_submit}"}">Accept</button> 
-                 </div> 
-                </div> 
-               </fieldset> 
-              </form> 
-             </div> 
+                </div>
+                <div class="form-group has-error has-feedback" data-z="z" id="password"
+                    data-th-classappend="${r"${param.error}"}? 'has-error has-feedback'" data-th-class="form-group">
+                 <label for="password" class="col-md-3 control-label" data-th-text="${r"#{label_login_password}"}">Password</label>
+                 <div class="col-md-6">
+                  <input id="password" name="password" type="password"
+                      class="form-control" placeholder="Password" data-th-placeholder="${r"#{label_login_password}"}"
+                      data-toggle="tooltip" aria-describedby="passwordStatus" />
+                  <span data-th-classappend="${r"${param.error}"}? 'glyphicon glyphicon-remove form-control-feedback'"
+                      class="glyphicon glyphicon-remove form-control-feedback" data-th-if="${r"${param.error}"}"
+                      aria-hidden="true"></span>
+                 </div>
+                </div>
+                <div class="form-group">
+                 <div class="col-md-9 col-md-offset-3">
+                  <button type="reset" class="btn btn-default" data-th-text="${r"#{label_reset}"}">Cancel</button>
+                  <button type="submit" class="btn btn-primary" data-th-text="${r"#{label_submit}"}">Accept</button>
+                 </div>
+                </div>
+               </fieldset>
+              </form>
+             </div>
           </div>
         </div>
         <!--/content-->
