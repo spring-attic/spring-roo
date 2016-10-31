@@ -158,8 +158,7 @@
                   <a class="dropdown-toggle" data-toggle="dropdown" role="button"
                     aria-haspopup="true" aria-expanded="false">
                     <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;
-                    <span class="hidden-sm" data-sec-authentication="principal.username"
-                      data-th-text="${r"#{"}label_user${r"}"}">User</span>
+                    <span class="hidden-sm" data-sec-authentication="principal.username">User</span>
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu">

@@ -12,10 +12,8 @@
     Only the internal content of the following div is included within
     the template, in session fragment
     -->
-    <div data-layout-fragment="languages">
-
+    <ul data-layout-fragment="languages">
       <!-- Language -->
-      <ul class="nav navbar-nav navbar-right upper-nav languages">
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" role="button"
             aria-haspopup="true" aria-expanded="false">
@@ -40,9 +38,7 @@
       		 </#if>
     	     </ul>
         </li>
-      </ul>
-
-    </div>
+    </ul>
 
   </body>
   </#if>
