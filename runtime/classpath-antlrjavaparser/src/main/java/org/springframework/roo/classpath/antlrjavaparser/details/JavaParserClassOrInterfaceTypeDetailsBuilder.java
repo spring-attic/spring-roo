@@ -215,8 +215,8 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements
     for (final JavaType param : name.getParameters()) {
       final JavaSymbolName arg = param.getArgName();
       // Fortunately type names can only appear at the top-level
-      if (arg != null && !JavaType.WILDCARD_NEITHER.equals(arg)
-          && !JavaType.WILDCARD_EXTENDS.equals(arg) && !JavaType.WILDCARD_SUPER.equals(arg)) {
+      if (arg != null && !JavaType.WILDCARD_NEITHER_ARG.equals(arg)
+          && !JavaType.WILDCARD_EXTENDS_ARG.equals(arg) && !JavaType.WILDCARD_SUPER_ARG.equals(arg)) {
         typeParameterNames.add(arg);
       }
     }

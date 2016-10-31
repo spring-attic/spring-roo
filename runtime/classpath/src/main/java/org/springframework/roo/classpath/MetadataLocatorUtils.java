@@ -59,8 +59,8 @@ public class MetadataLocatorUtils<CONTEXT> implements MetadataNotificationListen
 
   private final LocatorEvaluator<CONTEXT> evaluator;
 
-  private final Map<JavaType, Set<ClassOrInterfaceTypeDetails>> cacheMap =
-      new HashMap<JavaType, Set<ClassOrInterfaceTypeDetails>>();
+  private final Map<JavaType, Map<CONTEXT, Set<ClassOrInterfaceTypeDetails>>> cacheMap =
+      new HashMap<JavaType, Map<CONTEXT, Set<ClassOrInterfaceTypeDetails>>>();
 
   /**
    * stores current cache values with cacheMap keys.
@@ -108,10 +108,17 @@ public class MetadataLocatorUtils<CONTEXT> implements MetadataNotificationListen
    * @return
    */
   public Collection<ClassOrInterfaceTypeDetails> getValue(final JavaType type, final CONTEXT context) {
+    Map<CONTEXT, Set<ClassOrInterfaceTypeDetails>> currentMap;
     if (!cacheMap.containsKey(type)) {
-      cacheMap.put(type, new HashSet<ClassOrInterfaceTypeDetails>());
+      currentMap = new HashMap<CONTEXT, Set<ClassOrInterfaceTypeDetails>>();
+      cacheMap.put(type, currentMap);
+    } else {
+      currentMap = cacheMap.get(type);
     }
-    final Set<ClassOrInterfaceTypeDetails> existing = cacheMap.get(type);
+    if (!currentMap.containsKey(context)) {
+      currentMap.put(context, new HashSet<ClassOrInterfaceTypeDetails>());
+    }
+    final Set<ClassOrInterfaceTypeDetails> existing = currentMap.get(context);
     final Set<ClassOrInterfaceTypeDetails> located = evaluator.getAllPosibilities(context);
     if (existing.containsAll(located)) {
       return existing;
@@ -125,6 +132,8 @@ public class MetadataLocatorUtils<CONTEXT> implements MetadataNotificationListen
         cacheMapInverse.put(cid.getName(), type);
       }
     }
+    existing.clear();
+    existing.addAll(toReturn.values());
     return toReturn.values();
   }
 

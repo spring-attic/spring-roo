@@ -2,21 +2,14 @@ package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import static org.springframework.roo.model.RooJavaType.ROO_CONTROLLER;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.javabean.addon.JavaBeanMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
+import org.springframework.roo.addon.layers.service.addon.ServiceLocator;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.plural.addon.PluralService;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
@@ -32,17 +25,22 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.MetadataDependencyRegistryTracker;
-import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JpaJavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link ControllerMetadataProvider}.
@@ -65,6 +63,7 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
   protected CustomDataKeyDecoratorTracker keyDecoratorTracker = null;
 
   private ServiceInstaceManager serviceInstaceManager = new ServiceInstaceManager();
+
 
   /**
    * This service is being activated so setup it:
@@ -154,31 +153,33 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
       final String metadataIdentificationString, final JavaType aspectName,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 
-    AnnotationMetadata controllerAnnotation =
-        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getAnnotation(
-            RooJavaType.ROO_CONTROLLER);
+    ControllerAnnotationValues controllerValues =
+        new ControllerAnnotationValues(governorPhysicalTypeMetadata);
 
     // Getting entity
-    JavaType entity = (JavaType) controllerAnnotation.getAttribute("entity").getValue();
+    final JavaType entity = controllerValues.getEntity();
+
+    ClassOrInterfaceTypeDetails entityDetails = getTypeLocationService().getTypeDetails(entity);
+    // Get entity metadata
+    final String entityMetadataId = JpaEntityMetadata.createIdentifier(entityDetails);
+    registerDependency(entityMetadataId, metadataIdentificationString);
+    final JpaEntityMetadata entityMetadata = getMetadataService().get(entityMetadataId);
 
     // Getting type
-    ControllerType type =
-        ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
-            .getValue()).getField().getSymbolName());
+    ControllerType type = controllerValues.getType();
 
     // Getting pathPrefix
-    AnnotationAttributeValue<Object> pathPrefixAttr =
-        controllerAnnotation.getAttribute("pathPrefix");
     String pathPrefix = "";
-    if (pathPrefixAttr != null) {
-      pathPrefix = StringUtils.lowerCase((String) pathPrefixAttr.getValue());
+    if (controllerValues.getPathPrefix() != null) {
+      pathPrefix = StringUtils.lowerCase(controllerValues.getPathPrefix());
     }
 
     // Getting related service
-    JavaType service = getService(entity);
-
-    // Getting identifierType
-    JavaType identifierType = getPersistenceMemberLocator().getIdentifierType(entity);
+    ClassOrInterfaceTypeDetails serviceDetails = getServiceLocator().getService(entity);
+    JavaType service = serviceDetails.getType();
+    final String serviceMetadataId = ServiceMetadata.createIdentifier(serviceDetails);
+    registerDependency(serviceMetadataId, metadataIdentificationString);
+    final ServiceMetadata serviceMetadata = getMetadataService().get(serviceMetadataId);
 
     // Generate path
     String path = "/".concat(StringUtils.lowerCase(getPluralService().getPlural(entity)));
@@ -189,73 +190,31 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
       path = pathPrefix.concat(path);
     }
 
-    // Check if is necessary to include service fields of Set and List
-    // fields
-    Set<ClassOrInterfaceTypeDetails> allDefinedServices =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_SERVICE);
 
-    MemberDetails entityDetails = getMemberDetails(entity);
-    List<FieldMetadata> entityFields = entityDetails.getFields();
 
-    List<JavaType> detailsService = new ArrayList<JavaType>();
+    RelationInfo detailsFieldInfo = null;
+    JavaType detailsService = null;
+    ServiceMetadata detailsServiceMetadata = null;
 
-    for (FieldMetadata field : entityFields) {
-
-      // If entity has some Set or List field, maybe is necessary to
-      // generate details service
-      if (field.getFieldType().getFullyQualifiedTypeName().equals(Set.class.getName())
-          || field.getFieldType().getFullyQualifiedTypeName().equals(List.class.getName())) {
-
-        // Getting inner type
-        JavaType detailType = field.getFieldType().getBaseType();
-        // Check if provided inner type is an entity annotated with
-        // @RooJPAEntity
-        if (detailType != null
-            && getTypeLocationService().getTypeDetails(detailType) != null
-            && getTypeLocationService().getTypeDetails(detailType).getAnnotation(
-                RooJavaType.ROO_JPA_ENTITY) != null) {
-          // Getting service that manages detail type
-          for (ClassOrInterfaceTypeDetails detailService : allDefinedServices) {
-            AnnotationAttributeValue<JavaType> entityServiceAttr =
-                detailService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
-            if (entityServiceAttr != null && entityServiceAttr.getValue().equals(detailType)
-                && !detailsService.contains(detailService.getType())) {
-              detailsService.add(detailService.getType());
-            }
-          }
-        }
-
-      }
-    }
-
-    // Register dependency between JavaBeanMetadata and this one
-    final LogicalPath logicalPath =
-        PhysicalTypeIdentifier.getPath(getTypeLocationService().getTypeDetails(entity)
-            .getDeclaredByMetadataId());
-    final String javaBeanMetadataKey =
-        JavaBeanMetadata.createIdentifier(
-            getTypeLocationService().getTypeDetails(entity).getType(), logicalPath);
-    registerDependency(javaBeanMetadataKey, metadataIdentificationString);
-
-    // Getting service metadata
-    ClassOrInterfaceTypeDetails serviceDetails = getTypeLocationService().getTypeDetails(service);
-    final LogicalPath serviceLogicalPath =
-        PhysicalTypeIdentifier.getPath(serviceDetails.getDeclaredByMetadataId());
-    final String serviceMetadataKey =
-        ServiceMetadata.createIdentifier(serviceDetails.getType(), serviceLogicalPath);
-    final ServiceMetadata serviceMetadata =
-        (ServiceMetadata) getMetadataService().get(serviceMetadataKey);
-
-    ControllerDetailInfo controllerDetailInfo = null;
     if (type == ControllerType.DETAIL) {
+      // TODO
       // generate detail info object
-      controllerDetailInfo = getControllerDetailInfo(governorPhysicalTypeMetadata, path, entity);
+      detailsFieldInfo = getControllerDetailInfo(governorPhysicalTypeMetadata, entityMetadata);
+
+      // Getting related service
+      ClassOrInterfaceTypeDetails detailsServiceDetails =
+          getServiceLocator().getService(detailsFieldInfo.childType);
+      detailsService = detailsServiceDetails.getType();
+      final String detailServiceMetadataId =
+          ServiceMetadata.createIdentifier(detailsServiceDetails);
+      registerDependency(detailServiceMetadataId, metadataIdentificationString);
+      detailsServiceMetadata = getMetadataService().get(detailServiceMetadataId);
+
     }
 
-    return new ControllerMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, entity, service, detailsService, path, type, identifierType,
-        serviceMetadata, controllerDetailInfo);
+    return new ControllerMetadata(metadataIdentificationString, aspectName, controllerValues,
+        governorPhysicalTypeMetadata, entity, entityMetadata, service, detailsService, path, type,
+        serviceMetadata, detailsServiceMetadata, detailsFieldInfo);
   }
 
   private void registerDependency(final String upstreamDependency, final String downStreamDependency) {
@@ -280,82 +239,38 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
    *
    * @return Information about detail
    */
-  private ControllerDetailInfo getControllerDetailInfo(
-      PhysicalTypeMetadata governorPhysicalTypeMetadata, String path, JavaType entity) {
-
-    ControllerDetailInfo controllerDetailInfo = new ControllerDetailInfo();
+  private RelationInfo getControllerDetailInfo(
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata,
+      final JpaEntityMetadata entityMetadata) {
+    final JavaType controller =
+        governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
 
     // Getting the relationField from @RooDetail entity
-    AnnotationAttributeValue<Object> relationFieldAttr =
+    final AnnotationAttributeValue<Object> relationFieldAttr =
         governorPhysicalTypeMetadata.getMemberHoldingTypeDetails()
             .getAnnotation(RooJavaType.ROO_DETAIL).getAttribute("relationField");
 
-    if (relationFieldAttr == null) {
-      LOGGER.log(Level.INFO,
-          "ERROR: In %s controller, @RooDetail annotation must have relationField value",
-          governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
-      return null;
-    }
+    Validate.notNull(relationFieldAttr,
+        "ERROR: In %s controller, @RooDetail annotation must have relationField value", controller);
 
-    String relationField = (String) relationFieldAttr.getValue();
+    final String relationField = (String) relationFieldAttr.getValue();
 
-    if (StringUtils.isEmpty(relationField)) {
-      LOGGER.log(Level.INFO,
-          "ERROR: In %s controller, @RooDetail annotation must have relationField value",
-          governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
-      return null;
-    }
+    Validate.isTrue(StringUtils.isNotBlank(relationField),
+        "ERROR: In %s controller, @RooDetail annotation must have relationField value", controller);
+    final RelationInfo info = entityMetadata.getRelationInfos().get(relationField);
 
-    // get detail path
-    String[] relationFieldParts = relationField.split("[.]");
-    String pathDetail = path;
-    if (relationFieldParts.length == 1) {
-      pathDetail = pathDetail.concat("/{id}/").concat(relationFieldParts[0]);
-    } else {
-      pathDetail =
-          pathDetail.concat("/").concat("{")
-              .concat(StringUtils.lowerCase(entity.getSimpleTypeName())).concat("}/");
-      int count = 0;
-      while (count < relationFieldParts.length - 2) {
-        pathDetail = pathDetail.concat(relationFieldParts[count]);
-        pathDetail =
-            pathDetail.concat("/").concat("{").concat(relationFieldParts[count]).concat("}/");
-        count++;
-      }
-      pathDetail = pathDetail.concat(relationFieldParts[count]);
-      pathDetail = pathDetail.concat("/{id}/").concat(relationFieldParts[count + 1]);
+    Validate.notNull(info,
+        "ERROR: In %s controller, @RooDetail.relationField '%s' not found on '%s' entity",
+        controller, relationField, entityMetadata.getDestination());
 
-    }
-    controllerDetailInfo.setPath(pathDetail);
+    Validate
+        .isTrue(
+            info.cardinality == Cardinality.ONE_TO_MANY
+                || info.cardinality == Cardinality.MANY_TO_MANY,
+            "ERROR: In %s controller, @RooDetail.relationField '%s' has unsupported type (%s) on '%s' entity: should be ONE_TO_MANY or MANY_TO_MANY",
+            controller, relationField, info.cardinality.name(), entityMetadata.getDestination());
 
-    // get detail entity and detail patern entity
-    JavaType detailEntity = getEntityFromRelationField(relationFieldParts, entity, 0);
-    JavaType parentDetailEntity = entity;
-    if (relationFieldParts.length > 1) {
-      String[] parentRelationFieldParts =
-          Arrays.copyOf(relationFieldParts, relationFieldParts.length - 1);
-      parentDetailEntity = getEntityFromRelationField(parentRelationFieldParts, entity, 0);
-    }
-
-    // Getting & setting entities
-    controllerDetailInfo.setEntity(detailEntity);
-    controllerDetailInfo.setParentEntity(parentDetailEntity);
-
-    // Getting & set services
-    controllerDetailInfo.setService(getService(detailEntity));
-    controllerDetailInfo.setParentService(getService(parentDetailEntity));
-
-    // Getting & setting parent identifier type
-    controllerDetailInfo.setParentIdentifierType(getPersistenceMemberLocator().getIdentifierType(
-        entity));
-
-    // Getting & setting parent field name
-    controllerDetailInfo
-        .setParentReferenceFieldName(relationFieldParts[relationFieldParts.length - 1]);
-
-
-    return controllerDetailInfo;
-
+    return info;
   }
 
   /**
@@ -394,33 +309,6 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
     return entityTypeToCalculate;
   }
 
-  /**
-   * Get the service related with a entity
-   *
-   * @param entity Entity over wich search the service
-   *
-   * @return The service related with the entity
-   */
-  private JavaType getService(JavaType entity) {
-    // Getting related service
-    JavaType service = null;
-    Set<ClassOrInterfaceTypeDetails> services =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_SERVICE);
-    Iterator<ClassOrInterfaceTypeDetails> itServices = services.iterator();
-
-    while (itServices.hasNext()) {
-      ClassOrInterfaceTypeDetails existingService = itServices.next();
-      AnnotationAttributeValue<Object> entityAttr =
-          existingService.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity");
-      if (entityAttr != null && entityAttr.getValue().equals(entity)) {
-        service = existingService.getType();
-      }
-    }
-
-    return service;
-  }
-
   public String getProvidesType() {
     return ControllerMetadata.getMetadataIdentiferType();
   }
@@ -429,5 +317,9 @@ public class ControllerMetadataProviderImpl extends AbstractMemberDiscoveringItd
 
   private PluralService getPluralService() {
     return serviceInstaceManager.getServiceInstance(this, PluralService.class);
+  }
+
+  private ServiceLocator getServiceLocator() {
+    return serviceInstaceManager.getServiceInstance(this, ServiceLocator.class);
   }
 }

@@ -15,6 +15,8 @@ import org.springframework.roo.addon.web.mvc.views.components.EntityItem;
 import org.springframework.roo.addon.web.mvc.views.components.FieldItem;
 import org.springframework.roo.addon.web.mvc.views.components.MenuEntry;
 import org.springframework.roo.addon.web.mvc.views.template.engines.AbstractFreeMarkerViewGenerationService;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.settings.project.ProjectSettingsService;
@@ -45,6 +47,11 @@ public class ThymeleafViewGenerator extends AbstractFreeMarkerViewGenerationServ
 
   @Reference
   ProjectSettingsService projectSettings;
+
+  @Override
+  public JavaType getType() {
+    return RooJavaType.ROO_THYMELEAF;
+  }
 
   @Override
   public String getName() {

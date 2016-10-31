@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.web.mvc.thymeleaf.addon;
 
-import java.util.List;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.addon.web.mvc.thymeleaf.annotations.RooThymeleafMainController;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -9,17 +7,26 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.ImportRegistrationResolver;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Metadata for {@link RooThymeleafMainController}.
- * 
+ *
  * @author Juan Carlos García
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -60,21 +67,17 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
 
   /**
    * Constructor
-   * 
+   *
    * @param identifier the identifier for this item of metadata (required)
    * @param aspectName the Java type of the ITD (required)
    * @param governorPhysicalTypeMetadata the governor, which is expected to
    *            contain a {@link ClassOrInterfaceTypeDetails} (required)
-   * @param indexMethod MethodMetadata
-   * @param typesToImport List<JavaType>
    */
   public ThymeleafMainControllerMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, MethodMetadata indexMethod,
-      final List<JavaType> typesToImport) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
-    this.importResolver = builder.getImportRegistrationResolver();
-    this.indexMethod = indexMethod;
+    this.indexMethod = getIndexMethod();
 
     // Add @Controller annotation
     ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONTROLLER_ANNOTATION));
@@ -82,20 +85,67 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
     // Add index method
     ensureGovernorHasMethod(new MethodMetadataBuilder(indexMethod));
 
-    // Adding all necessary types to import
-    importResolver.addImports(typesToImport);
-
     // Build the ITD
     itdTypeDetails = builder.build();
   }
 
+  /*
+   * =====================================================================================
+   */
   /**
-   * This method returns the index method of Thymeleaf 
+   * This method provides the "index" method that returns Thymeleaf view
+   *
+   * @return MethodMetadata
+   */
+  private MethodMetadata getIndexMethod() {
+
+    // Define methodName
+    final JavaSymbolName methodName = new JavaSymbolName("index");
+
+    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+    parameterTypes.add(AnnotatedJavaType.convertFromJavaType(SpringJavaType.MODEL));
+
+    final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+    parameterNames.add(new JavaSymbolName("model"));
+
+    MethodMetadata existingMethod =
+        getGovernorMethod(methodName,
+            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
+    if (existingMethod != null) {
+      return existingMethod;
+    }
+    // Adding annotations
+    final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+    // Adding @GetMapping annotation
+    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING));
+
+    // Generate body
+    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+    // Always save locale
+    bodyBuilder.appendFormalLine(
+        "model.addAttribute(\"application_locale\", %s.getLocale().getLanguage());",
+        getNameOfJavaType(SpringJavaType.LOCALE_CONTEXT_HOLDER));
+
+    // return "index";
+    bodyBuilder.appendFormalLine("return \"index\";");
+
+    MethodMetadataBuilder methodBuilder =
+        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING,
+            parameterTypes, parameterNames, bodyBuilder);
+    methodBuilder.setAnnotations(annotations);
+
+    return methodBuilder.build();
+  }
+
+  /**
+   * This method returns the index method of Thymeleaf
    * main controller
-   * 
+   *
    * @return
    */
-  public MethodMetadata getIndexMethod() {
+  public MethodMetadata getCurrentIndexMethod() {
     return this.indexMethod;
   }
 

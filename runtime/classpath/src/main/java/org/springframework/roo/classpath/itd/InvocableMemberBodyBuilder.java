@@ -43,6 +43,16 @@ public class InvocableMemberBodyBuilder {
   }
 
   /**
+   * Prints the message, WITHOUT ANY INDENTATION.
+   */
+  public InvocableMemberBodyBuilder append(final String message, final Object... values) {
+    if (message != null && !"".equals(message)) {
+      stringBuilder.append(String.format(message, values));
+    }
+    return this;
+  }
+
+  /**
    * Prints the message, after adding indents and returns to a new line. This
    * is the most commonly used method.
    */

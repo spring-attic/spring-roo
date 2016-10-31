@@ -39,6 +39,8 @@ public final class SpringJavaType {
   public static final JavaType COMPONENT = new JavaType("org.springframework.stereotype.Component");
   public static final JavaType CONFIGURABLE = new JavaType(
       "org.springframework.beans.factory.annotation.Configurable");
+  public static final JavaType CONFIGURATION = new JavaType(
+      "org.springframework.context.annotation.Configuration");
   public static final JavaType CONTEXT_CONFIGURATION = new JavaType(
       "org.springframework.test.context.ContextConfiguration");
   public static final JavaType CONTEXT_LOADER_LISTENER = new JavaType(
@@ -56,6 +58,8 @@ public final class SpringJavaType {
   public static final JavaType DATA_ID = new JavaType("org.springframework.data.annotation.Id");
   public static final JavaType DATE_TIME_FORMAT = new JavaType(
       "org.springframework.format.annotation.DateTimeFormat");
+  public static final JavaType DELETE_MAPPING = new JavaType(
+      "org.springframework.web.bind.annotation.DeleteMapping");
   public static final JavaType DISPATCHER_SERVLET = new JavaType(
       "org.springframework.web.servlet.DispatcherServlet");
   public static final JavaType ENABLE_CACHING = new JavaType(
@@ -67,6 +71,8 @@ public final class SpringJavaType {
       "org.springframework.format.FormatterRegistry");
   public static final JavaType FORMATTING_CONVERSION_SERVICE = new JavaType(
       "org.springframework.format.support.FormattingConversionService");
+  public static final JavaType GET_MAPPING = new JavaType(
+      "org.springframework.web.bind.annotation.GetMapping");
   public static final JavaType HIDDEN_HTTP_METHOD_FILTER = new JavaType(
       "org.springframework.web.filter.HiddenHttpMethodFilter");
   public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");
@@ -89,16 +95,24 @@ public final class SpringJavaType {
       "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
   public static final JavaType LOCALE_CONTEXT_HOLDER = new JavaType(
       "org.springframework.context.i18n.LocaleContextHolder");
+  public static final JavaType LOCALE_RESOLVER = new JavaType(
+      "org.springframework.web.servlet.LocaleResolver");
   public static final JavaType LOCAL_VALIDATOR_FACTORY_BEAN = new JavaType(
       "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean");
   public static final JavaType MAIL_SENDER = new JavaType("org.springframework.mail.MailSender");
   public static final JavaType MEDIA_TYPE = new JavaType("org.springframework.http.MediaType");
+  public static final JavaType MESSAGE_SOURCE = new JavaType(
+      "org.springframework.context.MessageSource");
   public static final JavaType MOCK_STATIC_ENTITY_METHODS = new JavaType(
       "org.springframework.mock.staticmock.MockStaticEntityMethods");
   public static final JavaType MODEL = new JavaType("org.springframework.ui.Model");
   public static final JavaType MODEL_ATTRIBUTE = new JavaType(
       "org.springframework.web.bind.annotation.ModelAttribute");
+  public static final JavaType MODEL_AND_VIEW = new JavaType(
+      "org.springframework.web.servlet.ModelAndView");
   public static final JavaType MODEL_MAP = new JavaType("org.springframework.ui.ModelMap");
+  public static final JavaType MVC_URI_COMPONENTS_BUILDER = new JavaType(
+      "org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder");
   public static final JavaType NUMBER_FORMAT = new JavaType(
       "org.springframework.format.annotation.NumberFormat");
   public static final JavaType OPEN_ENTITY_MANAGER_IN_VIEW_FILTER = new JavaType(
@@ -125,10 +139,14 @@ public final class SpringJavaType {
       "org.springframework.security.access.prepost.PostAuthorize");
   public static final JavaType POST_FILTER = new JavaType(
       "org.springframework.security.access.prepost.PostFilter");
+  public static final JavaType POST_MAPPING = new JavaType(
+      "org.springframework.web.bind.annotation.PostMapping");
   public static final JavaType PROPAGATION = new JavaType(
       "org.springframework.transaction.annotation.Propagation");
   public static final JavaType PRIMARY = new JavaType(
       "org.springframework.context.annotation.Primary");
+  public static final JavaType PUT_MAPPING = new JavaType(
+      "org.springframework.web.bind.annotation.PutMapping");
   public static final JavaType REDIRECT_ATTRIBUTES = new JavaType(
       "org.springframework.web.servlet.mvc.support.RedirectAttributes");
   public static final JavaType REPOSITORY = new JavaType(
@@ -145,13 +163,18 @@ public final class SpringJavaType {
       "org.springframework.web.bind.annotation.ResponseBody");
   public static final JavaType RESPONSE_ENTITY = new JavaType(
       "org.springframework.http.ResponseEntity");
+  public static final JavaType REST_CONTROLLER = new JavaType(
+      "org.springframework.web.bind.annotation.RestController");
   public static final JavaType SPRING_BOOT_APPLICATION = new JavaType(
       "org.springframework.boot.autoconfigure.SpringBootApplication");
   public static final JavaType SERVICE = new JavaType("org.springframework.stereotype.Service");
+  public static final JavaType SESSION_LOCALE_RESOLVER = new JavaType(
+      "org.springframework.web.servlet.i18n.SessionLocaleResolver");
   public static final JavaType SIMPLE_MAIL_MESSAGE = new JavaType(
       "org.springframework.mail.SimpleMailMessage");
   public static final JavaType SIMPLE_TYPE_CONVERTER = new JavaType(
       "org.springframework.beans.SimpleTypeConverter");
+  public static final JavaType STRING_UTILS = new JavaType("org.springframework.util.StringUtils");
   public static final JavaType TRANSACTIONAL = new JavaType(
       "org.springframework.transaction.annotation.Transactional");
   public static final JavaType URI_UTILS = new JavaType("org.springframework.web.util.UriUtils");
@@ -161,7 +184,12 @@ public final class SpringJavaType {
       "org.springframework.web.util.UriComponentsBuilder");
   public static final JavaType VALUE = new JavaType(
       "org.springframework.beans.factory.annotation.Value");
+  public static final JavaType WEB_DATA_BINDER = new JavaType(
+      "org.springframework.web.bind.WebDataBinder");
+  public static final JavaType WEB_MVC_CONFIGURER_ADAPTER = new JavaType(
+      "org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter");
   public static final JavaType WEB_UTILS = new JavaType("org.springframework.web.util.WebUtils");
+
 
   /**
    * Returns the {@link JavaType} for a Spring converter

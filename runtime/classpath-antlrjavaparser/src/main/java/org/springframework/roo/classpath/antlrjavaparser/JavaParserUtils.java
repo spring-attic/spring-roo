@@ -257,7 +257,7 @@ public final class JavaParserUtils {
 
     if ("?".equals(nameToFind.getName())) {
       return new JavaType(OBJECT.getFullyQualifiedTypeName(), 0, DataType.TYPE,
-          JavaType.WILDCARD_NEITHER, null);
+          JavaType.WILDCARD_NEITHER_ARG, null);
     }
 
     // Unqualified name detected, so check if it's in the type parameter
@@ -372,16 +372,17 @@ public final class JavaParserUtils {
         final ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
         final JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit, typeParameters);
         return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(),
-            effectiveType.getDataType(), JavaType.WILDCARD_SUPER, effectiveType.getParameters());
+            effectiveType.getDataType(), JavaType.WILDCARD_SUPER_ARG, effectiveType.getParameters());
       } else if (wt.getExtends() != null) {
         final ReferenceType rt = wt.getExtends();
         final ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
         final JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit, typeParameters);
         return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(),
-            effectiveType.getDataType(), JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());
+            effectiveType.getDataType(), JavaType.WILDCARD_EXTENDS_ARG,
+            effectiveType.getParameters());
       } else {
         return new JavaType(OBJECT.getFullyQualifiedTypeName(), 0, DataType.TYPE,
-            JavaType.WILDCARD_NEITHER, null);
+            JavaType.WILDCARD_NEITHER_ARG, null);
       }
     }
 

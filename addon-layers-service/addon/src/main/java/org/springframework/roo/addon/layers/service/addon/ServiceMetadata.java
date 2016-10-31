@@ -8,6 +8,7 @@ import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.Relation
 import org.springframework.roo.addon.jpa.annotations.entity.JpaRelationType;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
 import org.springframework.roo.addon.layers.service.annotations.RooService;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -38,6 +39,7 @@ import java.util.TreeSet;
  * Metadata for {@link RooService}.
  *
  * @author Juan Carlos García
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -74,6 +76,12 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+  }
+
+  public static String createIdentifier(ClassOrInterfaceTypeDetails details) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(details.getDeclaredByMetadataId());
+    return createIdentifier(details.getType(), logicalPath);
   }
 
   public static JavaType getJavaType(final String metadataIdentificationString) {
@@ -862,52 +870,95 @@ public class ServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
     return this.customCountMethods;
   }
 
+  /**
+   * @return related repository
+   */
   public JavaType getRepositoryType() {
     return RepositoryJpaMetadata.getJavaType(repositoryMetadata.getId());
   }
 
+  /**
+   * @return method save(obj) method implemented in service
+   */
   public MethodMetadata getCurrentSaveMethod() {
     return this.saveMethod;
   }
 
+  /**
+   * @return method saveBatch(obj) implemented in service
+   */
   public MethodMetadata getCurrentSaveBatchMethod() {
     return this.saveBatchMethod;
   }
 
+  /**
+   * @return method deleteBatch(objs) implemented in service
+   */
   public MethodMetadata getCurrentDeleteBatchMethod() {
     return this.deleteBatchMethod;
   }
 
+  /**
+   * @return method delete(obj) implemented in service
+   */
   public MethodMetadata getCurrentDeleteMethod() {
     return this.deleteMethod;
   }
 
+  /**
+   * @return method findOne(id) implemented in service
+   */
   public MethodMetadata getCurrentFindOneMethod() {
     return this.findOneMethod;
   }
 
+  /**
+   * @return method findAll() implemented in service
+   */
   public MethodMetadata getCurrentFindAllMethod() {
     return this.findAllMethod;
   }
 
+  /**
+   * @return method findAll(Iterable) implemented in service
+   */
   public MethodMetadata getCurrentFindAllIterableMethod() {
     return this.findAllIterableMethod;
   }
 
+  /**
+   * @return method count() implemented in service
+   */
   public MethodMetadata getCurrentCountMethod() {
     return this.countMethod;
   }
 
+  /**
+   * @return method findAll(GlobalSearch, Pageable) implemented in service
+   */
   public MethodMetadata getCurrentFindAllWithGlobalSearchMethod() {
     return this.findAllWithGlobalSearchMethod;
   }
 
+  /**
+   * @return methods addToRelation generated in service
+   */
   public Map<RelationInfo, MethodMetadata> getAddToRelationMethods() {
     return addToRelationMethods;
   }
 
+  /**
+   * @return methods removeFromRelation generated in service
+   */
   public Map<RelationInfo, MethodMetadata> getRemoveFromRelationMethods() {
     return removeFromRelationMethods;
+  }
+
+  /**
+   * @return related entity
+   */
+  public JavaType getEntity() {
+    return entity;
   }
 
   @Override

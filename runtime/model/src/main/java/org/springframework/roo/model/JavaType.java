@@ -1,5 +1,9 @@
 package org.springframework.roo.model;
 
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,10 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
-
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 
 /**
  * The declaration of a Java type (i.e. contains no details of its members).
@@ -63,6 +63,7 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType LONG_PRIMITIVE = new JavaType("java.lang.Long", 0,
       DataType.PRIMITIVE, null, null);
   public static final JavaType OBJECT = new JavaType("java.lang.Object");
+  public static final JavaType NUMBER = new JavaType("java.lang.Number");
   public static final JavaType SERIALIZABLE = new JavaType("java.io.Serializable");
   public static final JavaType SET = new JavaType("java.util.Set");
   public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
@@ -87,13 +88,17 @@ public class JavaType implements Comparable<JavaType> {
   public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0,
       DataType.PRIMITIVE, null, null);
   // Used for wildcard type parameters; it must be one or the other
-  public static final JavaSymbolName WILDCARD_EXTENDS =
-      new JavaSymbolName("_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
+  public static final JavaSymbolName WILDCARD_EXTENDS_ARG = new JavaSymbolName(
+      "_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
 
-  public static final JavaSymbolName WILDCARD_NEITHER =
-      new JavaSymbolName("_ROO_WILDCARD_NEITHER_"); // List<?>
+  public static final JavaSymbolName WILDCARD_NEITHER_ARG = new JavaSymbolName(
+      "_ROO_WILDCARD_NEITHER_"); // List<?>
 
-  public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
+  public static final JavaType WILDCARD_NEITHER = new JavaType(OBJECT.getFullyQualifiedTypeName(),
+      0, DataType.TYPE, JavaType.WILDCARD_NEITHER_ARG, null);
+
+  public static final JavaSymbolName WILDCARD_SUPER_ARG =
+      new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
 
   static {
     COMMON_COLLECTION_TYPES.add(ArrayList.class.getName());
@@ -193,6 +198,19 @@ public class JavaType implements Comparable<JavaType> {
         Arrays.asList(elementType));
   }
 
+
+  /**
+   * Returns a {@link JavaType} for a {@link Collection} of the given element type
+   *
+   * @param elementType the type of element in the list (required)
+   * @return a non-<code>null</code> type
+   * @since 2.0.0
+   */
+  public static JavaType collectionOf(final JavaType elementType) {
+    return new JavaType(Collection.class.getName(), 0, DataType.TYPE, null,
+        Arrays.asList(elementType));
+  }
+
   /**
    * Returns a {@link JavaType} for a _collectionType_ of the given element type
    *
@@ -206,7 +224,9 @@ public class JavaType implements Comparable<JavaType> {
   }
 
   /**
-   * Returns a {@link JavaType} for a _collectionType_ of the given element type
+   * Returns a {@link JavaType} for a _wrapperType_ of the given element type:
+   * By example: JavaType.wrapperOf(JavaType.MAP,JavaType.STRING,JavaType.STRING) returns
+   * "Map<String,String>"
    *
    * @param elementType the type of element in the list (required)
    * @return a non-<code>null</code> type
@@ -215,6 +235,44 @@ public class JavaType implements Comparable<JavaType> {
   public static JavaType wrapperOf(final JavaType wrapperType, final JavaType... elementTypes) {
     return new JavaType(wrapperType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null,
         Arrays.asList(elementTypes));
+  }
+
+  /**
+   * Returns a {@link JavaType} for a _wrapperType_ with wildcard:
+   * JavaType.wrapperWilcard(JavaType.LIST) return List<?>
+   *
+   * @param elementType the type of element in the list (required)
+   * @return a non-<code>null</code> type
+   * @since 2.0.0
+   */
+  public static JavaType wrapperWilcard(final JavaType wrapperType) {
+    return wrapperOf(wrapperType, WILDCARD_NEITHER);
+  }
+
+  /** Return {@link JavaType} which is a Widcard of generics with "extends"
+   * value.
+   *
+   * By exampe: JavaType.listOf(JavaType.wilcardExtends(JavaType.NUMBER)) generates List<? extends Number>
+   *
+   * @param extendsOf
+   * @return
+   */
+  public static JavaType wilcardExtends(final JavaType extendsOf) {
+    return new JavaType(extendsOf.getFullyQualifiedTypeName(), 0, DataType.TYPE,
+        JavaType.WILDCARD_EXTENDS_ARG, null);
+  }
+
+  /** Return {@link JavaType} which is a Widcard of generics with "supper"
+   * value.
+   *
+   * By exampe: JavaType.listOf(JavaType.wilcardSupper(JavaType.NUMBER)) generates List<? supper Number>
+   *
+   * @param supperOf
+   * @return
+   */
+  public static JavaType wilcardSupper(final JavaType supperOf) {
+    return new JavaType(supperOf.getFullyQualifiedTypeName(), 0, DataType.TYPE,
+        JavaType.WILDCARD_SUPER_ARG, null);
   }
 
   private final JavaSymbolName argName;
@@ -566,21 +624,21 @@ public class JavaType implements Comparable<JavaType> {
 
     final StringBuilder sb = new StringBuilder();
 
-    if (WILDCARD_EXTENDS.equals(argName)) {
+    if (WILDCARD_EXTENDS_ARG.equals(argName)) {
       sb.append("?");
       if (dataType == DataType.TYPE || !staticForm) {
         sb.append(" extends ");
       } else if (types.containsKey(fullyQualifiedTypeName)) {
         sb.append(" extends ").append(types.get(fullyQualifiedTypeName));
       }
-    } else if (WILDCARD_SUPER.equals(argName)) {
+    } else if (WILDCARD_SUPER_ARG.equals(argName)) {
       sb.append("?");
       if (dataType == DataType.TYPE || !staticForm) {
         sb.append(" super ");
       } else if (types.containsKey(fullyQualifiedTypeName)) {
         sb.append(" extends ").append(types.get(fullyQualifiedTypeName));
       }
-    } else if (WILDCARD_NEITHER.equals(argName)) {
+    } else if (WILDCARD_NEITHER_ARG.equals(argName)) {
       sb.append("?");
     } else if (argName != null && !staticForm) {
       sb.append(argName);
@@ -591,7 +649,7 @@ public class JavaType implements Comparable<JavaType> {
       }
     }
 
-    if (!WILDCARD_NEITHER.equals(argName)) {
+    if (!WILDCARD_NEITHER_ARG.equals(argName)) {
       // It wasn't a WILDCARD_NEITHER, so we might need to continue with
       // more details
       if (dataType == DataType.TYPE || !staticForm) {
@@ -632,8 +690,8 @@ public class JavaType implements Comparable<JavaType> {
       sb.append(getArraySuffix());
     }
 
-    if (argName != null && !argName.equals(WILDCARD_EXTENDS) && !argName.equals(WILDCARD_SUPER)
-        && !argName.equals(WILDCARD_NEITHER)) {
+    if (argName != null && !argName.equals(WILDCARD_EXTENDS_ARG)
+        && !argName.equals(WILDCARD_SUPER_ARG) && !argName.equals(WILDCARD_NEITHER_ARG)) {
       types.put(argName.getSymbolName(), sb.toString());
     }
 
