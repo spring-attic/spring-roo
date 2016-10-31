@@ -75,9 +75,6 @@
 <#else>
   <body id="body">
 
-  <!--CONTAINER-->
-  <div class="container bg-container">
-
     <!-- HEADER -->
     <header role="banner">
 
@@ -190,87 +187,84 @@
     </header>
     <!-- /HEADER -->
 
-    <!--CONTENT-->
-    <section data-layout-fragment="content">
-      <div class="container-fluid content">
-	<!--
-	  Only the inner content of the following tag "section" is included
-	  within the template, in the section "content"
-        -->
+    <!--CONTAINER-->
+    <div class="container bg-container">
 
-        <h1 data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} Search</h1>
+      <!--CONTENT-->
+      <section data-layout-fragment="content">
+        <div class="container-fluid content">
+      	<!--
+      	  Only the inner content of the following tag "section" is included
+      	  within the template, in the section "content"
+              -->
+          <h1 data-th-text="${r"#{"}label_search_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} Search</h1>
 
-	<div class="panel panel-default">
-	  <div class="panel-body">
-
-        <!--FORM-->
-        <form id="search-form" class="form-horizontal" method="POST" data-th-object="${r"${formBean}"}"
-          data-th-action="@{${controllerPath}/search/${action}}" action="finderList.html">
-          <fieldset id="containerFields">
-            <#list fields as field>
-                <#if field.type == "TEXT">
-                    <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
-                <#elseif field.type == "NUMBER">
-                    <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
-                <#elseif field.type == "DATE">
-                    <@date.input label=field.label
-                    fieldName=field.fieldName
-                    fieldId=field.fieldId
-                    z=field.z
-                    format=field.configuration.format required=field.configuration.required />
-                <#elseif field.type == "REFERENCE">
-                    <@reference.input label=field.label
-                        fieldName=field.fieldName
-                        fieldId=field.fieldId
-                        z=field.z
-                        referencedEntity=field.configuration.referencedEntity
-                        identifierField=field.configuration.identifierField
-                        referencedPath=field.configuration.referencedPath
-                        fieldOne=field.configuration.fieldOne
-                        fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
-                <#elseif field.type == "ENUM">
-                    <@enum.input label=field.label
-                    fieldName=field.fieldName
-                    fieldId=field.fieldId
-                    z=field.z
-                    items=field.configuration.items required=field.configuration.required />
-                <#elseif field.type == "BOOLEAN">
-                    <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
-                </#if>
-            </#list>
-          </fieldset>
-
-            <!-- form buttons -->
-            <div class="form-group">
-              <div class="col-md-9 col-md-offset-3">
-                  <button type="reset" class="btn btn-default"
-                    onclick="location.href='list.html'"
-                    data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
-                    data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
-                  <button type="submit" class="btn btn-primary">
-		    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>&nbsp;<span
-                      data-th-text="${r"#{"}label_search${r"}"}">Search</span>
-                  </button>
-              </div>
-            </div>
-
-        </form>
-        <!-- /FORM -->
-
+        	<div class="panel panel-default">
+        	  <div class="panel-body">
+                  <!--FORM-->
+                <form id="search-form" class="form-horizontal" method="POST" data-th-object="${r"${formBean}"}"
+                  data-th-action="@{${controllerPath}/search/${action}}" action="finderList.html">
+                  <fieldset id="containerFields">
+                    <#list fields as field>
+                        <#if field.type == "TEXT">
+                            <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                        <#elseif field.type == "NUMBER">
+                            <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
+                        <#elseif field.type == "DATE">
+                            <@date.input label=field.label
+                            fieldName=field.fieldName
+                            fieldId=field.fieldId
+                            z=field.z
+                            format=field.configuration.format required=field.configuration.required />
+                        <#elseif field.type == "REFERENCE">
+                            <@reference.input label=field.label
+                                fieldName=field.fieldName
+                                fieldId=field.fieldId
+                                z=field.z
+                                referencedEntity=field.configuration.referencedEntity
+                                identifierField=field.configuration.identifierField
+                                referencedPath=field.configuration.referencedPath
+                                fieldOne=field.configuration.fieldOne
+                                fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
+                        <#elseif field.type == "ENUM">
+                            <@enum.input label=field.label
+                            fieldName=field.fieldName
+                            fieldId=field.fieldId
+                            z=field.z
+                            items=field.configuration.items required=field.configuration.required />
+                        <#elseif field.type == "BOOLEAN">
+                            <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
+                        </#if>
+                    </#list>
+                  </fieldset>
+                    <!-- form buttons -->
+                    <div class="form-group">
+                      <div class="col-md-9 col-md-offset-3">
+                          <button type="reset" class="btn btn-default"
+                            onclick="location.href='list.html'"
+                            data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
+                            data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
+                          <button type="submit" class="btn btn-primary">
+        		              <span class="glyphicon glyphicon-search" aria-hidden="true"></span>&nbsp;<span
+                              data-th-text="${r"#{"}label_search${r"}"}">Search</span>
+                          </button>
+                      </div>
+                    </div>
+                </form>
+                <!-- /FORM -->
+           </div>
          </div>
-       </div>
-       <!-- panel -->
+         <!-- panel -->
 
-       <!-- RESULT -->
-       <div id="result"></div>
+         <!-- RESULT -->
+         <div id="result"></div>
 
-      </div>
-      <!-- /CONTENT-->
+        </div>
+        <!-- /CONTENT-->
 
-    </section>
-
-  </div>
-  <!-- /CONTAINER -->
+      </section>
+    </div>
+    <!-- /CONTAINER -->
 
   <footer class="container">
      <div class="row">

@@ -57,11 +57,8 @@
 <#else>
   <body id="body">
 
-    <!--Main container-->
-    <div class="container bg-container">
-
-      <!-- Header -->
-      <header role="banner">
+    <!-- Header -->
+    <header role="banner">
 
         <!--Banner -->
         <div class="bg-header">
@@ -169,7 +166,10 @@
           </div>
         </nav>
 
-      </header>
+    </header>
+
+    <!--Main container-->
+    <div class="container bg-container">
 
       <!--Content-->
       <section data-layout-fragment="content">

@@ -77,11 +77,8 @@
 <#else>
   <body id="body">
 
-  <!--CONTAINER-->
-  <div class="container bg-container">
-
-      <!-- HEADER -->
-      <header role="banner">
+    <!-- HEADER -->
+    <header role="banner">
 
         <!-- BANNER -->
         <div class="bg-header">
@@ -189,92 +186,95 @@
           </div>
         </nav>
 
-      </header>
-      <!-- /HEADER -->
+    </header>
+    <!-- /HEADER -->
+
+    <!--CONTAINER-->
+    <div class="container bg-container">
 
 
-    <!-- CONTENT -->
-    <section data-layout-fragment="content">
-      <div class="container-fluid content">
-	<!--
-	  Only the inner content of the following tag "section" is included
-	  within the template, in the section "content"
-	-->
+      <!-- CONTENT -->
+      <section data-layout-fragment="content">
+        <div class="container-fluid content">
+      	<!--
+      	  Only the inner content of the following tag "section" is included
+      	  within the template, in the section "content"
+      	-->
 
-        <h1 data-th-text="${r"#{"}label_edit_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Edit ${entityName}</h1>
+          <h1 data-th-text="${r"#{"}label_edit_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">Edit ${entityName}</h1>
 
-        <!-- FORM -->
-        <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
-          data-th-action="@{${controllerPath}/{id}(id=*{id})}">
-          <input type="hidden" name="_method" value="PUT" />
+          <!-- FORM -->
+          <form class="form-horizontal validate" method="POST" data-th-object="${modelAttribute}"
+            data-th-action="@{${controllerPath}/{id}(id=*{id})}">
+            <input type="hidden" name="_method" value="PUT" />
 
-           <fieldset id="containerFields">
-            <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
+             <fieldset id="containerFields">
+              <legend data-th-text="${r"#{"}label_data_entity(${r"#{"}${entityLabel}${r"}"})${r"}"}">${entityName} data </legend>
 
 
-            <#list fields as field>
-                <#if field.userManaged>
-                  ${field.codeManaged}
-                <#elseif field.type == "TEXT">
-                    <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
-                <#elseif field.type == "NUMBER">
-                    <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
-                <#elseif field.type == "DATE">
-                    <@date.input label=field.label
-                    fieldName=field.fieldName
-                    fieldId=field.fieldId
-                    z=field.z
-                    format=field.configuration.format required=field.configuration.required />
-                <#elseif field.type == "REFERENCE">
-                    <@reference.input label=field.label
-                        fieldName=field.fieldName
-                        fieldId=field.fieldId
-                        z=field.z
-                referencedEntity=field.configuration.referencedEntity
-                        identifierField=field.configuration.identifierField
-                        referencedPath=field.configuration.referencedPath
-                        fieldOne=field.configuration.fieldOne
-                        fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
-                <#elseif field.type == "ENUM">
-                    <@enum.input label=field.label
-                    fieldName=field.fieldName
-                    fieldId=field.fieldId
-                    z=field.z
-                    items=field.configuration.items required=field.configuration.required />
-                <#elseif field.type == "BOOLEAN">
-                    <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
-                </#if>
-            </#list>
+              <#list fields as field>
+                  <#if field.userManaged>
+                    ${field.codeManaged}
+                  <#elseif field.type == "TEXT">
+                      <@text.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required maxLength=field.configuration.maxLength />
+                  <#elseif field.type == "NUMBER">
+                      <@number.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z width=3 required=field.configuration.required min=field.configuration.min max=field.configuration.max />
+                  <#elseif field.type == "DATE">
+                      <@date.input label=field.label
+                      fieldName=field.fieldName
+                      fieldId=field.fieldId
+                      z=field.z
+                      format=field.configuration.format required=field.configuration.required />
+                  <#elseif field.type == "REFERENCE">
+                      <@reference.input label=field.label
+                          fieldName=field.fieldName
+                          fieldId=field.fieldId
+                          z=field.z
+                  referencedEntity=field.configuration.referencedEntity
+                          identifierField=field.configuration.identifierField
+                          referencedPath=field.configuration.referencedPath
+                          fieldOne=field.configuration.fieldOne
+                          fieldTwo=field.configuration.fieldTwo required=field.configuration.required />
+                  <#elseif field.type == "ENUM">
+                      <@enum.input label=field.label
+                      fieldName=field.fieldName
+                      fieldId=field.fieldId
+                      z=field.z
+                      items=field.configuration.items required=field.configuration.required />
+                  <#elseif field.type == "BOOLEAN">
+                      <@checkbox.input label=field.label fieldName=field.fieldName fieldId=field.fieldId z=field.z />
+                  </#if>
+              </#list>
 
-            </fieldset>
+              </fieldset>
 
-            <!-- buttons form -->
-            <div class="form-group">
-              <div class="col-md-12">
-                <div class="pull-left">
-                  <button type="reset" class="btn btn-default"
-                    onclick="location.href='list.html'"
-                    data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
-                    data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
-                </div>
-                <div class="pull-right">
-                  <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit${r"}"}" >Save</button>
+              <!-- buttons form -->
+              <div class="form-group">
+                <div class="col-md-12">
+                  <div class="pull-left">
+                    <button type="reset" class="btn btn-default"
+                      onclick="location.href='list.html'"
+                      data-th-onclick="'location.href=\'' + @{${controllerPath}} + '\''"
+                      data-th-text="${r"#{"}label_reset${r"}"}">Cancel</button>
+                  </div>
+                  <div class="pull-right">
+                    <button type="submit" class="btn btn-primary" data-th-text="${r"#{"}label_submit${r"}"}" >Save</button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-        </form>
-        <!-- /FORM -->
+          </form>
+          <!-- /FORM -->
 
-      </div>
-      <!--  /CONTENT -->
+        </div>
+        <!--  /CONTENT -->
 
-    </section>
+      </section>
 
-  </div>
-  <!-- /CONTAINER-->
+   </div>
+   <!-- /CONTAINER-->
 
-  <footer class="container">
+   <footer class="container">
      <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
         <small class="clearfix">

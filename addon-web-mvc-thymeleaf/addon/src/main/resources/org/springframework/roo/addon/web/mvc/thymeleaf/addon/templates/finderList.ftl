@@ -85,9 +85,6 @@
 <#else>
   <body id="body">
 
-  <!--CONTAINER-->
-  <div class="container bg-container">
-
     <!-- HEADER -->
     <header role="banner">
 
@@ -200,192 +197,195 @@
     </header>
     <!-- /HEADER -->
 
-    <!--CONTENT-->
-    <section data-layout-fragment="content">
+    <!--CONTAINER-->
+    <div class="container bg-container">
 
-      <div data-th-unless="${customerOrderSearch.isEmpty()}">
-        <!-- TODO Finder with applied filter -->
-        <div class="col-md-12 alert alert-info" role="alert">
-          <div class="col-md-10">
-            <p data-th-text="|${r"#{"}label_applied_filter${r"}"}:|">Applied filter:</p>
-	          <ul data-th-object="${customerOrderSearch}">
-	            <li data-th-unless="${customer == null}"
-	              data-th-text="|${r"#{"}label_customerorder_customer${r"}"}: ${customer.companyName}|">Customer:
-	              Ramón Navarro Casañ</li>
-	            <li data-th-unless="${employee == null}"
-	              data-th-text="|${r"#{"}label_customerorder_employee${r"}"}: ${employee.firstName} ${employee.lastName}|">Employee:
-	              Ana Valero Román</li>
-	            <li data-th-unless="*{#lists.isEmpty(statuses)}"
-	              data-th-text="|${r"#{"}label_customerorder_status_plural${r"}"}: *{#strings.arrayJoin(statuses,',')}|">Status:
-	              NEWLY</li>
-	            <li data-th-unless="*{orderDateStart == null}"
-	              data-th-text="|${r"#{"}label_customerorder_orderdate_from${r"}"}: *{{orderDateStart}}|">Order
-                   Date Start: 22/03/2015</li>
-	            <li data-th-unless="*{orderDateEnd == null}"
-	              data-th-text="|${r"#{"}label_customerorder_orderdate_thru${r"}"}: *{{orderDateEnd}}|">Order
-                  Date End: 22/03/2016</li>
-	          </ul>
-          </div>
-          <div class="col-md-2">
-            <a id="share-button" href="#" class="btn btn-default">
-                <span class="glyphicon glyphicon-share" aria-hidden="true"></span>
-                <span data-th-text="${r"#{"}label_customerorder_share${r"}"}">Save Search</span>
-            </a>
+      <!--CONTENT-->
+      <section data-layout-fragment="content">
+
+        <div data-th-unless="${customerOrderSearch.isEmpty()}">
+          <!-- TODO Finder with applied filter -->
+          <div class="col-md-12 alert alert-info" role="alert">
+            <div class="col-md-10">
+              <p data-th-text="|${r"#{"}label_applied_filter${r"}"}:|">Applied filter:</p>
+  	          <ul data-th-object="${customerOrderSearch}">
+  	            <li data-th-unless="${customer == null}"
+  	              data-th-text="|${r"#{"}label_customerorder_customer${r"}"}: ${customer.companyName}|">Customer:
+  	              Ramón Navarro Casañ</li>
+  	            <li data-th-unless="${employee == null}"
+  	              data-th-text="|${r"#{"}label_customerorder_employee${r"}"}: ${employee.firstName} ${employee.lastName}|">Employee:
+  	              Ana Valero Román</li>
+  	            <li data-th-unless="*{#lists.isEmpty(statuses)}"
+  	              data-th-text="|${r"#{"}label_customerorder_status_plural${r"}"}: *{#strings.arrayJoin(statuses,',')}|">Status:
+  	              NEWLY</li>
+  	            <li data-th-unless="*{orderDateStart == null}"
+  	              data-th-text="|${r"#{"}label_customerorder_orderdate_from${r"}"}: *{{orderDateStart}}|">Order
+                     Date Start: 22/03/2015</li>
+  	            <li data-th-unless="*{orderDateEnd == null}"
+  	              data-th-text="|${r"#{"}label_customerorder_orderdate_thru${r"}"}: *{{orderDateEnd}}|">Order
+                    Date End: 22/03/2016</li>
+  	          </ul>
+            </div>
+            <div class="col-md-2">
+              <a id="share-button" href="#" class="btn btn-default">
+                  <span class="glyphicon glyphicon-share" aria-hidden="true"></span>
+                  <span data-th-text="${r"#{"}label_customerorder_share${r"}"}">Save Search</span>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="container-fluid content">
-        <!--
-           Only the inner content of the following tag "section" is included
-           within the template, in the section "content"
-        -->
-        <!--TABLE-->
-        <div class="table-responsive" id="containerFields">
-          <#if entity.userManaged>
-             ${entity.codeManaged}
-          <#else>
-            <table id="${entity.entityItemId}-table"
-                 class="table table-striped table-hover table-bordered"
-                 data-row-id="${entity.configuration.identifierField}"
-                 data-select="single"
-                 data-z="${entity.z}"
-                 data-order="[[ 0, &quot;asc&quot; ]]"
-                 data-th-attr="data-create-url=@{${entity.configuration.controllerPath}/create-form/}">
-              <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">${entityName} List</caption>
-              <thead>
-                <tr>
-                  <#list fields as field>
-                  <#if field.type != "LIST">
-                  <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
-                  </#if>
-                  </#list>
-                  <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                </tr>
-              </thead>
-              <tbody data-th-remove="all">
-                <tr>
-                  <#list fields as field>
-                  <#if field.type != "LIST">
-                  <td>${field.fieldName}</td>
-                  </#if>
-                  </#list>
-                  <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                </tr>
-              </tbody>
-            </table>
-          </#if>
-        </div>
-        <!-- /TABLE-->
-
-        <#if details?size != 0>
-          <hr>
-          <ul class="nav nav-tabs">
-          <#assign firstDetail=true>
-          <#list details as field>
-            <#if firstDetail == true>
-              <li class="active"><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
-              <#assign firstDetail=false>
+        <div class="container-fluid content">
+          <!--
+             Only the inner content of the following tag "section" is included
+             within the template, in the section "content"
+          -->
+          <!--TABLE-->
+          <div class="table-responsive" id="containerFields">
+            <#if entity.userManaged>
+               ${entity.codeManaged}
             <#else>
-                <li><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
-            </#if>
-          </#list>
-          </ul>
-
-          <div class="tab-content">
-                <#assign firstDetail=true>
-                <#list details as field>
-                    <#if firstDetail == true>
-                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane active">
-                        <#assign firstDetail=false>
-                    <#else>
-                        <div id="detail-${field.fieldNameCapitalized}" class="tab-pane">
+              <table id="${entity.entityItemId}-table"
+                   class="table table-striped table-hover table-bordered"
+                   data-row-id="${entity.configuration.identifierField}"
+                   data-select="single"
+                   data-z="${entity.z}"
+                   data-order="[[ 0, &quot;asc&quot; ]]"
+                   data-th-attr="data-create-url=@{${entity.configuration.controllerPath}/create-form/}">
+                <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">${entityName} List</caption>
+                <thead>
+                  <tr>
+                    <#list fields as field>
+                    <#if field.type != "LIST">
+                    <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
                     </#if>
-                        <!--START TABLE-->
-                        <div class="table-responsive">
-                          <table id="${field.fieldNameCapitalized}Table"
-                            class="table table-striped table-hover table-bordered"
-                            data-z="${field.z}"
-                            data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
-                            data-order="[[ 0, &quot;asc&quot; ]]"
-                            data-create-url-function="create${field.configuration.referencedFieldType}Url">
-                            <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.fieldNameCapitalized}</caption>
-                            <thead>
-                              <tr>
-                                <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                <#if referencedFieldField != entityName>
-                                    <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
-                                </#if>
-                                </#list>
-                                <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                              </tr>
-                            </thead>
-                            <tbody data-th-remove="all">
-                              <tr>
-                                <#list field.configuration.referenceFieldFields as referencedFieldField>
-                                <#if referencedFieldField != entityName>
-                                    <td>${referencedFieldField.fieldName}</td>
-                                </#if>
-                                </#list>
-                                <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <!--END TABLE-->
-                    </div>
-                  </#list>
-              </div>
-
-        </#if>
-
-        <div class="clearfix">
-          <div class="pull-left">
-            <a class="btn btn-default" data-th-href="@{${entity.configuration.controllerPath}/findAll/search-form/}">
-               <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-               <span data-th-text="${r"#{label_back}"}">Back</span>
-            </a>
+                    </#list>
+                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                  </tr>
+                </thead>
+                <tbody data-th-remove="all">
+                  <tr>
+                    <#list fields as field>
+                    <#if field.type != "LIST">
+                    <td>${field.fieldName}</td>
+                    </#if>
+                    </#list>
+                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                  </tr>
+                </tbody>
+              </table>
+            </#if>
           </div>
+          <!-- /TABLE-->
+
+          <#if details?size != 0>
+            <hr>
+            <ul class="nav nav-tabs">
+            <#assign firstDetail=true>
+            <#list details as field>
+              <#if firstDetail == true>
+                <li class="active"><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
+                <#assign firstDetail=false>
+              <#else>
+                  <li><a id="${field.fieldNameCapitalized}Tab" data-toggle="tab" href="#detail-${field.fieldNameCapitalized}">${field.fieldNameCapitalized}</a></li>
+              </#if>
+            </#list>
+            </ul>
+
+            <div class="tab-content">
+                  <#assign firstDetail=true>
+                  <#list details as field>
+                      <#if firstDetail == true>
+                          <div id="detail-${field.fieldNameCapitalized}" class="tab-pane active">
+                          <#assign firstDetail=false>
+                      <#else>
+                          <div id="detail-${field.fieldNameCapitalized}" class="tab-pane">
+                      </#if>
+                          <!--START TABLE-->
+                          <div class="table-responsive">
+                            <table id="${field.fieldNameCapitalized}Table"
+                              class="table table-striped table-hover table-bordered"
+                              data-z="${field.z}"
+                              data-row-id="${field.configuration.identifierField}" data-defer-loading="0"
+                              data-order="[[ 0, &quot;asc&quot; ]]"
+                              data-create-url-function="create${field.configuration.referencedFieldType}Url">
+                              <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${field.configuration.referencedFieldLabel}${r"}"})${r"}"}">List ${field.fieldNameCapitalized}</caption>
+                              <thead>
+                                <tr>
+                                  <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                  <#if referencedFieldField != entityName>
+                                      <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
+                                  </#if>
+                                  </#list>
+                                  <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                                </tr>
+                              </thead>
+                              <tbody data-th-remove="all">
+                                <tr>
+                                  <#list field.configuration.referenceFieldFields as referencedFieldField>
+                                  <#if referencedFieldField != entityName>
+                                      <td>${referencedFieldField.fieldName}</td>
+                                  </#if>
+                                  </#list>
+                                  <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          <!--END TABLE-->
+                      </div>
+                    </#list>
+                </div>
+
+          </#if>
+
+          <div class="clearfix">
+            <div class="pull-left">
+              <a class="btn btn-default" data-th-href="@{${entity.configuration.controllerPath}/findAll/search-form/}">
+                 <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                 <span data-th-text="${r"#{label_back}"}">Back</span>
+              </a>
+            </div>
+          </div>
+
         </div>
+        <!-- /CONTENT-->
 
-      </div>
-      <!-- /CONTENT-->
+         <!-- MODAL -->
+        <div
+          data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
 
-       <!-- MODAL -->
-      <div
-        data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete${r"}"})">
+          <script type="text/javascript">
+              function openDeleteModal(){
+                jQuery('#staticModal').modal();
+              }
+          </script>
 
-        <script type="text/javascript">
-            function openDeleteModal(){
-              jQuery('#staticModal').modal();
-            }
-        </script>
-
-        <div class="modal fade" id="staticModal" tabindex="-1" role="dialog"
-          aria-labelledby="staticModalLabel">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"
-                  aria-label="${r"#{"}label_close${r"}"}">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete${r"}"}">Delete</h2>
-              </div>
-              <div class="modal-body" id="staticModalBody">
-                <p data-th-text="${r"#{"}label_message${r"}"}">Message</p>
+          <div class="modal fade" id="staticModal" tabindex="-1" role="dialog"
+            aria-labelledby="staticModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"
+                    aria-label="${r"#{"}label_close${r"}"}">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                  <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete${r"}"}">Delete</h2>
+                </div>
+                <div class="modal-body" id="staticModalBody">
+                  <p data-th-text="${r"#{"}label_message${r"}"}">Message</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-    </section>
+      </section>
 
-  </div>
-  <!-- /CONTAINER-->
+    </div>
+    <!-- /CONTAINER-->
 
-  <footer class="container">
+    <footer class="container">
      <div class="row">
       <div class="col-sm-6 col-sm-offset-3">
         <small class="clearfix">
