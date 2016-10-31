@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.views;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaType;
 
 import java.util.List;
 
@@ -17,6 +18,14 @@ import java.util.List;
  * @since 2.0
  */
 public interface MVCViewGenerationService {
+
+
+  /**
+   * Return JavaType which identifies the view Type (usually annotation java type)
+   *
+   * @return
+   */
+  JavaType getType();
 
   /**
    * This operation returns the unique identifier name of

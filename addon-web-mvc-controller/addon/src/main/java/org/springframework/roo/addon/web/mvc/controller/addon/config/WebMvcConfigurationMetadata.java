@@ -1,10 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -18,16 +13,22 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.LogicalPath;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Metadata for {@link RooWebMVCConfiguration}.
  *
  * @author Juan Carlos García
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -36,13 +37,6 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private static final JavaType CONFIGURATION = new JavaType(
-      "org.springframework.context.annotation.Configuration");
-  private static final JavaType LOCAL_VALIDATOR_FACTORY_BEAN = new JavaType(
-      "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean");
-
-  private ImportRegistrationResolver importResolver;
-  private JavaType globalSearchHandler;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -77,19 +71,14 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
    *
    */
   public WebMvcConfigurationMetadata(final String identifier, final JavaType aspectName,
-      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String defaultLanguage,
-      final JavaType globalSearchHandler) {
+      final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String defaultLanguage) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
-    this.importResolver = builder.getImportRegistrationResolver();
-    this.globalSearchHandler = globalSearchHandler;
-
     // Add @Configuration
-    ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONFIGURATION));
+    ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(SpringJavaType.CONFIGURATION));
 
     // Add extends WebMvcConfigurerAdapter
-    ensureGovernorExtends(new JavaType(
-        "org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter"));
+    ensureGovernorExtends(SpringJavaType.WEB_MVC_CONFIGURER_ADAPTER);
 
     // Add validator method
     ensureGovernorHasMethod(new MethodMetadataBuilder(getValidatorMethod()));
@@ -102,15 +91,6 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
 
     // Add addInterceptors
     ensureGovernorHasMethod(new MethodMetadataBuilder(getAddInterceptors()));
-
-    // Add addArgumentResolvers() @Override method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getAddArgumentResolvers()));
-
-    // Add addViewControllers() @Override method
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getAddViewControllers()));
-
-    // Add globalSearchResolver()
-    ensureGovernorHasMethod(new MethodMetadataBuilder(getGlobalSearchResolver()));
 
     // Build the ITD
     itdTypeDetails = builder.build();
@@ -161,46 +141,6 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     // instance
   }
 
-
-  /**
-   * This method returns globalSearchResolver() method annotated with @Bean
-   *
-   * @return MethodMetadata that contains all information about globalSearchResolver
-   * method.
-   */
-  public MethodMetadata getGlobalSearchResolver() {
-    // Define method name
-    JavaSymbolName methodName = new JavaSymbolName("globalSearchResolver");
-
-    // Define method parameter types
-    List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-
-    // Define method parameter names
-    List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-
-    MethodMetadata existingMethod =
-        getGovernorMethod(methodName,
-            AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-    if (existingMethod != null) {
-      return existingMethod;
-    }
-
-    // Generate body
-    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-    // return new GLOBAL_SEARCH_HANDLER(sortResolver());
-    bodyBuilder.appendFormalLine(String.format("return new %s();",
-        this.globalSearchHandler.getNameIncludingTypeParameters(false, importResolver)));
-
-    // Use the MethodMetadataBuilder for easy creation of MethodMetadata
-    MethodMetadataBuilder methodBuilder =
-        new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.globalSearchHandler,
-            parameterTypes, parameterNames, bodyBuilder);
-
-    return methodBuilder.build(); // Build and return a MethodMetadata
-    // instance
-  }
-
   /**
    * Method that generates "validator" method.
    *
@@ -227,13 +167,14 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // return new LocalValidatorFactoryBean();
-    bodyBuilder.appendFormalLine(String.format("return new %s();",
-        LOCAL_VALIDATOR_FACTORY_BEAN.getNameIncludingTypeParameters(false, importResolver)));
+    bodyBuilder.appendFormalLine("return new %s();",
+        getNameOfJavaType(SpringJavaType.LOCAL_VALIDATOR_FACTORY_BEAN));
 
     // Use the MethodMetadataBuilder for easy creation of MethodMetadata
     MethodMetadataBuilder methodBuilder =
         new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName,
-            LOCAL_VALIDATOR_FACTORY_BEAN, parameterTypes, parameterNames, bodyBuilder);
+            SpringJavaType.LOCAL_VALIDATOR_FACTORY_BEAN, parameterTypes, parameterNames,
+            bodyBuilder);
 
     // Add @Bean and @Primary annotations
     methodBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.PRIMARY));
@@ -261,7 +202,7 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
     // Define method return type
-    JavaType returnType = new JavaType("org.springframework.web.servlet.LocaleResolver");
+    JavaType returnType = SpringJavaType.LOCALE_RESOLVER;
 
     if (governorHasMethod(methodName,
         AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
@@ -273,16 +214,13 @@ public class WebMvcConfigurationMetadata extends AbstractItdTypeDetailsProviding
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
     // SessionLocaleResolver localeResolver = new SessionLocaleResolver();
-    bodyBuilder.appendFormalLine(String.format("%1$s localeResolver = new %1$s();", new JavaType(
-        "org.springframework.web.servlet.i18n.SessionLocaleResolver")
-        .getNameIncludingTypeParameters(false, importResolver)));
+    bodyBuilder.appendFormalLine("%1$s localeResolver = new %1$s();",
+        getNameOfJavaType(SpringJavaType.SESSION_LOCALE_RESOLVER));
 
     // localeResolver.setDefaultLocale(new Locale(\"en\", \"EN\"));
     if (StringUtils.isNotBlank(defaultLanguage)) {
-      bodyBuilder.appendFormalLine(String.format(
-          "localeResolver.setDefaultLocale(new %s(\"%s\"));",
-          new JavaType("java.util.Locale").getNameIncludingTypeParameters(false, importResolver),
-          defaultLanguage));
+      bodyBuilder.appendFormalLine("localeResolver.setDefaultLocale(new %s(\"%s\"));",
+          getNameOfJavaType(JdkJavaType.LOCALE), defaultLanguage);
     }
 
     // return

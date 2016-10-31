@@ -1,39 +1,37 @@
 package org.springframework.roo.addon.web.mvc.controller.addon;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata;
+import org.springframework.roo.addon.jpa.addon.entity.JpaEntityMetadata.RelationInfo;
 import org.springframework.roo.addon.layers.service.addon.ServiceMetadata;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
 import org.springframework.roo.addon.web.mvc.controller.annotations.RooController;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.SpringJavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 /**
  * Metadata for {@link RooController}.
  *
  * @author Juan Carlos García
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -44,22 +42,30 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   private static final String PROVIDES_TYPE = MetadataIdentificationUtils
       .create(PROVIDES_TYPE_STRING);
 
-  private static final JavaType CONTROLLER_ANNOTATION = new JavaType(
-      "org.springframework.stereotype.Controller");
-  private static final JavaType REQUEST_MAPPING_ANNOTATION = new JavaType(
-      "org.springframework.web.bind.annotation.RequestMapping");
+  private final JavaType service;
+  private final JavaType detailsService;
+  private final ControllerType type;
+  private final JavaType entity;
+  private final JavaType identifierType;
+  private final ServiceMetadata serviceMetadata;
+  private final FieldMetadata detailsServiceField;
+  private final ServiceMetadata detailsServiceMetadata;
+  private final String path;
+  private final String requestMappingValue;
+  private final FieldMetadata identifierField;
+  private final JpaEntityMetadata entityMetadata;
+  private final RelationInfo detailsFieldInfo;
+  private final FieldMetadata serviceField;
 
-  private JavaType service;
-  private List<JavaType> detailsServices;
-  private ControllerType type;
-  private JavaType entity;
-  private JavaType identifierType;
-  private ServiceMetadata serviceMetadata;
-  private String path;
-  private ControllerDetailInfo controllerDetailInfo;
 
   public static String createIdentifier(final JavaType javaType, final LogicalPath path) {
     return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+  }
+
+  public static String createIdentifier(ClassOrInterfaceTypeDetails details) {
+    final LogicalPath logicalPath =
+        PhysicalTypeIdentifier.getPath(details.getDeclaredByMetadataId());
+    return createIdentifier(details.getType(), logicalPath);
   }
 
   public static JavaType getJavaType(final String metadataIdentificationString) {
@@ -88,6 +94,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
    *            the identifier for this item of metadata (required)
    * @param aspectName
    *            the Java type of the ITD (required)
+   * @param controllerValues
    * @param governorPhysicalTypeMetadata
    *            the governor, which is expected to contain a
    *            {@link ClassOrInterfaceTypeDetails} (required)
@@ -111,82 +118,61 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
    *            Contains information relative to detail controller
    */
   public ControllerMetadata(final String identifier, final JavaType aspectName,
+      ControllerAnnotationValues controllerValues,
       final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType entity,
-      final JavaType service, final List<JavaType> detailsServices, final String path,
-      final ControllerType type, final JavaType identifierType, ServiceMetadata serviceMetadata,
-      ControllerDetailInfo controllerDetailInfo) {
+      final JpaEntityMetadata entityMetadata, final JavaType service,
+      final JavaType detailsService, final String path, final ControllerType type,
+      ServiceMetadata serviceMetadata, ServiceMetadata detailsServiceMetadata,
+      RelationInfo detailsFieldInfo) {
     super(identifier, aspectName, governorPhysicalTypeMetadata);
 
     this.type = type;
     this.service = service;
-    this.detailsServices = detailsServices;
-    this.entity = entity;
-    this.identifierType = identifierType;
     this.serviceMetadata = serviceMetadata;
+    this.detailsService = detailsService;
+    this.detailsServiceMetadata = detailsServiceMetadata;
+    this.entity = entity;
+    this.entityMetadata = entityMetadata;
+    this.identifierField = entityMetadata.getCurrentIndentifierField();
+    this.identifierType = identifierField.getFieldType();
     this.path = path;
-    this.controllerDetailInfo = controllerDetailInfo;
+    this.detailsFieldInfo = detailsFieldInfo;
 
-    // Add @Controller annotation
-    ensureGovernorIsAnnotated(new AnnotationMetadataBuilder(CONTROLLER_ANNOTATION));
-
-    // Add @RequestMapping annotation
-    AnnotationMetadataBuilder requestMappingAnnotation =
-        new AnnotationMetadataBuilder(REQUEST_MAPPING_ANNOTATION);
-
-    if (this.type == ControllerType.ITEM) {
-      requestMappingAnnotation.addStringAttribute("value",
-          StringUtils.lowerCase(path).concat("/{id}"));
-    } else if (this.type == ControllerType.COLLECTION) {
-      requestMappingAnnotation.addStringAttribute("value", StringUtils.lowerCase(path));
-    } else if (this.type == ControllerType.SEARCH) {
-      requestMappingAnnotation.addStringAttribute("value",
-          StringUtils.lowerCase(path).concat("/search"));
-    } else if (this.type == ControllerType.DETAIL) {
-
-      if (controllerDetailInfo == null) {
-        return;
-      }
-
-      requestMappingAnnotation.addStringAttribute("value", controllerDetailInfo.getPath());
+    switch (this.type) {
+      case ITEM:
+        this.requestMappingValue =
+            StringUtils.lowerCase(path).concat(
+                "/{" + identifierField.getFieldName().getSymbolName() + " }");
+        break;
+      case COLLECTION:
+        this.requestMappingValue = StringUtils.lowerCase(path);
+        break;
+      case SEARCH:
+        this.requestMappingValue = StringUtils.lowerCase(path).concat("/search");
+        break;
+      case DETAIL:
+        Validate.notNull(detailsFieldInfo, "Missing details information for %s",
+            governorPhysicalTypeMetadata.getType());
+        this.requestMappingValue =
+            StringUtils.lowerCase(path).concat(
+                "/{" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "}/"
+                    + detailsFieldInfo.fieldName);
+        break;
+      default:
+        throw new IllegalArgumentException(String.format("Unsupported @%s.type '%s' on %s",
+            RooJavaType.ROO_CONTROLLER, this.type.name(), governorPhysicalTypeMetadata.getType()));
     }
 
-    ensureGovernorIsAnnotated(requestMappingAnnotation);
+    // Adding service field
+    this.serviceField = getFieldFor(this.service);
+    ensureGovernorHasField(new FieldMetadataBuilder(serviceField));
 
     if (this.type == ControllerType.DETAIL) {
-
-      // Adding reference service
-      ensureGovernorHasField(new FieldMetadataBuilder(
-          getServiceField(this.controllerDetailInfo.getParentService())));
-
-      // Adding detail service
-      ensureGovernorHasField(new FieldMetadataBuilder(
-          getServiceField(this.controllerDetailInfo.getService())));
+      // Adding service field
+      this.detailsServiceField = getFieldFor(this.detailsService);
+      ensureGovernorHasField(new FieldMetadataBuilder(detailsServiceField));
     } else {
-
-      // Adding service reference
-      FieldMetadata serviceField = getServiceField();
-      ensureGovernorHasField(new FieldMetadataBuilder(serviceField));
-
-      // Adding services of every fields that will be used as detail
-      for (JavaType detailService : detailsServices) {
-        FieldMetadata detailServiceField = getServiceDetailField(detailService);
-        ensureGovernorHasField(new FieldMetadataBuilder(detailServiceField));
-      }
-    }
-
-
-    // Adding constructor
-    ConstructorMetadata constructor = getConstructor();
-    ensureGovernorHasConstructor(new ConstructorMetadataBuilder(constructor));
-
-    // Adding ModelAttribute method
-    if (this.type == ControllerType.ITEM) {
-      ensureGovernorHasMethod(getModelAttributeMethod());
-    } else if (this.type == ControllerType.DETAIL) {
-
-      // Add model attribute method for parent entity
-      ensureGovernorHasMethod(getModelAttributeMethod(controllerDetailInfo.getParentEntity(),
-          controllerDetailInfo.getParentIdentifierType(), controllerDetailInfo.getParentService()));
+      this.detailsServiceField = null;
     }
 
     // Build the ITD
@@ -198,7 +184,8 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
    *
    * @return
    */
-  public ConstructorMetadata getConstructor() {
+  /*
+  private ConstructorMetadata getConstructor() {
 
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
@@ -254,23 +241,8 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
     return constructor.build();
   }
+  */
 
-  /**
-   * This method returns service field included on controller
-   *
-   * @return
-   */
-  public FieldMetadata getServiceField() {
-
-    // Generating service field name
-    String fieldName =
-        new JavaSymbolName(this.service.getSimpleTypeName())
-            .getSymbolNameUnCapitalisedFirstLetter();
-
-    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
-        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), this.service)
-        .build();
-  }
 
   /**
    * This method returns service field included on controller that it
@@ -280,7 +252,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
    *            Searched service
    * @return The field that represents the service spent as parameter
    */
-  public FieldMetadata getServiceField(JavaType service) {
+  private FieldMetadata getFieldFor(JavaType service) {
 
     // Generating service field name
     String fieldName =
@@ -291,29 +263,12 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
   }
 
   /**
-   * This method returns service field included on controller
-   *
-   * @param service
-   * @return
-   */
-  public FieldMetadata getServiceDetailField(JavaType detailService) {
-
-    // Generating service field name
-    String fieldName =
-        new JavaSymbolName(detailService.getSimpleTypeName())
-            .getSymbolNameUnCapitalisedFirstLetter();
-
-    return new FieldMetadataBuilder(getId(), Modifier.PUBLIC,
-        new ArrayList<AnnotationMetadataBuilder>(), new JavaSymbolName(fieldName), detailService)
-        .build();
-  }
-
-  /**
    * This method returns the model attribute method
    *
    * @return
    */
-  public MethodMetadataBuilder getModelAttributeMethod() {
+  /*
+  private MethodMetadataBuilder getModelAttributeMethod() {
 
     // Define method parameter types
     List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -360,12 +315,14 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
     return methodMetadataBuilder;
   }
+  */
 
   /**
    * This method returns the model attribute method
    *
    * @return
    */
+  /*
   public MethodMetadataBuilder getModelAttributeMethod(JavaType entity, JavaType identifierType,
       JavaType service) {
 
@@ -413,7 +370,7 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     methodMetadataBuilder.setAnnotations(annotations);
 
     return methodMetadataBuilder;
-  }
+  }*/
 
   @Override
   public String toString() {
@@ -439,12 +396,35 @@ public class ControllerMetadata extends AbstractItdTypeDetailsProvidingMetadataI
     return this.service;
   }
 
+  public JavaType getDetailsService() {
+    return detailsService;
+  }
+
   public String getPath() {
     return this.path;
   }
 
-  public ControllerDetailInfo getControllerDetailInfo() {
-    return this.controllerDetailInfo;
+  public FieldMetadata getIdentifierField() {
+    return identifierField;
   }
 
+  public JavaType getIdentifierType() {
+    return identifierType;
+  }
+
+  public RelationInfo getDetailsFieldInfo() {
+    return detailsFieldInfo;
+  }
+
+  public String getRequestMappingValue() {
+    return requestMappingValue;
+  }
+
+  public FieldMetadata getDetailsServiceField() {
+    return detailsServiceField;
+  }
+
+  public FieldMetadata getServiceField() {
+    return serviceField;
+  }
 }

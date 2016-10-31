@@ -37,7 +37,7 @@ import org.w3c.dom.NodeList;
 /**
  * Provides common project operations. Should be subclassed by a
  * project-specific operations subclass.
- * 
+ *
  * @author Ben Alex
  * @author Adrian Colyer
  * @author Stefan Schmidt
@@ -74,7 +74,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
   /**
    * Generates a message about the addition of the given items to the POM
-   * 
+   *
    * @param action the past tense of the action that was performed
    * @param items the items that were acted upon (required, can be empty)
    * @param singular the singular of this type of item (required)
@@ -93,7 +93,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
   /**
    * Highlights the given text
-   * 
+   *
    * @param text the text to highlight (can be blank)
    * @return the highlighted text
    */
@@ -859,7 +859,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   /**
    * Removes an element identified by the given dependency, whenever it occurs
    * at the given path
-   * 
+   *
    * @param moduleName the name of the module to remove the dependency from
    * @param dependency the dependency to remove
    * @param containingPath the path to the dependencies element
@@ -916,7 +916,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
   /**
    * Method that removes version from element if blank or "-"
-   * 
+   *
    * @param element
    * @return Element without version if blank
    */
@@ -1252,9 +1252,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
   }
 
   /**
-   * Write the dependencies provided in specified pom, as children of the provided 
+   * Write the dependencies provided in specified pom, as children of the provided
    * Element (usually 'dependencies' or 'dependencyManagement').
-   * 
+   *
    * @param newDependencies the collection of Dependency to be added.
    * @param parentPom the parent module which the dependencies should be added.
    * @param pom the module which the dependencies should be added.

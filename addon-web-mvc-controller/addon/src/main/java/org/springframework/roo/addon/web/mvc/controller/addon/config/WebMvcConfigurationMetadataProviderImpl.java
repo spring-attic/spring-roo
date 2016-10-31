@@ -1,11 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.config;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
@@ -13,7 +7,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorTracker;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -27,10 +20,15 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.LogicalPath;
 import org.springframework.roo.support.logging.HandlerUtils;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 /**
  * Implementation of {@link WebMvcConfigurationMetadataProvider}.
  *
  * @author Juan Carlos García
+ * @author Jose Manuel Vivó
  * @since 2.0
  */
 @Component
@@ -58,7 +56,6 @@ public class WebMvcConfigurationMetadataProviderImpl extends
    * </ul>
    */
   @Override
-  @SuppressWarnings("unchecked")
   protected void activate(final ComponentContext cContext) {
     context = cContext.getBundleContext();
     super.setDependsOnGovernorBeingAClass(false);
@@ -146,24 +143,8 @@ public class WebMvcConfigurationMetadataProviderImpl extends
       defaultLanguage = defaultLanguageAttr.getValue();
     }
 
-    // Looking for a valid GlobalSearchHandlerMethodArgumentResolver
-    JavaType globalSearchHandler = null;
-    Set<ClassOrInterfaceTypeDetails> globalSearchHandlerClasses =
-        getTypeLocationService().findClassesOrInterfaceDetailsWithAnnotation(
-            RooJavaType.ROO_GLOBAL_SEARCH_HANDLER);
-    if (globalSearchHandlerClasses.isEmpty()) {
-      throw new RuntimeException(
-          "ERROR: GlobalSearchHandlerMethodArgumentResolver class doesn't exists or has been deleted.");
-    }
-    Iterator<ClassOrInterfaceTypeDetails> globalSearchHandlerIterator =
-        globalSearchHandlerClasses.iterator();
-    while (globalSearchHandlerIterator.hasNext()) {
-      globalSearchHandler = globalSearchHandlerIterator.next().getType();
-      break;
-    }
-
     return new WebMvcConfigurationMetadata(metadataIdentificationString, aspectName,
-        governorPhysicalTypeMetadata, defaultLanguage, globalSearchHandler);
+        governorPhysicalTypeMetadata, defaultLanguage);
   }
 
   public String getProvidesType() {

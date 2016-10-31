@@ -25,7 +25,7 @@ import org.springframework.roo.model.JavaType;
 /**
  * Automatically populates the {@link AutoPopulate} annotated fields on a given
  * {@link Object}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -43,7 +43,7 @@ public abstract class AutoPopulationUtils {
    * the required field type, or silently skipped if this is not possible (eg
    * the user edited source code and made a formatting error). As such it is
    * important that the caller.
-   * 
+   *
    * @param target to put values into (mandatory, cannot be null)
    * @param annotation to obtain values from (can be null, for convenience of
    *            the caller)
@@ -117,7 +117,7 @@ public abstract class AutoPopulationUtils {
               && (fieldType.equals(Double.class) || fieldType.equals(Double.TYPE))) {
             field.set(target, value.getValue());
           } else if (value instanceof EnumAttributeValue && Enum.class.isAssignableFrom(fieldType)) {
-            field.set(target, ((EnumAttributeValue) value).getAsEnum());
+            field.set(target, ((EnumAttributeValue) value).getAsEnum(target));
           } else if (value instanceof IntegerAttributeValue
               && (fieldType.equals(Integer.class) || fieldType.equals(Integer.TYPE))) {
             field.set(target, value.getValue());

@@ -65,6 +65,7 @@ finder add --entity ~.domain.Visit --name findByDescriptionLike
 
 web mvc setup
 web mvc view setup --type THYMELEAF
+web mvc controller --all --responseType JSON
 web mvc controller --all --responseType THYMELEAF
 web mvc detail --all --responseType THYMELEAF
 

@@ -29,9 +29,10 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of {@link ControllerMVCService}.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
+ * @deprecated this method isn't needed
  */
 @Component
 @Service

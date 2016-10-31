@@ -61,6 +61,7 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
 
   private static Logger LOGGER = HandlerUtils.getLogger(ThymeleafMVCViewResponseService.class);
   private static final String RESPONSE_TYPE = "THYMELEAF";
+  private static final String CONTROLLER_NAME_MODIFIER = "Thymeleaf";
 
   private final Dependency starterThymeleafDependency = new Dependency("org.springframework.boot",
       "spring-boot-starter-thymeleaf", null);
@@ -962,5 +963,10 @@ public class ThymeleafMVCViewResponseService extends AbstractOperations implemen
     } else {
       return i18nOperations;
     }
+  }
+
+  @Override
+  public String getControllerNameModifier() {
+    return CONTROLLER_NAME_MODIFIER;
   }
 }

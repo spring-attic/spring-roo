@@ -1,20 +1,14 @@
 package org.springframework.roo.addon.web.mvc.controller.addon.finder;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaLocator;
 import org.springframework.roo.addon.layers.repository.jpa.addon.RepositoryJpaMetadata;
+import org.springframework.roo.addon.layers.service.addon.ServiceLocator;
 import org.springframework.roo.addon.plural.addon.PluralService;
+import org.springframework.roo.addon.web.mvc.controller.addon.ControllerLocator;
 import org.springframework.roo.addon.web.mvc.controller.addon.ControllerOperations;
 import org.springframework.roo.addon.web.mvc.controller.addon.responses.ControllerMVCResponseService;
 import org.springframework.roo.addon.web.mvc.controller.annotations.ControllerType;
@@ -35,7 +29,6 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooEnumDetails;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.LogicalPath;
@@ -43,6 +36,14 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link WebFinderOperations}
@@ -73,6 +74,10 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
   private RepositoryJpaLocator repositoryJpaLocator;
   @Reference
   private PluralService pluralService;
+  @Reference
+  private ServiceLocator serviceLocator;
+  @Reference
+  private ControllerLocator controllerLocator;
 
   public boolean isWebFinderInstallationPossible() {
     return projectOperations.isFeatureInstalled(FeatureNames.MVC);
@@ -121,28 +126,18 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
     }
 
     // Check if entity has any associated service
-    boolean entityHasService = false;
     JavaType relatedService = null;
-    Set<ClassOrInterfaceTypeDetails> services =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
-    for (ClassOrInterfaceTypeDetails service : services) {
-      if (service.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity") != null
-          && service.getAnnotation(RooJavaType.ROO_SERVICE).getAttribute("entity").getValue()
-              .equals(entity)) {
-        entityHasService = true;
-        relatedService = service.getType();
-        break;
-      }
-    }
-    if (!entityHasService) {
+    ClassOrInterfaceTypeDetails service = serviceLocator.getService(entity);
+    if (service == null) {
       LOGGER.log(Level.INFO, String.format("Entity %s doesn't have associated services, "
           + "necessary to create controllers. Please, create one associated service with "
           + "'service' command before publish finders to web layer.", entity.getSimpleTypeName()));
       return;
     }
+    relatedService = service.getType();
 
     // Seek for search type controllers related to entity
-    List<ClassOrInterfaceTypeDetails> entitySearchControllers =
+    Collection<ClassOrInterfaceTypeDetails> entitySearchControllers =
         getEntityRelatedSearchControllers(entity);
 
     // Check if any of the search controllers have the same pathPrefix.
@@ -454,29 +449,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
    * @param entity the Javatype to which controllers should be related.
    * @return a List<ClassOrInterfaceTypeDetails> with the related search controllers
    */
-  private List<ClassOrInterfaceTypeDetails> getEntityRelatedSearchControllers(JavaType entity) {
-    Set<ClassOrInterfaceTypeDetails> controllers =
-        typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_CONTROLLER);
-    List<ClassOrInterfaceTypeDetails> entitySearchControllers =
-        new ArrayList<ClassOrInterfaceTypeDetails>();
-    for (ClassOrInterfaceTypeDetails controller : controllers) {
-      AnnotationMetadata controllerAnnotation =
-          controller.getAnnotation(RooJavaType.ROO_CONTROLLER);
-
-      // Get annotation type enum value
-      ControllerType controllerType =
-          ControllerType.getControllerType(((EnumDetails) controllerAnnotation.getAttribute("type")
-              .getValue()).getField().getSymbolName());
-      if (controllerAnnotation.getAttribute("type") != null
-          && controllerType.equals(ControllerType
-              .getControllerType(RooEnumDetails.CONTROLLER_TYPE_SEARCH.getField().getSymbolName()))
-          && controllerAnnotation.getAttribute("entity") != null
-          && controllerAnnotation.getAttribute("entity").getValue().equals(entity)) {
-
-        // The controller is a search controller of the current entity
-        entitySearchControllers.add(controller);
-      }
-    }
-    return entitySearchControllers;
+  private Collection<ClassOrInterfaceTypeDetails> getEntityRelatedSearchControllers(JavaType entity) {
+    return controllerLocator.getControllers(entity, ControllerType.SEARCH);
   }
 }

@@ -35,6 +35,7 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -46,7 +47,7 @@ import org.apache.commons.lang3.Validate;
 /**
  * Constants for JDK {@link JavaType}s. Use them in preference to creating new
  * instances of these types.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -105,6 +106,7 @@ public final class JdkJavaType {
   public static final JavaType UNSUPPORTED_ENCODING_EXCEPTION = new JavaType(
       UnsupportedEncodingException.class);
 
+  public static final JavaType LOCALE = new JavaType(Locale.class);
   // Static methods
 
   static {
@@ -221,7 +223,7 @@ public final class JdkJavaType {
   /**
    * Determines whether the presented java type is in the java.lang package or
    * not.
-   * 
+   *
    * @param javaType the Java type (required)
    * @return whether the type is declared as part of java.lang
    */
@@ -238,7 +240,7 @@ public final class JdkJavaType {
   /**
    * Determines whether the presented simple type name is part of java.lang or
    * not.
-   * 
+   *
    * @param simpleTypeName the simple type name (required)
    * @return whether the type is declared as part of java.lang
    */

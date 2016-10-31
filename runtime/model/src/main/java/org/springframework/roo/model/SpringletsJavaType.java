@@ -23,6 +23,14 @@ public class SpringletsJavaType {
           "io.springlets.data.jpa.repository.support.QueryDslRepositorySupportExt.AttributeMappingBuilder");
   public static final JavaType SPRINGLETS_USER_DETAILS_SERVICE = new JavaType(
       "io.springlets.security.web.SpringletsUserDetailsService");
+  public static final JavaType SPRINGLETS_NOT_FOUND_EXCEPTION = new JavaType(
+      "io.springlets.web.NotFoundException");
+  public static final JavaType SPRINGLETS_DATATABLES_PAGEABLE = new JavaType(
+      "io.springlets.data.web.datatables.DatatablesPageable");
+  public static final JavaType SPRINGLETS_DATATABLES_DATA = new JavaType(
+      "io.springlets.data.web.datatables.DatatablesData");
+  public static final JavaType SPRINGLETS_DATATABLES = new JavaType(
+      "io.springlets.data.web.datatables.Datatables");
 
   /**
    * Constructor is private to prevent instantiation
