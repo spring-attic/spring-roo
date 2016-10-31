@@ -57,9 +57,6 @@
   <#else>
   <body class="home" id="body">
 
-    <!--Main container-->
-    <div class="bg-container">
-
       <!-- Header -->
       <header role="banner">
 
@@ -171,125 +168,128 @@
 
       </header>
 
-      <!--Content-->
-      <section data-layout-fragment="content">
+      <!--Main container-->
+      <div class="bg-container">
 
-        <div class="container content">
+        <!--Content-->
+        <section data-layout-fragment="content">
 
-          <div class="box-center">
+          <div class="container content">
 
-          <!-- Project info -->
-          <div class="row">
-            <div class="hidden-xs col-sm-4 col-sm-offset-1">
-               <img alt="Spring Roo" data-th-src="@{/public/img/springroo-logo.png}"
-              src="../static/public/img/springroo-logo.png" />
-            </div>
-            <div class="col-sm-6">
-              <h2 data-th-text="${r"#{"}info_homepage_header${r"}"}">With Roo you can easily build full Java applications in minutes.</h2>
+            <div class="box-center">
 
-              <p data-th-text="${r"#{"}info_homepage_paragraph${r"}"}">Spring Roo is a next-generation rapid application development tool for Java developers.
-              It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and
-              facilitating easy Roo removal.
-              </p>
+            <!-- Project info -->
+            <div class="row">
+              <div class="hidden-xs col-sm-4 col-sm-offset-1">
+                 <img alt="Spring Roo" data-th-src="@{/public/img/springroo-logo.png}"
+                src="../static/public/img/springroo-logo.png" />
+              </div>
+              <div class="col-sm-6">
+                <h2 data-th-text="${r"#{"}info_homepage_header${r"}"}">With Roo you can easily build full Java applications in minutes.</h2>
 
-              <p class="lead" data-th-text="${r"#{"}info_homepage_thanks${r"}"}">Thanks for your interest in Spring Roo!</p>
+                <p data-th-text="${r"#{"}info_homepage_paragraph${r"}"}">Spring Roo is a next-generation rapid application development tool for Java developers.
+                It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and
+                facilitating easy Roo removal.
+                </p>
+
+                <p class="lead" data-th-text="${r"#{"}info_homepage_thanks${r"}"}">Thanks for your interest in Spring Roo!</p>
+
+                </div>
 
               </div>
+            </div><!-- box-center -->
 
-            </div>
-          </div><!-- box-center -->
+           <!-- Features -->
+           <div class="row blocks">
 
-         <!-- Features -->
-         <div class="row blocks">
-
-          <!-- Doc -->
-          <div class="col-sm-6 col-md-3">
-            <div class="block-item bgm-teal">
-                <div class="clearfix">
-                    <div class="doc">
-                     <i class="fa fa-book"></i>
-                    </div>
-                    <div class="text">
-                     <h2><a href="http://docs.spring.io/spring-roo/docs/current/reference/html/" data-th-title="${r"#{"}label_spring_documentation${r"}"}" title="Spring Roo reference documentation" target="_blank" data-th-text="${r"#{"}label_documentation${r"}"}">Doc</a></h2>
-                     <small data-th-text="${r"#{"}info_spring_documentation${r"}"}">If you are looking for Reference Documentation you can get it here.</small>
-                    </div>
-                </div>
-            </div>
-         </div>
-
-          <!-- Project page -->
-          <div class="col-sm-6 col-md-3">
-              <div class="block-item bgm-red">
+            <!-- Doc -->
+            <div class="col-sm-6 col-md-3">
+              <div class="block-item bgm-teal">
                   <div class="clearfix">
                       <div class="doc">
-                        <i class="fa fa-envira"></i>
+                       <i class="fa fa-book"></i>
                       </div>
                       <div class="text">
-                        <h2><a href="http://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site${r"}"}" title="Spring Roo project site" target="_blank" data-th-text="${r"#{"}label_projectpage${r"}"}">Project Page</a></h2>
-                        <small data-th-text="${r"#{"}info_spring_site${r"}"}">All the info about Spring Roo development.</small>
+                       <h2><a href="http://docs.spring.io/spring-roo/docs/current/reference/html/" data-th-title="${r"#{"}label_spring_documentation${r"}"}" title="Spring Roo reference documentation" target="_blank" data-th-text="${r"#{"}label_documentation${r"}"}">Doc</a></h2>
+                       <small data-th-text="${r"#{"}info_spring_documentation${r"}"}">If you are looking for Reference Documentation you can get it here.</small>
+                      </div>
+                  </div>
+              </div>
+           </div>
+
+            <!-- Project page -->
+            <div class="col-sm-6 col-md-3">
+                <div class="block-item bgm-red">
+                    <div class="clearfix">
+                        <div class="doc">
+                          <i class="fa fa-envira"></i>
+                        </div>
+                        <div class="text">
+                          <h2><a href="http://projects.spring.io/spring-roo/" data-th-title="${r"#{"}label_spring_site${r"}"}" title="Spring Roo project site" target="_blank" data-th-text="${r"#{"}label_projectpage${r"}"}">Project Page</a></h2>
+                          <small data-th-text="${r"#{"}info_spring_site${r"}"}">All the info about Spring Roo development.</small>
+                      </div>
+                  </div>
+              </div>
+            </div>
+
+                <!-- Support -->
+                <div class="col-sm-6 col-md-3">
+                    <div class="block-item bgm-amber">
+                        <div class="clearfix">
+                            <div class="doc">
+                                  <i class="fa fa-stack-overflow"></i>
+                                </div>
+                                <div class="text">
+                                  <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support${r"}"}" title="Spring Roo Stackoverflow support" target="_blank" data-th-text="${r"#{"}label_support${r"}"}">Support</a></h2>
+                                  <small data-th-text="${r"#{"}label_spring_support${r"}"}">If you have any question about the project,
+                                  you can check it.</small>
+                              </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="col-sm-6 col-md-3">
+                    <div class="block-item bgm-bluegray">
+                        <div class="clearfix">
+                           <div class="doc">
+                                  <i class="fa fa-code"></i>
+                                </div>
+                                <div class="text">
+                                  <h2><a href="https://github.com/spring-projects/spring-roo/" data-th-title="${r"#{"}label_spring_code${r"}"}" title="Spring Roo source code" target="_blank" data-th-text="${r"#{"}label_code${r"}"}">Code</a></h2>
+                                  <small data-th-text="${r"#{"}label_spring_sourcecode${r"}"}">Known, modify and redistribute the source code.</small>
+                              </div>
+                        </div>
+                    </div>
+                </div>
+
+             </div><!-- /features -->
+
+
+              <!-- Social -->
+              <div class="row">
+                <div class="col-md-12">
+                  <ul class="pull-right list-inline social-links">
+                    <li><small data-th-text="${r"#{"}info_twitter${r"}"}">As always, you can find us also on </small></li>
+                    <li>
+                    <a href="http://twitter.com/springroo" class="icon-twitter" target="_blank">
+                    <i class="fa fa-twitter"></i>
+                    </a>
+                    </li>
+                    <li>
+                    <a href="https://www.linkedin.com/groups/3293132" class="icon-linkedin" target="_blank">
+                    <i class="fa fa-linkedin"></i>
+                    </a>
+                    </li>
+                </ul>
+               </div>
+           </div>
+
           </div>
+          <!--/content-->
 
-              <!-- Support -->
-              <div class="col-sm-6 col-md-3">
-                  <div class="block-item bgm-amber">
-                      <div class="clearfix">
-                          <div class="doc">
-                                <i class="fa fa-stack-overflow"></i>
-                              </div>
-                              <div class="text">
-                                <h2><a href="http://stackoverflow.com/questions/tagged/spring-roo" data-th-title="${r"#{"}label_spring_support${r"}"}" title="Spring Roo Stackoverflow support" target="_blank" data-th-text="${r"#{"}label_support${r"}"}">Support</a></h2>
-                                <small data-th-text="${r"#{"}label_spring_support${r"}"}">If you have any question about the project,
-                                you can check it.</small>
-                            </div>
-                      </div>
-                  </div>
-              </div>
-
-              <div class="col-sm-6 col-md-3">
-                  <div class="block-item bgm-bluegray">
-                      <div class="clearfix">
-                         <div class="doc">
-                                <i class="fa fa-code"></i>
-                              </div>
-                              <div class="text">
-                                <h2><a href="https://github.com/spring-projects/spring-roo/" data-th-title="${r"#{"}label_spring_code${r"}"}" title="Spring Roo source code" target="_blank" data-th-text="${r"#{"}label_code${r"}"}">Code</a></h2>
-                                <small data-th-text="${r"#{"}label_spring_sourcecode${r"}"}">Known, modify and redistribute the source code.</small>
-                            </div>
-                      </div>
-                  </div>
-              </div>
-
-           </div><!-- /features -->
-
-
-            <!-- Social -->
-            <div class="row">
-              <div class="col-md-12">
-                <ul class="pull-right list-inline social-links">
-                  <li><small data-th-text="${r"#{"}info_twitter${r"}"}">As always, you can find us also on </small></li>
-                  <li>
-                  <a href="http://twitter.com/springroo" class="icon-twitter" target="_blank">
-                  <i class="fa fa-twitter"></i>
-                  </a>
-                  </li>
-                  <li>
-                  <a href="https://www.linkedin.com/groups/3293132" class="icon-linkedin" target="_blank">
-                  <i class="fa fa-linkedin"></i>
-                  </a>
-                  </li>
-              </ul>
-             </div>
-         </div>
-
-        </div>
-        <!--/content-->
-
-      </section>
-    </div>
-    <!--container-->
+        </section>
+      </div>
+      <!--container-->
 
    <footer class="container">
      <div class="row">

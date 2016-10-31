@@ -89,9 +89,6 @@
 <#else>
   <body id="body">
 
-  <!--CONTAINER-->
-  <div class="container bg-container">
-
     <!-- HEADER -->
     <header role="banner">
 
@@ -204,183 +201,185 @@
     </header>
     <!-- /HEADER -->
 
-    <!-- CONTENT -->
-    <section data-layout-fragment="content">
-      <div class="container-fluid content">
-       <!--
-	   Only the inner content of the following tag "section" is included
-	   within the template, in the section "content"
-        -->
+    <!--CONTAINER-->
+    <div class="container bg-container">
 
-        <h1 data-th-text="${r"#{"}${entityLabelPlural}${r"}"}">${entityName}s</h1>
+      <!-- CONTENT -->
+      <section data-layout-fragment="content">
+        <div class="container-fluid content">
+         <!--
+  	   Only the inner content of the following tag "section" is included
+  	   within the template, in the section "content"
+          -->
 
-        <!--TABLE-->
-        <div class="table-responsive" id="containerFields">
-          <#if entity.userManaged>
-             ${entity.codeManaged}
-          <#else>
-            <table id="${entity.entityItemId}-table"
-                 class="table table-striped table-hover table-bordered"
-                 data-row-id="${entity.configuration.identifierField}"
-                 data-select="single"
-                 data-z="${entity.z}"
-                 data-order="[[ 0, &quot;asc&quot; ]]"
-                 data-th-attr="data-create-url=@{${entity.configuration.controllerPath}/create-form/}">
-              <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">${entityName} List</caption>
-              <thead>
-                <tr>
-                  <#list fields as field>
-                  <#if field.type != "LIST">
-                  <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
-                  </#if>
-                  </#list>
-                  <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                </tr>
-              </thead>
-              <tbody data-th-remove="all">
-                <tr>
-                  <#list fields as field>
-                  <#if field.type != "LIST">
-                  <td>${field.fieldName}</td>
-                  </#if>
-                  </#list>
-                  <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                </tr>
-              </tbody>
-            </table>
-          </#if>
-        </div>
-        <!-- /TABLE -->
+          <h1 data-th-text="${r"#{"}${entityLabelPlural}${r"}"}">${entityName}s</h1>
 
-        <#if details?size != 0>
-          <hr>
-          <ul class="nav nav-tabs" id="nav-tabs">
-          <#assign firstDetail=true>
-          <#list details as detail>
-            <#if firstDetail == true>
-                <li class="active">
-                <#if detail.tabLinkCode??>
-                  ${detail.tabLinkCode}
-                <#else>
-                  <a id="${detail.entityItemId}-table-tab" data-toggle="tab" href="#detail-${detail.entityItemId}" data-z="${detail.z}">${detail.fieldNameCapitalized}</a>
-                </#if>
-                </li>
-                <#assign firstDetail=false>
-              <#else>
-                  <li>
+          <!--TABLE-->
+          <div class="table-responsive" id="containerFields">
+            <#if entity.userManaged>
+               ${entity.codeManaged}
+            <#else>
+              <table id="${entity.entityItemId}-table"
+                   class="table table-striped table-hover table-bordered"
+                   data-row-id="${entity.configuration.identifierField}"
+                   data-select="single"
+                   data-z="${entity.z}"
+                   data-order="[[ 0, &quot;asc&quot; ]]"
+                   data-th-attr="data-create-url=@{${entity.configuration.controllerPath}/create-form/}">
+                <caption data-th-text="${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}">${entityName} List</caption>
+                <thead>
+                  <tr>
+                    <#list fields as field>
+                    <#if field.type != "LIST">
+                    <th data-th-text="${r"#{"}${field.label}${r"}"}">${field.fieldName}</th>
+                    </#if>
+                    </#list>
+                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                  </tr>
+                </thead>
+                <tbody data-th-remove="all">
+                  <tr>
+                    <#list fields as field>
+                    <#if field.type != "LIST">
+                    <td>${field.fieldName}</td>
+                    </#if>
+                    </#list>
+                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                  </tr>
+                </tbody>
+              </table>
+            </#if>
+          </div>
+          <!-- /TABLE -->
+
+          <#if details?size != 0>
+            <hr>
+            <ul class="nav nav-tabs" id="nav-tabs">
+            <#assign firstDetail=true>
+            <#list details as detail>
+              <#if firstDetail == true>
+                  <li class="active">
                   <#if detail.tabLinkCode??>
                     ${detail.tabLinkCode}
                   <#else>
                     <a id="${detail.entityItemId}-table-tab" data-toggle="tab" href="#detail-${detail.entityItemId}" data-z="${detail.z}">${detail.fieldNameCapitalized}</a>
                   </#if>
                   </li>
-              </#if>
-          </#list>
-          </ul>
-
-          <div class="tab-content" id="tab-content">
-                <#assign firstDetail=true>
-                <#list details as detail>
-                    <#if firstDetail == true>
-                        <div id="detail-${detail.entityItemId}" class="tab-pane active">
-                        <#assign firstDetail=false>
+                  <#assign firstDetail=false>
+                <#else>
+                    <li>
+                    <#if detail.tabLinkCode??>
+                      ${detail.tabLinkCode}
                     <#else>
-                        <div id="detail-${detail.entityItemId}" class="tab-pane">
+                      <a id="${detail.entityItemId}-table-tab" data-toggle="tab" href="#detail-${detail.entityItemId}" data-z="${detail.z}">${detail.fieldNameCapitalized}</a>
                     </#if>
-                        <!--START TABLE-->
-                        <div class="table-responsive">
-                          <#if detail.userManaged>
-                            ${detail.codeManaged}
-                          <#else>
-                            <table id="${detail.entityItemId}-table"
-                              class="table table-striped table-hover table-bordered"
-                              data-z="${detail.z}"
-                              data-row-id="${detail.configuration.identifierField}" data-defer-loading="0"
-                              data-order="[[ 0, &quot;asc&quot; ]]"
-                              data-create-url-function="create${detail.configuration.referencedFieldType}Url">
-                              <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${detail.configuration.referencedFieldLabel}${r"}"})${r"}"}">${detail.fieldNameCapitalized} List</caption>
-                              <thead>
-                                <tr>
-                                  <#list detail.configuration.referenceFieldFields as referencedFieldField>
-                                  <#if referencedFieldField != entityName>
-                                      <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
-                                  </#if>
-                                  </#list>
-                                  <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
-                                </tr>
-                              </thead>
-                              <tbody data-th-remove="all">
-                                <tr>
-                                  <#list detail.configuration.referenceFieldFields as referencedFieldField>
-                                  <#if referencedFieldField != entityName>
-                                      <td>${referencedFieldField.fieldName}</td>
-                                  </#if>
-                                  </#list>
-                                  <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </#if>
-                        </div>
-                        <!--END TABLE-->
-                    </div>
-                  </#list>
-              </div>
+                    </li>
+                </#if>
+            </#list>
+            </ul>
 
-        </#if>
+            <div class="tab-content" id="tab-content">
+                  <#assign firstDetail=true>
+                  <#list details as detail>
+                      <#if firstDetail == true>
+                          <div id="detail-${detail.entityItemId}" class="tab-pane active">
+                          <#assign firstDetail=false>
+                      <#else>
+                          <div id="detail-${detail.entityItemId}" class="tab-pane">
+                      </#if>
+                          <!--START TABLE-->
+                          <div class="table-responsive">
+                            <#if detail.userManaged>
+                              ${detail.codeManaged}
+                            <#else>
+                              <table id="${detail.entityItemId}-table"
+                                class="table table-striped table-hover table-bordered"
+                                data-z="${detail.z}"
+                                data-row-id="${detail.configuration.identifierField}" data-defer-loading="0"
+                                data-order="[[ 0, &quot;asc&quot; ]]"
+                                data-create-url-function="create${detail.configuration.referencedFieldType}Url">
+                                <caption data-th-text="${r"#{"}label_list_of_entity(${r"#{"}${detail.configuration.referencedFieldLabel}${r"}"})${r"}"}">${detail.fieldNameCapitalized} List</caption>
+                                <thead>
+                                  <tr>
+                                    <#list detail.configuration.referenceFieldFields as referencedFieldField>
+                                    <#if referencedFieldField != entityName>
+                                        <th data-th-text="${r"#{"}${referencedFieldField.label}${r"}"}">${referencedFieldField.fieldName}</th>
+                                    </#if>
+                                    </#list>
+                                    <th data-th-text="${r"#{"}label_tools${r"}"}">Tools</th>
+                                  </tr>
+                                </thead>
+                                <tbody data-th-remove="all">
+                                  <tr>
+                                    <#list detail.configuration.referenceFieldFields as referencedFieldField>
+                                    <#if referencedFieldField != entityName>
+                                        <td>${referencedFieldField.fieldName}</td>
+                                    </#if>
+                                    </#list>
+                                    <td data-th-text="${r"#{"}label_tools${r"}"}">Tools</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </#if>
+                          </div>
+                          <!--END TABLE-->
+                      </div>
+                    </#list>
+                </div>
 
-        <div class="clearfix">
-          <div class="pull-left">
-            <a href="../index.html" class="btn btn-default" data-th-href="@{/}">
-               <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-               <span data-th-text="${r"#{label_back}"}">Back</span>
-            </a>
+          </#if>
+
+          <div class="clearfix">
+            <div class="pull-left">
+              <a href="../index.html" class="btn btn-default" data-th-href="@{/}">
+                 <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                 <span data-th-text="${r"#{label_back}"}">Back</span>
+              </a>
+            </div>
           </div>
+
+        </div>
+        <!-- /CONTENT-->
+
+        <!-- MODAL -->
+        <div
+          data-layout-include="fragments/modal-confirm :: modalConfirm(id='confirmDelete${entityName}',
+            title=${r"#{"}label_delete_entity(${r"#{"}${entityLabel}})}, message=${r"#{"}info_delete_item_confirm},
+            onclickCallback='javascript:loading();javascript:jQuery.delete${entityName}();')">
+            <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
         </div>
 
-      </div>
-      <!-- /CONTENT-->
+        <div
+          data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete_entity(${r"#{"}${entityLabel}})}, message=${r"#{"}info_deleted_items_number(1)})">
 
-      <!-- MODAL -->
-      <div
-        data-layout-include="fragments/modal-confirm :: modalConfirm(id='confirmDelete${entityName}',
-          title=${r"#{"}label_delete_entity(${r"#{"}${entityLabel}})}, message=${r"#{"}info_delete_item_confirm},
-          onclickCallback='javascript:loading();javascript:jQuery.delete${entityName}();')">
-          <!-- content replaced by modal-confirm fragment of modal-confirm.html -->
-      </div>
+          <script type="text/javascript">
+              function openDeleteModal(){
+                jQuery('#staticModal').modal();
+              }
+            </script>
 
-      <div
-        data-layout-include="fragments/modal :: modal(id='delete${entityName}', title=${r"#{"}label_delete_entity(${r"#{"}${entityLabel}})}, message=${r"#{"}info_deleted_items_number(1)})">
-
-        <script type="text/javascript">
-            function openDeleteModal(){
-              jQuery('#staticModal').modal();
-            }
-          </script>
-
-        <div class="modal fade" id="staticModal" tabindex="-1" role="dialog"
-          aria-labelledby="staticModalLabel">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"
-                  aria-label="${r"#{"}label_close${r"}"}">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete${r"}"}">Delete</h2>
-              </div>
-              <div class="modal-body" id="staticModalBody">
-                <p data-th-text="${r"#{"}label_message${r"}"}">Message</p>
+          <div class="modal fade" id="staticModal" tabindex="-1" role="dialog"
+            aria-labelledby="staticModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"
+                    aria-label="${r"#{"}label_close${r"}"}">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                  <h2 class="modal-title" id="staticModalLabel" data-th-text="${r"#{"}label_delete${r"}"}">Delete</h2>
+                </div>
+                <div class="modal-body" id="staticModalBody">
+                  <p data-th-text="${r"#{"}label_message${r"}"}">Message</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-    </section>
-
-  </div>
-  <!-- /CONTAINER-->
+      </section>
+    </div>
+    <!-- /CONTAINER-->
 
   <footer class="container">
      <div class="row">
