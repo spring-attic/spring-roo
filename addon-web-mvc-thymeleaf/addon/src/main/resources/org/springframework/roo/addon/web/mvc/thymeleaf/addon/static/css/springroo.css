@@ -209,6 +209,11 @@ table a.btn-action {
 .btn-action.showInfo:before {
 	content:"\f06e";
 }
+.alert a.btn{
+  color: #555555;
+  text-decoration: none;
+}
+
 
 /*--TABLES-------------*/
 
