@@ -1,88 +1,84 @@
 <!DOCTYPE html>
 <html lang="en" data-layout-decorator="layouts/default-layout">
 
-<head>
-  <meta charset="UTF-8" data-th-remove="all"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"
-    data-th-remove="all"/>
-  <meta name="description"
-    content="Spring Roo, a next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes."
-    data-th-remove="all"/>
-  <meta name="author"
-    content="Spring Roo development team"
-    data-th-remove="all"/>
-  <#if isSecurityEnabled == true>
-  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf" data-th-content="${r"${_csrf.token}"}" />
-  <meta data-th-if="${r"${_csrf != null}"}" name="_csrf_header" data-th-content="${r"${_csrf.headerName}"}" />
-  </#if>
+  <head>
+    <meta charset="UTF-8" data-th-remove="all"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" data-th-remove="all"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"
+      data-th-remove="all"/>
+    <meta name="description"
+      content="Spring Roo, a next-generation rapid application development tool for Java developers. With Roo you can easily build full Java applications in minutes."
+      data-th-remove="all"/>
+    <meta name="author"
+      content="Spring Roo development team"
+      data-th-remove="all"/>
+    <#if isSecurityEnabled == true>
+    <meta data-th-if="${r"${_csrf != null}"}" name="_csrf" data-th-content="${r"${_csrf.token}"}" />
+    <meta data-th-if="${r"${_csrf != null}"}" name="_csrf_header" data-th-content="${r"${_csrf.headerName}"}" />
+    </#if>
 
- <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
-    data-th-remove="all"/>
- <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
-    data-th-remove="all"/>
+   <link rel="shortcut icon" href="../../static/public/img/favicon.ico"
+      data-th-remove="all"/>
+   <link rel="apple-touch-icon" href="../../static/public/img/apple-touch-icon.png"
+      data-th-remove="all"/>
 
- <title data-th-text="|${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}|">${entityName} List - ${projectName}</title>
+   <title data-th-text="|${r"#{"}label_list_entity(${r"#{"}${entityLabelPlural}${r"}"})${r"}"}|">${entityName} List - ${projectName}</title>
 
- <!-- Bootstrap -->
- <link rel="stylesheet" type="text/css"
-   href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
-   data-th-remove="all"></link>
+   <!-- Bootstrap -->
+   <link rel="stylesheet" type="text/css"
+     href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css"
+     data-th-remove="all"></link>
 
- <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
- <link rel="stylesheet" type="text/css"
-   href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
-   data-th-remove="all"></link>
+   <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+   <link rel="stylesheet" type="text/css"
+     href="https://maxcdn.bootstrapcdn.com/css/ie10-viewport-bug-workaround.css"
+     data-th-remove="all"></link>
 
- <!-- Font Awesome -->
- <link rel="stylesheet" type="text/css"
-   href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
-   data-th-remove="all"/>
+   <!-- Font Awesome -->
+   <link rel="stylesheet" type="text/css"
+     href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"
+     data-th-remove="all"/>
 
- <!-- Datatables -->
- <link
-   data-th-href="@{/webjars/datatables/1.10.11/media/css/jquery.dataTables.css}"
-   rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
+   <!-- Datatables -->
+   <link
+     data-th-href="@{/webjars/datatables/1.10.11/media/css/jquery.dataTables.css}"
+     rel="stylesheet" type="text/css"
+     href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.css"></link>
+   <link
+     data-th-href="@{/webjars/datatables.net-bs/1.10.11/css/dataTables.bootstrap.css}"
+     rel="stylesheet" type="text/css"
+     href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
+   <link
+     data-th-href="@{/webjars/datatables.net-responsive-bs/2.0.2/css/responsive.bootstrap.css}"
+     rel="stylesheet" type="text/css"
+     href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css"></link>
+   <link
+     data-th-href="@{/webjars/datatables.net-buttons-bs/1.1.2/css/buttons.bootstrap.css}"
+     rel="stylesheet" type="text/css"
+     href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"></link>
+   <link
+     data-th-href="@{/webjars/datatables.net-select-bs/1.1.2/css/select.bootstrap.css}"
+     rel="stylesheet" type="text/css"
+     href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
 
- <link
-   data-th-href="@{/webjars/datatables.net-bs/1.10.11/css/dataTables.bootstrap.css}"
-   rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.css"></link>
+   <!-- Bootswatch CSS custom -->
+   <link rel="stylesheet" type="text/css"
+     href="../../static/public/css/theme.css"
+     data-th-remove="all"/>
 
- <link
-   data-th-href="@{/webjars/datatables.net-responsive-bs/2.0.2/css/responsive.bootstrap.css}"
-   rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/responsive/2.0.2/css/responsive.bootstrap.css"></link>
+   <!-- Roo CSS -->
+   <link rel="stylesheet" type="text/css"
+     href="../../static/public/css/springroo.css"
+     data-th-remove="all"/>
 
- <link
-   data-th-href="@{/webjars/datatables.net-buttons-bs/1.1.2/css/buttons.bootstrap.css}"
-   rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.bootstrap.css"></link>
+   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+   <!--[if lt IE 9]>
+     <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+   <![endif]-->
 
- <link
-   data-th-href="@{/webjars/datatables.net-select-bs/1.1.2/css/select.bootstrap.css}"
-   rel="stylesheet" type="text/css"
-   href="https://cdn.datatables.net/select/1.1.2/css/select.bootstrap.css"></link>
-
- <!-- Bootswatch CSS custom -->
- <link rel="stylesheet" type="text/css"
-   href="../../static/public/css/theme.css"
-   data-th-remove="all"/>
-
- <!-- Roo CSS -->
- <link rel="stylesheet" type="text/css"
-   href="../../static/public/css/springroo.css"
-   data-th-remove="all"/>
-
- <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
- <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
- <!--[if lt IE 9]>
-   <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
- <![endif]-->
-
-</head>
+  </head>
 
 <#if userManagedComponents?has_content && userManagedComponents["body"]??>
   ${userManagedComponents["body"]}
@@ -207,6 +203,39 @@
 
     <!--CONTENT-->
     <section data-layout-fragment="content">
+
+      <div data-th-unless="${customerOrderSearch.isEmpty()}">
+        <!-- TODO Finder with applied filter -->
+        <div class="col-md-12 alert alert-info" role="alert">
+          <div class="col-md-10">
+            <p data-th-text="|${r"#{"}label_applied_filter${r"}"}:|">Applied filter:</p>
+	          <ul data-th-object="${customerOrderSearch}">
+	            <li data-th-unless="${customer == null}"
+	              data-th-text="|${r"#{"}label_customerorder_customer${r"}"}: ${customer.companyName}|">Customer:
+	              Ramón Navarro Casañ</li>
+	            <li data-th-unless="${employee == null}"
+	              data-th-text="|${r"#{"}label_customerorder_employee${r"}"}: ${employee.firstName} ${employee.lastName}|">Employee:
+	              Ana Valero Román</li>
+	            <li data-th-unless="*{#lists.isEmpty(statuses)}"
+	              data-th-text="|${r"#{"}label_customerorder_status_plural${r"}"}: *{#strings.arrayJoin(statuses,',')}|">Status:
+	              NEWLY</li>
+	            <li data-th-unless="*{orderDateStart == null}"
+	              data-th-text="|${r"#{"}label_customerorder_orderdate_from${r"}"}: *{{orderDateStart}}|">Order
+                   Date Start: 22/03/2015</li>
+	            <li data-th-unless="*{orderDateEnd == null}"
+	              data-th-text="|${r"#{"}label_customerorder_orderdate_thru${r"}"}: *{{orderDateEnd}}|">Order
+                  Date End: 22/03/2016</li>
+	          </ul>
+          </div>
+          <div class="col-md-2">
+            <a id="share-button" href="#" class="btn btn-default">
+                <span class="glyphicon glyphicon-share" aria-hidden="true"></span>
+                <span data-th-text="${r"#{"}label_customerorder_share${r"}"}">Save Search</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div class="container-fluid content">
         <!--
            Only the inner content of the following tag "section" is included
