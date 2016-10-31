@@ -63,18 +63,25 @@
               </ul>
 
               <!-- Language select -->
-              <div data-layout-include="fragments/languages :: languages">
+              <ul class="nav navbar-nav navbar-right upper-nav languages" data-layout-include="fragments/languages :: languages">
                 <!-- Content replaced by the session template fragment language.html
                 -->
                 <span>Language data</span>
-              </div>
+              </ul>
 
               <!-- User menu -->
-              <div data-layout-include="fragments/session-links :: session">
+              <ul class="nav navbar-nav navbar-right upper-nav session" data-layout-include="fragments/session-links :: session">
                 <!-- Content replaced by the session template fragment session-links.html
                 -->
                 <span>User session data</span>
-              </div>
+              </ul>
+
+              <!-- User menu links -->
+              <ul class="nav navbar-nav navbar-right upper-nav links" data-layout-include="fragments/session-links :: links">
+                <!-- Content replaced by the links template fragment session-links.html
+                -->
+                <span>User session data</span>
+              </ul>
 
            </div>
 

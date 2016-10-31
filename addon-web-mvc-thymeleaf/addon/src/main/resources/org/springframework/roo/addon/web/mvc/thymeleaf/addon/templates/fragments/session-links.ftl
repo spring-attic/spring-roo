@@ -12,10 +12,8 @@
     Only the internal content of the following div is included within
     the template, in session fragment
     -->
-    <div data-layout-fragment="session">
-
+    <ul data-layout-fragment="session">
       <!-- User menu -->
-      <ul class="nav navbar-nav navbar-right upper-nav session">
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" role="button"
             aria-haspopup="true" aria-expanded="false">
@@ -38,15 +36,16 @@
            </li>
          </ul>
         </li>
-      </ul>
+    </ul>
+
+    <ul data-layout-fragment="links">
       <!-- User menu links -->
-      <ul class="nav navbar-nav navbar-right upper-nav links">
-        <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-        &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_contact${r"}"}">Contact</span></a></li>
-        <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-        &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_help${r"}"}">Help</span></a></li>
-      </ul>
-   </div>
+      <li><a href="#"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+      &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_contact${r"}"}">Contact</span></a></li>
+      <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+      &nbsp;<span class="hidden-sm" data-th-text="${r"#{"}label_help${r"}"}">Help</span></a></li>
+   </ul>
+
   </body>
   </#if>
 </html>
