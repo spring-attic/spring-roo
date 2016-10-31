@@ -21,7 +21,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Enables a user to manage the Roo PGP keystore.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -142,7 +142,7 @@ public class PgpCommands implements CommandMarker {
   @CliCommand(value = "pgp key view",
       help = "Downloads a remote key and displays it to the user (does not change any trusts)")
   public String keyView(@CliOption(key = "keyId", mandatory = true,
-      help = "The key ID to view (eg 00B5050F or 0x00B5050F)") final PgpKeyId keyId) {
+      help = "The key ID to view (eg 00B5050F or 0x00B5050F (mandatory))") final PgpKeyId keyId) {
     final PGPPublicKeyRing keyRing = pgpService.getPublicKey(keyId);
     final StringBuilder sb = new StringBuilder();
     formatKeyRing(sb, keyRing);
@@ -190,7 +190,7 @@ public class PgpCommands implements CommandMarker {
 
   @CliCommand(value = "pgp trust", help = "Grants trust to a particular key ID")
   public String trust(@CliOption(key = "keyId", mandatory = true,
-      help = "The key ID to trust (eg 00B5050F or 0x00B5050F)") final PgpKeyId keyId) {
+      help = "The key ID to trust (eg 00B5050F or 0x00B5050F) (mandatory)") final PgpKeyId keyId) {
     final PGPPublicKeyRing keyRing = pgpService.trust(keyId);
     final StringBuilder sb = new StringBuilder();
     appendLine(sb, "Added trust for key:");
@@ -199,8 +199,9 @@ public class PgpCommands implements CommandMarker {
   }
 
   @CliCommand(value = "pgp untrust", help = "Revokes your trust for a particular key ID")
-  public String untrust(@CliOption(key = "keyId", mandatory = true,
-      help = "The key ID to remove trust from (eg 00B5050F or 0x00B5050F)") final PgpKeyId keyId) {
+  public String untrust(
+      @CliOption(key = "keyId", mandatory = true,
+          help = "The key ID to remove trust from (eg 00B5050F or 0x00B5050F) (mandatory)") final PgpKeyId keyId) {
     final PGPPublicKeyRing keyRing = pgpService.untrust(keyId);
     final StringBuilder sb = new StringBuilder();
     appendLine(sb, "Revoked trust from key:");

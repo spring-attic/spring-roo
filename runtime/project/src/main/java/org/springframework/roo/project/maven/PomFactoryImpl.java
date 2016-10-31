@@ -32,6 +32,8 @@ public class PomFactoryImpl implements PomFactory {
   private static final String ARTIFACT_ID_XPATH = "/project/artifactId";
   private static final String DEFAULT_RELATIVE_PATH = "../pom.xml";
   private static final String DEPENDENCY_XPATH = "/project/dependencies/dependency";
+  private static final String DEPENDENCY_IN_DEPENDENCY_MANAGEMENT_XPATH =
+      "/project/dependencyManagement/dependencies/dependency";
   private static final String FILTER_XPATH = "/project/build/filters/filter";
   private static final String GROUP_ID_XPATH = "/project/groupId";
   private static final String MODULE_XPATH = "/project/modules/module";
@@ -43,6 +45,8 @@ public class PomFactoryImpl implements PomFactory {
   private static final String PARENT_XPATH = "/project/parent";
   private static final String PLUGIN_REPOSITORY_XPATH =
       "/project/pluginRepositories/pluginRepository";
+  private static final String PLUGIN_IN_DEPENDENCY_MANAGEMENT_XPATH =
+      "/project/build/pluginManagement/plugins/plugin";
   private static final String PLUGIN_XPATH = "/project/build/plugins/plugin";
   private static final String PROPERTY_XPATH = "/project/properties/*";
   private static final String REPOSITORY_XPATH = "/project/repositories/repository";
@@ -79,9 +83,13 @@ public class PomFactoryImpl implements PomFactory {
     String version = XmlUtils.getTextContent(VERSION_XPATH, root);
     final String sourceDirectory = XmlUtils.getTextContent(SOURCE_DIRECTORY_XPATH, root);
     final String testSourceDirectory = XmlUtils.getTextContent(TEST_SOURCE_DIRECTORY_XPATH, root);
+    final List<Dependency> dependenciesInDependencyManagement =
+        parseElements(Dependency.class, DEPENDENCY_IN_DEPENDENCY_MANAGEMENT_XPATH, root);
     final List<Dependency> dependencies = parseElements(Dependency.class, DEPENDENCY_XPATH, root);
     final List<Filter> filters = parseElements(Filter.class, FILTER_XPATH, root);
     final List<Module> modules = getModules(root, pomPath, packaging);
+    final List<Plugin> pluginsInDependencyManagement =
+        parseElements(Plugin.class, PLUGIN_IN_DEPENDENCY_MANAGEMENT_XPATH, root);
     final List<Plugin> plugins = parseElements(Plugin.class, PLUGIN_XPATH, root);
     final List<Property> pomProperties = parseElements(Property.class, PROPERTY_XPATH, root);
     final List<Repository> pluginRepositories =
@@ -94,9 +102,10 @@ public class PomFactoryImpl implements PomFactory {
       version = projectParentVersion;
     }
     final Collection<Path> paths = getPaths(root, packaging);
-    return new Pom(groupId, artifactId, version, packaging, dependencies, parent, modules,
-        pomProperties, name, repositories, pluginRepositories, sourceDirectory,
-        testSourceDirectory, filters, plugins, resources, pomPath, moduleName, paths);
+    return new Pom(groupId, artifactId, version, packaging, dependenciesInDependencyManagement,
+        dependencies, parent, modules, pomProperties, name, repositories, pluginRepositories,
+        sourceDirectory, testSourceDirectory, filters, pluginsInDependencyManagement, plugins,
+        resources, pomPath, moduleName, paths);
   }
 
   private List<Module> getModules(final Element root, final String pomPath, final String packaging) {

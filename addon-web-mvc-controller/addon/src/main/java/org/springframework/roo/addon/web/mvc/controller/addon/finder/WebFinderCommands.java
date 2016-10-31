@@ -308,25 +308,41 @@ public class WebFinderCommands implements CommandMarker {
   @CliCommand(value = "web mvc finder",
       help = "Adds @RooWebFinder annotation to MVC controller type")
   public void addController(
-      @CliOption(key = "entity", mandatory = false,
-          help = "The entity owning the finders that should be published.") JavaType entity,
-      @CliOption(key = "all", mandatory = false, specifiedDefaultValue = "true",
+      @CliOption(
+          key = "entity",
+          mandatory = false,
+          help = "The entity owning the finders that should be published. Not avalaible if 'all' parameter has been specified before") JavaType entity,
+      @CliOption(
+          key = "all",
+          mandatory = false,
+          specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Indicates if developer wants to publish in web layer all finders from "
-              + "all entities in project.") boolean all,
-      @CliOption(key = "queryMethod", mandatory = false,
-          help = "Indicates the name of the finder to add to web layer.") String queryMethod,
-      @CliOption(key = "responseType", mandatory = false,
+              + "all entities in project. Not avalaible if 'entity' parameter has been specified before") boolean all,
+      @CliOption(
+          key = "queryMethod",
+          mandatory = false,
+          help = "Indicates the name of the finder to add to web layer. Not avalaible if 'entity' parameter has not been specified before") String queryMethod,
+      @CliOption(
+          key = "responseType",
+          mandatory = false,
           help = "Indicates the responseType to be used by generated controller. Depending "
-              + "of the selected responseType, generated methods and views will vary.") String responseType,
-      @CliOption(key = "package", mandatory = true, unspecifiedDefaultValue = "~.web",
+              + "of the selected responseType, generated methods and views will vary. Not avalaible if 'all' or 'entity' parameters have not been specified before") String responseType,
+      @CliOption(
+          key = "package",
+          mandatory = true,
+          unspecifiedDefaultValue = "~.web",
           help = "Indicates the package where generated controller will be located. If "
               + "multimodule project, package must be in an application module (those "
-              + "with @SpringBootApplication class).") JavaPackage controllerPackage, @CliOption(
-          key = "pathPrefix", mandatory = false, unspecifiedDefaultValue = "",
+              + "with @SpringBootApplication class). Not avalaible if 'all' or 'entity' parameters have not been specified before (mandatory if project has more than one "
+              + "'application' modules)") JavaPackage controllerPackage,
+      @CliOption(
+          key = "pathPrefix",
+          mandatory = false,
+          unspecifiedDefaultValue = "",
           specifiedDefaultValue = "",
           help = "Indicates the default path value for accesing finder resources in "
-              + "controller, excluding first '/'.") String pathPrefix) {
+              + "controller, excluding first '/'. Not avalaible if 'all' or 'entity' parameters have not been specified before") String pathPrefix) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =

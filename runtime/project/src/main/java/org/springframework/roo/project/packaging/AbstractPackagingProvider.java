@@ -49,8 +49,9 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
   }
 
   private static final String DEFAULT_VERSION = "0.1.0.BUILD-SNAPSHOT";
-  private static final String JAVA_VERSION_PLACEHOLDER = "JAVA_VERSION";
+  private static final String JAVA_PRODUCT_VERSION_PLACEHOLDER = "JAVA_PRODUCT_VERSION";
   private static final String ASPECTJ_PLUGIN_VERSION_PLACEHOLDER = "ASPECTJ_PLUGIN_VERSION";
+  private static final String ASCIIDOCLET_PLUGIN_VERSION_PLACEHOLDER = "ASCIIDOCLET_PLUGIN_VERSION";
   protected static final Logger LOGGER = HandlerUtils.getLogger(PackagingProvider.class);
   /**
    * The name of the POM property that stores the packaging provider's ID.
@@ -158,7 +159,7 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
    * <li>sets the artifactId to the result of {@link #getArtifactId}</li>
    * <li>sets the packaging to the result of {@link #getName()}</li>
    * <li>sets the project name to the result of {@link #getProjectName}</li>
-   * <li>replaces all occurrences of {@link #JAVA_VERSION_PLACEHOLDER} with
+   * <li>replaces all occurrences of {@link #JAVA_PRODUCT_VERSION_PLACEHOLDER} with
    * the given Java version</li>
    * </ul>
    * This method makes as few assumptions about the POM template as possible,
@@ -225,10 +226,10 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
         DomUtils.createChildElement(VERSION_ELEMENT, root, pom).setTextContent(DEFAULT_VERSION);
       }
 
-      // Java versions
-      final List<Element> versionElements =
-          XmlUtils.findElements("//*[.='" + JAVA_VERSION_PLACEHOLDER + "']", root);
-      for (final Element versionElement : versionElements) {
+      // Java product version (8, 7 ,6)
+      final List<Element> javaProductVersionElements =
+          XmlUtils.findElements("//*[.='" + JAVA_PRODUCT_VERSION_PLACEHOLDER + "']", root);
+      for (final Element versionElement : javaProductVersionElements) {
         versionElement.setTextContent(javaVersion);
       }
 
@@ -245,6 +246,14 @@ public abstract class AbstractPackagingProvider implements PackagingProvider {
         //          aspectJPluginVersion.setTextContent("1.8");
         //        }
       }
+
+      // Asciidoclet Plugin versions
+      final List<Element> asciidocletPluginVersionElements =
+          XmlUtils.findElements("//*[.='" + ASCIIDOCLET_PLUGIN_VERSION_PLACEHOLDER + "']", root);
+      for (final Element versionElement : asciidocletPluginVersionElements) {
+        versionElement.setTextContent("1.5.4");
+      }
+
     }
 
     // packaging

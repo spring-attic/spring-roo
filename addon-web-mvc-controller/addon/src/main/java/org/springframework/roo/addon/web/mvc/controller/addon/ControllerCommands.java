@@ -153,8 +153,11 @@ public class ControllerCommands implements CommandMarker {
    */
   @CliCommand(value = "web mvc setup", help = "Includes Spring MVC on generated project")
   public void setup(
-      @CliOption(key = "module", mandatory = true,
-          help = "The application module where to install the persistence",
+      @CliOption(
+          key = "module",
+          mandatory = true,
+          help = "The application module where to install the persistence. This option is available if there is more than "
+              + "one application module (mandatory if the focus is not set in application module)",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
       @CliOption(key = "appServer", mandatory = false,
           help = "The server where deploy the application", unspecifiedDefaultValue = "EMBEDDED") String appServer) {
@@ -319,28 +322,28 @@ public class ControllerCommands implements CommandMarker {
           mandatory = false,
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "This param will be visible if --entity parameter hasn't been specified. Indicates if developer wants to generate controllers for every entity of current project ") boolean all,
+          help = "Indicates if developer wants to generate controllers for every entity of current project. This param will be visible if 'entity' parameter has not been specified") boolean all,
       @CliOption(
           key = "entity",
           mandatory = false,
-          help = "This param will be visible if --all parameter hasn't been specified. Indicates the entity that new controller will be manage.") JavaType entity,
+          help = "Indicates the entity that new controller will be manage. This param will be visible if 'all' parameter has not been specified") JavaType entity,
       @CliOption(
           key = "responseType",
           mandatory = false,
           unspecifiedDefaultValue = "JSON",
           specifiedDefaultValue = "JSON",
-          help = "This param will be visible if --all or --entity parameters have been specified. Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary.") String responseType,
+          help = "Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param will be visible if 'all' or 'entity' parameters have been specified") String responseType,
       @CliOption(
           key = "package",
           mandatory = false,
           optionContext = APPLICATION_FEATURE,
-          help = "This param will be visible if --all or --entity parameters have been specified. Indicates which package should be used to include generated controllers") JavaPackage controllersPackage,
+          help = "Indicates which package should be used to include generated controllers. This param will be visible if 'all' or 'entity' parameters have been specified") JavaPackage controllersPackage,
       @CliOption(
           key = "pathPrefix",
           mandatory = false,
           specifiedDefaultValue = "",
           unspecifiedDefaultValue = "",
-          help = "This param will be visible if --all or --entity parameters have been specified. Indicates @ResquestMapping prefix to be used on this controller. Is not necessary to specify '/'. Spring Roo shell will include it automatically.") String pathPrefix) {
+          help = "Indicates @ResquestMapping prefix to be used on this controller. Is not necessary to specify '/'. Spring Roo shell will include it automatically. This param will be visible if 'all' or 'entity' parameters have been specified") String pathPrefix) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =
@@ -605,28 +608,31 @@ public class ControllerCommands implements CommandMarker {
           mandatory = false,
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "This param will be visible if --entity parameter hasn't been specified. Indicates if developer wants to generate first detail controllers for every entity that has a controller of current project") boolean all,
+          help = "Indicates if developer wants to generate first detail controllers for every entity"
+              + " that has a controller of current project. This param will be visible if 'entity' parameter has not been specified") boolean all,
       @CliOption(
           key = "entity",
           mandatory = false,
-          help = "This param will be visible if --all parameter hasn't been specified. Indicates the entity on which the detail controller is generated.") JavaType entity,
+          help = "Indicates the entity on which the detail controller is generated. This param will be visible if 'all' parameter has not been specified ") JavaType entity,
       @CliOption(
           key = "field",
           mandatory = false,
           specifiedDefaultValue = "",
           unspecifiedDefaultValue = "",
-          help = "This param will be visible if --all or --entity parameters have been specified. Indicates the entity's field on which the detail controller is generated.") String field,
+          help = "Indicates the entity's field on which the detail controller is generated. This param will be visible if 'entity' parameter has been specified before. ") String field,
       @CliOption(
           key = "package",
           mandatory = false,
           optionContext = APPLICATION_FEATURE,
-          help = "This param will be visible if --all or --entity parameters have been specified. Indicates which package has the controllers on which the detail controllers are generated.") JavaPackage controllersPackage,
+          help = "Indicates which package has the controllers on which the detail controllers are generated. This param will be visible if 'all' or 'entity' parameters "
+              + "have been specified") JavaPackage controllersPackage,
       @CliOption(
           key = "responseType",
           mandatory = false,
           unspecifiedDefaultValue = "JSON",
           specifiedDefaultValue = "JSON",
-          help = "This param will be visible if --all or --entity parameters have been specified. Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary.") String responseType) {
+          help = "Indicates the responseType to be used by generated controller. Depending of the selected responseType, generated methods and views will vary. This param "
+              + "will be visible if 'all' or 'entity' parameters have been specified") String responseType) {
 
     // Getting --responseType service
     Map<String, ControllerMVCResponseService> responseTypeServices =

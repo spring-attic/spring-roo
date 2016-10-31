@@ -1,13 +1,15 @@
 package org.springframework.roo.support.osgi;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.springframework.roo.support.logging.HandlerUtils;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * = _ServiceInstaceManager_
@@ -20,9 +22,14 @@ import java.util.logging.Logger;
  * before return service instances.
  *
  * @author Jose Manuel Vivó
+ * @author Juan Carlos García
  * @since 2.0.0
  */
 public class ServiceInstaceManager {
+
+  public interface Matcher<T> {
+    boolean match(T service);
+  }
 
   protected final static Logger LOGGER = HandlerUtils.getLogger(ServiceInstaceManager.class);
 
@@ -74,6 +81,47 @@ public class ServiceInstaceManager {
       }
     }
     return service;
+  }
+
+  @SuppressWarnings({"unchecked"})
+  public <SERVICE> List<SERVICE> getServiceInstance(Object requester, Class<SERVICE> serviceClass,
+      Matcher<SERVICE> matcher) {
+    SERVICE service = null;
+    if (context == null) {
+      throw new IllegalStateException("Tried to get service '" + serviceClass.getName()
+          + "' without activation in " + requester.getClass().getCanonicalName());
+    }
+    try {
+      ServiceReference<?>[] references =
+          context.getAllServiceReferences(serviceClass.getName(), null);
+
+      if (references == null) {
+        LOGGER.warning("Cannot load " + serviceClass.getName() + " on "
+            + requester.getClass().getName() + ": getAllServiceReferences returns 'null'");
+        return null;
+      }
+
+      List<SERVICE> matches = new ArrayList<SERVICE>();
+
+      if (references.length > 0) {
+        for (ServiceReference<?> reference : references) {
+          service = (SERVICE) context.getService(reference);
+          if (matcher.match(service)) {
+            matches.add(service);
+          }
+        }
+      }
+
+      if (!matches.isEmpty()) {
+        return matches;
+      }
+
+      return null;
+    } catch (InvalidSyntaxException e) {
+      LOGGER.warning("Cannot load " + serviceClass.getName() + " on "
+          + requester.getClass().getName() + ":".concat(e.toString()));
+      return null;
+    }
   }
 
   public void deactivate() {

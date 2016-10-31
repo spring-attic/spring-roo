@@ -21,6 +21,9 @@ public interface ProjectOperations {
    * {@link ProjectMetadata#isBuildPluginRegistered(org.springframework.roo.project.Plugin)}
    * , the method silently returns. Otherwise the plugin is added.
    * <p>
+   * By default, includes the provided plugin into pluginManagement
+   * element.
+   * <p>
    * An exception is thrown if this method is called before there is
    * {@link ProjectMetadata} available, or if the on-disk representation
    * cannot be modified for any reason.
@@ -31,9 +34,33 @@ public interface ProjectOperations {
   void addBuildPlugin(final String moduleName, Plugin plugin);
 
   /**
+   * Attempts to add the specified build plugin. If the plugin already exists
+   * according to
+   * {@link ProjectMetadata#isBuildPluginRegistered(org.springframework.roo.project.Plugin)}
+   * , the method silently returns. Otherwise the plugin is added.
+   * <p>
+   * If addToPluginManagement parameter has true value, the new plugin will
+   * be included into pluginManagement element. If false, the provided plugin
+   * will be included only as plugin.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param addToPluginManagement boolean that indicates if the new Plugin
+   * 		should be included into pluginManagement element or not.
+   * @param plugin the plugin to add (required)
+   */
+  void addBuildPlugin(final String moduleName, Plugin plugin, boolean addToPluginManagement);
+
+  /**
    * Attempts to add the specified plugins. If all the plugins already exist
    * according to {@link ProjectMetadata#isAllPluginRegistered(Plugin)}, the
    * method silently returns. Otherwise each new dependency is added.
+   * <p>
+   * By default, includes the provided plugin into pluginManagement
+   * element.
    * <p>
    * An exception is thrown if this method is called before there is
    * {@link ProjectMetadata} available, or if the on-disk representation
@@ -45,10 +72,77 @@ public interface ProjectOperations {
   void addBuildPlugins(final String moduleName, Collection<? extends Plugin> plugins);
 
   /**
+   * Attempts to add the specified plugins. If all the plugins already exist
+   * according to {@link ProjectMetadata#isAllPluginRegistered(Plugin)}, the
+   * method silently returns. Otherwise each new dependency is added.
+   * <p>
+   * If addToPluginManagement parameter has true value, the new plugin will
+   * be included into pluginManagement element. If false, the provided plugin
+   * will be included only as plugin.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param addToPluginManagement boolean that indicates if the new Plugin
+   * 		should be included into pluginManagement element or not.
+   * @param plugins the plugins to add (required)
+   */
+  void addBuildPlugins(final String moduleName, Collection<? extends Plugin> plugins,
+      boolean addToPluginManagement);
+
+  /**
+   * Attempts to add the specified package into the specified plugin execution. 
+   * If the package already exists or the execution does not exist in the specified plugin, the
+   * method silently returns. Otherwise the package is added.
+   * <p>
+   * By default, includes the provided package into pluginManagement
+   * element.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param plugin the plugin where add the package (required)
+   * @param executionId the id of the plugin execution where add the package (required)
+   * @param packageName the package to add (required)
+   */
+  void addPackageToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, final String packageName);
+
+  /**
+   * Attempts to add the specified package into the specified plugin execution. 
+   * If the package already exists or the execution does not exist in the specified plugin, the
+   * method silently returns. Otherwise the package is added.
+   * <p>
+   * If addToPluginManagement parameter has true value, the new plugin will
+   * be included into pluginManagement element. If false, the provided plugin
+   * will be included only as plugin.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param plugin the plugin where add the package (required)
+   * @param executionId the id of the plugin execution where add the package (required)
+   * @param addToPluginManagement boolean that indicates if the new Plugin
+   * 		should be included into pluginManagement element or not.
+   * @param packageName the package to add (required)
+   */
+  void addPackageToPluginExecution(final String moduleName, final Plugin plugin,
+      String executionId, final String packageName, boolean addToPluginManagement);
+
+  /**
    * Attempts to add the specified dependencies. If all the dependencies
    * already exist according to
    * {@link ProjectMetadata#isAllDependencyRegistered(Dependency)}, the method
    * silently returns. Otherwise each new dependency is added.
+   * <p>
+   * By default, includes the provided dependencies into dependencyManagement
+   * element.
    * <p>
    * An exception is thrown if this method is called before there is
    * {@link ProjectMetadata} available, or if the on-disk representation
@@ -62,10 +156,36 @@ public interface ProjectOperations {
       Collection<? extends Dependency> dependencies);
 
   /**
+   * Attempts to add the specified dependencies. If all the dependencies
+   * already exist according to
+   * {@link ProjectMetadata#isAllDependencyRegistered(Dependency)}, the method
+   * silently returns. Otherwise each new dependency is added.
+   * <p>
+   * If addToDependencyManagement parameter has true value, the new dependency will
+   * be included into dependencyManagement element. If false, the provided dependency
+   * will be included only as dependency.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param dependencies the dependencies to add (required)
+   * @param addToDependencyManagement boolean that indicates if the new Dependency
+   * 		should be included into dependencyManagement element or not.
+   * @return List of dependencies added on current operation
+   */
+  List<Dependency> addDependencies(final String moduleName,
+      Collection<? extends Dependency> dependencies, boolean addToDependencyManagement);
+
+  /**
    * Attempts to add the specified dependency. If the dependency already
    * exists according to to
    * {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}
    * , the method silently returns. Otherwise the dependency is added.
+   * <p>
+   * By default, includes the provided dependency into dependencyManagement
+   * element.
    * <p>
    * An exception is thrown if this method is called before there is
    * {@link ProjectMetadata} available, or if the on-disk representation
@@ -78,12 +198,39 @@ public interface ProjectOperations {
   Dependency addDependency(final String moduleName, Dependency dependency);
 
   /**
+   * Attempts to add the specified dependency. If the dependency already
+   * exists according to to
+   * {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}
+   * , the method silently returns. Otherwise the dependency is added.
+   * <p>
+   * If addToDependencyManagement parameter has true value, the new dependency will
+   * be included into dependencyManagement element. If false, the provided dependency
+   * will be included only as dependency.
+   * <p>
+   * An exception is thrown if this method is called before there is
+   * {@link ProjectMetadata} available, or if the on-disk representation
+   * cannot be modified for any reason.
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param dependency the dependency to add (required)
+   * @param addToDependencyManagement boolean that indicates if the new Dependency
+   * 		should be included into dependencyManagement element or not.
+   * @return added dependency
+   */
+  Dependency addDependency(final String moduleName, Dependency dependency,
+      boolean addToDependencyManagement);
+
+  /**
    * Allows addition of a JAR dependency to the POM.
    * <p>
    * Provides a convenient way for third parties to instruct end users how to
    * use the CLI to add support for their projects without requiring the user
    * to manually edit a pom.xml or write an add-on.
-   *
+   * <p>
+   * By default, includes the provided dependency into dependencyManagement
+   * element.
+   * <p>
+   * 
    * @param moduleName the name of the module to act upon (required)
    * @param groupId the group id of the dependency (required)
    * @param artifactId the artifact id of the dependency (required)
@@ -99,7 +246,34 @@ public interface ProjectOperations {
    * Provides a convenient way for third parties to instruct end users how to
    * use the CLI to add support for their projects without requiring the user
    * to manually edit a pom.xml or write an add-on.
-   *
+   * <p>
+   * If addToDependencyManagement parameter has true value, the new dependency will
+   * be included into dependencyManagement element. If false, the provided dependency
+   * will be included only as dependency.
+   * <p>
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param groupId the group id of the dependency (required)
+   * @param artifactId the artifact id of the dependency (required)
+   * @param version the version of the dependency (required)
+   * @param addToDependencyManagement boolean that indicates if the new Dependency
+   * 		should be included into dependencyManagement element or not.
+   * @return added dependency
+   */
+  Dependency addDependency(final String moduleName, String groupId, String artifactId,
+      String version, boolean addToDependencyManagement);
+
+  /**
+   * Allows addition of a JAR dependency to the POM.
+   * <p>
+   * Provides a convenient way for third parties to instruct end users how to
+   * use the CLI to add support for their projects without requiring the user
+   * to manually edit a pom.xml or write an add-on.
+   * <p>
+   * By default, includes the provided dependency into dependencyManagement
+   * element.
+   * <p>
+   * 
    * @param moduleName the name of the module to act upon (required)
    * @param groupId the group id of the dependency (required)
    * @param artifactId the artifact id of the dependency (required)
@@ -116,7 +290,35 @@ public interface ProjectOperations {
    * Provides a convenient way for third parties to instruct end users how to
    * use the CLI to add support for their projects without requiring the user
    * to manually edit a pom.xml or write an add-on.
-   *
+   * <p>
+   * If addToDependencyManagement parameter has true value, the new dependency will
+   * be included into dependencyManagement element. If false, the provided dependency
+   * will be included only as dependency.
+   * <p>
+   * 
+   * @param moduleName the name of the module to act upon (required)
+   * @param groupId the group id of the dependency (required)
+   * @param artifactId the artifact id of the dependency (required)
+   * @param version the version of the dependency (required)
+   * @param scope the scope of the dependency
+   * @param addToDependencyManagement boolean that indicates if the new Dependency
+   * 		should be included into dependencyManagement element or not.
+   * @return added dependency
+   */
+  Dependency addDependency(final String moduleName, String groupId, String artifactId,
+      String version, DependencyScope scope, boolean addToDependencyManagement);
+
+  /**
+   * Allows addition of a JAR dependency to the POM.
+   * <p>
+   * Provides a convenient way for third parties to instruct end users how to
+   * use the CLI to add support for their projects without requiring the user
+   * to manually edit a pom.xml or write an add-on.
+   * <p>
+   * By default, includes the provided dependency into dependencyManagement
+   * element.
+   * <p>
+   * 
    * @param moduleName the name of the module to act upon (required)
    * @param groupId the group id of the dependency (required)
    * @param artifactId the artifact id of the dependency (required)
@@ -129,71 +331,29 @@ public interface ProjectOperations {
       String version, DependencyScope scope, String classifier);
 
   /**
-   * Attempts to add the specified dependencies to the group of managed dependencies.
-   * If all the dependencies already exist according to
-   * {@link ProjectMetadata#isAllDependencyRegistered(Dependency)}, the method
-   * silently returns. Otherwise each new dependency is added.
+   * Allows addition of a JAR dependency to the POM.
    * <p>
-   * An exception is thrown if this method is called before there is
-   * {@link ProjectMetadata} available, or if the on-disk representation
-   * cannot be modified for any reason.
-   *
+   * Provides a convenient way for third parties to instruct end users how to
+   * use the CLI to add support for their projects without requiring the user
+   * to manually edit a pom.xml or write an add-on.
+   * <p>
+   * If addToDependencyManagement parameter has true value, the new dependency will
+   * be included into dependencyManagement element. If false, the provided dependency
+   * will be included only as dependency.
+   * <p>
+   * 
    * @param moduleName the name of the module to act upon (required)
-   * @param dependencies the dependencies to add (required)
-   * @return List of dependencies added on current operation
-   */
-  List<Dependency> addDependenciesToDependencyManagement(final String moduleName,
-      Collection<? extends Dependency> dependencies);
-
-  /**
-   * Attempts to add the specified dependency to the group of managed dependencies.
-   * If the dependency already exists according to to
-   * {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}
-   * , the method silently returns. Otherwise the dependency is added.
-   * <p>
-   * An exception is thrown if this method is called before there is
-   * {@link ProjectMetadata} available, or if the on-disk representation
-   * cannot be modified for any reason.
-   *
-   * @param moduleName the name of the module to act upon. If null, dependency
-   *            will be added to root pom.
-   * @param dependency the dependency to add (required)
-   * @return added dependency
-   */
-  Dependency addDependencyToDependencyManagement(String moduleName, Dependency dependency);
-
-  /**
-   * Allows addition of a JAR dependency to the dependencyManagement on parent POM.
-   * <p>
-   * Provides a convenient way for third parties to instruct end users how to
-   * use the CLI to add support for their projects without requiring the user
-   * to manually edit a pom.xml or write an add-on.
-   *
-   * @param groupId the group id of the dependency (required)
-   * @param artifactId the artifact id of the dependency (required)
-   * @param version the version of the dependency (required)
-   * @return added dependency
-   */
-  Dependency addDependencyToDependencyManagement(String groupId, String artifactId, String version);
-
-  /**
-   * Allows addition of a JAR dependency to the dependencyManagement on specified
-   * POM.
-   * <p>
-   * Provides a convenient way for third parties to instruct end users how to
-   * use the CLI to add support for their projects without requiring the user
-   * to manually edit a pom.xml or write an add-on.
-   *
-   * @param moduleName the name of the module to act upon. If null, dependency
-   *            will be added to root pom.
    * @param groupId the group id of the dependency (required)
    * @param artifactId the artifact id of the dependency (required)
    * @param version the version of the dependency (required)
    * @param scope the scope of the dependency
+   * @param classifier the classifier of the dependency
+   * @param addToDependencyManagement boolean that indicates if the new Dependency
+   * 		should be included into dependencyManagement element or not.
    * @return added dependency
    */
-  Dependency addDependencyToDependencyManagement(String moduleName, String groupId,
-      String artifactId, String version, DependencyScope scope);
+  Dependency addDependency(final String moduleName, String groupId, String artifactId,
+      String version, DependencyScope scope, String classifier, boolean addToDependencyManagement);
 
   /**
    * Attempts to add the specified filter. If the filter already exists
@@ -314,38 +474,6 @@ public interface ProjectOperations {
    * @param resource the resource to add (required)
    */
   void addResource(final String moduleName, Resource resource);
-
-  /**
-   * Attempts to add the specified package into the specified plugin execution.
-   * If the package already exists or the execution does not exist in the specified plugin, the
-   * method silently returns. Otherwise the package is added.
-   * <p>
-   * An exception is thrown if this method is called before there is
-   * {@link ProjectMetadata} available, or if the on-disk representation
-   * cannot be modified for any reason.
-   *
-   * @param moduleName the name of the module to act upon (required)
-   * @param plugin the plugin where add the package (required)
-   * @param executionId the id of the plugin execution where add the package (required)
-   * @param packageName the package to add (required)
-   */
-  void addPackageToPluginExecution(final String moduleName, final Plugin plugin,
-      String executionId, final String packageName);
-
-  /**
-   * Verifies if the specified build plugin is present. If it is present,
-   * silently returns. If it is not present, removes any build plugin which
-   * matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
-   * Always adds the presented plugin.
-   * <p>
-   * This method is deprecated - use {@link #updateBuildPlugin(Plugin)}
-   * instead.
-   *
-   * @param moduleName the name of the module to act upon (required)
-   * @param plugin the build plugin to update (required)
-   */
-  @Deprecated
-  void buildPluginUpdate(final String moduleName, Plugin plugin);
 
   /**
    * Returns the {@link Pom} of the currently focussed module, or if no module

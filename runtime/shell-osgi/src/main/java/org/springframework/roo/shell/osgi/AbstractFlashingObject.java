@@ -7,7 +7,9 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.Shell;
+import org.springframework.roo.support.osgi.OSGiUtils;
 
 /**
  * Provides an easy way for subclasses to publish flash messages if a
@@ -25,6 +27,7 @@ import org.springframework.roo.shell.Shell;
  * that {@link Shell}.
  * 
  * @author Ben Alex
+ * @author Juan Carlos García
  * @since 1.1
  */
 @Component(componentAbstract = true)
@@ -39,6 +42,11 @@ public abstract class AbstractFlashingObject {
    */
   protected final String MY_SLOT = getClass().getName();
   private Shell shell;
+
+  protected void activate(final ComponentContext context) {
+    // ROO-3824: Checking -DdevelopmentMode parameter
+    shell.setDevelopmentMode(OSGiUtils.isDevelopmentMode(context));
+  }
 
   protected final void bindShell(final Shell shell) {
     synchronized (mutex) {

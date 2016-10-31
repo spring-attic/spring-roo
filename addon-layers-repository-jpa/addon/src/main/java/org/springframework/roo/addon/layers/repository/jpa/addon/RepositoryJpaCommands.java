@@ -300,14 +300,26 @@ public class RepositoryJpaCommands implements CommandMarker {
           mandatory = false,
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Indicates if developer wants to generate repositories for every entity of current project ") boolean all,
-      @CliOption(key = "interface", mandatory = true,
-          help = "The java Spring Data repository to generate.") final JavaType interfaceType,
-      @CliOption(key = "entity", mandatory = false, optionContext = PROJECT,
-          help = "The domain entity this repository should expose") final JavaType domainType,
-      @CliOption(key = "defaultReturnType", mandatory = false,
-          help = "The findAll finder return type. Should be a Projection class associated "
-              + "to the entity specified in '--entity'.") JavaType defaultReturnType,
+          help = "Indicates if developer wants to generate repositories for every entity of current project. "
+              + "Not avalaible if 'entity' parameter has been specified before") boolean all,
+      @CliOption(
+          key = "interface",
+          mandatory = true,
+          help = "The java Spring Data repository to generate. Not avalaible if 'entity' parameter has not been "
+              + "specified before (mandatory if 'entity' parameter has been specified and you are working under "
+              + "multimodule project)") final JavaType interfaceType,
+      @CliOption(
+          key = "entity",
+          mandatory = false,
+          optionContext = PROJECT,
+          help = "The domain entity this repository should expose Not avalaible if 'all' parameter has been "
+              + "specified before") final JavaType domainType,
+      @CliOption(
+          key = "defaultReturnType",
+          mandatory = false,
+          help = "The findAll finder return type. Should be a Projection class associated to the entity specified "
+              + "in 'entity' parameter. This option is not available if domain entity specified in 'entity' parameter "
+              + "has no associated Projections.") JavaType defaultReturnType,
       @CliOption(key = "package", mandatory = false,
           help = "The package where repositories will be generated.") JavaPackage repositoriesPackage) {
 

@@ -20,7 +20,7 @@ import org.springframework.roo.shell.ShellContext;
 /**
  * Provides commands to include properties on application config properties
  * file.
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0
  */
@@ -71,9 +71,15 @@ public class PropFileCommands implements CommandMarker {
   @CliCommand(value = "property add",
       help = "Adds or updates a particular property from application config properties file.")
   public void setProperty(
-      @CliOption(key = "key", mandatory = true, help = "The property key that should be changed") final String key,
-      @CliOption(key = "value", mandatory = true, help = "The new vale for this property key") final String value,
-      @CliOption(key = "module", mandatory = true, help = "Module where property will be added",
+      @CliOption(key = "key", mandatory = true,
+          help = "The property key that should be changed (mandatory)") final String key,
+      @CliOption(key = "value", mandatory = true,
+          help = "The new vale for this property key (mandatory)") final String value,
+      @CliOption(
+          key = "module",
+          mandatory = true,
+          help = "Module where property will be added. Not available if there is "
+              + "only one application module (mandatory if the focus is not set in application module)",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
       ShellContext shellContext) {
 
@@ -95,8 +101,13 @@ public class PropFileCommands implements CommandMarker {
   @CliCommand(value = "property remove",
       help = "Removes a particular property from application config properties file.")
   public void removeProperty(
-      @CliOption(key = {"key"}, mandatory = true, help = "The property key that should be removed") final String key,
-      @CliOption(key = "module", mandatory = true, help = "Module where property will be removed",
+      @CliOption(key = {"key"}, mandatory = true,
+          help = "The property key that should be removed (mandatory)") final String key,
+      @CliOption(
+          key = "module",
+          mandatory = true,
+          help = "Module where property will be removed. Not available if there is "
+              + "only one application module (mandatory if the focus is not set in application module)",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
       ShellContext shellContext) {
 
@@ -117,7 +128,9 @@ public class PropFileCommands implements CommandMarker {
   @CliCommand(value = "property list",
       help = "List all properties from application config properties file.")
   public void listProperties(@CliOption(key = "module", mandatory = true,
-      unspecifiedDefaultValue = ".", help = "Module which properties will be listed",
+      unspecifiedDefaultValue = ".",
+      help = "Module which properties will be listed. Not available if there is only"
+          + " one application module (mandatory if the focus is not set in application module)",
       optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
       ShellContext shellContext) {
 

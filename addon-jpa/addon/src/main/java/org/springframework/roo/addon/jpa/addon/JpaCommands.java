@@ -134,7 +134,7 @@ public class JpaCommands implements CommandMarker {
       help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
   public void createEmbeddableClass(
       @CliOption(key = "class", optionContext = UPDATE_PROJECT, mandatory = true,
-          help = "The name of the class to create") final JavaType name,
+          help = "The name of the class to create (mandatory)") final JavaType name,
       @CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
@@ -226,16 +226,40 @@ public class JpaCommands implements CommandMarker {
   @CliCommand(value = "jpa setup",
       help = "Install or updates a JPA persistence provider in your project")
   public void installJpa(
-      @CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") final OrmProvider ormProvider,
-      @CliOption(key = "database", mandatory = true, help = "The database to support") final JdbcDatabase jdbcDatabase,
-      @CliOption(key = "module", mandatory = true,
-          help = "The application module where to install the persistence",
+      @CliOption(key = "provider", mandatory = true,
+          help = "The persistence provider to support (mandatory)") final OrmProvider ormProvider,
+      @CliOption(key = "database", mandatory = true, help = "The database to support (mandatory)") final JdbcDatabase jdbcDatabase,
+      @CliOption(
+          key = "module",
+          mandatory = true,
+          help = "The application module where to install the persistence. This option is available if there is more than one application module "
+              + "(mandatory if the focus is not set in application module)",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module,
-      @CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use") final String jndi,
-      @CliOption(key = "hostName", mandatory = false, help = "The host name to use") final String hostName,
-      @CliOption(key = "databaseName", mandatory = false, help = "The database name to use") final String databaseName,
-      @CliOption(key = "userName", mandatory = false, help = "The username to use") final String userName,
-      @CliOption(key = "password", mandatory = false, help = "The password to use") final String password,
+      @CliOption(
+          key = "jndiDataSource",
+          mandatory = false,
+          help = "The JNDI datasource to use. This option is not available if any of databaseName,"
+              + " hostName, password or userName options are specified, or you are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database.") final String jndi,
+      @CliOption(
+          key = "hostName",
+          mandatory = false,
+          help = "The host name to use. Parameter database must be defined. Not available if jndiDatasource "
+              + "is specified or you are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database.") final String hostName,
+      @CliOption(
+          key = "databaseName",
+          mandatory = false,
+          help = "The database name to use. Parameter database must be defined. Not available if "
+              + "jndiDatasource is specified or you are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database.") final String databaseName,
+      @CliOption(
+          key = "userName",
+          mandatory = false,
+          help = "The username to use. Parameter database must be defined. Not available if jndiDatasource "
+              + "is specified or you are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database") final String userName,
+      @CliOption(
+          key = "password",
+          mandatory = false,
+          help = "The password to use. Parameter database must be defined. Not available if jndiDatasource "
+              + "is specified or you are using an 'HYPERSONIC' or 'H2_IN_MEMORY' database") final String password,
       ShellContext shellContext) {
 
     if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
@@ -371,9 +395,9 @@ public class JpaCommands implements CommandMarker {
   @CliCommand(value = "entity jpa", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
   public void newPersistenceClassJpa(
       @CliOption(key = "class", optionContext = UPDATELAST_PROJECT, mandatory = true,
-          help = "Name of the entity to create") final JavaType name,
+          help = "Name of the entity to create (mandatory)") final JavaType name,
       @CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object",
-          optionContext = SUPERCLASS, help = "The superclass (defaults to java.lang.Object)") final JavaType superclass,
+          optionContext = SUPERCLASS, help = "The superclass") final JavaType superclass,
       @CliOption(key = "implements", mandatory = false, optionContext = INTERFACE,
           help = "The interface to implement") final JavaType implementsType,
       @CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true",
@@ -382,33 +406,38 @@ public class JpaCommands implements CommandMarker {
       @CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
           help = "Create automatic integration tests for this entity") final boolean testAutomatically,
-      @CliOption(key = "table", mandatory = true,
-          help = "The JPA table name to use for this entity") final String table,
+      @CliOption(
+          key = "table",
+          mandatory = true,
+          help = "The JPA table name to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String table,
       @CliOption(key = "schema", mandatory = false,
           help = "The JPA table schema name to use for this entity") final String schema,
       @CliOption(key = "catalog", mandatory = false,
           help = "The JPA table catalog name to use for this entity") final String catalog,
       @CliOption(key = "identifierField", mandatory = false,
           help = "The JPA identifier field name to use for this entity") final String identifierField,
-      @CliOption(key = "identifierColumn", mandatory = true,
-          help = "The JPA identifier field column to use for this entity") final String identifierColumn,
       @CliOption(
-          key = "identifierType",
-          mandatory = false,
-          optionContext = "java-lang",
+          key = "identifierColumn",
+          mandatory = true,
+          help = "The JPA identifier field column to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String identifierColumn,
+      @CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang",
           unspecifiedDefaultValue = IDENTIFIER_DEFAULT_TYPE,
           specifiedDefaultValue = "java.lang.Long",
-          help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType,
-      @CliOption(key = "versionField", mandatory = true,
-          help = "The JPA version field name to use for this entity") final String versionField,
-      @CliOption(key = "versionColumn", mandatory = true,
-          help = "The JPA version field column to use for this entity") final String versionColumn,
+          help = "The data type that will be used for the JPA identifier field") final JavaType identifierType,
+      @CliOption(
+          key = "versionField",
+          mandatory = true,
+          help = "The JPA version field name to use for this entity (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String versionField,
+      @CliOption(
+          key = "versionColumn",
+          mandatory = true,
+          help = "The JPA version field column to use for this entity. This option is available if 'versionField' option is set (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String versionColumn,
       @CliOption(
           key = "versionType",
           mandatory = true,
           optionContext = "java-lang,project",
           unspecifiedDefaultValue = VERSION_DEFAULT_TYPE,
-          help = "The data type that will be used for the JPA version field (defaults to java.lang.Integer)") final JavaType versionType,
+          help = "The data type that will be used for the JPA version field. This option is available if 'versionField' option is set (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final JavaType versionType,
       @CliOption(key = "inheritanceType", mandatory = false,
           help = "The JPA @Inheritance value (apply to base class)") final InheritanceType inheritanceType,
       @CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true",
@@ -424,10 +453,15 @@ public class JpaCommands implements CommandMarker {
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
       @CliOption(key = "entityName", mandatory = false,
           help = "The name used to refer to the entity in queries") final String entityName,
-      @CliOption(key = "sequenceName", mandatory = true,
-          help = "The name of the sequence for incrementing sequence-driven primary keys") final String sequenceName,
-      @CliOption(key = "identifierStrategy", mandatory = true, specifiedDefaultValue = "AUTO",
-          help = "The generation value strategy to be used") final IdentifierStrategy identifierStrategy,
+      @CliOption(
+          key = "sequenceName",
+          mandatory = true,
+          help = "The name of the sequence for incrementing sequence-driven primary keys (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final String sequenceName,
+      @CliOption(
+          key = "identifierStrategy",
+          mandatory = true,
+          specifiedDefaultValue = "AUTO",
+          help = "The generation value strategy to be used (mandatory if 'spring.roo.jpa.require.schema-object-name' configuration setting it’s 'true'. See 'settings list' command)") final IdentifierStrategy identifierStrategy,
       @CliOption(key = "readOnly", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Whether the generated entity should be used for read operations only.") final boolean readOnly,

@@ -16,7 +16,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Shell commands for {@link IntegrationTestOperationsImpl}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -39,7 +39,7 @@ public class IntegrationTestCommands implements CommandMarker {
   public void newIntegrationTest(
       @CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*",
           optionContext = UPDATE_PROJECT,
-          help = "The name of the entity to create an integration test for") final JavaType entity,
+          help = "The name of the entity to create an integration test") final JavaType entity,
       @CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false",
           specifiedDefaultValue = "true",
           help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,

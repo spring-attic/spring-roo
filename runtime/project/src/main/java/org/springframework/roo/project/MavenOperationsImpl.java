@@ -52,7 +52,8 @@ import java.util.logging.Logger;
 @Service
 public class MavenOperationsImpl extends AbstractProjectOperations implements MavenOperations {
 
-  protected final static Logger LOGGER = HandlerUtils.getLogger(MavenOperationsImpl.class);
+  protected static final Logger LOGGER = HandlerUtils.getLogger(MavenOperationsImpl.class);
+  private static final String JAVA_PRODUCT_VERSION_DEFAULT = "6";
 
   private PackagingProviderRegistry packagingProviderRegistry;
   private ProcessManager processManager;
@@ -180,7 +181,13 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
     // Create parent pom
     parentPackagingProvider.createArtifacts(topLevelPackage, projectName,
-        getJavaVersion(majorJavaVersion), null, "", this);
+        getJavaProductVersion(majorJavaVersion), null, "", this);
+
+    // Add java.version property if specified
+    if (majorJavaVersion != null) {
+      getProjectOperations().addProperty("",
+          new Property("java.version", getJavaVersion(majorJavaVersion)));
+    }
 
     Pom pom = getProjectOperations().getPomFromModuleName("");
 
@@ -275,8 +282,15 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
       final Integer majorJavaVersion, final PackagingProvider selectedPackagingProvider) {
     Validate.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
     final PackagingProvider packagingProvider = getPackagingProvider(selectedPackagingProvider);
+
     packagingProvider.createArtifacts(topLevelPackage, projectName,
-        getJavaVersion(majorJavaVersion), null, "", this);
+        getJavaProductVersion(majorJavaVersion), null, "", this);
+
+    // Add java.version property if specified
+    if (majorJavaVersion != null) {
+      getProjectOperations().addProperty("",
+          new Property("java.version", getJavaVersion(majorJavaVersion)));
+    }
 
     // ROO-3687: Generates necessary Spring Boot artifacts
     createSpringBootApplicationClass(topLevelPackage, projectName);
@@ -517,7 +531,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
    * @return a non-blank string
    */
   private String getJavaVersion(final Integer majorJavaVersion) {
-    if (majorJavaVersion != null && majorJavaVersion >= 6 && majorJavaVersion <= 8) {
+    Validate.notNull(majorJavaVersion, "ERROR: Java version required");
+    if (majorJavaVersion >= 6 && majorJavaVersion <= 8) {
       switch (majorJavaVersion) {
         case 6:
           return "1.6";
@@ -529,8 +544,24 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
           break;
       }
     }
-    // By default, Spring Roo projects will be generated on Java 1.8
-    return "1.8";
+    // Return null if given value is invalid.
+    return null;
+  }
+
+  /**
+   * Returns the project's target Java version in String format
+   *
+   * @param majorJavaVersion
+   *            the major version provided by the user; can be
+   *            <code>null</code> to auto-detect it
+   * @return a non-blank string
+   */
+  private String getJavaProductVersion(final Integer majorJavaVersion) {
+    if (majorJavaVersion != null && majorJavaVersion >= 6 && majorJavaVersion <= 8) {
+      return String.valueOf(majorJavaVersion);
+    } else {
+      return JAVA_PRODUCT_VERSION_DEFAULT;
+    }
   }
 
   private PackagingProvider getPackagingProvider(final PackagingProvider selectedPackagingProvider) {

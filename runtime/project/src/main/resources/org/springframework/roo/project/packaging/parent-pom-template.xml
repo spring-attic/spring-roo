@@ -19,11 +19,13 @@
 
   <properties>
     <roo.version>2.0.0.BUILD-SNAPSHOT</roo.version>
-    <java.version>JAVA_VERSION</java.version>
+    <java.product.version>JAVA_PRODUCT_VERSION</java.product.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <aspectj.plugin.version>ASPECTJ_PLUGIN_VERSION</aspectj.plugin.version>
+    <asciidoclet.version>ASCIIDOCLET_PLUGIN_VERSION</asciidoclet.version>
+    <spring-boot.version>1.4.1.RELEASE</spring-boot.version>
   </properties>
-  
+
   <repositories>
     <!-- Maven Snapshots Repository -->
     <repository>
@@ -47,13 +49,6 @@
 
   <dependencyManagement>
     <dependencies>
-
-      <!-- Test utils dependencies -->
-      <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${assertj.version}</version>
-      </dependency>
 
       <!-- Spring Roo annotations -->
       <dependency>
@@ -121,6 +116,44 @@
             <excludes>
               <exclude>**/*_Roo_*</exclude>
             </excludes>
+          </configuration>
+        </plugin>
+        <!-- Asciidoclet plugin -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <additionalparam>
+              --base-dir ${project.basedir}
+              --attribute
+              "projectName=${project.name}"
+              --attribute
+              "projectVersion=${project.version}"
+              --attribute "doctype=book"
+            </additionalparam>
+            <dependencySourceIncludes>
+              <dependencySourceInclude>${project.groupId}:*</dependencySourceInclude>
+            </dependencySourceIncludes>
+            <doclet>org.asciidoctor.Asciidoclet</doclet>
+            <docletArtifact>
+              <groupId>org.asciidoctor</groupId>
+              <artifactId>asciidoclet</artifactId>
+              <version>${asciidoclet.version}</version>
+            </docletArtifact>
+            <includeDependencySources>true</includeDependencySources>
+            <linksource>true</linksource>
+            <links>
+              <link>http://docs.oracle.com/javase/${java.version}/docs/api/</link>
+              <link>http://docs.oracle.com/javaee/${java.product.version}/api/</link>
+              <link>http://docs.spring.io/spring-framework/docs/${spring.version}/javadoc-api/</link>
+              <link>http://docs.spring.io/spring-boot/docs/${spring-boot.version}/api/</link>
+              <link>http://fasterxml.github.io/jackson-core/javadoc/2.8/</link>
+              <link>http://fasterxml.github.io/jackson-databind/javadoc/2.8</link>
+              <link>http://cxf.apache.org/javadoc/latest-3.1.x/</link>
+            </links>
+            <overview>src/main/java/overview.adoc</overview>
+            <show>private</show>
+            <source>${java.version}</source>
           </configuration>
         </plugin>
       </plugins>

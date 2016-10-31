@@ -16,7 +16,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for the 'addon create' add-on to be used by the ROO shell.
- * 
+ *
  * @author Stefan Schmidt
  * @author Juan Carlos García
  * @since 1.1
@@ -38,7 +38,7 @@ public class CreatorCommands implements CommandMarker {
       help = "Create a new simple add-on for Spring Roo (commands + operations)")
   public void simple(
       @CliOption(key = "topLevelPackage", mandatory = true, optionContext = UPDATE,
-          help = "The top level package of the new addon") final JavaPackage tlp,
+          help = "The top level package of the new addon (mandatory)") final JavaPackage tlp,
       @CliOption(key = "description", mandatory = false,
           help = "Description of your addon (surround text with double quotes)") final String description,
       @CliOption(
@@ -54,7 +54,7 @@ public class CreatorCommands implements CommandMarker {
       help = "Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies)")
   public void advanced(
       @CliOption(key = "topLevelPackage", mandatory = true, optionContext = UPDATE,
-          help = "The top level package of the new addon") final JavaPackage tlp,
+          help = "The top level package of the new addon (mandatory)") final JavaPackage tlp,
       @CliOption(key = "description", mandatory = false,
           help = "Description of your addon (surround text with double quotes)") final String description,
       @CliOption(
@@ -70,7 +70,7 @@ public class CreatorCommands implements CommandMarker {
       help = "Create a new Spring Roo Addon Suite for Spring Roo (two sample addons + repository + suite generator)")
   public void suite(
       @CliOption(key = "topLevelPackage", mandatory = true, optionContext = UPDATE,
-          help = "The top level package of all Spring Roo Addon Suite") final JavaPackage tlp,
+          help = "The top level package of all Spring Roo Addon Suite (mandatory)") final JavaPackage tlp,
       @CliOption(key = "description", mandatory = false,
           help = "Description of your Roo Addon Suite (surround text with double quotes)") final String description,
       @CliOption(
@@ -84,9 +84,11 @@ public class CreatorCommands implements CommandMarker {
       help = "Create a new Internationalization add-on for Spring Roo")
   public void i18n(
       @CliOption(key = "topLevelPackage", mandatory = true, optionContext = UPDATE,
-          help = "The top level package of the new addon") final JavaPackage tlp,
-      @CliOption(key = "locale", mandatory = true,
-          help = "The locale abbreviation (ie: en, or more specific like en_AU, or de_DE)") final Locale locale,
+          help = "The top level package of the new addon (mandatory))") final JavaPackage tlp,
+      @CliOption(
+          key = "locale",
+          mandatory = true,
+          help = "The locale abbreviation (ie: en, or more specific like en_AU, or de_DE) (mandatory)") final Locale locale,
       @CliOption(key = "messageBundle", mandatory = true,
           help = "Fully qualified path to the messages_xx.properties file") final File messageBundle,
       @CliOption(key = "language", mandatory = false,
@@ -113,12 +115,12 @@ public class CreatorCommands implements CommandMarker {
       help = "Create a new add-on for Spring Roo which wraps a maven artifact to create a OSGi compliant bundle")
   public void wrapper(
       @CliOption(key = "topLevelPackage", mandatory = true, optionContext = UPDATE,
-          help = "The top level package of the new wrapper bundle") final JavaPackage tlp,
-      @CliOption(key = "groupId", mandatory = true, help = "Dependency group id") final String groupId,
-      @CliOption(key = "artifactId", mandatory = true, help = "Dependency artifact id)") final String artifactId,
-      @CliOption(key = "version", mandatory = true, help = "Dependency version") final String version,
-      @CliOption(key = "vendorName", mandatory = true, help = "Dependency vendor name)") final String vendorName,
-      @CliOption(key = "licenseUrl", mandatory = true, help = "Dependency license URL") final String lincenseUrl,
+          help = "The top level package of the new wrapper bundle (mandatory)") final JavaPackage tlp,
+      @CliOption(key = "groupId", mandatory = true, help = "Dependency group id (mandatory)") final String groupId,
+      @CliOption(key = "artifactId", mandatory = true, help = "Dependency artifact id (mandatory)") final String artifactId,
+      @CliOption(key = "version", mandatory = true, help = "Dependency version (mandatory)") final String version,
+      @CliOption(key = "vendorName", mandatory = true, help = "Dependency vendor name (mandatory)") final String vendorName,
+      @CliOption(key = "licenseUrl", mandatory = true, help = "Dependency license URL (mandatory)") final String lincenseUrl,
       @CliOption(key = "docUrl", mandatory = false, help = "Dependency documentation URL") final String docUrl,
       @CliOption(
           key = "description",

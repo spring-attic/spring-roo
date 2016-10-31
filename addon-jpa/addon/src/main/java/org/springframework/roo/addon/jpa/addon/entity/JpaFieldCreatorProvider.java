@@ -428,11 +428,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isTransientVisibleForFieldSet(ShellContext shellContext) {
-    return true;
-  }
-
-  @Override
   public boolean isJoinTableVisibleForFieldSet(ShellContext shellContext) {
     return true;
   }
@@ -501,11 +496,6 @@ public class JpaFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isFetchVisibleForFieldList(ShellContext shellContext) {
-    return true;
-  }
-
-  @Override
-  public boolean isTransientVisibleForFieldList(ShellContext shellContext) {
     return true;
   }
 

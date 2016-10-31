@@ -231,11 +231,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
   }
 
   @Override
-  public boolean isTransientVisibleForFieldSet(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
   public boolean isJoinTableVisibleForFieldSet(ShellContext shellContext) {
     return false;
   }
@@ -267,11 +262,6 @@ public class DtoFieldCreatorProvider implements FieldCreatorProvider {
 
   @Override
   public boolean isFetchVisibleForFieldList(ShellContext shellContext) {
-    return false;
-  }
-
-  @Override
-  public boolean isTransientVisibleForFieldList(ShellContext shellContext) {
     return false;
   }
 

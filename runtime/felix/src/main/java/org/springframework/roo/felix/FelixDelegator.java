@@ -29,7 +29,7 @@ import org.springframework.roo.support.logging.LoggingOutputStream;
  * <p>
  * Also monitors the Roo Shell to determine when it wishes to shutdown. This
  * shutdown request is then passed through to Felix for processing.
- * 
+ *
  * @author Ben Alex
  * @author Juan Carlos García
  */
@@ -70,7 +70,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
     perform(commandLine);
   }
 
-  @CliCommand(value = {"exit", "quit"}, help = "Exits the shell")
+  @CliCommand(value = {"exit", "quit"}, help = "Exits the shell. You can also use 'quit' command")
   public ExitShellRequest quit() {
     return ExitShellRequest.NORMAL_EXIT;
   }

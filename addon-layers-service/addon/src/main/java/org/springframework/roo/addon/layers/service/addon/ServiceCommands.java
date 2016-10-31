@@ -304,18 +304,36 @@ public class ServiceCommands implements CommandMarker {
           mandatory = false,
           specifiedDefaultValue = "true",
           unspecifiedDefaultValue = "false",
-          help = "Indicates if developer wants to generate service interfaces and their implementations for every entity of current project ") boolean all,
-      @CliOption(key = "entity", optionContext = PROJECT, mandatory = false,
-          help = "The domain entity this service should expose") final JavaType domainType,
-      @CliOption(key = "repository", optionContext = PROJECT, mandatory = true,
-          help = "The repository this service should expose") final JavaType repositoryType,
-      @CliOption(key = "interface", mandatory = true,
-          help = "The service interface to be generated") final JavaType interfaceType,
-      @CliOption(key = "class", mandatory = false,
-          help = "The service implementation to be generated") final JavaType implType,
-      @CliOption(key = "apiPackage", mandatory = false, help = "The java interface package") JavaPackage apiPackage,
-      @CliOption(key = "implPackage", mandatory = false,
-          help = "The java package of the implementation classes for the interfaces") JavaPackage implPackage) {
+          help = "Indicates if developer wants to generate service interfaces and their implementations for every entity of current project. "
+              + "Not avalaible if 'entity' parameter has been specified before") boolean all,
+      @CliOption(
+          key = "entity",
+          optionContext = PROJECT,
+          mandatory = false,
+          help = "The domain entity this service should expose. Not avalaible if 'all' parameter has been specified before") final JavaType domainType,
+      @CliOption(
+          key = "repository",
+          optionContext = PROJECT,
+          mandatory = true,
+          help = "The repository this service should expose. Not available if you don't specify 'entity' parameter "
+              + "(mandatory if multimodule project)") final JavaType repositoryType,
+      @CliOption(
+          key = "interface",
+          mandatory = true,
+          help = "The service interface to be generated. Not available if you don't specify 'entity' parameter "
+              + "(mandatory if multimodule project)") final JavaType interfaceType,
+      @CliOption(
+          key = "class",
+          mandatory = false,
+          help = "The service implementation to be generated. Not available if you don't specify 'entity' parameter") final JavaType implType,
+      @CliOption(key = "apiPackage", mandatory = false,
+          help = "The java interface package. Not avalaible if 'all' "
+              + "parameter has not been specified before") JavaPackage apiPackage,
+      @CliOption(
+          key = "implPackage",
+          mandatory = false,
+          help = "The java package of the implementation classes for the interfaces. Not avalaible if 'all' parameter "
+              + "has not been specified before") JavaPackage implPackage) {
 
     if (all) {
 

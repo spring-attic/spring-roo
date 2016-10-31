@@ -296,14 +296,26 @@ public class FinderCommands implements CommandMarker, FinderAutocomplete {
       help = "Install a finder in the given target (must be an entity)")
   public void installFinders(
       @CliOption(key = "entity", mandatory = true, unspecifiedDefaultValue = "*",
-          optionContext = PROJECT, help = "The entity for which the finders are generated") final JavaType entity,
-      @CliOption(key = "name", mandatory = true,
-          help = "The finder string defined as a Spring Data query") final JavaSymbolName finderName,
-      @CliOption(key = "formBean", mandatory = true,
-          help = "The finder's search parameter. Should be a DTO.") final JavaType formBean,
-      @CliOption(key = "returnType", mandatory = false, optionContext = PROJECT,
-          help = "The finder's results return type. Should be a Projection class related "
-              + "with the specified entity in --entity parameter.") JavaType returnType) {
+          optionContext = PROJECT,
+          help = "The entity for which the finders are generated (mandatory") final JavaType entity,
+      @CliOption(
+          key = "name",
+          mandatory = true,
+          help = "The finder string defined as a Spring Data query. Use Spring Data JPA nomenclature. You must define 'entity' parameter "
+              + "before (mandatory) ") final JavaSymbolName finderName,
+      @CliOption(
+          key = "formBean",
+          mandatory = true,
+          help = "The finder's search parameter. Should be a DTO. Not avalaible if 'entity' parameter has not been specified "
+              + "before or if there aren't exist any DTO in generated project. If not specified, it is used as search parameter"
+              + " the entity specified in the 'entity' parameter (mandatory if 'returnType' is specified)") final JavaType formBean,
+      @CliOption(
+          key = "returnType",
+          mandatory = false,
+          optionContext = PROJECT,
+          help = "The finder's results return type. Should be a Projection class related with the specified entity in 'entity' parameter."
+              + " This option is not available if 'entity' parameter has not been specified before or if there are not exist any Projection "
+              + "class associated. If not specified, it is used as type of response the  entity specified in the 'entity' parameter") JavaType returnType) {
 
     // Check if specified finderName follows Spring Data nomenclature
     PartTree partTree = new PartTree(finderName.getSymbolName(), getEntityDetails(entity), this);

@@ -126,9 +126,6 @@ body.home .bg-header{ display: block;}
 
 /*--CONTENT-------------*/
 
-/* main container */
-.bg-container {}
-
 /* second container */
 .content {
   clear: both;
@@ -228,6 +225,15 @@ table.dataTable thead .sorting,
 table.dataTable thead .sorting_asc,
 table.dataTable thead .sorting_desc {
     background-image: none;
+}
+
+/** toolbars datatables **/
+div.dataTables_wrapper div.dataTables_paginate,
+div.dataTables_wrapper div.dataTables_filter {
+  padding-right: 0;
+}
+.dt-buttons.btn-group.col-sm-6{
+  padding-left: 0;
 }
 
 /*--SHOW-------------*/

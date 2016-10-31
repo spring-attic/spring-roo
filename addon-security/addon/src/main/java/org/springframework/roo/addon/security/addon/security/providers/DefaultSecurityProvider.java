@@ -11,6 +11,7 @@ import org.springframework.roo.application.config.ApplicationConfigService;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.FeatureNames;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.maven.Pom;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.ServiceInstaceManager;
@@ -82,6 +83,12 @@ public class DefaultSecurityProvider implements SecurityProvider {
         "true", "", true);
     getApplicationConfigService().addProperty(module.getModuleName(), "security.enable-csrf",
         "true", "dev", true);
+
+    // Add thymeleaf-extras-springsecurity4 dependency with Thymeleaf 3 support
+    getProjectOperations().addProperty(module.getModuleName(),
+        new Property("thymeleaf-extras-springsecurity4.version", "3.0.0.RELEASE"));
+    getProjectOperations().addDependency(module.getModuleName(),
+        new Dependency("org.thymeleaf.extras", "thymeleaf-extras-springsecurity4", null));
 
   }
 

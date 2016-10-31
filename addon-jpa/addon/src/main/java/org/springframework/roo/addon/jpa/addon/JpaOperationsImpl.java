@@ -90,21 +90,16 @@ public class JpaOperationsImpl implements JpaOperations {
   private static final String HIBERNATE_NAMING_STRATEGY = "spring.jpa.hibernate.naming.strategy";
   private static final String HIBERNATE_NAMING_STRATEGY_VALUE =
       "org.hibernate.cfg.ImprovedNamingStrategy";
-  private static final String DEFAULT_PROFILE_NAME = "default";
   static final String POM_XML = "pom.xml";
 
   private ServiceInstaceManager serviceManager = new ServiceInstaceManager();
 
   private static final Property SPRINGLETS_VERSION_PROPERTY = new Property("springlets.version",
       "1.0.0.BUILD-SNAPSHOT");
-  private static final Dependency SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION = new Dependency(
-      "io.springlets", "springlets-data-jpa", "${springlets.version}");
-  private static final Dependency SPRINGLETS_DATA_JPA_STARTER_WITHOUT_VERSION = new Dependency(
-      "io.springlets", "springlets-data-jpa", null);
-  private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION = new Dependency(
-      "io.springlets", "springlets-data-commons", "${springlets.version}");
-  private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER_WITHOUT_VERSION = new Dependency(
-      "io.springlets", "springlets-data-commons", null);
+  private static final Dependency SPRINGLETS_DATA_JPA_STARTER = new Dependency("io.springlets",
+      "springlets-data-jpa", "${springlets.version}");
+  private static final Dependency SPRINGLETS_DATA_COMMONS_STARTER = new Dependency("io.springlets",
+      "springlets-data-commons", "${springlets.version}");
 
   protected void activate(final ComponentContext context) {
     this.context = context.getBundleContext();
@@ -456,24 +451,6 @@ public class JpaOperationsImpl implements JpaOperations {
           DATABASE_USERNAME, profile);
       getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
           DATABASE_PASSWORD, profile);
-
-      // Create/update application-default.properties with JNDI name if database is Oracle
-      if (jdbcDatabase.getKey().equals(JdbcDatabase.ORACLE.getKey())) {
-        Map<String, String> defaultProps = new HashMap<String, String>();
-        defaultProps.put(JNDI_NAME, jndi);
-        getApplicationConfigService().addProperties(moduleName, DATASOURCE_PREFIX, defaultProps,
-            DEFAULT_PROFILE_NAME, force);
-
-        // Remove old properties if existing
-        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX, DATABASE_URL,
-            DEFAULT_PROFILE_NAME);
-        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
-            DATABASE_DRIVER, DEFAULT_PROFILE_NAME);
-        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
-            DATABASE_USERNAME, DEFAULT_PROFILE_NAME);
-        getApplicationConfigService().removeProperty(moduleName, DATASOURCE_PREFIX,
-            DATABASE_PASSWORD, DEFAULT_PROFILE_NAME);
-      }
     }
 
     // Add Hibernate naming strategy property
@@ -526,6 +503,10 @@ public class JpaOperationsImpl implements JpaOperations {
             configuration);
     for (final Element dependencyElement : databaseDependencies) {
       requiredDependencies.add(new Dependency(dependencyElement));
+    }
+    if (jdbcDatabase.toString().equals(JdbcDatabase.ORACLE.toString())) {
+      LOGGER
+          .warning("Oracle drivers aren't in Maven public repositories!! You should include them manually in your local Maven repository.");
     }
 
     final List<Element> ormDependencies =
@@ -620,26 +601,12 @@ public class JpaOperationsImpl implements JpaOperations {
     // Include Springlets Starter project dependencies and properties
     getProjectOperations().addProperty("", SPRINGLETS_VERSION_PROPERTY);
 
-    if (getProjectOperations().isMultimoduleProject()) {
+    // If current project is a multimodule project, include dependencies
+    // first
+    // on dependencyManagement and then on current module
+    getProjectOperations().addDependency(module.getModuleName(), SPRINGLETS_DATA_JPA_STARTER);
+    getProjectOperations().addDependency(module.getModuleName(), SPRINGLETS_DATA_COMMONS_STARTER);
 
-      // If current project is a multimodule project, include dependencies
-      // first
-      // on dependencyManagement and then on current module
-      getProjectOperations().addDependencyToDependencyManagement("",
-          SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
-      getProjectOperations().addDependency(module.getModuleName(),
-          SPRINGLETS_DATA_JPA_STARTER_WITHOUT_VERSION);
-      getProjectOperations().addDependencyToDependencyManagement("",
-          SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION);
-      getProjectOperations().addDependency(module.getModuleName(),
-          SPRINGLETS_DATA_COMMONS_STARTER_WITHOUT_VERSION);
-
-    } else {
-
-      // If not multimodule, include dependencies on root
-      getProjectOperations().addDependency("", SPRINGLETS_DATA_JPA_STARTER_WITH_VERSION);
-      getProjectOperations().addDependency("", SPRINGLETS_DATA_COMMONS_STARTER_WITH_VERSION);
-    }
   }
 
   /**
@@ -916,7 +883,18 @@ public class JpaOperationsImpl implements JpaOperations {
 
     boolean hasStarter = dependencies.contains(starter);
 
-    return getApplicationConfigService().existsSpringConfigFile(moduleName) && hasStarter;
+    // Check existing application profiles
+    boolean existsSpringConfigProfileInModule = false;
+    List<String> applicationProfiles =
+        getApplicationConfigService().getApplicationProfiles(moduleName);
+    for (String profile : applicationProfiles) {
+      if (getApplicationConfigService().existsSpringConfigFile(moduleName, profile)) {
+        existsSpringConfigProfileInModule = true;
+        break;
+      }
+    }
+
+    return existsSpringConfigProfileInModule && hasStarter;
   }
 
   public String getName() {

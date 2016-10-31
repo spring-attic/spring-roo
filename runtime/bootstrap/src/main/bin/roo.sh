@@ -44,6 +44,9 @@ ROO_CONFIG_FILE_PROPERTIES="$ROO_HOME/conf/config.properties"
 LOG_CONFIG_FILE_PROPERTIES="$ROO_HOME/conf/logging.properties"
 # echo "LOG_CONFIG_FILE_PROPERTIES: $LOG_CONFIG_FILE_PROPERTIES"
 
+ROO_DEVELOPMENT_MODE=false
+# echo "ROO_DEVELOPMENT_MODE : $ROO_DEVELOPMENT_MODE"
+
 cygwin=false;
 case "`uname`" in
     CYGWIN*)
@@ -73,6 +76,6 @@ fi
 ANSI="-Droo.console.ansi=true"
 LOG="-Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.Slf4jLog -Dorg.apache.felix.http.log.jul=true -Djava.util.logging.config.file=${LOG_CONFIG_FILE_PROPERTIES}"
 # Hop, hop, hop...
-java $LOG -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS $ANSI -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dorg.osgi.framework.system.packages.extra=org.w3c.dom.traversal -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
+java $LOG -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS $ANSI -Droo.args="$*" -DdevelopmentMode=$ROO_DEVELOPMENT_MODE -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dorg.osgi.framework.system.packages.extra=org.w3c.dom.traversal -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 # echo Roo exited with code $EXITED

@@ -14,6 +14,12 @@ import org.apache.commons.lang3.Validate;
 public final class SpringJavaType {
 
   // org.springframework
+  public static final JavaType ANNOTATION_CONFIGURATION = new JavaType(
+      "org.springframework.context.annotation.Configuration");
+  public static final JavaType ANNOTATION_IMPORT = new JavaType(
+      "org.springframework.context.annotation.Import");
+  public static final JavaType ANNOTATION_CONDITIONALONWEBAPPLICATION = new JavaType(
+      "org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication");
   public static final JavaType ASSERT = new JavaType("org.springframework.util.Assert");
   public static final JavaType ASYNC = new JavaType(
       "org.springframework.scheduling.annotation.Async");
@@ -167,6 +173,8 @@ public final class SpringJavaType {
       "org.springframework.web.bind.annotation.RestController");
   public static final JavaType SPRING_BOOT_APPLICATION = new JavaType(
       "org.springframework.boot.autoconfigure.SpringBootApplication");
+  public static final JavaType SPRING_BOOT_SERVLET_INITIALIZER = new JavaType(
+      "org.springframework.boot.web.support.SpringBootServletInitializer");
   public static final JavaType SERVICE = new JavaType("org.springframework.stereotype.Service");
   public static final JavaType SESSION_LOCALE_RESOLVER = new JavaType(
       "org.springframework.web.servlet.i18n.SessionLocaleResolver");
@@ -189,13 +197,21 @@ public final class SpringJavaType {
   public static final JavaType WEB_MVC_CONFIGURER_ADAPTER = new JavaType(
       "org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter");
   public static final JavaType WEB_UTILS = new JavaType("org.springframework.web.util.WebUtils");
+  public static final JavaType ENTITY_SCAN = new JavaType(
+      "org.springframework.boot.autoconfigure.domain.EntityScan");
+  public static final JavaType ENABLE_JPA_REPOSITORIES = new JavaType(
+      "org.springframework.data.jpa.repository.config.EnableJpaRepositories");
+  public static final JavaType WEB_APPLICATION_INITIALIZER = new JavaType(
+      "org.springframework.web.WebApplicationInitializer");
 
 
   /**
    * Returns the {@link JavaType} for a Spring converter
    *
-   * @param fromType the type being converted from (required)
-   * @param toType the type being converted to (required)
+   * @param fromType
+   *            the type being converted from (required)
+   * @param toType
+   *            the type being converted to (required)
    * @return a non-<code>null</code> type
    */
   public static JavaType getConverterType(final JavaType fromType, final JavaType toType) {

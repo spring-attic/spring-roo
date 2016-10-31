@@ -45,7 +45,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Commands for the security add-on to be used by the ROO shell.
- * 
+ *
  * @author Ben Alex
  * @author Sergio Clares
  * @author Juan Carlos García
@@ -114,7 +114,7 @@ public class SecurityCommands implements CommandMarker {
     return true;
   }
 
-  @CliOptionAutocompleteIndicator(command = "security setup", param = "type",
+  @CliOptionAutocompleteIndicator(command = "security setup", param = "provider",
       help = "You must select a valid security provider.", validate = true)
   public List<String> getAllSecurityProviders(ShellContext context) {
 
@@ -133,11 +133,14 @@ public class SecurityCommands implements CommandMarker {
 
   @CliCommand(value = "security setup", help = "Install Spring Security into your project")
   public void installSecurity(
-      @CliOption(key = "type", mandatory = false,
+      @CliOption(key = "provider", mandatory = false,
           help = "The Spring Security provider to install.", unspecifiedDefaultValue = "DEFAULT",
           specifiedDefaultValue = "DEFAULT") String type,
-      @CliOption(key = "module", mandatory = true,
-          help = "The application module where to install the persistence",
+      @CliOption(
+          key = "module",
+          mandatory = true,
+          help = "The application module where to install the persistence. Not available if there is only one application module "
+              + "(mandatory if the focus is not set in application module)",
           unspecifiedDefaultValue = ".", optionContext = APPLICATION_FEATURE_INCLUDE_CURRENT_MODULE) Pom module) {
 
     securityOperations.installSecurity(getSecurityProviderFromName(type), module);
@@ -215,12 +218,14 @@ public class SecurityCommands implements CommandMarker {
   @CliCommand(value = "security authorize",
       help = "Include @PreAuthorize annotation to an specific method.")
   public void authorizeOperation(
-      @CliOption(key = "class", mandatory = true,
-          help = "The service class that contains the method to annotate with @PreAuthorize.") JavaType klass,
+      @CliOption(
+          key = "class",
+          mandatory = true,
+          help = "The service class that contains the method to annotate with @PreAuthorize (mandatory)") JavaType klass,
       @CliOption(
           key = "method",
           mandatory = true,
-          help = "The service method name and its params that will be annotated with @PreAuthorize. Is possible to specify a regular expression.") String methodName,
+          help = "The service method name and its params that will be annotated with @PreAuthorize. Is possible to specify a regular expression (mandatory)") String methodName,
       @CliOption(key = "roles", mandatory = false,
           help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction. ") String roles,
       @CliOption(
@@ -327,23 +332,23 @@ public class SecurityCommands implements CommandMarker {
       @CliOption(
           key = "class",
           mandatory = true,
-          help = "The service class that contains the method to annotate with @PreFilter/@PostFilter.") JavaType klass,
+          help = "The service class that contains the method to annotate with @PreFilter/@PostFilter (mandatory)") JavaType klass,
       @CliOption(
           key = "method",
           mandatory = true,
-          help = "The service method name and its params that will be annotated with @PreFilter/@PostFilter. Is possible to specify a regular expression.") String methodName,
+          help = "The service method name and its params that will be annotated with @PreFilter/@PostFilter. Is possible to specify a regular expression (mandatory)") String methodName,
       @CliOption(key = "roles", mandatory = false,
-          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction. ") String roles,
+          help = "Comma separated list with all the roles to add inside 'hasAnyRole' instruction") String roles,
       @CliOption(
           key = "usernames",
           mandatory = false,
-          help = "Comma separated list with all the usernames to add inside Spring Security annotation.") String usernames,
+          help = "Comma separated list with all the usernames to add inside Spring Security annotation") String usernames,
       @CliOption(
           key = "when",
           mandatory = false,
           unspecifiedDefaultValue = PRE_FILTER,
           specifiedDefaultValue = PRE_FILTER,
-          help = "Indicates if filtering should be after or before to execute the operation. Depends of the specified value, @PreFilter annotation or @PostFilter annotation will be included.") String when) {
+          help = "Indicates if filtering should be after or before to execute the operation. Depends of the specified value, @PreFilter annotation or @PostFilter annotation will be included") String when) {
 
     if (StringUtils.isEmpty(roles) && StringUtils.isEmpty(usernames)) {
       LOGGER
@@ -369,10 +374,10 @@ public class SecurityCommands implements CommandMarker {
   /**
    * This method obtains the implementation of the Spring Security Provider
    * using the provided name.
-   * 
+   *
    * @param name
    *            The name of the SecurityProvider to obtain
-   * 
+   *
    * @return A SecurityProvider with the same name as the provided one.
    */
   private SecurityProvider getSecurityProviderFromName(String name) {
@@ -390,7 +395,7 @@ public class SecurityCommands implements CommandMarker {
   /**
    * Replaces a JavaType fullyQualifiedName for a shorter name using '~' for
    * TopLevelPackage
-   * 
+   *
    * @param cid
    *            ClassOrInterfaceTypeDetails of a JavaType
    * @param currentText

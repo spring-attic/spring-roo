@@ -11,7 +11,7 @@ import org.springframework.roo.support.api.AddOnSearch.SearchType;
 
 /**
  * Commands to manage Addons on OBR repositories
- * 
+ *
  * @author Juan Carlos García
  * @since 2.0.0
  */
@@ -27,7 +27,7 @@ public class ObrAddOnCommands implements CommandMarker {
       help = "Provide information about a specific Spring Roo Add-on")
   public void infoBundle(
       @CliOption(key = "bundleSymbolicName", mandatory = true,
-          help = "The bundle symbolic name for the add-on of interest") final ObrAddOnBundleSymbolicName bsn) {
+          help = "The bundle symbolic name for the add-on of interest (mandatory)") final ObrAddOnBundleSymbolicName bsn) {
 
     operations.addOnInfo(bsn);
   }
@@ -35,19 +35,20 @@ public class ObrAddOnCommands implements CommandMarker {
   @CliCommand(value = "addon install bundle", help = "Install Spring Roo Add-on")
   public void installBsn(
       @CliOption(key = "bundleSymbolicName", mandatory = true,
-          help = "The bundle symbolic name for the add-on of interest") final ObrAddOnBundleSymbolicName bsn) {
+          help = "The bundle symbolic name for the add-on of interest (mandatory)") final ObrAddOnBundleSymbolicName bsn) {
     operations.installAddOn(bsn);
   }
 
   @CliCommand(value = "addon install url", help = "Install Spring Roo Add-on using url")
   public void installByUrl(@CliOption(key = "url", mandatory = true,
-      help = "The url for the add-on of interest") final String url) {
+      help = "The url for the add-on of interest (mandatory)") final String url) {
     operations.installAddOnByUrl(url);
   }
 
   @CliCommand(value = "addon remove", help = "Remove Spring Roo Add-on")
-  public void remove(@CliOption(key = "bundleSymbolicName", mandatory = true,
-      help = "The bundle symbolic name for the add-on of interest") final BundleSymbolicName bsn) {
+  public void remove(
+      @CliOption(key = "bundleSymbolicName", mandatory = true,
+          help = "The bundle symbolic name for the add-on of interest (mandatory)") final BundleSymbolicName bsn) {
 
     operations.removeAddOn(bsn);
   }
@@ -61,7 +62,7 @@ public class ObrAddOnCommands implements CommandMarker {
   @CliCommand(value = "addon search", help = "Search all known Spring Roo Add-ons")
   public void search(
       @CliOption(key = "requiresCommand", mandatory = true,
-          help = "Only display add-ons in search results that offer this command") final String requiresCommand) {
+          help = "Only display add-ons in search results that offer this command (mandatory)") final String requiresCommand) {
 
     operations.searchAddOns(requiresCommand, SearchType.ADDON);
   }
