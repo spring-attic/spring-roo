@@ -118,7 +118,10 @@ public class ThymeleafMainControllerMetadata extends AbstractItdTypeDetailsProvi
     final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
     // Adding @GetMapping annotation
-    annotations.add(new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING));
+    AnnotationMetadataBuilder getMapping =
+        new AnnotationMetadataBuilder(SpringJavaType.GET_MAPPING);
+    getMapping.addStringAttribute("value", "/");
+    annotations.add(getMapping);
 
     // Generate body
     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
