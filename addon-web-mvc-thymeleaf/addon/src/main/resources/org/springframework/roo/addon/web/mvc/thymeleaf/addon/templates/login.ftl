@@ -130,7 +130,7 @@
                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
                    <span data-th-text="${r"#{info_security_login}"}">You tried to access a
                       restricted area of our application. By default, you can log in with </span>
-                      <span>"admin/pass".</span>
+                      <span>"user/password".</span>
                   </div>
                   <div data-th-if="${r"${param.error}"}" class="alert alert-danger" role="alert">
                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
